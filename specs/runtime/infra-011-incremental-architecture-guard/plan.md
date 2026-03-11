@@ -217,14 +217,15 @@ bun scripts/ai-guard.ts
 
 Triggered before running step 4 if any of these conditions hold:
 
-| Condition                                | Detection                                                             | Action                                                  |
-| ---------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
-| `ARCHITECTURE_MAP.json` staged           | `stagedFiles.some(f => f.includes('ARCHITECTURE_MAP'))`               | Full scan                                               |
-| Dependency graph missing                 | `!existsSync(GRAPH_PATH)`                                             | Regenerate graph, then full scan                        |
-| Dependency graph stale                   | `mtime(GRAPH_PATH) < Date.now() - ARCH_GRAPH_MAX_AGE_HOURS * 3600000` | Regenerate graph, then full scan                        |
-| Dependency graph schema version mismatch | `graph.schema_version !== EXPECTED_SCHEMA_VERSION`                    | Regenerate graph, then full scan                        |
-| New module on disk not in map            | `detectNewModules()` returns true                                     | Full scan (warn user to run `infra-audit.ts --fix-map`) |
-| Scope = all modules                      | `scope.size >= allModules.length`                                     | Full scan (no efficiency gain from incremental routing) |
+| Condition                                | Detection                                               | Action                                                                                                |
+| ---------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE_MAP.json` staged           | `stagedFiles.some(f => f.includes('ARCHITECTURE_MAP'))` | Full scan with `fallback_reason: "map_changed"`                                                       |
+| Dependency graph missing                 | `loadDependencyGraph().reason === "missing"`            | Regenerate graph with `--generate-graph`, then full scan with `fallback_reason: "graph_missing"`      |
+| Dependency graph stale                   | `loadDependencyGraph().reason === "stale"`              | Full scan with `fallback_reason: "graph_stale"` — no regeneration                                     |
+| Dependency graph schema version mismatch | `loadDependencyGraph().reason === "schema_mismatch"`    | Full scan with `fallback_reason: "graph_unusable"` — no regeneration                                  |
+| Dependency graph corrupt (invalid JSON)  | `loadDependencyGraph().reason === "corrupt"`            | Full scan with `fallback_reason: "graph_unusable"` — no regeneration                                  |
+| New module on disk not in map            | `detectNewModules()` returns true                       | Full scan with `fallback_reason: "new_module_detected"` (warn user to run `infra-audit.ts --fix-map`) |
+| Scope = all modules                      | `scope.size >= allModules.length`                       | Full scan with `fallback_reason: "full_scope"` (no efficiency gain from incremental routing)          |
 
 **Graph regeneration:**
 
@@ -274,25 +275,27 @@ function parseArgs(): GuardConfig {
 
 ```typescript
 const GRAPH_PATH = "docs/ai/context/ai-dependency-graph.json";
-const EXPECTED_SCHEMA_VERSION = 2;
+const EXPECTED_SCHEMA_VERSION = "2"; // string — matches SchemaVersion type in packages/types/src/ai-context.ts
 const DEFAULT_MAX_AGE_HOURS = 24;
 
-function loadDependencyGraph(): DependencyGraph | null {
-  if (!existsSync(GRAPH_PATH)) return null;
+function loadDependencyGraph(): GraphLoadResult {
+  if (!existsSync(GRAPH_PATH)) return { graph: null, reason: "missing" };
 
   try {
     const raw = readFileSync(GRAPH_PATH, "utf-8");
-    const graph = JSON.parse(raw) as DependencyGraph;
+    const graph = JSON.parse(raw) as AIDependencyGraph;
 
-    if (graph.schema_version !== EXPECTED_SCHEMA_VERSION) return null;
+    if (graph.schema_version !== EXPECTED_SCHEMA_VERSION) {
+      return { graph: null, reason: "schema_mismatch" };
+    }
 
     const maxAgeHours = Number(process.env.ARCH_GRAPH_MAX_AGE_HOURS ?? DEFAULT_MAX_AGE_HOURS);
     const ageMs = Date.now() - new Date(graph.generated_at).getTime();
-    if (ageMs > maxAgeHours * 3_600_000) return null;
+    if (ageMs > maxAgeHours * 3_600_000) return { graph: null, reason: "stale" };
 
-    return graph;
+    return { graph };
   } catch {
-    return null;
+    return { graph: null, reason: "corrupt" };
   }
 }
 ```
@@ -321,22 +324,36 @@ async function runIncremental(config: GuardConfig): Promise<ValidationResult> {
   // Fallback triggers
   const mapChanged = stagedFiles.some((f) => f.includes("ARCHITECTURE_MAP"));
   const newModuleDetected = detectNewModules(moduleKeys);
-  let graph = loadDependencyGraph();
-  const graphMissing = graph === null;
 
-  if (mapChanged || newModuleDetected || graphMissing) {
-    console.log("[ai-guard] Fallback triggered — running full validation");
-    if (graphMissing || mapChanged) {
-      execSync("bun scripts/infra-audit.ts --generate-graph", { stdio: "inherit" });
-      graph = loadDependencyGraph();
-    }
-    return runFull(
-      { ...config, mode: "full" },
-      {
-        fallbackReason: mapChanged ? "map_changed" : graphMissing ? "graph_missing" : "new_module",
-      },
-    );
+  if (mapChanged) {
+    return runFull({ ...config, mode: "full" }, { fallbackReason: "map_changed" });
   }
+  if (newModuleDetected) {
+    return runFull({ ...config, mode: "full" }, { fallbackReason: "new_module_detected" });
+  }
+
+  // Load dependency graph via discriminated union (T006)
+  let loadResult = loadDependencyGraph();
+
+  if (loadResult.graph === null) {
+    if (loadResult.reason === "missing") {
+      execSync("bun scripts/infra-audit.ts --generate-graph", { stdio: "inherit" });
+      const retry = loadDependencyGraph();
+      if (retry.graph === null) {
+        return runFull({ ...config, mode: "full" }, { fallbackReason: "graph_missing" });
+      }
+      // Regeneration succeeded — continue incremental validation with regenerated graph
+      loadResult = retry;
+    } else if (loadResult.reason === "corrupt" || loadResult.reason === "schema_mismatch") {
+      // Do NOT regenerate — treat as unusable cache
+      return runFull({ ...config, mode: "full" }, { fallbackReason: "graph_unusable" });
+    } else if (loadResult.reason === "stale") {
+      // Do NOT regenerate inline — time-based staleness falls back to full scan
+      return runFull({ ...config, mode: "full" }, { fallbackReason: "graph_stale" });
+    }
+  }
+
+  const graph = loadResult.graph!;
 
   // Use explicit modules or compute from staged files
   let scope: Set<string>;
@@ -387,9 +404,9 @@ Adds a fast-path that:
 
 1. Scans all modules listed in `ARCHITECTURE_MAP.json`
 2. Extracts import declarations from each module's source files
-3. Builds the edges array (deduplicates using a `Set<string>` of `from|to` pairs)
+3. Builds the `modules` object map (deduplicates dependency entries per module using a `Set<string>`)
 4. Computes `reverse_dependencies` as an inverted adjacency list
-5. Writes the result to `docs/ai/context/ai-dependency-graph.json` with `schema_version: 2`
+5. Writes the result to `docs/ai/context/ai-dependency-graph.json` with `schema_version: "2"` (string)
 
 ```typescript
 // CLI parsing addition
@@ -404,38 +421,41 @@ async function generateDependencyGraph(): Promise<void> {
   const archMap = loadArchitectureMap();
   const moduleKeys = Object.keys(archMap.modules ?? {});
 
-  const edgeSet = new Set<string>();
-  const edges: Array<{ from: string; to: string }> = [];
+  const reverseDeps: Record<string, string[]> = {};
+  // Build modules object-map (canonical v2 AIDependencyGraph structure)
+  const modules: Record<
+    string,
+    { dependencies: string[]; layer: string; type: "app" | "package" }
+  > = {};
 
   for (const moduleKey of moduleKeys) {
+    const deps = new Set<string>();
     const sourceFiles = getSourceFiles(moduleKey);
     for (const file of sourceFiles) {
       const imports = extractImports(file);
       for (const imp of imports) {
         const targetModule = resolveImportToModuleKey(imp, moduleKeys, file);
         if (targetModule && targetModule !== moduleKey) {
-          const key = `${moduleKey}|${targetModule}`;
-          if (!edgeSet.has(key)) {
-            edgeSet.add(key);
-            edges.push({ from: moduleKey, to: targetModule });
-          }
+          deps.add(targetModule);
         }
       }
     }
+    const depList = [...deps];
+    const layer = archMap.modules[moduleKey]?.layer ?? "unknown";
+    const type = moduleKey.startsWith("apps/") ? "app" : "package";
+    modules[moduleKey] = { dependencies: depList, layer, type };
+    for (const dep of depList) {
+      if (!reverseDeps[dep]) reverseDeps[dep] = [];
+      if (!reverseDeps[dep].includes(moduleKey)) reverseDeps[dep].push(moduleKey);
+    }
   }
 
-  const reverseMap: Record<string, string[]> = {};
-  for (const { from, to } of edges) {
-    if (!reverseMap[to]) reverseMap[to] = [];
-    if (!reverseMap[to].includes(from)) reverseMap[to].push(from);
-  }
-
-  const graph: DependencyGraph = {
-    schema_version: 2,
+  const graph: AIDependencyGraph = {
+    schema_version: "2", // string — matches SchemaVersion type
     generated_at: new Date().toISOString(),
-    modules: moduleKeys,
-    edges,
-    reverse_dependencies: reverseMap,
+    source_metadata: { infra_audit_timestamp: new Date().toISOString() },
+    modules,
+    reverse_dependencies: reverseDeps,
   };
 
   writeFileSync(GRAPH_PATH, JSON.stringify(graph, null, 2));
@@ -477,15 +497,17 @@ if [ -n "$CODE_FILES" ]; then
 
   # Pass staged files to the incremental guard via env var
   # --incremental reads STAGED_FILES and validates only affected modules
-  STAGED_FILES="$STAGED_FILES" bun scripts/ai-guard.ts --incremental
-
-  # Infrastructure audit remains full-quick (not incremental — separate concern)
-  bun scripts/infra-audit.ts --quick
+  _GUARD_STAGED=$(git diff --cached --name-only)
+  STAGED_FILES="$_GUARD_STAGED" bun scripts/ai-guard.ts --incremental
+  # Note: infra-audit.ts --quick is intentionally NOT in pre-commit (moved to pre-push).
+  # infra-audit.ts --quick runs a full repository walk unconditionally (QUICK_MODE only
+  # gates file writes, not the scan itself), making the hook ~500–870ms total and
+  # defeating the <200ms target. See section 1.5 for pre-push placement.
 fi
 ```
 
 **Rationale for removing parallelism:**
-The incremental guard now exits in <200ms, so the speed benefit of background parallelism is smaller than the complexity cost. Running sequentially also makes error output legible. `infra-audit.ts --quick` runs after, not in parallel, to avoid racing over shared output.
+The incremental guard now exits in <200ms, so the speed benefit of background parallelism is smaller than the complexity cost. Running sequentially also makes error output legible. `infra-audit.ts --quick` is moved to pre-push (not called in pre-commit) to meet the <200ms latency target.
 
 ---
 
@@ -505,9 +527,11 @@ bun scripts/ai-guard.ts
 ```sh
 echo "Running full architecture governance validation..."
 bun scripts/ai-guard.ts --full
+# infra-audit.ts --quick moved here from pre-commit to meet <200ms pre-commit target
+bun scripts/infra-audit.ts --quick
 ```
 
-The explicit `--full` flag documents intent clearly. Behavior is identical to the current `bun scripts/ai-guard.ts` invocation (no flags = full scan). This change is documentation-only in effect but enables future distinction.
+The explicit `--full` flag documents intent clearly. Behavior is identical to the current `bun scripts/ai-guard.ts` invocation (no flags = full scan). `infra-audit.ts --quick` was moved from pre-commit (where it caused 500–870ms latency) to pre-push where governance coverage is maintained without blocking fast commits.
 
 ---
 
@@ -522,21 +546,32 @@ The existing `docs/ai/context/ai-dependency-graph.json` uses schema v1:
 }
 ```
 
-Schema v2 (required by incremental guard):
+Schema v2 (required by incremental guard — canonical `AIDependencyGraph` from `packages/types/src/ai-context.ts`):
 
 ```json
 {
-  "schema_version": 2,
-  "generated_at": "ISO-8601 timestamp",
-  "modules": [...],
-  "edges": [{"from": ..., "to": ...}],
+  "schema_version": "2",
+  "generated_at": "2026-03-10T14:30:00Z",
+  "source_metadata": {
+    "infra_audit_timestamp": "2026-03-10T14:30:00Z"
+  },
+  "modules": {
+    "apps/api": {
+      "dependencies": ["packages/domain-core", "packages/logger"],
+      "layer": "api",
+      "type": "app"
+    },
+    "packages/logger": {
+      "dependencies": [],
+      "layer": "util",
+      "type": "package"
+    }
+  },
   "reverse_dependencies": {
-    "packages/logger": ["packages/job-queue", "packages/redis-utils", "packages/domain-core", "apps/api"]
+    "packages/logger": ["apps/api", "apps/worker"]
   }
 }
 ```
-
-**Migration:** The incremental guard checks `schema_version`. If it is `1` or absent, the guard immediately triggers a graph refresh (`bun scripts/infra-audit.ts --generate-graph`) which writes schema v2. This is transparent to the developer.
 
 ---
 
@@ -546,41 +581,31 @@ Generated on every validation run. Written to stdout always. Written to `docs/ai
 
 ```json
 {
-  "generated_at": "2026-03-10T14:32:00Z",
-  "mode": "incremental",
-  "git_context": {
-    "branch": "feature/something",
-    "commit_hash": "abc1234",
-    "changed_files_count": 3
-  },
-  "analysis": {
-    "staged_files": ["apps/mmc/src/views/ProductList.vue"],
-    "changed_modules": ["apps/mmc"],
-    "affected_modules": [],
-    "expanded_scope": ["apps/mmc"],
-    "modules_skipped": 12,
-    "skipped_unmapped_files": ["docs/README.md"],
-    "fallback_reason": null
-  },
-  "validation": {
-    "verdict": "PASS",
-    "violations": [],
-    "rules_checked": 12,
-    "duration_ms": 145
-  }
+  "run_id": "abc1234-1710080380000",
+  "timestamp": "2026-03-10T14:32:00Z",
+  "validation_mode": "incremental",
+  "modules_validated": 2,
+  "modules_skipped": 12,
+  "skipped_unmapped_files": ["docs/README.md"],
+  "fallback_reason": null,
+  "verdict": "pass",
+  "violations": [],
+  "duration_ms": 145
 }
 ```
 
-| Field                    | Description                                                                                                         |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `mode`                   | `"incremental"` or `"full"`                                                                                         |
-| `changed_modules`        | Modules directly mapped from staged files                                                                           |
-| `affected_modules`       | Additional modules added via reverse-dep traversal                                                                  |
-| `expanded_scope`         | Union of changed + affected                                                                                         |
-| `modules_skipped`        | `total_modules - expanded_scope.length`                                                                             |
-| `skipped_unmapped_files` | Files outside any module prefix (docs, scripts, etc.)                                                               |
-| `fallback_reason`        | If full scan triggered: `"map_changed" \| "graph_missing" \| "graph_stale" \| "new_module" \| "full_scope" \| null` |
-| `verdict`                | `"PASS"` or `"BLOCKED"`                                                                                             |
+| Field                    | Description                                                                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `run_id`                 | Unique run identifier (short commit hash + epoch ms)                                                                             |
+| `timestamp`              | ISO-8601 timestamp of the validation run                                                                                         |
+| `validation_mode`        | `"incremental"` or `"full"`                                                                                                      |
+| `modules_validated`      | Count of modules that were validated (scope size)                                                                                |
+| `modules_skipped`        | `total_modules - modules_validated`                                                                                              |
+| `skipped_unmapped_files` | Files outside any known module prefix (docs, scripts, etc.)                                                                      |
+| `fallback_reason`        | If full scan triggered: `"map_changed" \| "graph_missing" \| "graph_stale" \| "graph_unusable" \| "new_module_detected" \| null` |
+| `verdict`                | `"pass"` or `"fail"`                                                                                                             |
+| `violations`             | Array of rule violations found; empty on pass                                                                                    |
+| `duration_ms`            | Total validation duration in milliseconds                                                                                        |
 
 ---
 
@@ -606,8 +631,8 @@ Generated on every validation run. Written to stdout always. Written to `docs/ai
 | Pre-commit, <3 modules affected | <200ms | Same                                                                                     |
 | Pre-commit, full fallback       | ~900ms | Identical to today                                                                       |
 | Cache read                      | <5ms   | `JSON.parse` of small file (< 50KB)                                                      |
-| Module mapping (50 files)       | <10ms  | Single O(n×m) pass; n=files, m=13 modules                                                |
-| BFS traversal (full graph)      | <20ms  | 13 nodes, adjacency list lookup is O(1)                                                  |
+| Module mapping (50 files)       | <10ms  | Single O(n×m) pass; n=files, m=14 modules                                                |
+| BFS traversal (full graph)      | <20ms  | 14 nodes, adjacency list lookup is O(1)                                                  |
 | `--generate-graph`              | <500ms | Reads only source files; skips audit report generation                                   |
 
 **No lazy loading or async I/O required** for the graph — the file is small enough (<50KB) that synchronous `readFileSync` + `JSON.parse` completes in <5ms.

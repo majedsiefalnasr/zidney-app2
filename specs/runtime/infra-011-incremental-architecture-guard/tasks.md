@@ -61,7 +61,9 @@
 
 - [ ] T002 Add `--generate-graph` CLI flag detection at the top of `scripts/infra-audit.ts` startup block — when flag is present, call `generateDependencyGraph()` then `process.exit(0)` before any full-audit logic runs
 
-- [ ] T003 Implement `generateDependencyGraph()` in `scripts/infra-audit.ts` — reads `docs/architecture/intelligence/ARCHITECTURE_MAP.json`, recursively enumerates `.ts`/`.tsx`/`.vue` source files per module (excluding `node_modules/`, test files matching `*.test.*`/`*.spec.*`), extracts inter-module import statements using regex or the existing import-parsing logic, builds a deduplicated `modules` map (`{ [path]: { dependencies: string[], layer: string, type: "app"|"package" } }`) where each `dependencies[]` entry appears at most once per module pair, computes `reverse_dependencies` by inverting the forward dependency map, and writes `AIDependencyGraph`-conformant JSON to `docs/ai/context/ai-dependency-graph.json`
+- [ ] T003 Implement `generateDependencyGraph()` in `scripts/infra-audit.ts`.
+      **Sub-step A (type collision fix — do first):** `scripts/infra-audit.ts` contains an existing local `interface AIDependencyGraph` (approximately lines 1020–1024) with incompatible fields (`nodes[]`, `edges[]`, `centrality`). Before writing `generateDependencyGraph()`: rename this local interface to `AIGraphVizLegacy` and update all its usages in that file accordingly. Then add `import type { AIDependencyGraph } from '@zidney/types'` (or equivalent relative path). This prevents a duplicate-identifier TypeScript compile error.
+      **Sub-step B (implementation):** Reads `docs/architecture/intelligence/ARCHITECTURE_MAP.json`, recursively enumerates `.ts`/`.tsx`/`.vue` source files per module (excluding `node_modules/`, test files matching `*.test.*`/`*.spec.*`), extracts inter-module import statements using regex or the existing import-parsing logic, builds a deduplicated `modules` map (`{ [path]: { dependencies: string[], layer: string, type: "app"|"package" } }`) where each `dependencies[]` entry appears at most once per module pair, computes `reverse_dependencies` by inverting the forward dependency map, and writes `AIDependencyGraph`-conformant JSON to `docs/ai/context/ai-dependency-graph.json`
 
 - [ ] T004 Set required metadata fields in the output of `generateDependencyGraph()` in `scripts/infra-audit.ts` — `schema_version: "2"` (string to match `SchemaVersion = string`), `generated_at: new Date().toISOString()`, `source_metadata: { infra_audit_timestamp: new Date().toISOString() }`
 
@@ -71,21 +73,33 @@
 
 - [ ] T005 Add `import type { AIDependencyGraph } from "@zidney/types"` (or relative path equivalent) at the top of `scripts/ai-guard.ts`, then define the `GuardConfig` interface (`mode: "full"|"incremental"`, `explicitModules: string[]|null`, `outputJson: boolean`) and implement `parseArgs(): GuardConfig` — handles `--incremental`, `--full`, `--modules <csv>`, `--output json` flags; default (no flags) returns `{ mode: "full", explicitModules: null, outputJson: false }` for backward compatibility
 
-- [ ] T006 Add constants `GRAPH_PATH = "docs/ai/context/ai-dependency-graph.json"`, `EXPECTED_SCHEMA_VERSION = "2"` (string), `DEFAULT_MAX_AGE_HOURS = 24` to `scripts/ai-guard.ts`, then implement `loadDependencyGraph(): AIDependencyGraph | null` — returns `null` if file missing, JSON parse fails, `schema_version !== EXPECTED_SCHEMA_VERSION`, or `generated_at` age exceeds `ARCH_GRAPH_MAX_AGE_HOURS ?? DEFAULT_MAX_AGE_HOURS` hours
+- [ ] T006 Add constants `GRAPH_PATH = "docs/ai/context/ai-dependency-graph.json"`, `EXPECTED_SCHEMA_VERSION = "2"` (string), `DEFAULT_MAX_AGE_HOURS = 24` to `scripts/ai-guard.ts`, then implement `loadDependencyGraph()` with a discriminated-union return type:
+
+  ```typescript
+  type GraphLoadResult =
+    | { graph: AIDependencyGraph }
+    | { graph: null; reason: "missing" | "corrupt" | "stale" | "schema_mismatch" };
+  ```
+
+  Logic: return `{ graph: null, reason: "missing" }` if file does not exist; return `{ graph: null, reason: "corrupt" }` if JSON.parse throws; return `{ graph: null, reason: "schema_mismatch" }` if `schema_version !== EXPECTED_SCHEMA_VERSION`; return `{ graph: null, reason: "stale" }` if `generated_at` age exceeds `ARCH_GRAPH_MAX_AGE_HOURS ?? DEFAULT_MAX_AGE_HOURS` hours; otherwise return `{ graph: <parsed> }`.
 
 - [ ] T007 Add `mapToModules(files: string[], moduleKeys: string[]): { modules: Set<string>; skipped: string[] }` to `scripts/ai-guard.ts` — for each file apply longest-prefix match against `moduleKeys` (test `file.startsWith(key + "/") || file === key`); collect unmatched files in `skipped[]`; return deduplicated `modules` Set
 
 - [ ] T008 Add `detectNewModules(moduleKeys: string[]): boolean` to `scripts/ai-guard.ts` — reads `apps/` and `packages/` directories with `readdirSync`, filters to entries that are directories (`statSync(d).isDirectory()`), returns `true` if any `apps/<d>` or `packages/<d>` path is missing from `moduleKeys`
 
-- [ ] T009 Add `computeImpactScope(changed: Set<string>, graph: AIDependencyGraph): Set<string>` to `scripts/ai-guard.ts` — BFS traversal over `graph.reverse_dependencies`: initialize `scope = new Set(changed)` and `queue = [...changed]`; while queue non-empty, pop module, iterate `graph.reverse_dependencies[module] ?? []`, add unseen dependents to scope and queue; return `scope`
+- [ ] T009 Add `computeImpactScope(changed: Set<string>, graph: AIDependencyGraph): Set<string>` to `scripts/ai-guard.ts` — BFS traversal over `graph.reverse_dependencies` with explicit cycle protection: initialize `scope = new Set(changed)` (scope acts as the visited set) and `queue = [...changed]`; while queue non-empty, pop module, iterate `graph.reverse_dependencies[module] ?? []`, and **for each `dep` only if `!scope.has(dep)`**: add `dep` to `scope` AND push `dep` to `queue`; return `scope`. The `!scope.has(dep)` check is mandatory — it prevents infinite loops when circular dependencies exist in the graph data.
 
 - [ ] T010 Add `runIncremental(config: GuardConfig): Promise<ValidationResult>` to `scripts/ai-guard.ts` — full incremental execution path:
   1. Read `STAGED_FILES` env var (split on `\n`, trim, filter empty); if empty exit 0
   2. Load ARCHITECTURE_MAP; get `moduleKeys = Object.keys(archMap.modules ?? {})`
-  3. Check fallback triggers: `mapChanged` (ARCHITECTURE_MAP in staged files), `newModuleDetected` (detectNewModules), `graph = loadDependencyGraph()`, `graphMissing = graph === null`
-  4. If `mapChanged` or `newModuleDetected`: run full scan immediately (no regeneration)
-  5. If `graphMissing`: call `execSync("bun scripts/infra-audit.ts --generate-graph")`, reload graph; if still null, run full scan with `fallback_reason: "graph_missing"`
-  6. Use `config.explicitModules` as scope if provided; otherwise call `mapToModules()` then `computeImpactScope()`
+  3. Check fallback triggers: `mapChanged` (ARCHITECTURE_MAP in staged files), `newModuleDetected` (`detectNewModules(moduleKeys)`), `loadResult = loadDependencyGraph()` (discriminated union from T006)
+  4. If `mapChanged` or `newModuleDetected`: run full scan immediately with `fallback_reason: "map_changed"` or `"new_module_detected"` respectively (no graph needed)
+  5. Branch on `loadResult`:
+     - If `loadResult.graph === null && loadResult.reason === "missing"`: call `execSync("bun scripts/infra-audit.ts --generate-graph")`, retry `loadDependencyGraph()`; if still null, run full scan with `fallback_reason: "graph_missing"`; otherwise reassign `loadResult = retry` and continue to step 6 for incremental validation with the regenerated graph
+     - If `loadResult.graph === null && loadResult.reason === "corrupt"`: run full scan immediately with `fallback_reason: "graph_unusable"` (**do not** attempt regeneration — corrupt file is not a recoverable missing-file case)
+     - If `loadResult.graph === null && loadResult.reason === "stale"`: run full scan with `fallback_reason: "graph_stale"` (time-based staleness; regeneration is optional background step, not blocking)
+     - If `loadResult.graph === null && loadResult.reason === "schema_mismatch"`: run full scan with `fallback_reason: "graph_unusable"` (the cached file is incompatible)
+  6. On success (`loadResult.graph !== null`): use `config.explicitModules` as scope if provided; otherwise call `mapToModules()` then `computeImpactScope(loadResult.graph)`
   7. If `scope.size >= moduleKeys.length`: run full scan with `fallback_reason: "full_scope"`
   8. Call `validateModules([...scope], { mode: "incremental", skippedFiles, start })`
 
@@ -95,9 +109,18 @@
 
 ## Phase 4: Hook Updates
 
-- [ ] T012 Update `.husky/pre-commit` — inside the `if [ -n "$CODE_FILES" ]` block, replace the parallel execution pattern (`bun scripts/ai-guard.ts &` / `PID_AI=$!` / `bun scripts/infra-audit.ts --quick &` / `PID_INFRA=$!` / `wait $PID_AI` / `wait $PID_INFRA`) with sequential execution: first `STAGED_FILES="$STAGED_FILES" bun scripts/ai-guard.ts --incremental`, then `bun scripts/infra-audit.ts --quick`
+- [ ] T012 Update `.husky/pre-commit` — inside the `if [ -n "$CODE_FILES" ]` block, replace the parallel execution pattern (`bun scripts/ai-guard.ts &` / `PID_AI=$!` / `bun scripts/infra-audit.ts --quick &` / `PID_INFRA=$!` / `wait $PID_AI` / `wait $PID_INFRA`) with ONLY the incremental guard:
 
-- [ ] T013 Update `.husky/pre-push` — change the plain `bun scripts/ai-guard.ts` call (under the Architecture Governance section) to `bun scripts/ai-guard.ts --full` to make the full-scan intent explicit
+  ```bash
+  _GUARD_STAGED=$(git diff --cached --name-only)
+  STAGED_FILES="$_GUARD_STAGED" bun scripts/ai-guard.ts --incremental
+  ```
+
+  **Important — do NOT add `bun scripts/infra-audit.ts --quick` to pre-commit.** Performance analysis confirmed that `infra-audit.ts --quick` executes a full repository walk unconditionally (the `QUICK_MODE` flag only gates file writes, not the scan itself), making the hook ~500–870ms total — defeating the <200ms target. `infra-audit` is moved to pre-push (see T013). Use `_GUARD_STAGED` (not `STAGED_FILES`) to avoid shadowing the existing outer `$STAGED_FILES` variable used by the brain-file validation gate later in the hook.
+
+- [ ] T013 Update `.husky/pre-push` — make two changes under the Architecture Governance section:
+  1. Change the plain `bun scripts/ai-guard.ts` call to `bun scripts/ai-guard.ts --full` to make the full-scan intent explicit.
+  2. Add `bun scripts/infra-audit.ts --quick` on the next line after the guard. This was moved from pre-commit (see T012) — running infra-audit at pre-push preserves full governance coverage before code reaches the remote, while keeping pre-commit fast (<200ms incremental guard only).
 
 ---
 
@@ -123,11 +146,14 @@
   - Cycle-safe: no infinite loop when A depends on B and B depends on A
 
 - [ ] T017 Add unit tests for `loadDependencyGraph()` to `tests/unit/ai-guard/incremental-guard.test.ts`:
-  - Missing file → returns `null`
-  - Valid file with `schema_version: "1"` → returns `null`
-  - Valid file with `schema_version: "2"` but `generated_at` older than `DEFAULT_MAX_AGE_HOURS * 3600000 ms` → returns `null`
-  - `ARCH_GRAPH_MAX_AGE_HOURS=0` set → always returns `null` (always stale)
-  - Valid file with correct version and fresh `generated_at` → returns the parsed `AIDependencyGraph`
+  - Missing file → returns `{ graph: null, reason: "missing" }`
+  - File exists but contains malformed JSON (e.g. `"{not: valid"`) → returns `{ graph: null, reason: "corrupt" }` (must NOT throw; the try/catch must return this value)
+  - File exists with no `schema_version` field at all (i.e. the existing v1 format `{ nodes: [...], edges: [...] }`) → returns `{ graph: null, reason: "schema_mismatch" }`
+  - Valid file with `schema_version: "1"` → returns `{ graph: null, reason: "schema_mismatch" }`
+  - Valid file with `schema_version: "2"` but `generated_at` is absent/null → returns `{ graph: null, reason: "stale" }`
+  - Valid file with `schema_version: "2"` but `generated_at` older than `DEFAULT_MAX_AGE_HOURS * 3600000 ms` → returns `{ graph: null, reason: "stale" }`
+  - `ARCH_GRAPH_MAX_AGE_HOURS=0` set → always returns `{ graph: null, reason: "stale" }` (always stale)
+  - Valid file with correct version and fresh `generated_at` → returns `{ graph: <parsed AIDependencyGraph> }` (i.e. `loadResult.graph !== null`)
 
 - [ ] T018 [P] Create `tests/unit/infra-audit/generate-graph.test.ts` — integration test for `generateDependencyGraph()`:
   - Output file `docs/ai/context/ai-dependency-graph.json` is written and parseable as JSON
@@ -142,17 +168,23 @@
   - With `STAGED_FILES="apps/mmc/src/views/Dashboard.vue"` and a valid graph, `runIncremental()` resolves scope to at minimum `{"apps/mmc"}` plus any modules listed under `reverse_dependencies["apps/mmc"]`
   - `fallback_reason` in result is `null` (no fallback triggered)
 
-- [ ] T020 Add integration test for full fallback trigger to `tests/unit/ai-guard/incremental-guard.test.ts`:
+- [ ] T020 Add integration test for full fallback triggers to `tests/unit/ai-guard/incremental-guard.test.ts`:
   - With `STAGED_FILES` containing `"docs/architecture/intelligence/ARCHITECTURE_MAP.json"`, `runIncremental()` triggers full scan and result indicates `fallback_reason: "map_changed"`
-  - With `STAGED_FILES` set to a valid module file but graph file deleted/absent, result indicates `fallback_reason: "graph_missing"`
+  - With `STAGED_FILES` set to a valid module file but graph file deleted/absent, `loadDependencyGraph()` returns `{ graph: null, reason: "missing" }`, result indicates `fallback_reason: "graph_missing"`
+  - With `STAGED_FILES` containing a path under a new module directory not present in `graph.modules` keys (e.g., `packages/new-pkg/src/index.ts`) and a valid graph present, `runIncremental()` detects the new module and triggers full scan with `fallback_reason: "new_module_detected"`
+  - With a graph file whose `generated_at` is older than `DEFAULT_MAX_AGE_HOURS` hours, `loadDependencyGraph()` returns `{ graph: null, reason: "stale" }`, `runIncremental()` triggers full scan with `fallback_reason: "graph_stale"`
+  - With `STAGED_FILES` set to a valid module file but the graph file contains invalid JSON (corrupt cache), `loadDependencyGraph()` returns `{ graph: null, reason: "corrupt" }`, result indicates `fallback_reason: "graph_unusable"` and full scan runs without throwing (no regeneration attempted)
 
 ---
 
 ## Phase 6: Post-Implementation Validation
 
-- [ ] T021 Run `bun scripts/infra-audit.ts --generate-graph` to regenerate `docs/ai/context/ai-dependency-graph.json` — verify the output file contains `schema_version: "2"`, `generated_at`, `source_metadata`, `modules` object with 13 keys (9 packages + 4/5 apps), and non-empty `reverse_dependencies`
+- [ ] T021 Run `bun scripts/infra-audit.ts --generate-graph` to regenerate `docs/ai/context/ai-dependency-graph.json` — verify the output file contains `schema_version: "2"`, `generated_at`, `source_metadata`, `modules` object with **14 keys** (9 packages: `api-client`, `config`, `domain-core`, `job-queue`, `logger`, `redis-utils`, `types`, `ui-system`, `validation` + 5 apps: `api`, `backoffice`, `frontoffice`, `mmc`, `worker`), and non-empty `reverse_dependencies`
 
-- [ ] T022 [P] Smoke-test backward compatibility — run `bun scripts/ai-guard.ts` (no flags) on the repo and confirm it exits 0, performs full scan of all modules, and produces no regressions vs. pre-implementation behavior
+- [ ] T022 [P] Smoke-test backward compatibility — three scenarios:
+  1. `bun scripts/ai-guard.ts` (no flags) → exits 0, performs full scan of all 14 modules, no regressions vs. pre-implementation behavior
+  2. `bun scripts/ai-guard.ts --full` → exits 0, behaves identically to no-flags invocation (explicit full mode)
+  3. `STAGED_FILES="" bun scripts/ai-guard.ts --incremental` (empty staged files in TypeScript layer) → exits 0 immediately, no modules validated (graceful empty-input handling)
 
 - [ ] T023 [P] Smoke-test incremental mode — run `STAGED_FILES="apps/mmc/src/views/Dashboard.vue" bun scripts/ai-guard.ts --incremental` and confirm validation runs only on `apps/mmc` plus reverse-dependency-expanded modules, duration is well below full-scan baseline, exit 0 on a clean repo
 
@@ -239,7 +271,8 @@ After each phase, run `bun scripts/ai-guard.ts` (no flags) to confirm backward c
 | Integration tests — generate-graph    | T018      | 1      |
 | Integration tests — incremental path  | T019–T020 | 2      |
 | Post-implementation validation        | T021–T024 | 4      |
-| **Total**                             |           | **24** |
+| ArchitectureImpactReport interface    | T025      | 1      |
+| **Total**                             |           | **25** |
 
 Parallel opportunities identified: **3 groups** (Group A: T005–T009 drafting; Group B: T018 vs T015–T017; Group C: T022–T023)
 
@@ -250,3 +283,10 @@ Independent test criteria per phase:
 - After T013: pre-push hook explicitly flags as `--full`
 - After T021: graph file contains schema v2 fields and all 13+ modules
 - After T024: entire unit test suite green with no regressions
+- After T025: Architecture Impact Report JSON matches plan.md section 1.7 schema on every run
+
+---
+
+## Additional Tasks
+
+- [ ] T025 Implement `ArchitectureImpactReport` interface in `scripts/ai-guard.ts` matching the schema defined in plan.md section 1.7 — required fields: `run_id`, `timestamp`, `validation_mode` (`"incremental"` | `"full"`), `modules_validated` (count), `modules_skipped` (count), `skipped_unmapped_files` (string[]), `fallback_reason` (string | null), `verdict` (`"pass"` | `"fail"`), `violations` (array), `duration_ms`; write report to stdout as JSON on every run; when `CI=true` env var is set, additionally write to `docs/ai/context/architecture-impact-report.json`

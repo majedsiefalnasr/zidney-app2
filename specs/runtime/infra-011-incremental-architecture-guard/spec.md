@@ -3,7 +3,7 @@
 **Stage:** STAGE_INFRA_11  
 **Phase:** 01_PLATFORM_FOUNDATION  
 **Feature ID:** infra-011-incremental-architecture-guard  
-**Status:** DRAFT  
+**Status:** IN PROGRESS  
 **Initiated:** 2026-03-10
 
 ---
@@ -118,7 +118,7 @@ bun scripts/ai-guard.ts  # scans entire repository
 **Impact:**
 
 - Validation latency: **800–1000ms** per commit
-- Validation scope: **100% of modules** (all 5 apps + 8 packages = 13 modules)
+- Validation scope: **100% of modules** (all 5 apps + 9 packages = 14 modules)
 - Developer feedback loop: Slow, interrupts workflow
 - Pre-commit hooks fail due to timeout (if enforced)
 
@@ -136,9 +136,9 @@ Current validation:
   • Scans apps/frontoffice
   • Scans apps/mmc          ← relevant
   • Scans apps/worker
-  • Scans packages/* (8 modules)
+  • Scans packages/* (9 modules)
 
-Result: 12 unnecessary validations
+Result: 13 unnecessary validations
 ```
 
 ### Business Impact
@@ -157,7 +157,7 @@ Changed: apps/mmc
 Affected: apps/mmc (direct effect)
           + any modules that import from apps/mmc (transitive effect)
 
-Validation scope: 2–3 modules instead of 13
+Validation scope: 2–3 modules instead of 14
 Latency: 50–200ms instead of 800–1000ms
 ```
 
@@ -510,27 +510,27 @@ bun scripts/ai-guard.ts --full
 
 ### Cache Schema
 
+The cache uses the canonical `AIDependencyGraph` schema v2 defined in `packages/types/src/ai-context.ts` (line 299). Source of truth: always check the exported type there.
+
 ```json
 {
-  "version": "1.0",
+  "schema_version": "2",
   "generated_at": "2026-03-10T14:30:00Z",
-  "module_count": 13,
-  "modules": [
-    {
-      "id": "apps/api",
-      "type": "app",
+  "source_metadata": {
+    "infra_audit_timestamp": "2026-03-10T14:30:00Z"
+  },
+  "modules": {
+    "apps/api": {
+      "dependencies": ["packages/domain-core", "packages/logger", "packages/types"],
       "layer": "api",
-      "path": "apps/api",
-      "imports": ["packages/domain-core", "packages/logger", "packages/types"]
+      "type": "app"
+    },
+    "packages/domain-core": {
+      "dependencies": [],
+      "layer": "domain",
+      "type": "package"
     }
-  ],
-  "dependencies": [
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core",
-      "count": 23
-    }
-  ],
+  },
   "reverse_dependencies": {
     "packages/domain-core": ["apps/api", "apps/worker", "packages/api-client"]
   }
@@ -541,29 +541,25 @@ bun scripts/ai-guard.ts --full
 
 The cache is automatically regenerated when:
 
-| Condition                     | Detection                                                                          | Action                                |
-| ----------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------- |
-| New module added              | Directory `apps/*` or `packages/*` exists but not in ARCHITECTURE_MAP.json         | Run `infra-audit.ts --generate-graph` |
-| ARCHITECTURE_MAP.json changed | File in git diff                                                                   | Run `infra-audit.ts --generate-graph` |
-| Dependencies changed          | Import statement modifications detected                                            | Run `infra-audit.ts --generate-graph` |
-| Cache missing                 | `ai-dependency-graph.json` not found                                               | Run `infra-audit.ts --generate-graph` |
-| Cache stale                   | Generated >24 hours ago (default); override via `ARCH_GRAPH_MAX_AGE_HOURS` env var | Run `infra-audit.ts --generate-graph` |
+| Condition                     | Detection                                                                          | Action                                                                                        |
+| ----------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| New module added              | Directory `apps/*` or `packages/*` exists but not in ARCHITECTURE_MAP.json         | Full scan with `fallback_reason: "new_module_detected"` — no regeneration                     |
+| ARCHITECTURE_MAP.json changed | File in git diff                                                                   | Full scan with `fallback_reason: "map_changed"` — no regeneration                             |
+| Cache missing                 | `ai-dependency-graph.json` not found (`loadDependencyGraph` → reason `"missing"`)  | Run `infra-audit.ts --generate-graph`, then full scan with `fallback_reason: "graph_missing"` |
+| Cache stale                   | Generated >24 hours ago (default); override via `ARCH_GRAPH_MAX_AGE_HOURS` env var | Full scan with `fallback_reason: "graph_stale"` — no regeneration                             |
 
 **Implementation (in ai-guard.ts):**
 
 ```typescript
-// Before validation, check if graph needs refresh
-const shouldRefresh =
-  changedFiles.some((f) => f.includes("ARCHITECTURE_MAP.json")) ||
-  changedFiles.some((f) => f.includes("package.json")) ||
-  !graphCacheExists() ||
-  graphIsStale();
+// Load cached graph; route based on discriminated union result
+const loadResult = loadDependencyGraph();
 
-if (shouldRefresh) {
-  await exec("bun scripts/infra-audit.ts --generate-graph");
+if (loadResult.graph === null && loadResult.reason === "missing") {
+  // Regenerate graph only when cache is absent
+  execSync("bun scripts/infra-audit.ts --generate-graph");
+  // falls through to runFull() with fallback_reason: "graph_missing"
 }
-
-const graph = loadGraphCache();
+// mapChanged / new_module / stale / corrupt / schema_mismatch → full scan with fallback_reason — no regeneration
 ```
 
 ### Performance Impact
@@ -644,26 +640,16 @@ docs/ai/context/architecture-impact-report.json
 
 ```json
 {
+  "run_id": "abc1234-1710080380000",
   "timestamp": "2026-03-10T14:32:00Z",
-  "mode": "incremental" | "full",
-  "git_context": {
-    "branch": "feature/something",
-    "commit_hash": "abc1234",
-    "changed_files_count": 3
-  },
-  "analysis": {
-    "changed_modules": ["packages/domain-core"],
-    "affected_modules": ["apps/api", "apps/worker", "packages/api-client"],
-    "validation_scope": 4,
-    "modules_skipped": 9,
-    "efficiency_ratio": 0.31
-  },
-  "validation": {
-    "status": "pass" | "fail",
-    "violations": [],
-    "rules_checked": 48,
-    "duration_ms": 145
-  }
+  "validation_mode": "incremental",
+  "modules_validated": 2,
+  "modules_skipped": 12,
+  "skipped_unmapped_files": ["docs/README.md"],
+  "fallback_reason": null,
+  "verdict": "pass",
+  "violations": [],
+  "duration_ms": 145
 }
 ```
 
@@ -772,7 +758,6 @@ bun scripts/ai-guard.ts --full
 **New Features:**
 
 - `--generate-graph` – regenerate and cache dependency graph
-- `--refresh-graph` – update graph cache with latest changes
 - Reverse dependency graph computation
 - Cache generation and validation
 
@@ -981,7 +966,7 @@ The following reasonable defaults are assumed:
 
 - Q: Which git diff command should the pre-commit hook use — `git diff --name-only HEAD~1..HEAD`, `git diff --name-only $(git merge-base HEAD main)..HEAD`, or `git diff --cached --name-only`? → A: Pre-commit hooks must use `git diff --cached --name-only` because the commit has not been created yet and `HEAD` still points to the previous commit. CI and pre-push hooks use `git diff --name-only $(git merge-base HEAD main)..HEAD`. The `HEAD~1..HEAD` form previously shown in the pipeline diagram was incorrect and has been replaced.
 
-  **Impact on implementation:** `ai-guard.ts --incremental` must detect its execution context (pre-commit vs. CI/pre-push) and select the correct git command. Detection is reliable via the `HUSKY` or `GIT_PARAMS` environment variables that Husky injects, or via an explicit `--context pre-commit|ci` flag.
+  **Impact on implementation:** No context detection is required in `ai-guard.ts`. The pre-commit hook injects the list of staged files via the `STAGED_FILES` environment variable (`_GUARD_STAGED=$(git diff --cached --name-only); STAGED_FILES="$_GUARD_STAGED" bun scripts/ai-guard.ts --incremental`). The guard reads `process.env.STAGED_FILES` passively — it does not need to detect whether it is running in a pre-commit or CI context, because the caller is responsible for providing the correct file list.
 
 - Q: Where is the 24-hour cache staleness threshold configured? → A: Via the environment variable `ARCH_GRAPH_MAX_AGE_HOURS` (default: `24`). No separate config file is required; reading directly from the environment aligns with the no-secrets-in-code policy and keeps configuration portable across developer machines and CI environments.
 
@@ -1003,10 +988,11 @@ The following reasonable defaults are assumed:
 
 ## Document Version History
 
-| Date       | Status | Notes                                    |
-| ---------- | ------ | ---------------------------------------- |
-| 2026-03-10 | DRAFT  | Initial specification from stage outline |
-| 2026-03-10 | DRAFT  | Clarifications session added (5 items)   |
+| Date       | Status      | Notes                                                         |
+| ---------- | ----------- | ------------------------------------------------------------- |
+| 2026-03-10 | DRAFT       | Initial specification from stage outline                      |
+| 2026-03-10 | DRAFT       | Clarifications session added (5 items)                        |
+| 2026-03-10 | IN PROGRESS | Status promoted from DRAFT; post-remediation analysis applied |
 
 ---
 
