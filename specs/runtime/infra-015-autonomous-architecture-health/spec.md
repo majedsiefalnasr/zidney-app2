@@ -8,7 +8,7 @@
 ## Stage Status
 
 Status: DRAFT  
-Step: specify  
+Step: plan  
 Risk Level: LOW
 
 ## User Scenarios & Testing _(mandatory)_
@@ -80,11 +80,12 @@ As an architecture maintainer, I need health monitoring to detect stale or incon
 - **FR-010**: The system MUST preserve server-authoritative time and MUST NOT introduce client-authoritative timing, scheduling, submission, or grading behavior.
 - **FR-011**: If architecture health monitoring evaluates any attempt-related workflow, it MUST preserve snapshot integrity and MUST NOT allow live configuration references after attempt start.
 - **FR-012**: If architecture health monitoring evaluates any grading or submission-critical workflow, it MUST preserve worker-only grading finalization and idempotent submission guarantees.
-- **FR-013**: Any new persistent write introduced by the health monitoring workflow MUST be transactional and recoverable without leaving partial governance state.
-- **FR-014**: Any critical endpoint or repeated governance trigger introduced by this stage MUST be idempotent so duplicate execution does not create duplicate findings, duplicate writes, or inconsistent status.
+- **FR-013**: Any generated report artifact written by the health monitoring workflow MUST use atomic replacement and be recoverable without leaving partial governance state.
+- **FR-014**: Repeated governance triggers introduced by this stage MUST be idempotent so duplicate execution does not create duplicate findings, duplicate writes, or inconsistent status.
 - **FR-015**: The system MUST detect stale, missing, or inconsistent architecture intelligence artifacts and surface them as health findings instead of silently accepting them.
 - **FR-016**: The system MUST allow governance review to distinguish direct rule violations from synchronization or drift findings so remediation can be prioritized correctly.
 - **FR-017**: The system MUST keep this stage scoped to infrastructure governance and observability and MUST NOT change tenant-facing product behavior in MMC, Backoffice, Frontoffice, API business flows, or worker business flows.
+- **FR-018**: This stage MUST NOT introduce new HTTP endpoints, API routes, queue consumers, database persistence, or other runtime-facing interfaces; any such expansion requires a separate stage and review cycle.
 
 ### Key Entities _(include if feature involves data)_
 
@@ -113,7 +114,7 @@ As an architecture maintainer, I need health monitoring to detect stale or incon
 - Existing ADRs, architecture contracts, module boundaries, and trust-chain rules remain authoritative for all decisions in this stage.
 - Existing runtime enforcement for tenant resolution, license checks, compatibility validation, server-authoritative time, attempt snapshots, and worker-finalized grading remains unchanged by this stage.
 - Governance outputs and architecture intelligence artifacts are the source of truth for architecture health review.
-- If future implementation adds persistence or endpoints for health reporting, transactional writes and idempotent execution remain mandatory.
+- This stage does not authorize persistence or endpoints for health reporting; any future expansion of that kind requires a separate stage and review cycle.
 
 ## In Scope
 

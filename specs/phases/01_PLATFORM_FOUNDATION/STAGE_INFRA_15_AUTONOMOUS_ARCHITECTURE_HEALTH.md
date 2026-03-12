@@ -10,15 +10,15 @@ Zidney repository and reports architectural drift, risk signals, and governance 
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-12T20:28:52Z
+Last Updated: 2026-03-12T21:46:38Z
 
-Scope Defined:
+Scope Planned:
 
-- Architecture health monitoring remains governance-only and repository-scoped
-- Consolidated health outcomes cover drift, dependency, layer, circularity, type-safety, and intelligence synchronization signals
-- Existing ADR-backed trust-chain guarantees are preserved as explicit stage requirements
+- Architecture health scanner composes existing guard, audit, type-safety, AI-context, and GitNexus intelligence sources
+- Current plus state-keyed historical report artifacts are planned under `docs/architecture/health/`
+- Existing ADR-backed trust-chain guarantees remain preserved across the planned command surface
 
 Deferred Scope:
 
@@ -26,10 +26,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
@@ -232,14 +232,14 @@ docs/ai/context/
 
 ai-dependency-graph.json
 ai-module-map.json
-ai-layer-map.json
+ai-layer-model.json
 ai-runtime-map.json
 ```
 
 If outdated:
 
 ```
-bun scripts/architecture-brain/generate-architecture-brain.ts
+bun scripts/generate-ai-context.ts
 ```
 
 must be executed.
