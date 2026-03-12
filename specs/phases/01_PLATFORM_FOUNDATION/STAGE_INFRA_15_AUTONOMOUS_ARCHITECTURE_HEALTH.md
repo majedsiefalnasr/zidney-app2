@@ -10,15 +10,15 @@ Zidney repository and reports architectural drift, risk signals, and governance 
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-12T21:46:38Z
+Last Updated: 2026-03-12T21:58:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Architecture health scanner composes existing guard, audit, type-safety, AI-context, and GitNexus intelligence sources
-- Current plus state-keyed historical report artifacts are planned under `docs/architecture/health/`
-- Existing ADR-backed trust-chain guarantees remain preserved across the planned command surface
+- Total: 30 atomic tasks
+- Governance CLI, assessment flow, GitNexus enrichment, deterministic reports, CI wiring, and validation coverage are represented
+- Runtime, API, worker, and DB layers remain untouched by the generated task set
 
 Deferred Scope:
 
@@ -26,10 +26,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
