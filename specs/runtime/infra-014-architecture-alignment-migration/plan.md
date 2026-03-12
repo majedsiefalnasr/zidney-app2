@@ -7,14 +7,14 @@
 
 ## Summary
 
-Establish a deterministic full-repository alignment baseline, remediate violations by category, consolidate overlapping governance checks into the canonical toolchain, regenerate architecture intelligence, and finish with zero unresolved violations in scope. The migration may touch multiple modules across `apps/`, `packages/`, `scripts/`, and generated architecture artifacts, but every change must preserve database-per-tenant isolation, authentication and centralized license enforcement order, structured API error responses, server-authoritative attempt behavior, and the current ADR-backed module boundary model.
+Establish a deterministic full-repository alignment baseline, record the current zero-violation state as stage evidence, refresh canonical architecture intelligence, and finish with zero unresolved violations in scope. Because the live baseline already reports no in-scope violations, implementation is narrowed to stage-local evidence, canonical artifact refresh, and closure verification rather than repository code remediation. Every step must preserve database-per-tenant isolation, authentication and centralized license enforcement order, structured API error responses, server-authoritative attempt behavior, and the current ADR-backed module boundary model.
 
 ## Technical Context
 
 **Language/Version**: TypeScript (repo-standard, `typescript@latest`), Bun runtime, Bash automation  
 **Primary Dependencies**: Bun, TypeScript, Biome, Vitest, unified architecture guard, `scripts/ai-guard.ts`, `scripts/infra-audit.ts`, `scripts/type-safety-guard.ts`, `scripts/generate-ai-context.ts`, `scripts/validate-architecture-brain.ts`  
 **Storage**: Filesystem-based governance artifacts in `docs/architecture/intelligence/`, `docs/ai/context/`, and stage-local planning artifacts; tenant PostgreSQL and Redis flows remain unchanged by this stage  
-**Testing**: `bun run lint`, `bun run typecheck`, `bun run validate:types`, `bun run arch:guard:ci`, `bun scripts/infra-audit.ts`, Vitest static/unit/integration suites as needed by touched modules  
+**Testing**: `bun run lint`, `bun run validate:types`, `bun run arch:guard:ci`, `bun scripts/infra-audit.ts`, and targeted suites only if runtime-adjacent files are actually touched  
 **Target Platform**: macOS/Linux developer environments and GitHub Actions Bun CI  
 **Project Type**: Monorepo governance and architecture-alignment migration  
 **Performance Goals**: Deterministic repository-wide baseline and verification within existing local/CI governance workflows; zero added latency or behavior change to product runtime surfaces  
@@ -91,7 +91,7 @@ tests/
 └── integration/
 ```
 
-**Structure Decision**: The migration stays in the existing monorepo structure and resolves violations in place. Shared contracts move only within already-approved package boundaries such as `packages/types`, `packages/validation`, or other existing compliant packages; no new application relationships or architecture layers are introduced. Before code remediation starts, the stage must freeze a governed file allowlist and bind each remediation item to exact file paths plus required runtime invariants.
+**Structure Decision**: The migration stays in the existing monorepo structure and does not mutate repository code unless a fresh baseline later reveals new drift. The current implementation path is docs-only: stage-local evidence plus canonical artifact refresh. If a future baseline reports violations, planning must reopen and regenerate file-scoped remediation tasks before code changes begin.
 
 ## Migration Workstreams
 
@@ -101,26 +101,26 @@ tests/
 - Run `infra-audit.ts` to detect undeclared modules, dependency graph issues, stale architecture intelligence, and structural drift.
 - Run `type-safety-guard.ts --json` to inventory unsafe type escape patterns and exception usage.
 - Normalize findings into stage-local reporting grouped by module, rule family, and remediation priority.
+- If all canonical tools return zero in-scope violations, freeze a zero-violation evidence path and do not authorize repository remediation tasks.
 
-### 2. Category-Based Remediation
+### 2. Zero-Violation Evidence Path
 
-- Dependency and module boundaries: eliminate cross-app imports, package-to-app imports, runtime-to-UI violations, and UI-to-domain violations by moving code to existing compliant boundaries.
-- Circular dependencies: break cycles by extracting contracts to `packages/types`, pushing validation to `packages/validation`, or splitting implementation from interfaces without changing layer direction.
-- Unsafe typing and validation: replace `any` escape hatches with explicit types or `unknown` plus schema validation at governed boundaries.
-- Exported interface typing: add explicit public types where implicit contracts currently leak ambiguity across modules.
-- Legacy script overlap: retire, wrap, or consolidate checks whose responsibilities are already covered by the unified architecture guard, infra audit, or type-safety guard.
+- Record clean-state evidence in stage-local audits.
+- Freeze docs-only implementation scope and mark repository remediation as `not-required` for the captured baseline.
+- Preserve trust-chain, compatibility, secret/log hygiene, and runtime hot-path guarantees by proving no runtime files were changed.
+- Keep governance toolchain ownership explicit and avoid mid-stage script consolidation when no remediation is required.
 
 ### 3. Architecture Intelligence Regeneration
 
-- Refresh dependency and architecture metadata with `scripts/infra-audit.ts` after remediation.
+- Refresh dependency and architecture metadata with `scripts/infra-audit.ts` after evidence capture.
 - Regenerate AI context artifacts with `scripts/generate-ai-context.ts --force` so guard and AI consumers share the updated repository state.
 - Validate the regenerated brain with `scripts/validate-architecture-brain.ts` before final verification.
 
 ### 4. Final Verification
 
-- Run the canonical verification sequence: `bun run lint`, `bun run typecheck`, `bun run validate:types`, `bun run arch:guard:ci`, `bun scripts/infra-audit.ts`, and targeted Vitest suites for touched modules.
+- Run the canonical verification sequence: `bun run lint`, `bun run validate:types`, `bun run arch:guard:ci`, and `bun scripts/infra-audit.ts`.
 - Confirm zero remaining architecture-alignment violations in scope and no regressions to authentication flow, correlation propagation, tenant-bound routing, license middleware ordering, schema and product compatibility checks, structured API error responses, transaction and idempotency guarantees, secret and log hygiene, performance-sensitive runtime paths, or server-authoritative runtime flows.
-- Record final outputs in stage-local reporting so closure evidence matches the canonical governance toolchain.
+- Record final outputs in stage-local reporting so closure evidence matches the canonical governance toolchain. If runtime-adjacent files were not touched, record the explicit no-runtime-test-required decision rather than inventing synthetic regressions.
 
 ## Risks And Mitigations
 

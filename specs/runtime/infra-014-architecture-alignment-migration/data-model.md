@@ -12,7 +12,7 @@
 | `scope_modules`   | string[] | Governed modules included in the baseline.                       |
 | `rule_families`   | string[] | Violation families included in the inventory.                    |
 | `violation_count` | number   | Total findings in the collected scope.                           |
-| `status`          | enum     | `draft`, `established`, `refreshed`, `final`.                    |
+| `status`          | enum     | `draft`, `established`, `clean`, `refreshed`, `final`.           |
 
 ### Relationships
 
@@ -28,7 +28,9 @@
 ### State Transitions
 
 - `draft` -> `established` when the first full-scope baseline is captured.
+- `established` -> `clean` when baseline capture confirms zero in-scope violations and no remediation is required.
 - `established` -> `refreshed` after remediation changes alter the repository state.
+- `clean` -> `final` when final verification passes with zero unresolved violations in scope.
 - `refreshed` -> `final` when final verification passes with zero unresolved violations in scope.
 
 ## Entity: GovernanceViolation
@@ -158,3 +160,22 @@
 
 - Closure requires `verdict = pass` and `remaining_violations = 0` within stage scope.
 - Verification evidence must come from canonical repo scripts, not ad hoc scans.
+
+## Entity: ZeroViolationEvidence
+
+### Fields
+
+| Field                  | Type     | Description                                           |
+| ---------------------- | -------- | ----------------------------------------------------- |
+| `captured_at`          | datetime | Timestamp of the clean baseline evidence capture.     |
+| `arch_guard_verdict`   | enum     | `pass`, `fail`.                                       |
+| `type_safety_verdict`  | enum     | `pass`, `fail`.                                       |
+| `infra_audit_verdict`  | enum     | `pass`, `fail`.                                       |
+| `runtime_change_scope` | enum     | `none`, `docs-only`, `runtime-adjacent`.              |
+| `remediation_required` | boolean  | Whether any repository remediation is still required. |
+| `notes`                | string   | Evidence summary and follow-up guidance.              |
+
+### Validation Rules
+
+- If all baseline verdicts pass with zero violations, `remediation_required` must be `false`.
+- A zero-violation stage must still refresh and validate canonical intelligence before closure.

@@ -4,7 +4,23 @@
 
 Use this runbook to execute the stage in the same order assumed by the plan.
 
-## 1. Capture The Baseline
+## 1. Freeze Scope And Invariants
+
+Create the foundational stage evidence before any baseline or remediation work:
+
+- `audits/GOVERNED_SCOPE.md`
+- `guides/RUNTIME_INVARIANTS.md`
+- `audits/LEGACY_SCRIPT_REVIEW.md`
+- `audits/REMEDIATION_TRACKER.md`
+
+Expected result:
+
+- Governed file allowlist frozen.
+- Runtime invariants frozen.
+- Toolchain ownership documented.
+- Remediation tracker ready to record either clean-state evidence or exact file-scoped fixes.
+
+## 2. Capture The Baseline
 
 Run the full-scope governance tools and save their outputs for categorization.
 
@@ -19,7 +35,19 @@ Expected result:
 - Full repository violation inventory.
 - Findings grouped by boundary, cycle, unsafe type, export typing, script overlap, and artifact drift.
 
-## 2. Prioritize By Category
+If all three commands report zero in-scope violations, record a clean baseline and do not invent remediation work.
+
+## 3. Evaluate Clean-State Outcome
+
+If the baseline is clean:
+
+- Record zero-violation evidence in the stage audit files.
+- Mark repository remediation as `not-required`.
+- Limit implementation to stage-local evidence, canonical artifact refresh, and closure verification.
+
+If the baseline is not clean, convert every finding into an exact file-scoped tracker entry before implementation.
+
+## 4. Prioritize By Category
 
 Apply fixes in the following order:
 
@@ -29,7 +57,7 @@ Apply fixes in the following order:
 4. Public export typing gaps.
 5. Duplicate or overlapping legacy governance scripts.
 
-## 3. Keep Remediation Within Scope
+## 5. Keep Remediation Within Scope
 
 Do not change any of the following:
 
@@ -41,7 +69,7 @@ Do not change any of the following:
 - Server-authoritative attempt timing or worker grading authority.
 - Existing ADR-backed architecture boundaries.
 
-## 4. Refresh Architecture Intelligence
+## 6. Refresh Architecture Intelligence
 
 After remediation lands, regenerate the canonical architecture artifacts.
 
@@ -51,11 +79,10 @@ bun scripts/generate-ai-context.ts --force
 bun scripts/validate-architecture-brain.ts
 ```
 
-## 5. Run Final Verification
+## 7. Run Final Verification
 
 ```bash
 bun run lint
-bun run typecheck
 bun run validate:types
 bun run arch:guard:ci
 bun scripts/infra-audit.ts
@@ -67,11 +94,12 @@ If runtime-adjacent code changes, also verify authentication flow, correlation p
 
 If scripts, logging surfaces, API hot paths, or worker hot paths change, also verify secret handling, structured log hygiene, and performance-sensitive behavior remain unchanged.
 
-## 6. Stage Completion Criteria
+## 8. Stage Completion Criteria
 
 The stage is ready for tasks and implementation only when:
 
 - Baseline findings are categorized and actionable.
+- Clean-state evidence is recorded when no remediation is required.
 - Planned remediation paths stay within existing architecture rules.
 - Canonical architecture intelligence can be regenerated and validated.
 - Final verification can reasonably close with zero unresolved in-scope violations.

@@ -41,3 +41,9 @@
 - Decision: Final verification will use the existing blocking governance sequence: lint, typecheck, type validation, strict architecture guard, infra audit, then targeted tests for changed modules.
 - Rationale: This matches existing package scripts, CI expectations, and the lint governance model while keeping the stage focused on compliance evidence rather than custom verification logic.
 - Alternatives considered: A lighter changed-files-only verification was rejected because this migration is repository-wide. Running all tests unconditionally as the first gate was rejected because structural compliance must be restored before behavioral verification has signal value.
+
+## Decision 8
+
+- Decision: Use a zero-violation implementation path for this stage because the current canonical baseline is already clean.
+- Rationale: A live baseline captured on 2026-03-12 returned `PASS` with zero violations from the architecture guard, zero violations from the type-safety guard, and zero dependency, cycle, layer, and drift violations from infra audit. With no concrete repository remediation required, deterministic implementation should record clean-state evidence, refresh canonical artifacts, and close with proof instead of authorizing hypothetical code edits.
+- Alternatives considered: Keeping repository-remediation bucket tasks was rejected because Analyze cannot authorize implementation against a moving target when the current baseline does not produce any file-scoped remediation work.

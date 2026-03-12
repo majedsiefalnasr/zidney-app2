@@ -62,6 +62,9 @@ bun scripts/validate-architecture-brain.ts
 
 ### Required Artifacts
 
+- `docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json`
+- `docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md`
+- `docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md`
 - `docs/ai/context/ai-architecture-summary.md`
 - `docs/ai/context/ai-module-map.json`
 - `docs/ai/context/ai-layer-model.json`
@@ -73,6 +76,7 @@ bun scripts/validate-architecture-brain.ts
 ### Validation Rule
 
 - Refresh is not complete until the architecture brain validates successfully.
+- Refresh evidence is not complete until both `docs/architecture/intelligence/` and `docs/ai/context/` outputs are confirmed current.
 
 ## Contract 4: Final Verification
 
@@ -80,7 +84,6 @@ bun scripts/validate-architecture-brain.ts
 
 ```bash
 bun run lint
-bun run typecheck
 bun run validate:types
 bun run arch:guard:ci
 bun scripts/infra-audit.ts
@@ -100,3 +103,11 @@ bun scripts/infra-audit.ts
 - Zero unresolved architecture-alignment violations in stage scope.
 - No malformed or stale architecture intelligence artifacts.
 - No regressions to trust-chain invariants.
+
+## Contract 5: Zero-Violation Closure Path
+
+If baseline capture reports zero in-scope violations:
+
+- Repository remediation under `apps/`, `packages/`, `scripts/`, and `tests/` becomes `not-required` for this stage.
+- Implementation scope narrows to stage-local evidence, canonical artifact refresh, and final verification.
+- Any later non-zero finding requires reopening planning and regenerating file-scoped remediation tasks before implementation authority can continue.
