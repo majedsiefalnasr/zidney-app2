@@ -1,14 +1,26 @@
 # Plan Report — STAGE_INFRA_13_UNIFIED_ARCHITECTURE_GUARD
 
-**Step:** 3 — Plan  
-**Timestamp:** 2026-03-12T12:35:08Z  
+**Step:** 6 — Implement  
+**Timestamp:** 2026-03-12T17:45:00Z  
 **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Technical planning is complete for a governance-only unified architecture guard stage. The design keeps runtime business behavior unchanged while defining a deterministic rule orchestration contract, structured violation schema, architecture context artifact contract, and execution quickstart.
+Implementation is complete for a governance-only unified architecture guard stage. The stage now includes a deterministic runner with strict and changed modes, a unified rule registry, non-negotiable governance checks (FR-009A through FR-009D), structured JSON reporting, context generation and brain validation hooks, and stage-scoped test coverage.
+
+No runtime business behavior was changed.
+
+## Implementation Evidence
+
+- Unified runner and mode orchestration implemented under scripts/architecture-guard.
+- Deterministic rule registry and ordered execution implemented.
+- Rule adapters implemented for dependency boundaries, circular dependencies, non-negotiables, and TS suppression checks.
+- Structured JSON report contract implemented with normalized violation output.
+- Context generation and brain validation hooks integrated in strict and changed workflows.
+- Stage test suites created for US1, US2, US3, schema compatibility, and stage-scope regression.
+- Stage quickstart, README command docs, and architecture guard usage docs updated.
 
 ---
 

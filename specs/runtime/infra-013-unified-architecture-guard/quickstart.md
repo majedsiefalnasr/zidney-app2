@@ -13,7 +13,7 @@ This quickstart is scoped to infrastructure governance workflows only.
 Run full strict architecture and governance checks:
 
 ```bash
-bun run arch:guard -- --ci
+bun run arch:guard:ci
 ```
 
 Expected behavior:
@@ -27,7 +27,7 @@ Expected behavior:
 Run incremental validation for changed files:
 
 ```bash
-bun run arch:guard -- --changed
+bun run arch:guard:changed
 ```
 
 Expected behavior:
@@ -66,11 +66,25 @@ Expected behavior:
 ## 5) Minimum Governance Pipeline for Stage Validation
 
 ```bash
-bun scripts/ai-guard.ts
+bun run arch:guard:ci
 bun scripts/infra-audit.ts
 bun run lint
 bun run typecheck
 bun run test:unit:boundaries
+```
+
+## 6) Required Artifact Presence Check
+
+```bash
+test -f docs/ai/context/ai-architecture-summary.md
+test -f docs/ai/context/ai-module-map.json
+test -f docs/ai/context/ai-layer-model.json
+test -f docs/ai/context/ai-dependency-graph.json
+test -f docs/ai/context/ai-runtime-map.json
+test -f docs/ai/context/ai-runtime-dependents.json
+test -f docs/ai/context/ai-architecture-brain.json
+test -f docs/ai/context/ai-architecture-diff.json
+test -f docs/ai/context/ai-context-mini.json
 ```
 
 ## Scope Guardrails

@@ -37,9 +37,33 @@ const AUDIT_WORKSPACES_TABLE = 'audit_logging_workspaces'
 const AUDIT_USERS_TABLE = 'audit_logging_users'
 const AUDIT_LOGS_TABLE = 'audit_logging_events'
 
+interface AuditWorkspace {
+  id: string
+}
+
+interface AuditUser {
+  id: string
+}
+
+function requireFirstRow<T>(rows: T[], context: string): T {
+  const row = rows[0]
+  if (!row) {
+    throw new Error(`Expected row for ${context}`)
+  }
+  return row
+}
+
+function requireTenantPool(workspaceId: string) {
+  const pool = getTenantPool(workspaceId)
+  if (!pool) {
+    throw new Error(`Missing tenant pool for workspace ${workspaceId}`)
+  }
+  return pool
+}
+
 describe('Audit Logging', () => {
-  let workspace: any
-  let user: any
+  let workspace: AuditWorkspace | null = null
+  let user: AuditUser | null = null
 
   beforeAll(async () => {
     await db.master.query(`
@@ -74,28 +98,28 @@ describe('Audit Logging', () => {
       )
     `)
 
-    const ws = await db.master.query(
+    const ws = await db.master.query<AuditWorkspace>(
       `INSERT INTO ${AUDIT_WORKSPACES_TABLE} (slug, name, license_status, schema_version, product_version)
        VALUES ('audit-test', 'Audit Test', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
-    workspace = ws.rows[0]
+    workspace = requireFirstRow(ws.rows, 'workspace setup')
 
-    const pool = getTenantPool(workspace.id)!
-    const u = await pool.query(
+    const pool = requireTenantPool(workspace.id)
+    const u = await pool.query<AuditUser>(
       `INSERT INTO ${AUDIT_USERS_TABLE} (workspace_id, email, password_hash, role, token_version)
        VALUES ($1, 'audit@test.com', 'hash', 'admin', 1)
        RETURNING id, email`,
       [workspace.id]
     )
-    user = u.rows[0]
+    user = requireFirstRow(u.rows, 'user setup')
   })
 
   afterAll(async () => {
     if (!workspace || !user) {
       return
     }
-    const pool = getTenantPool(workspace.id)!
+    const pool = requireTenantPool(workspace.id)
     await pool.query(`DELETE FROM ${AUDIT_USERS_TABLE} WHERE id = $1`, [user.id])
 
     await db.master.query(`DELETE FROM ${AUDIT_WORKSPACES_TABLE} WHERE id = $1`, [workspace.id])

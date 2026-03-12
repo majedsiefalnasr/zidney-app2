@@ -134,11 +134,14 @@ implementation. */
 </template>
 
 <script setup lang="ts">
-import type { License } from '@zidney/domain-core/licenses/types'
+/* biome-ignore-all lint/correctness/noUnusedVariables: symbols are consumed by Vue template bindings */
+/* biome-ignore-all lint/correctness/noUnusedImports: symbols are consumed by Vue template bindings */
+
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { licensesApi } from '@/modules/licenses/api'
 import LicenseStatusBadge from '@/modules/licenses/components/LicenseStatusBadge.vue'
+import type { License } from '@/modules/licenses/types'
 
 // State
 const licenses = ref<License[]>([])
@@ -154,6 +157,13 @@ const filters = ref({
 
 const router = useRouter()
 
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message
+  }
+  return 'Failed to load licenses'
+}
+
 // Methods
 async function fetchLicenses() {
   loading.value = true
@@ -167,8 +177,8 @@ async function fetchLicenses() {
 
     licenses.value = result.licenses
     totalPages.value = result.pagination.pages
-  } catch (err: any) {
-    error.value = err.message || 'Failed to load licenses'
+  } catch (err: unknown) {
+    error.value = getErrorMessage(err)
   } finally {
     loading.value = false
   }
@@ -208,7 +218,7 @@ function editLicense(license: License) {
   router.push(`/licenses/${license.id}?edit=true`)
 }
 
-function showActions(license: License) {
+function showActions(_license: License) {
   // Show action menu
 }
 
@@ -216,7 +226,7 @@ function navigateToCreate() {
   router.push('/licenses/new')
 }
 
-function formatDate(date: any): string {
+function formatDate(date: string | Date): string {
   return new Date(date).toLocaleDateString()
 }
 

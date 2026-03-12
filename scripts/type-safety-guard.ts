@@ -2,6 +2,7 @@
 
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { runUnifiedArchitectureGuard } from './architecture-guard/runner'
 
 // Types
 interface AllowedException {
@@ -56,11 +57,10 @@ async function loadAllowedExceptions(): Promise<Map<string, AllowedException[]>>
       const content = await readFile(registryFile, 'utf-8')
       const data = JSON.parse(content) as AllowedExceptions
       for (const exception of data.exceptions) {
-        const key = `${exception.file}:${exception.line}:${exception.pattern}`
         if (!exceptionMap.has(exception.file)) {
           exceptionMap.set(exception.file, [])
         }
-        exceptionMap.get(exception.file)!.push(exception)
+        exceptionMap.get(exception.file)?.push(exception)
       }
     } catch {
       // Registry file not found or cannot be read - skip it
@@ -250,6 +250,11 @@ function outputMarkdown(violations: Violation[]): void {
 
 // Main entry point
 async function main(): Promise<void> {
+  if (process.argv.includes('--unified-runner')) {
+    const code = await runUnifiedArchitectureGuard(process.argv.slice(2))
+    process.exit(code)
+  }
+
   const args = parseArgs()
   const files = await collectTypeScriptFiles()
   const violations = await scanForViolations(files)
