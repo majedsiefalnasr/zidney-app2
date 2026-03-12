@@ -17,10 +17,10 @@
 
 **Purpose**: Create the stage-local evidence files and guardrail references used by clean-state validation and any later remediation if drift is rediscovered.
 
-- [ ] T001 Create the baseline evidence workspace in specs/runtime/infra-014-architecture-alignment-migration/audits/ALIGNMENT_BASELINE.md
-- [ ] T002 Create the remediation tracker in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md
-- [ ] T003 [P] Create the final verification ledger in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
-- [ ] T004 [P] Create the governance workflow guide in specs/runtime/infra-014-architecture-alignment-migration/guides/GOVERNANCE_WORKFLOW.md
+- [x] T001 Create the baseline evidence workspace in specs/runtime/infra-014-architecture-alignment-migration/audits/ALIGNMENT_BASELINE.md
+- [x] T002 Create the remediation tracker in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md
+- [x] T003 [P] Create the final verification ledger in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
+- [x] T004 [P] Create the governance workflow guide in specs/runtime/infra-014-architecture-alignment-migration/guides/GOVERNANCE_WORKFLOW.md
 
 ---
 
@@ -30,10 +30,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T005 Record the governed module scope, docs-only implementation allowlist, and boundary references in specs/runtime/infra-014-architecture-alignment-migration/audits/GOVERNED_SCOPE.md using docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json and docs/architecture/module-boundaries.json
-- [ ] T006 [P] Document trust-chain and runtime invariants in specs/runtime/infra-014-architecture-alignment-migration/guides/RUNTIME_INVARIANTS.md using specs/runtime/infra-014-architecture-alignment-migration/quickstart.md and specs/runtime/infra-014-architecture-alignment-migration/contracts/alignment-verification-contract.md
-- [ ] T007 [P] Inventory canonical and legacy governance entrypoints plus secret and log-sensitive script surfaces in specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md using package.json and scripts/
-- [ ] T008 Define remediation categories, closure states, and the zero-violation evidence path in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md using specs/runtime/infra-014-architecture-alignment-migration/data-model.md and specs/runtime/infra-014-architecture-alignment-migration/research.md
+- [x] T005 Record the governed module scope, docs-only implementation allowlist, and boundary references in specs/runtime/infra-014-architecture-alignment-migration/audits/GOVERNED_SCOPE.md using docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json and docs/architecture/module-boundaries.json
+- [x] T006 [P] Document trust-chain and runtime invariants in specs/runtime/infra-014-architecture-alignment-migration/guides/RUNTIME_INVARIANTS.md using specs/runtime/infra-014-architecture-alignment-migration/quickstart.md and specs/runtime/infra-014-architecture-alignment-migration/contracts/alignment-verification-contract.md
+- [x] T007 [P] Inventory canonical and legacy governance entrypoints plus secret and log-sensitive script surfaces in specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md using package.json and scripts/
+- [x] T008 Define remediation categories, closure states, and the zero-violation evidence path in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md using specs/runtime/infra-014-architecture-alignment-migration/data-model.md and specs/runtime/infra-014-architecture-alignment-migration/research.md
 
 **Checkpoint**: Stage evidence and invariant guardrails are ready for baseline capture.
 
@@ -47,12 +47,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T009 [P] [US1] Capture the unified architecture guard baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/us1-arch-guard-baseline.json using `bun run arch:guard -- --output json`
-- [ ] T010 [P] [US1] Capture the infrastructure audit baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/us1-infra-audit-baseline.md using scripts/infra-audit.ts
-- [ ] T011 [P] [US1] Capture the type-safety baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/us1-type-safety-baseline.json using `bun scripts/type-safety-guard.ts --json`
-- [ ] T012 [US1] Merge the baseline outputs into specs/runtime/infra-014-architecture-alignment-migration/audits/ALIGNMENT_BASELINE.md with source tool, module, rule family, severity, and location columns
-- [ ] T013 [US1] Record clean-state evidence, trust-chain risk flags, and hot-path sensitivity flags in specs/runtime/infra-014-architecture-alignment-migration/audits/ALIGNMENT_BASELINE.md when the canonical baseline reports zero violations
-- [ ] T014 [US1] Mark specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md with `not-required` repository remediation status and no-op closure notes when the baseline reports zero violations
+- [x] T009 [P] [US1] Capture the unified architecture guard baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/us1-arch-guard-baseline.json using `bun run arch:guard -- --output json`
+- [x] T010 [P] [US1] Capture the infrastructure audit baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/us1-infra-audit-baseline.md using scripts/infra-audit.ts
+- [x] T011 [P] [US1] Capture the type-safety baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/us1-type-safety-baseline.json using `bun scripts/type-safety-guard.ts --json`
+- [x] T012 [US1] Merge the baseline outputs into specs/runtime/infra-014-architecture-alignment-migration/audits/ALIGNMENT_BASELINE.md with source tool, module, rule family, severity, and location columns
+- [x] T013 [US1] Record clean-state evidence, trust-chain risk flags, and hot-path sensitivity flags in specs/runtime/infra-014-architecture-alignment-migration/audits/ALIGNMENT_BASELINE.md when the canonical baseline reports zero violations
+- [x] T014 [US1] Mark specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md with `not-required` repository remediation status and no-op closure notes when the baseline reports zero violations
 
 **Checkpoint**: User Story 1 is complete when the baseline is authoritative enough to schedule every in-scope remediation item without additional discovery.
 
@@ -66,12 +66,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Record a no-remediation decision for apps/, packages/, scripts/, and tests/ in specs/runtime/infra-014-architecture-alignment-migration/audits/GOVERNED_SCOPE.md using the zero-violation baseline captured in Phase 3
-- [ ] T016 [US2] Record exact trust-chain preservation checks and docs-only implementation scope in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md with no runtime file mutations authorized
-- [ ] T017 [US2] Document that dependency-boundary, circular-dependency, unsafe-type, and export-typing remediation are `not-required` in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md for the captured clean baseline
-- [ ] T018 [US2] Record that no transaction, idempotency, or compatibility regressions were introduced because implementation scope is limited to stage-local evidence and artifact refresh in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
-- [ ] T019 [US2] Document governance toolchain ownership and confirm no package.json or scripts/ consolidation is required for the current clean baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md
-- [ ] T020 [US2] Verify and record that authentication flow, correlation propagation, tenant resolver coverage, license enforcement order, schema and product compatibility checks, worker authority, server-authoritative time, secret and log hygiene, and the `{ success, data, error }` response contract remain unchanged because no runtime paths were modified in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
+- [x] T015 [US2] Record a no-remediation decision for apps/, packages/, scripts/, and tests/ in specs/runtime/infra-014-architecture-alignment-migration/audits/GOVERNED_SCOPE.md using the zero-violation baseline captured in Phase 3
+- [x] T016 [US2] Record exact trust-chain preservation checks and docs-only implementation scope in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md with no runtime file mutations authorized
+- [x] T017 [US2] Document that dependency-boundary, circular-dependency, unsafe-type, and export-typing remediation are `not-required` in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md for the captured clean baseline
+- [x] T018 [US2] Record that no transaction, idempotency, or compatibility regressions were introduced because implementation scope is limited to stage-local evidence and artifact refresh in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
+- [x] T019 [US2] Document governance toolchain ownership and confirm no package.json or scripts/ consolidation is required for the current clean baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md
+- [x] T020 [US2] Verify and record that authentication flow, correlation propagation, tenant resolver coverage, license enforcement order, schema and product compatibility checks, worker authority, server-authoritative time, secret and log hygiene, and the `{ success, data, error }` response contract remain unchanged because no runtime paths were modified in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
 
 **Checkpoint**: User Story 2 is complete when repository code is aligned to the current architecture contract and runtime invariants remain unchanged on every touched path.
 
@@ -85,11 +85,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Regenerate repository architecture intelligence in docs/architecture/intelligence/ and docs/ai/context/ using scripts/infra-audit.ts
-- [ ] T022 [US3] Refresh AI context artifacts in docs/ai/context/ using scripts/generate-ai-context.ts --force
-- [ ] T023 [US3] Validate docs/ai/context/ai-architecture-brain.json using scripts/validate-architecture-brain.ts and record the result in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
-- [ ] T024 [US3] Record that no targeted runtime regression suites or hot-path performance suites were required because implementation scope remained docs-only in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
-- [ ] T025 [US3] Execute the canonical closure sequence from specs/runtime/infra-014-architecture-alignment-migration/contracts/alignment-verification-contract.md and record zero unresolved in-scope violations plus refreshed intelligence artifacts in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
+- [x] T021 [US3] Regenerate repository architecture intelligence in docs/architecture/intelligence/ and docs/ai/context/ using scripts/infra-audit.ts
+- [x] T022 [US3] Refresh AI context artifacts in docs/ai/context/ using scripts/generate-ai-context.ts --force
+- [x] T023 [US3] Validate docs/ai/context/ai-architecture-brain.json using scripts/validate-architecture-brain.ts and record the result in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
+- [x] T024 [US3] Record that no targeted runtime regression suites or hot-path performance suites were required because implementation scope remained docs-only in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
+- [x] T025 [US3] Execute the canonical closure sequence from specs/runtime/infra-014-architecture-alignment-migration/contracts/alignment-verification-contract.md and record zero unresolved in-scope violations plus refreshed intelligence artifacts in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
 
 **Checkpoint**: User Story 3 is complete when canonical artifacts are regenerated, validated, and accepted by the final governance toolchain.
 
@@ -99,9 +99,9 @@
 
 **Purpose**: Finalize stage evidence, workflow status, and closure readiness.
 
-- [ ] T026 [P] Summarize task execution evidence, closure blockers, and residual risk in specs/runtime/infra-014-architecture-alignment-migration/reports/TASKS_REPORT.md
-- [ ] T027 Update workflow progress and generated artifact references in specs/runtime/infra-014-architecture-alignment-migration/README.md
-- [ ] T028 Reconcile final task status and closure notes in specs/runtime/infra-014-architecture-alignment-migration/tasks.md and specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
+- [x] T026 [P] Summarize task execution evidence, closure blockers, and residual risk in specs/runtime/infra-014-architecture-alignment-migration/reports/TASKS_REPORT.md
+- [x] T027 Update workflow progress and generated artifact references in specs/runtime/infra-014-architecture-alignment-migration/README.md
+- [x] T028 Reconcile final task status and closure notes in specs/runtime/infra-014-architecture-alignment-migration/tasks.md and specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
 
 ---
 
