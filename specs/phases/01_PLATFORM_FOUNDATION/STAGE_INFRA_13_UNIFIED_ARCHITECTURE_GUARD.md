@@ -11,26 +11,26 @@ system.
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-12T11:42:49Z
+Last Updated: 2026-03-12T12:35:08Z
 
-Scope Defined:
+Scope Planned:
 
-- Unified governance entrypoint for architecture enforcement
-- Strict and changed-files validation modes
-- Architecture context artifact generation and structured violation reporting
+- Unified guard execution modes and deterministic fallback strategy
+- Structured violation/report schema and governance contracts
+- Architecture context generation and validation contract
 
 Deferred Scope:
 
-- Runtime behavior changes for license, attempt engine, or UI flows
+- Runtime business behavior changes across API, worker, and UI layers
 
 Constitutional Compliance:
 
-- Clarifications resolved - planning authorized
+- Technical plan compliant - task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
@@ -111,7 +111,7 @@ Each rule operates independently but is executed through the guard runner.
 ## Development Mode
 
 ```
-bun architecture-guard
+bun run arch:guard
 ```
 
 Purpose:
@@ -128,7 +128,7 @@ Behavior:
 ## Pre-Push Mode
 
 ```
-bun architecture-guard --changed
+bun run arch:guard -- --changed
 ```
 
 Behavior:
@@ -149,7 +149,7 @@ This reduces scan time significantly.
 ## CI Mode
 
 ```
-bun architecture-guard --ci
+bun run arch:guard -- --ci
 ```
 
 Behavior:
@@ -278,9 +278,15 @@ Generated files:
 ```
 docs/ai/context/
 
+  ai-architecture-summary.md
   ai-dependency-graph.json
   ai-module-map.json
-  ai-layer-map.json
+  ai-layer-model.json
+  ai-runtime-map.json
+  ai-runtime-dependents.json
+  ai-architecture-brain.json
+  ai-architecture-diff.json
+  ai-context-mini.json
 ```
 
 These files provide structured architecture context to AI tools such as:
@@ -296,7 +302,7 @@ These files provide structured architecture context to AI tools such as:
 Add generator script:
 
 ```
-scripts/architecture-brain/generate-architecture-brain.ts
+scripts/generate-ai-context.ts
 ```
 
 Responsibilities:
@@ -340,7 +346,7 @@ Contains:
 ## Layer Map
 
 ```
-ai-layer-map.json
+ai-layer-model.json
 ```
 
 Contains:
@@ -367,7 +373,7 @@ Add architecture guard to CI pipeline.
 Example step:
 
 ```
-bun scripts/architecture-guard/architecture-guard.ts --ci
+bun run arch:guard -- --ci
 ```
 
 CI fails when:

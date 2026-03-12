@@ -2,8 +2,15 @@
 
 **Feature Branch**: `spec/infra-013-unified-architecture-guard`  
 **Created**: 2026-03-12  
-**Status**: Draft  
+**Status**: DRAFT  
 **Input**: User description: "Execute Step 1 (Specify) for STAGE_INFRA_13_UNIFIED_ARCHITECTURE_GUARD in Phase 01_PLATFORM_FOUNDATION"
+
+## Stage Status
+
+Status: DRAFT
+Step: plan
+Risk Level: LOW
+Last Updated: 2026-03-12T12:35:08Z
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -32,7 +39,7 @@ As a developer, I need a fast changed-files validation mode before push, so that
 
 **Acceptance Scenarios**:
 
-1. **Given** a branch with modified files, **When** changed-files mode is executed, **Then** only modified files are scanned and violations are reported if present.
+1. **Given** a branch with modified files, **When** changed-files mode is executed, **Then** modified files are scanned first, impact expansion may include additional affected files, and violations are reported if present.
 2. **Given** a branch with no changed files, **When** changed-files mode is executed, **Then** the run completes without false violations.
 
 ---
