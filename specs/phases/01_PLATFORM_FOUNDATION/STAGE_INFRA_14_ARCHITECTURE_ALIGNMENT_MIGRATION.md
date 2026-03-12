@@ -10,20 +10,27 @@ Architecture Guard**, **TypeScript Governance**, and **Architecture Brain** stan
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-12T15:01:57Z
+Last Updated: 2026-03-12T15:06:02Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Repository-wide alignment baseline and violation categorization
+- Safe remediation scope for dependency, module boundary, cycle, and type-governance drift
+- Canonical architecture intelligence regeneration after compliant alignment
+
+Deferred Scope:
+
+- Architecture redesign or new boundary models
+- Product-facing runtime behavior changes
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
