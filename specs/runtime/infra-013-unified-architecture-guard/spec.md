@@ -112,3 +112,12 @@ As an architecture/governance maintainer, I need machine-readable architecture c
 - Changes to attempt engine grading, snapshot, submission, or worker finalization logic.
 - UI behavior changes in MMC, Backoffice, Frontoffice, or shared UI components.
 - Introduction of new cross-module architecture patterns not already authorized by ADR/contract.
+
+## Clarifications
+
+### Session 2026-03-12
+
+- Q: Should this stage move lifecycle status out of DRAFT during Clarify?
+  A: No. Keep stage lifecycle in DRAFT until Analyze and implementation authorization gates are reached.
+- Q: Are additional runtime policy clarifications needed for license/attempt flows?
+  A: No. Existing constraints are explicit and remain unchanged; this stage is governance-only.
