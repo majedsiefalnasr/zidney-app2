@@ -2,15 +2,15 @@
 
 **Feature Branch**: `spec/infra-013-unified-architecture-guard`  
 **Created**: 2026-03-12  
-**Status**: DRAFT  
+**Status**: IN PROGRESS  
 **Input**: User description: "Execute Step 1 (Specify) for STAGE_INFRA_13_UNIFIED_ARCHITECTURE_GUARD in Phase 01_PLATFORM_FOUNDATION"
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: LOW
-Last Updated: 2026-03-12T12:47:27Z
+Last Updated: 2026-03-12T13:24:34Z
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -29,18 +29,18 @@ As a platform engineer, I need one governance entrypoint that checks architectur
 
 ---
 
-### User Story 2 - Validate Changed Files Quickly (Priority: P2)
+### User Story 2 - Validate Changed Mode Quickly (Priority: P2)
 
-As a developer, I need a fast changed-files validation mode before push, so that I can get governance feedback without waiting for full-repository scans.
+As a developer, I need a fast changed validation mode before push, so that I can get governance feedback without waiting for full-repository scans.
 
 **Why this priority**: Fast feedback improves compliance and developer adoption while preserving enforcement quality.
 
-**Independent Test**: Run changed-files mode on a branch with a small set of modified files and confirm only changed files are evaluated while violations are still detected.
+**Independent Test**: Run changed mode on a branch with a small set of modified files and confirm changed-first evaluation while violations are still detected.
 
 **Acceptance Scenarios**:
 
-1. **Given** a branch with modified files, **When** changed-files mode is executed, **Then** modified files are scanned first, impact expansion may include additional affected files, and violations are reported if present.
-2. **Given** a branch with no changed files, **When** changed-files mode is executed, **Then** the run completes without false violations.
+1. **Given** a branch with modified files, **When** changed mode is executed, **Then** modified files are scanned first, impact expansion may include additional affected files, and violations are reported if present.
+2. **Given** a branch with no changed files, **When** changed mode is executed, **Then** the run completes without false violations.
 
 ---
 
@@ -61,7 +61,7 @@ As an architecture/governance maintainer, I need machine-readable architecture c
 
 - What happens when the architecture map and discovered dependency graph disagree for a module relation?
 - How does the system handle generated context that is incomplete, malformed, or missing required artifacts?
-- What happens when changed-files validation is requested but the diff baseline is unavailable?
+- What happens when changed validation is requested but the diff baseline is unavailable?
 - How does the unified guard report multiple violations in a single run while remaining deterministic?
 
 ## Requirements _(mandatory)_
@@ -72,12 +72,21 @@ As an architecture/governance maintainer, I need machine-readable architecture c
 - **FR-002**: The system MUST enforce repository import boundaries, including no cross-app imports and no package-to-app imports.
 - **FR-003**: The system MUST detect and report circular dependency violations in governed modules.
 - **FR-004**: The system MUST detect unsafe TypeScript suppression/escape patterns governed by Zidney policy and report them as violations.
-- **FR-005**: The system MUST support a changed-files validation mode for pre-push workflows that preserves rule consistency with strict mode.
+- **FR-005**: The system MUST support a changed validation mode for pre-push workflows that preserves rule consistency with strict mode.
 - **FR-006**: The system MUST support a strict CI validation mode that fails when violations exist.
 - **FR-007**: The system MUST generate and refresh architecture intelligence artifacts required by governance and AI context workflows.
 - **FR-008**: Violation output MUST identify the violated rule, affected file/module, and remediation direction in a structured, actionable format.
-- **FR-009**: Governance rules MUST include enforcement of Zidney non-negotiables: database-per-tenant model, prohibition of cross-tenant joins, mandatory license enforcement in workspace-bound flows, and no architecture drift.
+- **FR-009A**: Governance rules MUST enforce database-per-tenant architectural signals from authoritative contracts and boundary maps.
+- **FR-009B**: Governance rules MUST detect and block cross-tenant join patterns in governed files.
+- **FR-009C**: Governance rules MUST verify mandatory workspace-bound license middleware contract presence in governed API surfaces.
+- **FR-009D**: Governance rules MUST detect and block architecture drift via map/graph/context consistency checks.
 - **FR-010**: The unified governance workflow MUST remain stage-scoped to infrastructure governance and MUST NOT alter runtime business behavior, tenant data flow, or license/attempt logic.
+
+### Non-Functional Requirements
+
+- **NFR-001 (Determinism)**: Identical inputs MUST produce identical verdict and violation ordering.
+- **NFR-002 (Performance)**: Changed mode MUST be measurably faster than strict mode in benchmark scenarios defined by stage tasks.
+- **NFR-003 (Contract Stability)**: JSON report output MUST remain schema-valid and backward-compatible within this stage scope.
 
 ### Key Entities _(include if feature involves data)_
 
@@ -91,7 +100,7 @@ As an architecture/governance maintainer, I need machine-readable architecture c
 ### Measurable Outcomes
 
 - **SC-001**: 100% of architecture boundary violations introduced in controlled test cases are detected by strict validation mode.
-- **SC-002**: Changed-files mode completes in less time than full validation mode for equivalent branches while returning consistent pass/fail outcomes for changed files.
+- **SC-002**: Changed mode completes in less time than strict validation mode for equivalent branches while returning consistent pass/fail outcomes for changed surfaces.
 - **SC-003**: Governance output includes actionable violation metadata (rule, location, remediation guidance) for 100% of reported violations.
 - **SC-004**: Required architecture context artifacts are regenerated successfully in 100% of successful generation runs.
 - **SC-005**: No new architecture drift is introduced by this stage’s governance workflow changes.

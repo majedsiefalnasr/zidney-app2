@@ -21,9 +21,10 @@ bun run arch:guard
 Contract:
 
 - Provides warnings-first developer feedback.
-- Must not block local iteration in development mode.
+- Must not block local iteration on policy warnings in development mode.
 - Uses the same rule taxonomy as strict mode for consistency.
-- Returns exit code `0` in development mode unless invocation is invalid.
+- Policy violations in development mode are surfaced as warnings and mapped to verdict `PASS`.
+- Contract-breaking execution errors in development mode return verdict `BLOCKED`.
 
 ### Strict Mode
 

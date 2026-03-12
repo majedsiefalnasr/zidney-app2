@@ -8,7 +8,7 @@
 
 ## Summary
 
-A dependency-ordered implementation task set was generated for the unified architecture guard stage. The set includes 37 atomic tasks spanning setup, foundational orchestration, user-story implementation tracks, tests, and stage polish.
+A dependency-ordered implementation task set was generated for the unified architecture guard stage. The set includes 48 atomic tasks spanning setup, foundational orchestration, user-story implementation tracks, tests, and stage polish.
 
 ---
 
@@ -22,15 +22,15 @@ A dependency-ordered implementation task set was generated for the unified archi
 
 ## Task Breakdown
 
-| Category       | Count | Notes                                                               |
-| -------------- | ----- | ------------------------------------------------------------------- |
-| Infrastructure | 34    | Governance scripts, runner wiring, docs, and package scripts        |
-| API            | 0     | No runtime API behavior tasks in this stage                         |
-| Worker         | 0     | No worker runtime behavior tasks in this stage                      |
-| Frontend       | 0     | No UI/runtime behavior tasks in this stage                          |
-| Observability  | 0     | No standalone observability workstream; covered via reporting tasks |
-| Testing        | 10    | Static/integration tests for strict, changed, and context flows     |
-| **Total**      | 37    | Stage-scoped and dependency-ordered                                 |
+| Category       | Count | Notes                                                                       |
+| -------------- | ----- | --------------------------------------------------------------------------- |
+| Infrastructure | 31    | Governance scripts, runner wiring, docs, and package scripts                |
+| API            | 0     | No runtime API behavior tasks in this stage                                 |
+| Worker         | 0     | No worker runtime behavior tasks in this stage                              |
+| Frontend       | 0     | No UI/runtime behavior tasks in this stage                                  |
+| Observability  | 0     | No standalone observability workstream; covered via reporting tasks         |
+| Testing        | 17    | Static/integration/performance tests for strict, changed, and context flows |
+| **Total**      | 48    | Stage-scoped and dependency-ordered (exclusive category counting)           |
 
 ---
 

@@ -5,7 +5,7 @@
 
 ## Summary
 
-Deliver a single, infrastructure-scoped governance entrypoint that orchestrates architecture-boundary, module-boundary, circular-dependency, and type-safety checks with deterministic reporting in strict and changed-files modes, while generating up-to-date architecture context artifacts for AI/governance consumers, covering FR-009 non-negotiables through static governance checks, and introducing zero runtime business behavior changes.
+Deliver a single, infrastructure-scoped governance entrypoint that orchestrates architecture-boundary, module-boundary, circular-dependency, and type-safety checks with deterministic reporting in strict and changed modes, while generating up-to-date architecture context artifacts for AI/governance consumers, covering FR-009 non-negotiables through static governance checks, and introducing zero runtime business behavior changes.
 
 ## Technical Context
 
@@ -15,7 +15,7 @@ Deliver a single, infrastructure-scoped governance entrypoint that orchestrates 
 **Testing**: Vitest static and unit governance tests, plus command-level validation (`bun scripts/ai-guard.ts`, `bun scripts/infra-audit.ts`, `bun scripts/validate-architecture-brain.ts`)  
 **Target Platform**: Monorepo CI and local developer CLI on macOS/Linux  
 **Project Type**: Infrastructure governance CLI orchestration and reporting  
-**Performance Goals**: Changed-files mode should validate only impacted scope and complete faster than full scan for small diffs; strict mode remains deterministic and complete  
+**Performance Goals**: Changed mode should validate changed-first impacted scope and complete faster than strict full scan for small diffs; strict mode remains deterministic and complete  
 **Constraints**: No tenant data-flow changes, no license/attempt runtime logic changes, no architecture redesign outside this stage scope, preserve import boundary governance rules  
 **Scale/Scope**: Repository-wide governance for all `apps/*` and `packages/*` modules with unified output and architecture-context regeneration
 
@@ -40,7 +40,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 ## Phase 0 Research Plan
 
-- Confirm validation mode strategy (`strict`, `changed-files`) and fallback rules from current governance scripts.
+- Confirm validation mode strategy (`strict`, `changed`) and fallback rules from current governance scripts.
 - Confirm rule orchestration patterns and structured output schema fields currently emitted by AI guard and type-safety guard.
 - Confirm architecture context generation producers/consumers and required artifact set.
 - Produce final decisions in `research.md` with rationale and alternatives.

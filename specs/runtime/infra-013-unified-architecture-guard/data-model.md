@@ -16,6 +16,7 @@ Fields:
   - `modules_skipped` (integer, required)
   - `skipped_unmapped_files` (string[], optional)
 - `fallback_reason` (enum|null, optional): `map_changed` | `new_module_detected` | `graph_missing` | `graph_stale` | `graph_unusable` | `full_scope` | null.
+- `contract_error` (boolean, optional): Indicates contract-breaking execution error.
 - `duration_ms` (number, required): Execution time.
 - `verdict` (enum, required): `PASS` | `BLOCKED`.
 
@@ -35,7 +36,7 @@ Fields:
 - `name` (string, required): Human-friendly rule name.
 - `category` (enum, required): `dependency` | `layer` | `module-boundary` | `circular` | `type-safety` | `ai-governance`.
 - `severity` (enum, required): `error` | `warning`.
-- `enabled_in_modes` (enum[], required): subset of `strict`, `changed`.
+- `enabled_in_modes` (enum[], required): subset of `development`, `strict`, `changed`.
 - `source_of_truth` (string, required): Path to contract/config consumed by this rule.
 
 Relationships:

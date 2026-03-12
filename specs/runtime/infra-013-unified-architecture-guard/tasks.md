@@ -17,7 +17,7 @@
 
 **Purpose**: Prepare unified-guard scaffolding and stage-linked script entrypoints.
 
-- [ ] T001 Create unified guard workspace structure in `scripts/architecture-guard/index.ts`
+- [ ] T001 Create unified guard workspace structure in `scripts/architecture-guard/architecture-guard.ts`
 - [ ] T002 Create runner skeleton and mode parser in `scripts/architecture-guard/runner.ts`
 - [ ] T003 [P] Create shared guard types for run/rule/violation contracts in `scripts/architecture-guard/types.ts`
 - [ ] T004 [P] Add stage-scoped npm scripts (`arch:guard`, `arch:guard:ci`, `arch:guard:changed`) in `package.json`
@@ -59,17 +59,23 @@
 
 - [ ] T016 [P] [US1] Implement dependency and cross-app boundary rule adapter in `scripts/architecture-guard/rules/dependency-boundaries.rule.ts`
 - [ ] T017 [P] [US1] Implement circular-dependency rule adapter in `scripts/architecture-guard/rules/circular-dependency.rule.ts`
-- [ ] T018 [P] [US1] Implement FR-009 static governance rule checks (tenant/license/drift contracts) in `scripts/architecture-guard/rules/non-negotiables.rule.ts`
+- [ ] T018 [P] [US1] Implement FR-009A database-per-tenant signal check in `scripts/architecture-guard/rules/non-negotiables.rule.ts`
 - [ ] T019 [US1] Integrate US1 rule adapters into deterministic execution pipeline in `scripts/architecture-guard/runner.ts`
 - [ ] T020 [US1] Emit structured strict-mode violations (`rule`, `location`, `source_module`, `remediation`) in `scripts/architecture-guard/reporters/json-reporter.ts`
+- [ ] T038 [P] [US1] Implement unsafe TS suppression detection rule in `scripts/architecture-guard/rules/type-safety-suppression.rule.ts`
+- [ ] T039 [US1] Add TS suppression detection tests (positive/negative) in `tests/static/architecture-guard/us1-type-safety-suppression.test.ts`
+- [ ] T042 [P] [US1] Implement FR-009B cross-tenant join pattern detection in `scripts/architecture-guard/rules/non-negotiables.rule.ts`
+- [ ] T043 [P] [US1] Implement FR-009C license middleware contract-presence rule in `scripts/architecture-guard/rules/non-negotiables.rule.ts`
+- [ ] T044 [P] [US1] Implement FR-009D architecture drift consistency rule in `scripts/architecture-guard/rules/non-negotiables.rule.ts`
+- [ ] T045 [US1] Add FR-009A/FR-009B/FR-009C/FR-009D rule coverage tests in `tests/static/architecture-guard/us1-non-negotiables.test.ts`
 
 **Checkpoint**: User Story 1 is independently functional and strict mode blocks known architecture violations.
 
 ---
 
-## Phase 4: User Story 2 - Validate Changed Files Quickly (Priority: P2)
+## Phase 4: User Story 2 - Validate Changed Mode Quickly (Priority: P2)
 
-**Goal**: Add fast changed-files validation with safe fallback while preserving strict-rule consistency.
+**Goal**: Add fast changed validation with safe fallback while preserving strict-rule consistency.
 
 **Independent Test**: Run changed mode with a small file diff and verify scoped validation, then simulate missing baseline and verify deterministic full-scan fallback.
 
@@ -85,6 +91,8 @@
 - [ ] T025 [P] [US2] Implement unchanged-file skip accounting for report scope metrics in `scripts/architecture-guard/utils/scope-accounting.ts`
 - [ ] T026 [US2] Add changed-mode execution path and fallback branching in `scripts/architecture-guard/runner.ts`
 - [ ] T027 [US2] Include fallback reason and scope counters in JSON output contract in `scripts/architecture-guard/reporters/json-reporter.ts`
+- [ ] T041 [US2] Add changed-vs-strict performance assertion task for SC-002 in `tests/performance/architecture-guard/us2-changed-vs-strict.benchmark.test.ts`
+- [ ] T046 [US2] Add strict-vs-changed rule parity assertion test for identical changed surfaces in `tests/static/architecture-guard/us2-parity-mode.test.ts`
 
 **Checkpoint**: User Story 2 is independently testable with fast-path validation and deterministic fallback behavior.
 
@@ -120,6 +128,9 @@
 - [ ] T035 Add stage report update with implemented verification evidence in `specs/runtime/infra-013-unified-architecture-guard/reports/PLAN_REPORT.md`
 - [ ] T036 Run and record governance validation pipeline outputs in `specs/runtime/infra-013-unified-architecture-guard/reports/TASKS_VALIDATION_REPORT.md`
 - [ ] T037 [P] Add/adjust npm script docs for guard modes in `README.md`
+- [ ] T040 Add no-runtime-mutation regression guard for SC-006 in `tests/static/architecture-guard/stage-scope-regression.test.ts`
+- [ ] T047 Add JSON schema validation task for unified guard output contract in `tests/static/architecture-guard/contract-schema-validation.test.ts`
+- [ ] T048 Add backward-compatibility snapshot test for report JSON structure in `tests/static/architecture-guard/contract-backward-compat.test.ts`
 
 ---
 
