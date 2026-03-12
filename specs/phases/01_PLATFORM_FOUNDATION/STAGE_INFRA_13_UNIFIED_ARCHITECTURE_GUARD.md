@@ -11,20 +11,26 @@ system.
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
-Risk Level: UNKNOWN
-Initiated: 2026-03-12T11:35:23Z
+Step: specify
+Risk Level: LOW
+Last Updated: 2026-03-12T11:39:48Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Unified governance entrypoint for architecture enforcement
+- Strict and changed-files validation modes
+- Architecture context artifact generation and structured violation reporting
+
+Deferred Scope:
+
+- Runtime behavior changes for license, attempt engine, or UI flows
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted - constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
