@@ -2,13 +2,13 @@
 
 **Feature Branch**: `spec/infra-015-autonomous-architecture-health`  
 **Created**: 2026-03-12  
-**Status**: Draft  
+**Status**: In Progress  
 **Input**: User description: "Execute Step 1 — Specify for the Zidney Hard Mode workflow for STAGE_INFRA_15_AUTONOMOUS_ARCHITECTURE_HEALTH in Phase 01_PLATFORM_FOUNDATION"
 
 ## Stage Status
 
-Status: DRAFT  
-Step: tasks  
+Status: IN PROGRESS  
+Step: analyze  
 Risk Level: LOW
 
 ## User Scenarios & Testing _(mandatory)_
