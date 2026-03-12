@@ -8,6 +8,13 @@ import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { GenerationError } from './types'
 
+interface CanonicalArchitectureContext {
+  generatedAt: string
+  modules: string[]
+  edges: Array<{ from: string; to: string }>
+  hotspots?: Array<{ module: string; score: number }>
+}
+
 /**
  * Loaded metadata from all source systems
  */
@@ -16,6 +23,7 @@ export interface SourceMetadata {
   moduleBoundaries: ModuleBoundariesConfig
   modules: ModuleInfo[]
   dockerServices: DockerService[]
+  architectureContext: CanonicalArchitectureContext | null
   sourceHash: string
   sourceTimestamp: string
   errors: GenerationError[]
@@ -209,6 +217,70 @@ async function loadDockerServices(composePath: string): Promise<DockerService[]>
   }
 }
 
+async function loadCanonicalArchitectureContext(
+  repoRoot: string
+): Promise<CanonicalArchitectureContext | null> {
+  const architectureContextPath = join(
+    repoRoot,
+    'docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json'
+  )
+  const graphPath = join(repoRoot, 'docs/architecture/graphs/dependency-graph-ai.json')
+
+  try {
+    const content = await readFile(architectureContextPath, 'utf-8')
+    const parsed = JSON.parse(content) as {
+      generatedAt?: string
+      modules?: string[]
+      edges?: Array<{ from?: string; to?: string }>
+      hotspots?: Array<{ module?: string; score?: number }>
+    }
+
+    if (Array.isArray(parsed.modules) && Array.isArray(parsed.edges)) {
+      return {
+        generatedAt: parsed.generatedAt ?? new Date().toISOString(),
+        modules: parsed.modules.filter((module): module is string => typeof module === 'string'),
+        edges: parsed.edges.filter(
+          (edge): edge is { from: string; to: string } =>
+            typeof edge?.from === 'string' && typeof edge?.to === 'string'
+        ),
+        hotspots: parsed.hotspots
+          ?.filter(
+            (hotspot): hotspot is { module: string; score: number } =>
+              typeof hotspot?.module === 'string' && typeof hotspot?.score === 'number'
+          )
+          .map((hotspot) => ({ module: hotspot.module, score: hotspot.score })),
+      }
+    }
+  } catch {
+    // Fall through to graph fallback.
+  }
+
+  try {
+    const content = await readFile(graphPath, 'utf-8')
+    const parsed = JSON.parse(content) as {
+      nodes?: Array<{ id?: string }>
+      edges?: Array<{ from?: string; to?: string }>
+    }
+
+    if (Array.isArray(parsed.nodes) && Array.isArray(parsed.edges)) {
+      return {
+        generatedAt: new Date().toISOString(),
+        modules: parsed.nodes
+          .map((node) => node.id)
+          .filter((module): module is string => typeof module === 'string'),
+        edges: parsed.edges.filter(
+          (edge): edge is { from: string; to: string } =>
+            typeof edge?.from === 'string' && typeof edge?.to === 'string'
+        ),
+      }
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
 /**
  * Compute SHA256 hash of source files for change detection
  */
@@ -244,35 +316,38 @@ export async function loadSourceMetadata(repoRoot: string): Promise<SourceMetada
     const boundariesPath = join(repoRoot, 'docs/architecture/module-boundaries.json')
     const composePath = join(repoRoot, 'docker-compose.yml')
 
-    const [adrs, boundaries, modules, services, sourceHash] = await Promise.all([
-      loadADRs(adrDir).catch((err) => {
-        errors.push({
-          code: 'ADR_LOAD_FAILED',
-          message: `Failed to load ADRs: ${String(err)}`,
-          context: { path: adrDir },
-          severity: 'warning',
-        })
-        return []
-      }),
-      loadModuleBoundaries(boundariesPath).catch((err) => {
-        errors.push({
-          code: 'BOUNDARIES_LOAD_FAILED',
-          message: `Failed to load module boundaries: ${String(err)}`,
-          context: { path: boundariesPath },
-          severity: 'error',
-        })
-        throw err
-      }),
-      scanModules(repoRoot),
-      loadDockerServices(composePath),
-      computeSourceHash(adrDir, boundariesPath),
-    ])
+    const [adrs, boundaries, modules, services, architectureContext, sourceHash] =
+      await Promise.all([
+        loadADRs(adrDir).catch((err) => {
+          errors.push({
+            code: 'ADR_LOAD_FAILED',
+            message: `Failed to load ADRs: ${String(err)}`,
+            context: { path: adrDir },
+            severity: 'warning',
+          })
+          return []
+        }),
+        loadModuleBoundaries(boundariesPath).catch((err) => {
+          errors.push({
+            code: 'BOUNDARIES_LOAD_FAILED',
+            message: `Failed to load module boundaries: ${String(err)}`,
+            context: { path: boundariesPath },
+            severity: 'error',
+          })
+          throw err
+        }),
+        scanModules(repoRoot),
+        loadDockerServices(composePath),
+        loadCanonicalArchitectureContext(repoRoot),
+        computeSourceHash(adrDir, boundariesPath),
+      ])
 
     return {
       adrFiles: adrs,
       moduleBoundaries: boundaries,
       modules,
       dockerServices: services,
+      architectureContext,
       sourceHash,
       sourceTimestamp,
       errors,
@@ -285,4 +360,4 @@ export async function loadSourceMetadata(repoRoot: string): Promise<SourceMetada
 /**
  * Export source metadata for testing
  */
-export type { ADRFile, ModuleInfo, DockerService }
+export type { ADRFile, CanonicalArchitectureContext, DockerService, ModuleInfo }

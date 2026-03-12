@@ -1309,6 +1309,13 @@ export function generateDependencyGraph(): void {
     }
   }
 
+  const edges: AIDependencyGraph['edges'] = []
+  for (const sourceModule of moduleKeys) {
+    for (const dep of forwardDeps[sourceModule] ?? new Set<string>()) {
+      edges.push({ from: sourceModule, to: dep })
+    }
+  }
+
   const now = new Date().toISOString()
   const output: AIDependencyGraph = {
     schema_version: '2',
@@ -1318,6 +1325,7 @@ export function generateDependencyGraph(): void {
     },
     modules,
     reverse_dependencies: reverseDeps,
+    edges,
   }
 
   if (!existsSync(AI_CONTEXT_DIR)) {

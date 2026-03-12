@@ -1,0 +1,15 @@
+{
+  "run_id": "1773331075112",
+  "timestamp": "2026-03-12T15:57:55.112Z",
+  "validation_mode": "development",
+  "scope": {
+    "modules_validated": 14,
+    "modules_skipped": 0,
+    "skipped_unmapped_files": []
+  },
+  "fallback_reason": null,
+  "contract_error": false,
+  "verdict": "PASS",
+  "violations": [],
+  "duration_ms": 362
+}

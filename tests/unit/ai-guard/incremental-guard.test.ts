@@ -50,6 +50,11 @@ function makeGraph(overrides: Partial<AIDependencyGraph> = {}): AIDependencyGrap
       'packages/logger': ['apps/api', 'apps/mmc'],
       'packages/types': ['apps/api'],
     },
+    edges: [
+      { from: 'apps/api', to: 'packages/logger' },
+      { from: 'apps/api', to: 'packages/types' },
+      { from: 'apps/mmc', to: 'packages/logger' },
+    ],
     ...overrides,
   }
 }

@@ -179,6 +179,13 @@ export function validateDependencyGraph(artifact: AIDependencyGraph): Validation
     })
   }
 
+  if (!Array.isArray(artifact.edges)) {
+    errors.push({
+      path: '$.edges',
+      message: 'Edges must be an array',
+    })
+  }
+
   if (artifact.violations && Array.isArray(artifact.violations)) {
     for (let i = 0; i < artifact.violations.length; i++) {
       const v = artifact.violations[i]
@@ -267,6 +274,13 @@ export function validateArchitectureBrain(artifact: AIArchitectureBrain): Valida
     }
   }
 
+  if (!Array.isArray(artifact.edges)) {
+    errors.push({
+      path: '$.edges',
+      message: 'Edges must be an array',
+    })
+  }
+
   return errors
 }
 
@@ -336,37 +350,18 @@ export function validateAllArtifacts(artifacts: {
   const startTime = performance.now()
   const results: { [key: string]: ValidationResult } = {}
 
-  const validators: Array<[string, keyof typeof artifacts, (artifact: any) => ValidationError[]]> =
-    [
-      ['ai-module-map.json', 'module_map', validateModuleMap],
-      ['ai-layer-model.json', 'layer_model', validateLayerModel],
-      ['ai-dependency-graph.json', 'dependency_graph', validateDependencyGraph],
-      ['ai-runtime-map.json', 'runtime_map', validateRuntimeMap],
-      ['ai-architecture-brain.json', 'architecture_brain', validateArchitectureBrain],
-      ['ai-context-mini.json', 'context_mini', validateContextMini],
-    ]
+  const validators = [
+    ['ai-module-map.json', () => validateModuleMap(artifacts.module_map)],
+    ['ai-layer-model.json', () => validateLayerModel(artifacts.layer_model)],
+    ['ai-dependency-graph.json', () => validateDependencyGraph(artifacts.dependency_graph)],
+    ['ai-runtime-map.json', () => validateRuntimeMap(artifacts.runtime_map)],
+    ['ai-architecture-brain.json', () => validateArchitectureBrain(artifacts.architecture_brain)],
+    ['ai-context-mini.json', () => validateContextMini(artifacts.context_mini)],
+  ] as const
 
-  for (const [name, artifactKey, validator] of validators) {
-    const artifact = artifacts[artifactKey]
-
-    if (!artifact) {
-      results[name] = {
-        valid: false,
-        errors: [
-          {
-            path: '$',
-            message: `Artifact ${name} not provided`,
-          },
-        ],
-        warnings: [],
-        artifact_name: name,
-        validation_time_ms: 0,
-      }
-      continue
-    }
-
+  for (const [name, validator] of validators) {
     const validationStart = performance.now()
-    const errors = validator(artifact)
+    const errors = validator()
     const validationTime = performance.now() - validationStart
 
     results[name] = {
