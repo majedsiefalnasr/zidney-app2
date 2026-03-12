@@ -10,11 +10,11 @@ Architecture Guard**, **TypeScript Governance**, and **Architecture Brain** stan
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
-Risk Level: MEDIUM
-Last Updated: 2026-03-12T15:10:10Z
+Step: plan
+Risk Level: HIGH
+Last Updated: 2026-03-12T15:30:38Z
 
-Scope Defined:
+Scope Planned:
 
 - Repository-wide alignment baseline and violation categorization
 - Safe remediation scope for dependency, module boundary, cycle, and type-governance drift
@@ -27,10 +27,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
@@ -251,31 +251,38 @@ Examples of candidates for removal:
 - deprecated architecture check scripts
 - experimental validation tools
 
-Replace them with:
+Consolidate them into the canonical governance workflow:
 
 ```
 scripts/architecture-guard
-scripts/architecture-brain
+scripts/infra-audit.ts
+scripts/generate-ai-context.ts
+scripts/validate-architecture-brain.ts
 ```
 
 ---
 
 # Step 9 — Regenerate Architecture Brain
 
-Run the architecture brain generator:
+Regenerate and validate canonical architecture intelligence in order:
 
 ```
-bun scripts/architecture-brain/generate-architecture-brain.ts
+bun scripts/infra-audit.ts
+bun scripts/generate-ai-context.ts --force
+bun scripts/validate-architecture-brain.ts
 ```
 
-This regenerates:
+This refreshes and validates:
 
 ```
 docs/ai/context/
 
   ai-dependency-graph.json
   ai-module-map.json
-  ai-layer-map.json
+  ai-layer-model.json
+  ai-runtime-map.json
+  ai-architecture-brain.json
+  ai-context-mini.json
 ```
 
 These files must reflect the updated repository structure.
@@ -302,16 +309,15 @@ If violations remain, they must be resolved before completing the stage.
 
 # Repository Cleanup Phase
 
-Perform a final repository cleanup to remove artifacts that no longer serve the architecture system.
+Perform a final repository cleanup only for overlapping governance assets that have confirmed canonical coverage.
 
 Targets:
 
 - unused scripts
-- obsolete documentation
-- duplicate architecture validation tools
+- duplicate governance wrappers
 - temporary migration utilities
 
-The final repository should contain **only the canonical governance tools**.
+Do not remove architecture or product documentation solely because it is older; documentation cleanup must stay bounded to duplicate governance guidance created by this migration.
 
 ---
 
