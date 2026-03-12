@@ -128,7 +128,7 @@ describe('Schema Validation', () => {
   describe('Dependency Graph Validation', () => {
     it('should validate correct dependency graph', () => {
       const validGraph: AIDependencyGraph = {
-        schema_version: '1.0.0',
+        schema_version: '2',
         generated_at: '2026-03-09T12:00:00Z',
         source_metadata: {
           infra_audit_timestamp: '2026-03-09T12:00:00Z',
@@ -143,6 +143,7 @@ describe('Schema Validation', () => {
         reverse_dependencies: {
           'packages/domain-core': ['apps/api'],
         },
+        edges: [{ from: 'apps/api', to: 'packages/domain-core' }],
       }
 
       const errors = validateDependencyGraph(validGraph)
@@ -187,6 +188,7 @@ describe('Schema Validation', () => {
         modules: {},
         rules: {},
         dependencies: {},
+        edges: [],
         violations: [],
         metrics: {
           max_severity: 'none',

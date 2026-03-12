@@ -331,6 +331,12 @@ export interface AIDependencyGraph {
     [modulePath: string]: string[]
   }
 
+  /** Canonical dependency edges for guard and cycle analysis */
+  edges: Array<{
+    from: string
+    to: string
+  }>
+
   /** Detected dependency violations */
   violations?: DependencyViolation[]
 }
@@ -533,6 +539,12 @@ export interface AIArchitectureBrain {
       violations: DependencyViolation[]
     }
   }
+
+  /** Canonical dependency edges for downstream validators */
+  edges: Array<{
+    from: string
+    to: string
+  }>
 
   /** All detected violations */
   violations: DependencyViolation[]
