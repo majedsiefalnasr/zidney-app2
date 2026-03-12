@@ -57,6 +57,17 @@ get_current_branch() {
     echo "main"  # Final fallback
 }
 
+normalize_feature_branch() {
+    local branch="$1"
+
+    if [[ "$branch" =~ ^spec/(.+)$ ]]; then
+        echo "${BASH_REMATCH[1]}"
+        return
+    fi
+
+    echo "$branch"
+}
+
 # Check if we have git available
 has_git() {
     git rev-parse --show-toplevel >/dev/null 2>&1
@@ -65,6 +76,9 @@ has_git() {
 check_feature_branch() {
     local branch="$1"
     local has_git_repo="$2"
+    local normalized_branch
+
+    normalized_branch=$(normalize_feature_branch "$branch")
 
     # For non-git repos, we can't enforce branch naming but still provide output
     if [[ "$has_git_repo" != "true" ]]; then
@@ -72,9 +86,9 @@ check_feature_branch() {
         return 0
     fi
 
-    if [[ ! "$branch" =~ ^[0-9]{3}- ]]; then
+    if [[ ! "$normalized_branch" =~ ^[0-9]{3}- && ! "$branch" =~ ^spec/.+ ]]; then
         echo "ERROR: Not on a feature branch. Current branch: $branch" >&2
-        echo "Feature branches should be named like: 001-feature-name" >&2
+        echo "Feature branches should be named like: 001-feature-name or spec/<stage-dir-name>" >&2
         return 1
     fi
 
@@ -89,11 +103,19 @@ find_feature_dir_by_prefix() {
     local repo_root="$1"
     local branch_name="$2"
     local specs_dir="$repo_root/specs/runtime"
+    local normalized_branch
+
+    normalized_branch=$(normalize_feature_branch "$branch_name")
+
+    if [[ -d "$specs_dir/$normalized_branch" ]]; then
+        echo "$specs_dir/$normalized_branch"
+        return
+    fi
 
     # Extract numeric prefix from branch (e.g., "004" from "004-whatever")
-    if [[ ! "$branch_name" =~ ^([0-9]{3})- ]]; then
+    if [[ ! "$normalized_branch" =~ ^([0-9]{3})- ]]; then
         # If branch doesn't have numeric prefix, fall back to exact match
-        echo "$specs_dir/$branch_name"
+        echo "$specs_dir/$normalized_branch"
         return
     fi
 
@@ -112,7 +134,7 @@ find_feature_dir_by_prefix() {
     # Handle results
     if [[ ${#matches[@]} -eq 0 ]]; then
         # No match found - return the branch name path (will fail later with clear error)
-        echo "$specs_dir/$branch_name"
+        echo "$specs_dir/$normalized_branch"
     elif [[ ${#matches[@]} -eq 1 ]]; then
         # Exactly one match - perfect!
         echo "$specs_dir/${matches[0]}"
@@ -120,7 +142,7 @@ find_feature_dir_by_prefix() {
         # Multiple matches - this shouldn't happen with proper naming convention
         echo "ERROR: Multiple spec directories found with prefix '$prefix': ${matches[*]}" >&2
         echo "Please ensure only one spec directory exists per numeric prefix." >&2
-        echo "$specs_dir/$branch_name"  # Return something to avoid breaking the script
+        echo "$specs_dir/$normalized_branch"  # Return something to avoid breaking the script
     fi
 }
 
