@@ -99,17 +99,35 @@ Expected behavior:
 Target stage command:
 
 ```bash
-bun scripts/architecture-health/architecture-health.ts --ci --threshold 80
+bun run arch:health:ci
 ```
 
 Expected behavior:
 
-- Exits non-zero when score is below threshold.
+- Exits non-zero when score is below the approved immutable governance threshold.
 - Exits non-zero when hard-fail synchronization conditions are present.
 - Keeps runtime behavior unchanged because the command only evaluates repository governance state.
 - Treats any non-passing governance outcome as `BLOCKED`.
+- Rejects or ignores caller attempts to lower the CI threshold.
+- Uploads the generated JSON and Markdown reports as CI artifacts for review.
 
-## 7) Review drift, synchronization, and history findings
+## 7) Confirm scheduled monitoring and artifact publication
+
+Governed workflow expectations:
+
+```bash
+pull_request
+push to main
+nightly schedule
+```
+
+Expected behavior:
+
+- The same immutable threshold policy is used across review and scheduled execution.
+- Generated health artifacts are attached to the workflow run for reviewer inspection.
+- Nightly runs preserve architecture evolution history even when no pull request is open.
+
+## 8) Review drift, synchronization, and history findings
 
 Generated artifacts to inspect:
 
@@ -124,9 +142,25 @@ Expected behavior:
 - Direct rule violations remain distinguishable from drift and synchronization findings.
 - Missing or stale AI-context artifacts appear as health findings instead of silent pass conditions.
 - Historical snapshots accumulate under `docs/architecture/health/history/` for trend review.
-- Retries of the same repository state update the same history snapshot key rather than creating duplicates.
+- Historical snapshots preserve run timestamps while `assessment_id` keeps same-state runs correlatable, and same-state reruns do not create duplicate history files.
 
-## 8) Validate the full governance pipeline
+## 9) Validate scanner safety and performance budgets
+
+Validation focus:
+
+```bash
+local run p95 <= 90s
+ci run p95 <= 120s
+sample size >= 20 runs per environment
+```
+
+Expected behavior:
+
+- All governed source commands execute through the allowlisted command runner.
+- Timeout budgets are recorded and enforced per source command.
+- Performance budget compliance is visible in validation output.
+
+## 10) Validate the full governance pipeline
 
 Use the standard verification sequence after implementing the stage:
 

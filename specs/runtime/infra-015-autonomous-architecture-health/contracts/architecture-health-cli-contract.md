@@ -56,10 +56,12 @@ bun run arch:health:ci
 Contract:
 
 - Uses the same scoring and finding model as standard mode.
-- Exits non-zero if the health score is below the configured threshold.
+- Exits non-zero if the health score is below the approved immutable threshold policy used for governance progression.
 - Exits non-zero on hard-fail conditions such as invalid architecture intelligence.
 - Must not introduce runtime behavior changes, middleware changes, or architecture-boundary changes.
 - Treats any non-passing outcome as `BLOCKED` for governance purposes.
+- Ignores or rejects caller-supplied threshold downgrades so governance results cannot be policy-bypassed from the command line.
+- Publishes the generated JSON and Markdown health artifacts as CI artifacts when invoked from the governed workflow.
 
 ### Explicit Output Mode
 
@@ -90,7 +92,7 @@ Required:
 Optional:
 
 - `--output json|markdown|text`
-- `--threshold <0-100>`
+- `--threshold <0-100>` for exploratory local assessment only; governance CI mode must use the approved immutable policy threshold
 - `--ci`
 - `--refresh-context` (refresh architecture intelligence only after the baseline synchronization state has been assessed and recorded)
 - `--fail-on-sync` (upgrade any non-`CURRENT` intelligence synchronization status to an overall `BLOCKED` verdict even if the score would otherwise pass)
@@ -108,11 +110,18 @@ Optional:
 ## Write Contract
 
 - Persistent writes are limited to generated report artifacts in `docs/architecture/health/`.
-- Persistent writes also include state-keyed history snapshots in `docs/architecture/health/history/`.
+- Persistent writes also include timestamped history snapshots in `docs/architecture/health/history/`.
 - Writes must use temp-file plus rename semantics so reruns are atomic and idempotent.
 - The scanner must not create database state, queue jobs, or tenant-scoped records.
 - The scanner must not expose new HTTP endpoints, API routes, or other runtime-facing interfaces as part of this stage.
-- History snapshots must be keyed by `assessment_id` so retries of the same repository state update the same snapshot rather than creating duplicates.
+- Every history snapshot must preserve its execution timestamp for architecture evolution tracking, include `assessment_id` for repository-state correlation, and be created only when the assessment state is newly observed so same-state reruns do not create duplicate persisted artifacts.
+
+## Command Safety Contract
+
+- Source commands must be invoked through an allowlisted argument-vector runner; shell interpolation is forbidden.
+- Each governed source command must have an explicit timeout budget recorded in the assessment metadata.
+- Timeout or allowlist violations must surface as structured findings and may yield `BLOCKED`.
+- The allowlist must cover `gitnexus query` and `gitnexus impact` in addition to the core local governance commands.
 
 ## Non-Goals
 

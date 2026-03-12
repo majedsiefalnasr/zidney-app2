@@ -184,7 +184,17 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["tool", "command", "started_at", "finished_at", "exit_code", "output_format"],
+        "required": [
+          "tool",
+          "command",
+          "timeout_ms",
+          "duration_ms",
+          "timed_out",
+          "started_at",
+          "finished_at",
+          "exit_code",
+          "output_format"
+        ],
         "properties": {
           "tool": {
             "type": "string",
@@ -197,6 +207,17 @@
           "enrichment_mode": {
             "type": "string",
             "enum": ["none", "gitnexus_query", "gitnexus_impact"]
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "duration_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "timed_out": {
+            "type": "boolean"
           },
           "started_at": {
             "type": "string",

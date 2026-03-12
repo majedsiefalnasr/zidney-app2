@@ -9,7 +9,7 @@ Purpose: Represents one authoritative repository-wide health evaluation for a si
 Fields:
 
 - `schema_version` (string, required): Version of the JSON report schema.
-- `assessment_id` (string, required): Stable repository-state fingerprint used as the deduplicated identity for the assessment and its history snapshot.
+- `assessment_id` (string, required): Stable repository-state fingerprint used to correlate repeated evaluations of the same repository state across current and historical artifacts.
 - `generated_at` (ISO-8601 string, required): Server-generated execution timestamp.
 - `overall` (object, required): Aggregate assessment outcome.
   - `score` (number, required): Normalized score from 0 to 100.
@@ -133,6 +133,9 @@ Fields:
 - `tool` (string, required): Example `arch:guard:ci` or `arch:validate-brain`.
 - `command` (string, required): Executed command string.
 - `enrichment_mode` (enum, optional): `none` | `gitnexus_query` | `gitnexus_impact`.
+- `timeout_ms` (integer, required): Allowlisted timeout budget assigned to the command.
+- `duration_ms` (integer, required): Observed elapsed runtime for the command.
+- `timed_out` (boolean, required): Whether the command exceeded its timeout budget and was terminated by the runner.
 - `started_at` (ISO-8601 string, required)
 - `finished_at` (ISO-8601 string, required)
 - `exit_code` (integer, required)
@@ -142,6 +145,8 @@ Fields:
 Validation rules:
 
 - `finished_at` must be greater than or equal to `started_at`.
+- `duration_ms` must be greater than or equal to 0.
+- `timed_out=true` indicates the timeout budget was exceeded even if a synthetic exit code is reported.
 - Non-zero `exit_code` must still be represented when the assessment can continue and translate the failure into findings.
 - `enrichment_mode` is set when GitNexus evidence is attached to the run.
 

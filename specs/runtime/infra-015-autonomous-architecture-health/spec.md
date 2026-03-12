@@ -8,7 +8,7 @@
 ## Stage Status
 
 Status: DRAFT  
-Step: plan  
+Step: tasks  
 Risk Level: LOW
 
 ## User Scenarios & Testing _(mandatory)_
@@ -86,6 +86,11 @@ As an architecture maintainer, I need health monitoring to detect stale or incon
 - **FR-016**: The system MUST allow governance review to distinguish direct rule violations from synchronization or drift findings so remediation can be prioritized correctly.
 - **FR-017**: The system MUST keep this stage scoped to infrastructure governance and observability and MUST NOT change tenant-facing product behavior in MMC, Backoffice, Frontoffice, API business flows, or worker business flows.
 - **FR-018**: This stage MUST NOT introduce new HTTP endpoints, API routes, queue consumers, database persistence, or other runtime-facing interfaces; any such expansion requires a separate stage and review cycle.
+- **FR-019**: CI governance enforcement for this stage MUST use one approved immutable threshold policy for pass or block decisions, and runtime callers MUST NOT be able to lower that governance threshold through ad hoc CLI input.
+- **FR-020**: The system MUST support pull request, push-to-main, and nightly scheduled governance execution that publishes the generated health report artifacts as CI artifacts for reviewer inspection.
+- **FR-021**: Historical architecture health artifacts MUST preserve time-based evolution tracking so trend analysis can compare repository health across distinct runs.
+- **FR-022**: Governance command execution introduced by this stage MUST be shell-safe, limited to an allowlisted command surface, and protected by explicit per-tool timeout budgets.
+- **FR-023**: The stage MUST define and verify measurable scanner performance budgets for local and CI assessment runs so the monitoring workflow cannot degrade the existing governance pipeline unpredictably.
 
 ### Key Entities _(include if feature involves data)_
 
@@ -107,6 +112,10 @@ As an architecture maintainer, I need health monitoring to detect stale or incon
 - **SC-006**: 0 changes introduced by this stage weaken attempt snapshot integrity, worker-only grading authority, or idempotent submission guarantees in any reviewed attempt-related workflow.
 - **SC-007**: 100% of required architecture intelligence synchronization issues are surfaced as explicit health findings rather than remaining implicit or silent.
 - **SC-008**: 0 scope items in this stage require architecture redesign outside infra-governance scope.
+- **SC-009**: 100% of CI-governed health runs use the same approved immutable threshold policy and publish the generated report artifacts for review.
+- **SC-010**: 100% of scheduled and CI history snapshots preserve run-time evolution metadata that can be compared across distinct assessments.
+- **SC-011**: 100% of governed source commands execute through the allowlisted command runner with explicit timeout budgets.
+- **SC-012**: 95% of compliant local assessment runs complete within 90 seconds and 95% of compliant CI assessment runs complete within 120 seconds during validation.
 
 ## Assumptions & Dependencies
 

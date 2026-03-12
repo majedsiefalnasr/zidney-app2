@@ -8,7 +8,7 @@
 
 ## Summary
 
-The technical plan defines a governance-only architecture health scanner that assesses current repository state, composes existing guard and audit tooling, captures synchronization drift before optional refresh, enriches findings with GitNexus intelligence, and writes deterministic current plus state-keyed historical reports. No runtime, tenant, middleware, or schema behavior is changed.
+The technical plan defines a governance-only architecture health scanner that assesses current repository state, composes existing guard and audit tooling, captures synchronization drift before optional refresh, enriches findings with GitNexus intelligence, enforces an immutable CI threshold, publishes CI artifacts on pull request, push, and nightly runs, and writes deterministic current plus timestamped historical reports. No runtime, tenant, middleware, or schema behavior is changed.
 
 ---
 
@@ -38,12 +38,14 @@ The technical plan defines a governance-only architecture health scanner that as
 
 ## Key Technical Decisions
 
-| #   | Decision                                                                        | Rationale                                                                                    |
-| --- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| 1   | Use `infra-audit --quick` plus existing governance outputs for baseline scoring | Keeps Step 3 implementable without mutating AI-context artifacts during baseline assessment  |
-| 2   | Capture synchronization findings before any optional refresh                    | Prevents stale or partially regenerated architecture intelligence from being normalized away |
-| 3   | Require GitNexus freshness check and enrichment in every scanner run            | Aligns the plan with stage authority while keeping stale-index remediation explicit          |
-| 4   | Store current reports plus state-keyed history snapshots                        | Preserves trend visibility without duplicate writes on retries of the same repository state  |
+| #   | Decision                                                                        | Rationale                                                                                                            |
+| --- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 1   | Use `infra-audit --quick` plus existing governance outputs for baseline scoring | Keeps Step 3 implementable without mutating AI-context artifacts during baseline assessment                          |
+| 2   | Capture synchronization findings before any optional refresh                    | Prevents stale or partially regenerated architecture intelligence from being normalized away                         |
+| 3   | Require GitNexus freshness check and enrichment in every scanner run            | Aligns the plan with stage authority while keeping stale-index remediation explicit                                  |
+| 4   | Store current reports plus timestamped history snapshots                        | Preserves architecture evolution visibility across CI and nightly runs while keeping current artifacts deterministic |
+| 5   | Lock CI threshold policy and reject caller downgrades                           | Prevents policy bypass during governance progression                                                                 |
+| 6   | Require allowlisted command execution with timeout budgets                      | Keeps governance orchestration shell-safe and bounded                                                                |
 
 ---
 
@@ -60,14 +62,14 @@ The technical plan defines a governance-only architecture health scanner that as
 ## Transaction Boundaries
 
 - Current report artifacts use temp-file plus rename semantics for atomic replacement.
-- State-keyed history snapshots write once per repository-state fingerprint to avoid duplicate persisted side effects on retries.
+- Timestamped history snapshots preserve longitudinal trend evidence, while current artifacts remain atomic and deterministic.
 
 ---
 
 ## Idempotency Strategy
 
 - Repeated scanner runs for the same repository-state fingerprint overwrite current artifacts deterministically.
-- History snapshots are keyed by `assessment_id` so retries update the same stored state rather than creating duplicate history entries.
+- `assessment_id` remains in every report so same-state assessments can be correlated even when historical runs are stored by execution time, and same-state reruns do not create duplicate history entries.
 
 ---
 
@@ -89,6 +91,7 @@ The technical plan defines a governance-only architecture health scanner that as
 ## Open Risks
 
 - GitNexus enrichment depends on index freshness; stale indexes must remain an explicit finding with `npx gitnexus analyze` remediation.
+- Performance budgets and timeout policies must be enforced explicitly during implementation so the scanner cannot stall CI.
 
 ---
 

@@ -7,7 +7,7 @@
 
 ## Summary
 
-Implement a small architecture-health orchestration layer under `scripts/architecture-health/` that first assesses the current repository state, normalizes existing governance outputs into a single assessment model, deduplicates overlapping findings, computes a weighted health score, and writes deterministic JSON and Markdown reports under `docs/architecture/health/`. The implementation stays within infra-governance and observability: it reuses `arch:guard`, `bun scripts/infra-audit.ts --quick`, `type-safety-guard`, current AI-context artifacts, and architecture-brain validation instead of introducing a parallel rule engine, while keeping full AI-context refresh as an explicit remediation option rather than a default assessment step.
+Implement a small architecture-health orchestration layer under `scripts/architecture-health/` that first assesses the current repository state, normalizes existing governance outputs into a single assessment model, deduplicates overlapping findings, computes a weighted health score, and writes deterministic JSON and Markdown reports under `docs/architecture/health/`. The implementation stays within infra-governance and observability: it reuses `arch:guard`, `bun scripts/infra-audit.ts --quick`, `type-safety-guard`, current AI-context artifacts, and architecture-brain validation instead of introducing a parallel rule engine, while keeping full AI-context refresh as an explicit remediation option rather than a default assessment step. CI uses one locked threshold policy, publishes generated reports as artifacts, and includes nightly scheduled monitoring for longitudinal trend visibility.
 
 ## Stage Alignment
 
@@ -34,7 +34,7 @@ Implement a small architecture-health orchestration layer under `scripts/archite
 **Testing**: `bun run arch:guard:ci`, `bun run arch:audit`, `bun type-safety-guard --json`, `bun run ai-context:refresh`, `bun run arch:validate-brain`, `bun run lint`, `bun run validate:types`, plus focused Vitest coverage for score calculation, finding deduplication, stale-artifact detection, and report serialization  
 **Target Platform**: macOS/Linux developer environments and GitHub Actions Bun CI  
 **Project Type**: Monorepo governance CLI and report generation workflow  
-**Performance Goals**: Deterministic full-repository health assessment within existing governance pipeline budgets, stable output ordering for CI diffing, and zero runtime impact on tenant-facing flows  
+**Performance Goals**: Deterministic full-repository health assessment with stable output ordering for CI diffing, zero runtime impact on tenant-facing flows, local compliant runs completing within 90 seconds at the 95th percentile, and CI compliant runs completing within 120 seconds at the 95th percentile  
 **Constraints**: No architecture redesign; no cross-tenant logic; no direct DB instantiation; all persistent writes must be atomic and recoverable; server-authoritative time only; version compatibility guarantees remain unchanged; reuse existing guard and audit sources of truth instead of inventing duplicate checks  
 **Scale/Scope**: Repository-wide assessment across `apps/*`, `packages/*`, `scripts/*`, `docs/architecture/intelligence/`, `docs/architecture/module-boundaries.json`, and `docs/ai/context/`
 
@@ -110,6 +110,7 @@ tests/
 - Consume existing outputs instead of copying rule logic: dependency, layer, and drift signals from architecture guard plus `bun scripts/infra-audit.ts --quick`, type-safety from `type-safety-guard`, and intelligence synchronization from pre-refresh inspection of current AI-context artifacts plus brain validation.
 - Keep all execution repository-scoped and read-only except for generated report artifacts.
 - Evaluate synchronization health against the current repository artifact state before any optional refresh step so stale, missing, or partially regenerated intelligence remains reportable instead of being normalized away.
+- Enforce source execution through an allowlisted non-shell command runner with explicit per-tool timeout budgets and structured command telemetry.
 
 ### 2. Finding Normalization And Score Calculation
 
@@ -122,23 +123,25 @@ tests/
 ### 3. Artifact Generation And Atomic Writes
 
 - Write `architecture-health.json`, `architecture-health-summary.md`, and `architecture-drift-report.md` under `docs/architecture/health/`.
-- Write a state-keyed historical snapshot under `docs/architecture/health/history/` using the same JSON schema so trend analysis remains possible over time without creating duplicate artifacts for retries of the same repository state.
+- Write timestamped historical snapshots under `docs/architecture/health/history/` using the same JSON schema so architecture evolution can be reviewed across nightly, push, and pull-request assessments, while retaining `assessment_id` inside each snapshot for state correlation. Same-state reruns must not create duplicate history files; the writer should create a timestamped snapshot only when a newly observed `assessment_id` differs from the latest persisted state.
 - Use temp-file plus atomic rename semantics so every write is recoverable and reruns remain idempotent.
 - Include generation timestamps, source command metadata, threshold values, and remediation hints in the output contract.
 
 ### 4. CI And Command Surface
 
 - Add `arch:health` and `arch:health:ci` scripts in `package.json` that wrap the new scanner without introducing any HTTP or runtime-facing surface.
-- Add a GitHub workflow step or dedicated workflow that runs the health scanner after the baseline governance commands.
-- Fail CI when score falls below the approved threshold or when critical synchronization checks fail.
+- Add a GitHub workflow step or dedicated workflow that runs the health scanner after the baseline governance commands on pull requests, pushes to `main`, and a nightly schedule, and publishes the generated report artifacts for review.
+- Fail CI when score falls below the approved immutable threshold policy or when critical synchronization checks fail.
 - Preserve the existing `arch:` family naming convention and keep health monitoring downstream of the current contracts instead of upstream of them.
-- Require GitNexus enrichment as part of every scanner run: check repository index freshness first, run `gitnexus query` and `gitnexus impact` when the index is fresh, and record an explicit enrichment finding plus remediation (`npx gitnexus analyze`) when the index is stale or unavailable.
+- Require GitNexus enrichment as part of every scanner run: check repository index freshness first, run `gitnexus query` and `gitnexus impact` when the index is fresh, and record an explicit enrichment finding plus remediation (`npx gitnexus analyze`) when the index is stale or unavailable. These GitNexus commands are part of the same allowlisted, timeout-governed command surface as the core governance commands.
 - Keep default baseline evaluation read-safe by using `infra-audit --quick`; reserve full `arch:audit` and `ai-context:refresh` for explicit remediation or CI refresh flows.
+- Keep the CI wrapper threshold immutable at the policy level; exploratory local runs may inspect alternative thresholds, but governance progression may not use caller-supplied threshold overrides.
 
 ### 5. Test And Verification Strategy
 
 - Add unit tests for score weighting, threshold evaluation, finding deduplication, and report serialization.
-- Add static or integration-style tests for stale or missing AI-context artifacts and undeclared-module drift reporting.
+- Add static or integration-style tests for stale or missing AI-context artifacts, undeclared-module drift reporting, immutable CI threshold behavior, nightly artifact publication, non-duplicating history snapshots, and scanner performance budgets.
+- Verify p95 performance using a benchmark harness that executes at least 20 compliant assessment runs in local and CI environments, then computes p95 from emitted duration telemetry.
 - Verify the final pipeline with: `bun run arch:guard:ci`, `bun run arch:audit`, `bun type-safety-guard --json`, `bun run ai-context:refresh`, `bun run arch:validate-brain`, `bun run lint`, and `bun run validate:types`.
 
 ## Implementation Layers
@@ -153,7 +156,7 @@ API Layer
 Worker Layer (if applicable)
 
 - Queue name: None
-- Idempotency mechanism: Filesystem overwrite-by-replacement and deterministic assessment IDs
+- Idempotency mechanism: Filesystem overwrite-by-replacement, deterministic assessment IDs, and history writes only for newly observed assessment states
 - Transaction usage: N/A for worker queues
 - Retry strategy: N/A for worker queues
 - DLQ handling: N/A
@@ -192,14 +195,14 @@ Reference: `STAGE_02C_MIGRATION_AND_VERSIONING_MODEL` remains unaffected because
 - Atomic operations defined? Yes, temp-file plus rename for report writes
 - Rollback behavior defined? Yes, failed write leaves prior artifact intact
 - Isolation level: N/A
-- Concurrency protection mechanism: deterministic filenames for current artifacts and state-keyed history files to avoid overwrite races
+- Concurrency protection mechanism: deterministic filenames for current artifacts plus timestamped history filenames and atomic rename semantics to avoid overwrite races
 
 ## Idempotency Plan
 
 - Idempotency key header used? N/A
 - Unique constraint used? N/A
-- Replay-safe? Yes, repeated runs overwrite current artifacts and update the same history snapshot key when the repository state fingerprint is unchanged
-- Duplicate submission safe? Yes, repeated CLI execution yields deterministic current-state outputs
+- Replay-safe? Yes, repeated runs overwrite current artifacts deterministically; timestamped history is appended only for newly observed assessment states while `assessment_id` keeps same-state runs correlatable
+- Duplicate submission safe? Yes, repeated CLI execution yields deterministic current-state outputs and does not create duplicate history files for the same assessment state
 - Worker deduplication strategy? N/A
 
 ## Version Enforcement Strategy
@@ -219,12 +222,12 @@ Reference: `STAGE_02C_MIGRATION_AND_VERSIONING_MODEL` remains unaffected because
 
 ## Observability & Logging
 
-- Structured log format: scanner emits structured JSON-compatible records for source command metadata
+- Structured log format: scanner emits structured JSON-compatible records for source command metadata, timeout budgets, elapsed durations, and artifact publication metadata
 - request_id propagation: N/A for CLI execution
 - workspace_slug propagation: N/A because this stage is not tenant-bound
 - attempt_id propagation: N/A
 - Error contract adherence: findings and verdict contract are deterministic and schema-validated
-- Metrics emitted: architecture score, signal counts, blocking finding counts, synchronization status, and historical snapshot timestamps
+- Metrics emitted: architecture score, signal counts, blocking finding counts, synchronization status, command durations, local or CI budget compliance, and historical snapshot timestamps
 
 ## Rate Limiting
 
@@ -240,7 +243,7 @@ Reference: `STAGE_02C_MIGRATION_AND_VERSIONING_MODEL` remains unaffected because
 - License blocked: No effect; stage does not execute workspace-bound routes
 - Worker failure: N/A
 - Duplicate request: repeat CLI execution is idempotent and preserves current artifact consistency
-- Timeout: source command timeout becomes a finding and may yield `BLOCKED`
+- Timeout: source command timeout becomes a finding and may yield `BLOCKED`; per-tool timeout budgets are fixed in the allowlisted command runner
 - Queue backlog: N/A
 - Partial transaction failure: atomic write failure preserves the previous artifact set and records the failure in command output
 
@@ -257,7 +260,7 @@ Reference: `STAGE_02C_MIGRATION_AND_VERSIONING_MODEL` remains unaffected because
 - How feature can be safely rolled back: remove the scanner entrypoint, workflow integration, and generated docs without touching runtime systems
 - Migration rollback plan: N/A because no schema changes are introduced
 - Feature flag: Not required; the feature is invoked by CLI/CI only
-- Data integrity preservation: current artifacts are overwritten atomically and history snapshots are keyed by repository-state fingerprint so retries update the same record rather than creating duplicates
+- Data integrity preservation: current artifacts are overwritten atomically and timestamped history snapshots preserve each approved run for evolution review without touching runtime systems
 
 ## Non-Goals
 
@@ -277,8 +280,8 @@ Reference: `STAGE_02C_MIGRATION_AND_VERSIONING_MODEL` remains unaffected because
   Mitigation: Capture synchronization findings against the pre-refresh artifact state first, then optionally run refresh and validation to enrich remediation output without erasing the original finding.
 - Risk: Report generation leaves partial files on interrupted runs.  
   Mitigation: Use atomic writes and overwrite-by-replacement semantics only.
-- Risk: CI health gating becomes flaky because ordering or output changes across runs.  
-  Mitigation: Keep deterministic signal ordering, explicit threshold configuration, and stable JSON schema.
+- Risk: CI health gating becomes flaky because ordering, timeouts, or output changes across runs.  
+  Mitigation: Keep deterministic signal ordering, an immutable governance threshold policy, allowlisted command execution with fixed timeout budgets, and a stable JSON schema.
 
 ## Post-Design Constitution Re-Check
 
