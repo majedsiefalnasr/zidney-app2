@@ -10,20 +10,26 @@ Zidney repository and reports architectural drift, risk signals, and governance 
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
-Risk Level: UNKNOWN
-Initiated: 2026-03-12T20:20:56Z
+Step: specify
+Risk Level: LOW
+Last Updated: 2026-03-12T20:26:06Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Architecture health monitoring remains governance-only and repository-scoped
+- Consolidated health outcomes cover drift, dependency, layer, circularity, type-safety, and intelligence synchronization signals
+- Existing ADR-backed trust-chain guarantees are preserved as explicit stage requirements
+
+Deferred Scope:
+
+- Runtime redesign, tenant-facing behavior changes, and boundary relaxations remain out of scope
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
