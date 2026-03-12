@@ -256,6 +256,32 @@ Example (valid):
 apps/api → packages/domain-core ✔
 ```
 
+## Unified Architecture Guard
+
+Use the unified governance entrypoint for architecture checks:
+
+```
+bun run arch:guard
+```
+
+Strict CI validation:
+
+```
+bun run arch:guard:ci
+```
+
+Changed-files fast path:
+
+```
+bun run arch:guard:changed
+```
+
+JSON output contract:
+
+```
+bun run arch:guard -- --output json
+```
+
 ---
 
 ### 2. Applications Cannot Import Other Applications

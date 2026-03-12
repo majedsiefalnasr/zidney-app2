@@ -282,7 +282,16 @@ export function extractTokenFromHeader(authHeader: string | undefined): string {
     )
   }
 
-  return parts[1]!
+  const token = parts[1]
+  if (!token) {
+    throw new AuthError(
+      AuthErrorCode.TOKEN_INVALID,
+      'Token is missing from authorization header',
+      401
+    )
+  }
+
+  return token
 }
 
 /**

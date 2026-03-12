@@ -26,9 +26,33 @@ import { db, getTenantPool } from '../../db'
 const LOCKOUT_WORKSPACES_TABLE = 'account_lockout_workspaces'
 const LOCKOUT_USERS_TABLE = 'account_lockout_users'
 
+interface LockoutWorkspace {
+  id: string
+}
+
+interface LockoutUser {
+  id: string
+}
+
+function requireFirstRow<T>(rows: T[], context: string): T {
+  const row = rows[0]
+  if (!row) {
+    throw new Error(`Expected row for ${context}`)
+  }
+  return row
+}
+
+function requireTenantPool(workspaceId: string) {
+  const pool = getTenantPool(workspaceId)
+  if (!pool) {
+    throw new Error(`Missing tenant pool for workspace ${workspaceId}`)
+  }
+  return pool
+}
+
 describe('Account Lockout', () => {
-  let workspace: any
-  let user: any
+  let workspace: LockoutWorkspace | null = null
+  let user: LockoutUser | null = null
 
   beforeAll(async () => {
     await db.master.query(`
@@ -54,28 +78,28 @@ describe('Account Lockout', () => {
       )
     `)
 
-    const ws = await db.master.query(
+    const ws = await db.master.query<LockoutWorkspace>(
       `INSERT INTO ${LOCKOUT_WORKSPACES_TABLE} (slug, name, license_status, schema_version, product_version)
        VALUES ('lockout-test', 'Lockout Test', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
-    workspace = ws.rows[0]!
+    workspace = requireFirstRow(ws.rows, 'workspace setup')
 
-    const pool = getTenantPool(workspace.id)!
-    const u = await pool.query(
+    const pool = requireTenantPool(workspace.id)
+    const u = await pool.query<LockoutUser>(
       `INSERT INTO ${LOCKOUT_USERS_TABLE} (workspace_id, email, password_hash, role, token_version, failed_login_count)
        VALUES ($1, 'lockout@test.com', 'hash', 'student', 1, 0)
        RETURNING id, email, failed_login_count`,
       [workspace.id]
     )
-    user = u.rows[0]!
+    user = requireFirstRow(u.rows, 'user setup')
   })
 
   afterAll(async () => {
     if (!workspace || !user) {
       return
     }
-    const pool = getTenantPool(workspace.id)!
+    const pool = requireTenantPool(workspace.id)
     await pool.query(`DELETE FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`, [user.id])
     await db.master.query(`DELETE FROM ${LOCKOUT_WORKSPACES_TABLE} WHERE id = $1`, [workspace.id])
   })
@@ -84,7 +108,7 @@ describe('Account Lockout', () => {
     if (!workspace || !user) {
       return
     }
-    const pool = getTenantPool(workspace.id)!
+    const pool = requireTenantPool(workspace.id)
     await pool.query(
       `UPDATE ${LOCKOUT_USERS_TABLE}
        SET failed_login_count = 0,
@@ -95,7 +119,7 @@ describe('Account Lockout', () => {
   })
 
   it('should increment failed login counter', async () => {
-    const pool = getTenantPool(workspace.id)!
+    const pool = requireTenantPool(workspace.id)
 
     const before = await pool.query(
       `SELECT failed_login_count FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
@@ -119,7 +143,7 @@ describe('Account Lockout', () => {
   })
 
   it('should lock account after 5 failed attempts', async () => {
-    const pool = getTenantPool(workspace.id)!
+    const pool = requireTenantPool(workspace.id)
 
     // Simulate reaching threshold from a clean state.
     // In production this increment+lock happens atomically in login handler logic.
@@ -144,7 +168,7 @@ describe('Account Lockout', () => {
   })
 
   it('should reject login with 423 while locked', async () => {
-    const pool = getTenantPool(workspace.id)!
+    const pool = requireTenantPool(workspace.id)
 
     const result = await pool.query(
       `SELECT locked_until FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
@@ -161,7 +185,7 @@ describe('Account Lockout', () => {
   })
 
   it('should reset counter on successful login', async () => {
-    const pool = getTenantPool(workspace.id)!
+    const pool = requireTenantPool(workspace.id)
 
     // Simulate successful login (counter reset)
     await pool.query(
@@ -182,7 +206,7 @@ describe('Account Lockout', () => {
   })
 
   it('should auto-unlock after timeout', async () => {
-    const pool = getTenantPool(workspace.id)!
+    const pool = requireTenantPool(workspace.id)
 
     // Lock account
     await pool.query(
@@ -212,7 +236,7 @@ describe('Account Lockout', () => {
   it('should use FOR UPDATE to prevent race conditions', async () => {
     // Simulating concurrent failed logins
 
-    const pool = getTenantPool(workspace.id)!
+    const pool = requireTenantPool(workspace.id)
 
     // Reset counter
     await pool.query(

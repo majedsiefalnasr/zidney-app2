@@ -20,6 +20,7 @@
 import { execSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import type { AIDependencyGraph } from '../packages/types/src/ai-context'
+import { runUnifiedArchitectureGuard } from './architecture-guard/runner'
 
 function getCurrentBranch(): string {
   try {
@@ -300,13 +301,15 @@ export function extractImports(filePath: string): string[] {
     const importRegex = /import\s+(?:[\w*\s{},]+)\s+from\s+['"]([^'"]+)['"]/g
 
     const matches: string[] = []
-    let match
+    let match: RegExpExecArray | null
 
-    while ((match = importRegex.exec(content))) {
+    match = importRegex.exec(content)
+    while (match) {
       const captured = match[1]
       if (captured) {
         matches.push(captured)
       }
+      match = importRegex.exec(content)
     }
 
     return matches
@@ -752,7 +755,10 @@ export function computeImpactScope(changed: Set<string>, graph: AIDependencyGrap
   const queue = [...changed]
 
   while (queue.length > 0) {
-    const module = queue.pop()!
+    const module = queue.pop()
+    if (!module) {
+      continue
+    }
     const dependents = graph.reverse_dependencies[module] ?? []
     for (const dep of dependents) {
       if (!scope.has(dep)) {
@@ -1162,10 +1168,14 @@ function runGuard() {
 
 // Only execute when run directly (not when imported for unit testing)
 if ((import.meta as { main?: boolean }).main) {
-  const config = parseArgs()
-  if (config.mode === 'incremental') {
-    runIncremental(config)
+  if (process.argv.includes('--unified-runner')) {
+    runUnifiedArchitectureGuard(process.argv.slice(2)).then((code) => process.exit(code))
   } else {
-    runGuard()
+    const config = parseArgs()
+    if (config.mode === 'incremental') {
+      runIncremental(config)
+    } else {
+      runGuard()
+    }
   }
 }

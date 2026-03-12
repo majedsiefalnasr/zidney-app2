@@ -10,7 +10,35 @@ system.
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: LOW
+Closure Date: 2026-03-12
+
+Implementation: COMPLETE
+Tasks: 48 / 48 completed
+
+Scope Closed:
+
+- Governance runner and rule orchestration implementation
+- Changed/strict mode logic, reporting contract, and context hooks
+- Stage-scoped tests and documentation updates
+
+Deferred Scope:
+
+- Runtime business behavior changes across API, worker, and UI layers
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced
+- ADR-0002 Snapshot immutability enforced (if applicable)
+- ADR-0006 Server-authoritative time enforced
+- ADR-0007 Version compatibility enforced
+- ADR-0008 Semantic versioning enforced
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 
@@ -91,7 +119,7 @@ Each rule operates independently but is executed through the guard runner.
 ## Development Mode
 
 ```
-bun architecture-guard
+bun run arch:guard
 ```
 
 Purpose:
@@ -108,7 +136,7 @@ Behavior:
 ## Pre-Push Mode
 
 ```
-bun architecture-guard --changed
+bun run arch:guard -- --changed
 ```
 
 Behavior:
@@ -129,7 +157,7 @@ This reduces scan time significantly.
 ## CI Mode
 
 ```
-bun architecture-guard --ci
+bun run arch:guard -- --ci
 ```
 
 Behavior:
@@ -258,9 +286,15 @@ Generated files:
 ```
 docs/ai/context/
 
+  ai-architecture-summary.md
   ai-dependency-graph.json
   ai-module-map.json
-  ai-layer-map.json
+  ai-layer-model.json
+  ai-runtime-map.json
+  ai-runtime-dependents.json
+  ai-architecture-brain.json
+  ai-architecture-diff.json
+  ai-context-mini.json
 ```
 
 These files provide structured architecture context to AI tools such as:
@@ -276,7 +310,7 @@ These files provide structured architecture context to AI tools such as:
 Add generator script:
 
 ```
-scripts/architecture-brain/generate-architecture-brain.ts
+scripts/generate-ai-context.ts
 ```
 
 Responsibilities:
@@ -320,7 +354,7 @@ Contains:
 ## Layer Map
 
 ```
-ai-layer-map.json
+ai-layer-model.json
 ```
 
 Contains:
@@ -347,7 +381,7 @@ Add architecture guard to CI pipeline.
 Example step:
 
 ```
-bun scripts/architecture-guard/architecture-guard.ts --ci
+bun run arch:guard -- --ci
 ```
 
 CI fails when:

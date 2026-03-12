@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zidney.local/schemas/unified-guard/violation-report.schema.json",
+  "title": "UnifiedGuardViolationReport",
+  "type": "object",
+  "required": [
+    "run_id",
+    "timestamp",
+    "validation_mode",
+    "scope",
+    "verdict",
+    "violations",
+    "duration_ms"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validation_mode": {
+      "type": "string",
+      "enum": ["development", "strict", "changed"]
+    },
+    "scope": {
+      "type": "object",
+      "required": ["modules_validated", "modules_skipped"],
+      "properties": {
+        "modules_validated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "modules_skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped_unmapped_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "fallback_reason": {
+      "type": ["string", "null"],
+      "enum": [
+        "map_changed",
+        "new_module_detected",
+        "graph_missing",
+        "graph_stale",
+        "graph_unusable",
+        "full_scope",
+        null
+      ]
+    },
+    "contract_error": {
+      "type": "boolean"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["PASS", "BLOCKED"]
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule", "severity", "message", "location", "source_module", "remediation"],
+        "properties": {
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["error", "warning"]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "location": {
+            "type": "object",
+            "required": ["file"],
+            "properties": {
+              "file": {
+                "type": "string",
+                "minLength": 1
+              },
+              "line": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "column": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "source_module": {
+            "type": "string"
+          },
+          "target_module": {
+            "type": "string"
+          },
+          "remediation": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "duration_ms": {
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false
+}

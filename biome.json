@@ -9,6 +9,7 @@
       "!**/*.d.ts",
       "!.specify",
       "!coverage",
+      "!.ai-context-cache",
       "!**/*.css",
       "!docs/**/*.html"
     ]
@@ -72,8 +73,18 @@
       "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
     },
     {
-      "includes": ["tests/**", "**/*.test.ts", "**/*.spec.ts"],
-      "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
+      "includes": ["tests/**", "**/tests/**", "**/*.test.ts", "**/*.spec.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off",
+            "noExplicitAny": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off"
+          }
+        }
+      }
     },
     {
       "includes": ["**/*.vue"],

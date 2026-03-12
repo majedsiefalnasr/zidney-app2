@@ -69,3 +69,5 @@ Thumbs.db
 
 # AI context — ephemeral generated artifacts (not committed)
 docs/ai/context/architecture-impact-report.json
+# AI context cache (local, generated)
+.ai-context-cache/

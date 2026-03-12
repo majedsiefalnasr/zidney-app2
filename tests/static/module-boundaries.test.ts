@@ -24,10 +24,10 @@ describe('module-boundaries.json — static structure validation', () => {
     expect(() => JSON.parse(raw)).not.toThrow()
   })
 
-  it('has exactly 4 infrastructure modules', () => {
+  it('has exactly 5 infrastructure modules', () => {
     const data = JSON.parse(readFileSync(BOUNDARIES_PATH, 'utf-8'))
     expect(Array.isArray(data.layers.infrastructure)).toBe(true)
-    expect(data.layers.infrastructure.length).toBe(4)
+    expect(data.layers.infrastructure.length).toBe(5)
   })
 
   it('has exactly 2 domain modules', () => {
@@ -48,13 +48,13 @@ describe('module-boundaries.json — static structure validation', () => {
     expect(data.layers.ui.length).toBe(5)
   })
 
-  it('has exactly 13 total modules across all layers', () => {
+  it('has exactly 14 total modules across all layers', () => {
     const data = JSON.parse(readFileSync(BOUNDARIES_PATH, 'utf-8'))
     const totalModules = Object.values(data.layers as Record<string, string[]>).reduce(
       (sum, modules) => sum + modules.length,
       0
     )
-    expect(totalModules).toBe(13)
+    expect(totalModules).toBe(14)
   })
 
   it('has well-formed required top-level fields', () => {

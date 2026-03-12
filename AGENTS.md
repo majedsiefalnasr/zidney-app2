@@ -1077,8 +1077,7 @@ This contract is authoritative.
 
 # GitNexus MCP
 
-This project is indexed by GitNexus as **zidney-app2** (7071 symbols, 13978 relationships, 300
-execution flows).
+This project is indexed by GitNexus as **zidney-app2** (7848 symbols, 15379 relationships, 300 execution flows).
 
 AI must use GitNexus for:
 

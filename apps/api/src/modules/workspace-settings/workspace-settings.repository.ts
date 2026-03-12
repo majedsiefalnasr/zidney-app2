@@ -99,7 +99,11 @@ export async function upsertSettings(
   )
 
   if (updateResult.rows.length > 0) {
-    return { config_version: updateResult.rows[0]!.config_version }
+    const updated = updateResult.rows[0]
+    if (!updated) {
+      throw new Error('Workspace settings update returned no rows')
+    }
+    return { config_version: updated.config_version }
   }
 
   // Check if row exists but version mismatch
@@ -133,7 +137,12 @@ export async function upsertSettings(
     [jsonData]
   )
 
-  return { config_version: insertResult.rows[0]!.config_version }
+  const inserted = insertResult.rows[0]
+  if (!inserted) {
+    throw new Error('Failed to upsert workspace settings row')
+  }
+
+  return { config_version: inserted.config_version }
 }
 
 // ---------------------------------------------------------------------------
