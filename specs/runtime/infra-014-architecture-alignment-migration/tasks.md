@@ -30,10 +30,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T005 Record the governed module scope and boundary references in specs/runtime/infra-014-architecture-alignment-migration/audits/GOVERNED_SCOPE.md using docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json and docs/architecture/module-boundaries.json
+- [ ] T005 Record the governed module scope, remediation file allowlist, and boundary references in specs/runtime/infra-014-architecture-alignment-migration/audits/GOVERNED_SCOPE.md using docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json and docs/architecture/module-boundaries.json
 - [ ] T006 [P] Document trust-chain and runtime invariants in specs/runtime/infra-014-architecture-alignment-migration/guides/RUNTIME_INVARIANTS.md using specs/runtime/infra-014-architecture-alignment-migration/quickstart.md and specs/runtime/infra-014-architecture-alignment-migration/contracts/alignment-verification-contract.md
-- [ ] T007 [P] Inventory canonical and legacy governance entrypoints in specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md using package.json and scripts/
-- [ ] T008 Define remediation categories, severity mapping, and closure states in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md using specs/runtime/infra-014-architecture-alignment-migration/data-model.md and specs/runtime/infra-014-architecture-alignment-migration/research.md
+- [ ] T007 [P] Inventory canonical and legacy governance entrypoints plus secret and log-sensitive script surfaces in specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md using package.json and scripts/
+- [ ] T008 Define remediation categories, severity mapping, closure states, and required invariant checks in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md using specs/runtime/infra-014-architecture-alignment-migration/data-model.md and specs/runtime/infra-014-architecture-alignment-migration/research.md
 
 **Checkpoint**: Stage evidence and invariant guardrails are ready for baseline capture.
 
@@ -51,8 +51,8 @@
 - [ ] T010 [P] [US1] Capture the infrastructure audit baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/us1-infra-audit-baseline.md using scripts/infra-audit.ts
 - [ ] T011 [P] [US1] Capture the type-safety baseline in specs/runtime/infra-014-architecture-alignment-migration/audits/us1-type-safety-baseline.json using scripts/type-safety-guard.ts
 - [ ] T012 [US1] Merge the baseline outputs into specs/runtime/infra-014-architecture-alignment-migration/audits/ALIGNMENT_BASELINE.md with source tool, module, rule family, severity, and location columns
-- [ ] T013 [US1] Add remediation priority, contract mapping, and trust-chain risk flags to specs/runtime/infra-014-architecture-alignment-migration/audits/ALIGNMENT_BASELINE.md using docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json and docs/architecture/module-boundaries.json
-- [ ] T014 [US1] Seed specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md with dependency-boundary, circular-dependency, unsafe-type, validation-gap, export-typing, script-overlap, and artifact-drift work queues
+- [ ] T013 [US1] Add remediation priority, contract mapping, trust-chain risk flags, and hot-path sensitivity flags to specs/runtime/infra-014-architecture-alignment-migration/audits/ALIGNMENT_BASELINE.md using docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json and docs/architecture/module-boundaries.json
+- [ ] T014 [US1] Seed specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md with dependency-boundary, circular-dependency, unsafe-type, validation-gap, export-typing, script-overlap, and artifact-drift work queues, each with exact file paths and required invariant checks before execution
 
 **Checkpoint**: User Story 1 is complete when the baseline is authoritative enough to schedule every in-scope remediation item without additional discovery.
 
@@ -66,12 +66,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Remediate cross-app, package-to-app, runtime-to-UI, and UI-to-domain dependency violations in affected files under apps/ and packages/ tracked from specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md
-- [ ] T016 [US2] Break circular dependencies in affected files under packages/ and scripts/ tracked from specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md by moving shared contracts to approved package boundaries only
-- [ ] T017 [US2] Replace unsafe typing and add trust-boundary validation in affected files under apps/, packages/, and tests/ tracked from specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md without introducing new `any` escape hatches
-- [ ] T018 [US2] Add explicit exported type boundaries in affected public interfaces under apps/ and packages/ tracked from specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md
-- [ ] T019 [P] [US2] Consolidate, narrow, or retire overlapping governance checks in package.json and scripts/ documented in specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md
-- [ ] T020 [US2] Verify all touched runtime paths under apps/api/ and apps/worker/ still preserve tenant resolver coverage, license enforcement order, worker authority, server-authoritative time, and the `{ success, data, error }` response contract in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
+- [ ] T015 [US2] Remediate file-scoped cross-app, package-to-app, runtime-to-UI, and UI-to-domain dependency violations in exact paths listed in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md under the governed allowlist from specs/runtime/infra-014-architecture-alignment-migration/audits/GOVERNED_SCOPE.md
+- [ ] T016 [US2] Break file-scoped circular dependencies in exact paths listed in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md by moving shared contracts to approved package boundaries only
+- [ ] T017 [US2] Replace unsafe typing and add trust-boundary validation in exact paths listed in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md without introducing new `any` escape hatches
+- [ ] T018 [US2] Add explicit exported type boundaries in exact public interfaces listed in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md
+- [ ] T019 [US2] Consolidate, narrow, or retire overlapping governance checks in package.json and scripts/ documented in specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md, then rerun the canonical verification entrypoints before closure evidence is accepted
+- [ ] T020 [US2] Verify all touched runtime and script paths still preserve authentication flow, correlation propagation, tenant resolver coverage, license enforcement order, schema and product compatibility checks, worker authority, server-authoritative time, transaction and idempotency guarantees, secret and log hygiene, and the `{ success, data, error }` response contract in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
 
 **Checkpoint**: User Story 2 is complete when repository code is aligned to the current architecture contract and runtime invariants remain unchanged on every touched path.
 
@@ -88,7 +88,7 @@
 - [ ] T021 [US3] Regenerate repository architecture intelligence in docs/architecture/intelligence/ and docs/ai/context/ using scripts/infra-audit.ts
 - [ ] T022 [US3] Refresh AI context artifacts in docs/ai/context/ using scripts/generate-ai-context.ts --force
 - [ ] T023 [US3] Validate docs/ai/context/ai-architecture-brain.json using scripts/validate-architecture-brain.ts and record the result in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
-- [ ] T024 [US3] Run targeted regression suites for touched modules from package.json and record results in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
+- [ ] T024 [US3] Run targeted regression suites and performance-sensitive checks for touched modules and hot paths from package.json and record results in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
 - [ ] T025 [US3] Execute the canonical closure sequence from specs/runtime/infra-014-architecture-alignment-migration/contracts/alignment-verification-contract.md and record zero unresolved in-scope violations in specs/runtime/infra-014-architecture-alignment-migration/audits/FINAL_VERIFICATION.md
 
 **Checkpoint**: User Story 3 is complete when canonical artifacts are regenerated, validated, and accepted by the final governance toolchain.
@@ -138,7 +138,6 @@
 - T003 and T004 can run in parallel after T001 and T002.
 - T006 and T007 can run in parallel after T005.
 - T009, T010, and T011 can run in parallel once Foundational is complete.
-- T019 can run in parallel with T015-T018 only when specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md confirms the touched files are disjoint.
 - T026 can run in parallel with T027 after T025 completes.
 
 ---
@@ -157,9 +156,8 @@ Task: "Capture the type-safety baseline in specs/runtime/infra-014-architecture-
 ## Parallel Example: User Story 2
 
 ```bash
-# Only if the tracker confirms non-overlapping files:
-Task: "Consolidate, narrow, or retire overlapping governance checks in package.json and scripts/ documented in specs/runtime/infra-014-architecture-alignment-migration/audits/LEGACY_SCRIPT_REVIEW.md"
-Task: "Remediate cross-app, package-to-app, runtime-to-UI, and UI-to-domain dependency violations in affected files under apps/ and packages/ tracked from specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md"
+# Repository remediation must stay inside the governed allowlist and file-scoped tracker entries:
+Task: "Remediate file-scoped cross-app, package-to-app, runtime-to-UI, and UI-to-domain dependency violations in exact paths listed in specs/runtime/infra-014-architecture-alignment-migration/audits/REMEDIATION_TRACKER.md"
 ```
 
 ---
@@ -193,9 +191,9 @@ Task: "Update workflow progress and generated artifact references in specs/runti
 ### Execution Discipline
 
 1. Do not introduce ADR changes, architecture redesign, cross-app imports, or package-to-app imports.
-2. Preserve tenant isolation, license enforcement order, worker authority, and server-authoritative time on all touched runtime paths.
+2. Preserve authentication flow, correlation propagation, tenant isolation, license enforcement order, schema and product compatibility checks, worker authority, server-authoritative time, transaction and idempotency guarantees, and secret and log hygiene on all touched runtime paths.
 3. Preserve the standard `{ success, data, error }` response envelope on touched runtime endpoints.
-4. Use canonical governance tooling for baseline capture, remediation verification, and architecture refresh.
+4. Use canonical governance tooling for baseline capture, remediation verification, and architecture refresh, and rerun verification after any governance-script consolidation.
 
 ---
 

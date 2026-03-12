@@ -36,8 +36,11 @@ bun scripts/type-safety-guard.ts --json
 - No change may weaken authentication, correlation, tenant resolution, or license middleware ordering on runtime paths.
 - No change may introduce row-based multi-tenancy, cross-tenant joins, or tenant override from request data.
 - No change may bypass centralized tenant and license middleware ordering.
+- No change may bypass schema-version or product-version compatibility checks on runtime paths.
 - No change may move grading, timing, or finalization authority out of the worker/server-authoritative flow.
 - No change may drift from the standard API response envelope `{ success, data, error }` on touched runtime endpoints.
+- No change may weaken transaction or idempotency guarantees on critical runtime flows.
+- No change may expose secrets or regress structured log hygiene on touched runtime or script surfaces.
 - No change may add new architecture exceptions, cross-app imports, or package-to-app imports.
 
 ### Allowed Remediation Moves
@@ -87,7 +90,10 @@ bun scripts/infra-audit.ts
 
 - Run targeted tests for touched modules and runtime paths affected by alignment work.
 - Confirm authentication, tenant resolution, and license middleware coverage remain intact where runtime-adjacent code changes occurred.
+- Confirm correlation propagation plus schema-version and product-version compatibility checks remain intact where runtime-adjacent code changes occurred.
 - Confirm structured API error responses remain intact where runtime-adjacent code changes occurred.
+- Confirm transaction, idempotency, secret-handling, and structured-log guarantees remain intact where runtime-adjacent or script changes occurred.
+- Confirm no measurable regressions are introduced on touched API or worker hot paths when performance-sensitive flows are modified.
 
 ### Exit Criteria
 

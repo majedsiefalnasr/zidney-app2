@@ -8,7 +8,7 @@
 
 ## Summary
 
-SpecKit generated a dependency-ordered 28-task implementation plan for the architecture alignment migration. The task set establishes stage-local evidence first, then baseline capture, repository remediation, canonical architecture-intelligence refresh, and final closure evidence, all while preserving trust-chain invariants and the standard runtime error contract on touched paths.
+SpecKit generated a dependency-ordered 28-task implementation plan for the architecture alignment migration. The task set establishes stage-local evidence first, then baseline capture, repository remediation, canonical architecture-intelligence refresh, and final closure evidence, all while preserving trust-chain invariants, secret and log hygiene, performance-sensitive runtime behavior, and the standard runtime error contract on touched paths.
 
 ---
 
@@ -22,15 +22,15 @@ SpecKit generated a dependency-ordered 28-task implementation plan for the archi
 
 ## Task Breakdown
 
-| Category       | Count | Notes                                                                                                                                      |
-| -------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Infrastructure | 21    | Stage-local evidence, baseline capture, remediation tracking, governance-script consolidation, architecture refresh, and closure reporting |
-| API            | 2     | Runtime-adjacent remediation and verification tasks touching API-facing boundary and response-contract safety                              |
-| Worker         | 1     | Runtime invariant verification preserving worker authority on touched paths                                                                |
-| Frontend       | 1     | Boundary remediation coverage if UI-to-runtime or UI-to-domain violations are detected                                                     |
-| Observability  | 1     | Final verification evidence and closure ledgers                                                                                            |
-| Testing        | 2     | Targeted regression suites and canonical closure verification                                                                              |
-| **Total**      | 28    | Dependency-ordered across setup, foundational, US1, US2, US3, and polish phases                                                            |
+| Category       | Count | Notes                                                                                                                                                                  |
+| -------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Infrastructure | 21    | Stage-local evidence, baseline capture, governed allowlist control, remediation tracking, governance-script consolidation, architecture refresh, and closure reporting |
+| API            | 2     | Runtime-adjacent remediation and verification tasks touching API-facing boundary, trust-chain, and response-contract safety                                            |
+| Worker         | 1     | Runtime invariant verification preserving worker authority and hot-path safety on touched paths                                                                        |
+| Frontend       | 1     | Boundary remediation coverage if UI-to-runtime or UI-to-domain violations are detected                                                                                 |
+| Observability  | 1     | Final verification evidence plus secret and structured-log hygiene checks                                                                                              |
+| Testing        | 2     | Targeted regression and performance-sensitive suites plus canonical closure verification                                                                               |
+| **Total**      | 28    | Dependency-ordered across setup, foundational, US1, US2, US3, and polish phases                                                                                        |
 
 ---
 
@@ -42,7 +42,7 @@ SpecKit generated a dependency-ordered 28-task implementation plan for the archi
 
 ## Idempotency Tasks
 
-- None added as standalone new behavior. Existing idempotency guarantees are preserved indirectly through runtime invariant verification and final closure checks.
+- None added as standalone new behavior. Existing idempotency guarantees are preserved indirectly through explicit runtime invariant verification and final closure checks.
 
 ---
 
@@ -63,7 +63,7 @@ SpecKit generated a dependency-ordered 28-task implementation plan for the archi
 ## Open Risks
 
 - Repository-wide remediation may expand unevenly once the baseline inventory is captured and categorized.
-- Some remediation tasks intentionally reference tracker-driven file sets rather than concrete files because the baseline has not been captured yet.
+- Remediation remains baseline-driven, so the tracker must freeze exact file paths and invariant checks before any code change begins.
 
 ---
 

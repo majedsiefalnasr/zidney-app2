@@ -31,7 +31,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 - Pass: Snapshot-based attempt integrity and server-authoritative time remain unchanged; the migration is explicitly barred from altering grading, submission, timer, or worker authority semantics.
 - Pass: Strict separation of layers is strengthened, not weakened; remediation moves code toward current module boundaries and does not authorize new cross-app or package-to-app imports.
 - Pass: Change governance is preserved; the stage remains within current ADR-backed architecture and does not create new architecture decisions.
-- Pass with note: Runtime stage status is still `DRAFT` in the runtime spec, but the authoritative phase stage document marks clarifications resolved and planning authorized. This plan stops at research/design and does not implement runtime changes.
+- Pass with note: The stage remains `DRAFT` until Analyze passes. Planning and task generation are authorized now, but implementation remains blocked until drift analysis is approved and the workflow state explicitly opens the implementation gate.
 
 ## Project Structure
 
@@ -91,7 +91,7 @@ tests/
 └── integration/
 ```
 
-**Structure Decision**: The migration stays in the existing monorepo structure and resolves violations in place. Shared contracts move only within already-approved package boundaries such as `packages/types`, `packages/validation`, or other existing compliant packages; no new application relationships or architecture layers are introduced.
+**Structure Decision**: The migration stays in the existing monorepo structure and resolves violations in place. Shared contracts move only within already-approved package boundaries such as `packages/types`, `packages/validation`, or other existing compliant packages; no new application relationships or architecture layers are introduced. Before code remediation starts, the stage must freeze a governed file allowlist and bind each remediation item to exact file paths plus required runtime invariants.
 
 ## Migration Workstreams
 
@@ -119,7 +119,7 @@ tests/
 ### 4. Final Verification
 
 - Run the canonical verification sequence: `bun run lint`, `bun run typecheck`, `bun run validate:types`, `bun run arch:guard:ci`, `bun scripts/infra-audit.ts`, and targeted Vitest suites for touched modules.
-- Confirm zero remaining architecture-alignment violations in scope and no regressions to authentication flow, tenant-bound routing, license middleware ordering, structured API error responses, or server-authoritative runtime flows.
+- Confirm zero remaining architecture-alignment violations in scope and no regressions to authentication flow, correlation propagation, tenant-bound routing, license middleware ordering, schema and product compatibility checks, structured API error responses, transaction and idempotency guarantees, secret and log hygiene, performance-sensitive runtime paths, or server-authoritative runtime flows.
 - Record final outputs in stage-local reporting so closure evidence matches the canonical governance toolchain.
 
 ## Risks And Mitigations
@@ -132,8 +132,12 @@ tests/
   Mitigation: Treat unified architecture guard, infra audit, type-safety guard, and validated AI context generation as canonical; legacy checks must become wrappers or be retired.
 - Risk: Repository-wide remediation on API-adjacent code could accidentally drift from the standard response envelope or authentication sequence.
   Mitigation: Treat structured error responses and trust-chain ordering as blocking verification criteria for any touched runtime surface.
+- Risk: Governance-script consolidation could change the toolchain used for closure evidence mid-stage.
+  Mitigation: Sequence toolchain consolidation before closure proof and rerun canonical verification after any governance-script change.
 - Risk: Architecture intelligence refresh produces false drift because artifacts are stale or malformed.
   Mitigation: Regenerate in canonical order and always validate the architecture brain before using the artifacts as final evidence.
+- Risk: Runtime-adjacent alignment could alter secret handling, log hygiene, or hot-path performance unintentionally.
+  Mitigation: Add explicit verification for secret exposure, structured logs, and performance-sensitive API or worker flows whenever those surfaces are touched.
 
 ## Post-Design Constitution Re-Check
 

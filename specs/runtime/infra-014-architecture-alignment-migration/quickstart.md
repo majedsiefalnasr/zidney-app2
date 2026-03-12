@@ -36,6 +36,8 @@ Do not change any of the following:
 - Authentication, correlation, tenant resolution, or license middleware order.
 - Database-per-tenant isolation model.
 - Structured API response envelope on touched runtime paths.
+- Schema-version or product-version compatibility checks.
+- Existing transaction, idempotency, secret-handling, or structured-log guarantees.
 - Server-authoritative attempt timing or worker grading authority.
 - Existing ADR-backed architecture boundaries.
 
@@ -61,7 +63,9 @@ bun scripts/infra-audit.ts
 
 Then run targeted tests for changed modules or tenant-bound runtime paths.
 
-If runtime-adjacent code changes, also verify the authentication flow and the standard `{ success, data, error }` response shape remain unchanged.
+If runtime-adjacent code changes, also verify authentication flow, correlation propagation, schema and product compatibility checks, the standard `{ success, data, error }` response shape, and existing transaction and idempotency guarantees remain unchanged.
+
+If scripts, logging surfaces, API hot paths, or worker hot paths change, also verify secret handling, structured log hygiene, and performance-sensitive behavior remain unchanged.
 
 ## 6. Stage Completion Criteria
 
