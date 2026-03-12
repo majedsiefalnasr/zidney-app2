@@ -11,6 +11,20 @@ system.
 ## Stage Status
 
 Status: DRAFT
+Step: pre_step
+Risk Level: UNKNOWN
+Initiated: 2026-03-12T11:35:23Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
 
 ---
 

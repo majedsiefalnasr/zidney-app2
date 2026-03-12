@@ -1,0 +1,24 @@
+{
+  "stage": "STAGE_INFRA_13_UNIFIED_ARCHITECTURE_GUARD",
+  "phase": "01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-013-unified-architecture-guard",
+  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_13_UNIFIED_ARCHITECTURE_GUARD.md",
+  "branch": "spec/infra-013-unified-architecture-guard",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-12T11:35:23Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/infra-013-unified-architecture-guard",
+      "timestamp": "2026-03-12T11:35:23Z"
+    }
+  ]
+}
