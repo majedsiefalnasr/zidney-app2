@@ -51,7 +51,7 @@ describe('Idempotency & Isolation', () => {
 
     await mockRedis.setex(key, ttl, 'result')
 
-    const storedTTL = mockRedis.getTTL(key)
+    const storedTTL = await mockRedis.getTTL(key)
     expect(storedTTL).toBeLessThanOrEqual(ttl)
     expect(storedTTL).toBeGreaterThan(0)
   })

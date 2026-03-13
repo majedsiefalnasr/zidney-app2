@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./auth": "./src/auth/index.ts",
     "./license": "./src/license/index.ts",
+    "./license/transaction-wrapper": "./src/license/transaction-wrapper.ts",
     "./attempts": "./src/attempts/attempt-init.ts",
     "./audit": "./src/audit/attempt-event-logger.ts",
     "./logging": "./src/logging/master-db-logger.ts",
