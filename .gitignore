@@ -71,3 +71,4 @@ Thumbs.db
 docs/ai/context/architecture-impact-report.json
 # AI context cache (local, generated)
 .ai-context-cache/
+tests/ai-context/

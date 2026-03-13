@@ -9,7 +9,7 @@ import { join } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { generateAllArtifacts } from '../../scripts/ai-context/artifact-generator'
 
-const TEST_OUTPUT_DIR = './test-ai-context-output'
+const TEST_OUTPUT_DIR = './tests/ai-context/test-ai-context-output'
 
 describe('AI Context Integration', () => {
   beforeAll(async () => {
