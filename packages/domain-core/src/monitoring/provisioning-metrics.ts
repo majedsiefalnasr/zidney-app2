@@ -227,8 +227,22 @@ export interface MetricsCollector {
  * In-memory metrics collector (for testing)
  * In production: Use Prometheus client
  */
+type MetricsSnapshot = {
+  requests_total: Record<string, number>
+  api_latencies: number[]
+  worker_tasks: Record<string, number>
+  worker_durations: number[]
+  idempotency_cache: Record<string, number>
+  retries: Record<string, number>
+  dlq_escalations: Record<string, number>
+  pool_utilization: Record<string, number>
+  lock_timeouts: number
+  tampering_detected: number
+  schema_verifications: number[]
+}
+
 export class InMemoryMetricsCollector implements MetricsCollector {
-  private metrics: any = {
+  private metrics: MetricsSnapshot = {
     requests_total: {} as Record<string, number>,
     api_latencies: [] as number[],
     worker_tasks: {} as Record<string, number>,

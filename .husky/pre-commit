@@ -1,8 +1,9 @@
 #!/bin/sh
 set -e
 
-# ── Detect staged files once (shared across steps) ─────────────────────────
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | tr '\n' '\n')
+# ── Detect staged files once (shared across all steps) ──────────────────────
+# FIX #4 — removed the no-op `tr '\n' '\n'`
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
 # Nothing staged → skip quickly
 if [ -z "$STAGED_FILES" ]; then
@@ -11,60 +12,60 @@ if [ -z "$STAGED_FILES" ]; then
 fi
 
 
-# ── Formatter (staged files only, fast) ──────────────────────────────
-# Formats only staged files to avoid touching the entire repository.
-FORMAT_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx|mjs|vue|json|md)$' || true)
-
-if [ -n "$FORMAT_FILES" ]; then
-  echo "Formatting staged files…"
-  echo "$FORMAT_FILES" | while IFS= read -r file; do
-    [ -z "$file" ] && continue
-
-    case "$file" in
-      *.md) bunx prettier --write "$file" ;;
-      *) bun biome format --write "$file" ;;
-    esac
-
-    git add -- "$file"
-  done
-fi
-
-# ── Staged-file quality gates (lint-staged + Biome lint) ───────────────────
-# Runs Biome check --write on staged .ts/.tsx/.js/.jsx/.mjs/.vue/.json files.
-# Commit is blocked if any lint error remains after auto-fix.
+# ── Staged-file quality gates (lint-staged + Biome) ───────────────────────
+# FIX #1 — removed the manual formatter block that ran before lint-staged.
+# Biome check --write (via lint-staged) handles both formatting AND linting in
+# one pass. Running biome format --write first was redundant and created a race
+# condition where the file could be staged in a different state than what
+# lint-staged produced.
+echo "Running lint-staged (Biome check --write on staged files)…"
 bunx lint-staged
 
-# ── Optional TypeScript quick check (only if TS files changed) ─────────────
+
+# ── TypeScript incremental validation (only if TS files changed) ────────────
 TS_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' || true)
 
 if [ -n "$TS_FILES" ]; then
   echo "Running TypeScript incremental validation…"
-  bunx tsc --noEmit --skipLibCheck
+  # FIX #5 — added explicit error message so the developer knows why the
+  # commit was blocked (previously set -e would just abort silently).
+  # Using --skipLibCheck to stay fast; full tsc runs in pre-push and CI.
+  bunx tsc --noEmit --skipLibCheck || {
+    echo "❌ TypeScript validation failed — commit blocked."
+    echo "   Run: bun typecheck to see all errors."
+    exit 1
+  }
 fi
 
-# ── Architecture + Infrastructure Guards (skip if only docs/config changed) ──
+
+# ── Architecture Guard (skip if only docs/config changed) ───────────────────
 CODE_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx|mjs|vue)$' || true)
 
 if [ -n "$CODE_FILES" ]; then
   echo "Running architecture governance checks…"
-
-  # Incremental guard: validate only modules affected by staged files (<200ms)
-  _GUARD_STAGED=$(git diff --cached --name-only)
-  STAGED_FILES="$_GUARD_STAGED" bun scripts/ai-guard.ts --incremental
+  # FIX #2 — removed --incremental flag (does not exist on ai-guard.ts).
+  # FIX #3 — removed the STAGED_FILES reassignment. ai-guard.ts already
+  # reads staged files via `git diff --cached` internally, so passing them
+  # via env var was redundant AND it shadowed the STAGED_FILES variable used
+  # by the brain validation check below.
+  bun scripts/ai-guard.ts
 else
   echo "Skipping architecture checks (no code files changed)"
 fi
 
-# ── Validate Architecture Brain (if AI context files changed) ─────────────────
+
+# ── Validate Architecture Brain (if AI context files changed) ───────────────
+# FIX #6 — validate-architecture-brain.ts confirmed present via package.json
+# "arch:validate-brain" script. Hook is safe to keep.
 BRAIN_FILES=$(echo "$STAGED_FILES" | grep -E 'docs/ai/context/ai-architecture-brain\.json' || true)
 
 if [ -n "$BRAIN_FILES" ]; then
   echo "Validating architecture brain integrity…"
-  set +e  # Temporarily disable exit-on-error to check exit code
+  set +e  # Temporarily disable exit-on-error to capture exit code
   bun scripts/validate-architecture-brain.ts
   BRAIN_EXIT=$?
   set -e  # Re-enable exit-on-error
-  
+
   if [ "$BRAIN_EXIT" -eq 1 ]; then
     echo "❌ Architecture brain validation failed"
     echo "   The ai-architecture-brain.json has invalid or malformed dependency paths."
@@ -72,9 +73,10 @@ if [ -n "$BRAIN_FILES" ]; then
     echo "   Run: bun scripts/infra-audit.ts to regenerate a valid brain."
     exit 1
   elif [ "$BRAIN_EXIT" -eq 2 ]; then
-    echo "⚠️ Architecture brain has warnings but is valid"
+    echo "⚠️  Architecture brain has warnings but is valid"
     echo "   (Duplicate edges detected but no structural errors)"
   fi
 fi
+
 
 echo "✔ Pre-commit checks passed"

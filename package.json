@@ -18,7 +18,7 @@
     "format:check:biome": "biome format .",
     "format:check:md": "prettier --check '**/*.md'",
     "validate:yaml": "yamllint .",
-    "validate:workflows": "actionlint .github/workflows/",
+    "validate:workflows": "find .github/workflows -type f \\( -name '*.yml' -o -name '*.yaml' \\) | xargs actionlint",
     "check:tsconfig": "bash scripts/check-tsconfig-strict.sh",
     "check:store-cycles": "bun scripts/check-store-cycles.ts",
     "test": "vitest run",

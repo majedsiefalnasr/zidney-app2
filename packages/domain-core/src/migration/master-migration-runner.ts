@@ -4,11 +4,11 @@
  * Platform bootstrap (executed once at app boot)
  */
 
-import type { MigrationResult } from '@zidney/types'
-import { calculateChecksum, detectMigrationGap, validateMigrationFile } from '@zidney/validation'
 import crypto from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import type { MigrationResult } from '@zidney/types'
+import { calculateChecksum, detectMigrationGap, validateMigrationFile } from '@zidney/validation'
 import type { Pool } from 'pg'
 
 /**

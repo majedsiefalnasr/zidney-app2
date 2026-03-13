@@ -54,7 +54,7 @@ export const useMmcAppStore = defineStore(
     persist: {
       pick: ['sidebarCollapsed', 'theme', 'locale'],
     },
-  } as any
+  } as unknown as Record<string, unknown>
 )
 
 // ── HMR (development only) ────────────────────────────────────────────────────

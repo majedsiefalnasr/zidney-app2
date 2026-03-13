@@ -11,7 +11,9 @@
       "!coverage",
       "!.ai-context-cache",
       "!**/*.css",
-      "!docs/**/*.html"
+      "!docs/**/*.html",
+      "!docs/architecture",
+      "!docs/ai/context"
     ]
   },
   "formatter": {
@@ -34,14 +36,15 @@
       "correctness": {
         "noUnusedImports": "error",
         "noUnreachable": "error",
-        "noPrecisionLoss": "warn"
+        "noPrecisionLoss": "error"
       },
       "suspicious": {
         "noDebugger": "error",
         "noConsole": "error",
+        "noExplicitAny": "error",
         "noImplicitAnyLet": "warn",
-        "noExportsInTest": "warn",
-        "noAssignInExpressions": "warn"
+        "noExportsInTest": "error",
+        "noAssignInExpressions": "error"
       },
       "style": {
         "useConst": "error"
@@ -88,7 +91,14 @@
     },
     {
       "includes": ["**/*.vue"],
-      "linter": { "rules": { "correctness": { "noUnusedImports": "warn" } } }
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "warn",
+            "noUnusedVariables": "warn"
+          }
+        }
+      }
     }
   ]
 }
