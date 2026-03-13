@@ -206,37 +206,37 @@ export class MockRedisClient {
   private store: Map<string, any> = new Map()
   private ttls: Map<string, number> = new Map()
 
-  get = vi.fn((key: string) => {
+  get = vi.fn(async (key: string) => {
     return this.store.has(key) ? this.store.get(key) : null
   })
 
-  set = vi.fn((key: string, value: any) => {
+  set = vi.fn(async (key: string, value: any) => {
     this.store.set(key, value)
     return 'OK'
   })
 
-  setex = vi.fn((key: string, ttl: number, value: any) => {
+  setex = vi.fn(async (key: string, ttl: number, value: any) => {
     this.store.set(key, value)
     this.ttls.set(key, ttl)
     return 'OK'
   })
 
-  del = vi.fn((key: string) => {
+  del = vi.fn(async (key: string) => {
     const existed = this.store.has(key)
     this.store.delete(key)
     this.ttls.delete(key)
     return existed ? 1 : 0
   })
 
-  flushall = vi.fn(() => {
+  flushall = vi.fn(async () => {
     this.store.clear()
     this.ttls.clear()
     return 'OK'
   })
 
-  flush = vi.fn(() => this.flushall())
+  flush = vi.fn(async () => this.flushall())
 
-  getTTL = vi.fn((key: string) => this.ttls.get(key) ?? -2)
+  getTTL = vi.fn(async (key: string) => this.ttls.get(key) ?? -2)
 
   reset = () => {
     this.store.clear()
