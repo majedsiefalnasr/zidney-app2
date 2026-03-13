@@ -27,14 +27,14 @@ export interface LogContext {
   duration_ms?: number
   error_code?: string
   error_message?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
  * Structured Logger Pipeline
  */
 export class StructuredLoggerPipeline {
-  private pinoLogger: any
+  private pinoLogger: ReturnType<typeof pino>
   private serviceName: string
   private transports: Array<(log: LogContext) => void> = []
 
@@ -185,7 +185,7 @@ export class StructuredLoggerPipeline {
       originalLog(level, event, {
         ...additionalContext,
         ...context,
-      } as any)
+      } as unknown as Omit<LogContext, 'timestamp' | 'level' | 'service' | 'event'>)
     }
 
     return childLogger
@@ -218,7 +218,7 @@ export function getGlobalLogger(serviceName: string = 'provisioning'): Structure
   if (!globalLogger) {
     globalLogger = createStructuredLoggerPipeline(serviceName, {
       level: process.env.LOG_LEVEL || 'info',
-      transport: (process.env.LOG_TRANSPORT as any) || 'console',
+      transport: (process.env.LOG_TRANSPORT as 'console' | 'file' | 'remote') || 'console',
       remoteUrl: process.env.LOG_REMOTE_URL,
     })
   }

@@ -69,6 +69,10 @@ export function createCombinedSignal(
   }
 
   if (signals.length === 0) return undefined
-  if (signals.length === 1) return signals[0]!
+  if (signals.length === 1) {
+    const [first] = signals
+    if (first) return first
+    return undefined
+  }
   return AbortSignal.any(signals)
 }

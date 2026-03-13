@@ -127,7 +127,7 @@ describe('GET /backoffice/context', () => {
     // In integration: the RBAC guard would have fired before reaching handler
     // Here we test the error shape that guard middleware produces
     const app = new Hono<BackofficeEnv>()
-    app.use('/backoffice/context', async (ctx, next) => {
+    app.use('/backoffice/context', async (ctx, _next) => {
       ctx.set('workspace_id' as any, 'ws-001')
       ctx.set('correlation_id' as any, 'trace-rbac')
       ctx.set('correlationId' as any, 'trace-rbac')
@@ -157,7 +157,7 @@ describe('GET /backoffice/context', () => {
 
   it('(d) 403 MODULE_NOT_LICENSED — error code discriminated from RBAC_PERMISSION_DENIED', async () => {
     const app = new Hono<BackofficeEnv>()
-    app.use('/backoffice/context', async (ctx, next) => {
+    app.use('/backoffice/context', async (ctx, _next) => {
       return ctx.json(
         {
           success: false,
@@ -184,7 +184,7 @@ describe('GET /backoffice/context', () => {
 
   it('(e) 423 — LICENSE_SOFT_LOCKED for soft-locked workspace', async () => {
     const app = new Hono<BackofficeEnv>()
-    app.use('/backoffice/context', async (ctx, next) => {
+    app.use('/backoffice/context', async (ctx, _next) => {
       return ctx.json(
         {
           success: false,
@@ -210,7 +210,7 @@ describe('GET /backoffice/context', () => {
 
   it('(f) 403 LICENSE_ARCHIVED — for archived workspace', async () => {
     const app = new Hono<BackofficeEnv>()
-    app.use('/backoffice/context', async (ctx, next) => {
+    app.use('/backoffice/context', async (ctx, _next) => {
       return ctx.json(
         {
           success: false,
@@ -234,7 +234,7 @@ describe('GET /backoffice/context', () => {
 
   it('(g) 404 WORKSPACE_NOT_FOUND — nonexistent workspace', async () => {
     const app = new Hono<BackofficeEnv>()
-    app.use('/backoffice/context', async (ctx, next) => {
+    app.use('/backoffice/context', async (ctx, _next) => {
       return ctx.json(
         {
           success: false,
@@ -259,7 +259,7 @@ describe('GET /backoffice/context', () => {
 
   it('(h) 426 SCHEMA_VERSION_INCOMPATIBLE — schema version mismatch', async () => {
     const app = new Hono<BackofficeEnv>()
-    app.use('/backoffice/context', async (ctx, next) => {
+    app.use('/backoffice/context', async (ctx, _next) => {
       return ctx.json(
         {
           success: false,
@@ -285,7 +285,7 @@ describe('GET /backoffice/context', () => {
     // Simulate: the JWT is valid but issued for a different workspace
     // In real flow, auth middleware rejects after comparing JWT.workspace_id vs ctx.workspace_id
     const app = new Hono<BackofficeEnv>()
-    app.use('/backoffice/context', async (ctx, next) => {
+    app.use('/backoffice/context', async (ctx, _next) => {
       // Cross-workspace scenario: JWT workspace_id doesn't match request workspace
       return ctx.json(
         {
@@ -312,7 +312,7 @@ describe('GET /backoffice/context', () => {
   it('(j) AC-12 — incremented token_version JWT returns 401', async () => {
     // The token was issued before staff_user.token_version was bumped (e.g., password change)
     const app = new Hono<BackofficeEnv>()
-    app.use('/backoffice/context', async (ctx, next) => {
+    app.use('/backoffice/context', async (ctx, _next) => {
       return ctx.json(
         {
           success: false,

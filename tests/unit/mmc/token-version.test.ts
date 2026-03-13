@@ -8,10 +8,10 @@ import { randomUUID } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('T053: Token Version Invalidation Tests', () => {
-  let mockDb: any
+  let _mockDb: any
 
   beforeEach(() => {
-    mockDb = {
+    _mockDb = {
       query: vi.fn(),
     }
   })
@@ -22,7 +22,7 @@ describe('T053: Token Version Invalidation Tests', () => {
 
   describe('Member disablement invalidates all sessions', () => {
     it('should increment token_version when member disabled', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
       // Setup: Member with token_version=1
 
       // Call disableMember(memberId)
@@ -32,7 +32,7 @@ describe('T053: Token Version Invalidation Tests', () => {
 
     it('should reject subsequent requests with old token', async () => {
       const memberId = randomUUID()
-      const userId = memberId
+      const _userId = memberId
       // Setup: User has token_version=1, creates JWT with version=1
 
       // Admin disables user (token_version→2)
@@ -53,7 +53,7 @@ describe('T053: Token Version Invalidation Tests', () => {
     })
 
     it('should be idempotent: disable twice increments twice', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
       // Setup: token_version=1
 
       // Disable once → 2
@@ -65,7 +65,7 @@ describe('T053: Token Version Invalidation Tests', () => {
 
   describe('Role permission edit cascades token_version', () => {
     it('should increment token_version for all members with edited role', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 5 members M1-M5 with role R, token_versions=[1,1,1,1,1]
 
       // PATCH /mmc/roles/:id/permissions
@@ -142,8 +142,8 @@ describe('T053: Token Version Invalidation Tests', () => {
 
   describe('Token version in JWT payload', () => {
     it('should include token_version in JWT at issuance', async () => {
-      const userId = randomUUID()
-      const version = 3
+      const _userId = randomUUID()
+      const _version = 3
 
       // issueToken includes: payload.token_version = version
       // Expected: JWT contains token_version field

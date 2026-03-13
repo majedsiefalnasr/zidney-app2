@@ -9,10 +9,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as PasswordValidation from '../../../packages/validation/src/password.validator'
 
 describe('T048: MemberService Unit Tests', () => {
-  let mockDb: any // Mocked database connection
+  let _mockDb: any // Mocked database connection
 
   beforeEach(() => {
-    mockDb = {
+    _mockDb = {
       query: vi.fn(),
       transaction: vi.fn(),
     }
@@ -24,7 +24,7 @@ describe('T048: MemberService Unit Tests', () => {
 
   describe('createMember() with validation', () => {
     it('should create member with valid credentials', async () => {
-      const input = {
+      const _input = {
         username: 'new_user',
         email: 'new@example.com',
         password: 'SecurePass123!',
@@ -43,7 +43,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should validate username uniqueness', async () => {
-      const input = {
+      const _input = {
         username: 'duplicate_user',
         email: 'unique@example.com',
         password: 'SecurePass123!',
@@ -57,7 +57,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should validate email uniqueness', async () => {
-      const input = {
+      const _input = {
         username: 'unique_user',
         email: 'existing@example.com',
         password: 'SecurePass123!',
@@ -71,7 +71,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should validate password complexity', async () => {
-      const input = {
+      const _input = {
         username: 'new_user',
         email: 'new@example.com',
         password: 'weak', // Missing uppercase, digit, special char
@@ -84,7 +84,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should validate role_id exists', async () => {
-      const input = {
+      const _input = {
         username: 'new_user',
         email: 'new@example.com',
         password: 'SecurePass123!',
@@ -98,7 +98,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should hash password using bcrypt with cost=12', async () => {
-      const input = {
+      const _input = {
         username: 'new_user',
         email: 'new@example.com',
         password: 'SecurePass123!',
@@ -112,7 +112,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should roll back on validation failure (transaction)', async () => {
-      const input = {
+      const _input = {
         username: 'tx_user',
         email: 'tx@example.com',
         password: 'SecurePass123!',
@@ -126,7 +126,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should set initial token_version to 1', async () => {
-      const input = {
+      const _input = {
         username: 'new_user',
         email: 'new@example.com',
         password: 'SecurePass123!',
@@ -139,7 +139,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should set created_at and updated_at to server time', async () => {
-      const input = {
+      const _input = {
         username: 'new_user',
         email: 'new@example.com',
         password: 'SecurePass123!',
@@ -154,8 +154,8 @@ describe('T048: MemberService Unit Tests', () => {
 
   describe('updateMember() with validation', () => {
     it('should update email successfully', async () => {
-      const memberId = randomUUID()
-      const update = {
+      const _memberId = randomUUID()
+      const _update = {
         email: 'newemail@example.com',
       }
 
@@ -164,8 +164,8 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should validate email uniqueness on update', async () => {
-      const memberId = randomUUID()
-      const update = {
+      const _memberId = randomUUID()
+      const _update = {
         email: 'taken@example.com', // Already assigned to another member
       }
 
@@ -174,8 +174,8 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should prevent username update (immutable)', async () => {
-      const memberId = randomUUID()
-      const update = {
+      const _memberId = randomUUID()
+      const _update = {
         username: 'new_username',
       }
 
@@ -184,8 +184,8 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should prevent password_hash direct update', async () => {
-      const memberId = randomUUID()
-      const update = {
+      const _memberId = randomUUID()
+      const _update = {
         password_hash: 'fake_hash',
       }
 
@@ -194,8 +194,8 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should update team_id, group_id, department_id', async () => {
-      const memberId = randomUUID()
-      const update = {
+      const _memberId = randomUUID()
+      const _update = {
         team_id: randomUUID(),
         group_id: randomUUID(),
         department_id: randomUUID(),
@@ -208,21 +208,21 @@ describe('T048: MemberService Unit Tests', () => {
 
   describe('disableMember()', () => {
     it('should set status=DISABLED and increment token_version', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Expected: status='DISABLED', token_version incremented by 1
       expect(true).toBe(true)
     })
 
     it('should update updated_at timestamp', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Expected: updated_at set to current server time
       expect(true).toBe(true)
     })
 
     it('should be idempotent (disable already disabled member)', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Setup: Member with status='DISABLED', token_version=5
       // Call disableMember twice
@@ -232,7 +232,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should return 404 if member not found', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Setup: DB query returns no rows
       // Expected: Service throws error with code 'member_not_found'
@@ -242,7 +242,7 @@ describe('T048: MemberService Unit Tests', () => {
 
   describe('getMember()', () => {
     it('should return member with role name augmentation', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Mock DB responses
       // Expected: Returns member object with:
@@ -253,14 +253,14 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should not return password_hash', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Expected: password_hash NOT in response
       expect(true).toBe(true)
     })
 
     it('should return 404 if member not found', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Expected: Service throws error with code 'member_not_found'
       expect(true).toBe(true)
@@ -274,14 +274,14 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should support filtering by status', async () => {
-      const filter = { status: 'ACTIVE' }
+      const _filter = { status: 'ACTIVE' }
 
       // Expected: Only ACTIVE members returned
       expect(true).toBe(true)
     })
 
     it('should support filtering by role_id', async () => {
-      const filter = { role_id: randomUUID() }
+      const _filter = { role_id: randomUUID() }
 
       // Expected: Only members with that role returned
       expect(true).toBe(true)
@@ -295,7 +295,7 @@ describe('T048: MemberService Unit Tests', () => {
 
   describe('Audit logging integration', () => {
     it('should log member creation with actor_user_id', async () => {
-      const input = {
+      const _input = {
         username: 'audit_test',
         email: 'audit@example.com',
         password: 'SecurePass123!',
@@ -314,8 +314,8 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should log member update with previous and new state', async () => {
-      const memberId = randomUUID()
-      const update = {
+      const _memberId = randomUUID()
+      const _update = {
         email: 'updated@example.com',
       }
 
@@ -327,7 +327,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should log member disablement', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // After disable: Verify audit service called with:
       // - action_type: 'MEMBER_DISABLED'
@@ -337,7 +337,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should NOT log password_hash in audit trail', async () => {
-      const input = {
+      const _input = {
         username: 'sensitive_test',
         email: 'sensitive@example.com',
         password: 'SecurePass123!',
@@ -352,7 +352,7 @@ describe('T048: MemberService Unit Tests', () => {
 
   describe('Transaction safety', () => {
     it('should roll back on duplicate username (constraint violation)', async () => {
-      const input = {
+      const _input = {
         username: 'takes_forever',
         email: 'unique1@example.com',
         password: 'SecurePass123!',
@@ -367,7 +367,7 @@ describe('T048: MemberService Unit Tests', () => {
     })
 
     it('should roll back on foreign key constraint (invalid role)', async () => {
-      const input = {
+      const _input = {
         username: 'fk_test',
         email: 'unique2@example.com',
         password: 'SecurePass123!',

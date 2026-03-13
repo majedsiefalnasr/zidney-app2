@@ -71,16 +71,6 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '@shadcn-vue/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@shadcn-vue/ui/dialog'
-import { Input } from '@shadcn-vue/ui/input'
-import { Textarea } from '@shadcn-vue/ui/textarea'
 import { computed, ref, watch } from 'vue'
 
 interface Props {
@@ -103,7 +93,7 @@ const props = withDefaults(defineProps<Props>(), {
   maxLength: 500,
 })
 
-const emit = defineEmits<{
+const _emit = defineEmits<{
   submit: []
   cancel: []
 }>()
@@ -112,19 +102,19 @@ const activeLanguage = ref('')
 const formValues = ref<Record<string, string>>({})
 const languageErrors = ref<Record<string, string[]>>({})
 
-const filteredLanguages = computed(() => props.languages)
+const _filteredLanguages = computed(() => props.languages)
 
 const filledLanguagesCount = computed(
   () => props.languages.filter((lang) => formValues.value[lang]?.trim()).length
 )
 
-const coveragePercent = computed(() =>
+const _coveragePercent = computed(() =>
   props.languages.length > 0
     ? Math.round((filledLanguagesCount.value / props.languages.length) * 100)
     : 0
 )
 
-const isValid = computed(() => {
+const _isValid = computed(() => {
   if (props.languages.length === 0) return false
   for (const lang of props.requiredLanguages) {
     if (!formValues.value[lang]?.trim()) return false
@@ -153,9 +143,15 @@ watch(
   () => props.isOpen,
   (newIsOpen) => {
     if (newIsOpen) {
-      formValues.value = props.initialValues
-        ? { ...props.initialValues }
-        : props.languages.reduce((acc, lang) => ({ ...acc, [lang]: '' }), {})
+      if (props.initialValues) {
+        formValues.value = { ...props.initialValues }
+      } else {
+        const obj: Record<string, string> = {}
+        for (const lang of props.languages) {
+          obj[lang] = ''
+        }
+        formValues.value = obj
+      }
       activeLanguage.value = props.languages[0] || ''
       for (const lang of props.languages) {
         validateLanguage(lang)

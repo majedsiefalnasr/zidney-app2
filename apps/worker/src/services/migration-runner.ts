@@ -15,8 +15,8 @@
  * - baseline_006_init_admin_user.sql
  */
 
-import * as fs from 'fs'
-import * as path from 'path'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 import type { Pool, PoolClient } from 'pg'
 
 /**
@@ -45,11 +45,11 @@ export interface MigrationRunResult {
  */
 export class MigrationRunnerService {
   private migrationsDir: string
-  private logger?: any
+  private logger?: unknown
 
   constructor(
     migrationsDir: string = path.join(__dirname, '../../db/tenant/migrations'),
-    logger?: any
+    logger?: unknown
   ) {
     this.migrationsDir = migrationsDir
     this.logger = logger
@@ -184,7 +184,8 @@ export class MigrationRunnerService {
     const migrations: MigrationFile[] = []
 
     for (let i = 0; i < files.length; i++) {
-      const filename = files[i]!
+      const filename = files[i]
+      if (!filename) continue
       const filePath = path.join(this.migrationsDir, filename)
 
       if (!fs.existsSync(filePath)) {
@@ -224,7 +225,7 @@ export class MigrationRunnerService {
    * Calculate SHA256 checksum of SQL
    */
   private calculateChecksum(sql: string): string {
-    const crypto = require('crypto')
+    const crypto = require('node:crypto')
     return crypto.createHash('sha256').update(sql).digest('hex')
   }
 }
@@ -232,6 +233,6 @@ export class MigrationRunnerService {
 /**
  * Factory to create migration runner
  */
-export function createMigrationRunnerService(logger?: any): MigrationRunnerService {
+export function createMigrationRunnerService(logger?: unknown): MigrationRunnerService {
   return new MigrationRunnerService(undefined, logger)
 }

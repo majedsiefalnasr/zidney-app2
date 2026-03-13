@@ -372,9 +372,9 @@ describe('T052: Product Creation Integration Tests', () => {
         [input.slug]
       )
 
-      expect(parseInt(productCount.rows[0]!.count)).toBe(1)
-      expect(parseInt(versionCount.rows[0]!.count)).toBe(1)
-      expect(parseInt(auditCount.rows[0]!.count)).toBe(1)
+      expect(parseInt(productCount.rows[0]!.count, 10)).toBe(1)
+      expect(parseInt(versionCount.rows[0]!.count, 10)).toBe(1)
+      expect(parseInt(auditCount.rows[0]!.count, 10)).toBe(1)
     })
   })
 })

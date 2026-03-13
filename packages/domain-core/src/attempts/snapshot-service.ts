@@ -27,7 +27,7 @@ export interface QuestionSnapshot {
   question_id: string
   question_text: string
   question_type: 'mcq' | 'traditional'
-  options?: Record<string, any> // For MCQ
+  options?: Record<string, unknown> // For MCQ
   solution?: string // For traditional
   difficulty: string
   tags: string[]
@@ -117,7 +117,7 @@ export async function captureExamSnapshot(examId: string, pool: Pool): Promise<C
     exam_id: examId,
     question_count: questions.length,
     captured_at: snapshot.config.captured_at,
-    correlation_id: (global as any).correlationId,
+    correlation_id: (global as unknown as { correlationId?: string }).correlationId,
   })
 
   return snapshot

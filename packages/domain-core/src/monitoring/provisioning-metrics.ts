@@ -220,7 +220,7 @@ export interface MetricsCollector {
   /**
    * Get current metrics snapshot (for testing/debugging)
    */
-  getMetricsSnapshot(): Record<string, any>
+  getMetricsSnapshot(): Record<string, unknown>
 }
 
 /**
@@ -228,18 +228,18 @@ export interface MetricsCollector {
  * In production: Use Prometheus client
  */
 export class InMemoryMetricsCollector implements MetricsCollector {
-  private metrics: Record<string, any> = {
-    requests_total: {},
-    api_latencies: [],
-    worker_tasks: {},
-    worker_durations: [],
-    idempotency_cache: {},
-    retries: {},
-    dlq_escalations: {},
-    pool_utilization: {},
+  private metrics: any = {
+    requests_total: {} as Record<string, number>,
+    api_latencies: [] as number[],
+    worker_tasks: {} as Record<string, number>,
+    worker_durations: [] as number[],
+    idempotency_cache: {} as Record<string, number>,
+    retries: {} as Record<string, number>,
+    dlq_escalations: {} as Record<string, number>,
+    pool_utilization: {} as Record<string, number>,
     lock_timeouts: 0,
     tampering_detected: 0,
-    schema_verifications: [],
+    schema_verifications: [] as number[],
   }
 
   recordApiRequest(workspace_id: string, result: string, latency_ms: number): void {
@@ -337,7 +337,7 @@ export class InMemoryMetricsCollector implements MetricsCollector {
     })
   }
 
-  getMetricsSnapshot(): Record<string, any> {
+  getMetricsSnapshot(): Record<string, unknown> {
     // Calculate percentiles
     const apiLatencies = this.metrics.api_latencies.sort((a: number, b: number) => a - b)
     const workerDurations = this.metrics.worker_durations.sort((a: number, b: number) => a - b)

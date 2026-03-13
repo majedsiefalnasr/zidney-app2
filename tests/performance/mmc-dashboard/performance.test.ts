@@ -18,7 +18,7 @@ describe('Performance & Load Tests', () => {
       //   - Max latency (p99): < 300ms
       //   - Success rate: 100%
 
-      const latencies: number[] = []
+      const _latencies: number[] = []
 
       // Simulate:
       // for (let i = 0; i < 100; i++) {

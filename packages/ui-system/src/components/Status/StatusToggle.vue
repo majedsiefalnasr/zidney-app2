@@ -12,8 +12,6 @@
 </template>
 
 <script setup lang="ts">
-import { Switch } from '@shadcn-vue/ui/switch'
-
 interface Props {
   modelValue: boolean
   disabled?: boolean

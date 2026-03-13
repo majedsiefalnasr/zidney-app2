@@ -163,22 +163,22 @@ export class AuthService {
   /**
    * Private: Augment member with role name (for response)
    */
-  private async augmentMember(member: any): Promise<MMCMember> {
+  private async augmentMember(member: Record<string, unknown>): Promise<MMCMember> {
     const roleResult = await this.db.query(`SELECT name FROM roles WHERE id = $1`, [member.role_id])
 
     return {
-      id: member.id,
-      username: member.username,
-      email: member.email,
-      role_id: member.role_id,
-      role_name: roleResult.rows[0]?.name,
-      team_id: member.team_id,
-      group_id: member.group_id,
-      department_id: member.department_id,
-      token_version: member.token_version,
-      status: member.status,
-      created_at: member.created_at,
-      updated_at: member.updated_at,
+      id: member.id as string,
+      username: member.username as string,
+      email: member.email as string,
+      role_id: member.role_id as string,
+      role_name: roleResult.rows[0]?.name as string | undefined,
+      team_id: member.team_id as string | null,
+      group_id: member.group_id as string | null,
+      department_id: member.department_id as string | null,
+      token_version: (member.token_version as number) ?? 0,
+      status: member.status as string,
+      created_at: member.created_at as string,
+      updated_at: member.updated_at as string,
     }
   }
 }

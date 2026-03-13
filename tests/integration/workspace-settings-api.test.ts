@@ -60,7 +60,7 @@ function createTestApp(overrides: {
   // Mock middleware — set Hono variables
   app.use('*', async (c, next) => {
     const mockPool = {
-      query: vi.fn(async (sql: string, params?: unknown[]) => {
+      query: vi.fn(async (sql: string, _params?: unknown[]) => {
         if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
           return { rows: [], rowCount: 0 }
         }

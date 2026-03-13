@@ -4,7 +4,6 @@
  * T088: License Bulk Actions
  */
 
-import { Button } from '@zidney/ui/components/shadcn-vue/button'
 import { computed } from 'vue'
 
 interface Props {
@@ -14,21 +13,21 @@ interface Props {
   pageSize: number
 }
 
-const emit = defineEmits<{
+const _emit = defineEmits<{
   'update:page': [page: number]
   'bulk-action': [action: string, ids: string[]]
 }>()
 
 const props = defineProps<Props>()
 
-const pages = computed(() => {
+const _pages = computed(() => {
   const start = Math.max(1, props.currentPage - 2)
   const end = Math.min(props.totalPages, props.currentPage + 2)
   return Array.from({ length: end - start + 1 }, (_, i) => start + i)
 })
 
-const canGoBack = computed(() => props.currentPage > 1)
-const canGoNext = computed(() => props.currentPage < props.totalPages)
+const _canGoBack = computed(() => props.currentPage > 1)
+const _canGoNext = computed(() => props.currentPage < props.totalPages)
 </script>
 
 <template>

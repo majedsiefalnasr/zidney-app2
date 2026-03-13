@@ -51,7 +51,7 @@ describe('T087: DLQ Lifecycle', () => {
     const attemptId = await insertTestAttempt(ctx.tenantDb, ctx.workspaceId)
 
     // Add job to DLQ
-    const dlqJobId = 'dlq-job-' + Math.random().toString(36).substring(7)
+    const dlqJobId = `dlq-job-${Math.random().toString(36).substring(7)}`
     await ctx.redis.lPush(`dlq:${attemptId}`, dlqJobId)
 
     // Retry the job
@@ -60,9 +60,9 @@ describe('T087: DLQ Lifecycle', () => {
   })
 
   it('should create dlq_resolutions record on successful retry', async () => {
-    const dlqJobId = 'dlq-job-' + Math.random().toString(36).substring(7)
+    const dlqJobId = `dlq-job-${Math.random().toString(36).substring(7)}`
 
-    const res = await client.post(`/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/retry`, {})
+    const _res = await client.post(`/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/retry`, {})
 
     await sleep(50)
 
@@ -73,7 +73,7 @@ describe('T087: DLQ Lifecycle', () => {
   })
 
   it('should discard DLQ job with reason', async () => {
-    const dlqJobId = 'dlq-job-' + Math.random().toString(36).substring(7)
+    const dlqJobId = `dlq-job-${Math.random().toString(36).substring(7)}`
 
     const res = await client.post(`/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/discard`, {
       reason: 'Invalid exam data',

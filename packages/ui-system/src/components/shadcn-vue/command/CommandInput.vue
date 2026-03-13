@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { reactiveOmit } from '@vueuse/core'
-import { Search } from 'lucide-vue-next'
 import type { ListboxFilterProps } from 'reka-ui'
-import { ListboxFilter, useForwardProps } from 'reka-ui'
+import { useForwardProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 import { useCommand } from '.'
 
 defineOptions({
@@ -19,9 +17,10 @@ const props = defineProps<
 
 const delegatedProps = reactiveOmit(props, 'class')
 
-const forwardedProps = useForwardProps(delegatedProps)
+const _forwardedProps = useForwardProps(delegatedProps)
 
 const { filterState } = useCommand()
+void [filterState]
 </script>
 
 <template>

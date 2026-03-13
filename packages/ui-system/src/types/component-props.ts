@@ -19,7 +19,7 @@ import type {
 import type { RowAction } from './row-action'
 
 // ===== DataTable Props (LOCKED DECISION 1: Pagination Agnostic) =====
-export interface DataTableProps<TRow = any> {
+export interface DataTableProps<TRow = unknown> {
   rows: TRow[]
   columns: AnyColumnDef<TRow>[]
   totalCount: number
@@ -197,7 +197,7 @@ export interface InputProps {
 
 export interface SelectProps {
   modelValue: string | number | string[]
-  options: Array<{ value: any; label: string }>
+  options: Array<{ value: unknown; label: string }>
   placeholder?: string
   disabled?: boolean
   multiple?: boolean
@@ -222,7 +222,7 @@ export interface TableActionBarProps {
 }
 
 // Type-safe prop extraction
-export type ExtractProps<T extends { $$props?: any }> = T extends {
+export type ExtractProps<T extends { $$props?: unknown }> = T extends {
   $$props: infer P
 }
   ? P

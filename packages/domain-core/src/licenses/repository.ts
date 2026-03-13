@@ -75,10 +75,18 @@ export class LicenseRepository {
         ]
       )
 
-      return this.mapToLicense(result.rows[0])
-    } catch (error: any) {
-      if (error?.code === '23505' || error?.message?.includes('duplicate key')) {
-        throw LicenseValidationError.slugNotUnique()
+      return this.mapToLicense(result.rows[0] as Record<string, unknown>)
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null) {
+        const e = error as Record<string, unknown>
+        const code = e.code
+        const message = e.message
+        if (
+          code === '23505' ||
+          (typeof message === 'string' && message.includes('duplicate key'))
+        ) {
+          throw LicenseValidationError.slugNotUnique()
+        }
       }
       throw error
     }
@@ -95,7 +103,7 @@ export class LicenseRepository {
       [id]
     )
 
-    return result.rows[0] ? this.mapToLicense(result.rows[0]) : null
+    return result.rows[0] ? this.mapToLicense(result.rows[0] as Record<string, unknown>) : null
   }
 
   /**
@@ -238,7 +246,7 @@ export class LicenseRepository {
 
     if (!result.rows[0]) throw new LicenseNotFoundError(id)
 
-    return this.mapToLicense(result.rows[0])
+    return this.mapToLicense(result.rows[0] as Record<string, unknown>)
   }
 
   /**
@@ -257,7 +265,7 @@ export class LicenseRepository {
 
     if (!result.rows[0]) throw new LicenseNotFoundError(id)
 
-    return this.mapToLicense(result.rows[0])
+    return this.mapToLicense(result.rows[0] as Record<string, unknown>)
   }
 
   /**
@@ -283,7 +291,7 @@ export class LicenseRepository {
       [LicenseStatus.SOFT_LOCKED, softLockUntil, id]
     )
 
-    return this.mapToLicense(result.rows[0])
+    return this.mapToLicense(result.rows[0] as Record<string, unknown>)
   }
 
   /**
@@ -307,7 +315,7 @@ export class LicenseRepository {
       [LicenseStatus.ACTIVE, id]
     )
 
-    return this.mapToLicense(result.rows[0])
+    return this.mapToLicense(result.rows[0] as Record<string, unknown>)
   }
 
   /**
@@ -331,7 +339,7 @@ export class LicenseRepository {
       [LicenseStatus.ARCHIVED, id]
     )
 
-    return this.mapToLicense(result.rows[0])
+    return this.mapToLicense(result.rows[0] as Record<string, unknown>)
   }
 
   /**
@@ -355,7 +363,7 @@ export class LicenseRepository {
       [LicenseStatus.ACTIVE, id]
     )
 
-    return this.mapToLicense(result.rows[0])
+    return this.mapToLicense(result.rows[0] as Record<string, unknown>)
   }
 
   /**
@@ -379,7 +387,7 @@ export class LicenseRepository {
       [LicenseStatus.DELETED, id]
     )
 
-    return this.mapToLicense(result.rows[0])
+    return this.mapToLicense(result.rows[0] as Record<string, unknown>)
   }
 
   /**
@@ -393,7 +401,7 @@ export class LicenseRepository {
       [slug]
     )
 
-    return result.rows[0] ? this.mapToLicense(result.rows[0]) : null
+    return result.rows[0] ? this.mapToLicense(result.rows[0] as Record<string, unknown>) : null
   }
 
   /**
@@ -468,31 +476,34 @@ export class LicenseRepository {
   /**
    * Helper: Map database row to License object
    */
-  private mapToLicense(row: any): License {
+  private mapToLicense(row: Record<string, unknown>): License {
     return {
-      id: row.id,
-      product_id: row.product_id,
-      workspace_slug: row.workspace_slug,
-      workspace_name: row.workspace_name,
-      student_limit: row.student_limit,
-      staff_limit: row.staff_limit,
+      id: String(row.id),
+      product_id: String(row.product_id),
+      workspace_slug: String(row.workspace_slug),
+      workspace_name: String(row.workspace_name),
+      student_limit: typeof row.student_limit === 'number' ? (row.student_limit as number) : null,
+      staff_limit: typeof row.staff_limit === 'number' ? (row.staff_limit as number) : null,
       use_zidney_payment: Boolean(row.use_zidney_payment),
-      commission_per_user: row.commission_per_user,
-      default_language: row.default_language,
+      commission_per_user:
+        typeof row.commission_per_user === 'number' ? (row.commission_per_user as number) : null,
+      default_language: String(row.default_language),
       uses_divisions: Boolean(row.uses_divisions),
-      status: row.status as LicenseStatus,
-      soft_lock_until: row.soft_lock_until ? new Date(row.soft_lock_until) : null,
-      archived_at: row.archived_at ? new Date(row.archived_at) : null,
-      deleted_at: row.deleted_at ? new Date(row.deleted_at) : null,
-      schema_version: row.schema_version,
-      product_version: row.product_version,
-      provisioning_error: row.provisioning_error,
-      provisioning_retries: row.provisioning_retries,
+      status: (row.status as LicenseStatus) || ('' as LicenseStatus),
+      soft_lock_until: row.soft_lock_until ? new Date(String(row.soft_lock_until)) : null,
+      archived_at: row.archived_at ? new Date(String(row.archived_at)) : null,
+      deleted_at: row.deleted_at ? new Date(String(row.deleted_at)) : null,
+      schema_version: row.schema_version as number,
+      product_version: row.product_version as number,
+      provisioning_error:
+        typeof row.provisioning_error === 'string' ? row.provisioning_error : null,
+      provisioning_retries:
+        typeof row.provisioning_retries === 'number' ? row.provisioning_retries : 0,
       provisioning_last_attempt_at: row.provisioning_last_attempt_at
-        ? new Date(row.provisioning_last_attempt_at)
+        ? new Date(String(row.provisioning_last_attempt_at))
         : null,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at),
+      created_at: new Date(String(row.created_at)),
+      updated_at: new Date(String(row.updated_at)),
     }
   }
 }

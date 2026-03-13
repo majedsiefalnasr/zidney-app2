@@ -51,7 +51,7 @@ describe('T044: Member Management API Integration Tests', () => {
 
   describe('POST /mmc/members', () => {
     it('should create member with valid credentials when authorized', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'test_user_001',
         email: 'test@example.com',
         password: 'SecurePass123!',
@@ -64,7 +64,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should return 409 Conflict on duplicate username', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'duplicate_user', // Already exists in seed data
         email: 'unique@example.com',
         password: 'SecurePass123!',
@@ -76,7 +76,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should return 409 Conflict on duplicate email', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'new_user',
         email: 'existing@example.com', // Already exists
         password: 'SecurePass123!',
@@ -88,7 +88,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should return 400 Bad Request on invalid password complexity', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'new_user',
         email: 'test@example.com',
         password: 'weak', // Too weak: no uppercase, no number, no special
@@ -100,7 +100,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should return 400 Bad Request on non-existent role_id', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'new_user',
         email: 'test@example.com',
         password: 'SecurePass123!',
@@ -112,7 +112,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should return 403 Forbidden when user lacks MEMBERS_MANAGEMENT.create permission', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'new_user',
         email: 'test@example.com',
         password: 'SecurePass123!',
@@ -125,7 +125,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should hash password before storing', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'test_user_002',
         email: 'test2@example.com',
         password: 'SecurePass123!',
@@ -138,7 +138,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should audit log member creation with actor_user_id', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'test_user_003',
         email: 'test3@example.com',
         password: 'SecurePass123!',
@@ -155,7 +155,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should set initial token_version to 1', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'test_user_004',
         email: 'test4@example.com',
         password: 'SecurePass123!',
@@ -201,8 +201,8 @@ describe('T044: Member Management API Integration Tests', () => {
 
   describe('PATCH /mmc/members/:id', () => {
     it('should update email successfully', async () => {
-      const memberId = randomUUID()
-      const updatePayload = {
+      const _memberId = randomUUID()
+      const _updatePayload = {
         email: 'newemail@example.com',
       }
 
@@ -211,8 +211,8 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should update team_id, group_id, department_id', async () => {
-      const memberId = randomUUID()
-      const updatePayload = {
+      const _memberId = randomUUID()
+      const _updatePayload = {
         team_id: randomUUID(),
         group_id: randomUUID(),
         department_id: randomUUID(),
@@ -223,8 +223,8 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should return 409 Conflict on duplicate email', async () => {
-      const memberId = randomUUID()
-      const updatePayload = {
+      const _memberId = randomUUID()
+      const _updatePayload = {
         email: 'existing@example.com', // Already assigned to another member
       }
 
@@ -233,8 +233,8 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should NOT allow editing username (immutable)', async () => {
-      const memberId = randomUUID()
-      const updatePayload = {
+      const _memberId = randomUUID()
+      const _updatePayload = {
         username: 'new_username',
       }
 
@@ -243,8 +243,8 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should NOT allow editing password_hash directly', async () => {
-      const memberId = randomUUID()
-      const updatePayload = {
+      const _memberId = randomUUID()
+      const _updatePayload = {
         password_hash: 'fake_hash',
       }
 
@@ -253,8 +253,8 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should return 403 Forbidden when user lacks MEMBERS_MANAGEMENT.edit permission', async () => {
-      const memberId = randomUUID()
-      const updatePayload = { email: 'test@example.com' }
+      const _memberId = randomUUID()
+      const _updatePayload = { email: 'test@example.com' }
 
       // Call with viewer token
       // Expected: 403 Forbidden
@@ -262,8 +262,8 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should audit log member update with previous_state and new_state', async () => {
-      const memberId = randomUUID()
-      const updatePayload = {
+      const _memberId = randomUUID()
+      const _updatePayload = {
         email: 'updated@example.com',
       }
 
@@ -275,8 +275,8 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should update updated_at timestamp', async () => {
-      const memberId = randomUUID()
-      const updatePayload = {
+      const _memberId = randomUUID()
+      const _updatePayload = {
         email: 'timestamp_test@example.com',
       }
 
@@ -287,7 +287,7 @@ describe('T044: Member Management API Integration Tests', () => {
 
   describe('DELETE /mmc/members/:id', () => {
     it('should soft-delete member (set status=DISABLED)', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Call DELETE endpoint
       // Expected: 200 OK with status: 'DISABLED'
@@ -295,7 +295,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should increment token_version on disable', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Call DELETE endpoint
       // Expected: token_version incremented by 1
@@ -304,7 +304,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should return 403 Forbidden when user lacks MEMBERS_MANAGEMENT.delete permission', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Call with viewer token
       // Expected: 403 Forbidden
@@ -312,7 +312,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should return 404 Not Found for non-existent member', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // Call DELETE with non-existent ID
       // Expected: 404 Not Found
@@ -320,7 +320,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should audit log member disablement', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // After DELETE: Verify audit log contains:
       // - action_type: 'MEMBER_DISABLED'
@@ -330,7 +330,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should allow disabled member to be soft-deleted again (idempotent)', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // DELETE twice
       // Expected: Both return 200 OK (idempotent)
@@ -340,7 +340,7 @@ describe('T044: Member Management API Integration Tests', () => {
 
   describe('Transactional Safety', () => {
     it('should roll back member creation on validation failure at insert', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'tx_test_user',
         email: 'tx_test@example.com',
         password: 'SecurePass123!',
@@ -359,7 +359,7 @@ describe('T044: Member Management API Integration Tests', () => {
 
   describe('Correlation ID Propagation', () => {
     it('should include correlation_id in response header', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'corr_test_user',
         email: 'corr_test@example.com',
         password: 'SecurePass123!',
@@ -372,7 +372,7 @@ describe('T044: Member Management API Integration Tests', () => {
     })
 
     it('should generate correlation_id if not provided', async () => {
-      const newMember = {
+      const _newMember = {
         username: 'corr_gen_user',
         email: 'corr_gen@example.com',
         password: 'SecurePass123!',

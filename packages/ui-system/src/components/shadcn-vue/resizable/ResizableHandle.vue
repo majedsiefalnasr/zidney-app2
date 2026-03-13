@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { reactiveOmit } from '@vueuse/core'
-import { GripVertical } from 'lucide-vue-next'
 import type { SplitterResizeHandleEmits, SplitterResizeHandleProps } from 'reka-ui'
-import { SplitterResizeHandle, useForwardPropsEmits } from 'reka-ui'
+import { useForwardPropsEmits } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 
 const props = defineProps<
   SplitterResizeHandleProps & {
@@ -15,7 +13,7 @@ const props = defineProps<
 const emits = defineEmits<SplitterResizeHandleEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class', 'withHandle')
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const _forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

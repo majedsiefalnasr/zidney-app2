@@ -424,10 +424,10 @@ async function updateJobStatus(
   masterDb: Pool,
   jobId: string,
   status: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   const fields: string[] = ['status = $1', 'updated_at = NOW()']
-  const values: any[] = [status]
+  const values: unknown[] = [status]
   let paramIndex = 2
 
   if (metadata?.started_at) {

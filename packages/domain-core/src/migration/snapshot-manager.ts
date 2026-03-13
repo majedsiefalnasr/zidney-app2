@@ -4,8 +4,8 @@
  * Called before transaction, idempotent via checksum-based key
  */
 
+import crypto from 'node:crypto'
 import { RetentionPolicy, type SnapshotRecord } from '@zidney/types'
-import crypto from 'crypto'
 import type { Pool } from 'pg'
 
 export interface SnapshotCreateParams {
@@ -82,10 +82,11 @@ export async function createSnapshot(
       expires_at: record.expires_at,
       retention_policy: record.retention_policy,
     }
-  } catch (err: any) {
-    const errorCode = err.message.includes('storage')
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    const errorCode = msg.includes('storage')
       ? 'SNAPSHOT_STORAGE_UNAVAILABLE'
-      : err.message.includes('full')
+      : msg.includes('full')
         ? 'SNAPSHOT_STORAGE_FULL'
         : 'SNAPSHOT_CREATION_FAILED'
 
@@ -96,12 +97,12 @@ export async function createSnapshot(
         event: 'snapshot_creation_failed',
         workspace_id: params.workspace_id,
         error_code: errorCode,
-        error_message: err.message,
+        error_message: msg,
         timestamp: new Date().toISOString(),
       })
     )
 
-    throw new Error(`${errorCode}: ${err.message}`)
+    throw new Error(`${errorCode}: ${msg}`)
   }
 }
 

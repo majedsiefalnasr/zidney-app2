@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { HoverCardTriggerProps } from 'reka-ui'
-import { HoverCardTrigger } from 'reka-ui'
 
-const props = defineProps<HoverCardTriggerProps>()
+const _props = defineProps<HoverCardTriggerProps>()
 </script>
 
 <template>

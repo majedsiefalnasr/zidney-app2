@@ -42,7 +42,7 @@ function createTestApp(
 
   app.use('*', async (c, next) => {
     const mockPool = {
-      query: vi.fn(async (sql: string, params?: unknown[]) => {
+      query: vi.fn(async (sql: string, _params?: unknown[]) => {
         if (dbError) throw new Error('DB error')
 
         if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {

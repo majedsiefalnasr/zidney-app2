@@ -108,7 +108,7 @@ describe('T053: Product Listing Integration Tests', () => {
   describe('Status filtering', () => {
     beforeEach(async () => {
       // Create 2 active and 2 inactive
-      const p1 = await productService.createProduct(
+      const _p1 = await productService.createProduct(
         dbClient,
         {
           name: { en: 'A1' },
@@ -117,7 +117,7 @@ describe('T053: Product Listing Integration Tests', () => {
         },
         ctx.userId
       )
-      const p2 = await productService.createProduct(
+      const _p2 = await productService.createProduct(
         dbClient,
         {
           name: { en: 'A2' },

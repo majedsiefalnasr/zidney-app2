@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { reactiveOmit } from '@vueuse/core'
-import { ChevronRightIcon } from 'lucide-vue-next'
 import type { PaginationNextProps } from 'reka-ui'
-import { PaginationNext, useForwardProps } from 'reka-ui'
+import { useForwardProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 import type { ButtonVariants } from '@/registry/new-york-v4/ui/button'
-import { buttonVariants } from '@/registry/new-york-v4/ui/button'
 
 const props = withDefaults(
   defineProps<
@@ -21,7 +18,7 @@ const props = withDefaults(
 )
 
 const delegatedProps = reactiveOmit(props, 'class', 'size')
-const forwarded = useForwardProps(delegatedProps)
+const _forwarded = useForwardProps(delegatedProps)
 </script>
 
 <template>

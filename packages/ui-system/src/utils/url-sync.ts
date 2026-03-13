@@ -73,14 +73,14 @@ export function deserializeQueryState(
   // Parse pagination
   if (paramsObj.page) {
     const page = parseInt(paramsObj.page, 10)
-    if (!isNaN(page) && page > 0) {
+    if (!Number.isNaN(page) && page > 0) {
       state.page = page
     }
   }
 
   if (paramsObj.pageSize) {
     const pageSize = parseInt(paramsObj.pageSize, 10)
-    if (!isNaN(pageSize) && pageSize > 0) {
+    if (!Number.isNaN(pageSize) && pageSize > 0) {
       state.pageSize = pageSize
     }
   }
@@ -89,7 +89,7 @@ export function deserializeQueryState(
   if (paramsObj.sort) {
     state.sort = {
       column: paramsObj.sort,
-      direction: (paramsObj.sortDir as any) === 'desc' ? 'desc' : 'asc',
+      direction: paramsObj.sortDir === 'desc' ? 'desc' : 'asc',
     }
   }
 
@@ -117,7 +117,7 @@ export function getQueryParamValue(
   params: Record<string, string> | URLSearchParams,
   key: string,
   type: 'string' | 'number' | 'boolean'
-): any {
+): unknown {
   let value: string | null = null
 
   if (params instanceof URLSearchParams) {
@@ -131,13 +131,11 @@ export function getQueryParamValue(
   switch (type) {
     case 'number': {
       const num = Number(value)
-      return isNaN(num) ? null : num
+      return Number.isNaN(num) ? null : num
     }
 
     case 'boolean':
       return value === 'true' || value === '1' || value === 'yes'
-
-    case 'string':
     default:
       return value
   }

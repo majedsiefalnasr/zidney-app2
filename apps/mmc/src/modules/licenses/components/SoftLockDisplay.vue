@@ -3,14 +3,6 @@
  * T080-T081: Soft-Lock Display & Grace Period Timer
  */
 
-import { Badge } from '@zidney/ui/components/shadcn-vue/badge'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@zidney/ui/components/shadcn-vue/card'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 interface Props {
@@ -32,7 +24,7 @@ onUnmounted(() => {
   if (interval) clearInterval(interval)
 })
 
-const timeRemaining = computed(() => {
+const _timeRemaining = computed(() => {
   if (!props.softLockUntil) return null
 
   const expiresAt = new Date(props.softLockUntil).getTime()
@@ -47,7 +39,7 @@ const timeRemaining = computed(() => {
   return `${days}d ${hours}h ${minutes}m`
 })
 
-const isExpiring = computed(() => {
+const _isExpiring = computed(() => {
   if (!props.softLockUntil) return false
   const expiresAt = new Date(props.softLockUntil).getTime()
   const remaining = expiresAt - now.value.getTime()

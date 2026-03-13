@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 import type { InputGroupVariants } from '.'
-import { inputGroupAddonVariants } from '.'
 
-const props = withDefaults(
+const _props = withDefaults(
   defineProps<{
     align?: InputGroupVariants['align']
     class?: HTMLAttributes['class']
@@ -14,13 +12,13 @@ const props = withDefaults(
   }
 )
 
-function handleInputGroupAddonClick(e: MouseEvent) {
+function _handleInputGroupAddonClick(e: MouseEvent) {
   const currentTarget = e.currentTarget as HTMLElement | null
   const target = e.target as HTMLElement | null
-  if (target && target.closest('button')) {
+  if (target?.closest('button')) {
     return
   }
-  if (currentTarget && currentTarget?.parentElement) {
+  if (currentTarget?.parentElement) {
     currentTarget.parentElement?.querySelector('input')?.focus()
   }
 }

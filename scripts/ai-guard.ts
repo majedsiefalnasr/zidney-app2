@@ -719,7 +719,7 @@ export function mapToModules(
     // Longest-prefix match
     let matched: string | null = null
     for (const key of moduleKeys) {
-      if (file === key || file.startsWith(key + '/')) {
+      if (file === key || file.startsWith(`${key}/`)) {
         if (!matched || key.length > matched.length) {
           matched = key
         }
@@ -943,7 +943,7 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
 
   // Incremental: validate only files in affected scope
   const scopedFiles = stagedFiles.filter((f) => {
-    const matched = moduleKeys.find((k) => f === k || f.startsWith(k + '/'))
+    const matched = moduleKeys.find((k) => f === k || f.startsWith(`${k}/`))
     return matched ? scope.has(matched) : false
   })
 

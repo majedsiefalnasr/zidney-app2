@@ -41,7 +41,7 @@ const logger = createLogger('translation-service')
 // ---------------------------------------------------------------------------
 
 interface DbClient {
-  query: <T = any>(
+  query: <T = unknown>(
     sql: string,
     params?: unknown[]
   ) => Promise<{ rows: T[]; rowCount: number | null }>
@@ -307,10 +307,11 @@ export async function resolveEntityTranslations(
   for (const field of translatableFields) {
     if (translationMap.has(field)) {
       // Translation exists
-      fields[field] = translationMap.get(field)!
+      const val = translationMap.get(field)
+      fields[field] = val ?? ''
     } else if (baseEntityFields[field] !== undefined) {
       // FR-011: Fall back to base entity value
-      fields[field] = baseEntityFields[field]!
+      fields[field] = baseEntityFields[field]
       fallback_fields.push(field)
     } else {
       // FR-012: Both absent — return '' + emit warning
@@ -383,7 +384,7 @@ export async function batchLoadTranslations(
     if (!resultMap.has(row.entity_id)) {
       resultMap.set(row.entity_id, new Map())
     }
-    resultMap.get(row.entity_id)!.set(row.field_name, row.translated_value)
+    resultMap.get(row.entity_id)?.set(row.field_name, row.translated_value)
   }
 
   return resultMap

@@ -28,7 +28,6 @@
 </template>
 
 <script setup lang="ts">
-import { Input } from '@shadcn-vue/ui/input'
 import { ref, watch } from 'vue'
 
 interface Props {
@@ -62,7 +61,7 @@ watch(
   }
 )
 
-const handleInput = (): void => {
+const _handleInput = (): void => {
   if (debounceTimeoutId !== null) {
     clearTimeout(debounceTimeoutId)
   }
@@ -72,18 +71,18 @@ const handleInput = (): void => {
   }, props.debounceMs)
 }
 
-const selectSuggestion = (suggestion: string): void => {
+const _selectSuggestion = (suggestion: string): void => {
   localQuery.value = suggestion
   emit('suggestion-selected', suggestion)
   emit('query-changed', suggestion)
   showSuggestions.value = false
 }
 
-const preventBlur = (event: MouseEvent): void => {
+const _preventBlur = (event: MouseEvent): void => {
   event.preventDefault()
 }
 
-const hideSuggestionsLater = (): void => {
+const _hideSuggestionsLater = (): void => {
   setTimeout(() => {
     showSuggestions.value = false
   }, 100)

@@ -1,10 +1,7 @@
 <script lang="ts" setup>
 import type { DialogContentEmits, DialogContentProps } from 'reka-ui'
 import { useForwardPropsEmits } from 'reka-ui'
-import { DrawerContent, DrawerPortal } from 'vaul-vue'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
-import DrawerOverlay from './DrawerOverlay.vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -13,7 +10,7 @@ defineOptions({
 const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>()
 const emits = defineEmits<DialogContentEmits>()
 
-const forwarded = useForwardPropsEmits(props, emits)
+const _forwarded = useForwardPropsEmits(props, emits)
 </script>
 
 <template>

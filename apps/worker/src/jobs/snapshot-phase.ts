@@ -44,13 +44,15 @@ export async function executeSnapshotCreation(
     })
 
     return snapshot.id
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err)
+
     logger.error('snapshot_creation_phase_failed', {
       service: 'worker-upgrade',
       correlation_id,
       workspace_id,
-      error_code: err.errorCode || 'SNAPSHOT_CREATION_FAILED',
-      error_message: err.message,
+      error_code: 'SNAPSHOT_CREATION_FAILED',
+      error_message: errorMessage,
     })
 
     throw err

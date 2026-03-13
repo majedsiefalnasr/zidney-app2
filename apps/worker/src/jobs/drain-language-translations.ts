@@ -51,7 +51,7 @@ const DrainLanguageTranslationsPayloadSchema = z.object({
 // ---------------------------------------------------------------------------
 
 interface DbClient {
-  query: <T = any>(
+  query: <T = unknown>(
     sql: string,
     params?: unknown[]
   ) => Promise<{ rows: T[]; rowCount: number | null }>
@@ -99,7 +99,11 @@ interface RedisClient {
  */
 export async function handleDrainLanguageTranslationsJob(
   job: DrainLanguageTranslationsJob,
-  jobLogger: any,
+  jobLogger: {
+    info: (payload: Record<string, unknown>) => void
+    error: (payload: Record<string, unknown>) => void
+    warn?: (payload: Record<string, unknown>) => void
+  },
   db: DbClient,
   redis?: RedisClient
 ): Promise<{ success: boolean; error?: Error; batches_processed?: number }> {
@@ -265,7 +269,7 @@ export async function handleDrainLanguageTranslationsJob(
 
     // Invalidate all coverage cache keys for this workspace (SCAN-based)
     if (redis) {
-      await invalidateWorkspaceCoverage(redis as any, job.workspace_id)
+      await invalidateWorkspaceCoverage(redis as RedisClient, job.workspace_id)
     }
 
     jobLogger.info({
@@ -315,10 +319,14 @@ export async function handleDrainLanguageTranslationsJob(
  *   import { createDrainJobHandler } from './drain-language-translations'
  *   registerJobHandler('DRAIN_LANGUAGE_TRANSLATIONS', createDrainJobHandler(tenantPoolMap, redis))
  */
-export function createDrainJobHandler(tenantPoolMap: Map<string, any>, redis?: RedisClient) {
+export function createDrainJobHandler(tenantPoolMap: Map<string, DbClient>, redis?: RedisClient) {
   return async (
     job: DrainLanguageTranslationsJob,
-    jobLogger: any
+    jobLogger: {
+      info: (payload: Record<string, unknown>) => void
+      error: (payload: Record<string, unknown>) => void
+      warn?: (payload: Record<string, unknown>) => void
+    }
   ): Promise<{ success: boolean; error?: Error }> => {
     const db = tenantPoolMap.get(job.workspace_id)
     if (!db) {

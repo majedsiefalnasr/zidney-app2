@@ -192,7 +192,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      const beforeNum = parseInt(beforeCount.rows[0]!.count)
+      const beforeNum = parseInt(beforeCount.rows[0]!.count, 10)
 
       await productService.changeProductStatus(
         dbClient,
@@ -205,7 +205,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      const afterNum = parseInt(afterCount.rows[0]!.count)
+      const afterNum = parseInt(afterCount.rows[0]!.count, 10)
 
       expect(afterNum).toBe(beforeNum)
       expect(afterNum).toBe(1) // Only the initial version

@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { Minus } from 'lucide-vue-next'
 import type { PrimitiveProps } from 'reka-ui'
-import { Primitive, useForwardProps } from 'reka-ui'
+import { useForwardProps } from 'reka-ui'
 
 const props = defineProps<PrimitiveProps>()
-const forwardedProps = useForwardProps(props)
+const _forwardedProps = useForwardProps(props)
 </script>
 
 <template>

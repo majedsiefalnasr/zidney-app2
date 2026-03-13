@@ -90,7 +90,7 @@ export function createApiClient(
       'X-Correlation-ID': Math.random().toString(36).slice(2) + Date.now().toString(36),
     }
     const token = tokenStore.getAccessToken()
-    if (token) headers['Authorization'] = `Bearer ${token}`
+    if (token) headers.Authorization = `Bearer ${token}`
     if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey
     return headers
   }

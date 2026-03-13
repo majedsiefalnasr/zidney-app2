@@ -1,15 +1,4 @@
 <script setup lang="ts">
-import { Badge } from '@zidney/ui/components/shadcn-vue/badge'
-import { Button } from '@zidney/ui/components/shadcn-vue/button'
-import { Input } from '@zidney/ui/components/shadcn-vue/input'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@zidney/ui/components/shadcn-vue/table'
 import { computed, onMounted, ref } from 'vue'
 import type { License } from '@/types/license'
 
@@ -27,7 +16,7 @@ const currentPage = ref(1)
 const pageSize = ref(20)
 const selectedStatus = ref<string | null>(null)
 
-const paginatedLicenses = computed(() => {
+const _paginatedLicenses = computed(() => {
   let filtered = licenses.value
 
   if (searchQuery.value) {
@@ -45,7 +34,7 @@ const paginatedLicenses = computed(() => {
   return filtered.slice(start, start + pageSize.value)
 })
 
-const statusBadgeVariant = (status: string) => {
+const _statusBadgeVariant = (status: string) => {
   const variants: Record<string, string> = {
     ACTIVE: 'default',
     SOFT_LOCKED: 'secondary',
@@ -60,7 +49,7 @@ onMounted(() => {
   // fetchLicenses()
 })
 
-const fetchLicenses = async () => {
+const _fetchLicenses = async () => {
   loading.value = true
   try {
     // TODO: Bind to API endpoint

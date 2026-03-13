@@ -9,6 +9,7 @@
  * This is the final success marker for provisioning.
  */
 
+import type { Logger } from '@zidney/logger'
 import type { Pool } from 'pg'
 
 /**
@@ -26,9 +27,9 @@ export interface LicenseActivationResult {
  */
 export class LicenseActivationService {
   private masterDb: Pool
-  private logger?: any
+  private logger?: Logger
 
-  constructor(masterDb: Pool, logger?: any) {
+  constructor(masterDb: Pool, logger?: Logger) {
     this.masterDb = masterDb
     this.logger = logger
   }
@@ -92,7 +93,7 @@ export class LicenseActivationService {
  */
 export function createLicenseActivationService(
   masterDb: Pool,
-  logger?: any
+  logger?: Logger
 ): LicenseActivationService {
   return new LicenseActivationService(masterDb, logger)
 }
@@ -103,9 +104,9 @@ export function createLicenseActivationService(
  */
 export class FailureHandlerService {
   private masterDb: Pool
-  private logger?: any
+  private logger?: Logger
 
-  constructor(masterDb: Pool, logger?: any) {
+  constructor(masterDb: Pool, logger?: Logger) {
     this.masterDb = masterDb
     this.logger = logger
   }
@@ -156,6 +157,9 @@ export class FailureHandlerService {
 /**
  * Factory to create failure handler
  */
-export function createFailureHandlerService(masterDb: Pool, logger?: any): FailureHandlerService {
+export function createFailureHandlerService(
+  masterDb: Pool,
+  logger?: Logger
+): FailureHandlerService {
   return new FailureHandlerService(masterDb, logger)
 }

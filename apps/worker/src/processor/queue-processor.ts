@@ -26,7 +26,7 @@ import {
 export interface QueuedTask {
   id: string
   type: string
-  payload: Record<string, any>
+  payload: Record<string, unknown>
   attempt: number
   createdAt: string
   nextRetryAt?: string
@@ -89,7 +89,7 @@ export class TaskQueueProcessor {
       task.status = 'PROCESSING'
 
       // Execute task based on type
-      let result: any
+      let result: unknown
 
       if (task.type === 'INIT_TENANT_SCHEMA') {
         result = await this.processInitTenantSchema(task)
@@ -174,13 +174,18 @@ export class TaskQueueProcessor {
   /**
    * Route task to DLQ (Dead Letter Queue)
    */
-  private async routeToDLQ(task: QueuedTask, result: any, logger: any): Promise<QueuedTask> {
+  private async routeToDLQ(
+    task: QueuedTask,
+    result: unknown,
+    logger: ReturnType<typeof createLogger>
+  ): Promise<QueuedTask> {
+    const resultObj = (result ?? {}) as Record<string, unknown>
     const dlqMessage = createDLQMessage(
       task.type,
       task.id,
-      result.workspace_id || 'unknown',
+      (resultObj.workspace_id as string) || 'unknown',
       task.payload,
-      result,
+      resultObj,
       task.attempt
     )
 
@@ -206,7 +211,11 @@ export class TaskQueueProcessor {
   /**
    * Schedule task for retry with exponential backoff
    */
-  private async scheduleRetry(task: QueuedTask, result: any, logger: any): Promise<QueuedTask> {
+  private async scheduleRetry(
+    task: QueuedTask,
+    result: unknown,
+    logger: ReturnType<typeof createLogger>
+  ): Promise<QueuedTask> {
     const backoffMs = getRetryDelay(task.type, task.attempt)
     const nextAttempt = task.attempt + 1
     const nextRetryAt = new Date(Date.now() + backoffMs).toISOString()
@@ -220,9 +229,10 @@ export class TaskQueueProcessor {
 
     // Check if ops should be alerted (e.g., after 2 failures)
     if (shouldAlertOps(task.type, result, task.attempt)) {
+      const reason = (result as Record<string, unknown>).error
       logger.warn('Ops alert triggered for retry', {
         attempt: task.attempt,
-        reason: result.error,
+        reason,
       })
     }
 
@@ -284,7 +294,7 @@ export class TaskQueueProcessor {
       return false
     }
 
-    const dlqMessage = this.dlqQueue[index]!
+    const dlqMessage = this.dlqQueue[index]
 
     this.logger.info('Manually retrying DLQ message', {
       task_type: dlqMessage.taskType,

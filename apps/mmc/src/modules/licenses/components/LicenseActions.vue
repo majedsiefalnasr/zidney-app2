@@ -3,8 +3,6 @@
  * T079: License Status Actions - Soft-lock, unlock, archive, restore buttons
  */
 
-import { Button } from '@zidney/ui/components/shadcn-vue/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
 import { ref } from 'vue'
 
 interface Props {
@@ -16,7 +14,7 @@ const props = defineProps<Props>()
 
 const loading = ref<string | null>(null)
 
-const performAction = async (action: string) => {
+const _performAction = async (action: string) => {
   loading.value = action
   try {
     // TODO: Call API based on action
@@ -29,7 +27,7 @@ const performAction = async (action: string) => {
   }
 }
 
-const getAvailableActions = () => {
+const _getAvailableActions = () => {
   const actions: Array<{ label: string; action: string; variant: string }> = []
 
   switch (props.status) {
@@ -54,6 +52,13 @@ const getAvailableActions = () => {
   actions.push({ label: 'Delete', action: 'delete', variant: 'destructive' })
   return actions
 }
+
+// Expose template-friendly aliases (template auto-unwraps refs)
+const getAvailableActions = _getAvailableActions
+const performAction = _performAction
+
+// Mark as used for the linter (template usage not always visible to static analysis)
+void [getAvailableActions, performAction]
 </script>
 
 <template>

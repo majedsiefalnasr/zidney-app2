@@ -44,21 +44,21 @@ export function extractMigrationHeader(sqlContent: string): MigrationHeader {
   if (!versionMatch) {
     throw new Error('Missing required migration header: "-- Migration: X.Y.Z"')
   }
-  const targetVersion = versionMatch[1]!
+  const targetVersion = versionMatch[1] as string
 
   // Extract product version requirement (optional)
   const productVersionMatch = sqlContent.match(
     /--\s*Required\s+Minimum\s+Product\s+Version:\s*(\d+\.\d+\.\d+)/i
   )
-  const targetProductVersion = productVersionMatch ? productVersionMatch[1]! : undefined
+  const targetProductVersion = productVersionMatch ? (productVersionMatch[1] as string) : undefined
 
   // Extract breaking flag (optional, defaults to false)
   const breakingMatch = sqlContent.match(/--\s*Breaking:\s*(true|false)/i)
-  const isBreaking = breakingMatch ? breakingMatch[1]?.toLowerCase() === 'true' : false
+  const isBreaking = breakingMatch ? (breakingMatch[1] as string).toLowerCase() === 'true' : false
 
   // Extract description (optional)
   const descriptionMatch = sqlContent.match(/--\s*Purpose:\s*(.+?)(?=\n--|\n[A-Z]|$)/)
-  const description = descriptionMatch ? descriptionMatch[1]?.trim() : undefined
+  const description = descriptionMatch ? (descriptionMatch[1] as string).trim() : undefined
 
   return {
     targetVersion,
@@ -192,15 +192,15 @@ export function detectMigrationGap(fileList: string[]): Error | null {
         `Migration file "${filename}" does not follow naming convention (should start with number, e.g., "001_init.sql")`
       )
     }
-    numbers.push(parseInt(match[1]!, 10))
+    numbers.push(parseInt(match[1] as string, 10))
   }
 
   // Sort and check for gaps
   const sorted = numbers.sort((a, b) => a - b)
 
   for (let i = 0; i < sorted.length - 1; i++) {
-    const current = sorted[i]!
-    const next = sorted[i + 1]!
+    const current = sorted[i] as number
+    const next = sorted[i + 1] as number
     if (next - current !== 1) {
       const missing = current + 1
       return new Error(
@@ -245,8 +245,9 @@ export function validateMigrationFile(
   // Validate header
   try {
     header = extractMigrationHeader(sqlContent)
-  } catch (err: any) {
-    errors.push(`Header validation failed: ${err.message}`)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    errors.push(`Header validation failed: ${msg}`)
   }
 
   // Detect destructive operations

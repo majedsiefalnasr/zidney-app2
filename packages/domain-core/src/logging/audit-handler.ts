@@ -1,5 +1,5 @@
+import { randomUUID } from 'node:crypto'
 import { createLogger } from '@zidney/logger'
-import { randomUUID } from 'crypto'
 import type { Pool } from 'pg'
 
 const logger = createLogger('audit-handler')
@@ -11,7 +11,7 @@ interface AuditLogPayload {
   actor_id?: string
   actor_type: 'ADMIN' | 'SYSTEM'
   reason: string
-  transition_metadata?: Record<string, any>
+  transition_metadata?: Record<string, unknown>
   correlation_id: string
 }
 
@@ -62,16 +62,17 @@ export async function createAuditLog(
       success: true,
       audit_log_id,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
     logger.error(
       {
         correlation_id,
         license_id,
-        error: error.message,
+        error: msg,
         actor_type,
       },
       'Failed to create audit log'
     )
-    return { success: false, error: error.message }
+    return { success: false, error: msg }
   }
 }

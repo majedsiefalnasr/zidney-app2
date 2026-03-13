@@ -31,9 +31,10 @@ async function main(): Promise<void> {
 
     // Start worker (runs indefinitely)
     await initializeWorker()
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
     logger.error(
-      { action: 'worker_startup_error', error_message: error.message },
+      { action: 'worker_startup_error', error_message: msg },
       'Failed to start worker service'
     )
     process.exit(1)
@@ -72,8 +73,9 @@ async function gracefulShutdown(): Promise<void> {
   try {
     await shutdownWorker(0)
     clearTimeout(shutdownTimeout)
-  } catch (error: any) {
-    logger.error({ error_message: error.message }, 'Error during graceful shutdown')
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    logger.error({ error_message: msg }, 'Error during graceful shutdown')
     process.exit(1)
   }
 }
@@ -81,9 +83,10 @@ async function gracefulShutdown(): Promise<void> {
 /**
  * Main Entry Point
  */
-main().catch((err) => {
+main().catch((err: unknown) => {
+  const msg = err instanceof Error ? err.message : String(err)
   logger.error(
-    { action: 'worker_startup_error', error_message: err.message },
+    { action: 'worker_startup_error', error_message: msg },
     'Fatal error starting worker'
   )
   process.exit(1)

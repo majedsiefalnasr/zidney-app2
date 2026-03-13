@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import type { PrimitiveProps } from 'reka-ui'
-import { Primitive } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 import type { ButtonGroupVariants } from '.'
 
 interface Props extends PrimitiveProps {
@@ -10,7 +8,7 @@ interface Props extends PrimitiveProps {
   orientation?: ButtonGroupVariants['orientation']
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const _props = withDefaults(defineProps<Props>(), {
   as: 'div',
 })
 </script>

@@ -18,10 +18,10 @@ import { createClient } from './http-client'
 const API_URL = process.env.API_URL || 'https://staging-mmc-api.example.com'
 const JWT_TOKEN = process.env.JWT_TOKEN || 'test-token'
 
-let client: ReturnType<typeof createClient>
+let _client: ReturnType<typeof createClient>
 
 beforeAll(() => {
-  client = createClient({ baseURL: API_URL, token: JWT_TOKEN })
+  _client = createClient({ baseURL: API_URL, token: JWT_TOKEN })
 })
 
 async function makeRequest(method: string, endpoint: string, body?: unknown, customToken?: string) {
@@ -72,11 +72,11 @@ describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
   it('T075d: Cache is initialized (Redis connectivity)', async () => {
     // First request should hit database
     const first = await makeRequest('GET', '/api/mmc/dashboard/summary')
-    const firstTime = Date.parse(first.headers['date'] || '0')
+    const _firstTime = Date.parse(first.headers.date || '0')
 
     // Second request should hit cache (faster)
     const second = await makeRequest('GET', '/api/mmc/dashboard/summary')
-    const secondTime = Date.parse(second.headers['date'] || '0')
+    const _secondTime = Date.parse(second.headers.date || '0')
 
     expect(first.status).toBe(200)
     expect(second.status).toBe(200)
@@ -202,8 +202,8 @@ describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
     const first = await makeRequest('GET', '/api/mmc/dashboard/summary')
     const second = await makeRequest('GET', '/api/mmc/dashboard/summary')
 
-    const firstRemaining = parseInt(first.headers['x-ratelimit-remaining'] as string)
-    const secondRemaining = parseInt(second.headers['x-ratelimit-remaining'] as string)
+    const firstRemaining = parseInt(first.headers['x-ratelimit-remaining'] as string, 10)
+    const secondRemaining = parseInt(second.headers['x-ratelimit-remaining'] as string, 10)
 
     expect(secondRemaining).toBeLessThanOrEqual(firstRemaining)
   })

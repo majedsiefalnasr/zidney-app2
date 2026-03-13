@@ -2,10 +2,9 @@
 import { reactiveOmit } from '@vueuse/core'
 import type { VariantProps } from 'class-variance-authority'
 import type { ToggleGroupItemProps } from 'reka-ui'
-import { ToggleGroupItem, useForwardProps } from 'reka-ui'
+import { useForwardProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 import { inject } from 'vue'
-import { cn } from '@/lib/utils'
 import type { toggleVariants } from '@/registry/new-york-v4/ui/toggle'
 
 type ToggleGroupVariants = VariantProps<typeof toggleVariants> & {
@@ -20,10 +19,10 @@ const props = defineProps<
   }
 >()
 
-const context = inject<ToggleGroupVariants>('toggleGroup')
+const _context = inject<ToggleGroupVariants>('toggleGroup')
 
 const delegatedProps = reactiveOmit(props, 'class', 'size', 'variant')
-const forwardedProps = useForwardProps(delegatedProps)
+const _forwardedProps = useForwardProps(delegatedProps)
 </script>
 
 <template>

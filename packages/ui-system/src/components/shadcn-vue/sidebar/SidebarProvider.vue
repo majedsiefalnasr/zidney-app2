@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import { defaultDocument, useEventListener, useMediaQuery, useVModel } from '@vueuse/core'
-import { TooltipProvider } from 'reka-ui'
 import type { HTMLAttributes, Ref } from 'vue'
 import { computed, ref } from 'vue'
-import { cn } from '@/lib/utils'
 import {
   provideSidebarContext,
   SIDEBAR_COOKIE_MAX_AGE,
   SIDEBAR_COOKIE_NAME,
   SIDEBAR_KEYBOARD_SHORTCUT,
-  SIDEBAR_WIDTH,
-  SIDEBAR_WIDTH_ICON,
 } from './utils'
 
 const props = withDefaults(
@@ -41,6 +37,7 @@ function setOpen(value: boolean) {
   open.value = value // emits('update:open', value)
 
   // This sets the cookie to keep the sidebar state.
+  // biome-ignore lint/suspicious/noDocumentCookie: Cookie fallback required for legacy browsers
   document.cookie = `${SIDEBAR_COOKIE_NAME}=${open.value}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
 }
 

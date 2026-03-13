@@ -31,7 +31,7 @@ describe.skip('[QUARANTINED] License Management — RBAC Enforcement', () => {
   describe('License Creation (POST /mmc/licenses)', () => {
     it('should reject creation by student (401)', async () => {
       // ✅ CRITICAL P1 TEST: Students cannot create licenses
-      const studentUser: TestUser = {
+      const _studentUser: TestUser = {
         id: 'user:student:1',
         role: 'student',
         workspace_id: 'workspace:1',
@@ -50,7 +50,7 @@ describe.skip('[QUARANTINED] License Management — RBAC Enforcement', () => {
 
     it('should reject creation by institution admin (403)', async () => {
       // ✅ CRITICAL P1 TEST: Institution admins cannot create licenses
-      const instAdmin: TestUser = {
+      const _instAdmin: TestUser = {
         id: 'user:admin:1',
         role: 'institution_admin',
         workspace_id: 'workspace:1',
@@ -69,7 +69,7 @@ describe.skip('[QUARANTINED] License Management — RBAC Enforcement', () => {
 
     it('should allow creation by MMC admin (200)', async () => {
       // ✅ CRITICAL P1 TEST: Only MMC admins can create licenses
-      const mmcAdmin: TestUser = {
+      const _mmcAdmin: TestUser = {
         id: 'user:mmc:1',
         role: 'mmc_admin',
       }

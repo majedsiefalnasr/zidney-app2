@@ -1,15 +1,14 @@
 <script lang="ts" setup>
 import { reactiveOmit } from '@vueuse/core'
 import type { StepperTriggerProps } from 'reka-ui'
-import { StepperTrigger, useForwardProps } from 'reka-ui'
+import { useForwardProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 
 const props = defineProps<StepperTriggerProps & { class?: HTMLAttributes['class'] }>()
 
 const delegatedProps = reactiveOmit(props, 'class')
 
-const forwarded = useForwardProps(delegatedProps)
+const _forwarded = useForwardProps(delegatedProps)
 </script>
 
 <template>

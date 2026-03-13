@@ -16,7 +16,7 @@ export class HttpClient {
   }
 
   setJWT(token: string): this {
-    this.headers['Authorization'] = `Bearer ${token}`
+    this.headers.Authorization = `Bearer ${token}`
     return this
   }
 

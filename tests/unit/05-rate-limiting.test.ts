@@ -79,7 +79,7 @@ describe('Area 5: Rate Limiting Validation (Unit)', () => {
     expect(headers['X-RateLimit-Reset']).toBeDefined()
 
     // Remaining should decrease with requests
-    const remaining1 = parseInt(headers['X-RateLimit-Remaining'])
+    const remaining1 = parseInt(headers['X-RateLimit-Remaining'], 10)
     const remaining2 = remaining1 - 1
 
     expect(remaining2).toBe(remaining1 - 1)

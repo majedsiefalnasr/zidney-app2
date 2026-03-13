@@ -1,5 +1,5 @@
+import { randomUUID } from 'node:crypto'
 import { logger } from '@zidney/logger'
-import { randomUUID } from 'crypto'
 
 export interface JobQueueEntry {
   job_id: string
@@ -17,10 +17,10 @@ export interface JobQueueEntry {
   }
 }
 
-type DbRow = Record<string, any>
+type DbRow = Record<string, unknown>
 type QueryResult = { rows: DbRow[] }
 type DbAdapter = {
-  query: (queryText: string, values?: any[]) => Promise<QueryResult>
+  query: (queryText: string, values?: unknown[]) => Promise<QueryResult>
 }
 
 let dlqDb: DbAdapter | null = null
@@ -197,7 +197,7 @@ export class DLQManager {
         [workspaceId]
       )
 
-      return parseInt(result.rows[0]?.count ?? '0')
+      return parseInt(result.rows[0]?.count ?? '0', 10)
     } catch (error) {
       logger.error(`DLQ size query error`, {
         workspace_id: workspaceId,

@@ -1,7 +1,7 @@
 <template>
   <TopBar
-    :appName="appTitle"
-    :subtitle="showWorkspace ? workspaceName : undefined"
+    :appName="_appTitle"
+    :subtitle="showWorkspace ? _workspaceName : undefined"
   >
     <slot name="left" />
     <div class="app-header__search-placeholder" aria-hidden="true" />
@@ -11,19 +11,19 @@
       <DropdownMenuTrigger as-child>
         <button
           class="app-header__avatar"
-          :aria-label="`User menu for ${userName}`"
+          :aria-label="`User menu for ${_userName}`"
         >
           <Avatar>
-            <AvatarFallback>{{ userInitials }}</AvatarFallback>
+            <AvatarFallback>{{ _userInitials }}</AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem disabled class="pointer-events-none">{{
-          userName
+          _userName
         }}</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem @click="handleLogout">Sign out</DropdownMenuItem>
+        <DropdownMenuItem @click="_handleLogout">Sign out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   </TopBar>
@@ -62,23 +62,23 @@ const workspaceStore = useBackofficeWorkspaceStore()
 const { user } = storeToRefs(authStore)
 const { workspace } = storeToRefs(workspaceStore)
 
-const appTitle = 'Backoffice'
+const _appTitle = 'Backoffice'
 
-const workspaceName = computed(() => workspace.value?.name ?? '')
+const _workspaceName = computed(() => workspace.value?.name ?? '')
 
-const userName = computed(() => user.value?.name ?? '')
+const _userName = computed(() => user.value?.name ?? '')
 
-const userInitials = computed(() => {
+const _userInitials = computed(() => {
   const name = user.value?.name ?? ''
   return name
     .split(' ')
     .filter(Boolean)
-    .map((part) => part[0].toUpperCase())
+    .map((part) => part.charAt(0).toUpperCase())
     .slice(0, 2)
     .join('')
 })
 
-async function handleLogout(): Promise<void> {
+async function _handleLogout(): Promise<void> {
   try {
     await authStore.logout()
   } catch {

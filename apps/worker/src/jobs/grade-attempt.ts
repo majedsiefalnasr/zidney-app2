@@ -34,7 +34,11 @@ import type { GradeAttemptJob } from '@zidney/types/job-envelope'
  */
 export async function handleGradeAttemptJob(
   job: GradeAttemptJob,
-  logger: any
+  logger: {
+    info: (payload: Record<string, unknown>) => void
+    error: (payload: Record<string, unknown>) => void
+    warn?: (payload: Record<string, unknown>) => void
+  }
 ): Promise<{ success: boolean; error?: Error }> {
   const { attempt_id, exam_id, student_id } = job.payload
   const startTime = Date.now()

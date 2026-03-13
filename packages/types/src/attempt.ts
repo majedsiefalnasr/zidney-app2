@@ -67,9 +67,9 @@ export interface QuestionSnapshot {
   text: string // Question text (may include HTML)
   type: QuestionType // Question format
   options?: string[] // MCQ options: ["A", "B", "C", "D"]
-  correct_answer: any // Correct answer (secret; server-only)
+  correct_answer: unknown // Correct answer (secret; server-only)
   points: number // Points possible for this question
-  metadata?: Record<string, any> // Additional metadata (hints, difficulty, etc.)
+  metadata?: Record<string, unknown> // Additional metadata (hints, difficulty, etc.)
 }
 
 /**
@@ -129,7 +129,7 @@ export interface UserAnswer {
   order?: string[]
 
   // Other
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -198,7 +198,7 @@ export interface Attempt {
 export interface QuestionResult {
   question_id: string
   user_answer?: UserAnswer // What student answered
-  correct_answer: any // Correct answer
+  correct_answer: unknown // Correct answer
   points_earned: number // Points awarded
   points_possible: number // Points available
   feedback: string // "Correct!" or explanation
@@ -231,7 +231,7 @@ export interface SubmissionIdempotencyKey {
   idempotency_key: string
   request_timestamp: Date
   response_status: number // HTTP status
-  response_body: Record<string, any> // Full response JSON
+  response_body: Record<string, unknown> // Full response JSON
   created_at: Date
   expires_at: Date // TTL: 24 hours
 }

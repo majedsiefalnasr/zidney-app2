@@ -81,20 +81,20 @@ const ERROR_MAPPINGS: Record<ProvisioningErrorCode, ErrorMapping> = {
   },
 }
 
-export class ProvisioningErrorHandler {
-  static getErrorMapping(code: ProvisioningErrorCode): ErrorMapping | null {
+export const ProvisioningErrorHandler = {
+  getErrorMapping(code: ProvisioningErrorCode): ErrorMapping | null {
     return ERROR_MAPPINGS[code] || null
-  }
+  },
 
-  static getHttpStatus(code: ProvisioningErrorCode): number {
+  getHttpStatus(code: ProvisioningErrorCode): number {
     return ERROR_MAPPINGS[code]?.http_status || 500
-  }
+  },
 
-  static getMessage(code: ProvisioningErrorCode): string {
+  getMessage(code: ProvisioningErrorCode): string {
     return ERROR_MAPPINGS[code]?.message || 'Unknown provisioning error'
-  }
+  },
 
-  static handleError(error: Error | string, correlation_id: string) {
+  handleError(error: Error | string, correlation_id: string) {
     const error_str = typeof error === 'string' ? error : error.message
     let code = ProvisioningErrorCode.PROV_002 // Default
 
@@ -125,8 +125,8 @@ export class ProvisioningErrorHandler {
         correlation_id,
       },
     }
-  }
-}
+  },
+} as const
 
 // ============================================================================
 // T023: Structured Logger (Foundational for all logging)
@@ -151,7 +151,7 @@ export interface LogContext {
   organization_id?: number
   user_id?: string
   event: string
-  details?: any
+  details?: Record<string, unknown>
   error?: {
     code?: string
     message?: string
@@ -194,15 +194,21 @@ export class StructuredLogger {
     if (!this.shouldLog(context.level)) return
 
     // Mask sensitive data
-    if (context.details?.password) {
-      context.details.password = '***MASKED***'
-    }
-    if (context.details?.token) {
-      context.details.token = '***MASKED***'
+    const details = context.details as Record<string, unknown> | undefined
+    let sanitizedDetails: Record<string, unknown> | undefined
+    if (details && typeof details === 'object') {
+      sanitizedDetails = { ...details }
+      if ('password' in sanitizedDetails) {
+        sanitizedDetails.password = '***MASKED***'
+      }
+      if ('token' in sanitizedDetails) {
+        sanitizedDetails.token = '***MASKED***'
+      }
     }
 
     // Write to stdout as JSON
-    console.log(JSON.stringify(context, null, 2))
+    const output = { ...context, details: sanitizedDetails ?? context.details }
+    console.log(JSON.stringify(output, null, 2))
 
     // For FATAL, also write to stderr
     if (context.level === LogLevel.FATAL) {
@@ -221,7 +227,7 @@ export class StructuredLogger {
       license_id: context.license_id,
       organization_id: context.organization_id,
       event,
-      details: context.details,
+      details,
       duration_ms: context.duration_ms,
     })
   }

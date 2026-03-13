@@ -21,7 +21,7 @@ describe('T055: Audit Log Immutability Tests', () => {
 
   describe('Append-only constraint', () => {
     it('should allow INSERT to mmc_audit_log', async () => {
-      const auditEntry = {
+      const _auditEntry = {
         action_type: 'MEMBER_CREATED',
         entity_type: 'mmc_members',
         entity_id: randomUUID(),
@@ -37,7 +37,7 @@ describe('T055: Audit Log Immutability Tests', () => {
     })
 
     it('should reject UPDATE to mmc_audit_log', async () => {
-      const auditId = randomUUID()
+      const _auditId = randomUUID()
 
       // Try: UPDATE mmc_audit_log SET action_type='MODIFIED' WHERE id=auditId
       // Expected: Error (trigger or constraint prevents it)
@@ -45,7 +45,7 @@ describe('T055: Audit Log Immutability Tests', () => {
     })
 
     it('should reject DELETE from mmc_audit_log', async () => {
-      const auditId = randomUUID()
+      const _auditId = randomUUID()
 
       // Try: DELETE FROM mmc_audit_log WHERE id=auditId
       // Expected: Error (FK constraint prevents delete, or PROTECT trigger)
@@ -62,7 +62,7 @@ describe('T055: Audit Log Immutability Tests', () => {
     })
 
     it('should raise error on attempt to modify', async () => {
-      const auditId = randomUUID()
+      const _auditId = randomUUID()
 
       // Try: UPDATE
       // Expected: Error message: 'Audit log is immutable'
@@ -300,7 +300,7 @@ describe('T055: Audit Log Immutability Tests', () => {
       const auditId = randomUUID()
       mockDb.query.mockRejectedValueOnce(new Error('Audit log is immutable'))
 
-      let updateError
+      let updateError: unknown
       try {
         await mockDb.query('UPDATE mmc_audit_log SET action_type = ? WHERE id = ?', [
           'MODIFIED',
@@ -318,7 +318,7 @@ describe('T055: Audit Log Immutability Tests', () => {
       const auditId = randomUUID()
       mockDb.query.mockRejectedValueOnce(new Error('Audit log is immutable'))
 
-      let deleteError
+      let deleteError: unknown
       try {
         await mockDb.query('DELETE FROM mmc_audit_log WHERE id = ?', [auditId])
       } catch (e) {
@@ -330,7 +330,7 @@ describe('T055: Audit Log Immutability Tests', () => {
     })
 
     it('should verify INSERT still works (append)', async () => {
-      const entry = {
+      const _entry = {
         action_type: 'TEST_ACTION',
         entity_type: 'test',
         entity_id: randomUUID(),

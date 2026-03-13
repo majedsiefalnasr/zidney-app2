@@ -51,16 +51,6 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '@shadcn-vue/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@shadcn-vue/ui/dropdown-menu'
-import { Input } from '@shadcn-vue/ui/input'
-import { ChevronDown } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 
 interface Props {
@@ -92,21 +82,21 @@ const allVisible = computed(() => {
   return filteredColumns.value.every((col) => props.visibleColumns.includes(col))
 })
 
-const someVisible = computed(() => {
+const _someVisible = computed(() => {
   const selected = filteredColumns.value.filter((col) => props.visibleColumns.includes(col))
   return selected.length > 0 && selected.length < filteredColumns.value.length
 })
 
-const visibleCount = computed(() => props.visibleColumns.length)
+const _visibleCount = computed(() => props.visibleColumns.length)
 
-const toggleColumn = (column: string): void => {
+const _toggleColumn = (column: string): void => {
   const newVisibleColumns = props.visibleColumns.includes(column)
     ? props.visibleColumns.filter((col) => col !== column)
     : [...props.visibleColumns, column]
   emit('visibility-changed', newVisibleColumns)
 }
 
-const toggleAll = (): void => {
+const _toggleAll = (): void => {
   if (allVisible.value) {
     const newVisibleColumns = props.visibleColumns.filter(
       (col) => !filteredColumns.value.includes(col)

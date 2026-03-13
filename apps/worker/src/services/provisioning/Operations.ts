@@ -9,6 +9,7 @@
  * Task: T024 – Prometheus metrics emission
  */
 
+import type { Redis } from 'ioredis'
 import type { Pool } from 'pg'
 import { LogLevel, StructuredLogger } from './ErrorHandling'
 
@@ -127,10 +128,10 @@ export interface DLQJob {
 }
 
 export class DLQHandler {
-  private redis: any // Redis client
+  private redis: Redis
   private logger: StructuredLogger
 
-  constructor(_master_pool: Pool, redis: any, logger?: StructuredLogger) {
+  constructor(_master_pool: Pool, redis: Redis, logger?: StructuredLogger) {
     this.redis = redis
     this.logger = logger || new StructuredLogger('dlq-handler', '1.0.0', LogLevel.INFO)
   }

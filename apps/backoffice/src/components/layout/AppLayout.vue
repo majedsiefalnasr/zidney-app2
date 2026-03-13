@@ -2,12 +2,12 @@
   <div
     class="app-layout"
     :class="{
-      'app-layout--mobile': isMobile,
-      'app-layout--collapsed': sidebarCollapsed,
+      'app-layout--mobile': _isMobile,
+      'app-layout--collapsed': _sidebarCollapsed,
     }"
   >
     <!-- Sidebar -->
-    <AppSidebar :navigation-config="navigationConfig">
+    <AppSidebar :navigation-config="_navigationConfig">
       <template #footer>
         <slot name="sidebar-footer" />
       </template>
@@ -35,10 +35,10 @@
 
     <!-- Mobile backdrop -->
     <div
-      v-if="isMobile && !sidebarCollapsed"
+      v-if="_isMobile && !_sidebarCollapsed"
       class="app-layout__backdrop"
       aria-hidden="true"
-      @click="toggleSidebar"
+      @click="_toggleSidebar"
     />
   </div>
 </template>
@@ -57,14 +57,16 @@
 
 import { storeToRefs } from 'pinia'
 import { useBreakpoint } from '@/composables/useBreakpoint'
+import { navigationConfig } from '@/core/navigation/index'
 import { useBackofficeUiStore } from '@/core/state/ui.store'
 
 useBreakpoint()
 
+const _navigationConfig = navigationConfig
 const uiStore = useBackofficeUiStore()
-const { sidebarCollapsed, isMobile } = storeToRefs(uiStore)
+const { sidebarCollapsed: _sidebarCollapsed, isMobile: _isMobile } = storeToRefs(uiStore)
 
-function toggleSidebar(): void {
+function _toggleSidebar(): void {
   uiStore.toggleSidebar()
 }
 </script>

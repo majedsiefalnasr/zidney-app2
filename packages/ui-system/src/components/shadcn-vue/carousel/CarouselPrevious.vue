@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { ArrowLeft } from 'lucide-vue-next'
-import { cn } from '@/lib/utils'
 import type { ButtonVariants } from '@/registry/new-york-v4/ui/button'
-import { Button } from '@/registry/new-york-v4/ui/button'
 import type { WithClassAsProps } from './interface'
 import { useCarousel } from './useCarousel'
 
-const props = withDefaults(
+const _props = withDefaults(
   defineProps<
     {
       variant?: ButtonVariants['variant']
@@ -20,6 +17,7 @@ const props = withDefaults(
 )
 
 const { orientation, canScrollPrev, scrollPrev } = useCarousel()
+void [orientation, canScrollPrev, scrollPrev]
 </script>
 
 <template>

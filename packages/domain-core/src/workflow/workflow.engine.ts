@@ -105,7 +105,8 @@ export async function executeTransition(
     throw unknownEntityType(context.entityType)
   }
 
-  const tableName = ENTITY_TABLE_MAP[context.entityType]!
+  const tableName = ENTITY_TABLE_MAP[context.entityType]
+  if (!tableName) throw unknownEntityType(context.entityType)
 
   logger.info({
     event: 'workflow.transition.attempt',

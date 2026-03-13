@@ -48,7 +48,7 @@ export type CreateAttemptRequest = z.infer<typeof createAttemptRequestSchema>
  * Validate attempt creation request and return typed result
  */
 export function validateCreateAttemptRequest(
-  body: any,
+  body: unknown,
   logger: Logger,
   correlation_id: string
 ): { valid: boolean; data?: CreateAttemptRequest; errors?: string[] } {
@@ -56,7 +56,7 @@ export function validateCreateAttemptRequest(
     const result = createAttemptRequestSchema.parse(body)
     return { valid: true, data: result }
   } catch (error) {
-    const errors = (error as z.ZodError).errors.map((e: any) => {
+    const errors = (error as z.ZodError).errors.map((e: z.ZodIssue) => {
       const path = e.path.join('.')
       return `${path || 'body'}: ${e.message}`
     })
@@ -109,7 +109,7 @@ export type UpdateProgressRequest = z.infer<typeof updateProgressRequestSchema>
  * Validate progress update request
  */
 export function validateUpdateProgressRequest(
-  body: any,
+  body: unknown,
   logger: Logger,
   correlation_id: string
 ): {
@@ -130,15 +130,27 @@ export function validateUpdateProgressRequest(
 
     return { valid: true, data: result }
   } catch (error) {
-    const errors = (error as z.ZodError).errors.map((e: any) => {
+    const errors = (error as z.ZodError).errors.map((e: z.ZodIssue) => {
       const path = e.path.join('.')
       return `${path || 'body'}: ${e.message}`
     })
 
+    const responseCount = (() => {
+      if (
+        typeof body === 'object' &&
+        body !== null &&
+        'responses' in (body as Record<string, unknown>)
+      ) {
+        const b = body as { responses?: unknown }
+        if (Array.isArray(b.responses)) return b.responses.length
+      }
+      return undefined
+    })()
+
     logger.warn('Progress update validation failed', {
       correlation_id,
       errors,
-      response_count: body?.responses?.length,
+      response_count: responseCount,
     })
 
     return { valid: false, errors }
@@ -183,7 +195,7 @@ export type SubmitAttemptRequest = z.infer<typeof submitAttemptRequestSchema>
  * Validate submission request
  */
 export function validateSubmitAttemptRequest(
-  body: any,
+  body: unknown,
   logger: Logger,
   correlation_id: string
 ): {
@@ -195,7 +207,7 @@ export function validateSubmitAttemptRequest(
     const result = submitAttemptRequestSchema.parse(body)
     return { valid: true, data: result }
   } catch (error) {
-    const errors = (error as z.ZodError).errors.map((e: any) => {
+    const errors = (error as z.ZodError).errors.map((e: z.ZodIssue) => {
       const path = e.path.join('.')
       return `${path || 'body'}: ${e.message}`
     })
@@ -252,7 +264,9 @@ export interface SubmissionBusinessValidation {
  * ```
  */
 export async function validateSubmissionBusiness(
-  tenantDb: any,
+  tenantDb: {
+    query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[]; rowCount?: number }>
+  },
   attempt_id: string,
   user_id: string,
   workspace_id: string,
@@ -298,7 +312,13 @@ export async function validateSubmissionBusiness(
       }
     }
 
-    const attempt = result.rows[0]
+    const attempt = result.rows[0] as {
+      status?: string
+      submitted_at?: string | null
+      started_at?: string
+      time_limit_snapshot?: number
+      user_id?: string
+    }
 
     // Verify status is IN_PROGRESS
     if (attempt.status !== 'IN_PROGRESS') {
@@ -347,8 +367,28 @@ export async function validateSubmissionBusiness(
     }
 
     // Verify within time limit (+ 30s grace period)
-    const time_limit_ms = attempt.time_limit_snapshot
+    const time_limit_ms =
+      typeof attempt.time_limit_snapshot === 'number' ? attempt.time_limit_snapshot : undefined
     const grace_period_ms = 30 * 1000 // 30 seconds
+
+    if (typeof time_limit_ms !== 'number' || typeof attempt.started_at !== 'string') {
+      logger.warn('Submission validation: Missing timing metadata', {
+        correlation_id,
+        attempt_id,
+        time_limit_snapshot: attempt.time_limit_snapshot,
+        started_at: attempt.started_at,
+      })
+
+      return {
+        valid: false,
+        error: {
+          code: 'ATTEMPT_INVALID_DATA',
+          message: 'Attempt timing metadata is missing or invalid',
+          http_status: 500,
+        },
+      }
+    }
+
     const elapsed_ms = Date.now() - new Date(attempt.started_at).getTime()
     const max_allowed_ms = time_limit_ms + grace_period_ms
 

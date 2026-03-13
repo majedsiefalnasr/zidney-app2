@@ -11,6 +11,7 @@
  * - Isolation from master database
  */
 
+import type { Logger } from '@zidney/logger'
 import { ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
 import { Pool, type QueryResult } from 'pg'
 
@@ -32,9 +33,9 @@ export interface DatabaseOperation {
 export class DatabaseService {
   private adminPool: Pool
   private tenantPools: Map<string, Pool> = new Map()
-  private logger?: any
+  private logger?: Logger
 
-  constructor(adminPool: Pool, logger?: any) {
+  constructor(adminPool: Pool, logger?: Logger) {
     this.adminPool = adminPool
     this.logger = logger
   }
@@ -60,7 +61,7 @@ export class DatabaseService {
         // Drop and recreate for clean slate (on idempotent retry)
         try {
           await this.dropDatabase(dbName)
-        } catch (error) {
+        } catch (_error) {
           this.logger?.logWarn('Failed to drop existing database', {
             db_name: dbName,
           })
@@ -117,7 +118,8 @@ export class DatabaseService {
   async getTenantPool(dbName: string): Promise<Pool> {
     // Return cached pool if exists
     if (this.tenantPools.has(dbName)) {
-      return this.tenantPools.get(dbName)!
+      const cached = this.tenantPools.get(dbName)
+      if (cached) return cached
     }
 
     // Create new connection pool for tenant
@@ -259,9 +261,11 @@ export class DatabaseService {
 
       // Remove from connection pool cache
       if (this.tenantPools.has(dbName)) {
-        const pool = this.tenantPools.get(dbName)!
-        await pool.end()
-        this.tenantPools.delete(dbName)
+        const pool = this.tenantPools.get(dbName)
+        if (pool) {
+          await pool.end()
+          this.tenantPools.delete(dbName)
+        }
       }
 
       this.logger?.logStep('database-dropped', 'Tenant database dropped', {
@@ -290,7 +294,7 @@ export class DatabaseService {
         dbName,
       ])
       return result.rows.length > 0
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }
@@ -330,7 +334,7 @@ export class DatabaseService {
     for (const [dbName, pool] of this.tenantPools.entries()) {
       try {
         await pool.end()
-      } catch (error) {
+      } catch (_error) {
         this.logger?.logWarn('Pool cleanup error', { db_name: dbName })
       }
     }
@@ -341,6 +345,6 @@ export class DatabaseService {
 /**
  * Factory to create database service
  */
-export function createDatabaseService(adminPool: Pool, logger?: any): DatabaseService {
+export function createDatabaseService(adminPool: Pool, logger?: Logger): DatabaseService {
   return new DatabaseService(adminPool, logger)
 }

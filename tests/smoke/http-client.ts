@@ -27,7 +27,7 @@ export function createClient(
       'Content-Type': 'application/json',
     }
     if (authToken) {
-      headers['Authorization'] = authToken.startsWith('Bearer ') ? authToken : `Bearer ${authToken}`
+      headers.Authorization = authToken.startsWith('Bearer ') ? authToken : `Bearer ${authToken}`
     }
     const response = await fetch(`${baseUrl}${path}`, {
       method,

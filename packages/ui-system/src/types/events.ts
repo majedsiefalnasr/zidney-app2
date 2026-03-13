@@ -40,8 +40,8 @@ export interface DataTableColumnVisibilityChangedEvent {
 }
 
 // Row actions (LOCKED DECISION 2: @action-start and @action-end required)
-export type DataTableActionStartEvent<TRow = any> = RowActionStartEvent<TRow>
-export type DataTableActionEndEvent<TRow = any> = RowActionEndEvent<TRow>
+export type DataTableActionStartEvent<TRow = unknown> = RowActionStartEvent<TRow>
+export type DataTableActionEndEvent<TRow = unknown> = RowActionEndEvent<TRow>
 
 // ===== AdvancedFilterBuilder Events (LOCKED DECISION 3: storage-fallback) =====
 export interface AdvancedFilterBuilderFiltersChangedEvent {
@@ -74,18 +74,17 @@ export interface MultiLanguageInputModalValidationChangedEvent {
 }
 
 // ===== Form Component Events =====
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export type DrawerFormLayoutSubmitEvent = {}
+// Use `unknown` for empty event payloads to avoid `{}` banned-type
+export type DrawerFormLayoutSubmitEvent = unknown
 
 export interface DrawerFormLayoutCancelEvent {
   isDirty: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export type ModalFormLayoutSubmitEvent = {}
+// Use `unknown` for empty event payloads to avoid `{}` banned-type
+export type ModalFormLayoutSubmitEvent = unknown
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export type ConfirmDialogConfirmEvent = {}
+export type ConfirmDialogConfirmEvent = unknown
 
 // ===== Filter Component Events =====
 export interface QuickFilterDropdownQueryChangedEvent {
@@ -113,11 +112,9 @@ export interface PaginationBarPageSizeChangedEvent {
   pageSize: number
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export type EmptyStatePrimaryActionClickedEvent = {}
+export type EmptyStatePrimaryActionClickedEvent = unknown
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export type EmptyStateSecondaryActionClickedEvent = {}
+export type EmptyStateSecondaryActionClickedEvent = unknown
 
 // ===== Generic Event Payload =====
 export interface BaseEventPayload {
@@ -131,14 +128,14 @@ export interface ErrorEventPayload extends BaseEventPayload {
 }
 
 // Event emitter type-safe wrapper
-export type EmitFn<T extends { [key: string]: any[] }> = <K extends keyof T>(
+export type EmitFn<T extends { [key: string]: unknown[] }> = <K extends keyof T>(
   event: K,
   ...args: T[K]
 ) => void
 
 // Common emit signatures
 export interface ComponentEmitsMap {
-  'update:modelValue': [value: any]
+  'update:modelValue': [value: unknown]
   'pagination-changed': [event: DataTablePaginationChangedEvent]
   'sort-changed': [event: DataTableSortChangedEvent]
   'filter-changed': [event: DataTableFilterChangedEvent]

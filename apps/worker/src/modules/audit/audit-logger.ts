@@ -22,7 +22,7 @@ export interface AuditLogEntry {
     | 'grading_completed'
     | 'result_persisted'
     | 'error'
-  details: Record<string, any>
+  details: Record<string, unknown>
   correlation_id: string
   created_at?: string
 }
@@ -32,7 +32,9 @@ export interface AuditLogEntry {
  * Uses SERIALIZABLE isolation to prevent concurrent audit inconsistencies
  */
 export async function insertAuditLog(
-  client: any, // PoolClient
+  client: {
+    query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>
+  },
   entry: AuditLogEntry
 ): Promise<string> {
   const query = `
@@ -61,7 +63,7 @@ export async function insertAuditLog(
     throw new Error(`Failed to insert audit log for attempt ${entry.attempt_id}`)
   }
 
-  return result.rows[0].id
+  return String((result.rows[0] as Record<string, unknown>).id)
 }
 
 /**
@@ -205,7 +207,9 @@ export const AuditLogFactory = {
  * Query audit logs for a specific attempt
  */
 export async function queryAttemptAuditLog(
-  client: any,
+  client: {
+    query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>
+  },
   workspaceId: string,
   attemptId: string
 ): Promise<AuditLogEntry[]> {
@@ -227,15 +231,18 @@ export async function queryAttemptAuditLog(
 
   const result = await client.query(query, [workspaceId, attemptId])
 
-  return result.rows.map((row: any) => ({
-    id: row.id,
-    workspace_id: row.workspace_id,
-    attempt_id: row.attempt_id,
-    user_id: row.user_id,
-    event: row.event,
-    details: typeof row.details === 'string' ? JSON.parse(row.details) : row.details,
-    correlation_id: row.correlation_id,
-    created_at: row.created_at,
+  return result.rows.map((row: Record<string, unknown>) => ({
+    id: row.id as string | undefined,
+    workspace_id: row.workspace_id as string,
+    attempt_id: row.attempt_id as string,
+    user_id: row.user_id as string,
+    event: row.event as AuditLogEntry['event'],
+    details:
+      typeof row.details === 'string'
+        ? (JSON.parse(row.details) as Record<string, unknown>)
+        : (row.details as Record<string, unknown>),
+    correlation_id: row.correlation_id as string,
+    created_at: row.created_at as string | undefined,
   }))
 }
 
@@ -243,7 +250,9 @@ export async function queryAttemptAuditLog(
  * Query audit logs by correlation ID (for distributed tracing)
  */
 export async function queryAuditLogByCorrelationId(
-  client: any,
+  client: {
+    query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>
+  },
   correlationId: string
 ): Promise<AuditLogEntry[]> {
   const query = `
@@ -263,15 +272,18 @@ export async function queryAuditLogByCorrelationId(
 
   const result = await client.query(query, [correlationId])
 
-  return result.rows.map((row: any) => ({
-    id: row.id,
-    workspace_id: row.workspace_id,
-    attempt_id: row.attempt_id,
-    user_id: row.user_id,
-    event: row.event,
-    details: typeof row.details === 'string' ? JSON.parse(row.details) : row.details,
-    correlation_id: row.correlation_id,
-    created_at: row.created_at,
+  return result.rows.map((row: Record<string, unknown>) => ({
+    id: row.id as string | undefined,
+    workspace_id: row.workspace_id as string,
+    attempt_id: row.attempt_id as string,
+    user_id: row.user_id as string,
+    event: row.event as AuditLogEntry['event'],
+    details:
+      typeof row.details === 'string'
+        ? (JSON.parse(row.details) as Record<string, unknown>)
+        : (row.details as Record<string, unknown>),
+    correlation_id: row.correlation_id as string,
+    created_at: row.created_at as string | undefined,
   }))
 }
 
@@ -280,7 +292,9 @@ export async function queryAuditLogByCorrelationId(
  * Returns true if expected events are present in order
  */
 export async function verifyAuditLogCompleteness(
-  client: any,
+  client: {
+    query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>
+  },
   workspaceId: string,
   attemptId: string
 ): Promise<{

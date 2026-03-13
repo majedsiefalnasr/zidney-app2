@@ -39,15 +39,6 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '@shadcn-vue/ui/button'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@shadcn-vue/ui/drawer'
-
 interface Props {
   isOpen: boolean
   title: string

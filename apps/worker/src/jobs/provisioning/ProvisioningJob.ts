@@ -103,45 +103,73 @@ export class ProvisioningJob {
    * Deserialize job from Redis message (JSON object)
    * Validates message structure and types
    */
-  static fromRedisMessage(message: any): ProvisioningJob {
-    // Validate required fields
-    if (!message.id || typeof message.id !== 'string') {
+  static fromRedisMessage(message: unknown): ProvisioningJob {
+    if (typeof message !== 'object' || message === null) {
+      throw new Error('Invalid message: expected object')
+    }
+
+    const m = message as Record<string, unknown>
+
+    const id = typeof m.id === 'string' ? m.id : undefined
+    if (!id) {
       throw new Error('Invalid message: missing or non-string id')
     }
-    if (!Number.isInteger(message.license_id) || message.license_id <= 0) {
+
+    const license_id = Number.isInteger(m.license_id as number)
+      ? (m.license_id as number)
+      : undefined
+    if (!Number.isInteger(license_id as number) || (license_id as number) <= 0) {
       throw new Error('Invalid message: license_id must be positive integer')
     }
-    if (!message.workspace_slug || typeof message.workspace_slug !== 'string') {
+
+    const workspace_slug = typeof m.workspace_slug === 'string' ? m.workspace_slug : undefined
+    if (!workspace_slug) {
       throw new Error('Invalid message: missing or non-string workspace_slug')
     }
-    if (!Number.isInteger(message.organization_id) || message.organization_id < 0) {
+
+    const organization_id = Number.isInteger(m.organization_id as number)
+      ? (m.organization_id as number)
+      : undefined
+    if (!Number.isInteger(organization_id as number) || (organization_id as number) < 0) {
       throw new Error('Invalid message: organization_id must be non-negative integer')
     }
-    if (!message.correlation_id || typeof message.correlation_id !== 'string') {
+
+    const correlation_id = typeof m.correlation_id === 'string' ? m.correlation_id : undefined
+    if (!correlation_id) {
       throw new Error('Invalid message: missing or non-string correlation_id')
     }
-    if (!message.enqueued_at || typeof message.enqueued_at !== 'string') {
+
+    const enqueued_at = typeof m.enqueued_at === 'string' ? m.enqueued_at : undefined
+    if (!enqueued_at) {
       throw new Error('Invalid message: missing or non-string enqueued_at')
     }
 
-    const attempt = message.attempt || 1
-    const max_attempts = message.max_attempts || 3
-    const version = message.version || 1
+    const attempt =
+      typeof m.attempt === 'number' &&
+      Number.isInteger(m.attempt as number) &&
+      (m.attempt as number) >= 1
+        ? (m.attempt as number)
+        : 1
 
-    if (!Number.isInteger(attempt) || attempt < 1) {
-      throw new Error('Invalid message: attempt must be positive integer')
-    }
-    if (!Number.isInteger(max_attempts) || max_attempts < 1) {
-      throw new Error('Invalid message: max_attempts must be positive integer')
-    }
+    const max_attempts =
+      typeof m.max_attempts === 'number' &&
+      Number.isInteger(m.max_attempts as number) &&
+      (m.max_attempts as number) >= 1
+        ? (m.max_attempts as number)
+        : 3
+
+    const version =
+      typeof m.version === 'number' && Number.isInteger(m.version as number)
+        ? (m.version as number)
+        : 1
 
     return new ProvisioningJob(
-      message.id,
-      message.license_id,
-      message.workspace_slug,
-      message.organization_id,
-      message.correlation_id,
-      message.enqueued_at,
+      id,
+      license_id as number,
+      workspace_slug,
+      organization_id as number,
+      correlation_id,
+      enqueued_at,
       attempt,
       max_attempts,
       version
@@ -176,7 +204,7 @@ export class ProvisioningJob {
   /**
    * Get formatted log context for structured logging
    */
-  toLogContext(): Record<string, any> {
+  toLogContext(): Record<string, unknown> {
     return {
       job_id: this.id,
       license_id: this.license_id,

@@ -5,12 +5,21 @@
  * Per-workspace schema upgrades (executed by Worker)
  */
 
+import crypto from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { MigrationResult, UpgradeJob } from '@zidney/types'
 import { calculateChecksum, detectMigrationGap, validateMigrationFile } from '@zidney/validation'
-import crypto from 'crypto'
-import { readFileSync } from 'fs'
-import { join } from 'path'
 import type { Pool } from 'pg'
+
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message
+  if (typeof e === 'object' && e !== null && 'message' in e) {
+    const m = (e as { message?: unknown }).message
+    return typeof m === 'string' ? m : String(m)
+  }
+  return String(e)
+}
 
 /**
  * Tenant context passed by Worker after resolver validation
@@ -43,7 +52,7 @@ export async function runTenantMigrations(
 
   try {
     // Load migration files
-    const fs = require('fs').promises
+    const fs = require('node:fs').promises
     const files = await fs.readdir(migrationsDir)
     const migrationFiles = files.filter((f: string) => f.endsWith('.sql')).sort()
 
@@ -166,8 +175,8 @@ export async function runTenantMigrations(
           // Execute migration SQL
           try {
             await tenantClient.query(sqlContent)
-          } catch (err: any) {
-            throw new Error(`Syntax error in migration ${filename}: ${err.message}`)
+          } catch (err: unknown) {
+            throw new Error(`Syntax error in migration ${filename}: ${getErrorMessage(err)}`)
           }
 
           // Record in migration_registry
@@ -191,8 +200,8 @@ export async function runTenantMigrations(
                 upgradeJob.snapshotId || null,
               ]
             )
-          } catch (err: any) {
-            throw new Error(`Failed to record migration in registry: ${err.message}`)
+          } catch (err: unknown) {
+            throw new Error(`Failed to record migration in registry: ${getErrorMessage(err)}`)
           }
 
           migrationsApplied++
@@ -250,12 +259,13 @@ export async function runTenantMigrations(
     } finally {
       tenantClient.release()
     }
-  } catch (err: any) {
-    const errorCode = err.message.includes('Syntax error')
+  } catch (err: unknown) {
+    const msg = getErrorMessage(err)
+    const errorCode = msg.includes('Syntax error')
       ? 'MIGRATION_SYNTAX_ERROR'
-      : err.message.includes('gap')
+      : msg.includes('gap')
         ? 'MIGRATION_SEQUENCE_GAP'
-        : err.message.includes('product version')
+        : msg.includes('product version')
           ? 'PRODUCT_VERSION_INCOMPATIBLE'
           : 'MIGRATION_EXECUTION_FAILED'
 
@@ -268,7 +278,7 @@ export async function runTenantMigrations(
         workspace_slug,
         correlation_id: correlationId,
         error_code: errorCode,
-        error_message: err.message,
+        error_message: msg,
         migrations_applied: migrationsApplied,
         execution_time_ms: Date.now() - startTime,
         timestamp: new Date().toISOString(),
@@ -284,7 +294,7 @@ export async function runTenantMigrations(
       migrationsApplied,
       error: {
         code: errorCode,
-        message: err.message,
+        message: msg,
       },
     }
   }

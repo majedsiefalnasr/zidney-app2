@@ -23,6 +23,31 @@
 import { logger } from '@zidney/logger'
 import { type Attempt, AttemptMode, QuestionType, type UserAnswer } from '@zidney/types/attempt'
 
+// Minimal local types to avoid using `any` across grading logic
+type QuestionSnapshot = {
+  id: string
+  type: QuestionType
+  correct_answer?: unknown
+  points?: number
+}
+
+type GradingConfigSnapshot = {
+  total_points: number
+  pass_score_percentage?: number
+  show_correct_answer?: boolean
+  default_essay_score?: number
+}
+
+type QuestionResult = {
+  question_id: string
+  user_answer?: UserAnswer
+  correct_answer?: unknown
+  points_earned: number
+  points_possible: number
+  feedback: string
+  explanation?: string
+}
+
 /**
  * Interface: Grading Result
  * Returned from gradeAttempt, persisted as result_snapshot
@@ -32,15 +57,7 @@ export interface GradeResult {
   passed: boolean // Pass/fail determination
   total_points: number // Maximum achievable points
   pass_score: number // Passing threshold percentage
-  question_results: Array<{
-    question_id: string
-    user_answer?: UserAnswer
-    correct_answer: any
-    points_earned: number
-    points_possible: number
-    feedback: string
-    explanation?: string
-  }>
+  question_results: QuestionResult[]
   summary: string
   graded_at: string // ISO 8601 timestamp
   attempt_duration_seconds: number
@@ -72,8 +89,8 @@ export async function gradeAttempt(attempt: Attempt, workspaceId: string): Promi
 
   try {
     // 1. Extract immutable data from attempt
-    const questions = attempt.question_snapshot.questions
-    const gradingConfig = attempt.grading_config_snapshot
+    const questions = attempt.question_snapshot.questions as QuestionSnapshot[]
+    const gradingConfig = attempt.grading_config_snapshot as GradingConfigSnapshot
     const responseData = attempt.result_snapshot?.question_results || []
 
     if (!questions || !Array.isArray(questions) || questions.length === 0) {
@@ -88,11 +105,7 @@ export async function gradeAttempt(attempt: Attempt, workspaceId: string): Promi
     const answerMap = new Map<string, UserAnswer | undefined>()
     for (const question of questions) {
       const qResult = responseData.find((r) => r.question_id === question.id)
-      if (qResult?.user_answer) {
-        answerMap.set(question.id, qResult.user_answer)
-      } else {
-        answerMap.set(question.id, undefined)
-      }
+      answerMap.set(question.id, qResult?.user_answer)
     }
 
     // 3. Validate time limit (server-authoritative time only)
@@ -128,11 +141,12 @@ export async function gradeAttempt(attempt: Attempt, workspaceId: string): Promi
     }
 
     // 4. Compute scores using ScoreEngine (snapshot-only deterministic)
-    const questionResults = []
+    const questionResults: QuestionResult[] = []
     let totalEarned = 0
 
     for (let i = 0; i < questions.length; i++) {
-      const question = questions[i]!
+      const question = questions[i]
+      if (!question) continue
       const userAnswer = answerMap.get(question.id)
 
       const result = scoreQuestion(question, userAnswer, gradingConfig)
@@ -141,9 +155,9 @@ export async function gradeAttempt(attempt: Attempt, workspaceId: string): Promi
     }
 
     // 5. Calculate normalized score
-    const totalPoints = gradingConfig.total_points
+    const totalPoints = gradingConfig.total_points || 0
     const normalizedScore = totalPoints > 0 ? (totalEarned / totalPoints) * 100 : 0
-    const passScorePercentage = gradingConfig.pass_score_percentage || 60
+    const passScorePercentage = gradingConfig.pass_score_percentage ?? 60
     const passed = normalizedScore >= passScorePercentage
 
     // 6. Generate summary
@@ -205,18 +219,10 @@ export async function gradeAttempt(attempt: Attempt, workspaceId: string): Promi
  * @returns Question result with points and feedback
  */
 function scoreQuestion(
-  question: any,
+  question: QuestionSnapshot,
   userAnswer: UserAnswer | undefined,
-  gradingConfig: any
-): {
-  question_id: string
-  user_answer?: UserAnswer
-  correct_answer: any
-  points_earned: number
-  points_possible: number
-  feedback: string
-  explanation?: string
-} {
+  gradingConfig: GradingConfigSnapshot
+): QuestionResult {
   const result = {
     question_id: question.id,
     user_answer: userAnswer,
@@ -265,7 +271,12 @@ function scoreQuestion(
 /**
  * Score MCQ question
  */
-function scoreMCQ(question: any, userAnswer: UserAnswer, result: any, gradingConfig: any): any {
+function scoreMCQ(
+  question: QuestionSnapshot,
+  userAnswer: UserAnswer,
+  result: QuestionResult,
+  gradingConfig: GradingConfigSnapshot
+): QuestionResult {
   const selectedOption = userAnswer.selected_option
   const correctOption = question.correct_answer
 
@@ -287,11 +298,11 @@ function scoreMCQ(question: any, userAnswer: UserAnswer, result: any, gradingCon
  * Score True/False question
  */
 function scoreTrueFalse(
-  question: any,
+  question: QuestionSnapshot,
   userAnswer: UserAnswer,
-  result: any,
-  gradingConfig: any
-): any {
+  result: QuestionResult,
+  gradingConfig: GradingConfigSnapshot
+): QuestionResult {
   const selectedAnswer = userAnswer.selected_option
   const correctAnswer = question.correct_answer
 
@@ -313,17 +324,17 @@ function scoreTrueFalse(
  * Score Short Answer question (fuzzy matching)
  */
 function scoreShortAnswer(
-  question: any,
+  question: QuestionSnapshot,
   userAnswer: UserAnswer,
-  result: any,
-  gradingConfig: any
-): any {
+  result: QuestionResult,
+  gradingConfig: GradingConfigSnapshot
+): QuestionResult {
   const userText = (userAnswer.text || '').trim().toLowerCase()
   const correctAnswers = Array.isArray(question.correct_answer)
-    ? question.correct_answer
+    ? (question.correct_answer as unknown[])
     : [question.correct_answer]
 
-  const normalized = correctAnswers.map((a: string) => a.trim().toLowerCase())
+  const normalized = correctAnswers.map((a) => String(a).trim().toLowerCase())
   const isCorrect = normalized.includes(userText)
 
   if (isCorrect) {
@@ -344,18 +355,18 @@ function scoreShortAnswer(
  * Score Fill-in-the-blank question
  */
 function scoreFillBlank(
-  question: any,
+  question: QuestionSnapshot,
   userAnswer: UserAnswer,
-  result: any,
-  gradingConfig: any
-): any {
+  result: QuestionResult,
+  gradingConfig: GradingConfigSnapshot
+): QuestionResult {
   const userText = (userAnswer.text || '').trim().toLowerCase()
   const correctAnswers = Array.isArray(question.correct_answer)
-    ? question.correct_answer
+    ? (question.correct_answer as unknown[])
     : [question.correct_answer]
 
-  const normalized = correctAnswers.map((a: string) => a.trim().toLowerCase())
-  const isCorrect = normalized.some((answer: string) => {
+  const normalized = correctAnswers.map((a) => String(a).trim().toLowerCase())
+  const isCorrect = normalized.some((answer) => {
     // Exact match or substring match
     return userText === answer || userText.includes(answer)
   })
@@ -377,7 +388,12 @@ function scoreFillBlank(
 /**
  * Score Essay question (no autograding; placeholder)
  */
-function scoreEssay(_question: any, _userAnswer: UserAnswer, result: any, gradingConfig: any): any {
+function scoreEssay(
+  _question: QuestionSnapshot,
+  _userAnswer: UserAnswer,
+  result: QuestionResult,
+  gradingConfig: GradingConfigSnapshot
+): QuestionResult {
   // Essays require manual grading
   // Award default score or zero based on config
   result.points_earned = gradingConfig.default_essay_score || 0
@@ -391,13 +407,13 @@ function scoreEssay(_question: any, _userAnswer: UserAnswer, result: any, gradin
  * Score Matching question
  */
 function scoreMatching(
-  question: any,
+  question: QuestionSnapshot,
   userAnswer: UserAnswer,
-  result: any,
-  _gradingConfig: any
-): any {
-  const correctPairs = question.correct_answer || {}
-  const userMatches = userAnswer.matches || []
+  result: QuestionResult,
+  _gradingConfig: GradingConfigSnapshot
+): QuestionResult {
+  const correctPairs = (question.correct_answer as Record<string, unknown>) || {}
+  const userMatches = (userAnswer.matches as Array<{ from: string; to: string }>) || []
 
   let correctCount = 0
 
@@ -429,13 +445,13 @@ function scoreMatching(
  * Score Ordering question
  */
 function scoreOrdering(
-  question: any,
+  question: QuestionSnapshot,
   userAnswer: UserAnswer,
-  result: any,
-  _gradingConfig: any
-): any {
-  const correctOrder = question.correct_answer || []
-  const userOrder = userAnswer.order || []
+  result: QuestionResult,
+  _gradingConfig: GradingConfigSnapshot
+): QuestionResult {
+  const correctOrder = (question.correct_answer as unknown[]) || []
+  const userOrder = (userAnswer.order as unknown[]) || []
 
   if (JSON.stringify(correctOrder) === JSON.stringify(userOrder)) {
     result.points_earned = result.points_possible

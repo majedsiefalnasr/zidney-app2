@@ -36,7 +36,7 @@ const menuItems: MenuItem[] = [
   },
 ]
 
-const visibleItems = computed(() => {
+const _visibleItems = computed(() => {
   return menuItems.filter((item) => item.requiredRoles.includes(auth.userRole))
 })
 

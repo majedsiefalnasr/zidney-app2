@@ -170,7 +170,7 @@ export async function logLoginSuccess(
   workspaceSlug: string,
   ipAddress?: string,
   userAgent?: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     correlationId,

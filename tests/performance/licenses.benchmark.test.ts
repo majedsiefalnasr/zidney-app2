@@ -12,8 +12,8 @@ describe('T113: Database Query Performance Benchmarks', () => {
     const startTime = performance.now()
 
     // Simulate database query
-    const query = `SELECT * FROM licenses WHERE id = $1`
-    const params = ['lic-abc123-uuid']
+    const _query = `SELECT * FROM licenses WHERE id = $1`
+    const _params = ['lic-abc123-uuid']
 
     // Mock query execution
     await new Promise((resolve) => setTimeout(resolve, 50)) // Simulated 50ms query
@@ -29,13 +29,13 @@ describe('T113: Database Query Performance Benchmarks', () => {
     const startTime = performance.now()
 
     // Simulate paginated list query
-    const query = `
+    const _query = `
       SELECT * FROM licenses 
       WHERE status = $1 
       ORDER BY created_at DESC 
       LIMIT $2 OFFSET $3
     `
-    const params = ['ACTIVE', 20, 0] // page 1, 20 results
+    const _params = ['ACTIVE', 20, 0] // page 1, 20 results
 
     // Mock query execution
     await new Promise((resolve) => setTimeout(resolve, 200)) // Simulated 200ms
@@ -51,7 +51,7 @@ describe('T113: Database Query Performance Benchmarks', () => {
     const startTime = performance.now()
 
     // Simulate complex filter query
-    const query = `
+    const _query = `
       SELECT * FROM licenses 
       WHERE status = $1 
         AND product_id = $2
@@ -59,7 +59,7 @@ describe('T113: Database Query Performance Benchmarks', () => {
       ORDER BY created_at DESC
       LIMIT $4 OFFSET $5
     `
-    const params = ['ACTIVE', 'prod-001', '2026-02-01', 50, 0] // Complex filter
+    const _params = ['ACTIVE', 'prod-001', '2026-02-01', 50, 0] // Complex filter
 
     // Mock query execution with index usage
     await new Promise((resolve) => setTimeout(resolve, 400)) // Simulated 400ms
@@ -75,7 +75,7 @@ describe('T113: Database Query Performance Benchmarks', () => {
     const startTime = performance.now()
 
     // Simulate INSERT operation
-    const query = `
+    const _query = `
       INSERT INTO licenses (
         product_id, workspace_id, workspace_slug, 
         status, expected_schema_version, expected_product_version
@@ -97,7 +97,7 @@ describe('T113: Database Query Performance Benchmarks', () => {
     const startTime = performance.now()
 
     // Simulate status transition UPDATE
-    const query = `
+    const _query = `
       UPDATE licenses
       SET status = $1, updated_at = NOW()
       WHERE id = $2 
@@ -118,7 +118,7 @@ describe('T113: Database Query Performance Benchmarks', () => {
     const startTime = performance.now()
 
     // Simulate audit log query
-    const query = `
+    const _query = `
       SELECT * FROM audit_log 
       WHERE license_id = $1 
       ORDER BY created_at DESC 
@@ -139,7 +139,7 @@ describe('T113: Database Query Performance Benchmarks', () => {
     const startTime = performance.now()
 
     // Simulate COUNT query for report
-    const query = `
+    const _query = `
       SELECT COUNT(*) 
       FROM licenses
       WHERE status = 'SOFT_LOCKED' AND soft_lock_until < NOW()
@@ -237,7 +237,7 @@ describe('T114: API Response Time Benchmarks', () => {
 
   it('should handle errors without n+1 queries', async () => {
     // Verify error path doesn't trigger additional queries
-    const errorQuery = `SELECT * FROM licenses WHERE workspace_slug = $1 LIMIT 1`
+    const _errorQuery = `SELECT * FROM licenses WHERE workspace_slug = $1 LIMIT 1`
     const queryCount = 1 // Should only run once
 
     expect(queryCount).toBe(1)

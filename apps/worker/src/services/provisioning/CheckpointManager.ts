@@ -29,7 +29,7 @@ export interface Checkpoint {
   step: string
   step_ordinal: number
   completed_at: string
-  payload?: any
+  payload?: unknown
   correlation_id: string
 }
 
@@ -57,7 +57,7 @@ export class CheckpointManager {
     client: PoolClient,
     step: string,
     ordinal: number,
-    payload: any,
+    payload: unknown,
     correlation_id: string
   ): Promise<void> {
     try {

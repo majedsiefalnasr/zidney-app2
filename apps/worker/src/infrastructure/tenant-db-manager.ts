@@ -31,12 +31,11 @@ export class TenantDBManager {
    */
   async getPool(workspaceId: string, config: PoolConfig): Promise<Pool> {
     // Check if pool already exists
-    if (this.pools.has(workspaceId)) {
-      const pool = this.pools.get(workspaceId)!
-
+    const existingPool = this.pools.get(workspaceId)
+    if (existingPool) {
       // Verify pool is healthy
-      if (await this.isPoolHealthy(pool)) {
-        return pool
+      if (await this.isPoolHealthy(existingPool)) {
+        return existingPool
       } else {
         // Pool is unhealthy, remove it
         this.pools.delete(workspaceId)

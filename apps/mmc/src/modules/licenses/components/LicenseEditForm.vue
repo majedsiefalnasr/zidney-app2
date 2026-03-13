@@ -4,9 +4,6 @@
  * T082: License Limits Editor
  */
 
-import { Button } from '@zidney/ui/components/shadcn-vue/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
-import { Input } from '@zidney/ui/components/shadcn-vue/input'
 import { ref } from 'vue'
 
 interface Props {
@@ -17,7 +14,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {})
 
-const form = ref({
+const _form = ref({
   student_limit: props.initialStudentLimit,
   staff_limit: props.initialStaffLimit,
 })
@@ -25,7 +22,7 @@ const form = ref({
 const loading = ref(false)
 const submitted = ref(false)
 
-const onSubmit = async () => {
+const _onSubmit = async () => {
   loading.value = true
   try {
     // TODO: Call API: PATCH /v1/mmc/licenses/:id

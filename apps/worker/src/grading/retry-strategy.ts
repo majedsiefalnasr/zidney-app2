@@ -96,7 +96,10 @@ export async function handleJobFailure(
   // Check if should retry
   if (currentRetryCount <= maxRetries) {
     const backoffIndex = Math.min(currentRetryCount - 1, retryConfig.backoffMs.length - 1)
-    const delayMs = retryConfig.backoffMs[backoffIndex]!
+    const delayMs =
+      retryConfig.backoffMs[backoffIndex] ??
+      retryConfig.backoffMs[retryConfig.backoffMs.length - 1] ??
+      1000
 
     logger.info(
       {

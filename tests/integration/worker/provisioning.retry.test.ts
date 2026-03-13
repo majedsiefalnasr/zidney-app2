@@ -2,19 +2,19 @@ import type { Queue, Worker } from 'bullmq'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('T103: Worker Retry Logic - 6 Backoff Attempts', () => {
-  let queue: Queue
-  let worker: Worker
-  let jobId: string
+  let _queue: Queue
+  let _worker: Worker
+  let _jobId: string
 
   beforeEach(() => {
     // Mock Bull queue for testing
-    queue = {
+    _queue = {
       add: vi.fn(),
       getJob: vi.fn(),
       process: vi.fn(),
     } as any
 
-    worker = {
+    _worker = {
       on: vi.fn(),
       start: vi.fn(),
       close: vi.fn(),

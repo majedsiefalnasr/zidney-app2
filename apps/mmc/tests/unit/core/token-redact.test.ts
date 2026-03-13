@@ -11,8 +11,8 @@
  * Refs: token-redact.ts, logging security rules (no tokens in logs)
  */
 
-import { describe, expect, it } from 'vitest'
 import { looksLikeToken, redactSensitiveFields } from '@/core/auth/token-redact'
+import { describe, expect, it } from 'vitest'
 
 describe('redactSensitiveFields', () => {
   describe('redacts all SENSITIVE_KEYS', () => {
@@ -166,7 +166,7 @@ describe('looksLikeToken', () => {
 
     it('returns false for numbers', () => {
       expect(looksLikeToken(42)).toBe(false)
-      expect(looksLikeToken(1_234_567_890_123_456_789)).toBe(false)
+      expect(looksLikeToken(Number('1234567890123456789'))).toBe(false)
     })
 
     it('returns false for booleans', () => {

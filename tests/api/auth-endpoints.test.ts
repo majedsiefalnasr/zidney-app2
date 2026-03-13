@@ -102,7 +102,7 @@ describe('T097-T101: Auth Endpoints', () => {
   })
 
   it('should reject invalid JWT', async () => {
-    client.headers['Authorization'] = 'Bearer invalid'
+    client.headers.Authorization = 'Bearer invalid'
     const res = await client.get(`/workspace/${ctx.workspaceId}/verify`)
     expect(res.status).toBe(401)
   })

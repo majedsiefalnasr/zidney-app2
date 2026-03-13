@@ -7,10 +7,10 @@ import { randomUUID } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('T052: Permission Enforcement Tests', () => {
-  let mockDb: any
+  let _mockDb: any
 
   beforeEach(() => {
-    mockDb = {
+    _mockDb = {
       query: vi.fn(),
     }
   })
@@ -21,7 +21,7 @@ describe('T052: Permission Enforcement Tests', () => {
 
   describe('Permission bit checking', () => {
     it('should allow action when permission bit is true', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: role_permissions { domain: 'PRODUCT_MANAGEMENT', can_view: true }
 
       // Call middleware with GET request to PRODUCT_MANAGEMENT resource
@@ -30,7 +30,7 @@ describe('T052: Permission Enforcement Tests', () => {
     })
 
     it('should deny action when permission bit is false', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: role_permissions { domain: 'LICENSE_MANAGEMENT', can_delete: false }
 
       // Call middleware with DELETE request to LICENSE_MANAGEMENT resource
@@ -39,7 +39,7 @@ describe('T052: Permission Enforcement Tests', () => {
     })
 
     it('should check correct action bit (view, create, edit, delete)', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: ORGANIZATION_SETTINGS { can_view: true, can_create: false, can_edit: true, can_delete: false }
 
       // POST (create) request → check can_create → false → 403
@@ -59,7 +59,7 @@ describe('T052: Permission Enforcement Tests', () => {
 
   describe('Implicit deny', () => {
     it('should deny access when permission entry NOT found (implicit deny)', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: No entry in role_permissions for REPORTING domain
 
       // Call middleware with request to REPORTING resource
@@ -102,8 +102,8 @@ describe('T052: Permission Enforcement Tests', () => {
 
   describe('Permission denial audit logging', () => {
     it('should log permission denial with action_type: PERMISSION_DENIED', async () => {
-      const userId = randomUUID()
-      const roleId = randomUUID()
+      const _userId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: User with role, missing AFFILIATE_MANAGEMENT.create
 
       // Call POST /mmc/affiliates (not allowed)

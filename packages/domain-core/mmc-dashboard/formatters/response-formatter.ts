@@ -392,7 +392,7 @@ export function formatTrendsResponse(data: {
  */
 export function formatExportResponse(data: {
   section: 'geographic' | 'revenue' | 'affiliate' | 'product'
-  rows: Array<Record<string, any>>
+  rows: Array<Record<string, unknown>>
 }): string {
   // Add UTF-8 BOM for Excel compatibility
   const bom = '\uFEFF'
@@ -402,8 +402,8 @@ export function formatExportResponse(data: {
   }
 
   // Extract headers from first row
-  // Non-null assertion is safe: length > 0 check above guarantees element exists
-  const firstRow = data.rows[0]!
+  const firstRow = data.rows[0]
+  if (!firstRow) return `${bom}No data\n`
   const headers = Object.keys(firstRow)
   const headerRow = headers.join(',')
 

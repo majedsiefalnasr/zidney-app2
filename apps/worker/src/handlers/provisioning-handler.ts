@@ -211,7 +211,7 @@ export class ProvisioningHandler {
       )
 
       // On handler crash, nack job for retry
-      if (job && job.isRetryable()) {
+      if (job?.isRetryable()) {
         const nextJob = job.markAttempt()
         await this.job_queue.nack(job.id, nextJob)
       }
@@ -293,7 +293,7 @@ export class ProvisioningHandler {
     license_id: number,
     new_status: string,
     error_message: string | null,
-    metadata: Record<string, any>
+    metadata: Record<string, unknown>
   ): Promise<void> {
     const client = await this.master_pool.connect()
 

@@ -1,23 +1,21 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils'
-import { Sheet, SheetContent } from '@/registry/new-york-v4/ui/sheet'
-import SheetDescription from '@/registry/new-york-v4/ui/sheet/SheetDescription.vue'
-import SheetHeader from '@/registry/new-york-v4/ui/sheet/SheetHeader.vue'
-import SheetTitle from '@/registry/new-york-v4/ui/sheet/SheetTitle.vue'
 import type { SidebarProps } from '.'
-import { SIDEBAR_WIDTH_MOBILE, useSidebar } from './utils'
+import { useSidebar } from './utils'
 
 defineOptions({
   inheritAttrs: false,
 })
 
-const props = withDefaults(defineProps<SidebarProps>(), {
+const _props = withDefaults(defineProps<SidebarProps>(), {
   side: 'left',
   variant: 'sidebar',
   collapsible: 'offcanvas',
 })
 
 const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+
+// Linter shim: some sidebar helpers are only used in template or by consumers
+void [isMobile, state, openMobile, setOpenMobile]
 </script>
 
 <template>

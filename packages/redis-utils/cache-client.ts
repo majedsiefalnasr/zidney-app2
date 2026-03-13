@@ -60,7 +60,7 @@ const CACHE_TTL_CONFIG: Record<string, number> = {
 function generateCacheKey(
   endpoint: string,
   workspaceId: string,
-  queryParams?: Record<string, any>
+  queryParams?: Record<string, unknown>
 ): string {
   // Hash query parameters to create deterministic key
   let paramHash = ''
@@ -125,7 +125,7 @@ export class DashboardCacheClient {
   async get(
     endpoint: string,
     workspaceId: string,
-    queryParams?: Record<string, any>
+    queryParams?: Record<string, unknown>
   ): Promise<string | null> {
     if (!this.isAvailable()) {
       // Graceful fallback: cache unavailable
@@ -176,7 +176,7 @@ export class DashboardCacheClient {
     endpoint: string,
     workspaceId: string,
     value: string,
-    queryParams?: Record<string, any>
+    queryParams?: Record<string, unknown>
   ): Promise<boolean> {
     if (!this.isAvailable()) {
       return false
@@ -228,7 +228,7 @@ export class DashboardCacheClient {
   async del(
     endpoint: string,
     workspaceId: string,
-    queryParams?: Record<string, any>
+    queryParams?: Record<string, unknown>
   ): Promise<boolean> {
     if (!this.isAvailable()) {
       return false
@@ -273,7 +273,7 @@ export class DashboardCacheClient {
   async exists(
     endpoint: string,
     workspaceId: string,
-    queryParams?: Record<string, any>
+    queryParams?: Record<string, unknown>
   ): Promise<boolean> {
     if (!this.isAvailable()) {
       return false

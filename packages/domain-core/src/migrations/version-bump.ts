@@ -16,10 +16,11 @@ export function parseVersion(version: string): {
   patch: number
 } {
   const parts = version.split('.').map((p) => parseInt(p, 10))
-  if (parts.length !== 3 || parts.some((p) => isNaN(p))) {
+  if (parts.length !== 3 || parts.some((p) => Number.isNaN(p))) {
     throw new Error(`Invalid version format: ${version}. Expected X.Y.Z`)
   }
-  return { major: parts[0]!, minor: parts[1]!, patch: parts[2]! }
+  const [major, minor, patch] = parts
+  return { major, minor, patch }
 }
 
 /**

@@ -148,10 +148,15 @@ export async function createRole(
         `,
         [input.workspace_id, input.name, input.description ?? null]
       )
-      roleRow = result.rows[0]!
-    } catch (err: any) {
-      if (err?.code === '23505') {
-        throw new RbacError('ROLE_NAME_CONFLICT', 'A role with this name already exists')
+      const inserted = result.rows[0]
+      if (!inserted) throw new RbacError('ROLE_INSERT_FAILED', 'Failed to insert role')
+      roleRow = inserted
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null) {
+        const e = err as Record<string, unknown>
+        if (typeof e.code === 'string' && e.code === '23505') {
+          throw new RbacError('ROLE_NAME_CONFLICT', 'A role with this name already exists')
+        }
       }
       throw err
     }
@@ -225,7 +230,7 @@ export async function getRoleById(
   )
   if (roleResult.rows.length === 0) return null
 
-  const role = roleResult.rows[0]!
+  const role = roleResult.rows[0] as RoleRow
   const permissions = await getRolePermissions(db, roleId)
 
   return {
@@ -358,9 +363,15 @@ export async function updateRole(
         throw new RbacError('ROLE_NOT_FOUND', 'Role not found')
       }
       await db.query('COMMIT')
+      const ex = existing.rows[0] as RoleRow
       return {
-        ...existing.rows[0]!,
-        status: existing.rows[0]!.status as RoleStatus,
+        id: ex.id,
+        workspace_id: ex.workspace_id,
+        name: ex.name,
+        description: ex.description,
+        status: ex.status as RoleStatus,
+        created_at: ex.created_at,
+        updated_at: ex.updated_at,
       }
     }
 
@@ -381,10 +392,13 @@ export async function updateRole(
       if (result.rows.length === 0) {
         throw new RbacError('ROLE_NOT_FOUND', 'Role not found')
       }
-      updated = result.rows[0]!
-    } catch (err: any) {
-      if (err?.code === '23505') {
-        throw new RbacError('ROLE_NAME_CONFLICT', 'A role with this name already exists')
+      updated = result.rows[0] as RoleRow
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null) {
+        const e = err as Record<string, unknown>
+        if (e.code === '23505') {
+          throw new RbacError('ROLE_NAME_CONFLICT', 'A role with this name already exists')
+        }
       }
       throw err
     }
@@ -616,7 +630,7 @@ export async function assignRoleToStaffUser(
   if (roleResult.rows.length === 0) {
     throw new RbacError('ROLE_NOT_FOUND', 'Role not found')
   }
-  if (roleResult.rows[0]!.status !== RoleStatus.ACTIVE) {
+  if (roleResult.rows[0]?.status !== RoleStatus.ACTIVE) {
     throw new RbacError('ROLE_NOT_ASSIGNABLE', 'Cannot assign a disabled role')
   }
 
@@ -683,7 +697,7 @@ export async function evaluatePermission(input: EvaluatePermissionInput): Promis
       [user_id]
     )
     if (userResult.rows.length === 0) return false
-    const user = userResult.rows[0]!
+    const user = userResult.rows[0] as StaffUserRow
 
     // Step 2: is_active check
     if (!user.is_active) return false
@@ -697,7 +711,8 @@ export async function evaluatePermission(input: EvaluatePermissionInput): Promis
       [user.role_id]
     )
     if (roleResult.rows.length === 0) return false
-    if (roleResult.rows[0]!.status !== RoleStatus.ACTIVE) return false
+    const roleRow = roleResult.rows[0]
+    if (roleRow?.status !== RoleStatus.ACTIVE) return false
 
     // Step 6+7: Load permission row, check flag
     const permResult = await db.query<Record<string, boolean>>(
@@ -709,7 +724,7 @@ export async function evaluatePermission(input: EvaluatePermissionInput): Promis
       [user.role_id, module]
     )
     if (permResult.rows.length === 0) return false
-    return permResult.rows[0]![action] === true
+    return permResult.rows[0]?.[action] === true
   } catch (err) {
     logger.error('evaluatePermission unexpected DB error', {
       user_id,

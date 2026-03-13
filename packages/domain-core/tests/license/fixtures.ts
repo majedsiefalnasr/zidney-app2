@@ -108,8 +108,8 @@ export const testFixtures = {
  * Mock Database Client
  */
 export class MockDatabaseClient {
+  transactionActive = false
   private queries: { sql: string; params: any[] }[] = []
-  private transactionActive = false
   private mockedResults: Array<{
     matcher: string | RegExp
     rows: any[] | null
@@ -206,37 +206,37 @@ export class MockRedisClient {
   private store: Map<string, any> = new Map()
   private ttls: Map<string, number> = new Map()
 
-  get = vi.fn((key: string) => {
-    return Promise.resolve(this.store.has(key) ? this.store.get(key) : null)
+  get = vi.fn(async (key: string) => {
+    return this.store.has(key) ? this.store.get(key) : null
   })
 
-  set = vi.fn((key: string, value: any) => {
+  set = vi.fn(async (key: string, value: any) => {
     this.store.set(key, value)
-    return Promise.resolve('OK')
+    return 'OK'
   })
 
-  setex = vi.fn((key: string, ttl: number, value: any) => {
+  setex = vi.fn(async (key: string, ttl: number, value: any) => {
     this.store.set(key, value)
     this.ttls.set(key, ttl)
-    return Promise.resolve('OK')
+    return 'OK'
   })
 
-  del = vi.fn((key: string) => {
+  del = vi.fn(async (key: string) => {
     const existed = this.store.has(key)
     this.store.delete(key)
     this.ttls.delete(key)
-    return Promise.resolve(existed ? 1 : 0)
+    return existed ? 1 : 0
   })
 
-  flushall = vi.fn(() => {
+  flushall = vi.fn(async () => {
     this.store.clear()
     this.ttls.clear()
-    return Promise.resolve('OK')
+    return 'OK'
   })
 
-  flush = vi.fn(() => this.flushall())
+  flush = vi.fn(async () => this.flushall())
 
-  getTTL = vi.fn((key: string) => Promise.resolve(this.ttls.get(key) ?? -2))
+  getTTL = vi.fn(async (key: string) => this.ttls.get(key) ?? -2)
 
   reset = () => {
     this.store.clear()

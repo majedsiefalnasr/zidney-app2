@@ -28,11 +28,16 @@ export async function getTrendsData(pool: Pool, months: 3 | 6 | 12 = 12) {
   `
 
   const result = await pool.query(query, [startDate])
-  return result.rows.map((row: any) => ({
-    period: row.period.toISOString().substring(0, 7),
-    revenue_cents: row.revenue_cents || 0,
-    license_count: row.license_count || 0,
-  }))
+  return result.rows.map((row: Record<string, unknown>) => {
+    const periodVal = row.period as Date | string | undefined
+    const periodStr =
+      periodVal instanceof Date ? periodVal.toISOString().substring(0, 7) : String(periodVal ?? '')
+    return {
+      period: periodStr,
+      revenue_cents: (row.revenue_cents as number) || 0,
+      license_count: (row.license_count as number) || 0,
+    }
+  })
 }
 
 export default {

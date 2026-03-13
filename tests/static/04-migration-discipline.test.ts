@@ -3,12 +3,12 @@
  * Verifies migrations are forward-only, immutable, no duplicates
  */
 
-import crypto from 'crypto'
-import path from 'path'
+import crypto from 'node:crypto'
+import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 describe('Area 4: Migration Discipline Validation', () => {
-  const migrationsDir = path.join(process.cwd(), 'apps/api/src/db')
+  const _migrationsDir = path.join(process.cwd(), 'apps/api/src/db')
 
   /**
    * Test 4.1: Forward-only migration check
@@ -55,7 +55,7 @@ DROP TABLE users;
     // In real implementation, compare current hashes with stored hashes
     // Mock for now
 
-    const mockHashStore = {
+    const _mockHashStore = {
       '001-create-users.sql': 'abc123def456',
       '002-create-licenses.sql': 'xyz789uvw012',
     }

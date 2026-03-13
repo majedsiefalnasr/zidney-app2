@@ -9,6 +9,8 @@ on:
     branches:
       - main
       - develop
+  schedule:
+    - cron: "0 2 * * *"
 
 jobs:
   architecture-governance:
@@ -52,7 +54,23 @@ jobs:
       - name: Run Architecture Diff (PR-specific architecture drift check)
         run: bun scripts/architecture-diff.ts
 
-      # ── 8. Publish Architecture Summary ────────────────────────────────
+      # ── 8. Run Architecture Health ─────────────────────────────────────
+      - name: Run Architecture Health
+        run: bun run arch:health:ci
+
+      # ── 9. Upload Architecture Health Artifacts ───────────────────────
+      - name: Upload Architecture Health Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-health-artifacts
+          path: |
+            docs/architecture/health/architecture-health.json
+            docs/architecture/health/architecture-health-summary.md
+            docs/architecture/health/architecture-drift-report.md
+            docs/architecture/health/history/
+
+      # ── 10. Publish Architecture Summary ───────────────────────────────
       - name: Publish Architecture Summary
         if: always()
         run: |
@@ -74,4 +92,10 @@ jobs:
             echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
             cat docs/architecture/graph/infra-dependency-graph.json >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f docs/architecture/health/architecture-health-summary.md ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Architecture Health" >> $GITHUB_STEP_SUMMARY
+            cat docs/architecture/health/architecture-health-summary.md >> $GITHUB_STEP_SUMMARY
           fi

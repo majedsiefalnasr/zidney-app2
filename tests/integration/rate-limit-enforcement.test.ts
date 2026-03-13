@@ -66,7 +66,7 @@ describe('T084: Rate Limit Enforcement', () => {
       password: 'wrong',
     })
     expect(res.headers['Retry-After']).toBeDefined()
-    expect(parseInt(res.headers['Retry-After'])).toBeGreaterThan(0)
+    expect(parseInt(res.headers['Retry-After'], 10)).toBeGreaterThan(0)
   })
 
   it('should apply exponential backoff lock', async () => {
@@ -81,7 +81,7 @@ describe('T084: Rate Limit Enforcement', () => {
       email: 'test@example.com',
       password: 'wrong',
     })
-    const backoff1 = parseInt(res1.headers['Retry-After'])
+    const backoff1 = parseInt(res1.headers['Retry-After'], 10)
 
     await sleep(100)
 
@@ -89,7 +89,7 @@ describe('T084: Rate Limit Enforcement', () => {
       email: 'test@example.com',
       password: 'wrong',
     })
-    const backoff2 = parseInt(res2.headers['Retry-After'])
+    const backoff2 = parseInt(res2.headers['Retry-After'], 10)
 
     expect(backoff2).toBeGreaterThanOrEqual(backoff1)
   })

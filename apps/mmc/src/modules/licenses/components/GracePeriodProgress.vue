@@ -7,6 +7,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
 import { computed, onMounted, ref } from 'vue'
 
+void [Card, CardContent, CardHeader, CardTitle]
+
 interface Props {
   gracePeriodDays: number
   softLockUntil: string
@@ -28,6 +30,8 @@ const statusColor = computed(() => {
   if (progress.value >= 70) return 'bg-yellow-500'
   return 'bg-blue-500'
 })
+
+void [statusColor]
 </script>
 
 <template>

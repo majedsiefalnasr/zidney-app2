@@ -7,6 +7,7 @@
  * Detects and cleans orphaned databases (registry missing).
  */
 
+import type { Logger } from '@zidney/logger'
 import type { Pool } from 'pg'
 
 /**
@@ -25,9 +26,9 @@ export interface DatabaseCleanupResult {
  */
 export class DatabaseCleanupService {
   private masterDb: Pool
-  private logger?: any
+  private logger?: Logger
 
-  constructor(masterDb: Pool, logger?: any) {
+  constructor(masterDb: Pool, logger?: Logger) {
     this.masterDb = masterDb
     this.logger = logger
   }
@@ -163,6 +164,9 @@ export class DatabaseCleanupService {
 /**
  * Factory to create database cleanup service
  */
-export function createDatabaseCleanupService(masterDb: Pool, logger?: any): DatabaseCleanupService {
+export function createDatabaseCleanupService(
+  masterDb: Pool,
+  logger?: Logger
+): DatabaseCleanupService {
   return new DatabaseCleanupService(masterDb, logger)
 }

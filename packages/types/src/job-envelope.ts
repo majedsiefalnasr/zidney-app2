@@ -15,7 +15,7 @@
  * Base job envelope structure (generic over payload type T).
  * All jobs in the queue follow this envelope format for consistency.
  */
-export interface JobEnvelope<T = any> {
+export interface JobEnvelope<T = unknown> {
   /**
    * Unique identifier for this job execution.
    * Generated at enqueue time (UUID-v4).
@@ -129,7 +129,7 @@ export interface GradeAttemptPayload {
   attempt_id: string
   exam_id: string
   student_id: string
-  submission_data?: Record<string, any>
+  submission_data?: Record<string, unknown>
 }
 
 /**
@@ -159,7 +159,7 @@ export interface SendEmailJob extends JobEnvelope<SendEmailPayload> {
 export interface SendEmailPayload {
   template: string
   recipient: string
-  context: Record<string, any>
+  context: Record<string, unknown>
   retry_limit?: number
 }
 

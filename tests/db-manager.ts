@@ -95,7 +95,7 @@ export class DbManager {
 
     try {
       await masterDb.query(`DROP DATABASE IF EXISTS "${dbName}"`)
-    } catch (error) {
+    } catch (_error) {
       // Ignore errors
     }
   }
@@ -108,7 +108,7 @@ export class DbManager {
     for (const [, pool] of this.tenantDbs) {
       try {
         await pool.end()
-      } catch (error) {
+      } catch (_error) {
         // Ignore errors
       }
     }
@@ -118,7 +118,7 @@ export class DbManager {
     if (this.masterDb) {
       try {
         await this.masterDb.end()
-      } catch (error) {
+      } catch (_error) {
         // Ignore errors
       }
       this.masterDb = null

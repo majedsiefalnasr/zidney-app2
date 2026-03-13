@@ -276,7 +276,7 @@ export interface AuditLog {
   workspace_slug: string
   ip_address: string | null
   user_agent: string | null
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
   schema_version: string | null
   product_version: string | null
   timestamp: Date
@@ -294,7 +294,7 @@ export interface AuditEventData {
   workspaceSlug: string
   ipAddress?: string
   userAgent?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   schemaVersion?: string
   productVersion?: string
 }
@@ -333,7 +333,7 @@ export class AuthError extends Error {
     public code: AuthErrorCode,
     public message: string,
     public statusCode: number = 401,
-    public metadata?: Record<string, any>
+    public metadata?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'AuthError'
@@ -371,7 +371,7 @@ export interface RolePermission {
 export interface PermissionResult {
   allowed: boolean
   reason?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 /**

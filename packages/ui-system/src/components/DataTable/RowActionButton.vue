@@ -25,10 +25,10 @@
   </button>
 </template>
 
-<script setup lang="ts" generic="TRow extends Record<string, any>">
+<script setup lang="ts" generic="TRow extends Record<string, unknown>">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
-export interface RowAction<TRow = any> {
+export interface RowAction<TRow = unknown> {
   id: string
   label: string
   icon?: string
@@ -73,7 +73,7 @@ const isActionDisabled = computed((): boolean => {
 const computedDisabled = computed(() => props.disabled || props.isLoading || isActionDisabled.value)
 
 // Handlers: Execute action with error state management
-const handleClick = (): void => {
+const _handleClick = (): void => {
   if (computedDisabled.value || isUnmounting.value) return
   emit('execute', props.row)
 }

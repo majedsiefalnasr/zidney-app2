@@ -285,7 +285,7 @@ describe('T055: Product Update Integration Tests', () => {
         [initial.id]
       )
 
-      expect(parseInt(beforeCount.rows[0]!.count)).toBe(parseInt(afterCount.rows[0]!.count))
+      expect(parseInt(beforeCount.rows[0]!.count, 10)).toBe(parseInt(afterCount.rows[0]!.count, 10))
     })
 
     it('should not create audit log for no-op update', async () => {
@@ -316,7 +316,7 @@ describe('T055: Product Update Integration Tests', () => {
         [initial.id]
       )
 
-      expect(parseInt(beforeCount.rows[0]!.count)).toBe(parseInt(afterCount.rows[0]!.count))
+      expect(parseInt(beforeCount.rows[0]!.count, 10)).toBe(parseInt(afterCount.rows[0]!.count, 10))
     })
   })
 

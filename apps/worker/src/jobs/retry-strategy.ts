@@ -46,10 +46,12 @@ export function shouldRetry(
  * Send job to DLQ (Dead Letter Queue)
  * Stores failed jobs for manual investigation
  */
+export type DbLike = { query: (sql: string, params?: unknown[]) => Promise<unknown> }
+
 export async function sendToDLQ(
   job: SchemaMigrationJob,
   error: Error,
-  database: any
+  database: DbLike
 ): Promise<void> {
   try {
     await database.query(
@@ -65,10 +67,11 @@ export async function sendToDLQ(
       workspace_id: job.workspace_id,
       error_message: error.message,
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err)
     logger.error('dlq_write_failed', {
       service: 'dlq',
-      error_message: err.message,
+      error_message: errMsg,
     })
   }
 }

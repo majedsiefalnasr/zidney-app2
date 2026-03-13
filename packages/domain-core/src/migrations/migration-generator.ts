@@ -1,6 +1,15 @@
-import { createHash } from 'crypto'
-import { mkdirSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { createHash } from 'node:crypto'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message
+  if (typeof e === 'object' && e !== null && 'message' in e) {
+    const m = (e as { message?: unknown }).message
+    return typeof m === 'string' ? m : String(m)
+  }
+  return String(e)
+}
 
 /**
  * T052: Migration File Generator
@@ -31,9 +40,11 @@ export function generateMigrationFile(options: {
   // Ensure directory exists
   try {
     mkdirSync(outputDir, { recursive: true })
-  } catch (err: any) {
-    if (err.code !== 'EEXIST') {
-      throw new Error(`Failed to create migration directory: ${err.message}`)
+  } catch (err: unknown) {
+    const msg = getErrorMessage(err)
+    // mkdirSync with recursive should not usually throw, but guard anyway
+    if (!msg.includes('EEXIST')) {
+      throw new Error(`Failed to create migration directory: ${msg}`)
     }
   }
 
@@ -49,8 +60,8 @@ export function generateMigrationFile(options: {
   // Write file
   try {
     writeFileSync(filePath, wrappedSQL, 'utf-8')
-  } catch (err: any) {
-    throw new Error(`Failed to write migration file: ${err.message}`)
+  } catch (err: unknown) {
+    throw new Error(`Failed to write migration file: ${getErrorMessage(err)}`)
   }
 
   return {

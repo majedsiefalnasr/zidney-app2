@@ -197,7 +197,7 @@ describe('T027: Concurrency & Crash Recovery Tests', () => {
 // Test Utilities
 // ============================================================================
 
-export const TEST_FIXTURES = {
+const _TEST_FIXTURES = {
   VALID_SLUGS: ['acme-university', 'my-school-123', 'org-name', 'a-b', 'acme-university-uk'],
 
   INVALID_SLUGS: [
@@ -215,8 +215,4 @@ export const TEST_FIXTURES = {
   TEST_LICENSE_ID: 999,
   TEST_WORKSPACE_SLUG: 'test-workspace',
   TEST_ORGANIZATION_ID: 888,
-}
-
-export default {
-  TEST_FIXTURES,
 }

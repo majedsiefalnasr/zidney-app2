@@ -31,7 +31,7 @@ const logger = createLogger('coverage-service')
 // ---------------------------------------------------------------------------
 
 interface DbClient {
-  query: <T = any>(
+  query: <T = Record<string, unknown>>(
     sql: string,
     params?: unknown[]
   ) => Promise<{ rows: T[]; rowCount: number | null }>

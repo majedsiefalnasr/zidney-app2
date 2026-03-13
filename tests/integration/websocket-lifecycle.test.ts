@@ -40,7 +40,7 @@ describe('T085: WebSocket Lifecycle', () => {
   })
 
   it('should send heartbeat to keep connection alive', async () => {
-    const jwt = generateJWT(ctx.workspaceId, ctx.userId)
+    const _jwt = generateJWT(ctx.workspaceId, ctx.userId)
     // Heartbeat interval: 30 seconds
     const heartbeatInterval = 30000
     expect(heartbeatInterval).toBe(30000)

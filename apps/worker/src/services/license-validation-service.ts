@@ -7,6 +7,7 @@
  * Prevents provisioning of invalid/expired licenses.
  */
 
+import type { Logger } from '@zidney/logger'
 import type { Pool } from 'pg'
 
 /**
@@ -40,11 +41,11 @@ interface LicenseRecord {
  */
 export class LicenseValidationService {
   private masterDb: Pool
-  private logger?: any
+  private logger?: Logger
   private requiredSchemaVersion: string = '1.0.0'
   private requiredProductVersion: string = '1.0.0'
 
-  constructor(masterDb: Pool, logger?: any) {
+  constructor(masterDb: Pool, logger?: Logger) {
     this.masterDb = masterDb
     this.logger = logger
   }
@@ -78,7 +79,18 @@ export class LicenseValidationService {
         }
       }
 
-      const license = result.rows[0]!
+      const license = result.rows[0]
+      if (!license) {
+        this.logger?.logValidationError('License row missing after query', {
+          license_id: licenseId,
+        })
+        return {
+          valid: false,
+          licenseExists: false,
+          reason: 'License does not exist',
+          durationMs: Date.now() - startTime,
+        }
+      }
 
       // Check if license is in a valid state for provisioning
       if (license.status === 'DELETED' || license.status === 'ARCHIVED') {
@@ -245,7 +257,7 @@ export class LicenseValidationService {
  */
 export function createLicenseValidationService(
   masterDb: Pool,
-  logger?: any
+  logger?: Logger
 ): LicenseValidationService {
   return new LicenseValidationService(masterDb, logger)
 }

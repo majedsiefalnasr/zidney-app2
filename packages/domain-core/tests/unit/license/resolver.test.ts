@@ -76,7 +76,7 @@ describe('LicenseResolver', () => {
       JSON.stringify(testFixtures.makeLicense({ workspace_slug }))
     )
 
-    const storedTTL = mockRedis.getTTL(`license:${workspace_slug}`)
+    const storedTTL = await mockRedis.getTTL(`license:${workspace_slug}`)
     expect(storedTTL).toBeLessThanOrEqual(ttl)
     expect(storedTTL).toBeGreaterThan(0)
   })
@@ -95,9 +95,9 @@ describe('LicenseResolver', () => {
     const cacheKey = `license:${workspace_slug}`
 
     mockRedis.set(cacheKey, JSON.stringify(testFixtures.makeLicense()))
-    expect(mockRedis.get(cacheKey)).toBeDefined()
+    expect(await mockRedis.get(cacheKey)).toBeDefined()
 
     await resolver.invalidateCache(workspace_slug)
-    expect(mockRedis.get(cacheKey)).toBeNull()
+    expect(await mockRedis.get(cacheKey)).toBeNull()
   })
 })

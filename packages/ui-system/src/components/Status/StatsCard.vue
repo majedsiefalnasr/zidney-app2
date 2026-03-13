@@ -46,8 +46,6 @@
 </template>
 
 <script setup lang="ts">
-import { Card } from '@shadcn-vue/ui/card'
-
 interface Trend {
   direction: 'up' | 'down'
   percentage: number

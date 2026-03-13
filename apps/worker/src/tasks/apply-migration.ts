@@ -1,5 +1,5 @@
-import { createHash } from 'crypto'
-import { readFileSync } from 'fs'
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import type { Pool, PoolClient } from 'pg'
 
 /**
@@ -29,7 +29,7 @@ export interface ApplyMigrationTaskPayload {
 export async function applyMigration(
   payload: ApplyMigrationTaskPayload,
   tenantPool: Pool,
-  logger?: any
+  logger?: unknown
 ): Promise<{ success: boolean; message: string; error?: string }> {
   const {
     workspace_id,
@@ -80,8 +80,9 @@ export async function applyMigration(
     let migrationSQL: string
     try {
       migrationSQL = readFileSync(migration_file_path, 'utf-8')
-    } catch (err: any) {
-      throw new Error(`Failed to read migration file: ${migration_file_path} - ${err.message}`)
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      throw new Error(`Failed to read migration file: ${migration_file_path} - ${errMsg}`)
     }
 
     // Step 5: CRITICAL - Verify checksum (tampering detection)
@@ -119,11 +120,12 @@ export async function applyMigration(
     try {
       await client.query(cleanSQL)
       logger?.log('debug', 'Migration SQL executed successfully')
-    } catch (err: any) {
-      logger?.log('error', 'Migration SQL execution failed', {
-        error: err.message,
-        code: err.code,
-      })
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      // code may not exist on unknown errors; stringify instead
+      logger?.log?.('error', 'Migration SQL execution failed', {
+        error: errMsg,
+      } as Record<string, unknown>)
       throw err
     }
 
@@ -168,7 +170,7 @@ export async function applyMigration(
       success: true,
       message: `Migration applied: ${from_version} → ${to_version}`,
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Rollback on any error
     if (client) {
       try {
@@ -178,16 +180,16 @@ export async function applyMigration(
       }
     }
 
-    logger?.log('error', 'Migration failed', {
+    const errMsg = err instanceof Error ? err.message : String(err)
+    logger?.log?.('error', 'Migration failed', {
       task_id,
-      error: err.message,
-      code: err.code,
-    })
+      error: errMsg,
+    } as Record<string, unknown>)
 
     return {
       success: false,
       message: 'Migration failed',
-      error: err.message,
+      error: errMsg,
     }
   } finally {
     // Release connection

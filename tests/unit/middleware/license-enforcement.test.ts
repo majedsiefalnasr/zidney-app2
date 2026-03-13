@@ -25,6 +25,7 @@ function makeCtx(
     correlationId?: string
     resolver?: any
     versionValidator?: any
+    _license?: any
     license?: any
     transitionResult?: boolean
   } = {}
@@ -34,9 +35,10 @@ function makeCtx(
     correlationId = 'test-corr-001',
     resolver,
     versionValidator,
-    license,
+    _license,
     transitionResult = true,
   } = overrides
+  const providedLicense = (overrides as any).license ?? _license
 
   const jsonFn = vi.fn().mockReturnValue({})
   const contextMap: Record<string, unknown> = {
@@ -55,7 +57,10 @@ function makeCtx(
     req: {
       param: vi.fn().mockReturnValue(workspace_slug),
     },
-    get: vi.fn((key: string) => contextMap[key]),
+    get: vi.fn((key: string) => {
+      if (key === 'license') return providedLicense
+      return contextMap[key]
+    }),
     set: vi.fn(),
     json: jsonFn,
     app: { get: vi.fn() },
@@ -70,6 +75,7 @@ function makeResolver(
     errorCode?: string
     httpStatus?: number
     valid?: boolean
+    _license?: any
     license?: any
     schemaValid?: boolean
   } = {}
@@ -79,10 +85,11 @@ function makeResolver(
     errorCode = null,
     httpStatus = null,
     valid = true,
-    license = null,
+    _license = null,
     schemaValid = true,
   } = overrides
 
+  const providedLicense = (overrides as any).license ?? _license
   return {
     validateLicenseStatus: vi.fn().mockResolvedValue({
       valid,
@@ -91,7 +98,7 @@ function makeResolver(
       error_message: errorCode ? `${errorCode} error` : null,
       http_status: httpStatus,
     }),
-    getLicenseBySlug: vi.fn().mockResolvedValue(license),
+    getLicenseBySlug: vi.fn().mockResolvedValue(providedLicense),
     validateVersions: vi.fn().mockResolvedValue(schemaValid),
   }
 }

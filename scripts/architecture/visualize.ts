@@ -153,7 +153,7 @@ export function generateModuleGraph(
     }
   }
 
-  return lines.join('\n') + '\n'
+  return `${lines.join('\n')}\n`
 }
 
 /**
@@ -191,7 +191,7 @@ export function generateLayerDiagram(
     }
   }
 
-  return lines.join('\n') + '\n'
+  return `${lines.join('\n')}\n`
 }
 
 /**
@@ -309,7 +309,7 @@ function groupNodesByLayer(
   for (const n of sortedNodes) {
     const layer = layerMap.get(n) ?? 'unknown'
     if (!result.has(layer)) result.set(layer, [])
-    result.get(layer)!.push(n)
+    result.get(layer)?.push(n)
   }
 
   return result
@@ -370,7 +370,7 @@ function buildLayerMap(nodes: string[], archMap: ArchitectureMap | null): Map<st
   for (const node of nodes) {
     let layer: string
 
-    if (archMap && archMap.modules[node]) {
+    if (archMap?.modules[node]) {
       layer = archMap.modules[node].layer
     } else {
       layer = classifyLayerHeuristic(node)

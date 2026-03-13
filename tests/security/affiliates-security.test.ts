@@ -221,7 +221,7 @@ describe('Affiliate Security Tests', () => {
        * Rationale: Prevents information leakage if logs exposed
        */
       const fullCode = 'SPRING25'
-      const redactedCode = fullCode.substring(0, 3) + '*'
+      const redactedCode = `${fullCode.substring(0, 3)}*`
       expect(redactedCode).toBe('SPR*')
     })
 

@@ -64,7 +64,7 @@ describe('Area 1: Tenant Isolation (Unit)', () => {
     const mockTenantContext = {
       workspaceId: TEST_WORKSPACES.WS_A,
       database: {
-        query: async (sql: string) => ({ rows: [], rowCount: 0 }),
+        query: async (_sql: string) => ({ rows: [], rowCount: 0 }),
       },
     }
 

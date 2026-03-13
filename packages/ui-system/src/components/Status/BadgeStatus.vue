@@ -10,7 +10,6 @@
 </template>
 
 <script setup lang="ts">
-import { Badge } from '@shadcn-vue/ui/badge'
 import { computed } from 'vue'
 
 type StatusType = 'active' | 'inactive' | 'pending' | 'archived' | 'warning'
@@ -23,7 +22,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const badgeVariant = computed<'default' | 'secondary' | 'destructive' | 'outline'>(() => {
+const _badgeVariant = computed<'default' | 'secondary' | 'destructive' | 'outline'>(() => {
   const variantMap: Record<StatusType, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     active: 'default',
     inactive: 'secondary',

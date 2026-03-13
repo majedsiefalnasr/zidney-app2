@@ -8,10 +8,10 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { HttpClient } from '../http-client'
 
 describe('Area 3: License Engine Validation', () => {
-  let client: HttpClient
+  let _client: HttpClient
 
   beforeEach(() => {
-    client = new HttpClient()
+    _client = new HttpClient()
   })
 
   describe('Test 3.1: License State Machine', () => {

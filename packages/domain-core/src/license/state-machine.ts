@@ -92,7 +92,6 @@ export class StateTransition {
         return [LicenseStatus.ACTIVE, LicenseStatus.ARCHIVED]
       case LicenseStatus.ARCHIVED:
         return [LicenseStatus.ACTIVE, LicenseStatus.DELETED]
-      case LicenseStatus.DELETED:
       default:
         return []
     }

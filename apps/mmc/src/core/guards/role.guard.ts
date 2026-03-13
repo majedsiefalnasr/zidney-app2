@@ -44,7 +44,7 @@ export function createRoleGuard(options: {
 }): NavigationGuard {
   return (to: RouteLocationNormalized): RouteLocationRaw | boolean => {
     try {
-      const roles = to.meta['roles'] as string[] | undefined
+      const roles = to.meta.roles as string[] | undefined
 
       // Skip if no roles required for this route
       if (!roles || roles.length === 0) return true

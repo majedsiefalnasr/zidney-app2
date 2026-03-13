@@ -7,10 +7,10 @@ import { randomUUID } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('T051: InvitationService Unit Tests', () => {
-  let mockDb: any // Mocked database
+  let _mockDb: any // Mocked database
 
   beforeEach(() => {
-    mockDb = {
+    _mockDb = {
       query: vi.fn(),
     }
   })
@@ -21,9 +21,9 @@ describe('T051: InvitationService Unit Tests', () => {
 
   describe('sendInvitation()', () => {
     it('should create invitation with valid email and role', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected:
       // 1. Check email not already member (SELECT mmc_members WHERE email)
@@ -36,54 +36,54 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should return 409 if email already member', async () => {
-      const email = 'existing@example.com' // Already in mmc_members
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'existing@example.com' // Already in mmc_members
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: Throws error with code 'email_already_member'
       expect(true).toBe(true)
     })
 
     it('should return 409 if pending invitation exists for email', async () => {
-      const email = 'pending@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'pending@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: Throws error with code 'pending_invitation_exists'
       expect(true).toBe(true)
     })
 
     it('should return 400 if invalid role_id', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID() // Non-existent
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID() // Non-existent
+      const _invitedByUserId = randomUUID()
 
       // Expected: Throws error with code 'invalid_role_id'
       expect(true).toBe(true)
     })
 
     it('should return 400 if invalid email format', async () => {
-      const email = 'not-an-email'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'not-an-email'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: Throws error with code 'invalid_email_format'
       expect(true).toBe(true)
     })
 
     it('should generate secure 32-byte token', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: Token is crypto.randomBytes(32) (256-bit entropy)
       expect(true).toBe(true)
     })
 
     it('should store token_hash (SHA256), not plaintext', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected:
       // - DB stores token_hash = SHA256(token)
@@ -93,27 +93,27 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should set expires_at to 24 hours from now', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: expires_at = NOW() + 24 hours
       expect(true).toBe(true)
     })
 
     it('should set status to PENDING', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: status = 'PENDING'
       expect(true).toBe(true)
     })
 
     it('should send invitation email asynchronously', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: Email sent with:
       // - Accept link: /mmc/invitations/{token}/accept
@@ -123,18 +123,18 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should store invited_by for audit trail', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: invitation.invited_by = invitedByUserId
       expect(true).toBe(true)
     })
 
     it('should audit log invitation creation', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: Audit log entry with action_type: 'INVITATION_SENT'
       expect(true).toBe(true)
@@ -143,8 +143,8 @@ describe('T051: InvitationService Unit Tests', () => {
 
   describe('acceptInvitation()', () => {
     it('should accept invitation with valid token and password', async () => {
-      const token = 'valid-32-byte-token' // Plaintext from email
-      const password = 'NewPassword123!'
+      const _token = 'valid-32-byte-token' // Plaintext from email
+      const _password = 'NewPassword123!'
 
       // Expected:
       // 1. Hash token (SHA256)
@@ -160,24 +160,24 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should return 401 if token not found', async () => {
-      const token = 'invalid-token'
-      const password = 'NewPassword123!'
+      const _token = 'invalid-token'
+      const _password = 'NewPassword123!'
 
       // Expected: Throws error with code 'invalid_token'
       expect(true).toBe(true)
     })
 
     it('should return 401 if invitation expired', async () => {
-      const token = 'valid-but-expired-token' // Invitation created 24+ hours ago
-      const password = 'NewPassword123!'
+      const _token = 'valid-but-expired-token' // Invitation created 24+ hours ago
+      const _password = 'NewPassword123!'
 
       // Expected: Throws error with code 'invitation_expired'
       expect(true).toBe(true)
     })
 
     it('should return 401 if invitation already accepted', async () => {
-      const token = 'already-used-token'
-      const password = 'NewPassword123!'
+      const _token = 'already-used-token'
+      const _password = 'NewPassword123!'
 
       // Setup: invitation.status = 'ACCEPTED'
       // Expected: Throws error with code 'invitation_already_accepted'
@@ -185,17 +185,17 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should return 400 if password invalid', async () => {
-      const token = 'valid-token'
-      const password = 'weak'
+      const _token = 'valid-token'
+      const _password = 'weak'
 
       // Expected: Throws error with code 'invalid_password_complexity'
       expect(true).toBe(true)
     })
 
     it('should generate username from email prefix', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
-      const email = 'john.doe@company.com'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
+      const _email = 'john.doe@company.com'
 
       // Setup: Invitation for john.doe@company.com
       // Expected: Generated username like 'john.doe_abcd1234'
@@ -203,18 +203,18 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should append 8-character random suffix to username', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
-      const email = 'user@example.com'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
+      const _email = 'user@example.com'
 
       // Expected: username = 'user_' + 8 random chars
       expect(true).toBe(true)
     })
 
     it('should verify generated username uniqueness', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
-      const email = 'user@example.com'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
+      const _email = 'user@example.com'
 
       // If generated username already exists: retry suffix
       // Expected: No duplicate usernames
@@ -222,32 +222,32 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should hash password (bcrypt, cost=12)', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // Expected: password_hash starts with $2b$12$...
       expect(true).toBe(true)
     })
 
     it('should update invitation status to ACCEPTED', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // Expected: UPDATE mmc_member_invitations SET status = 'ACCEPTED'
       expect(true).toBe(true)
     })
 
     it('should set invitation accepted_at timestamp', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // Expected: accepted_at = NOW()
       expect(true).toBe(true)
     })
 
     it('should create member transaction atomically', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // If member creation fails: rollback invitation update
       // Expected: Invitation remains PENDING, no orphaned member
@@ -255,24 +255,24 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should audit log invitation acceptance', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // Expected: Audit log entry with action_type: 'INVITATION_ACCEPTED'
       expect(true).toBe(true)
     })
 
     it('should NOT log plaintext password', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // Expected: Plaintext password never logged
       expect(true).toBe(true)
     })
 
     it('should set new member token_version to 1', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // Expected: Created member.token_version = 1
       expect(true).toBe(true)
@@ -281,21 +281,21 @@ describe('T051: InvitationService Unit Tests', () => {
 
   describe('getInvitations()', () => {
     it('should return paginated list of invitations', async () => {
-      const filter = { limit: 10, offset: 0 }
+      const _filter = { limit: 10, offset: 0 }
 
       // Expected: Array of invitations with pagination metadata
       expect(true).toBe(true)
     })
 
     it('should filter by status (PENDING, ACCEPTED, EXPIRED)', async () => {
-      const filter = { status: 'PENDING', limit: 10, offset: 0 }
+      const _filter = { status: 'PENDING', limit: 10, offset: 0 }
 
       // Expected: Only invitations with matching status
       expect(true).toBe(true)
     })
 
     it('should NOT include plaintext token in response', async () => {
-      const filter = { limit: 10, offset: 0 }
+      const _filter = { limit: 10, offset: 0 }
 
       // Expected: Response includes invitation_id, email, role_id, status, expires_at
       // Expected: No token or token_hash
@@ -303,14 +303,14 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should include role_name augmentation', async () => {
-      const filter = { limit: 10, offset: 0 }
+      const _filter = { limit: 10, offset: 0 }
 
       // Expected: Each invitation includes role_name (not just role_id)
       expect(true).toBe(true)
     })
 
     it('should handle empty list', async () => {
-      const filter = { limit: 10, offset: 0 }
+      const _filter = { limit: 10, offset: 0 }
 
       // Setup: No invitations in DB
       // Expected: Empty array with total_count: 0
@@ -346,8 +346,8 @@ describe('T051: InvitationService Unit Tests', () => {
 
   describe('Expiration handling', () => {
     it('should accept invitation before 24-hour mark', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // Setup: Invitation created 23 hours 59 minutes ago
       // Expected: Accept succeeds
@@ -355,8 +355,8 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should reject invitation after 24-hour mark', async () => {
-      const token = 'expired-token'
-      const password = 'NewPassword123!'
+      const _token = 'expired-token'
+      const _password = 'NewPassword123!'
 
       // Setup: Invitation created 24 hours 1 minute ago
       // Expected: Throws error with code 'invitation_expired'
@@ -378,7 +378,7 @@ describe('T051: InvitationService Unit Tests', () => {
 
   describe('Resend invitation', () => {
     it('should resend invitation email to pending invitations', async () => {
-      const invitationId = randomUUID()
+      const _invitationId = randomUUID()
 
       // Call resendInvitation(invitationId)
       // Expected:
@@ -389,7 +389,7 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should NOT resend expired invitation', async () => {
-      const invitationId = randomUUID()
+      const _invitationId = randomUUID()
 
       // Setup: Invitation expired
       // Expected: Throws error with code 'invitation_expired'
@@ -397,7 +397,7 @@ describe('T051: InvitationService Unit Tests', () => {
     })
 
     it('should NOT resend accepted invitation', async () => {
-      const invitationId = randomUUID()
+      const _invitationId = randomUUID()
 
       // Setup: Invitation already accepted
       // Expected: Throws error or handles gracefully
@@ -407,17 +407,17 @@ describe('T051: InvitationService Unit Tests', () => {
 
   describe('Audit logging integration', () => {
     it('should log invitation send', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // Expected: Audit log entry with action_type: 'INVITATION_SENT'
       expect(true).toBe(true)
     })
 
     it('should log invitation accept', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // Expected: Audit log entry with action_type: 'INVITATION_ACCEPTED'
       // Expected: Related member_id in additional_data
@@ -432,8 +432,8 @@ describe('T051: InvitationService Unit Tests', () => {
 
   describe('Transactional safety', () => {
     it('should roll back member creation if accepted_at update fails', async () => {
-      const token = 'valid-token'
-      const password = 'NewPassword123!'
+      const _token = 'valid-token'
+      const _password = 'NewPassword123!'
 
       // If invitation update fails: rollback member
       // Expected: No member created, invitation remains PENDING
@@ -448,9 +448,9 @@ describe('T051: InvitationService Unit Tests', () => {
 
   describe('Email delivery integration', () => {
     it('should handle email send failure gracefully', async () => {
-      const email = 'newmember@example.com'
-      const roleId = randomUUID()
-      const invitedByUserId = randomUUID()
+      const _email = 'newmember@example.com'
+      const _roleId = randomUUID()
+      const _invitedByUserId = randomUUID()
 
       // If email fails: invitation still created (async flow)
       // Expected: Can retry via resend endpoint

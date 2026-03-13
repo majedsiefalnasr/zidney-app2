@@ -18,7 +18,7 @@ export async function executeMigrationPhase(
   masterDb: Pool,
   tenantDb: Pool,
   workspace_slug: string
-): Promise<{ success: boolean; error?: any }> {
+): Promise<{ success: boolean; error?: unknown }> {
   const { workspace_id, target_schema_version, correlation_id, operator_id } = job
 
   try {
@@ -63,13 +63,14 @@ export async function executeMigrationPhase(
     })
 
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const maybeErr = err as { errorCode?: string; message?: string } | undefined
     logger.error('migration_phase_failed', {
       service: 'worker-upgrade',
       correlation_id,
       workspace_id,
-      error_code: err.errorCode || 'MIGRATION_EXECUTION_FAILED',
-      error_message: err.message,
+      error_code: maybeErr?.errorCode ?? 'MIGRATION_EXECUTION_FAILED',
+      error_message: maybeErr?.message ?? String(err),
     })
 
     return { success: false, error: err }

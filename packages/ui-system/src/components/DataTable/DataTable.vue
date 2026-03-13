@@ -168,10 +168,6 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '@shadcn-vue/ui/button'
-import { Checkbox } from '@shadcn-vue/ui/checkbox'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shadcn-vue/ui/table'
-import { ChevronDown, ChevronUp, Loader } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 
 // STORIES & COMPOSABLES
@@ -249,11 +245,11 @@ const allRowsSelected = computed(
     displayedRows.value.every((row) => isRowSelected(getRowKey(row)))
 )
 
-const someRowsSelected = computed(
+const _someRowsSelected = computed(
   () => displayedRows.value.some((row) => isRowSelected(getRowKey(row))) && !allRowsSelected.value
 )
 
-const visibleColumns = computed(() => props.columns.filter((col) => col.id !== 'actions'))
+const _visibleColumns = computed(() => props.columns.filter((col) => col.id !== 'actions'))
 
 const totalPages = computed(() => Math.ceil(props.rows.length / pageSize.value))
 
@@ -266,7 +262,7 @@ const getRowKey = (row: Record<string, unknown>): string => {
 
 const isRowSelected = (rowKey: string): boolean => selectedRows.value.has(rowKey)
 
-const getCellValue = (row: Record<string, unknown>, column: Column): unknown => {
+const _getCellValue = (row: Record<string, unknown>, column: Column): unknown => {
   if (column.accessor) {
     return row[column.accessor]
   }
@@ -274,13 +270,13 @@ const getCellValue = (row: Record<string, unknown>, column: Column): unknown => 
 }
 
 // Methods: Row actions
-const isActionLoading = (rowKey: string, actionId: string): boolean => {
+const _isActionLoading = (rowKey: string, actionId: string): boolean => {
   return actionLoading.value.get(rowKey)?.has(actionId) ?? false
 }
 
 // EVENT HANDLERS
 // Methods: Row selection
-const handleSelectAll = (checked: boolean): void => {
+const _handleSelectAll = (checked: boolean): void => {
   if (checked) {
     displayedRows.value.forEach((row) => {
       selectedRows.value.add(getRowKey(row))
@@ -291,7 +287,7 @@ const handleSelectAll = (checked: boolean): void => {
   emit('selectAll', checked)
 }
 
-const handleSelectRow = (row: Record<string, unknown>, checked: boolean) => {
+const _handleSelectRow = (row: Record<string, unknown>, checked: boolean) => {
   const key = getRowKey(row)
   if (checked) {
     selectedRows.value.add(key)
@@ -302,7 +298,7 @@ const handleSelectRow = (row: Record<string, unknown>, checked: boolean) => {
 }
 
 // Methods: Sorting
-const handleSort = (columnId: string): void => {
+const _handleSort = (columnId: string): void => {
   const newDirection =
     sortState.value?.column === columnId && sortState.value?.direction === 'asc' ? 'desc' : 'asc'
 
@@ -310,7 +306,7 @@ const handleSort = (columnId: string): void => {
   emit('sort', columnId, newDirection)
 }
 
-const executeAction = async (row: Record<string, unknown>, action: RowAction) => {
+const _executeAction = async (row: Record<string, unknown>, action: RowAction) => {
   const rowKey = getRowKey(row)
   if (!actionLoading.value.has(rowKey)) {
     actionLoading.value.set(rowKey, new Set())
@@ -328,14 +324,14 @@ const executeAction = async (row: Record<string, unknown>, action: RowAction) =>
 }
 
 // Methods: Pagination
-const handlePreviousPage = (): void => {
+const _handlePreviousPage = (): void => {
   if (currentPageInternal.value > 1) {
     currentPageInternal.value--
     emit('update:page', currentPageInternal.value)
   }
 }
 
-const handleNextPage = () => {
+const _handleNextPage = () => {
   if (currentPageInternal.value < totalPages.value) {
     currentPageInternal.value++
     emit('update:page', currentPageInternal.value)

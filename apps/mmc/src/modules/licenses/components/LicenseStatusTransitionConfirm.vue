@@ -150,14 +150,6 @@ Integrations:
 </template>
 
 <script setup lang="ts">
-import { Button } from '@zidney/ui/components/shadcn-vue/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@zidney/ui/components/shadcn-vue/dialog'
 import { computed, ref } from 'vue'
 
 interface License {
@@ -189,19 +181,19 @@ const isConfirmationValid = computed(() => {
   return false
 })
 
-const confirmButtonText = computed(() => {
+const _confirmButtonText = computed(() => {
   if (props.targetStatus === 'ARCHIVED') return 'Archive License'
   if (props.targetStatus === 'DELETED') return 'Delete Forever'
   return 'Continue'
 })
 
-const onConfirm = () => {
+const _onConfirm = () => {
   if (isConfirmationValid.value) {
     emit('confirm')
   }
 }
 
-const onCancel = () => {
+const _onCancel = () => {
   confirmationInput.value = ''
   emit('cancel')
 }

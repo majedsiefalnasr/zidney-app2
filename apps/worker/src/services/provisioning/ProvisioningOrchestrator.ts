@@ -67,7 +67,7 @@ export class ProvisioningOrchestrator {
   async provision(job: ProvisioningJob): Promise<ProvisioningResult> {
     const start_time = Date.now()
     let steps_completed = 0
-    let lock_released: any = null
+    let lock_released: unknown = null
 
     try {
       // Step 1: Validate job, license, slug
@@ -138,8 +138,8 @@ export class ProvisioningOrchestrator {
 
       // Step 9: Release lock and complete
       logger.info('provisioning_step', { step: 9, description: 'Completing provisioning' })
-      if (lock_released) {
-        await lock_released()
+      if (typeof lock_released === 'function') {
+        await (lock_released as () => Promise<void>)()
       }
       steps_completed = 9
 
@@ -279,7 +279,7 @@ export class ProvisioningOrchestrator {
   private async rollbackProvisioning(
     job: ProvisioningJob,
     steps_completed: number,
-    _error: any
+    _error: unknown
   ): Promise<void> {
     logger.info('provisioning_rollback_started', { workspace_slug: job.workspace_slug })
 

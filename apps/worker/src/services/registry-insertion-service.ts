@@ -26,9 +26,18 @@ export interface RegistryInsertionResult {
  */
 export class RegistryInsertionService {
   private masterDb: Pool
-  private logger?: any
+  private logger?: {
+    logStep?: (step: string, msg: string, meta?: Record<string, unknown>) => void
+    logError?: (msg: string, err?: Error, meta?: Record<string, unknown>) => void
+  }
 
-  constructor(masterDb: Pool, logger?: any) {
+  constructor(
+    masterDb: Pool,
+    logger?: {
+      logStep?: (step: string, msg: string, meta?: Record<string, unknown>) => void
+      logError?: (msg: string, err?: Error, meta?: Record<string, unknown>) => void
+    }
+  ) {
     this.masterDb = masterDb
     this.logger = logger
   }
@@ -95,7 +104,10 @@ export class RegistryInsertionService {
  */
 export function createRegistryInsertionService(
   masterDb: Pool,
-  logger?: any
+  logger?: {
+    logStep?: (step: string, msg: string, meta?: Record<string, unknown>) => void
+    logError?: (msg: string, err?: Error, meta?: Record<string, unknown>) => void
+  }
 ): RegistryInsertionService {
   return new RegistryInsertionService(masterDb, logger)
 }

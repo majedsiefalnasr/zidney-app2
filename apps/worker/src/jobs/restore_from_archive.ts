@@ -11,7 +11,12 @@ const logger = createLogger('restore-from-archive-job')
  * Retry: max_retries=3, exponential backoff [1s, 2s, 4s]
  * Idempotent: Multiple submissions before first completes both succeed with same end state
  */
-export async function restoreFromArchiveJob(payload: any, jobId: string) {
+export interface RestoreFromArchivePayload {
+  license_id: string
+  snapshot_id: string
+}
+
+export async function restoreFromArchiveJob(payload: RestoreFromArchivePayload, jobId: string) {
   const { license_id, snapshot_id } = payload
 
   try {
@@ -37,16 +42,17 @@ export async function restoreFromArchiveJob(payload: any, jobId: string) {
       restored_at: new Date(),
       row_count: 0, // TODO: Calculate
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
     logger.error(
       {
         job_id: jobId,
         license_id,
-        error: error.message,
+        error: errMsg,
         action: 'restore_failed',
       },
       'Restore failed'
     )
-    return { success: false, error: error.message }
+    return { success: false, error: errMsg }
   }
 }

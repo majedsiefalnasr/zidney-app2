@@ -229,7 +229,7 @@ describe('T060: Error Handling Integration Tests', () => {
       await dbClient.query(
         `INSERT INTO licenses (id, product_id, workspace_id, status, created_at, updated_at)
          VALUES ($1, $2, $3, $4, NOW(), NOW())`,
-        ['lic-' + Math.random().toString(36), product.id, ctx.workspaceId, ProductStatus.ACTIVE]
+        [`lic-${Math.random().toString(36)}`, product.id, ctx.workspaceId, ProductStatus.ACTIVE]
       )
 
       try {
@@ -462,5 +462,5 @@ describe('T060: Error Handling Integration Tests', () => {
 })
 
 // Helper type for context
-type TestContextWithDatabase = TestContext & { masterDb: any }
-const dbContext = null // Placeholder for type checking
+type _TestContextWithDatabase = TestContext & { masterDb: any }
+const _dbContext = null // Placeholder for type checking

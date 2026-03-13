@@ -2,26 +2,11 @@
 import { getLocalTimeZone, today } from '@internationalized/date'
 import { createReusableTemplate, reactiveOmit, useVModel } from '@vueuse/core'
 import type { CalendarRootEmits, CalendarRootProps, DateValue } from 'reka-ui'
-import { CalendarRoot, useDateFormatter, useForwardPropsEmits } from 'reka-ui'
-import { createYear, createYearRange, toDate } from 'reka-ui/date'
+import { useDateFormatter, useForwardPropsEmits } from 'reka-ui'
+import { createYearRange } from 'reka-ui/date'
 import type { HTMLAttributes, Ref } from 'vue'
 import { computed, toRaw } from 'vue'
-import { cn } from '@/lib/utils'
-import { NativeSelect, NativeSelectOption } from '@/registry/new-york-v4/ui/native-select'
 import type { LayoutTypes } from '.'
-import {
-  CalendarCell,
-  CalendarCellTrigger,
-  CalendarGrid,
-  CalendarGridBody,
-  CalendarGridHead,
-  CalendarGridRow,
-  CalendarHeadCell,
-  CalendarHeader,
-  CalendarHeading,
-  CalendarNextButton,
-  CalendarPrevButton,
-} from '.'
 
 const props = withDefaults(
   defineProps<
@@ -40,14 +25,14 @@ const emits = defineEmits<CalendarRootEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class', 'layout', 'placeholder')
 
-const placeholder = useVModel(props, 'placeholder', emits, {
+const _placeholder = useVModel(props, 'placeholder', emits, {
   passive: true,
   defaultValue: props.defaultPlaceholder ?? today(getLocalTimeZone()),
 }) as Ref<DateValue>
 
-const formatter = useDateFormatter(props.locale ?? 'en')
+const _formatter = useDateFormatter(props.locale ?? 'en')
 
-const yearRange = computed(() => {
+const _yearRange = computed(() => {
   return (
     props.yearRange ??
     createYearRange({
@@ -68,14 +53,14 @@ const yearRange = computed(() => {
   )
 })
 
-const [DefineMonthTemplate, ReuseMonthTemplate] = createReusableTemplate<{
+const [_DefineMonthTemplate, _ReuseMonthTemplate] = createReusableTemplate<{
   date: DateValue
 }>()
-const [DefineYearTemplate, ReuseYearTemplate] = createReusableTemplate<{
+const [_DefineYearTemplate, _ReuseYearTemplate] = createReusableTemplate<{
   date: DateValue
 }>()
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const _forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

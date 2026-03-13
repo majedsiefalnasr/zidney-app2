@@ -14,7 +14,7 @@ export interface TenantResolverContext {
 }
 
 // In-memory cache with TTL for platform settings
-const platformSettingsCache = new Map<string, { data: any; expiry: number }>()
+const platformSettingsCache = new Map<string, { data: unknown; expiry: number }>()
 const CACHE_TTL_MS = 60 * 1000 // 60 seconds
 
 /**
@@ -33,7 +33,7 @@ export async function validateSchemaCompatibility(
 
     const cached = platformSettingsCache.get('minimum_supported_schema_version')
     if (cached && cached.expiry > Date.now()) {
-      minimumSupported = cached.data
+      minimumSupported = cached.data as string
     } else {
       const result = await masterDb.query(
         `SELECT minimum_supported_schema_version FROM platform_settings 
@@ -69,12 +69,12 @@ export async function validateSchemaCompatibility(
     const compatible = isCompatible(tenantVersion, minimumSupported)
 
     if (!compatible) {
-      const err = new Error(
+      const compatErr = new Error(
         `Workspace schema version ${tenantVersion} below minimum supported ${minimumSupported}. Upgrade required.`
-      )
-      ;(err as any).statusCode = 426
-      ;(err as any).errorCode = 'SCHEMA_VERSION_MISMATCH'
-      throw err
+      ) as Error & { statusCode?: number; errorCode?: string }
+      compatErr.statusCode = 426
+      compatErr.errorCode = 'SCHEMA_VERSION_MISMATCH'
+      throw compatErr
     }
 
     logger.debug('schema_version_check_passed', {
@@ -83,19 +83,20 @@ export async function validateSchemaCompatibility(
       minimum_version: minimumSupported,
       compatible: true,
     })
-  } catch (err: any) {
-    if (err.statusCode === 426) {
-      throw err
+  } catch (err: unknown) {
+    // If this is already a compatibility error, rethrow
+    if ((err as { statusCode?: number }).statusCode === 426) {
+      throw err as Error
     }
 
     logger.error('schema_version_check_failed', {
       workspace_id: tenantContext.workspace_id,
-      error_message: err.message,
+      error_message: (err as Error).message,
     })
 
     // Re-throw as compatibility error
-    const err426 = new Error(err.message)
-    ;(err426 as any).statusCode = 500
+    const err426 = new Error((err as Error).message)
+    ;(err426 as { statusCode?: number }).statusCode = 500
     throw err426
   }
 }

@@ -34,9 +34,24 @@ export class RetryEnqueueService {
   private redis: Redis
   private queueName: string
   private dlqName: string
-  private logger?: any
+  private logger?: {
+    logRetry?: (msg: string, meta?: Record<string, unknown>) => void
+    logWarn?: (msg: string, meta?: Record<string, unknown>) => void
+    logError?: (msg: string, err?: Error, meta?: Record<string, unknown>) => void
+    logStep?: (step: string, msg: string, meta?: Record<string, unknown>) => void
+  }
 
-  constructor(redis: Redis, queueName: string, dlqName: string, logger?: any) {
+  constructor(
+    redis: Redis,
+    queueName: string,
+    dlqName: string,
+    logger?: {
+      logRetry?: (msg: string, meta?: Record<string, unknown>) => void
+      logWarn?: (msg: string, meta?: Record<string, unknown>) => void
+      logError?: (msg: string, err?: Error, meta?: Record<string, unknown>) => void
+      logStep?: (step: string, msg: string, meta?: Record<string, unknown>) => void
+    }
+  ) {
     this.redis = redis
     this.queueName = queueName
     this.dlqName = dlqName
@@ -229,7 +244,12 @@ export function createRetryEnqueueService(
   redis: Redis,
   queueName: string,
   dlqName: string,
-  logger?: any
+  logger?: {
+    logRetry?: (msg: string, meta?: Record<string, unknown>) => void
+    logWarn?: (msg: string, meta?: Record<string, unknown>) => void
+    logError?: (msg: string, err?: Error, meta?: Record<string, unknown>) => void
+    logStep?: (step: string, msg: string, meta?: Record<string, unknown>) => void
+  }
 ): RetryEnqueueService {
   return new RetryEnqueueService(redis, queueName, dlqName, logger)
 }

@@ -12,7 +12,8 @@
  * - Email verified: false (admin must verify email)
  */
 
-import * as crypto from 'crypto'
+import * as crypto from 'node:crypto'
+import type { Logger } from '@zidney/logger'
 import type { Pool } from 'pg'
 
 /**
@@ -31,9 +32,9 @@ export interface AdminAccountResult {
  * Admin Account Service
  */
 export class AdminAccountService {
-  private logger?: any
+  private logger?: Logger
 
-  constructor(logger?: any) {
+  constructor(logger?: Logger) {
     this.logger = logger
   }
 
@@ -148,6 +149,6 @@ export class AdminAccountService {
 /**
  * Factory to create admin account service
  */
-export function createAdminAccountService(logger?: any): AdminAccountService {
+export function createAdminAccountService(logger?: Logger): AdminAccountService {
   return new AdminAccountService(logger)
 }

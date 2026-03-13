@@ -16,14 +16,6 @@ import { describe, expect, it } from 'vitest'
 
 const API_BASE = 'http://localhost:3000/api/mmc/dashboard'
 
-interface ApiResponse<T> {
-  success: boolean
-  data?: T
-  error?: { code: string; message: string }
-  timestamp: string
-  correlationId: string
-}
-
 async function makeRequest(method: string, endpoint: string, token: string, body?: unknown) {
   const url = `${API_BASE}${endpoint}`
 
@@ -37,7 +29,7 @@ async function makeRequest(method: string, endpoint: string, token: string, body
   })
 
   const contentType = response.headers.get('content-type')
-  let data
+  let data: unknown = null
 
   if (contentType?.includes('application/json')) {
     data = await response.json()

@@ -1210,7 +1210,7 @@ export function generateDependencyGraph(): void {
         else if (seg !== '.') normalized.push(seg)
       }
       const joined = normalized.join('/')
-      return moduleKeys.find((k) => joined === k || joined.startsWith(k + '/')) ?? null
+      return moduleKeys.find((k) => joined === k || joined.startsWith(`${k}/`)) ?? null
     }
     // Workspace package aliases (e.g. @zidney/types → packages/types)
     if (specifier.startsWith('@zidney/')) {
@@ -1219,7 +1219,7 @@ export function generateDependencyGraph(): void {
       return moduleKeys.includes(candidate) ? candidate : null
     }
     // Direct module-path references (e.g. apps/api, packages/logger)
-    const direct = moduleKeys.find((k) => specifier === k || specifier.startsWith(k + '/'))
+    const direct = moduleKeys.find((k) => specifier === k || specifier.startsWith(`${k}/`))
     if (direct) return direct
     // External package (not a monorepo module)
     return null
@@ -1227,9 +1227,7 @@ export function generateDependencyGraph(): void {
 
   // Determine the layer for a module from the architecture map
   function getModuleLayer(modulePath: string): string {
-    return archMap && archMap.modules
-      ? (archMap.modules[modulePath]?.layer ?? 'unknown')
-      : 'unknown'
+    return archMap?.modules ? (archMap.modules[modulePath]?.layer ?? 'unknown') : 'unknown'
   }
 
   // Recursively enumerate .ts/.tsx/.vue files, excluding node_modules and test files
@@ -1333,7 +1331,7 @@ export function generateDependencyGraph(): void {
   }
 
   const outPath = join(AI_CONTEXT_DIR, 'ai-dependency-graph.json')
-  writeFileSync(outPath, JSON.stringify(output, null, 2) + '\n', 'utf-8')
+  writeFileSync(outPath, `${JSON.stringify(output, null, 2)}\n`, 'utf-8')
   console.log(`[GEN-GRAPH] Written: ${outPath}`)
   console.log(`[GEN-GRAPH] Modules: ${moduleKeys.length}`)
 }

@@ -1,14 +1,14 @@
 import { logger } from '@zidney/logger'
 import type { GradingResult } from '../../types/job-schema'
 
-type DbRow = Record<string, any>
+type DbRow = Record<string, unknown>
 type QueryResult = { rows: DbRow[] }
 type DbClient = {
-  query: (queryText: string, values?: any[]) => Promise<QueryResult>
+  query: (queryText: string, values?: unknown[]) => Promise<QueryResult>
   release: () => void
 }
 type DbAdapter = {
-  query: (queryText: string, values?: any[]) => Promise<QueryResult>
+  query: (queryText: string, values?: unknown[]) => Promise<QueryResult>
   connect: () => Promise<DbClient>
 }
 
@@ -71,7 +71,18 @@ export async function persistGradingResult(
       throw new Error(`Attempt not found: ${attemptId}`)
     }
 
-    const attempt = attemptResult.rows[0]!
+    const attemptRow = attemptResult.rows[0]
+    if (!attemptRow) {
+      await client.query('ROLLBACK')
+      throw new Error(`Attempt not found: ${attemptId}`)
+    }
+
+    const attempt = attemptRow as {
+      id: string
+      workspace_id: string
+      user_id: string
+      status: string
+    }
 
     if (attempt.status === 'COMPLETED') {
       await client.query('ROLLBACK')
@@ -185,8 +196,9 @@ export async function verifyResultPersistence(
     if (result.rows.length === 0) {
       return false
     }
-
-    const attempt = result.rows[0]!
+    const attemptRow = result.rows[0]
+    if (!attemptRow) return false
+    const attempt = attemptRow as { status?: string; grading_result?: unknown }
     return attempt.status === 'COMPLETED' && attempt.grading_result !== null
   } catch (error) {
     logger.error(`Result verification error`, {
