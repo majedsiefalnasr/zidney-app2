@@ -64,15 +64,6 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '@shadcn-vue/ui/button'
-import { Input } from '@shadcn-vue/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@shadcn-vue/ui/select'
 import { ref, watch } from 'vue'
 
 interface Props {
@@ -113,19 +104,19 @@ watch(
   }
 )
 
-const handlePrevious = (): void => {
+const _handlePrevious = (): void => {
   if (props.currentPage > 1) {
     emit('page-changed', props.currentPage - 1)
   }
 }
 
-const handleNext = (): void => {
+const _handleNext = (): void => {
   if (props.currentPage < props.totalPages) {
     emit('page-changed', props.currentPage + 1)
   }
 }
 
-const handlePageChange = (): void => {
+const _handlePageChange = (): void => {
   if (inputPage.value >= 1 && inputPage.value <= props.totalPages) {
     emit('page-changed', inputPage.value)
   } else {
@@ -133,7 +124,7 @@ const handlePageChange = (): void => {
   }
 }
 
-const handlePageSizeChange = (): void => {
+const _handlePageSizeChange = (): void => {
   emit('page-size-changed', parseInt(selectedPageSize.value, 10))
 }
 </script>

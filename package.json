@@ -50,6 +50,8 @@
     "arch:guard": "bun scripts/architecture-guard/architecture-guard.ts",
     "arch:guard:ci": "bun scripts/architecture-guard/architecture-guard.ts --ci",
     "arch:guard:changed": "bun scripts/architecture-guard/architecture-guard.ts --changed",
+    "arch:health": "bun scripts/architecture-health/architecture-health.ts",
+    "arch:health:ci": "bun scripts/architecture-health/architecture-health.ts --ci",
     "arch:validate-brain": "bun scripts/validate-architecture-brain.ts",
     "arch:visualize": "bun scripts/architecture/visualize.ts",
     "type-safety-guard": "bun scripts/type-safety-guard.ts",

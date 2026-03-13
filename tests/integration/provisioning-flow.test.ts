@@ -13,7 +13,7 @@ import { E2EIntegrationTestSetup } from '../../tests/integration/provisioning-e2
 
 describe('End-to-End Provisioning Flow', () => {
   let setup: E2EIntegrationTestSetup
-  let licenseId: string
+  let _licenseId: string
 
   beforeEach(async () => {
     setup = new E2EIntegrationTestSetup()

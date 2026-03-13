@@ -69,7 +69,7 @@ export function getJobLogger(job: JobEnvelope): Logger {
  * @param context - Context fields to inject
  * @returns Child logger
  */
-export function createChildLogger(context: Record<string, any>): Logger {
+export function createChildLogger(context: Record<string, unknown>): Logger {
   return logger.child(context)
 }
 

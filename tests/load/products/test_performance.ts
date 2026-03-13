@@ -269,7 +269,7 @@ describe('T068-T071: Load and Performance Tests', () => {
       )
 
       const batch2Results = await Promise.all(batch2Promises)
-      const batch2Succeeded = batch2Results.filter((r) => r && r.id).length
+      const batch2Succeeded = batch2Results.filter((r) => r?.id).length
       expect(batch2Succeeded).toBe(5)
     })
 
@@ -374,7 +374,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         limit: 10,
         offset: 10,
       })
-      const page3 = await productService.listProducts(dbClient, {
+      const _page3 = await productService.listProducts(dbClient, {
         limit: 10,
         offset: 20,
       })
@@ -418,7 +418,7 @@ describe('T068-T071: Load and Performance Tests', () => {
       // Measure filter performance
       const startTime = performance.now()
 
-      const result = await productService.listProducts(dbClient, {
+      const _result = await productService.listProducts(dbClient, {
         limit: 100,
       })
 
@@ -505,11 +505,11 @@ describe('T068-T071: Load and Performance Tests', () => {
         limit: 10,
         offset: 0,
       })
-      const page2 = await productService.getProductAuditLog(dbClient, product.id, {
+      const _page2 = await productService.getProductAuditLog(dbClient, product.id, {
         limit: 10,
         offset: 10,
       })
-      const page3 = await productService.getProductAuditLog(dbClient, product.id, {
+      const _page3 = await productService.getProductAuditLog(dbClient, product.id, {
         limit: 10,
         offset: 20,
       })

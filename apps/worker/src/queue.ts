@@ -11,20 +11,21 @@
  * Per clarification Q5: Payload hash computed at enqueue, verified at dequeue.
  */
 
+import { randomUUID } from 'node:crypto'
 import { computeJobPayloadHash } from '@zidney/domain-core/job-hash'
 import { logger } from '@zidney/logger'
 import type { JobEnvelope } from '@zidney/types/job-envelope'
-import { randomUUID } from 'crypto'
+import type { RedisClientType } from 'redis'
 
 /** Redis client (injected from service setup) */
-let redisClient: any
+let redisClient: RedisClientType | null = null
 
 /**
  * Initialize queue service with Redis client.
  *
  * @param redis - Redis client instance
  */
-export function initializeQueueService(redis: any): void {
+export function initializeQueueService(redis: RedisClientType): void {
   redisClient = redis
 }
 
@@ -47,7 +48,7 @@ export function initializeQueueService(redis: any): void {
  * @returns Generated job_id
  * @throws Error if enqueue fails
  */
-export async function enqueueJob<T extends Record<string, any>>(
+export async function enqueueJob<T extends Record<string, unknown>>(
   job_type: string,
   payload: T,
   request_id: string,
@@ -75,6 +76,7 @@ export async function enqueueJob<T extends Record<string, any>>(
   }
 
   try {
+    if (!redisClient) throw new Error('Redis client not initialized')
     // Enqueue to Redis queue (list-based FIFO)
     const queueKey = `queue:${job_type}`
     await redisClient.lpush(queueKey, JSON.stringify(envelope))

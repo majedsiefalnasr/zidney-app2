@@ -51,15 +51,16 @@ export function deserializeFilters(encoded: string): Filter[] {
     }
 
     // Map back to full Filter objects
-    const filters: Filter[] = data.filters.map((f: any) => {
-      if (!f.f || !f.op) {
+    const filters: Filter[] = data.filters.map((f: unknown) => {
+      const fi = f as { f?: string; op?: string; v?: unknown }
+      if (!fi.f || !fi.op) {
         throw new Error('Invalid filter: missing fieldId or operator')
       }
 
       return {
-        fieldId: f.f,
-        operator: f.op,
-        value: f.v,
+        fieldId: fi.f,
+        operator: fi.op,
+        value: fi.v,
       }
     })
 
@@ -116,7 +117,7 @@ export function getFilterQueryParam(filters: Filter[]): string {
   try {
     const serialized = serializeFilters(filters)
     return `filters=${encodeURIComponent(serialized)}`
-  } catch (error) {
+  } catch (_error) {
     return ''
   }
 }
@@ -134,7 +135,7 @@ export function parseFilterQueryParam(queryParam: string): Filter[] {
 
     const decoded = decodeURIComponent(encoded)
     return deserializeFilters(decoded)
-  } catch (error) {
+  } catch (_error) {
     return []
   }
 }
@@ -161,20 +162,21 @@ export function getSerializationInfo(filters: Filter[]): {
     serializedSize,
     urlEncodedSize,
     isOverflow: checkUrlOverflow(filters),
-    compressionRatio: rawSize > 0 ? ((serializedSize / rawSize).toFixed(2) as any) : 0,
+    compressionRatio: rawSize > 0 ? Number((serializedSize / rawSize).toFixed(2)) : 0,
   }
 }
 
 /**
  * Validate filter array before serialization
  */
-export function validateFilters(filters: any[]): boolean {
+export function validateFilters(filters: unknown[]): boolean {
   if (!Array.isArray(filters)) return false
 
   return filters.every((f) => {
     if (!f || typeof f !== 'object') return false
-    if (!f.fieldId || !f.operator) return false
-    if (f.value === undefined && f.operator !== 'is_empty' && f.operator !== 'is_not_empty') {
+    const obj = f as { fieldId?: unknown; operator?: unknown; value?: unknown }
+    if (typeof obj.fieldId !== 'string' || typeof obj.operator !== 'string') return false
+    if (obj.value === undefined && obj.operator !== 'is_empty' && obj.operator !== 'is_not_empty') {
       return false
     }
     return true
@@ -186,9 +188,9 @@ export function validateFilters(filters: any[]): boolean {
  * Useful for normalizing values before comparison
  */
 export function filterByColumnType(
-  value: any,
+  value: unknown,
   fieldType: 'text' | 'select' | 'date' | 'boolean' | 'number'
-): any {
+): unknown {
   if (value === null || value === undefined) return value
 
   switch (fieldType) {
@@ -199,7 +201,7 @@ export function filterByColumnType(
     case 'boolean':
       return value === true || value === 'true' || value === 1
     case 'date':
-      return new Date(value).toISOString()
+      return new Date(String(value)).toISOString()
     case 'select':
       return value
     default:
@@ -214,7 +216,8 @@ export function areFiltersEqual(filters1: Filter[], filters2: Filter[]): boolean
   if (filters1.length !== filters2.length) return false
 
   return filters1.every((f1, index) => {
-    const f2 = filters2[index]!
+    const f2 = filters2[index]
+    if (!f2) return false
     return (
       f1.fieldId === f2.fieldId &&
       f1.operator === f2.operator &&

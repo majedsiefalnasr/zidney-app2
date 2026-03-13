@@ -26,8 +26,8 @@ export function validateProductVersionCompatibility(
     const error = new Error(
       `Migration ${migrationFile.filename} requires product version >= ${requiredProductVersion}. Current: ${currentProductVersion}`
     )
-    ;(error as any).errorCode = 'PRODUCT_VERSION_INCOMPATIBLE'
-    ;(error as any).statusCode = 400
+    ;(error as { errorCode?: string }).errorCode = 'PRODUCT_VERSION_INCOMPATIBLE'
+    ;(error as { statusCode?: number }).statusCode = 400
     throw error
   }
 }

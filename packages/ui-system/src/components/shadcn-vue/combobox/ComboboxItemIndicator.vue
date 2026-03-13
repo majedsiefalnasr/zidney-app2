@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { reactiveOmit } from '@vueuse/core'
 import type { ComboboxItemIndicatorProps } from 'reka-ui'
-import { ComboboxItemIndicator, useForwardProps } from 'reka-ui'
+import { useForwardProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 
 const props = defineProps<ComboboxItemIndicatorProps & { class?: HTMLAttributes['class'] }>()
 
 const delegatedProps = reactiveOmit(props, 'class')
 
-const forwarded = useForwardProps(delegatedProps)
+const _forwarded = useForwardProps(delegatedProps)
 </script>
 
 <template>

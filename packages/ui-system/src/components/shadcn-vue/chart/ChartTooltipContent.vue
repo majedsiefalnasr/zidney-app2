@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
 import { computed } from 'vue'
-import { cn } from '@/lib/utils'
 import type { ChartConfig } from '.'
 
 const props = withDefaults(
@@ -12,7 +11,7 @@ const props = withDefaults(
     nameKey?: string
     labelKey?: string
     labelFormatter?: (d: number | Date) => string
-    payload?: Record<string, any>
+    payload?: Record<string, unknown>
     config?: ChartConfig
     class?: HTMLAttributes['class']
     color?: string
@@ -28,7 +27,7 @@ const props = withDefaults(
 // TODO: currently we use `createElement` and `render` to render the
 // const chartContext = useChart(null)
 
-const payload = computed(() => {
+const _payload = computed(() => {
   return Object.entries(props.payload)
     .map(([key, value]) => {
       // const key = `${props.nameKey || item.name || item.dataKey || "value"}`
@@ -40,10 +39,10 @@ const payload = computed(() => {
     .filter((i) => i.itemConfig)
 })
 
-const nestLabel = computed(
+const _nestLabel = computed(
   () => Object.keys(props.payload).length === 1 && props.indicator !== 'dot'
 )
-const tooltipLabel = computed(() => {
+const _tooltipLabel = computed(() => {
   if (props.hideLabel) return null
   if (props.labelFormatter && props.x !== undefined) {
     return props.labelFormatter(props.x)

@@ -133,7 +133,7 @@ describe('T054: Get Single Product Integration Tests', () => {
 
   describe('Error handling', () => {
     it('should throw error for non-existent product ID', async () => {
-      const fakeId = 'fake-id-' + Math.random().toString(36).substring(7)
+      const fakeId = `fake-id-${Math.random().toString(36).substring(7)}`
 
       try {
         await productService.getProductById(dbClient, fakeId)

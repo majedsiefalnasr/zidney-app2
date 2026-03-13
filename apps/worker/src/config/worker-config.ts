@@ -29,7 +29,7 @@ const getEnv = (key: string, defaultValue?: string): string => {
   if (!value && defaultValue === undefined) {
     throw new Error(`Environment variable ${key} not set`)
   }
-  return value || defaultValue!
+  return value ?? (defaultValue as string)
 }
 
 /**
@@ -174,7 +174,7 @@ export function validateWorkerConfig(): void {
 /**
  * Get configuration summary for logging
  */
-export function getConfigSummary(): Record<string, any> {
+export function getConfigSummary(): Record<string, unknown> {
   return {
     service: WORKER_CONFIG.SERVICE_NAME,
     version: WORKER_CONFIG.SERVICE_VERSION,
@@ -237,7 +237,7 @@ export const QUEUE_CONFIG = {
  * Logging Configuration
  */
 export const LOG_CONFIG = {
-  LEVEL: WORKER_CONFIG.LOG_LEVEL as any,
+  LEVEL: WORKER_CONFIG.LOG_LEVEL as string,
   FORMAT: WORKER_CONFIG.LOG_FORMAT,
   SERIALIZERS: {
     error: (err: Error) => ({

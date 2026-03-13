@@ -61,8 +61,6 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Badge } from '../shadcn-vue/badge'
-import { Button } from '../shadcn-vue/button'
 
 interface NavItem {
   id: string
@@ -109,12 +107,12 @@ watch(
   }
 )
 
-const toggleCollapse = () => {
+const _toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
   emit('collapse-toggled', isCollapsed.value)
 }
 
-const handleItemClick = (item: NavItem) => {
+const _handleItemClick = (item: NavItem) => {
   if (!item.disabled) {
     emit('item-clicked', item)
   }

@@ -18,14 +18,14 @@ describe('Area 2: Provisioning Validation', () => {
     dbManager = createDbManager()
     masterDb = await dbManager.getMasterDb()
     workspace = await seedWorkspace(masterDb, {
-      slug: 'test-provision-' + Date.now(),
+      slug: `test-provision-${Date.now()}`,
     })
   })
 
   afterEach(async () => {
     try {
       await cleanupAllFixtures(masterDb)
-    } catch (error) {
+    } catch (_error) {
       // Ignore
     }
   })
@@ -52,7 +52,7 @@ describe('Area 2: Provisioning Validation', () => {
    */
   it('Test 2.2: Enforces distributed lock under concurrency', async () => {
     const concurrentWorkspace = await seedWorkspace(masterDb, {
-      slug: 'test-concurrent-' + Date.now(),
+      slug: `test-concurrent-${Date.now()}`,
     })
 
     // Simulate 5 concurrent provisioning requests
@@ -89,13 +89,13 @@ describe('Area 2: Provisioning Validation', () => {
    */
   it('Test 2.3: Provisions with complete baseline schema', async () => {
     const testWs = await seedWorkspace(masterDb, {
-      slug: 'test-schema-' + Date.now(),
+      slug: `test-schema-${Date.now()}`,
     })
 
     await dbManager.createTenantDatabase(testWs.slug)
 
     // Verify baseline tables exist
-    const expectedTables = ['users', 'students', 'attempts', 'questions', 'schema_version']
+    const _expectedTables = ['users', 'students', 'attempts', 'questions', 'schema_version']
 
     // For mock/test purposes, we'll just verify the workspace is created
     const result = await masterDb.query('SELECT id FROM workspaces WHERE id = $1', [testWs.id])

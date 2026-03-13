@@ -42,7 +42,7 @@ describe('T092: CSRF Protection', () => {
   })
 
   it('should accept POST with valid CSRF token', async () => {
-    const validToken = 'csrf-token-' + Math.random().toString(36).substring(7)
+    const validToken = `csrf-token-${Math.random().toString(36).substring(7)}`
     client.headers['X-CSRF-Token'] = validToken
     // Assume token is validated server-side
   })

@@ -1,6 +1,6 @@
+import { execSync } from 'node:child_process'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { logger } from '@zidney/logger'
-import { execSync } from 'child_process'
 
 export interface ArchiveSnapshotJobPayload {
   type: 'ARCHIVE_SNAPSHOT'
@@ -107,12 +107,13 @@ export async function archiveSnapshotJob(
         `pg_dump --format=plain --no-privileges --no-password ${tenantDbName} > ${localDumpPath}`,
         { timeout: 300000 } // 5 minutes
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error)
       logger.error(
         {
           action: 'archive_snapshot_dump_error',
           license_id,
-          error_message: error.message,
+          error_message: errMsg,
         },
         'pg_dump failed'
       )
@@ -132,7 +133,7 @@ export async function archiveSnapshotJob(
       const uploadCommand = new PutObjectCommand({
         Bucket: s3Bucket,
         Key: s3Key,
-        Body: require('fs').readFileSync(localDumpPath),
+        Body: require('node:fs').readFileSync(localDumpPath),
         ContentType: 'application/sql',
         Metadata: {
           'license-id': license_id,
@@ -142,13 +143,14 @@ export async function archiveSnapshotJob(
       })
 
       await s3Client.send(uploadCommand)
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error)
       logger.error(
         {
           action: 'archive_snapshot_upload_error',
           license_id,
           s3_bucket: s3Bucket,
-          error_message: error.message,
+          error_message: errMsg,
         },
         'S3 upload failed'
       )
@@ -156,8 +158,8 @@ export async function archiveSnapshotJob(
     } finally {
       // Clean up local dump file
       try {
-        require('fs').unlinkSync(localDumpPath)
-      } catch (e) {
+        require('node:fs').unlinkSync(localDumpPath)
+      } catch (_e) {
         logger.warn(
           {
             action: 'archive_snapshot_cleanup_error',
@@ -211,13 +213,14 @@ export async function archiveSnapshotJob(
         snapshot_location: s3Url,
         snapshot_id,
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       await client.query('ROLLBACK').catch(() => {})
+      const errMsg = error instanceof Error ? error.message : String(error)
       logger.error(
         {
           action: 'archive_snapshot_transaction_error',
           license_id,
-          error_message: error.message,
+          error_message: errMsg,
         },
         'Archive snapshot transaction failed'
       )
@@ -225,13 +228,14 @@ export async function archiveSnapshotJob(
     } finally {
       client.release()
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
     logger.error(
       {
         action: 'archive_snapshot_job_error',
         license_id,
         workspace_id,
-        error_message: error.message,
+        error_message: errMsg,
         duration_ms: Date.now() - startTime,
       },
       'Archive snapshot job failed'

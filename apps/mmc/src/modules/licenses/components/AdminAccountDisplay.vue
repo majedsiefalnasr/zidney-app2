@@ -8,6 +8,8 @@ import { Button } from '@zidney/ui/components/shadcn-vue/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
 import { ref } from 'vue'
 
+void [Badge, Button, Card, CardContent, CardHeader, CardTitle]
+
 interface Props {
   licenseId: string
   adminEmail?: string
@@ -19,13 +21,15 @@ const props = defineProps<Props>()
 const showPassword = ref(false)
 const copied = ref(false)
 
-const copyToClipboard = async (text: string) => {
+const copyToClipboard = async (_text: string) => {
   // TODO: Copy to clipboard
   copied.value = true
   setTimeout(() => {
     copied.value = false
   }, 2000)
 }
+
+void [props, showPassword, copyToClipboard]
 </script>
 
 <template>

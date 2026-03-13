@@ -15,21 +15,21 @@ export class TestCleanup {
     try {
       // Delete all audit log entries first
       await this.db.query('TRUNCATE TABLE audit_logs CASCADE')
-    } catch (error) {
+    } catch (_error) {
       // Ignore if table doesn't exist
     }
 
     try {
       // Delete all licenses
       await this.db.query('DELETE FROM licenses')
-    } catch (error) {
+    } catch (_error) {
       // Ignore if table doesn't exist
     }
 
     try {
       // Delete all workspaces
       await this.db.query('DELETE FROM workspaces')
-    } catch (error) {
+    } catch (_error) {
       // Ignore if table doesn't exist
     }
   }
@@ -40,19 +40,19 @@ export class TestCleanup {
   async cleanupWorkspace(workspaceId: string): Promise<void> {
     try {
       await this.db.query('DELETE FROM licenses WHERE workspace_id = $1', [workspaceId])
-    } catch (error) {
+    } catch (_error) {
       // Ignore
     }
 
     try {
       await this.db.query('DELETE FROM workspaces WHERE id = $1', [workspaceId])
-    } catch (error) {
+    } catch (_error) {
       // Ignore
     }
 
     try {
       await this.db.query('DELETE FROM audit_logs WHERE workspace_id = $1', [workspaceId])
-    } catch (error) {
+    } catch (_error) {
       // Ignore
     }
   }
@@ -63,7 +63,7 @@ export class TestCleanup {
   async cleanupAllLicenses(): Promise<void> {
     try {
       await this.db.query('TRUNCATE TABLE licenses CASCADE')
-    } catch (error) {
+    } catch (_error) {
       // Ignore
     }
   }
@@ -74,7 +74,7 @@ export class TestCleanup {
   async cleanupAllAttempts(): Promise<void> {
     try {
       await this.db.query('TRUNCATE TABLE attempts CASCADE')
-    } catch (error) {
+    } catch (_error) {
       // Ignore
     }
   }
@@ -87,7 +87,7 @@ export class TestCleanup {
       await this.cleanupAllWorkspaces()
       await this.cleanupAllWorkspaces() // Second call should not fail
       return true
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }

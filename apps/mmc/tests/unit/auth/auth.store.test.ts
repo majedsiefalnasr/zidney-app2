@@ -97,7 +97,7 @@ describe('defineAuthStore', () => {
 
   describe('setSession()', () => {
     it('sets isAuthenticated to true', () => {
-      const { store, tokenManager } = buildStore()
+      const { store } = buildStore()
       store.setSession('tok-123', {
         id: '1',
         email: 'a@b.com',

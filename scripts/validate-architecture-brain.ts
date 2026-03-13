@@ -63,7 +63,7 @@ function validateBrain(): ValidationResult {
   }
 
   // Load and parse brain
-  let brain: any
+  let brain: unknown
   try {
     const raw = readFileSync(BRAIN_PATH, 'utf-8')
     brain = JSON.parse(raw)
@@ -75,29 +75,32 @@ function validateBrain(): ValidationResult {
     return result
   }
 
+  const brainObj = brain as { modules?: unknown; edges?: unknown[] } | undefined
+
   // Validate schema
-  if (!brain.modules) {
+  if (!brainObj?.modules) {
     result.errors.push('Brain missing "modules" field')
     result.valid = false
   }
 
-  if (!Array.isArray(brain.edges)) {
+  if (!Array.isArray(brainObj?.edges)) {
     result.errors.push('Brain missing "edges" field or it\'s not an array')
     result.valid = false
     return result
   }
 
   // Count modules
-  if (brain.modules) {
-    result.stats.modules = Array.isArray(brain.modules)
-      ? brain.modules.length
-      : Object.keys(brain.modules).length
+  if (brainObj?.modules) {
+    const modulesVal = brainObj.modules
+    result.stats.modules = Array.isArray(modulesVal)
+      ? modulesVal.length
+      : Object.keys(modulesVal as Record<string, unknown>).length
   }
 
-  result.stats.edges = brain.edges.length
+  result.stats.edges = Array.isArray(brainObj?.edges) ? (brainObj?.edges as unknown[]).length : 0
 
   // Load boundaries for reference
-  let boundaries: any = null
+  let boundaries: unknown = null
   if (existsSync(BOUNDARIES_PATH)) {
     try {
       boundaries = JSON.parse(readFileSync(BOUNDARIES_PATH, 'utf-8'))
@@ -121,7 +124,7 @@ function validateBrain(): ValidationResult {
   const validatedEdges = new Set<string>()
   const seenFromEdges = new Map<string, number>()
 
-  for (const edge of brain.edges) {
+  for (const edge of brainObj?.edges || []) {
     if (!edge.from || !edge.to) {
       result.errors.push(`Edge with missing from/to: ${JSON.stringify(edge)}`)
       result.stats.malformedEdges++
@@ -186,7 +189,7 @@ function validateBrain(): ValidationResult {
   }
 
   // Check for path-like patterns that shouldn't exist
-  for (const edge of brain.edges) {
+  for (const edge of brainObj?.edges || []) {
     // Should never have edges with './  prefix
     if (edge.from?.startsWith('./') || edge.to?.startsWith('./')) {
       result.errors.push(

@@ -33,7 +33,7 @@ const integrationDescribe = runSchemaProvisioningMustItems ? describe : describe
 let masterPool: Pool | undefined
 let tenantPool: Pool | undefined
 let testWorkspaceId: string
-let testTaskId: string
+let _testTaskId: string
 
 beforeAll(async () => {
   if (!runSchemaProvisioningMustItems) return
@@ -184,7 +184,7 @@ integrationDescribe('MUST Item 2: UNIQUE Constraint + Idempotency Handler', () =
 
     expect(result1.is_duplicate).toBe(false)
     expect(result1.task_id).toBeTruthy()
-    testTaskId = result1.task_id
+    _testTaskId = result1.task_id
 
     // Second insert (duplicate)
     const result2 = await insertProvisioningTaskIdempotent(
@@ -425,7 +425,7 @@ integrationDescribe('MUST Item 6: Alerts and Monitoring Configuration', () => {
   })
 
   it('should verify Terraform module files exist', async () => {
-    const fs = require('fs').promises
+    const fs = require('node:fs').promises
 
     const mainTfExists = await fs
       .stat('terraform/modules/monitoring/schema-provisioning/main.tf')

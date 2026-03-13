@@ -17,8 +17,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 // ============================================================================
 
 describe('License Lifecycle - Complete Feature Test Suite', () => {
-  let db: Pool
-  let mockJobQueue: any
+  let _db: Pool
+  let _mockJobQueue: any
 
   beforeEach(() => {
     // TODO: Phase 8 implementation - Initialize test database

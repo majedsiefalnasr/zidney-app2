@@ -1,20 +1,20 @@
 <template>
   <SidebarLayout
-    :items="sidebarItems"
-    :collapsed="sidebarCollapsed"
+    :items="_sidebarItems"
+    :collapsed="_sidebarCollapsed"
     :collapsible="true"
-    :active-item="activeRouteName"
-    @collapse-toggled="toggleSidebar"
+    :active-item="_activeRouteName"
+    @collapse-toggled="_toggleSidebar"
   >
     <!-- FR-030: Group label separator rows (non-interactive) -->
-    <template v-if="hasGroups">
+    <template v-if="_hasGroups">
       <div
-        v-for="group in visibleGroups"
+        v-for="group in _visibleGroups"
         :key="group.label ?? '__default__'"
         class="app-sidebar__group"
       >
         <div
-          v-if="group.label && !sidebarCollapsed"
+          v-if="group.label && !_sidebarCollapsed"
           class="app-sidebar__group-label"
           role="separator"
           aria-hidden="true"
@@ -27,14 +27,14 @@
           :to="{ name: item.routeName }"
           class="app-sidebar__nav-item"
           :class="{
-            'app-sidebar__nav-item--active': activeRouteName === item.routeName,
+            'app-sidebar__nav-item--active': _activeRouteName === item.routeName,
           }"
-          :title="sidebarCollapsed ? item.label : undefined"
+          :title="_sidebarCollapsed ? item.label : undefined"
         >
           <span v-if="item.icon" class="app-sidebar__nav-icon shrink-0">{{
             item.icon
           }}</span>
-          <span v-if="!sidebarCollapsed" class="app-sidebar__nav-label">{{
+          <span v-if="!_sidebarCollapsed" class="app-sidebar__nav-label">{{
             item.label
           }}</span>
         </RouterLink>
@@ -42,11 +42,11 @@
     </template>
 
     <!-- Mobile overlay backdrop -->
-    <teleport to="body" v-if="isMobile && !sidebarCollapsed">
+    <teleport to="body" v-if="_isMobile && !_sidebarCollapsed">
       <div
         class="app-sidebar__backdrop"
         aria-hidden="true"
-        @click="toggleSidebar"
+        @click="_toggleSidebar"
       />
     </teleport>
 
@@ -84,12 +84,12 @@ defineSlots<{
 
 const uiStore = useFrontofficeUiStore()
 const authStore = useFrontofficeAuthStore()
-const route = useRoute()
+const _route = useRoute()
 
-const { sidebarCollapsed, isMobile } = storeToRefs(uiStore)
+const { sidebarCollapsed: _sidebarCollapsed, isMobile: _isMobile } = storeToRefs(uiStore)
 const { resolvedPermissions } = storeToRefs(authStore)
 
-const activeRouteName = computed(() => String(route.name ?? ''))
+const _activeRouteName = computed(() => String(_route.name ?? ''))
 
 function canView(permission?: string): boolean {
   if (!permission) return true
@@ -101,7 +101,7 @@ interface VisibleGroup {
   visibleItems: NavigationConfig[number]['items']
 }
 
-const visibleGroups = computed((): VisibleGroup[] =>
+const _visibleGroups = computed((): VisibleGroup[] =>
   props.navigationConfig
     .map((group: NavigationGroup) => ({
       label: group.label,
@@ -110,11 +110,11 @@ const visibleGroups = computed((): VisibleGroup[] =>
     .filter((group) => group.visibleItems.length > 0)
 )
 
-const hasGroups = computed(() => visibleGroups.value.length > 0)
+const _hasGroups = computed(() => _visibleGroups.value.length > 0)
 
 // Flatten items for SidebarLayout (it expects a flat list)
-const sidebarItems = computed(() =>
-  visibleGroups.value.flatMap((group) =>
+const _sidebarItems = computed(() =>
+  _visibleGroups.value.flatMap((group) =>
     group.visibleItems.map((item) => ({
       id: item.routeName,
       label: item.label,
@@ -124,7 +124,7 @@ const sidebarItems = computed(() =>
   )
 )
 
-function toggleSidebar(): void {
+function _toggleSidebar(): void {
   uiStore.toggleSidebar()
 }
 </script>

@@ -8,13 +8,11 @@
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { readdirSync, readFileSync } from 'fs'
-import { join, resolve } from 'path'
+import { readdirSync, readFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-const WORKSPACE_ROOT = resolve(
-  import.meta.url.replace('file://', '').replace('/tests/unit/no-console-in-stores.test.ts', '')
-)
+const WORKSPACE_ROOT = resolve(process.cwd())
 
 const STATE_DIRS = [
   'apps/mmc/src/core/state',

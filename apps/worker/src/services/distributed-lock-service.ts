@@ -15,6 +15,7 @@
  * TTL: 30 seconds (configurable)
  */
 
+import type { Logger } from '@zidney/logger'
 import { ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
 import type { Redis } from 'ioredis'
 import { LOCK_CONFIG, QUEUE_KEYS } from '../config/queue-config'
@@ -47,9 +48,9 @@ export interface LockResult {
 export class DistributedLockService {
   private redis: Redis
   private config: typeof LOCK_CONFIG
-  private logger?: any
+  private logger?: Logger
 
-  constructor(redis: Redis, config: typeof LOCK_CONFIG = LOCK_CONFIG, logger?: any) {
+  constructor(redis: Redis, config: typeof LOCK_CONFIG = LOCK_CONFIG, logger?: Logger) {
     this.redis = redis
     this.config = config
     this.logger = logger
@@ -277,7 +278,7 @@ export class DistributedLockService {
     try {
       const result = await this.redis.del(lockKey)
       return result === 1
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }
@@ -286,6 +287,9 @@ export class DistributedLockService {
 /**
  * Factory to create distributed lock service
  */
-export function createDistributedLockService(redis: Redis, logger?: any): DistributedLockService {
+export function createDistributedLockService(
+  redis: Redis,
+  logger?: Logger
+): DistributedLockService {
   return new DistributedLockService(redis, LOCK_CONFIG, logger)
 }

@@ -11,6 +11,7 @@
  * 3. Are we reprocessing a failed job?
  */
 
+import type { Logger } from '@zidney/logger'
 import { ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
 import type { Pool } from 'pg'
 
@@ -30,9 +31,9 @@ export interface IdempotencyCheckResult {
  */
 export class IdempotencyService {
   private masterDb: Pool
-  private logger?: any
+  private logger?: Logger
 
-  constructor(masterDb: Pool, logger?: any) {
+  constructor(masterDb: Pool, logger?: Logger) {
     this.masterDb = masterDb
     this.logger = logger
   }
@@ -126,7 +127,7 @@ export class IdempotencyService {
       ])
 
       return result.rows.length === 0
-    } catch (error) {
+    } catch (_error) {
       this.logger?.logWarn('Failed to check for orphan database', {
         db_name: dbName,
       })
@@ -138,6 +139,6 @@ export class IdempotencyService {
 /**
  * Factory to create idempotency service
  */
-export function createIdempotencyService(masterDb: Pool, logger?: any): IdempotencyService {
+export function createIdempotencyService(masterDb: Pool, logger?: Logger): IdempotencyService {
   return new IdempotencyService(masterDb, logger)
 }

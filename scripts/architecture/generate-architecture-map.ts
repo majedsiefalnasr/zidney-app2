@@ -90,7 +90,16 @@ function generateMap() {
         modules: {},
       }
 
-  const newModules: any = {}
+  const newModules: Record<
+    string,
+    {
+      layer: string
+      description: string
+      criticality: string
+      allowed_dependencies: string[]
+      forbidden_dependencies: string[]
+    }
+  > = {}
 
   for (const m of modules) {
     const deps = scanDependencies(m)

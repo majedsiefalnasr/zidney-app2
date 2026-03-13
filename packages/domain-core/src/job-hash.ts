@@ -12,7 +12,7 @@
  * - Determinism: JSON.stringify with sorted keys ensures consistency
  */
 
-import { createHash } from 'crypto'
+import { createHash } from 'node:crypto'
 
 /**
  * Compute deterministic SHA256 hash of job payload.
@@ -35,7 +35,7 @@ import { createHash } from 'crypto'
  * @returns SHA256 hash as hex string (64 characters)
  * @throws Error if payload cannot be stringified (e.g., circular references)
  */
-export function computeJobPayloadHash(payload: any): string {
+export function computeJobPayloadHash(payload: unknown): string {
   try {
     // JSON.stringify converts object to string deterministically
     // Sorted keys ensure order-independence
@@ -63,7 +63,7 @@ export function computeJobPayloadHash(payload: any): string {
  * @param expectedHash - Hash computed at enqueue time
  * @returns true if hashes match, false if mutation detected
  */
-export function verifyPayloadHashConsistency(payload: any, expectedHash: string): boolean {
+export function verifyPayloadHashConsistency(payload: unknown, expectedHash: string): boolean {
   try {
     const currentHash = computeJobPayloadHash(payload)
     return currentHash === expectedHash
@@ -80,7 +80,7 @@ export function verifyPayloadHashConsistency(payload: any, expectedHash: string)
  * @param expectedHash - Hash computed at enqueue time
  * @returns Object with both hashes (for comparison logging)
  */
-export function getHashMismatchDetails(payload: any, expectedHash: string) {
+export function getHashMismatchDetails(payload: unknown, expectedHash: string) {
   try {
     const currentHash = computeJobPayloadHash(payload)
     return {

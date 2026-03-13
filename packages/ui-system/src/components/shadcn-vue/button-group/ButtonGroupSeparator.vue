@@ -2,13 +2,11 @@
 import { reactiveOmit } from '@vueuse/core'
 import type { SeparatorProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
-import { Separator } from '@/registry/new-york-v4/ui/separator'
 
 const props = withDefaults(defineProps<SeparatorProps & { class?: HTMLAttributes['class'] }>(), {
   orientation: 'vertical',
 })
-const delegatedProps = reactiveOmit(props, 'class')
+const _delegatedProps = reactiveOmit(props, 'class')
 </script>
 
 <template>

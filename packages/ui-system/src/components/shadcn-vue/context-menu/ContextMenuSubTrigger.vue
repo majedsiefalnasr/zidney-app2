@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { reactiveOmit } from '@vueuse/core'
-import { ChevronRight } from 'lucide-vue-next'
 import type { ContextMenuSubTriggerProps } from 'reka-ui'
-import { ContextMenuSubTrigger, useForwardProps } from 'reka-ui'
+import { useForwardProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 
 const props = defineProps<
   ContextMenuSubTriggerProps & {
@@ -15,7 +13,7 @@ const props = defineProps<
 
 const delegatedProps = reactiveOmit(props, 'class')
 
-const forwardedProps = useForwardProps(delegatedProps)
+const _forwardedProps = useForwardProps(delegatedProps)
 </script>
 
 <template>

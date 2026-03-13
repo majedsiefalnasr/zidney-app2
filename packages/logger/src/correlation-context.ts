@@ -167,10 +167,13 @@ export function extractCorrelationContext(
 /**
  * Middleware factory: Express-style correlation ID middleware
  */
-export function correlationIdMiddleware(req: any, res: any, next: any): void {
-  const correlationId = correlationIdFromHeaders(req.headers)
-  req.correlationId = correlationId
-  res.setHeader('X-Correlation-ID', correlationId)
+export function correlationIdMiddleware(req: unknown, res: unknown, next: () => void): void {
+  const r = req as Record<string, unknown>
+  const h = (r.headers as Record<string, string | string[]>) || {}
+  const correlationId = correlationIdFromHeaders(h)
+  ;(r as Record<string, unknown>).correlationId = correlationId
+  const rr = res as { setHeader?: (name: string, value: string) => void }
+  rr.setHeader?.('X-Correlation-ID', correlationId)
   next()
 }
 

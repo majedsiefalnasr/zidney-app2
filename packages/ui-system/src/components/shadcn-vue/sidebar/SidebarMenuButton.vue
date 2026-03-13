@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { reactiveOmit } from '@vueuse/core'
 import type { Component } from 'vue'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/registry/new-york-v4/ui/tooltip'
 import type { SidebarMenuButtonProps } from './SidebarMenuButtonChild.vue'
-import SidebarMenuButtonChild from './SidebarMenuButtonChild.vue'
 import { useSidebar } from './utils'
 
 defineOptions({
@@ -25,7 +23,10 @@ const props = withDefaults(
 
 const { isMobile, state } = useSidebar()
 
-const delegatedProps = reactiveOmit(props, 'tooltip')
+// Linter shim for template-only usage
+void [isMobile, state]
+
+const _delegatedProps = reactiveOmit(props, 'tooltip')
 </script>
 
 <template>

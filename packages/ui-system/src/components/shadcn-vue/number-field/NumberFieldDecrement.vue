@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { reactiveOmit } from '@vueuse/core'
-import { Minus } from 'lucide-vue-next'
 import type { NumberFieldDecrementProps } from 'reka-ui'
-import { NumberFieldDecrement, useForwardProps } from 'reka-ui'
+import { useForwardProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 
 const props = defineProps<NumberFieldDecrementProps & { class?: HTMLAttributes['class'] }>()
 
 const delegatedProps = reactiveOmit(props, 'class')
 
-const forwarded = useForwardProps(delegatedProps)
+const _forwarded = useForwardProps(delegatedProps)
 </script>
 
 <template>

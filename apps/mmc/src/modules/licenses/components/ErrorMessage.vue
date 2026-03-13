@@ -5,11 +5,13 @@
 
 import { Alert, AlertDescription, AlertTitle } from '@zidney/ui/components/shadcn-vue/alert'
 
+void [Alert, AlertDescription, AlertTitle]
+
 interface Props {
   error: {
     code: string
     message: string
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   } | null
   dismissible?: boolean
 }
@@ -32,6 +34,8 @@ const getErrorIcon = (code: string) => {
   }
   return icons[code] || '❌'
 }
+
+void [props, emit, getErrorIcon]
 </script>
 
 <template>

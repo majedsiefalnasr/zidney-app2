@@ -3,13 +3,11 @@
  * T085: License Report Generator Component
  */
 
-import { Button } from '@zidney/ui/components/shadcn-vue/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
 import { ref } from 'vue'
 
 const generating = ref(false)
 
-const generateReport = async (format: 'csv' | 'pdf') => {
+const _generateReport = async (_format: 'csv' | 'pdf') => {
   generating.value = true
   try {
     // TODO: Call API to generate report

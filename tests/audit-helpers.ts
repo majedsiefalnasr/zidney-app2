@@ -70,7 +70,7 @@ export class AuditHelper {
     try {
       const result = await this.db.query(query, params)
       return result.rows
-    } catch (error) {
+    } catch (_error) {
       // Table may not exist yet
       return []
     }
@@ -116,7 +116,7 @@ export class AuditHelper {
         [workspaceId, limit]
       )
       return result.rows
-    } catch (error) {
+    } catch (_error) {
       return []
     }
   }

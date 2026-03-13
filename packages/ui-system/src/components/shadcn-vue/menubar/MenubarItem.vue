@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { reactiveOmit } from '@vueuse/core'
 import type { MenubarItemEmits, MenubarItemProps } from 'reka-ui'
-import { MenubarItem, useForwardPropsEmits } from 'reka-ui'
+import { useForwardPropsEmits } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 
 const props = defineProps<
   MenubarItemProps & {
@@ -16,7 +15,7 @@ const props = defineProps<
 const emits = defineEmits<MenubarItemEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class', 'inset', 'variant')
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const _forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

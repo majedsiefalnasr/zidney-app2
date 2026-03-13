@@ -76,7 +76,7 @@ export class InvitationService {
     // Create invitation record within transaction
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
 
-    const result = await this.db.transaction(async (trx: any) => {
+    const result = await this.db.transaction(async (trx: unknown) => {
       // Insert invitation
       const [invitation] = await trx
         .insert(mmc_member_invitations)
@@ -165,7 +165,7 @@ export class InvitationService {
     const passwordHash = await hashPassword(password)
 
     // Create member and update invitation within transaction
-    const result = await this.db.transaction(async (trx: any) => {
+    const result = await this.db.transaction(async (trx: unknown) => {
       // Create member
       const [member] = await trx
         .insert(mmc_members)
@@ -247,12 +247,13 @@ export class InvitationService {
       .where(status ? eq(mmc_member_invitations.status, status) : undefined)
 
     const total = status
-      ? invitations.filter((inv: any) => inv.status === status).length
+      ? invitations.filter((inv: Record<string, unknown>) => (inv.status as string) === status)
+          .length
       : invitations.length
 
     // Augment with invited_by username and role name
     const enriched = await Promise.all(
-      invitations.map(async (inv: any) => {
+      invitations.map(async (inv: Record<string, unknown>) => {
         const invitedByMember = await this.db.query.mmc_members.findFirst({
           where: eq(mmc_members.id, inv.invited_by),
         })
@@ -333,7 +334,12 @@ export class InvitationService {
         status: 'EXPIRED',
         updated_at: now,
       })
-      .where(and(eq(mmc_member_invitations.status, 'PENDING'), (col: any) => col.expires_at < now))
+      .where(
+        and(eq(mmc_member_invitations.status, 'PENDING'), (col: unknown) => {
+          const e = (col as { expires_at?: Date }).expires_at
+          return e !== undefined && e < now
+        })
+      )
 
     return result.rowCount || 0
   }

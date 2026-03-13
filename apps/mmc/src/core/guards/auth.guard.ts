@@ -82,7 +82,7 @@ export function createAuthGuard(options: {
       if (to.name === options.loginRouteName && !authenticated) return true
 
       // requiresAuth: unauthenticated users → redirect to login with optional ?redirect
-      if (to.meta['requiresAuth'] === true) {
+      if (to.meta.requiresAuth === true) {
         if (!authenticated) {
           logger.debug('Auth guard: unauthenticated access to protected route', {
             route: to.name?.toString() ?? to.path,
@@ -101,7 +101,7 @@ export function createAuthGuard(options: {
       }
 
       // public: authenticated users → redirect to dashboard
-      if (to.meta['public'] === true) {
+      if (to.meta.public === true) {
         if (authenticated) {
           logger.debug('Auth guard: authenticated user accessing public route', {
             route: to.name?.toString() ?? to.path,

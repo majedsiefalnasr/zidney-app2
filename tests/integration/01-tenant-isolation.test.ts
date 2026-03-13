@@ -25,10 +25,10 @@ describe('Area 1: Tenant Isolation (Integration)', () => {
 
     // Create two workspaces
     workspaceA = await seedWorkspace(masterDb, {
-      slug: 'test-ws-a-' + Date.now(),
+      slug: `test-ws-a-${Date.now()}`,
     })
     workspaceB = await seedWorkspace(masterDb, {
-      slug: 'test-ws-b-' + Date.now(),
+      slug: `test-ws-b-${Date.now()}`,
     })
 
     // Setup audit helper
@@ -42,7 +42,7 @@ describe('Area 1: Tenant Isolation (Integration)', () => {
   afterEach(async () => {
     try {
       await cleanupAllFixtures(masterDb)
-    } catch (error) {
+    } catch (_error) {
       // Ignore cleanup errors
     }
   })

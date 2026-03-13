@@ -86,7 +86,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(versions.rows[0]!.count)).toBe(2)
+      expect(parseInt(versions.rows[0]!.count, 10)).toBe(2)
 
       // Delete product
       await productService.deleteProduct(dbClient, product.id)
@@ -96,7 +96,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(versions.rows[0]!.count)).toBe(0)
+      expect(parseInt(versions.rows[0]!.count, 10)).toBe(0)
     })
 
     it('should cascade delete product_audit_logs', async () => {
@@ -129,7 +129,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(audits.rows[0]!.count)).toBeGreaterThan(1)
+      expect(parseInt(audits.rows[0]!.count, 10)).toBeGreaterThan(1)
 
       // Delete product
       await productService.deleteProduct(dbClient, product.id)
@@ -139,7 +139,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(audits.rows[0]!.count)).toBe(0)
+      expect(parseInt(audits.rows[0]!.count, 10)).toBe(0)
     })
 
     it('should be atomic - delete all or nothing', async () => {
@@ -170,9 +170,9 @@ describe('T057: Product Deletion Integration Tests', () => {
         [product.id]
       )
 
-      expect(parseInt(productCount.rows[0]!.count)).toBe(0)
-      expect(parseInt(versionCount.rows[0]!.count)).toBe(0)
-      expect(parseInt(auditCount.rows[0]!.count)).toBe(0)
+      expect(parseInt(productCount.rows[0]!.count, 10)).toBe(0)
+      expect(parseInt(versionCount.rows[0]!.count, 10)).toBe(0)
+      expect(parseInt(auditCount.rows[0]!.count, 10)).toBe(0)
     })
   })
 
@@ -193,7 +193,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       await dbClient.query(
         `INSERT INTO licenses (id, product_id, workspace_id, status, created_at, updated_at)
          VALUES ($1, $2, $3, $4, NOW(), NOW())`,
-        ['lic-' + Math.random().toString(36), product.id, ctx.workspaceId, ProductStatus.ACTIVE]
+        [`lic-${Math.random().toString(36)}`, product.id, ctx.workspaceId, ProductStatus.ACTIVE]
       )
 
       try {
@@ -223,7 +223,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       await dbClient.query(
         `INSERT INTO licenses (id, product_id, workspace_id, status, created_at, updated_at)
          VALUES ($1, $2, $3, $4, NOW(), NOW())`,
-        ['lic-' + Math.random().toString(36), product.id, ctx.workspaceId, ProductStatus.ACTIVE]
+        [`lic-${Math.random().toString(36)}`, product.id, ctx.workspaceId, ProductStatus.ACTIVE]
       )
 
       try {
@@ -237,7 +237,7 @@ describe('T057: Product Deletion Integration Tests', () => {
 
   describe('Error handling', () => {
     it('should return 404 for non-existent product', async () => {
-      const fakeId = 'non-existent-' + Math.random().toString(36)
+      const fakeId = `non-existent-${Math.random().toString(36)}`
 
       try {
         await productService.deleteProduct(dbClient, fakeId)
@@ -373,7 +373,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(auditBefore.rows[0]!.count)).toBeGreaterThan(0)
+      expect(parseInt(auditBefore.rows[0]!.count, 10)).toBeGreaterThan(0)
 
       // Delete product (cascade deletes audit logs)
       await productService.deleteProduct(dbClient, product.id)
@@ -383,7 +383,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(auditAfter.rows[0]!.count)).toBe(0)
+      expect(parseInt(auditAfter.rows[0]!.count, 10)).toBe(0)
     })
   })
 })

@@ -62,7 +62,7 @@ function makeGraph(overrides: Partial<AIDependencyGraph> = {}): AIDependencyGrap
 function writeGraph(data: unknown, filePath = GRAPH_PATH) {
   const dir = filePath.split('/').slice(0, -1).join('/')
   if (dir && !existsSync(dir)) mkdirSync(dir, { recursive: true })
-  writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+  writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 }
 
 function deleteGraph(filePath = GRAPH_PATH) {

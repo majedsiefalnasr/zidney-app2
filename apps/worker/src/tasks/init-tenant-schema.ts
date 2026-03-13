@@ -83,7 +83,7 @@ export interface InitTenantSchemaResult {
 export async function executeInitTenantSchema(
   payload: InitTenantSchemaPayload,
   pool: Pool,
-  _redisClient?: any
+  _redisClient?: unknown
 ): Promise<InitTenantSchemaResult> {
   const { workspace_id, task_id, idempotency_key, schema_version, schema_file_checksum } = payload
 
@@ -141,7 +141,7 @@ export async function executeInitTenantSchema(
         // CRITICAL EDGE CASE: If schema_version exists but tables missing,
         // the previous worker crashed mid-transaction. Retry to recover.
         try {
-          await verifySchemaIntegrity(client as any)
+          await verifySchemaIntegrity(client as unknown as PoolClient)
 
           logger.info('IDEMPOTENT: Schema fully initialized (all baseline tables verified)', {
             existing_version: existingVersion.version,
@@ -244,7 +244,7 @@ export async function executeInitTenantSchema(
       }
 
       logger.debug('Checksum validation passed', {
-        checksum: calculatedChecksum.substring(0, 8) + '...',
+        checksum: `${calculatedChecksum.substring(0, 8)}...`,
       })
 
       // ======================================================================
@@ -252,28 +252,28 @@ export async function executeInitTenantSchema(
       // ======================================================================
 
       // Execute baseline schema SQL
-      await executeMigrationSQL(client as any, schemaSQL)
+      await executeMigrationSQL(client as unknown as PoolClient, schemaSQL)
       logger.debug('Baseline schema SQL executed')
 
       // Execute trigger functions
-      await executeMigrationSQL(client as any, triggersSQL)
+      await executeMigrationSQL(client as unknown as PoolClient, triggersSQL)
       logger.debug('Trigger functions created')
 
       // ======================================================================
       // VERIFY SCHEMA INTEGRITY (critical tables exist)
       // ======================================================================
 
-      await verifySchemaIntegrity(client as any)
+      await verifySchemaIntegrity(client as unknown as PoolClient)
       logger.debug('Schema integrity verified')
 
       // ======================================================================
       // INSERT SCHEMA_VERSION RECORD (marks initialization complete)
       // ======================================================================
 
-      await insertSchemaVersion(client as any, schema_version, calculatedChecksum)
+      await insertSchemaVersion(client as unknown as PoolClient, schema_version, calculatedChecksum)
       logger.info('Schema version record inserted', {
         version: schema_version,
-        checksum: calculatedChecksum.substring(0, 8) + '...',
+        checksum: `${calculatedChecksum.substring(0, 8)}...`,
       })
 
       // ======================================================================
@@ -367,8 +367,8 @@ export async function executeInitTenantSchema(
  * - On FAILED: Send to DLQ after retries exhausted
  */
 export async function handleInitTenantSchema(
-  taskData: any,
-  dependencies: { pool: Pool; redis?: any }
+  taskData: unknown,
+  dependencies: { pool: Pool; redis?: unknown }
 ): Promise<InitTenantSchemaResult> {
   const payload = taskData as InitTenantSchemaPayload
 

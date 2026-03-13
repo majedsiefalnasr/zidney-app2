@@ -53,10 +53,19 @@ interface MetricsState {
 export class MetricsEmitter {
   private config: Required<MetricsEmitterConfig>
   private state: MetricsState
-  private logger?: any
+  private logger?: {
+    logStep?: (id: string, message: string, ctx?: Record<string, unknown>) => void
+    logError?: (message: string, error: Error) => void
+  }
   private metricsCallbacks: Array<(metrics: ProvisioningMetrics) => void> = []
 
-  constructor(config: MetricsEmitterConfig = {}, logger?: any) {
+  constructor(
+    config: MetricsEmitterConfig = {},
+    logger?: {
+      logStep?: (id: string, message: string, ctx?: Record<string, unknown>) => void
+      logError?: (message: string, error: Error) => void
+    }
+  ) {
     this.config = {
       namespace: 'provisioning',
       enabled: true,
@@ -261,7 +270,10 @@ export class MetricsEmitter {
  */
 export function createMetricsEmitter(
   config: MetricsEmitterConfig = {},
-  logger?: any
+  logger?: {
+    logStep?: (id: string, message: string, ctx?: Record<string, unknown>) => void
+    logError?: (message: string, error: Error) => void
+  }
 ): MetricsEmitter {
   return new MetricsEmitter(config, logger)
 }

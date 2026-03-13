@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { reactiveOmit } from '@vueuse/core'
 import type { ListboxRootEmits, ListboxRootProps } from 'reka-ui'
-import { ListboxRoot, useFilter, useForwardPropsEmits } from 'reka-ui'
+import { useFilter, useForwardPropsEmits } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 import { reactive, ref, watch } from 'vue'
-import { cn } from '@/lib/utils'
 import { provideCommandContext } from '.'
 
 const props = withDefaults(defineProps<ListboxRootProps & { class?: HTMLAttributes['class'] }>(), {
@@ -15,7 +14,7 @@ const emits = defineEmits<ListboxRootEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class')
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const _forwarded = useForwardPropsEmits(delegatedProps, emits)
 
 const allItems = ref<Map<string, string>>(new Map())
 const allGroups = ref<Map<string, Set<string>>>(new Map())
@@ -54,7 +53,8 @@ function filterItems() {
   // Check which groups have at least 1 item shown
   for (const [groupId, group] of allGroups.value) {
     for (const itemId of group) {
-      if (filterState.filtered.items.get(itemId)! > 0) {
+      const score = filterState.filtered.items.get(itemId)
+      if (score !== undefined && score > 0) {
         filterState.filtered.groups.add(groupId)
         break
       }

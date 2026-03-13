@@ -145,6 +145,24 @@ import type { Component } from 'vue'
 import { ref } from 'vue'
 import { Button, Card, CardContent, Checkbox, Label } from '@/components/ui'
 
+void [
+  AlertCircle,
+  Award,
+  BarChart3,
+  Check,
+  CheckCircle,
+  Download,
+  Globe,
+  Info,
+  Loader,
+  TrendingUp,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Label,
+]
+
 interface ExportOption {
   id: string
   label: string
@@ -292,6 +310,8 @@ const handleExport = async () => {
     isExporting.value = false
   }
 }
+
+void [formats, exportOptions, selectOption, handleExport]
 </script>
 
 <style scoped>

@@ -22,9 +22,9 @@ import { dequeueJob, moveToDeadLetter, retryJob } from './queue'
  * Job handler type definition.
  * Each job type has a specific handler that processes its payload.
  */
-export type JobHandler<T = any> = (
+export type JobHandler<T = unknown> = (
   job: JobEnvelope<T>,
-  logger: any
+  logger: Logger
 ) => Promise<{ success: boolean; error?: Error }>
 
 /** Registry of job handlers by job type */
@@ -218,7 +218,11 @@ export async function startJobProcessor(
 
   while (true) {
     try {
-      const currentType = jobTypes[typeIndex % jobTypes.length]!
+      const currentType = jobTypes[typeIndex % jobTypes.length]
+      if (!currentType) {
+        typeIndex++
+        continue
+      }
 
       // Process one job from current queue
       await processJob(currentType, dequeue_timeout)

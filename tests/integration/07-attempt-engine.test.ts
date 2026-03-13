@@ -22,7 +22,7 @@ describe('Area 7: Attempt Engine Validation', () => {
     tenantDb = masterDb // Mock for this test
 
     workspace = await seedWorkspace(masterDb, {
-      slug: 'test-attempt-' + Date.now(),
+      slug: `test-attempt-${Date.now()}`,
     })
     exam = await seedExam(tenantDb, { workspace_id: workspace.id })
     attempt = await seedAttempt(tenantDb, {
@@ -34,7 +34,7 @@ describe('Area 7: Attempt Engine Validation', () => {
   afterEach(async () => {
     try {
       await cleanupAllFixtures(masterDb)
-    } catch (error) {
+    } catch (_error) {
       // Ignore
     }
   })
@@ -45,7 +45,7 @@ describe('Area 7: Attempt Engine Validation', () => {
    */
   it('Test 7.1: Maintains immutable snapshot configuration', async () => {
     // Original snapshot
-    const originalSnapshot = {
+    const _originalSnapshot = {
       exam_questions: 5,
       pass_threshold: 60,
       passing_grade: 'D',
@@ -73,7 +73,7 @@ describe('Area 7: Attempt Engine Validation', () => {
    */
   it('Test 7.2: CRITICAL - Enforces worker-only grading authority', async () => {
     // Simulate submission payload
-    const submission = {
+    const _submission = {
       attempt_id: attempt.id,
       question_id: 'q1',
       answer: 'correct_answer',
@@ -109,7 +109,7 @@ describe('Area 7: Attempt Engine Validation', () => {
     const deadline = new Date(serverTime.getTime() + 60 * 60 * 1000)
 
     // Malicious client submission (55 min elapsed, fake early time)
-    const maliciousSubmission = {
+    const _maliciousSubmission = {
       attempt_id: attempt.id,
       question_id: 'q1',
       answer: 'answer',
@@ -131,7 +131,7 @@ describe('Area 7: Attempt Engine Validation', () => {
     const pastDeadline = new Date(serverTime.getTime() - 1 * 60 * 1000) // 1 min in past
 
     // Client tries to submit past deadline with fake early timestamp
-    const clientFakeTime = new Date(serverTime.getTime() - 30 * 60 * 1000) // 30 min before deadline
+    const _clientFakeTime = new Date(serverTime.getTime() - 30 * 60 * 1000) // 30 min before deadline
 
     // Server should validate using actual server time (past deadline)
     const isWithinDeadline = serverTime < pastDeadline

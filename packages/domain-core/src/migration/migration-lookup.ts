@@ -20,7 +20,7 @@ export async function getMigrationHistory(
     [workspace_id]
   )
 
-  return result.rows.map((row: any) => ({
+  return result.rows.map((row: Record<string, unknown>) => ({
     id: row.id,
     workspace_id: row.workspace_id,
     migration_file: row.migration_file,
@@ -93,7 +93,7 @@ export interface UpgradeStatusSnapshot {
 
 export async function getUpgradeStatus(
   upgradeId: string,
-  jobQueue: any // Job queue dependency (type depends on queue implementation)
+  jobQueue: { getJob: (id: string) => Promise<Record<string, unknown> | null> }
 ): Promise<UpgradeStatusSnapshot | null> {
   // Implementation depends on job queue system
   // This is a placeholder for the interface
@@ -118,7 +118,7 @@ export async function getUpgradeStatus(
           }
         : undefined,
     }
-  } catch (err: any) {
+  } catch (_err: unknown) {
     return null
   }
 }

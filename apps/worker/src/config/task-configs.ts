@@ -172,7 +172,8 @@ export function getRetryDelay(taskType: string, attemptNumber: number): number {
     return 0
   }
 
-  return config.retryPolicy.backoffDelays[retryIndex]!
+  const delay = config.retryPolicy.backoffDelays[retryIndex]
+  return delay ?? 0
 }
 
 /**
@@ -216,8 +217,8 @@ export interface DLQMessage {
   taskType: string
   taskId: string
   workspaceId: string
-  payload: Record<string, any>
-  result: Record<string, any>
+  payload: Record<string, unknown>
+  result: Record<string, unknown>
   attemptCount: number
   lastError: string
   timestamp: string
@@ -232,8 +233,8 @@ export function createDLQMessage(
   taskType: string,
   taskId: string,
   workspaceId: string,
-  payload: Record<string, any>,
-  result: Record<string, any>,
+  payload: Record<string, unknown>,
+  result: Record<string, unknown>,
   attemptCount: number
 ): DLQMessage {
   const config =

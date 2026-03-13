@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { reactiveOmit, useVModel } from '@vueuse/core'
-import { ChevronDownIcon } from 'lucide-vue-next'
 import type { AcceptableValue } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
 
 defineOptions({
   inheritAttrs: false,
@@ -18,12 +16,12 @@ const emit = defineEmits<{
   'update:modelValue': AcceptableValue
 }>()
 
-const model = useVModel(props, 'modelValue', emit, {
+const _model = useVModel(props, 'modelValue', emit, {
   passive: true,
   defaultValue: '',
 })
 
-const delegatedProps = reactiveOmit(props, 'class')
+const _delegatedProps = reactiveOmit(props, 'class')
 </script>
 
 <template>

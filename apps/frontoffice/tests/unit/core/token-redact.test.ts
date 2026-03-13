@@ -166,7 +166,7 @@ describe('looksLikeToken', () => {
 
     it('returns false for numbers', () => {
       expect(looksLikeToken(42)).toBe(false)
-      expect(looksLikeToken(1_234_567_890_123_456_789)).toBe(false)
+      expect(looksLikeToken(1_234_567_890_123_456)).toBe(false)
     })
 
     it('returns false for booleans', () => {

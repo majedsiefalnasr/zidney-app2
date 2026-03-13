@@ -44,7 +44,7 @@ function resolveSelectedOption(answer: UserAnswer): unknown {
 }
 
 function resolveCorrectOption(question: QuestionSnapshot): unknown {
-  const payload = question as Record<string, any>
+  const payload = question as Record<string, unknown>
   const correctAnswer = payload.correct_answer
   if (correctAnswer && typeof correctAnswer === 'object' && !Array.isArray(correctAnswer)) {
     if ('selected_option' in correctAnswer) {
@@ -58,7 +58,7 @@ function resolveCorrectOption(question: QuestionSnapshot): unknown {
 }
 
 function resolveFillBlankCorrectAnswers(question: QuestionSnapshot): string[] {
-  const payload = question as Record<string, any>
+  const payload = question as Record<string, unknown>
   const correctAnswer = payload.correct_answer
   const legacyAnswers = payload.correct_answers
 
@@ -106,7 +106,7 @@ function resolveUserMatches(userAnswer: UserAnswer): Pair[] {
 }
 
 function resolveCorrectMatches(question: QuestionSnapshot): Pair[] {
-  const payload = question as Record<string, any>
+  const payload = question as Record<string, unknown>
   if (Array.isArray(payload.correct_answer?.matches)) {
     return normalizePairs(payload.correct_answer.matches)
   }
@@ -117,7 +117,7 @@ function resolveCorrectMatches(question: QuestionSnapshot): Pair[] {
 }
 
 function resolveCorrectOrder(question: QuestionSnapshot): string[] {
-  const payload = question as Record<string, any>
+  const payload = question as Record<string, unknown>
   if (Array.isArray(payload.correct_answer?.order)) {
     return payload.correct_answer.order
   }
@@ -152,7 +152,7 @@ export interface GradingResult {
 export function computeScore(
   questions: QuestionSnapshot[],
   answers: Map<string, UserAnswer | undefined>,
-  gradingConfig: any
+  gradingConfig: Record<string, unknown>
 ): GradingResult {
   if (!questions || questions.length === 0) {
     throw new Error('Questions array required')
@@ -216,7 +216,7 @@ export function computeScore(
 export function scoreQuestion(
   question: QuestionSnapshot,
   userAnswer: UserAnswer | undefined,
-  _gradingConfig: any
+  _gradingConfig: Record<string, unknown>
 ): QuestionResult {
   // Not answered
   if (!userAnswer) {
@@ -472,7 +472,7 @@ function scoreMatching(question: QuestionSnapshot, userAnswer: UserAnswer): Ques
   let correctCount = 0
   for (const userMatch of userMatches) {
     const isCorrect = correctMatches.some(
-      (correct: any) => correct.from === userMatch.from && correct.to === userMatch.to
+      (correct: Pair) => correct.from === userMatch.from && correct.to === userMatch.to
     )
     if (isCorrect) {
       correctCount++

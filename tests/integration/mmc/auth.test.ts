@@ -35,7 +35,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
 
   describe('POST /mmc/auth/login', () => {
     it('should return JWT token with valid credentials (ACTIVE member)', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: ctx.adminPassword,
       }
@@ -50,7 +50,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should return 401 Unauthorized with invalid password', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: 'WrongPassword123!',
       }
@@ -61,7 +61,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should return 401 Unauthorized with non-existent username', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: 'nonexistent_user',
         password: 'SomePassword123!',
       }
@@ -71,7 +71,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should return 401 Unauthorized for DISABLED member', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: 'disabled_user',
         password: 'CorrectPassword123!',
       }
@@ -82,7 +82,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should include user metadata in response', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: ctx.adminPassword,
       }
@@ -99,7 +99,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should issue JWT with HS256 signature', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: ctx.adminPassword,
       }
@@ -109,7 +109,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should include sub, issuer, exp, token_version in JWT payload', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: ctx.adminPassword,
       }
@@ -127,7 +127,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should NOT include workspace_id in JWT payload', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: ctx.adminPassword,
       }
@@ -138,7 +138,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should audit log login attempt', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: ctx.adminPassword,
       }
@@ -152,7 +152,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should update last_login timestamp on successful login', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: ctx.adminPassword,
       }
@@ -251,14 +251,14 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
 
   describe('POST /mmc/auth/logout', () => {
     it('should return 200 OK on logout', async () => {
-      const authToken = 'valid-jwt-token'
+      const _authToken = 'valid-jwt-token'
 
       // Expected: 200 OK with message 'Logged out successfully'
       expect(true).toBe(true)
     })
 
     it('should audit log logout event', async () => {
-      const authToken = 'valid-jwt-token'
+      const _authToken = 'valid-jwt-token'
 
       // Expected: Audit log contains:
       // - action_type: 'LOGOUT'
@@ -288,7 +288,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
 
   describe('GET /mmc/permissions/check', () => {
     it('should return current user permissions for queried domains', async () => {
-      const authToken = 'valid-jwt-token'
+      const _authToken = 'valid-jwt-token'
 
       // Call GET /mmc/permissions/check?domains=ORGANIZATION_SETTINGS,PRODUCT_MANAGEMENT
       // Expected: 200 OK with:
@@ -300,7 +300,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should return all domains if no query parameter provided', async () => {
-      const authToken = 'valid-jwt-token'
+      const _authToken = 'valid-jwt-token'
 
       // Call GET /mmc/permissions/check (no domains param)
       // Expected: 200 OK with all 7 domains
@@ -308,7 +308,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should return permissions for current authenticated user', async () => {
-      const authToken = 'valid-jwt-token-user-A'
+      const _authToken = 'valid-jwt-token-user-A'
 
       // Call with User A token
       // Expected: Permissions for User A's role
@@ -322,7 +322,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should NOT require specific permission to call endpoint (UX optimization)', async () => {
-      const authToken = 'valid-jwt-token-viewer'
+      const _authToken = 'valid-jwt-token-viewer'
 
       // Viewer role has no create/edit/delete permissions
       // Call GET /mmc/permissions/check
@@ -383,7 +383,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
 
   describe('Correlation ID Propagation', () => {
     it('should include correlation_id in all auth responses', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: ctx.adminPassword,
       }
@@ -393,7 +393,7 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
     })
 
     it('should propagate correlation_id to audit logs', async () => {
-      const loginPayload = {
+      const _loginPayload = {
         username: ctx.adminUsername,
         password: ctx.adminPassword,
       }

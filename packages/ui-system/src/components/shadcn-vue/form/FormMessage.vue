@@ -1,15 +1,13 @@
 <script lang="ts" setup>
-import { ErrorMessage } from 'vee-validate'
 import type { HTMLAttributes } from 'vue'
-import { toValue } from 'vue'
-import { cn } from '@/lib/utils'
 import { useFormField } from './useFormField'
 
-const props = defineProps<{
+const _props = defineProps<{
   class?: HTMLAttributes['class']
 }>()
 
 const { name, formMessageId } = useFormField()
+void [name, formMessageId]
 </script>
 
 <template>

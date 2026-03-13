@@ -63,7 +63,7 @@ function makeMockRedis(setNxResult: 0 | 1 = 1) {
       keys.delete(key)
       return 1
     }),
-    setex: vi.fn(async (key: string, ttl: number, value: string) => {
+    setex: vi.fn(async (key: string, _ttl: number, value: string) => {
       keys.set(key, value)
       return 'OK'
     }),
@@ -240,7 +240,7 @@ describe('WebSocket backoffice — lifecycle tests', () => {
 
     it('counter resets to 0 on successful poll (no premature close)', async () => {
       const ws = makeMockWs()
-      const MAX_POLL_FAILURES = 3
+      const _MAX_POLL_FAILURES = 3
       let consecutivePollFailures = 0
 
       // Two failures

@@ -54,7 +54,7 @@ export class E2EIntegrationTestSetup {
         host: process.env.PGHOST || 'localhost',
         database: process.env.PGDATABASE || 'zidney_test',
         password: process.env.PGPASSWORD || 'postgres',
-        port: parseInt(process.env.PGPORT || '5432'),
+        port: parseInt(process.env.PGPORT || '5432', 10),
       })
 
       // Verify connection
@@ -66,8 +66,8 @@ export class E2EIntegrationTestSetup {
       // Connect to Redis
       this.redis = new Redis({
         host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        db: parseInt(process.env.REDIS_DB || '1'), // Use separate DB for tests
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
+        db: parseInt(process.env.REDIS_DB || '1', 10), // Use separate DB for tests
       })
 
       await this.redis.ping()
@@ -122,7 +122,7 @@ export class E2EIntegrationTestSetup {
       for (const row of result.rows) {
         try {
           await this.masterDb.query(`DROP DATABASE IF EXISTS "${row.datname}"`)
-        } catch (error) {
+        } catch (_error) {
           this.logger?.logWarn('Failed to drop test database', {
             database: row.datname,
           })
@@ -277,7 +277,7 @@ export class E2EIntegrationTestSetup {
       )
 
       return (result.rowCount ?? 0) > 0
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }
@@ -307,7 +307,7 @@ export class E2EIntegrationTestSetup {
         exists: true,
         entry: result.rows[0]!,
       }
-    } catch (error) {
+    } catch (_error) {
       return { exists: false }
     }
   }
@@ -325,7 +325,7 @@ export class E2EIntegrationTestSetup {
       host: process.env.PGHOST || 'localhost',
       database: dbName,
       password: process.env.PGPASSWORD || 'postgres',
-      port: parseInt(process.env.PGPORT || '5432'),
+      port: parseInt(process.env.PGPORT || '5432', 10),
     })
 
     try {

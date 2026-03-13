@@ -41,8 +41,8 @@ export interface AffiliateAdminAudit {
   affiliate_id: string // UUID, FK to affiliates
   admin_id: string // UUID
   action: 'CREATE' | 'UPDATE' | 'DISABLE'
-  old_values: Record<string, any> | null // JSONB
-  new_values: Record<string, any> | null // JSONB
+  old_values: Record<string, unknown> | null // JSONB
+  new_values: Record<string, unknown> | null // JSONB
   ip_address?: string // inet type
   created_at: Date
 }

@@ -87,6 +87,8 @@
 import { TrendingDown, TrendingUp } from 'lucide-vue-next'
 import { computed } from 'vue'
 
+void [TrendingDown, TrendingUp]
+
 interface ProductRevenue {
   productId: string
   productName: string
@@ -124,6 +126,8 @@ const averageGrowth = computed(() => {
   const sum = props.data.topProducts.reduce((acc, p) => acc + p.growth, 0)
   return sum / props.data.topProducts.length
 })
+
+void [formatCurrency, totalTopRevenue, topProductsPercentage, averageGrowth]
 </script>
 
 <style scoped>

@@ -3,8 +3,6 @@
  * T084-T086: Error Message Display, License Search, License Table Pagination
  */
 
-import { Button } from '@zidney/ui/components/shadcn-vue/button'
-import { Input } from '@zidney/ui/components/shadcn-vue/input'
 import { ref } from 'vue'
 
 interface Props {
@@ -23,16 +21,16 @@ const emit = defineEmits<{
 const searchQuery = ref('')
 const selectedStatus = ref('all')
 
-const handleSearch = () => {
+const _handleSearch = () => {
   emit('search', searchQuery.value)
 }
 
-const handleFilter = (status: string) => {
+const _handleFilter = (status: string) => {
   selectedStatus.value = status
   emit('filter', status)
 }
 
-const statuses = ['all', 'ACTIVE', 'SOFT_LOCKED', 'ARCHIVED', 'PENDING_PROVISION']
+const _statuses = ['all', 'ACTIVE', 'SOFT_LOCKED', 'ARCHIVED', 'PENDING_PROVISION']
 </script>
 
 <template>

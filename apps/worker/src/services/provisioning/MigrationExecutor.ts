@@ -9,10 +9,10 @@
  * Stage: STAGE_05_TENANT_PROVISIONING_SERVICE
  */
 
+import { createHash } from 'node:crypto'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 import { logger } from '@zidney/logger'
-import { createHash } from 'crypto'
-import * as fs from 'fs'
-import * as path from 'path'
 import type { Pool, PoolClient } from 'pg'
 
 export interface MigrationFile {
@@ -59,7 +59,8 @@ export class MigrationExecutor {
       const match = filename.match(/^(\d+)-(.+)\.sql$/)
       if (!match) continue
 
-      const ordinal = parseInt(match[1]!, 10)
+      if (!match[1]) continue
+      const ordinal = parseInt(match[1], 10)
       const version = `${ordinal}`
 
       migrations.push({
@@ -110,7 +111,7 @@ export class MigrationExecutor {
         ORDER BY version ASC
       `)
       return result.rows
-    } catch (error) {
+    } catch (_error) {
       // Table might not exist yet on fresh DB
       return []
     }
@@ -197,15 +198,17 @@ export class MigrationExecutor {
 
         // Update schema_version with latest version
         if (pending.length > 0) {
-          const latest = pending[pending.length - 1]!
-          await client.query(
-            `
+          const latest = pending[pending.length - 1]
+          if (latest) {
+            await client.query(
+              `
             UPDATE schema_version
             SET current_schema_version = $1, applied_at = NOW()
             WHERE id = 1
             `,
-            [`${latest.ordinal}.0.0`] // Simplified versioning for baseline
-          )
+              [`${latest.ordinal}.0.0`] // Simplified versioning for baseline
+            )
+          }
         }
 
         await client.query('COMMIT')

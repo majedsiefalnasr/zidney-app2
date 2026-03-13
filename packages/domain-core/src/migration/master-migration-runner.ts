@@ -6,15 +6,16 @@
 
 import type { MigrationResult } from '@zidney/types'
 import { calculateChecksum, detectMigrationGap, validateMigrationFile } from '@zidney/validation'
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import crypto from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { Pool } from 'pg'
 
 /**
  * Load all migration files from migrations directory
  */
 async function loadMigrationFiles(migrationsDir: string): Promise<string[]> {
-  const fs = require('fs').promises
+  const fs = require('node:fs').promises
   const files = await fs.readdir(migrationsDir)
   return files.filter((f: string) => f.endsWith('.sql')).sort()
 }
@@ -67,14 +68,19 @@ export async function runMasterMigrations(
         try {
           await client.query(sqlContent)
           migrationsApplied++
-        } catch (err: any) {
-          throw new Error(`Syntax error in migration ${filename}: ${err.message}`)
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err)
+          throw new Error(`Syntax error in migration ${filename}: ${msg}`)
         }
       }
 
       // Update platform_settings.current_schema_version
       // Extract latest version from last migration
-      const lastMigrationFile = migrationFiles[migrationFiles.length - 1]!
+      if (migrationFiles.length === 0) {
+        throw new Error('No migration files found')
+      }
+      const lastMigrationFile = migrationFiles[migrationFiles.length - 1]
+      if (!lastMigrationFile) throw new Error('Unable to determine last migration file')
       const lastSqlContent = readFileSync(join(migrationsDir, lastMigrationFile), 'utf-8')
       const lastValidation = validateMigrationFile(lastMigrationFile, lastSqlContent)
 
@@ -119,10 +125,11 @@ export async function runMasterMigrations(
     } finally {
       client.release()
     }
-  } catch (err: any) {
-    const errorCode = err.message.includes('Syntax error')
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    const errorCode = msg.includes('Syntax error')
       ? 'MIGRATION_SYNTAX_ERROR'
-      : err.message.includes('gap')
+      : msg.includes('gap')
         ? 'MIGRATION_SEQUENCE_GAP'
         : 'MIGRATION_EXECUTION_FAILED'
 
@@ -133,7 +140,7 @@ export async function runMasterMigrations(
         event: 'master_migrations_failed',
         correlation_id: correlationId,
         error_code: errorCode,
-        error_message: err.message,
+        error_message: msg,
         migrations_applied: migrationsApplied,
         execution_time_ms: Date.now() - startTime,
         timestamp: new Date().toISOString(),
@@ -149,10 +156,8 @@ export async function runMasterMigrations(
       migrationsApplied,
       error: {
         code: errorCode,
-        message: err.message,
+        message: msg,
       },
     }
   }
 }
-
-import crypto from 'crypto'

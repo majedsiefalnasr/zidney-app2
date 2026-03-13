@@ -132,16 +132,6 @@
 </template>
 
 <script setup lang="ts">
-import { Badge } from '@shadcn-vue/ui/badge'
-import { Button } from '@shadcn-vue/ui/button'
-import { Input } from '@shadcn-vue/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@shadcn-vue/ui/select'
 import { computed, ref, watch } from 'vue'
 import type { Filter } from '../../types'
 import { checkUrlOverflow, serializeFilters } from '../../utils/filter-serializer'
@@ -165,7 +155,7 @@ interface FilterField {
   label: string
   type: FilterFieldType
   operators: FilterOperator[]
-  options?: Array<{ value: any; label: string }>
+  options?: Array<{ value: unknown; label: string }>
   placeholder?: string
   description?: string
 }
@@ -199,7 +189,7 @@ watch(
 )
 
 // Computed: Serialized filter string (LOCKED DECISION 3: compact JSON + Base64 + v1: prefix)
-const serialized = computed((): string => {
+const _serialized = computed((): string => {
   return serializeFilters(localFilters.value)
 })
 
@@ -213,7 +203,7 @@ const isPersistedExternally = computed((): boolean => {
   return persistenceMode.value === 'localStorage'
 })
 
-const addFilter = (): void => {
+const _addFilter = (): void => {
   localFilters.value.push({
     fieldId: '',
     operator: 'eq',
@@ -221,12 +211,12 @@ const addFilter = (): void => {
   })
 }
 
-const removeFilter = (index: number): void => {
+const _removeFilter = (index: number): void => {
   localFilters.value.splice(index, 1)
   emit('filters-changed', localFilters.value)
 }
 
-const updateFilter = (index: number): void => {
+const _updateFilter = (_index: number): void => {
   emit('filters-changed', localFilters.value)
 
   if (isOverflowed.value && !isPersistedExternally.value) {
@@ -234,7 +224,7 @@ const updateFilter = (index: number): void => {
   }
 }
 
-const triggerStorageFallback = (): void => {
+const _triggerStorageFallback = (): void => {
   persistenceMode.value = 'localStorage'
   emit('storage-fallback-triggered', { reason: 'url-overflow' })
 }

@@ -7,10 +7,10 @@ import { randomUUID } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('T054: Concurrency Tests', () => {
-  let mockDb: any
+  let _mockDb: any
 
   beforeEach(() => {
-    mockDb = {
+    _mockDb = {
       query: vi.fn(),
       transaction: vi.fn(),
     }
@@ -22,7 +22,7 @@ describe('T054: Concurrency Tests', () => {
 
   describe('Simultaneous role permission edits', () => {
     it('should handle two concurrent PATCH /mmc/roles/:id/permissions requests', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
 
       // T1 starts: SELECT role_permissions for roleId
       // T2 starts: SELECT role_permissions for roleId
@@ -39,7 +39,7 @@ describe('T054: Concurrency Tests', () => {
     })
 
     it('should serialize transactions (not lose updates)', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 5 members with role, all token_version=1
 
       // T1: Edit permission A (cascade token_version→2)
@@ -94,7 +94,7 @@ describe('T054: Concurrency Tests', () => {
 
   describe('Token version cascade races', () => {
     it('should increment token_version atomically for all members', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 10 members, all version=1
 
       // Two concurrent role edits:
@@ -123,7 +123,7 @@ describe('T054: Concurrency Tests', () => {
 
   describe('Member disable race with login', () => {
     it('should handle disable while user attempting login', async () => {
-      const memberId = randomUUID()
+      const _memberId = randomUUID()
 
       // T1: User calls login (SELECT member WHERE username)
       // T2: Admin disables member (UPDATE status='DISABLED', token_version→2)
@@ -213,8 +213,8 @@ describe('T054: Concurrency Tests', () => {
 
   describe('Invitation acceptance races', () => {
     it('should prevent double acceptance of same invitation', async () => {
-      const token = 'valid-token'
-      const password = 'Password123!'
+      const _token = 'valid-token'
+      const _password = 'Password123!'
 
       // T1: Accept invitation (INSERT member, UPDATE invitation status)
       // T2: Accept same invitation (concurrent)

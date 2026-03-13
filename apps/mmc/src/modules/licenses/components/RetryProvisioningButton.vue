@@ -3,8 +3,6 @@
  * Retry Provisioning Button Component
  */
 
-import { Button } from '@zidney/ui/components/shadcn-vue/button'
-import { Card, CardContent } from '@zidney/ui/components/shadcn-vue/card'
 import { ref } from 'vue'
 
 interface Props {
@@ -13,13 +11,13 @@ interface Props {
   provisioning_retries?: number
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const _props = withDefaults(defineProps<Props>(), {
   provisioning_retries: 0,
 })
 
 const retrying = ref(false)
 
-const retry = async () => {
+const _retry = async () => {
   retrying.value = true
   try {
     // TODO: Call API: POST /v1/mmc/licenses/:id/retry-provisioning

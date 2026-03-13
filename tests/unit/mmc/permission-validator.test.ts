@@ -24,7 +24,7 @@ interface User {
   roles: Role[]
 }
 
-export function hasPermission(user: User, requiredPermission: string): boolean {
+function hasPermission(user: User, requiredPermission: string): boolean {
   if (!user || !user.roles || user.roles.length === 0) {
     return false
   }

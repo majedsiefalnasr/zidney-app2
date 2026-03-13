@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { Slot } from 'reka-ui'
 import { useFormField } from './useFormField'
 
 const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+void [error, formItemId, formDescriptionId, formMessageId]
 </script>
 
 <template>

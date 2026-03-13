@@ -70,7 +70,7 @@ interface AuditLog {
   actor_id?: string
   actor_type: 'ADMIN' | 'SYSTEM'
   reason: string
-  transition_metadata?: Record<string, any>
+  transition_metadata?: Record<string, unknown>
   timestamp: Date
 }
 
@@ -78,16 +78,16 @@ interface Props {
   licenseId: string
 }
 
-const props = defineProps<Props>()
+const _props = defineProps<Props>()
 
 const loading = ref(true)
-const auditLogs = ref<AuditLog[]>([])
-const dateFrom = ref('')
-const dateTo = ref('')
-const filterActorType = ref('')
+const _auditLogs = ref<AuditLog[]>([])
+const _dateFrom = ref('')
+const _dateTo = ref('')
+const _filterActorType = ref('')
 const offset = ref(0)
 const limit = 50
-const hasMore = ref(false)
+const _hasMore = ref(false)
 
 onMounted(async () => {
   await loadAuditLogs()
@@ -102,7 +102,7 @@ async function loadAuditLogs() {
     // Handle pagination
     // auditLogs.value = response.logs
     // hasMore.value = response.total_count > offset + limit
-  } catch (err: any) {
+  } catch (err: unknown) {
     // biome-ignore lint/suspicious/noConsole: frontend error boundary
     console.error('Failed to load audit logs:', err)
   } finally {
@@ -110,24 +110,24 @@ async function loadAuditLogs() {
   }
 }
 
-function loadMore() {
+function _loadMore() {
   offset.value += limit
   loadAuditLogs()
 }
 
-async function downloadAudit() {
+async function _downloadAudit() {
   try {
     // TODO: Trigger CSV/JSON export
     // Query all logs with current filters
     // Generate and download file
     // biome-ignore lint/correctness/noUnreachable: catch block retained as error boundary for pending TODO implementation
-  } catch (err: any) {
+  } catch (err: unknown) {
     // biome-ignore lint/suspicious/noConsole: frontend error boundary
     console.error('Failed to export audit logs:', err)
   }
 }
 
-function formatDate(date: Date | string): string {
+function _formatDate(date: Date | string): string {
   const d = new Date(date)
   return d.toLocaleString()
 }

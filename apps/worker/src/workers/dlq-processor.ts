@@ -31,7 +31,7 @@ export interface DLQAlert {
   severity: 'warning' | 'critical'
   message: string
   affected_licenses: string[]
-  dlq_stats: any
+  dlq_stats: unknown
 }
 
 /**
@@ -42,7 +42,7 @@ export class DLQProcessor {
   private logger: ProvisioningLogger
   private config: Required<DLQProcessorConfig>
   private isRunning: boolean = false
-  private previousStats: any = null
+  private previousStats: unknown = null
   private alerts: DLQAlert[] = []
   private alertCallbacks: Array<(alert: DLQAlert) => void> = []
 
@@ -117,7 +117,14 @@ export class DLQProcessor {
       // Check absolute threshold
       if (stats.total_entries > this.config.alertThreshold) {
         const entries = await this.dlqHandler.getDLQEntries(stats.total_entries)
-        const affectedLicenses = [...new Set(entries.map((e: any) => e.license_id))] as string[]
+        const affectedLicenses = [
+          ...new Set(
+            entries.map((e: unknown) => {
+              const item = e as { license_id?: string }
+              return item.license_id ?? ''
+            })
+          ),
+        ].filter(Boolean) as string[]
 
         this.emitAlert({
           timestamp: new Date().toISOString(),
@@ -132,10 +139,18 @@ export class DLQProcessor {
       // Check for manual intervention needs
       if (stats.manual_intervention_count > 0) {
         const entries = await this.dlqHandler.getDLQEntries(stats.total_entries)
-        const manualEntries = entries.filter((e: any) => e.requires_manual_intervention)
+        const manualEntries = entries.filter((e: unknown) => {
+          const item = e as { requires_manual_intervention?: boolean }
+          return Boolean(item.requires_manual_intervention)
+        })
         const affectedLicenses = [
-          ...new Set(manualEntries.map((e: any) => e.license_id)),
-        ] as string[]
+          ...new Set(
+            manualEntries.map((e: unknown) => {
+              const item = e as { license_id?: string }
+              return item.license_id ?? ''
+            })
+          ),
+        ].filter(Boolean) as string[]
 
         this.emitAlert({
           timestamp: new Date().toISOString(),

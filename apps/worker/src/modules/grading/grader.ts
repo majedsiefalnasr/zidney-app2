@@ -23,6 +23,8 @@ export interface GradingConfig {
   show_answers_after_submission: boolean
 }
 
+type GradingRules = { passing_score_percent?: number }
+
 /**
  * Grade an attempt submission
  */
@@ -126,7 +128,7 @@ export async function gradeAttempt(
 function gradeQuestion(
   question: Question,
   studentAnswer: StudentAnswer | undefined,
-  _gradingRules: any
+  _gradingRules: GradingRules
 ): QuestionResult {
   const result: QuestionResult = {
     question_id: question.question_id,
@@ -256,7 +258,7 @@ function gradeEssay(
   let matchCount = 0
   let maxMatches = 0
 
-  if (rubric && rubric.keywords) {
+  if (rubric?.keywords) {
     maxMatches = rubric.keywords.length
 
     for (const keyword of rubric.keywords) {
@@ -295,7 +297,7 @@ function generateFeedback(
   questionResults: QuestionResult[],
   scorePercent: number,
   passed: boolean,
-  gradingRules: any
+  gradingRules: GradingRules
 ): string {
   const correctCount = questionResults.filter((q) => q.is_correct).length
   const totalcount = questionResults.length
@@ -305,7 +307,8 @@ function generateFeedback(
   if (passed) {
     feedback += 'Congratulations, you passed! '
   } else {
-    feedback += `You need ${gradingRules.passing_score_percent}% or higher to pass. `
+    const passing = gradingRules?.passing_score_percent ?? 0
+    feedback += `You need ${passing}% or higher to pass. `
   }
 
   // Add guidance for incorrect answers

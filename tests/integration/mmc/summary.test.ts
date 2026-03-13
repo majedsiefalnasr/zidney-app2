@@ -16,7 +16,7 @@ describe('GET /summary - Integration Tests', () => {
       // 3. Make GET /api/mmc/dashboard/summary request
       // 4. Verify response structure and data accuracy
 
-      const expectedResponse = {
+      const _expectedResponse = {
         success: true,
         data: {
           licenses: {

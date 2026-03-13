@@ -68,7 +68,7 @@ function createTestApp(
     redisLPushSpy = vi.fn().mockResolvedValue(1),
     dbError = false,
   } = options
-  const isAboveThreshold = translationCount > SYNC_THRESHOLD
+  const _isAboveThreshold = translationCount > SYNC_THRESHOLD
 
   const app = new Hono<BackofficeEnv>()
 
@@ -80,7 +80,7 @@ function createTestApp(
     }
 
     const mockPool = {
-      query: vi.fn(async (sql: string, params?: unknown[]) => {
+      query: vi.fn(async (sql: string, _params?: unknown[]) => {
         if (dbError) throw new Error('DB error')
 
         if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {

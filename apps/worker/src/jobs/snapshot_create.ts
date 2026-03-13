@@ -61,16 +61,17 @@ export async function snapshotCreateJob(
     )
 
     return { success: true, snapshot_id, size_bytes }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
     logger.error(
       {
         job_id: jobId,
         license_id,
-        error: error.message,
+        error: msg,
         action: 'snapshot_create_failed',
       },
       'Snapshot creation failed'
     )
-    return { success: false, error: error.message }
+    return { success: false, error: msg }
   }
 }

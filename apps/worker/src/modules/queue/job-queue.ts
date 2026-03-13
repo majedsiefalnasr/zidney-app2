@@ -26,8 +26,8 @@ export interface GradeAttemptJob {
   // Grading context
   payload: {
     exam_id: string
-    attempt_config_snapshot: Record<string, any> // Snapshot at submission time
-    responses: Record<string, any> // Student answers
+    attempt_config_snapshot: Record<string, unknown> // Snapshot at submission time
+    responses: Record<string, unknown> // Student answers
   }
 
   // Retry state
@@ -39,7 +39,7 @@ export interface GradeAttemptJob {
   result?: {
     score: number
     feedback: string
-    details: Record<string, any>
+    details: Record<string, unknown>
     graded_at: Date
   }
 
@@ -165,8 +165,8 @@ export class JobQueue {
         scheduled_for: new Date(),
         expires_at: new Date(Date.now() + 5 * 60 * 1000), // 5 min
         payload: JSON.parse(payload.payload || '{}'),
-        retry_count: parseInt(payload.retry_count || '0'),
-        max_retries: parseInt(payload.max_retries || '3'),
+        retry_count: parseInt(payload.retry_count || '0', 10),
+        max_retries: parseInt(payload.max_retries || '3', 10),
         status: 'PROCESSING',
       }
 

@@ -201,6 +201,34 @@ import {
 } from '@/components/ui'
 import { useDashboardStore } from '@/stores/dashboard-store'
 
+void [
+  AlertCircle,
+  Award,
+  BarChart3,
+  Download,
+  Globe,
+  LineChart,
+  Loader,
+  RefreshCw,
+  TrendingUp,
+  AffiliateLeaderboard,
+  CommercialHealth,
+  DataExport,
+  GeographicDistribution,
+  GrowthTrends,
+  RevenueBreakdown,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Skeleton,
+]
+
 // Store
 const dashboardStore = useDashboardStore()
 
@@ -285,6 +313,38 @@ const handleExport = async (section: string) => {
     console.error('Export error:', err)
   }
 }
+
+void [
+  AlertCircle,
+  Award,
+  BarChart3,
+  Download,
+  Globe,
+  LineChart,
+  Loader,
+  RefreshCw,
+  TrendingUp,
+  AffiliateLeaderboard,
+  CommercialHealth,
+  DataExport,
+  GeographicDistribution,
+  GrowthTrends,
+  RevenueBreakdown,
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Skeleton,
+  dashboardData,
+  formatTime,
+  refreshData,
+  handleExport,
+]
 
 // Lifecycle
 onMounted(async () => {

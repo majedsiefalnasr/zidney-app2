@@ -1,5 +1,5 @@
 <template>
-  <TopBar :appName="appTitle">
+  <TopBar :appName="_appTitle">
     <slot name="left" />
     <div class="app-header__search-placeholder" aria-hidden="true" />
     <div class="app-header__notification-placeholder" aria-hidden="true" />
@@ -8,19 +8,19 @@
       <DropdownMenuTrigger as-child>
         <button
           class="app-header__avatar"
-          :aria-label="`User menu for ${userName}`"
+          :aria-label="`User menu for ${_userName}`"
         >
           <Avatar>
-            <AvatarFallback>{{ userInitials }}</AvatarFallback>
+            <AvatarFallback>{{ _userInitials }}</AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem disabled class="pointer-events-none">{{
-          userName
+          _userName
         }}</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem @click="handleLogout">Sign out</DropdownMenuItem>
+        <DropdownMenuItem @click="_handleLogout">Sign out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   </TopBar>
@@ -35,16 +35,6 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  */
 
-import {
-  Avatar,
-  AvatarFallback,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  TopBar,
-} from '@zidney/ui-system'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useMmcAuthStore } from '@/core/state/auth.store'
@@ -65,21 +55,21 @@ defineSlots<{
 const authStore = useMmcAuthStore()
 const { user } = storeToRefs(authStore)
 
-const appTitle = 'MMC'
+const _appTitle = 'MMC'
 
-const userName = computed(() => user.value?.name ?? '')
+const _userName = computed(() => user.value?.name ?? '')
 
-const userInitials = computed(() => {
+const _userInitials = computed(() => {
   const name = user.value?.name ?? ''
   return name
     .split(' ')
     .filter(Boolean)
-    .map((part) => part[0].toUpperCase())
+    .map((part) => part.charAt(0).toUpperCase())
     .slice(0, 2)
     .join('')
 })
 
-async function handleLogout(): Promise<void> {
+async function _handleLogout(): Promise<void> {
   try {
     await authStore.logout()
   } catch {

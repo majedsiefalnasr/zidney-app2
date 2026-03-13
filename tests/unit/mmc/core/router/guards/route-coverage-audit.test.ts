@@ -46,7 +46,7 @@ describe('route coverage audit (mmc)', () => {
     const allRoutes = flattenRoutes(mmcRoutes)
 
     const unprotectedUnknownRoutes = allRoutes.filter((route) => {
-      const hasRequiresAuth = route.meta?.['requiresAuth'] === true
+      const hasRequiresAuth = route.meta?.requiresAuth === true
       const routeName = String(route.name ?? '')
       const isKnownPublic = KNOWN_PUBLIC_ROUTE_NAMES.has(routeName)
       return !hasRequiresAuth && !isKnownPublic
@@ -66,7 +66,7 @@ describe('route coverage audit (mmc)', () => {
 
   it('all routes with requiresAuth: true are actually present in the routes array', () => {
     const allRoutes = flattenRoutes(mmcRoutes)
-    const protectedRoutes = allRoutes.filter((r) => r.meta?.['requiresAuth'] === true)
+    const protectedRoutes = allRoutes.filter((r) => r.meta?.requiresAuth === true)
     // At minimum, the dashboard and licenses routes should be guarded
     const protectedNames = protectedRoutes.map((r) => r.name)
     expect(protectedNames).toContain('dashboard')

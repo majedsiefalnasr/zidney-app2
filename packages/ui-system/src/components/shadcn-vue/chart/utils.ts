@@ -7,16 +7,16 @@ import type { ChartConfig } from '.'
 const cache = new Map<string, string>()
 
 // Convert object to a consistent string key
-function serializeKey(key: Record<string, any>): string {
+function serializeKey(key: Record<string, unknown>): string {
   return JSON.stringify(key, Object.keys(key).sort())
 }
 
-interface Constructor<P = any> {
+interface Constructor<P = unknown> {
   __isFragment?: never
   __isTeleport?: never
   __isSuspense?: never
   new (
-    ...args: any[]
+    ...args: unknown[]
   ): {
     $props: P
   }
@@ -29,9 +29,22 @@ export function componentToString<P>(config: ChartConfig, component: Constructor
   const id = useId()
 
   // https://unovis.dev/docs/auxiliary/Crosshair#component-props
-  return (_data: any, x: number | Date) => {
-    const data = 'data' in _data ? _data.data : _data
-    const serializedKey = `${id}-${serializeKey(data)}`
+  return (_data: unknown, x: number | Date) => {
+    // _data may be the raw data or an object with `.data`
+    const maybeWithData = _data as { data?: unknown } | null
+    const data: unknown =
+      typeof _data === 'object' && _data !== null && maybeWithData && 'data' in maybeWithData
+        ? (maybeWithData.data as unknown)
+        : _data
+    // Ensure `data` is serializable to an object key; fallback to JSON.stringify for primitives
+    let keyPart: string
+    if (typeof data === 'object' && data !== null) {
+      keyPart = serializeKey(data as Record<string, unknown>)
+    } else {
+      keyPart = JSON.stringify(data)
+    }
+
+    const serializedKey = `${id}-${keyPart}`
     const cachedContent = cache.get(serializedKey)
     if (cachedContent) return cachedContent
 

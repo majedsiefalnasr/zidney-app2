@@ -174,6 +174,17 @@ import {
   SelectValue,
 } from '@/components/ui'
 
+void [
+  TrendingDown,
+  TrendingUp,
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+]
+
 interface TrendDataPoint {
   month: string
   revenue: string
@@ -193,7 +204,7 @@ const props = defineProps<Props>()
 
 // State
 const selectedPeriod = ref('12mo')
-const metricFilter = ref('all')
+const _metricFilter = ref('all')
 
 // Methods
 const formatPeriodLabel = (period: string): string => {
@@ -238,7 +249,7 @@ const revenuePoints = computed(() => {
   if (!filteredData.value.length) return ''
   return filteredData.value
     .map((point: TrendDataPoint, i: number) => {
-      const value = parseInt(point.revenue) || 0
+      const value = parseInt(point.revenue, 10) || 0
       const normalized = Math.min(value / 100000, 100)
       return `${(i / (filteredData.value.length - 1)) * 100},${100 - normalized}`
     })
@@ -249,7 +260,7 @@ const licensePoints = computed(() => {
   if (!filteredData.value.length) return ''
   return filteredData.value
     .map((point: TrendDataPoint, i: number) => {
-      const value = parseInt(point.licenses) || 0
+      const value = parseInt(point.licenses, 10) || 0
       const normalized = Math.min(value / 1000, 100)
       return `${(i / (filteredData.value.length - 1)) * 100},${100 - normalized}`
     })
@@ -259,7 +270,7 @@ const licensePoints = computed(() => {
 const avgRevenue = computed(() => {
   if (!filteredData.value.length) return 0
   const sum = filteredData.value.reduce((acc: number, point: TrendDataPoint) => {
-    return acc + (parseInt(point.revenue) || 0)
+    return acc + (parseInt(point.revenue, 10) || 0)
   }, 0)
   return sum / filteredData.value.length
 })
@@ -267,18 +278,30 @@ const avgRevenue = computed(() => {
 const avgLicenses = computed(() => {
   if (!filteredData.value.length) return 0
   const sum = filteredData.value.reduce((acc: number, point: TrendDataPoint) => {
-    return acc + (parseInt(point.licenses) || 0)
+    return acc + (parseInt(point.licenses, 10) || 0)
   }, 0)
   return sum / filteredData.value.length
 })
 
 const revenueTrend = computed(() => {
   if (!filteredData.value.length) return 0
-  const first = parseInt(filteredData.value[0]?.revenue) || 0
-  const last = parseInt(filteredData.value[filteredData.value.length - 1]?.revenue) || 0
+  const first = parseInt(filteredData.value[0]?.revenue, 10) || 0
+  const last = parseInt(filteredData.value[filteredData.value.length - 1]?.revenue, 10) || 0
   if (first === 0) return 0
   return ((last - first) / first) * 100
 })
+
+void [
+  displayedMonths,
+  tableData,
+  revenuePoints,
+  licensePoints,
+  avgRevenue,
+  avgLicenses,
+  revenueTrend,
+  formatPeriodLabel,
+  formatCurrency,
+]
 </script>
 
 <style scoped>

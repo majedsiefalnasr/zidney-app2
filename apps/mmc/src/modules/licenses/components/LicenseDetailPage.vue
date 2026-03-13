@@ -107,13 +107,13 @@ interface License {
   soft_lock_until?: Date
 }
 
-const license = ref<License | null>(null)
+const _license = ref<License | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
-const showSoftLockDialog = ref(false)
-const showRenewDialog = ref(false)
-const showRestoreDialog = ref(false)
-const showDeleteDialog = ref(false)
+const _showSoftLockDialog = ref(false)
+const _showRenewDialog = ref(false)
+const _showRestoreDialog = ref(false)
+const _showDeleteDialog = ref(false)
 
 onMounted(async () => {
   try {
@@ -121,26 +121,28 @@ onMounted(async () => {
     // TODO: Fetch license details from API
     // const response = await fetch(`/api/v1/licenses/${licenseId}`)
     // license.value = await response.json()
-  } catch (err: any) {
-    error.value = err.message
+  } catch (err: unknown) {
+    const e = err as { message?: string }
+    error.value = e.message ?? String(err)
   } finally {
     loading.value = false
   }
 })
 
-function formatCountdown(date?: Date): string {
+function _formatCountdown(date?: Date): string {
   if (!date) return 'Unknown'
   // TODO: Implement countdown formatting
   return 'Days remaining'
 }
 
-async function archiveLicense() {
+async function _archiveLicense() {
   try {
     // TODO: Call archive API endpoint
     // const response = await fetch(`/api/v1/licenses/${license.value?.id}/archive`, { method: 'POST' })
     // biome-ignore lint/correctness/noUnreachable: catch block retained as error boundary for pending TODO implementation
-  } catch (err: any) {
-    error.value = err.message
+  } catch (err: unknown) {
+    const e = err as { message?: string }
+    error.value = e.message ?? String(err)
   }
 }
 </script>

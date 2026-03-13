@@ -192,7 +192,7 @@ type ActiveContext = {
 let activeContext: ActiveContext | null = null
 
 function parseJwt(headers: Record<string, string>): Record<string, any> | null {
-  const auth = headers['Authorization'] ?? headers['authorization']
+  const auth = headers.Authorization ?? headers.authorization
   if (!auth || !auth.startsWith('Bearer ')) return null
   const token = auth.slice('Bearer '.length)
 
@@ -276,11 +276,6 @@ export class MockHttpClient implements TestClient {
 
   private workspaceFromPath(path: string): string | null {
     const match = path.match(/\/workspaces?\/([^/]+)/)
-    return match?.[1] ?? null
-  }
-
-  private attemptFromPath(path: string): string | null {
-    const match = path.match(/\/attempt\/([^/]+)/)
     return match?.[1] ?? null
   }
 
@@ -705,7 +700,7 @@ export class MockHttpClient implements TestClient {
   }
 
   setJWT(token: string): void {
-    this.headers['Authorization'] = `Bearer ${token}`
+    this.headers.Authorization = `Bearer ${token}`
   }
 
   setCorrelationId(id: string): void {

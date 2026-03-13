@@ -134,6 +134,19 @@ import {
   SelectValue,
 } from '@/components/ui'
 
+void [
+  TrendingDown,
+  TrendingUp,
+  Users,
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+]
+
 interface AffiliateData {
   affiliateId: string
   affiliateName: string
@@ -208,7 +221,7 @@ const topAffiliateName = computed(() => {
 
 const topAffiliateRevenue = computed(() => {
   if (filteredData.value.length === 0) return '$0.00'
-  return '$' + formatCurrency(filteredData.value[0].totalRevenue)
+  return `$${formatCurrency(filteredData.value[0].totalRevenue)}`
 })
 
 const averageConversionRate = computed(() => {
@@ -233,6 +246,16 @@ const nextPage = () => {
     currentPage.value++
   }
 }
+
+void [
+  paginatedData,
+  topAffiliateName,
+  topAffiliateRevenue,
+  averageConversionRate,
+  totalReferredLicenses,
+  previousPage,
+  nextPage,
+]
 </script>
 
 <style scoped>

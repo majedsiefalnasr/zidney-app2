@@ -125,7 +125,7 @@ describe('T106: Async Notification Chain - Events', () => {
   })
 
   it('should include correlation ID in all event chain notifications', async () => {
-    const jobId = 'license-prov-event-6'
+    const _jobId = 'license-prov-event-6'
     const correlationId = 'corr-chain-abc'
 
     const events = [
@@ -144,7 +144,7 @@ describe('T106: Async Notification Chain - Events', () => {
   })
 
   it('should allow event subscribers to hook into notification chain', async () => {
-    const jobId = 'license-prov-event-7'
+    const _jobId = 'license-prov-event-7'
     const subscribers: string[] = []
 
     // Simulate subscribers

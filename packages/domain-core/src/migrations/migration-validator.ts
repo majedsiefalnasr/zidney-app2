@@ -1,5 +1,5 @@
-import { createHash } from 'crypto'
-import { readFileSync } from 'fs'
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 
 /**
  * T053: Migration Validator
@@ -87,8 +87,9 @@ export function validateMigrationFile(filePath: string): {
   try {
     readFileSync(filePath, 'utf-8')
     return { valid: true }
-  } catch (err: any) {
-    if (err.code === 'ENOENT') {
+  } catch (err: unknown) {
+    const e = err as { code?: string; message?: string }
+    if (e.code === 'ENOENT') {
       return { valid: false, error: `Migration file not found: ${filePath}` }
     }
     if (err.code === 'EACCES') {
@@ -99,7 +100,7 @@ export function validateMigrationFile(filePath: string): {
     }
     return {
       valid: false,
-      error: `Failed to read migration file: ${err.message}`,
+      error: `Failed to read migration file: ${e.message}`,
     }
   }
 }
@@ -124,10 +125,11 @@ export function validateMigrationChecksum(
     }
 
     return { valid: true, calculatedChecksum: calculated }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const e = err as { message?: string }
     return {
       valid: false,
-      error: `Failed to validate checksum: ${err.message}`,
+      error: `Failed to validate checksum: ${e.message}`,
     }
   }
 }
@@ -137,14 +139,17 @@ export function validateMigrationChecksum(
  * (ensures table exists and is accessible)
  */
 export async function validateSchemaVersionTable(
-  pool: any,
+  pool: {
+    query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[]; rowCount?: number }>
+  },
   _workspaceId: string
 ): Promise<{ valid: boolean; error?: string }> {
   try {
     await pool.query('SELECT version FROM schema_version LIMIT 1')
     return { valid: true }
-  } catch (err: any) {
-    if (err.code === '42P01') {
+  } catch (err: unknown) {
+    const e = err as { code?: string; message?: string }
+    if (e.code === '42P01') {
       // Table does not exist
       return {
         valid: false,
@@ -153,7 +158,7 @@ export async function validateSchemaVersionTable(
     }
     return {
       valid: false,
-      error: `Failed to access schema_version table: ${err.message}`,
+      error: `Failed to access schema_version table: ${e.message}`,
     }
   }
 }
@@ -162,7 +167,9 @@ export async function validateSchemaVersionTable(
  * Comprehensive migration validation
  */
 export async function validateMigrationPath(options: {
-  pool: any
+  pool: {
+    query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[]; rowCount?: number }>
+  }
   fromVersion: string
   toVersion: string
   migrationFilePath: string

@@ -57,7 +57,7 @@ export function validatePercentageRange(percent: string | number | null | undefi
     }
 
     const p = parseFloat(str)
-    return !isNaN(p) && p >= 0 && p <= 100
+    return !Number.isNaN(p) && p >= 0 && p <= 100
   } catch {
     return false
   }

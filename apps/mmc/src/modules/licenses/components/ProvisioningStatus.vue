@@ -3,8 +3,6 @@
  * T083: Provisioning Status Indicator
  */
 
-import { Badge } from '@zidney/ui/components/shadcn-vue/badge'
-import { Card, CardContent } from '@zidney/ui/components/shadcn-vue/card'
 import { computed } from 'vue'
 
 interface Props {
@@ -18,7 +16,7 @@ const props = withDefaults(defineProps<Props>(), {
   provisioning_retries: 0,
 })
 
-const statusIcon = computed(() => {
+const _statusIcon = computed(() => {
   const icons: Record<string, string> = {
     PENDING_PROVISION: '⏳',
     ACTIVE: '✅',
@@ -29,7 +27,7 @@ const statusIcon = computed(() => {
   return icons[props.status] || '❓'
 })
 
-const statusMessage = computed(() => {
+const _statusMessage = computed(() => {
   const messages: Record<string, string> = {
     PENDING_PROVISION: 'Provisioning workspace...',
     ACTIVE: 'Ready for use',
@@ -40,7 +38,7 @@ const statusMessage = computed(() => {
   return messages[props.status] || 'Unknown'
 })
 
-const variant = computed(() => {
+const _variant = computed(() => {
   if (props.status === 'ACTIVE') return 'default'
   if (props.status === 'PROVISION_FAILED') return 'destructive'
   if (props.status === 'SOFT_LOCKED') return 'secondary'

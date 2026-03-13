@@ -112,7 +112,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
           },
           ctx.userId
         )
-      } catch (error: any) {
+      } catch (_error: any) {
         // Expected to fail validation
       }
 
@@ -136,7 +136,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      const countBefore = parseInt(beforeCount.rows[0]!.count)
+      const countBefore = parseInt(beforeCount.rows[0]!.count, 10)
 
       // Try invalid update
       try {
@@ -148,7 +148,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
           },
           ctx.userId
         )
-      } catch (error: any) {
+      } catch (_error: any) {
         // Expected
       }
 
@@ -156,7 +156,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      const countAfter = parseInt(afterCount.rows[0]!.count)
+      const countAfter = parseInt(afterCount.rows[0]!.count, 10)
 
       expect(countAfter).toBe(countBefore)
     })
@@ -176,7 +176,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      const auditBefore = parseInt(beforeAudit.rows[0]!.count)
+      const auditBefore = parseInt(beforeAudit.rows[0]!.count, 10)
 
       // Try invalid update
       try {
@@ -188,7 +188,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
           },
           ctx.userId
         )
-      } catch (error: any) {
+      } catch (_error: any) {
         // Expected
       }
 
@@ -196,7 +196,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      const auditAfter = parseInt(afterAudit.rows[0]!.count)
+      const auditAfter = parseInt(afterAudit.rows[0]!.count, 10)
 
       expect(auditAfter).toBe(auditBefore)
     })
@@ -226,7 +226,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
           },
           ctx.userId
         )
-      } catch (error: any) {
+      } catch (_error: any) {
         // Expected
       }
 
@@ -249,7 +249,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         ctx.userId
       )
 
-      const productId = product.id
+      const _productId = product.id
 
       // All product_versions should have valid product_id
       const orphans = await dbClient.query(
@@ -339,14 +339,14 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
       )
 
       // Rapid updates
-      const updates = await Promise.all([
+      const _updates = await Promise.all([
         productService.updateProduct(dbClient, product.id, { description: 'Update 1' }, ctx.userId),
         productService.updateProduct(dbClient, product.id, { description: 'Update 2' }, ctx.userId),
         productService.updateProduct(dbClient, product.id, { description: 'Update 3' }, ctx.userId),
       ])
 
       // Final state should be consistent
-      const final = await productService.getProductById(dbClient, product.id)
+      const _final = await productService.getProductById(dbClient, product.id)
 
       // Should have versions 1-4 (or more if all succeeded)
       const versions = await dbClient.query(
@@ -354,14 +354,14 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         [product.id]
       )
 
-      expect(parseInt(versions.rows[0]!.count)).toBeGreaterThanOrEqual(2)
+      expect(parseInt(versions.rows[0]!.count, 10)).toBeGreaterThanOrEqual(2)
     })
   })
 
   describe('Rollback scenarios', () => {
     it('should rollback all changes if transaction fails mid-way', async () => {
       // Simulate constraint violation by duplicate slug
-      const product1 = await productService.createProduct(
+      const _product1 = await productService.createProduct(
         dbClient,
         {
           name: { en: 'Product 1' },
@@ -383,13 +383,13 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
           ctx.userId
         )
         expect.fail('Should have failed with duplicate slug')
-      } catch (error: any) {
+      } catch (_error: any) {
         // Expected
       }
 
       // Verify only one product created
       const products = await dbClient.query('SELECT COUNT(*) as count FROM products')
-      expect(parseInt(products.rows[0]!.count)).toBe(1)
+      expect(parseInt(products.rows[0]!.count, 10)).toBe(1)
 
       // Verify consistent state
       const list = await productService.listProducts(dbClient, {})

@@ -104,29 +104,33 @@ export async function handleProvisioningJob(ctx: ProvisioningJobContext): Promis
       workspace_id: workspaceId,
       admin_email: adminEmail,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
+    const errStack = error instanceof Error ? error.stack : undefined
+
     logger.error({
       event: 'provisioning_failed',
       license_id: payload.license_id,
       workspace_slug: payload.workspace_slug,
       attempt: attemptNumber + 1,
-      error_message: error.message,
-      error_stack: error.stack,
+      error_message: errMsg,
+      error_stack: errStack,
     })
 
     // T049: Cleanup on failure
     try {
       await cleanupFailedProvisioning(payload.workspace_slug, logger)
-    } catch (cleanupError: any) {
+    } catch (cleanupError: unknown) {
+      const cleanupMsg = cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
       logger.error({
         event: 'provisioning_cleanup_failed',
         license_id: payload.license_id,
-        error_message: cleanupError.message,
+        error_message: cleanupMsg,
       })
     }
 
     // Sanitize error message for database
-    const sanitizedError = sanitizeErrorMessage(error.message)
+    const sanitizedError = sanitizeErrorMessage(errMsg)
 
     // Update license with failure status
     await masterDb.query(
@@ -177,13 +181,14 @@ async function runTenantMigrations(workspaceSlug: string, logger: Logger): Promi
       event: 'tenant_migrations_completed',
       workspace_slug: workspaceSlug,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsgLocal = error instanceof Error ? error.message : String(error)
     logger.error({
       event: 'tenant_migrations_failed',
       workspace_slug: workspaceSlug,
-      error_message: error.message,
+      error_message: errMsgLocal,
     })
-    throw error
+    throw error instanceof Error ? error : new Error(errMsgLocal)
   }
 }
 
@@ -208,13 +213,14 @@ async function seedTenantData(payload: ProvisioningJobPayload, logger: Logger): 
       event: 'tenant_seeding_completed',
       workspace_slug: payload.workspace_slug,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsgLocal = error instanceof Error ? error.message : String(error)
     logger.error({
       event: 'tenant_seeding_failed',
       workspace_slug: payload.workspace_slug,
-      error_message: error.message,
+      error_message: errMsgLocal,
     })
-    throw error
+    throw error instanceof Error ? error : new Error(errMsgLocal)
   }
 }
 
@@ -249,13 +255,14 @@ async function createAdminAccount(
     })
 
     return tempPassword
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsgLocal = error instanceof Error ? error.message : String(error)
     logger.error({
       event: 'admin_account_creation_failed',
       workspace_slug: workspaceSlug,
-      error_message: error.message,
+      error_message: errMsgLocal,
     })
-    throw error
+    throw error instanceof Error ? error : new Error(errMsgLocal)
   }
 }
 
@@ -292,13 +299,14 @@ async function insertTenantRegistry(
     })
 
     return workspaceId
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsgLocal = error instanceof Error ? error.message : String(error)
     logger.error({
       event: 'tenant_registry_insertion_failed',
       license_id: payload.license_id,
-      error_message: error.message,
+      error_message: errMsgLocal,
     })
-    throw error
+    throw error instanceof Error ? error : new Error(errMsgLocal)
   }
 }
 
@@ -320,13 +328,14 @@ async function cleanupFailedProvisioning(workspaceSlug: string, logger: Logger):
       event: 'provisioning_cleanup_completed',
       workspace_slug: workspaceSlug,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsgLocal = error instanceof Error ? error.message : String(error)
     logger.error({
       event: 'provisioning_cleanup_failed',
       workspace_slug: workspaceSlug,
-      error_message: error.message,
+      error_message: errMsgLocal,
     })
-    throw error
+    throw error instanceof Error ? error : new Error(errMsgLocal)
   }
 }
 

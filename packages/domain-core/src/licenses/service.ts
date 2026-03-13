@@ -50,7 +50,16 @@ interface Logger {
 }
 
 export interface QueueService {
-  enqueueProvisioningJob(payload: any): Promise<void>
+  enqueueProvisioningJob(payload: Record<string, unknown>): Promise<void>
+}
+
+function getErrorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message
+  if (typeof e === 'object' && e !== null && 'message' in e) {
+    const m = (e as { message?: unknown }).message
+    return typeof m === 'string' ? m : String(m)
+  }
+  return String(e)
 }
 
 export class LicenseService {
@@ -112,12 +121,12 @@ export class LicenseService {
           default_language: input.default_language || 'en',
           uses_divisions: input.uses_divisions ?? false,
         })
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.logger.warn({
           event: 'provisioning_job_enqueue_failed',
           license_id: licenseId,
           correlation_id: correlationId,
-          error: error.message,
+          error: getErrorMessage(error),
         })
         // Don't fail license creation if queue is temporarily unavailable
         // UI will show manual retry button
@@ -268,7 +277,7 @@ export class LicenseService {
       }
 
       // Update license
-      const updated = await this.repository.update(id, input as any)
+      const updated = await this.repository.update(id, input as unknown as Record<string, unknown>)
 
       // Log event
       this.logger.info({
@@ -480,7 +489,7 @@ export class LicenseService {
         provisioning_retries: license.provisioning_retries + 1,
         provisioning_error: null,
         provisioning_last_attempt_at: new Date(),
-      } as any)
+      } as unknown as Record<string, unknown>)
 
       // Enqueue new provisioning job
       try {
@@ -494,12 +503,12 @@ export class LicenseService {
           default_language: license.default_language,
           uses_divisions: license.uses_divisions,
         })
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.logger.error({
           event: 'provisioning_retry_enqueue_failed',
           license_id: id,
           correlation_id: correlationId,
-          error: error.message,
+          error: getErrorMessage(error),
         })
         throw ProvisioningError.queueUnavailable()
       }

@@ -11,7 +11,12 @@ const logger = createLogger('delete-license-job')
  * Retry: max_retries=2 (only 2, terminal operation)
  * On failure: Alert ops, preserve license in ARCHIVED state
  */
-export async function deleteLicenseJob(payload: any, jobId: string) {
+export interface DeleteLicenseJobPayload {
+  license_id: string
+  grace_period_until?: string
+}
+
+export async function deleteLicenseJob(payload: DeleteLicenseJobPayload, jobId: string) {
   const { license_id, grace_period_until: _grace_period_until } = payload
 
   try {
@@ -33,17 +38,18 @@ export async function deleteLicenseJob(payload: any, jobId: string) {
       license_id,
       deleted_at: new Date(),
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
     logger.error(
       {
         job_id: jobId,
         license_id,
-        error: error.message,
+        error: errMsg,
         action: 'delete_failed',
       },
       'Delete failed'
     )
     // Alert ops on persistent failure
-    return { success: false, error: error.message }
+    return { success: false, error: errMsg }
   }
 }

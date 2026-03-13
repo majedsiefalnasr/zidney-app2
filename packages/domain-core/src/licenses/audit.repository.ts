@@ -91,16 +91,16 @@ export class AuditRepository {
   /**
    * Helper: Map database row to AuditLogEntry
    */
-  private mapToAuditLogEntry(row: any): AuditLogEntry {
+  private mapToAuditLogEntry(row: Record<string, unknown>): AuditLogEntry {
     return {
-      id: row.id,
-      license_id: row.license_id,
-      action: row.action,
-      old_status: row.old_status as LicenseStatus | null,
-      new_status: row.new_status as LicenseStatus | null,
-      reason: row.reason,
-      correlation_id: row.correlation_id,
-      created_at: new Date(row.created_at),
+      id: String(row.id),
+      license_id: String(row.license_id),
+      action: String(row.action),
+      old_status: (row.old_status as LicenseStatus) || null,
+      new_status: (row.new_status as LicenseStatus) || null,
+      reason: typeof row.reason === 'string' ? row.reason : undefined,
+      correlation_id: String(row.correlation_id),
+      created_at: new Date(String(row.created_at)),
     }
   }
 }

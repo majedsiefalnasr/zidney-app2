@@ -20,8 +20,8 @@
  * ADRs: ADR-0001 (tenant isolation)
  */
 
+import { randomUUID } from 'node:crypto'
 import { logger } from '@zidney/logger'
-import { randomUUID } from 'crypto'
 import type { Pool } from 'pg'
 
 /**
@@ -250,7 +250,7 @@ async function getDLQRecords(
     FROM failed_grading_jobs
   `
 
-  const params: any[] = []
+  const params: unknown[] = []
 
   if (options?.reviewed !== undefined) {
     query += ` WHERE reviewed = $1`

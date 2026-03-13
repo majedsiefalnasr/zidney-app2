@@ -33,7 +33,7 @@ describe('route coverage audit (backoffice)', () => {
     const allRoutes = flattenRoutes(backofficeRoutes)
 
     const unprotectedUnknownRoutes = allRoutes.filter((route) => {
-      const hasRequiresAuth = route.meta?.['requiresAuth'] === true
+      const hasRequiresAuth = route.meta?.requiresAuth === true
       const routeName = String(route.name ?? '')
       const isKnownPublic = KNOWN_PUBLIC_ROUTE_NAMES.has(routeName)
       return !hasRequiresAuth && !isKnownPublic

@@ -18,10 +18,32 @@ export interface FailedMigrationTask {
 /**
  * Process failed migration from DLQ
  */
+function getErrorMessage(err: unknown): string {
+  if (
+    err &&
+    typeof err === 'object' &&
+    'message' in err &&
+    typeof (err as { message?: unknown }).message === 'string'
+  ) {
+    return (err as { message: string }).message
+  }
+  try {
+    return String(err)
+  } catch {
+    return 'unknown error'
+  }
+}
+
 export async function processMigrationDLQ(
   task: FailedMigrationTask,
-  logger?: any,
-  alertService?: any
+  logger?: {
+    log?: (level: string, msg: string, meta?: Record<string, unknown>) => void
+    info?: (msg: string, meta?: Record<string, unknown>) => void
+    debug?: (msg: string, meta?: Record<string, unknown>) => void
+    error?: (msg: string, meta?: Record<string, unknown>) => void
+    critical?: (msg: string, meta?: Record<string, unknown>) => void
+  },
+  alertService?: { sendAlert: (payload: Record<string, unknown>) => Promise<void> }
 ): Promise<void> {
   logger?.log('error', 'Processing failed migration from DLQ', {
     task_id: task.task_id,
@@ -48,10 +70,8 @@ export async function processMigrationDLQ(
           workspace_id: task.workspace_id,
           task_id: task.task_id,
         })
-      } catch (err: any) {
-        logger?.log('error', 'Failed to send tampering alert', {
-          error: err.message,
-        })
+      } catch (err: unknown) {
+        logger?.error?.('Failed to send tampering alert', { error: getErrorMessage(err) })
       }
     }
 
@@ -85,10 +105,8 @@ export async function processMigrationDLQ(
         workspace_id: task.workspace_id,
         task_id: task.task_id,
       })
-    } catch (err: any) {
-      logger?.log('error', 'Failed to send migration failure alert', {
-        error: err.message,
-      })
+    } catch (err: unknown) {
+      logger?.error?.('Failed to send migration failure alert', { error: getErrorMessage(err) })
     }
   }
 }

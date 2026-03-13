@@ -191,7 +191,18 @@ export class MemberService {
       return null
     }
 
-    return this.augmentMember(result.rows[0], this.db as any)
+    return this.augmentMember(
+      result.rows[0] as Record<string, unknown>,
+      this.db as unknown as {
+        query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[]; rowCount?: number }>
+        db?: {
+          query: (
+            sql: string,
+            params?: unknown[]
+          ) => Promise<{ rows: unknown[]; rowCount?: number }>
+        }
+      }
+    )
   }
 
   /**
@@ -228,7 +239,23 @@ export class MemberService {
 
     const result = await this.db.query(query, params)
     const members = await Promise.all(
-      result.rows.map((m: any) => this.augmentMember(m, this.db as any))
+      result.rows.map((m: unknown) =>
+        this.augmentMember(
+          m as Record<string, unknown>,
+          this.db as unknown as {
+            query: (
+              sql: string,
+              params?: unknown[]
+            ) => Promise<{ rows: unknown[]; rowCount?: number }>
+            db?: {
+              query: (
+                sql: string,
+                params?: unknown[]
+              ) => Promise<{ rows: unknown[]; rowCount?: number }>
+            }
+          }
+        )
+      )
     )
 
     return { members, total }
@@ -343,7 +370,7 @@ export class MemberService {
 
       await client.query('COMMIT')
 
-      return this.augmentMember(updated, client)
+      return this.augmentMember(updated as Record<string, unknown>, client)
     } catch (error) {
       await client.query('ROLLBACK')
       throw error
@@ -411,7 +438,7 @@ export class MemberService {
 
       await client.query('COMMIT')
 
-      return this.augmentMember(updated, client)
+      return this.augmentMember(updated as Record<string, unknown>, client)
     } catch (error) {
       await client.query('ROLLBACK')
       throw error
@@ -441,40 +468,61 @@ export class MemberService {
   /**
    * Private: Augment member with role_name and creator info
    */
-  private async augmentMember(member: any, client: any): Promise<MMCMember> {
+  private async augmentMember(
+    member: Record<string, unknown>,
+    client: {
+      query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[]; rowCount?: number }>
+      db?: {
+        query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[]; rowCount?: number }>
+      }
+    }
+  ): Promise<MMCMember> {
+    // Helper to run a query against either client.query or client.db.query safely
+    const runQuery = async (sql: string, params?: unknown[]) => {
+      if (client && typeof client.query === 'function') {
+        return client.query(sql, params)
+      }
+      if (client.db && typeof client.db.query === 'function') {
+        return client.db.query(sql, params)
+      }
+      throw new Error('Database client missing query function')
+    }
+
     // Get role name
-    const roleResult = await (client.query || client.db.query)(
-      `SELECT name FROM roles WHERE id = $1`,
-      [member.role_id]
-    )
-    const roleName = roleResult.rowCount > 0 ? roleResult.rows[0].name : undefined
+    const roleResult = await runQuery(`SELECT name FROM roles WHERE id = $1`, [member.role_id])
+    const roleName =
+      roleResult.rowCount && roleResult.rowCount > 0
+        ? ((roleResult.rows[0] as Record<string, unknown>).name as string)
+        : undefined
 
     // Get creator username
     let createdByUsername: string | undefined
     if (member.created_by) {
-      const creatorResult = await (client.query || client.db.query)(
-        `SELECT username FROM mmc_members WHERE id = $1`,
-        [member.created_by]
-      )
-      createdByUsername = creatorResult.rowCount > 0 ? creatorResult.rows[0].username : undefined
+      const creatorResult = await runQuery(`SELECT username FROM mmc_members WHERE id = $1`, [
+        member.created_by,
+      ])
+      createdByUsername =
+        creatorResult.rowCount && creatorResult.rowCount > 0
+          ? ((creatorResult.rows[0] as Record<string, unknown>).username as string)
+          : undefined
     }
 
     return {
-      id: member.id,
-      username: member.username,
-      email: member.email,
-      role_id: member.role_id,
+      id: member.id as string,
+      username: member.username as string,
+      email: member.email as string,
+      role_id: member.role_id as string,
       role_name: roleName,
-      team_id: member.team_id,
-      group_id: member.group_id,
-      department_id: member.department_id,
-      token_version: member.token_version,
-      status: member.status,
-      created_at: member.created_at,
-      updated_at: member.updated_at,
-      created_by: member.created_by,
+      team_id: member.team_id as string | undefined,
+      group_id: member.group_id as string | undefined,
+      department_id: member.department_id as string | undefined,
+      token_version: member.token_version as number,
+      status: member.status as string,
+      created_at: member.created_at as Date,
+      updated_at: member.updated_at as Date,
+      created_by: member.created_by as string | undefined,
       created_by_username: createdByUsername,
-      updated_by: member.updated_by,
+      updated_by: member.updated_by as string | undefined,
     }
   }
 

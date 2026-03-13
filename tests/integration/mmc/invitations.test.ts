@@ -35,7 +35,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
 
   describe('POST /mmc/invitations', () => {
     it('should create invitation with valid email and role', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -52,7 +52,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should send invitation email asynchronously', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -64,7 +64,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should return 409 Conflict if email already MMC member', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'existing_member@example.com', // Already has mmc_members record
         role_id: ctx.roleId,
       }
@@ -74,7 +74,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should return 409 Conflict if pending invitation already exists for email', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'pending@example.com', // Has PENDING invitation
         role_id: ctx.roleId,
       }
@@ -85,7 +85,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should return 400 Bad Request for invalid role_id', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: randomUUID(), // Non-existent role
       }
@@ -95,7 +95,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should return 400 Bad Request for invalid email format', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'not-an-email',
         role_id: ctx.roleId,
       }
@@ -105,7 +105,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should return 403 Forbidden if user lacks MEMBERS_MANAGEMENT.create permission', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -116,7 +116,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should generate secure token (32 bytes, random)', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -129,7 +129,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should store token_hash (SHA256 of token), not plaintext token', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -142,7 +142,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should audit log invitation creation', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -155,7 +155,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should set invitation expiration to 24 hours', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -167,7 +167,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
 
   describe('POST /mmc/invitations/:token/accept', () => {
     it('should accept invitation with valid token before expiration', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -185,7 +185,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should generate username from email prefix + random suffix', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -196,7 +196,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should return 401 Unauthorized if token expired', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -207,7 +207,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should return 401 Unauthorized if token already used', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -218,7 +218,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should return 401 Unauthorized if token invalid', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -228,7 +228,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should return 400 Bad Request if password invalid', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'weak', // Weak: no uppercase, no digit, no special
       }
 
@@ -237,7 +237,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should hash password before storing', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -246,7 +246,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should update invitation status to ACCEPTED', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -255,7 +255,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should update invitation accepted_at timestamp', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -264,7 +264,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should audit log invitation acceptance', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -276,7 +276,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should ensure username uniqueness on acceptance', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -286,7 +286,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should create member transaction atomically', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -357,7 +357,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
 
   describe('Invitation Expiration Handling', () => {
     it('should accept invitation before 24-hour mark', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -367,7 +367,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should reject invitation after 24-hour mark', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -386,7 +386,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
 
   describe('Email Delivery', () => {
     it('should send invitation email with token link', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -401,7 +401,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should handle email sending failures gracefully', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -415,7 +415,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
 
   describe('Transactional Safety', () => {
     it('should roll back member creation if invitation update fails', async () => {
-      const acceptPayload = {
+      const _acceptPayload = {
         password: 'NewPassword123!',
       }
 
@@ -425,7 +425,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
     })
 
     it('should roll back invitation creation if email send fails', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }
@@ -438,7 +438,7 @@ describe('T047: Invitations Workflow Integration Tests', () => {
 
   describe('Correlation ID Propagation', () => {
     it('should propagate correlation_id through invitation workflow', async () => {
-      const invitePayload = {
+      const _invitePayload = {
         email: 'newmember@example.com',
         role_id: ctx.roleId,
       }

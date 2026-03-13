@@ -2,6 +2,17 @@ import { logger } from '@zidney/logger'
 import type { Pool } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 
+function getErrorMeta(err: unknown): { code?: string; message?: string } {
+  if (err instanceof Error) return { message: err.message }
+  if (typeof err === 'object' && err !== null) {
+    const e = err as Record<string, unknown>
+    const code = typeof e.code === 'string' ? (e.code as string) : undefined
+    const message = typeof e.message === 'string' ? (e.message as string) : undefined
+    return { code, message }
+  }
+  return {}
+}
+
 export interface CreateLicenseOptions {
   product_id: string
   workspace_id: string
@@ -58,6 +69,7 @@ export async function createLicense(
   options: CreateLicenseOptions
 ): Promise<License> {
   const client = await masterDb.connect()
+  let license_id: string | undefined
 
   try {
     // Begin transaction with SERIALIZABLE isolation
@@ -72,15 +84,15 @@ export async function createLicense(
 
     if (!productResult.rows.length) {
       await client.query('ROLLBACK')
-      const error: any = new Error('Product not found')
-      error.code = 'PRODUCT_NOT_FOUND'
-      throw error
+      const err = new Error('Product not found') as Error & { code?: string }
+      err.code = 'PRODUCT_NOT_FOUND'
+      throw err
     }
 
     const product = productResult.rows[0]
 
     // Create license with ACTIVE status
-    const license_id = uuidv4()
+    license_id = uuidv4()
     const now = new Date()
 
     const licenseResult = await client.query(
@@ -127,22 +139,21 @@ export async function createLicense(
     )
 
     return license
-  } catch (error: any) {
+  } catch (error: unknown) {
     await client.query('ROLLBACK').catch(() => {})
+    const meta = getErrorMeta(error)
 
     logger.error(
       {
-        action: 'license_create_service_error',
-        workspace_slug: options.workspace_slug,
-        error_code: error.code,
-        error_message: error.message,
+        action: 'activate_error',
+        workspace_id: options.workspace_id,
+        error_message: meta.message,
       },
-      'License creation failed in domain-core'
+      'Activate transition failed'
     )
 
     throw error
   } finally {
-    client.release()
   }
 }
 
@@ -210,7 +221,7 @@ export async function transitionLicenseState(
     }
 
     // Update license status
-    const updateParams: any[] = [target_state, new Date(), options.license_id]
+    const updateParams: unknown[] = [target_state, new Date(), options.license_id]
 
     let updateQuery = `UPDATE licenses SET status = $1, updated_at = $2`
 
@@ -252,15 +263,16 @@ export async function transitionLicenseState(
       license: updatedLicense,
       previous_state: current_state,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     await client.query('ROLLBACK').catch(() => {})
+    const meta = getErrorMeta(error)
 
     logger.error(
       {
         action: 'license_transition_service_error',
         license_id: options.license_id,
         target_state: options.target_state,
-        error_message: error.message,
+        error_message: meta.message,
       },
       'License transition failed in domain-core'
     )
@@ -389,13 +401,14 @@ export async function transitionToSoftLock(
       license: updatedLicense,
       previous_state: current_state,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     await client.query('ROLLBACK').catch(() => {})
+    const meta = getErrorMeta(error)
     logger.error(
       {
         action: 'soft_lock_error',
         license_id,
-        error_message: error.message,
+        error_message: meta.message,
       },
       'Soft lock transition failed'
     )
@@ -508,13 +521,14 @@ export async function transitionToActive(
       license: updatedLicense,
       previous_state: current_state,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     await client.query('ROLLBACK').catch(() => {})
+    const meta = getErrorMeta(error)
     logger.error(
       {
         action: 'activate_error',
         license_id,
-        error_message: error.message,
+        error_message: meta.message,
       },
       'Activate transition failed'
     )
@@ -670,14 +684,15 @@ export async function transitionToArchived(
       archive_timestamp: now,
       snapshot_id,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     await client.query('ROLLBACK').catch(() => {})
+    const errMsg = error instanceof Error ? error.message : String(error)
     logger.error(
       {
         action: 'archive_error',
         license_id,
         snapshot_id,
-        error_message: error.message,
+        error_message: errMsg,
       },
       'Archive transition failed'
     )
@@ -828,13 +843,14 @@ export async function restoreFromArchive(
       restore_timestamp: now,
       eta_seconds: 30,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     await client.query('ROLLBACK').catch(() => {})
+    const meta = getErrorMeta(error)
     logger.error(
       {
         action: 'restore_job_error',
         license_id,
-        error_message: error.message,
+        error_message: meta.message,
       },
       'Restore job queueing failed'
     )
@@ -1014,13 +1030,14 @@ export async function transitionToDeleted(
       delete_job_id,
       delete_timestamp: now,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     await client.query('ROLLBACK').catch(() => {})
+    const meta = getErrorMeta(error)
     logger.error(
       {
         action: 'delete_job_error',
         license_id,
-        error_message: error.message,
+        error_message: meta.message,
       },
       'Delete job queueing failed'
     )
@@ -1204,14 +1221,15 @@ export async function deleteLicense(
       success: true,
       deleted_at: now,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     await client.query('ROLLBACK').catch(() => {})
+    const meta = getErrorMeta(error)
 
     logger.error(
       {
         action: 'license_delete_error',
         license_id,
-        error_message: error.message,
+        error_message: meta.message,
       },
       'License deletion failed'
     )

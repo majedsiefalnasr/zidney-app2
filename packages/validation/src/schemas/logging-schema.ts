@@ -82,7 +82,7 @@ export const ERROR_LOG_CONTEXT = z.object({
   error_code: z.string().optional(),
   error_message: z.string().optional(),
   error_stack: z.string().optional(),
-  error_details: z.any().optional(),
+  error_details: z.unknown().optional(),
 })
 
 /**
@@ -104,7 +104,7 @@ export const LOG_ENTRY = BASE_LOG_ENTRY.extend({
   ...PERFORMANCE_LOG_CONTEXT.shape,
   ...ERROR_LOG_CONTEXT.shape,
   ...SECURITY_LOG_CONTEXT.shape,
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.unknown()).optional(),
 })
 
 export type LogEntry = z.infer<typeof LOG_ENTRY>
@@ -137,7 +137,7 @@ function sanitizeLogEntry(entry: LogEntry): LogEntry {
 
   // Sanitize metadata for common sensitive patterns
   if (sanitized.metadata) {
-    sanitized.metadata = sanitizeMetadata(sanitized.metadata)
+    sanitized.metadata = sanitizeMetadata(sanitized.metadata) as Record<string, unknown> | undefined
   }
 
   return sanitized
@@ -146,16 +146,16 @@ function sanitizeLogEntry(entry: LogEntry): LogEntry {
 /**
  * Recursively sanitize metadata object
  */
-function sanitizeMetadata(obj: any): any {
+function sanitizeMetadata(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null) {
     return obj
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(sanitizeMetadata)
+    return obj.map((v) => sanitizeMetadata(v))
   }
 
-  const sanitized: any = {}
+  const sanitized: Record<string, unknown> = {}
   const SENSITIVE_KEYS = [
     'password',
     'token',
@@ -170,7 +170,7 @@ function sanitizeMetadata(obj: any): any {
     'email',
   ]
 
-  for (const [key, value] of Object.entries(obj)) {
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
     const lowerKey = key.toLowerCase()
     if (SENSITIVE_KEYS.some((sk) => lowerKey.includes(sk))) {
       sanitized[key] = '[REDACTED]'
@@ -193,7 +193,7 @@ export const LogEventFactories = {
    */
   apiRequest: (params: {
     correlationId: string
-    method: string
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD'
     path: string
     statusCode: number
     durationMs: number
@@ -208,7 +208,7 @@ export const LogEventFactories = {
     event: `http_${params.method.toLowerCase()}_${params.statusCode}`,
     message: `${params.method} ${params.path} completed with status ${params.statusCode}`,
     correlation_id: params.correlationId,
-    method: params.method as any,
+    method: params.method,
     path: params.path,
     status_code: params.statusCode,
     duration_ms: params.durationMs,

@@ -18,7 +18,7 @@ describe('Area 3: License Engine Validation (Integration)', () => {
     masterDb = await dbManager.getMasterDb()
 
     workspace = await seedWorkspace(masterDb, {
-      slug: 'test-license-' + Date.now(),
+      slug: `test-license-${Date.now()}`,
     })
 
     license = await seedLicense(masterDb, {
@@ -30,7 +30,7 @@ describe('Area 3: License Engine Validation (Integration)', () => {
   afterEach(async () => {
     try {
       await cleanupAllFixtures(masterDb)
-    } catch (error) {
+    } catch (_error) {
       // Ignore
     }
   })

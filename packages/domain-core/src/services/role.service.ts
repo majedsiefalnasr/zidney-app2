@@ -63,14 +63,14 @@ export class RoleService {
 
     const result = await this.db.query(query, params)
 
-    return result.rows.map((r: any) => ({
-      id: r.id,
-      name: r.name,
-      description: r.description,
-      status: r.status,
-      member_count: parseInt(r.member_count, 10),
-      created_at: r.created_at,
-      updated_at: r.updated_at,
+    return result.rows.map((r: Record<string, unknown>) => ({
+      id: r.id as string,
+      name: r.name as string,
+      description: r.description as string | undefined,
+      status: r.status as string,
+      member_count: parseInt((r.member_count as string) || '0', 10),
+      created_at: r.created_at as Date,
+      updated_at: r.updated_at as Date,
     }))
   }
 
@@ -121,16 +121,16 @@ export class RoleService {
 
     return {
       role_id: roleId,
-      permissions: result.rows.map((r: any) => ({
-        id: r.id,
-        role_id: r.role_id,
-        domain: r.domain,
-        can_view: r.can_view,
-        can_create: r.can_create,
-        can_edit: r.can_edit,
-        can_delete: r.can_delete,
-        created_at: r.created_at,
-        updated_at: r.updated_at,
+      permissions: result.rows.map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        role_id: r.role_id as string,
+        domain: r.domain as PermissionDomain,
+        can_view: r.can_view as boolean,
+        can_create: r.can_create as boolean,
+        can_edit: r.can_edit as boolean,
+        can_delete: r.can_delete as boolean,
+        created_at: r.created_at as Date,
+        updated_at: r.updated_at as Date,
       })),
     }
   }
@@ -237,16 +237,16 @@ export class RoleService {
 
       const permissionsMatrix: RolePermissionsMatrix = {
         role_id: roleId,
-        permissions: updatedPermissions.map((r: any) => ({
-          id: r.id,
-          role_id: r.role_id,
-          domain: r.domain,
-          can_view: r.can_view,
-          can_create: r.can_create,
-          can_edit: r.can_edit,
-          can_delete: r.can_delete,
-          created_at: r.created_at,
-          updated_at: r.updated_at,
+        permissions: updatedPermissions.map((r: Record<string, unknown>) => ({
+          id: r.id as string,
+          role_id: r.role_id as string,
+          domain: r.domain as PermissionDomain,
+          can_view: r.can_view as boolean,
+          can_create: r.can_create as boolean,
+          can_edit: r.can_edit as boolean,
+          can_delete: r.can_delete as boolean,
+          created_at: r.created_at as Date,
+          updated_at: r.updated_at as Date,
         })),
       }
 

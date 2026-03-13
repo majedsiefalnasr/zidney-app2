@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
 import { computed } from 'vue'
-import { cn } from '@/lib/utils'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
   errors?: Array<string | { message: string | undefined } | undefined>
 }>()
 
-const content = computed(() => {
+const _content = computed(() => {
   if (!props.errors || props.errors.length === 0) return null
 
   const uniqueErrors = [

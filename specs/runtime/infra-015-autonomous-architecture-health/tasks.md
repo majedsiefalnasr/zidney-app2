@@ -11,9 +11,9 @@
 
 **Purpose**: Establish the new governance-only command surface and shared assessment model.
 
-- [ ] T001 Create the architecture health CLI entrypoint scaffold and option parsing in scripts/architecture-health/architecture-health.ts
-- [ ] T002 [P] Create shared assessment, signal, finding, and source-run types in scripts/architecture-health/types.ts
-- [ ] T003 [P] Register the governance-only `arch:health` and `arch:health:ci` command placeholders in package.json
+- [x] T001 Create the architecture health CLI entrypoint scaffold and option parsing in scripts/architecture-health/architecture-health.ts
+- [x] T002 [P] Create shared assessment, signal, finding, and source-run types in scripts/architecture-health/types.ts
+- [x] T003 [P] Register the governance-only `arch:health` and `arch:health:ci` command placeholders in package.json
 
 ---
 
@@ -23,13 +23,13 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T004 Create a deterministic governance command runner with an allowlisted non-shell command surface, explicit per-tool timeout budgets, and structured execution telemetry for `arch:guard:ci`, `bun scripts/infra-audit.ts --quick`, `bun type-safety-guard --json`, `bun run arch:validate-brain`, `gitnexus query`, and `gitnexus impact` in scripts/architecture-health/source-runner.ts
-- [ ] T005 [P] Implement the approved weighted threshold policy and PASS/BLOCKED verdict calculation in scripts/architecture-health/score-model.ts
-- [ ] T006 [P] Implement finding fingerprinting and cross-tool deduplication in scripts/architecture-health/finding-normalizer.ts
-- [ ] T007 [P] Implement baseline-first architecture-intelligence inspection for stale, missing, invalid, and partially regenerated artifacts in scripts/architecture-health/intelligence-snapshot.ts
-- [ ] T008 [P] Implement GitNexus freshness checks, enrichment hooks, and stale-index remediation handling in scripts/architecture-health/gitnexus-enrichment.ts
-- [ ] T009 Implement atomic current-report writes plus timestamped history snapshots that only persist newly observed assessment states in scripts/architecture-health/report-writer.ts
-- [ ] T010 Implement deterministic JSON, Markdown, and text formatter helpers in scripts/architecture-health/formatters.ts
+- [x] T004 Create a deterministic governance command runner with an allowlisted non-shell command surface, explicit per-tool timeout budgets, and structured execution telemetry for `arch:guard:ci`, `bun scripts/infra-audit.ts --quick`, `bun type-safety-guard --json`, `bun run arch:validate-brain`, `gitnexus query`, and `gitnexus impact` in scripts/architecture-health/source-runner.ts
+- [x] T005 [P] Implement the approved weighted threshold policy and PASS/BLOCKED verdict calculation in scripts/architecture-health/score-model.ts
+- [x] T006 [P] Implement finding fingerprinting and cross-tool deduplication in scripts/architecture-health/finding-normalizer.ts
+- [x] T007 [P] Implement baseline-first architecture-intelligence inspection for stale, missing, invalid, and partially regenerated artifacts in scripts/architecture-health/intelligence-snapshot.ts
+- [x] T008 [P] Implement GitNexus freshness checks, enrichment hooks, and stale-index remediation handling in scripts/architecture-health/gitnexus-enrichment.ts
+- [x] T009 Implement atomic current-report writes plus timestamped history snapshots that only persist newly observed assessment states in scripts/architecture-health/report-writer.ts
+- [x] T010 Implement deterministic JSON, Markdown, and text formatter helpers in scripts/architecture-health/formatters.ts
 
 **Checkpoint**: Foundation ready. The health scanner can now collect signals, score them, and write deterministic artifacts without touching runtime systems.
 
@@ -43,15 +43,15 @@
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Add unit coverage for weighting, threshold evaluation, and health-state mapping in tests/unit/architecture-health/score-model.test.ts
-- [ ] T012 [P] [US1] Add unit coverage for finding fingerprints and duplicate-penalty prevention in tests/unit/architecture-health/finding-normalizer.test.ts
+- [x] T011 [P] [US1] Add unit coverage for weighting, threshold evaluation, and health-state mapping in tests/unit/architecture-health/score-model.test.ts
+- [x] T012 [P] [US1] Add unit coverage for finding fingerprints and duplicate-penalty prevention in tests/unit/architecture-health/finding-normalizer.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T013 [P] [US1] Implement dependency, layer, circular-risk, and drift signal normalization from `arch:guard:ci` and `infra-audit --quick` in scripts/architecture-health/collectors/baseline-governance.ts
-- [ ] T014 [P] [US1] Implement type-safety and architecture-brain validation normalization in scripts/architecture-health/collectors/validation-governance.ts
-- [ ] T015 [US1] Compose the consolidated assessment flow, deterministic signal ordering, and repository-scoped verdict emission in scripts/architecture-health/architecture-health.ts (depends on T004, T005, T006, T007, T008, T009, T010, T013, T014)
-- [ ] T016 [US1] Add focused compliant-vs-regressed assessment coverage in tests/unit/architecture-health/architecture-health.test.ts
+- [x] T013 [P] [US1] Implement dependency, layer, circular-risk, and drift signal normalization from `arch:guard:ci` and `infra-audit --quick` in scripts/architecture-health/collectors/baseline-governance.ts
+- [x] T014 [P] [US1] Implement type-safety and architecture-brain validation normalization in scripts/architecture-health/collectors/validation-governance.ts
+- [x] T015 [US1] Compose the consolidated assessment flow, deterministic signal ordering, and repository-scoped verdict emission in scripts/architecture-health/architecture-health.ts (depends on T004, T005, T006, T007, T008, T009, T010, T013, T014)
+- [x] T016 [US1] Add focused compliant-vs-regressed assessment coverage in tests/unit/architecture-health/architecture-health.test.ts
 
 **Checkpoint**: User Story 1 is complete when one governance-only command produces a trustworthy consolidated assessment without runtime/API/DB changes.
 
@@ -65,14 +65,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T017 [P] [US2] Add CLI contract coverage for `--ci`, locked-threshold CI behavior, exploratory local `--threshold`, `--output`, `--refresh-context`, `--fail-on-sync`, and the default no-refresh path in tests/unit/architecture-health/cli-contract.test.ts
-- [ ] T018 [P] [US2] Add static regression coverage for package scripts, governance workflow gating, nightly scheduling, artifact publication, performance budgets, and trust-chain preservation against runtime/API/Worker drift in tests/static/07-architecture-health-governance.test.ts
+- [x] T017 [P] [US2] Add CLI contract coverage for `--ci`, locked-threshold CI behavior, exploratory local `--threshold`, `--output`, `--refresh-context`, `--fail-on-sync`, and the default no-refresh path in tests/unit/architecture-health/cli-contract.test.ts
+- [x] T018 [P] [US2] Add static regression coverage for package scripts, governance workflow gating, nightly scheduling, artifact publication, performance budgets, and trust-chain preservation against runtime/API/Worker drift in tests/static/07-architecture-health-governance.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T019 [US2] Wire the final `arch:health` and `arch:health:ci` commands to the governance CLI in package.json
-- [ ] T020 [US2] Integrate architecture health threshold gating, immutable CI policy enforcement, artifact upload, and nightly scheduling into .github/workflows/architecture-governance.yml
-- [ ] T021 [US2] Document governance-only CI usage, immutable threshold semantics, nightly monitoring, artifact publication, and the required validation sequence in docs/architecture/health/README.md
+- [x] T019 [US2] Wire the final `arch:health` and `arch:health:ci` commands to the governance CLI in package.json
+- [x] T020 [US2] Integrate architecture health threshold gating, immutable CI policy enforcement, artifact upload, and nightly scheduling into .github/workflows/architecture-governance.yml
+- [x] T021 [US2] Document governance-only CI usage, immutable threshold semantics, nightly monitoring, artifact publication, and the required validation sequence in docs/architecture/health/README.md
 
 **Checkpoint**: User Story 2 is complete when governance automation can block unhealthy repository states using the same health model without changing tenant, license, version, attempt, API, or worker behavior.
 
@@ -86,19 +86,19 @@
 
 ### Tests for User Story 3
 
-- [ ] T022 [P] [US3] Add unit coverage for stale, missing, invalid, and partially regenerated intelligence artifacts in tests/unit/architecture-health/intelligence-synchronization.test.ts
-- [ ] T023 [P] [US3] Add unit coverage for deterministic current artifacts and non-duplicating timestamped history snapshot generation in tests/unit/architecture-health/report-writer.test.ts
+- [x] T022 [P] [US3] Add unit coverage for stale, missing, invalid, and partially regenerated intelligence artifacts in tests/unit/architecture-health/intelligence-synchronization.test.ts
+- [x] T023 [P] [US3] Add unit coverage for deterministic current artifacts and non-duplicating timestamped history snapshot generation in tests/unit/architecture-health/report-writer.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] Implement baseline-first synchronization evidence capture, optional `--refresh-context` follow-up, and `--fail-on-sync` handling in scripts/architecture-health/intelligence-snapshot.ts
-- [ ] T025 [US3] Integrate GitNexus enrichment results and stale-index findings into the assessment flow in scripts/architecture-health/architecture-health.ts
-- [ ] T026 [US3] Generate deterministic `docs/architecture/health/architecture-health.json`, `docs/architecture/health/architecture-health-summary.md`, `docs/architecture/health/architecture-drift-report.md`, and timestamped snapshots under docs/architecture/health/history/ via scripts/architecture-health/report-writer.ts
-- [ ] T027 [US3] Validate generated report payloads against specs/runtime/infra-015-autonomous-architecture-health/contracts/architecture-health-report.schema.json in scripts/architecture-health/report-schema.ts
-- [ ] T031 [US3] Implement structured scanner logging and health metrics emission validation in scripts/architecture-health/architecture-health.ts and tests/static/07-architecture-health-governance.test.ts
-- [ ] T032 [US2] Implement immutable threshold policy enforcement and reject caller-supplied threshold downgrades in CI mode within scripts/architecture-health/architecture-health.ts and package.json
-- [ ] T033 [P] [US1] Add unit coverage for allowlisted command execution, timeout handling, and command-budget telemetry in tests/unit/architecture-health/source-runner.test.ts
-- [ ] T034 [P] [US2] Add a benchmark harness that executes at least 20 compliant local and CI scanner runs, verifies p95 duration budgets from emitted telemetry, and asserts artifact-upload behavior in tests/static/07-architecture-health-governance.test.ts
+- [x] T024 [US3] Implement baseline-first synchronization evidence capture, optional `--refresh-context` follow-up, and `--fail-on-sync` handling in scripts/architecture-health/intelligence-snapshot.ts
+- [x] T025 [US3] Integrate GitNexus enrichment results and stale-index findings into the assessment flow in scripts/architecture-health/architecture-health.ts
+- [x] T026 [US3] Generate deterministic `docs/architecture/health/architecture-health.json`, `docs/architecture/health/architecture-health-summary.md`, `docs/architecture/health/architecture-drift-report.md`, and timestamped snapshots under docs/architecture/health/history/ via scripts/architecture-health/report-writer.ts
+- [x] T027 [US3] Validate generated report payloads against specs/runtime/infra-015-autonomous-architecture-health/contracts/architecture-health-report.schema.json in scripts/architecture-health/report-schema.ts
+- [x] T031 [US3] Implement structured scanner logging and health metrics emission validation in scripts/architecture-health/architecture-health.ts and tests/static/07-architecture-health-governance.test.ts
+- [x] T032 [US2] Implement immutable threshold policy enforcement and reject caller-supplied threshold downgrades in CI mode within scripts/architecture-health/architecture-health.ts and package.json
+- [x] T033 [P] [US1] Add unit coverage for allowlisted command execution, timeout handling, and command-budget telemetry in tests/unit/architecture-health/source-runner.test.ts
+- [x] T034 [P] [US2] Add a benchmark harness that executes at least 20 compliant local and CI scanner runs, verifies p95 duration budgets from emitted telemetry, and asserts artifact-upload behavior in tests/static/07-architecture-health-governance.test.ts
 
 **Checkpoint**: User Story 3 is complete when synchronization drift is surfaced explicitly, GitNexus enrichment is required when available, and current/history reports remain deterministic and idempotent for same-state reruns.
 
@@ -108,9 +108,9 @@
 
 **Purpose**: Final validation and operator confidence tasks that apply across all user stories.
 
-- [ ] T028 [P] Run the focused architecture-health unit and static suites centered on tests/unit/architecture-health/architecture-health.test.ts and tests/static/07-architecture-health-governance.test.ts
+- [x] T028 [P] Run the focused architecture-health unit and static suites centered on tests/unit/architecture-health/architecture-health.test.ts and tests/static/07-architecture-health-governance.test.ts
 - [ ] T029 Run the full governance validation sequence declared in package.json (`arch:guard:ci`, `arch:audit`, `type-safety-guard`, `ai-context:refresh`, `arch:validate-brain`, `lint`, `validate:types`)
-- [ ] T030 Validate generated artifact expectations and remediation guidance against docs/architecture/health/README.md and specs/runtime/infra-015-autonomous-architecture-health/quickstart.md
+- [x] T030 Validate generated artifact expectations and remediation guidance against docs/architecture/health/README.md and specs/runtime/infra-015-autonomous-architecture-health/quickstart.md
 
 ---
 

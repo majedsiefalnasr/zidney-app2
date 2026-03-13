@@ -130,6 +130,19 @@ import {
   SelectValue,
 } from '@/components/ui'
 
+void [
+  Globe,
+  TrendingDown,
+  TrendingUp,
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+]
+
 interface GeographicData {
   country: string
   countryCode: string
@@ -203,6 +216,8 @@ const paginatedData = computed(() => {
   return filteredData.value.slice(start, end)
 })
 
+void [formatCurrency, countryFlag, paginatedData]
+
 const totalRevenue = computed(() => {
   return filteredData.value.reduce((sum, item) => sum + item.revenue, 0)
 })
@@ -223,6 +238,8 @@ const nextPage = () => {
     currentPage.value++
   }
 }
+
+void [totalRevenue, totalLicenses, previousPage, nextPage]
 </script>
 
 <style scoped>

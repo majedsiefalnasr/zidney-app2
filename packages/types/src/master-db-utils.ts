@@ -40,10 +40,18 @@ export function parseVersion(versionString: string): SemanticVersion {
     )
   }
 
+  // Destructure matched groups to avoid non-null assertions (forbidden by lint rules)
+  const [, majorStr, minorStr, patchStr] = match
+
+  // Ensure captured groups are present (defensive check to satisfy TS narrowing)
+  if (majorStr === undefined || minorStr === undefined || patchStr === undefined) {
+    throw new Error(`Invalid semantic version format: "${versionString}". Expected X.Y.Z`)
+  }
+
   return {
-    major: parseInt(match[1]!, 10),
-    minor: parseInt(match[2]!, 10),
-    patch: parseInt(match[3]!, 10),
+    major: parseInt(majorStr, 10),
+    minor: parseInt(minorStr, 10),
+    patch: parseInt(patchStr, 10),
   }
 }
 

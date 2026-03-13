@@ -36,7 +36,12 @@ export class StudentStaffCounter {
    * @param workspace_id - UUID
    * @returns Number of ENABLED students (status = 'ENABLED' AND role = 'STUDENT')
    */
-  async countStudents(tenantDb: any, workspace_id: string): Promise<number> {
+  async countStudents(
+    tenantDb: {
+      query: (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>> }>
+    },
+    workspace_id: string
+  ): Promise<number> {
     const result = await tenantDb.query(
       `
       SELECT COUNT(*) as count
@@ -48,7 +53,9 @@ export class StudentStaffCounter {
       [workspace_id]
     )
 
-    return parseInt(result.rows[0].count, 10)
+    const raw = result?.rows?.[0]?.count
+    if (raw == null) return 0
+    return parseInt(String(raw), 10)
   }
 
   /**
@@ -58,7 +65,12 @@ export class StudentStaffCounter {
    * @param workspace_id - UUID
    * @returns Number of ENABLED staff (status = 'ENABLED' AND role = 'STAFF')
    */
-  async countStaff(tenantDb: any, workspace_id: string): Promise<number> {
+  async countStaff(
+    tenantDb: {
+      query: (sql: string, params?: unknown[]) => Promise<{ rows: Array<Record<string, unknown>> }>
+    },
+    workspace_id: string
+  ): Promise<number> {
     const result = await tenantDb.query(
       `
       SELECT COUNT(*) as count
@@ -70,7 +82,9 @@ export class StudentStaffCounter {
       [workspace_id]
     )
 
-    return parseInt(result.rows[0].count, 10)
+    const raw = result?.rows?.[0]?.count
+    if (raw == null) return 0
+    return parseInt(String(raw), 10)
   }
 
   /**

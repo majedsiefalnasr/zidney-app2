@@ -2,8 +2,8 @@
   <div
     class="app-layout"
     :class="{
-      'app-layout--mobile': isMobile,
-      'app-layout--collapsed': sidebarCollapsed,
+      'app-layout--mobile': _isMobile,
+      'app-layout--collapsed': _sidebarCollapsed,
     }"
   >
     <!-- Sidebar (suppressed when hideSidebar=true, e.g. for attempt runtime) -->
@@ -35,10 +35,10 @@
 
     <!-- Mobile backdrop (only when sidebar is visible) -->
     <div
-      v-if="!hideSidebar && isMobile && !sidebarCollapsed"
+      v-if="!hideSidebar && _isMobile && !_sidebarCollapsed"
       class="app-layout__backdrop"
       aria-hidden="true"
-      @click="toggleSidebar"
+      @click="_toggleSidebar"
     />
   </div>
 </template>
@@ -71,9 +71,9 @@ withDefaults(defineProps<AppLayoutProps>(), {
 useBreakpoint()
 
 const uiStore = useFrontofficeUiStore()
-const { sidebarCollapsed, isMobile } = storeToRefs(uiStore)
+const { sidebarCollapsed: _sidebarCollapsed, isMobile: _isMobile } = storeToRefs(uiStore)
 
-function toggleSidebar(): void {
+function _toggleSidebar(): void {
   uiStore.toggleSidebar()
 }
 </script>

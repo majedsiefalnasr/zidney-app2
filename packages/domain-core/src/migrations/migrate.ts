@@ -10,10 +10,10 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { createLogger } from '@zidney/logger/logger'
-import { createHash } from 'crypto'
-import { readFileSync } from 'fs'
-import { join } from 'path'
 import type { Pool, QueryResult } from 'pg'
 
 /**
@@ -178,7 +178,7 @@ export async function insertSchemaVersion(
 
     logger_fn.info('Schema version inserted', {
       version,
-      checksum: checksum.substring(0, 8) + '...',
+      checksum: `${checksum.substring(0, 8)}...`,
     })
   } catch (error) {
     logger_fn.error('Failed to insert schema version', {

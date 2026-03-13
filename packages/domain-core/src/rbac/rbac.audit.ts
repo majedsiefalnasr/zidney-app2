@@ -29,7 +29,7 @@ const logger = createLogger('rbac-audit')
 // ---------------------------------------------------------------------------
 
 export interface DbClient {
-  query: <T = any>(
+  query: <T = unknown>(
     sql: string,
     params?: unknown[]
   ) => Promise<{ rows: T[]; rowCount: number | null }>

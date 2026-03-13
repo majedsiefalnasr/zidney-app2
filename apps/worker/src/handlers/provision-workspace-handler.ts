@@ -64,10 +64,6 @@ export interface ProvisioningOrchestrationResult {
  * Main provisioning orchestrator
  */
 export class ProvisionWorkspaceHandler {
-  // @ts-expect-error: TS6133 - stored for dependency injection via constructor, not directly accessed [INFRA-001]
-  private masterDb: Pool
-  // @ts-expect-error: TS6133 - stored for dependency injection via constructor, not directly accessed [INFRA-001]
-  private redis: Redis
   private logger: ProvisioningLogger
   private lockService: DistributedLockService
   private licenseValidator: LicenseValidationService
@@ -354,16 +350,21 @@ export class ProvisionWorkspaceHandler {
         completedSteps,
         durationMs: Date.now() - startTime,
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // ========== ERROR HANDLING: Cleanup & Rollback ==========
-      const errorCode = (error as any)?.code || ProvisioningErrorCode.PROVISION_FAILED
-      const errorMessage = (error as any)?.message || String(error)
+      const maybeError = error as { code?: ProvisioningErrorCode; message?: string } | undefined
+      const errorCode = maybeError?.code ?? ProvisioningErrorCode.PROVISION_FAILED
+      const errorMessage = maybeError?.message ?? String(error)
 
-      this.logger.logError('Provisioning failed', error as Error, {
-        license_id: job.licenseId,
-        failed_at_step: job.currentStep,
-        error_code: errorCode,
-      })
+      this.logger.logError(
+        'Provisioning failed',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          license_id: job.licenseId,
+          failed_at_step: job.currentStep,
+          error_code: errorCode,
+        }
+      )
 
       // Mark license as failed
       await this.failureHandler.markFailed(job.licenseId, errorCode, errorMessage)
@@ -446,7 +447,20 @@ export function createProvisionWorkspaceHandler(
   masterDb: Pool,
   redis: Redis,
   logger: ProvisioningLogger,
-  services: any
+  services: {
+    lockService: DistributedLockService
+    licenseValidator: LicenseValidationService
+    idempotencyChecker: IdempotencyService
+    dbService: DatabaseService
+    migrationRunner: MigrationRunnerService
+    seedService: SeedDataService
+    adminService: AdminAccountService
+    registryService: RegistryInsertionService
+    licenseActivator: LicenseActivationService
+    failureHandler: FailureHandlerService
+    cleanupService: DatabaseCleanupService
+    retryEnqueuer: RetryEnqueueService
+  }
 ): ProvisionWorkspaceHandler {
   return new ProvisionWorkspaceHandler(masterDb, redis, logger, services)
 }

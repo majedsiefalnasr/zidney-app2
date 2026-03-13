@@ -29,9 +29,15 @@ export interface SeedDataResult {
  * Seed Data Service
  */
 export class SeedDataService {
-  private logger?: any
+  private logger?: {
+    logDatabaseOperation?: (op: string, name: string, duration: number, rows: number) => void
+    logError?: (msg: string, err?: Error) => void
+  }
 
-  constructor(logger?: any) {
+  constructor(logger?: {
+    logDatabaseOperation?: (op: string, name: string, duration: number, rows: number) => void
+    logError?: (msg: string, err?: Error) => void
+  }) {
     this.logger = logger
   }
 
@@ -101,6 +107,9 @@ export class SeedDataService {
 /**
  * Factory to create seed service
  */
-export function createSeedDataService(logger?: any): SeedDataService {
+export function createSeedDataService(logger?: {
+  logDatabaseOperation?: (op: string, name: string, duration: number, rows: number) => void
+  logError?: (msg: string, err?: Error) => void
+}): SeedDataService {
   return new SeedDataService(logger)
 }

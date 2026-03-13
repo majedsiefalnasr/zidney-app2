@@ -54,31 +54,37 @@ export type SchemaJob = SchemaMigrationJob | SchemaRollbackJob
 /**
  * Validate job schema
  */
-export function validateSchemaMigrationJob(job: any): {
+export function validateSchemaMigrationJob(job: unknown): {
   valid: boolean
   errors: string[]
 } {
   const errors: string[] = []
 
-  if (job.job_type !== 'SCHEMA_MIGRATION') {
+  if (typeof job !== 'object' || job === null) {
+    return { valid: false, errors: ['job must be an object'] }
+  }
+
+  const j = job as Partial<SchemaMigrationJob>
+
+  if (j.job_type !== 'SCHEMA_MIGRATION') {
     errors.push('job_type must be SCHEMA_MIGRATION')
   }
 
-  if (!job.workspace_id) {
+  if (!j.workspace_id) {
     errors.push('workspace_id is required')
   }
 
-  if (!job.workspace_slug) {
+  if (!j.workspace_slug) {
     errors.push('workspace_slug is required')
   }
 
-  if (!job.target_schema_version) {
+  if (!j.target_schema_version) {
     errors.push('target_schema_version is required')
-  } else if (!/^\d+\.\d+\.\d+$/.test(job.target_schema_version)) {
-    errors.push(`Invalid version format: ${job.target_schema_version}`)
+  } else if (!/^\d+\.\d+\.\d+$/.test(j.target_schema_version)) {
+    errors.push(`Invalid version format: ${j.target_schema_version}`)
   }
 
-  if (!job.correlation_id) {
+  if (!j.correlation_id) {
     errors.push('correlation_id is required')
   }
 
@@ -88,25 +94,31 @@ export function validateSchemaMigrationJob(job: any): {
   }
 }
 
-export function validateSchemaRollbackJob(job: any): {
+export function validateSchemaRollbackJob(job: unknown): {
   valid: boolean
   errors: string[]
 } {
   const errors: string[] = []
 
-  if (job.job_type !== 'SCHEMA_ROLLBACK') {
+  if (typeof job !== 'object' || job === null) {
+    return { valid: false, errors: ['job must be an object'] }
+  }
+
+  const j = job as Partial<SchemaRollbackJob>
+
+  if (j.job_type !== 'SCHEMA_ROLLBACK') {
     errors.push('job_type must be SCHEMA_ROLLBACK')
   }
 
-  if (!job.workspace_id) {
+  if (!j.workspace_id) {
     errors.push('workspace_id is required')
   }
 
-  if (!job.snapshot_id) {
+  if (!j.snapshot_id) {
     errors.push('snapshot_id is required')
   }
 
-  if (!job.correlation_id) {
+  if (!j.correlation_id) {
     errors.push('correlation_id is required')
   }
 

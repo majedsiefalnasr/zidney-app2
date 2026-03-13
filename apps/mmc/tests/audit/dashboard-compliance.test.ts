@@ -22,7 +22,7 @@ async function makeRequest(method: string, endpoint: string, token?: string, bod
     body: body ? JSON.stringify(body) : undefined,
   })
 
-  let data
+  let data: unknown = null
 
   try {
     data = await response.json()

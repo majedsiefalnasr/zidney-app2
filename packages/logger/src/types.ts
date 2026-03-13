@@ -49,7 +49,7 @@ export interface LogContext {
   duration_ms?: number
 
   /** Additional metadata */
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**

@@ -219,12 +219,12 @@ const staffUsagePercent = computed(() => {
   return Math.round((props.license.current_staff / props.license.staff_limit) * 100)
 })
 
-const studentAvailable = computed(() => {
+const _studentAvailable = computed(() => {
   if (!props.license) return 0
   return Math.max(0, props.license.student_limit - props.license.current_students)
 })
 
-const staffAvailable = computed(() => {
+const _staffAvailable = computed(() => {
   if (!props.license) return 0
   return Math.max(0, props.license.staff_limit - props.license.current_staff)
 })
@@ -232,48 +232,50 @@ const staffAvailable = computed(() => {
 // Warning Thresholds
 const studentWarning = computed(() => studentUsagePercent.value >= 80)
 const staffWarning = computed(() => staffUsagePercent.value >= 80)
-const isNearLimit = computed(() => studentWarning.value || staffWarning.value)
-const isAtLimit = computed(() => studentUsagePercent.value >= 100 || staffUsagePercent.value >= 100)
+const _isNearLimit = computed(() => studentWarning.value || staffWarning.value)
+const _isAtLimit = computed(
+  () => studentUsagePercent.value >= 100 || staffUsagePercent.value >= 100
+)
 
-const studentWarningLabel = computed(() => {
+const _studentWarningLabel = computed(() => {
   if (studentUsagePercent.value >= 100) return 'FULL'
   return '80%+'
 })
 
-const staffWarningLabel = computed(() => {
+const _staffWarningLabel = computed(() => {
   if (staffUsagePercent.value >= 100) return 'FULL'
   return '80%+'
 })
 
 // CSS Classes
-const studentQuotaClass = computed(() => ({
+const _studentQuotaClass = computed(() => ({
   'text-red-600': studentUsagePercent.value >= 100,
   'text-amber-600': studentUsagePercent.value >= 80 && studentUsagePercent.value < 100,
   'text-green-600': studentUsagePercent.value < 80,
 }))
 
-const staffQuotaClass = computed(() => ({
+const _staffQuotaClass = computed(() => ({
   'text-red-600': staffUsagePercent.value >= 100,
   'text-amber-600': staffUsagePercent.value >= 80 && staffUsagePercent.value < 100,
   'text-green-600': staffUsagePercent.value < 80,
 }))
 
-const studentProgressClass = computed(() => ({
+const _studentProgressClass = computed(() => ({
   'bg-red-500': studentUsagePercent.value >= 100,
   'bg-amber-500': studentUsagePercent.value >= 80 && studentUsagePercent.value < 100,
   'bg-green-500': studentUsagePercent.value < 80,
 }))
 
-const staffProgressClass = computed(() => ({
+const _staffProgressClass = computed(() => ({
   'bg-red-500': staffUsagePercent.value >= 100,
   'bg-amber-500': staffUsagePercent.value >= 80 && staffUsagePercent.value < 100,
   'bg-green-500': staffUsagePercent.value < 80,
 }))
 
-const showAutoRefreshInfo = computed(() => props.autoRefresh)
+const _showAutoRefreshInfo = computed(() => props.autoRefresh)
 
 // Utilities
-const formatTime = (date: Date) => {
+const _formatTime = (date: Date) => {
   return date.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',

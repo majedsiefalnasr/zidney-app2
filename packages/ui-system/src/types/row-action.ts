@@ -7,7 +7,7 @@
 export type RowActionCallback<TRow> = (row: TRow) => Promise<void>
 
 // Row action definition
-export interface RowAction<TRow = any> {
+export interface RowAction<TRow = unknown> {
   id: string
   label: string
   icon?: string
@@ -25,13 +25,13 @@ export interface RowAction<TRow = any> {
 }
 
 // Row action event (emitted by component per LOCKED DECISION 2)
-export interface RowActionStartEvent<TRow = any> {
+export interface RowActionStartEvent<TRow = unknown> {
   actionId: string
   row: TRow
   timestamp: number
 }
 
-export interface RowActionEndEvent<TRow = any> {
+export interface RowActionEndEvent<TRow = unknown> {
   actionId: string
   row: TRow
   success: boolean
@@ -64,7 +64,7 @@ export interface RowActionConfig {
 }
 
 // Row context for action determination
-export interface RowContext<TRow = any> {
+export interface RowContext<TRow = unknown> {
   row: TRow
   isSelected: boolean
   isLoading: boolean
@@ -75,7 +75,7 @@ export interface RowContext<TRow = any> {
 export type RowActionHandler<TRow> = (row: TRow, action: RowAction<TRow>) => Promise<void>
 
 // Action group for organizing related actions
-export interface RowActionGroup<TRow = any> {
+export interface RowActionGroup<TRow = unknown> {
   id: string
   label?: string
   actions: RowAction<TRow>[]

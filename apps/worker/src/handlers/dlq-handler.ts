@@ -34,10 +34,24 @@ export interface DLQEntry {
 export class DLQHandler {
   private redis: Redis
   private dlqName: string
-  private logger?: any
+  private logger?: {
+    logDLQMove?: (msg: string, meta?: Record<string, unknown>) => void
+    logError?: (msg: string, err?: Error | string, meta?: Record<string, unknown>) => void
+    logStep?: (step: string, msg: string, meta?: Record<string, unknown>) => void
+    logWarn?: (msg: string, meta?: Record<string, unknown>) => void
+  }
   private maxDLQRetention: number = 30 * 24 * 60 * 60 // 30 days
 
-  constructor(redis: Redis, dlqName: string, logger?: any) {
+  constructor(
+    redis: Redis,
+    dlqName: string,
+    logger?: {
+      logDLQMove?: (msg: string, meta?: Record<string, unknown>) => void
+      logError?: (msg: string, err?: Error | string, meta?: Record<string, unknown>) => void
+      logStep?: (step: string, msg: string, meta?: Record<string, unknown>) => void
+      logWarn?: (msg: string, meta?: Record<string, unknown>) => void
+    }
+  ) {
     this.redis = redis
     this.dlqName = dlqName
     this.logger = logger
@@ -54,7 +68,7 @@ export class DLQHandler {
   ): Promise<boolean> {
     try {
       const dlqEntry: DLQEntry = {
-        job_id: job.id!,
+        job_id: job.id ?? '',
         license_id: job.licenseId,
         workspace_slug: job.workspaceSlug,
         retry_count: job.retryCount || 0,
@@ -72,7 +86,7 @@ export class DLQHandler {
       await this.redis.lpush(this.dlqName, JSON.stringify(dlqEntry))
 
       // Store metadata in separate key for quick lookup
-      const metaKey = `${this.dlqName}:meta:${job.id}`
+      const metaKey = `${this.dlqName}:meta:${job.id ?? ''}`
       await this.redis.setex(
         metaKey,
         this.maxDLQRetention,
@@ -87,8 +101,8 @@ export class DLQHandler {
       // Set expiration on the DLQ entry itself
       await this.redis.expire(this.dlqName, this.maxDLQRetention)
 
-      this.logger?.logDLQMove('Job moved to DLQ', {
-        job_id: job.id,
+      this.logger?.logDLQMove?.('Job moved to DLQ', {
+        job_id: job.id ?? '',
         license_id: job.licenseId,
         workspace_slug: job.workspaceSlug,
         reason,
@@ -98,10 +112,10 @@ export class DLQHandler {
 
       return true
     } catch (error) {
-      this.logger?.logError(
+      this.logger?.logError?.(
         'DLQ operation failed',
-        error instanceof Error ? error : new Error(String(error)),
-        { job_id: job.id }
+        error instanceof Error ? error : String(error),
+        { job_id: job.id ?? '' }
       )
       return false
     }
@@ -115,9 +129,9 @@ export class DLQHandler {
       const entries = await this.redis.lrange(this.dlqName, 0, limit - 1)
       return entries.map((entry) => JSON.parse(entry) as DLQEntry)
     } catch (error) {
-      this.logger?.logError(
+      this.logger?.logError?.(
         'Failed to retrieve DLQ entries',
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : String(error)
       )
       return []
     }
@@ -130,9 +144,9 @@ export class DLQHandler {
     try {
       return await this.redis.llen(this.dlqName)
     } catch (error) {
-      this.logger?.logError(
+      this.logger?.logError?.(
         'Failed to get DLQ size',
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : String(error)
       )
       return 0
     }
@@ -146,9 +160,9 @@ export class DLQHandler {
       const allEntries = await this.getDLQEntries(1000)
       return allEntries.filter((entry) => entry.license_id === licenseId)
     } catch (error) {
-      this.logger?.logError(
+      this.logger?.logError?.(
         'Failed to retrieve DLQ entries for license',
-        error instanceof Error ? error : new Error(String(error)),
+        error instanceof Error ? error : String(error),
         { license_id: licenseId }
       )
       return []
@@ -163,9 +177,9 @@ export class DLQHandler {
       const entries = await this.getDLQEntries(1000)
       return entries.find((entry) => entry.job_id === jobId) || null
     } catch (error) {
-      this.logger?.logError(
+      this.logger?.logError?.(
         'Failed to retrieve job from DLQ',
-        error instanceof Error ? error : new Error(String(error)),
+        error instanceof Error ? error : String(error),
         { job_id: jobId }
       )
       return null
@@ -191,15 +205,15 @@ export class DLQHandler {
       const metaKey = `${this.dlqName}:meta:${jobId}`
       await this.redis.del(metaKey)
 
-      this.logger?.logStep('dlq-remove', 'Job removed from DLQ', {
+      this.logger?.logStep?.('dlq-remove', 'Job removed from DLQ', {
         job_id: jobId,
       })
 
       return true
     } catch (error) {
-      this.logger?.logError(
+      this.logger?.logError?.(
         'Failed to remove job from DLQ',
-        error instanceof Error ? error : new Error(String(error)),
+        error instanceof Error ? error : String(error),
         { job_id: jobId }
       )
       return false
@@ -231,9 +245,9 @@ export class DLQHandler {
         by_error_code: byErrorCode,
       }
     } catch (error) {
-      this.logger?.logError(
+      this.logger?.logError?.(
         'Failed to get DLQ stats',
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : String(error)
       )
       return {
         total_entries: 0,
@@ -294,12 +308,9 @@ export class DLQHandler {
   async clear(): Promise<void> {
     try {
       await this.redis.del(this.dlqName)
-      this.logger?.logWarn('DLQ cleared')
+      this.logger?.logWarn?.('DLQ cleared')
     } catch (error) {
-      this.logger?.logError(
-        'Failed to clear DLQ',
-        error instanceof Error ? error : new Error(String(error))
-      )
+      this.logger?.logError?.('Failed to clear DLQ', error instanceof Error ? error : String(error))
     }
   }
 }
@@ -307,6 +318,15 @@ export class DLQHandler {
 /**
  * Factory to create DLQ handler
  */
-export function createDLQHandler(redis: Redis, dlqName: string, logger?: any): DLQHandler {
+export function createDLQHandler(
+  redis: Redis,
+  dlqName: string,
+  logger?: {
+    logDLQMove?: (msg: string, meta?: Record<string, unknown>) => void
+    logError?: (msg: string, err?: Error | string, meta?: Record<string, unknown>) => void
+    logStep?: (step: string, msg: string, meta?: Record<string, unknown>) => void
+    logWarn?: (msg: string, meta?: Record<string, unknown>) => void
+  }
+): DLQHandler {
   return new DLQHandler(redis, dlqName, logger)
 }

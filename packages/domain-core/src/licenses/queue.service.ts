@@ -15,7 +15,7 @@ import type { Logger } from '@zidney/logger'
 
 export interface Job {
   id?: string
-  data: any
+  data: Record<string, unknown>
   opts?: {
     attempts?: number
     backoff?: {
@@ -27,7 +27,7 @@ export interface Job {
 }
 
 export interface QueueImpl {
-  add(name: string, data: any, opts?: any): Promise<Job>
+  add(name: string, data: Record<string, unknown>, opts?: Record<string, unknown>): Promise<Job>
   process(name: string, handler: (job: Job) => Promise<void>): Promise<void>
 }
 
@@ -49,7 +49,7 @@ export class QueueService {
    * Creates async job to provision tenant database for new license.
    * Called from LicenseService.create()
    */
-  async enqueueProvisioningJob(payload: any): Promise<void> {
+  async enqueueProvisioningJob(payload: Record<string, unknown>): Promise<void> {
     try {
       const job = await this.provisioningQueue.add('provisioning:license', payload, {
         attempts: 6, // 1 initial + 5 retries
@@ -66,10 +66,11 @@ export class QueueService {
         job_id: job.id,
         license_id: payload.license_id,
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error)
       this.logger.error({
         event: 'provisioning_job_enqueue_failed',
-        error_message: error.message,
+        error_message: msg,
         license_id: payload.license_id,
       })
       throw error
@@ -95,10 +96,11 @@ export class QueueService {
         job_id: job.id,
         license_id,
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error)
       this.logger.error({
         event: 'snapshot_job_enqueue_failed',
-        error_message: error.message,
+        error_message: msg,
         license_id,
       })
       throw error
@@ -123,10 +125,11 @@ export class QueueService {
         job_id: job.id,
         license_id,
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error)
       this.logger.error({
         event: 'restore_job_enqueue_failed',
-        error_message: error.message,
+        error_message: msg,
         license_id,
       })
       throw error
@@ -151,10 +154,11 @@ export class QueueService {
         job_id: job.id,
         license_id,
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error)
       this.logger.error({
         event: 'database_drop_job_enqueue_failed',
-        error_message: error.message,
+        error_message: msg,
         license_id,
       })
       throw error

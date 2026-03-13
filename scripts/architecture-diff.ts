@@ -56,9 +56,11 @@ function extractImports(filePath: string): string[] {
     const importRegex = /import\s+(?:[\w*\s{},]+)\s+from\s+['"]([^'"]+)['"]/g
 
     const matches: string[] = []
-    let match
+    let match: RegExpExecArray | null = null
 
-    while ((match = importRegex.exec(content))) {
+    while (true) {
+      match = importRegex.exec(content)
+      if (match === null) break
       matches.push(match[1])
     }
 

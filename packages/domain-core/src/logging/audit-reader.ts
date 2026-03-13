@@ -11,7 +11,7 @@ interface AuditLogEntry {
   actor_id?: string
   actor_type: 'ADMIN' | 'SYSTEM'
   reason: string
-  transition_metadata?: Record<string, any>
+  transition_metadata?: Record<string, unknown>
   timestamp: Date
   correlation_id: string
 }
@@ -61,15 +61,16 @@ export async function readAuditLogs(
       logs: [],
       total_count: 0,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
     logger.error(
       {
         license_id,
-        error: error.message,
+        error: msg,
         action: 'read_audit_logs_failed',
       },
       'Failed to read audit logs'
     )
-    return { success: false, error: error.message }
+    return { success: false, error: msg }
   }
 }

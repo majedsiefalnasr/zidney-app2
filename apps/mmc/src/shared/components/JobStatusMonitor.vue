@@ -37,13 +37,13 @@ const props = defineProps<Props>()
 type JobStatus = 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED'
 
 const status = ref<JobStatus>((props.initialStatus as JobStatus) || 'QUEUED')
-const progress = ref(0)
-const currentStep = ref<string | null>(null)
-const eta = ref<string | null>(null)
-const errorMessage = ref<string | null>(null)
-const completedAt = ref<string | null>(null)
+const _progress = ref(0)
+const _currentStep = ref<string | null>(null)
+const _eta = ref<string | null>(null)
+const _errorMessage = ref<string | null>(null)
+const _completedAt = ref<string | null>(null)
 
-const statusText = computed(() => {
+const _statusText = computed(() => {
   const texts = {
     QUEUED: 'Waiting in queue...',
     RUNNING: 'Processing...',
@@ -60,11 +60,11 @@ onMounted(async () => {
   // Automatically close dialog on completion or error
 })
 
-function handleRetry() {
+function _handleRetry() {
   // TODO: Retry job
 }
 
-function handleContact() {
+function _handleContact() {
   // TODO: Open support contact dialog
 }
 </script>

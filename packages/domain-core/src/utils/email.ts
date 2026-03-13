@@ -147,51 +147,8 @@ export class EmailService {
         return this.sendViaSendGrid(options)
       case 'smtp':
         return this.sendViaSMTP(options)
-      case 'console':
       default:
         return this.sendViaConsole(options)
-    }
-  }
-
-  /**
-   * Send via SendGrid API (requires API key)
-   * LOGIC-BUG: Method is unreachable; sendEmail() calls non-existent sendViaSendGrid — see INFRA-001-LOGIC-04
-   */
-  // @ts-expect-error: method declared for future use; sendViaSendGrid invokes it incorrectly [INFRA-001-LOGIC-04]
-  private async _sendViaServiceProvider(options: SendEmailOptions): Promise<void> {
-    const apiKey = this.config.apiKey
-    if (!apiKey) {
-      throw new Error('SendGrid API key not configured')
-    }
-
-    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        personalizations: [
-          {
-            to: [{ email: options.to }],
-          },
-        ],
-        from: {
-          email: this.config.senderEmail || 'noreply@example.com',
-          name: this.config.senderName || 'Platform',
-        },
-        subject: options.subject,
-        content: [
-          {
-            type: 'text/html',
-            value: options.html,
-          },
-        ],
-      }),
-    })
-
-    if (!response.ok) {
-      throw new Error(`SendGrid API error: ${response.statusText}`)
     }
   }
 

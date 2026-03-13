@@ -96,7 +96,7 @@ export async function getGeographicExport(pool: Pool) {
  * Get revenue data for export
  */
 export async function getRevenueExport(pool: Pool, dateFrom?: Date, dateTo?: Date) {
-  const params: any[] = []
+  const params: unknown[] = []
   let dateFilter = ''
 
   if (dateFrom && dateTo) {

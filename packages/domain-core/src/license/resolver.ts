@@ -130,7 +130,9 @@ export class LicenseResolver {
         return null
       }
 
-      const license = this.mapRowToLicense(result.rows[0]!)
+      const row = result.rows[0]
+      if (!row) return null
+      const license = this.mapRowToLicense(row)
 
       // Cache result for 5 minutes (after successful query)
       await this.redis.setex(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(license))
@@ -171,7 +173,10 @@ export class LicenseResolver {
         return null
       }
 
-      return this.mapRowToLicense(result.rows[0]!)
+      const row = result.rows[0]
+      if (!row) return null
+
+      return this.mapRowToLicense(row)
     } catch (error) {
       this.logger.error('getLicenseByWorkspaceId: database error', {
         workspace_id,

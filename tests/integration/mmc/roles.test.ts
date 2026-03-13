@@ -126,7 +126,7 @@ describe('T045: Role & Permission Management Integration Tests', () => {
 
   describe('PATCH /mmc/roles/:id/permissions', () => {
     it('should update single domain permissions', async () => {
-      const updatePayload = {
+      const _updatePayload = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,
@@ -139,7 +139,7 @@ describe('T045: Role & Permission Management Integration Tests', () => {
     })
 
     it('should update multiple domains in single transaction', async () => {
-      const updatePayload = {
+      const _updatePayload = {
         permissions: [
           {
             domain: 'PRODUCT_MANAGEMENT',
@@ -184,7 +184,7 @@ describe('T045: Role & Permission Management Integration Tests', () => {
     })
 
     it('should return 400 Bad Request for invalid domain', async () => {
-      const updatePayload = {
+      const _updatePayload = {
         domain: 'INVALID_DOMAIN',
         can_view: true,
         can_create: true,
@@ -202,7 +202,7 @@ describe('T045: Role & Permission Management Integration Tests', () => {
     })
 
     it('should audit log role permission update', async () => {
-      const updatePayload = {
+      const _updatePayload = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,
@@ -220,7 +220,7 @@ describe('T045: Role & Permission Management Integration Tests', () => {
     })
 
     it('should return affected_members_count in response', async () => {
-      const updatePayload = {
+      const _updatePayload = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,
@@ -265,7 +265,7 @@ describe('T045: Role & Permission Management Integration Tests', () => {
 
   describe('Role Deletion Safety', () => {
     it('should prevent deletion of role with assigned members', async () => {
-      const roleId = ctx.defaultRoleId
+      const _roleId = ctx.defaultRoleId
       // Setup: 5 members assigned to this role
 
       // Call DELETE /mmc/roles/:id
@@ -274,7 +274,7 @@ describe('T045: Role & Permission Management Integration Tests', () => {
     })
 
     it('should allow deletion of role with no assigned members', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: Empty role (no members assigned)
 
       // Call DELETE /mmc/roles/:id

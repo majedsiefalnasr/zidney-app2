@@ -50,16 +50,15 @@ export async function acquireWorkspaceLock(
       acquiredAt,
       timeoutMs,
     }
-  } catch (err: any) {
-    if (err.code === '55P03' || err.message.includes('timeout')) {
-      const error = new Error(
+  } catch (err: unknown) {
+    const maybeErr = err as { code?: string; message?: string } | undefined
+    if (maybeErr?.code === '55P03' || (maybeErr?.message ?? '').includes('timeout')) {
+      throw new Error(
         `Failed to acquire lock for workspace ${workspace_id} (timeout after ${timeoutMs}ms)`
       )
-      ;(error as any).errorCode = 'MIGRATION_LOCK_TIMEOUT'
-      throw error
     }
 
-    throw new Error(`Failed to acquire lock: ${err.message}`)
+    throw new Error(`Failed to acquire lock: ${maybeErr?.message ?? String(err)}`)
   }
 }
 

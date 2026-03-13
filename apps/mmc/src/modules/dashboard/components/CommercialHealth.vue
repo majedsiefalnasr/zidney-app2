@@ -95,6 +95,8 @@ import { Activity, Info, TrendingDown, TrendingUp } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { Badge } from '@/components/ui'
 
+void [Activity, Info, TrendingDown, TrendingUp, Badge]
+
 interface CommercialHealthData {
   activeLicenses: number
   monthlyRevenue: number
@@ -134,6 +136,8 @@ const healthVariant = computed(() => {
   if (status === 'At Risk') return 'destructive'
   return 'outline'
 })
+
+void [formatCurrency, healthVariant]
 </script>
 
 <style scoped>

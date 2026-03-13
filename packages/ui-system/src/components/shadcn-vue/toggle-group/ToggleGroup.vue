@@ -2,10 +2,9 @@
 import { reactiveOmit } from '@vueuse/core'
 import type { VariantProps } from 'class-variance-authority'
 import type { ToggleGroupRootEmits, ToggleGroupRootProps } from 'reka-ui'
-import { ToggleGroupRoot, useForwardPropsEmits } from 'reka-ui'
+import { useForwardPropsEmits } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 import { provide } from 'vue'
-import { cn } from '@/lib/utils'
 import type { toggleVariants } from '@/registry/new-york-v4/ui/toggle'
 
 type ToggleGroupVariants = VariantProps<typeof toggleVariants>
@@ -33,7 +32,7 @@ provide('toggleGroup', {
 })
 
 const delegatedProps = reactiveOmit(props, 'class', 'size', 'variant')
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const _forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
 
 <template>

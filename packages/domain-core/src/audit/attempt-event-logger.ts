@@ -27,7 +27,7 @@ export type AttemptEventType =
 export interface LogAttemptEventOptions {
   attemptId: string
   eventType: AttemptEventType
-  payload?: Record<string, any>
+  payload?: Record<string, unknown>
   client?: PoolClient // Optional - use existing transaction
   currentUserId?: string
 }
@@ -36,7 +36,7 @@ export interface AttemptEvent {
   id: string
   attempt_id: string
   event_type: string
-  event_payload: Record<string, any>
+  event_payload: Record<string, unknown>
   occurred_at: Date
   created_at: Date
   created_by: string
@@ -90,13 +90,14 @@ export async function logAttemptEvent(options: LogAttemptEventOptions, pool: Poo
           attempt_id: attemptId,
           event_type: eventType,
           attempt_number: attempt + 1,
-          correlation_id: (global as any).correlationId,
+          correlation_id: (global as unknown as { correlationId?: string }).correlationId,
         })
 
         return
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Lock timeout - retry
-        if (error.code === 'LOCK_TIMEOUT' && attempt < 2) {
+        const e = error as { code?: string }
+        if (e.code === 'LOCK_TIMEOUT' && attempt < 2) {
           const backoffMs = 2 ** attempt * 1000 // 1s, 2s, 4s
           logger.warn('Lock timeout, retrying', {
             attempt: attempt + 1,
@@ -104,7 +105,7 @@ export async function logAttemptEvent(options: LogAttemptEventOptions, pool: Poo
           })
           await new Promise((r) => setTimeout(r, backoffMs))
           attempt++
-          lastError = error
+          lastError = error as Error
           continue
         }
 
@@ -117,7 +118,8 @@ export async function logAttemptEvent(options: LogAttemptEventOptions, pool: Poo
     // Release connection if we got it from pool
     if (!client && conn) {
       try {
-        ;(conn as any).release?.()
+        const releaseFn = (conn as unknown as { release?: () => void }).release
+        releaseFn?.()
       } catch (_) {
         // Ignore release errors
       }
@@ -160,7 +162,7 @@ export async function countAttemptEventsByType(
 
   const counts: Record<string, number> = {}
   for (const row of result.rows) {
-    counts[row.event_type] = parseInt(row.count)
+    counts[row.event_type] = parseInt(row.count, 10)
   }
 
   return counts

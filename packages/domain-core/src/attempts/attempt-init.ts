@@ -29,9 +29,9 @@ export interface Attempt {
   status: string
   started_at: Date
   submission_deadline_at: Date
-  configuration_snapshot: any
-  question_list_snapshot: any
-  grading_config_snapshot: any
+  configuration_snapshot: unknown
+  question_list_snapshot: unknown
+  grading_config_snapshot: unknown
   created_by: string
 }
 
@@ -109,25 +109,27 @@ export async function initializeAttempt(
         user_id: userId,
         question_count: snapshot.config.question_count,
         deadline: submissionDeadline.toISOString(),
-        correlation_id: (global as any).correlationId,
+        correlation_id: (global as unknown as { correlationId?: string }).correlationId,
       })
 
       return attempt as Attempt
     } finally {
       if (!options.client && conn) {
         try {
-          ;(conn as any).release?.()
+          const releaseFn = (conn as unknown as { release?: () => void }).release
+          releaseFn?.()
         } catch (_) {
           // Ignore release errors
         }
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
     logger.error('Failed to initialize attempt', {
       exam_id: examId,
       user_id: userId,
-      error: error.message,
-      correlation_id: (global as any).correlationId,
+      error: msg,
+      correlation_id: (global as unknown as { correlationId?: string }).correlationId,
     })
     throw error
   }
@@ -157,7 +159,7 @@ export async function getOrCreateAttempt(
       attempt_id: existing.rows[0].id,
       exam_id: examId,
       user_id: userId,
-      correlation_id: (global as any).correlationId,
+      correlation_id: (global as unknown as { correlationId?: string }).correlationId,
     })
     return existing.rows[0] as Attempt
   }

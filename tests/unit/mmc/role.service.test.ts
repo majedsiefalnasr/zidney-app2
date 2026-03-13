@@ -7,10 +7,13 @@ import { randomUUID } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('T049: RoleService Unit Tests', () => {
-  let mockDb: any // Mocked database connection
+  let _mockDb: {
+    query: ReturnType<typeof vi.fn>
+    transaction: ReturnType<typeof vi.fn>
+  }
 
   beforeEach(() => {
-    mockDb = {
+    _mockDb = {
       query: vi.fn(),
       transaction: vi.fn(),
     }
@@ -31,7 +34,7 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should filter roles by status parameter', async () => {
-      const filter = { status: 'INACTIVE' }
+      const _filter = { status: 'INACTIVE' }
 
       // Expected: Only INACTIVE roles returned
       expect(true).toBe(true)
@@ -46,7 +49,7 @@ describe('T049: RoleService Unit Tests', () => {
 
   describe('getRole()', () => {
     it('should return single role with metadata', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
 
       // Mock DB: SELECT * FROM roles WHERE id = roleId
       // Expected: { id, name, status, member_count, created_at, updated_at }
@@ -54,7 +57,7 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should return 404 if role not found', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
 
       // Expected: Service throws error with code 'role_not_found'
       expect(true).toBe(true)
@@ -63,7 +66,7 @@ describe('T049: RoleService Unit Tests', () => {
 
   describe('getPermissions()', () => {
     it('should return all 7 permission domains for role', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
 
       // Mock DB: SELECT * FROM role_permissions WHERE role_id = roleId
       // Expected: 7 domains with { domain, can_view, can_create, can_edit, can_delete }
@@ -71,14 +74,14 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should include all 4 permission bits per domain', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
 
       // Expected: Each domain has can_view, can_create, can_edit, can_delete (boolean)
       expect(true).toBe(true)
     })
 
     it('should handle missing domains gracefully (explicit false assumed)', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
 
       // If role_permissions missing entry for domain:
       // Expected: Assume all bits false (implicit deny)
@@ -88,8 +91,8 @@ describe('T049: RoleService Unit Tests', () => {
 
   describe('updatePermissions() with cascade', () => {
     it('should update single domain permissions', async () => {
-      const roleId = randomUUID()
-      const update = {
+      const _roleId = randomUUID()
+      const _update = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,
@@ -106,8 +109,8 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should update multiple domains in single transaction', async () => {
-      const roleId = randomUUID()
-      const updates = [
+      const _roleId = randomUUID()
+      const _updates = [
         {
           domain: 'PRODUCT_MANAGEMENT',
           can_view: true,
@@ -129,10 +132,10 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should cascade token_version increment to all members with role', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 5 members with this role, token_versions = [1, 1, 1, 1, 1]
 
-      const update = {
+      const _update = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,
@@ -146,10 +149,10 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should return affected_members_count in response', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 8 members with this role
 
-      const update = {
+      const _update = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,
@@ -162,10 +165,10 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should handle zero members (no-op cascade)', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: Role with no members assigned
 
-      const update = {
+      const _update = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,
@@ -178,9 +181,9 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should validate domain enum value', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
 
-      const update = {
+      const _update = {
         domain: 'INVALID_DOMAIN',
         can_view: true,
         can_create: true,
@@ -198,10 +201,10 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should roll back cascade if member update fails', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 5 members with role, but one member insert fails
 
-      const update = {
+      const _update = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,
@@ -216,7 +219,7 @@ describe('T049: RoleService Unit Tests', () => {
 
   describe('cascadeTokenVersion()', () => {
     it('should increment token_version for all members with given role', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 5 members M1-M5, all with role R, token_versions = [1, 1, 1, 1, 1]
 
       // Call cascadeTokenVersion(roleId)
@@ -226,7 +229,7 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should NOT increment members with other roles', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 5 members with role R1, 3 members with role R2
 
       // Call cascadeTokenVersion(roleId of R1)
@@ -236,7 +239,7 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should be atomic: all-or-nothing', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
 
       // If one UPDATE fails: whole cascade rolled back
       // Expected: No partial updates
@@ -244,7 +247,7 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should handle concurrent cascades (optimistic lock)', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Two concurrent calls to cascadeTokenVersion(roleId)
 
       // Expected: Both succeed with increments (non-blocking)
@@ -256,7 +259,7 @@ describe('T049: RoleService Unit Tests', () => {
 
   describe('Role deletion safety', () => {
     it('should check member count before deletion', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: Role with 5 members assigned
 
       // Call deleteRole(roleId)
@@ -266,7 +269,7 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should prevent deletion if members assigned', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 3 members assigned
 
       // Expected: Service throws error with code 'role_has_members'
@@ -274,7 +277,7 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should allow deletion if no members assigned', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: Empty role
 
       // Expected: DELETE succeeds
@@ -282,7 +285,7 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should not allow assignment of inactive role to members', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: Role with status = 'INACTIVE'
 
       // Expected: createMember or updateMember rejects this role_id
@@ -292,7 +295,7 @@ describe('T049: RoleService Unit Tests', () => {
 
   describe('Permission evaluation', () => {
     it('should check specific permission bit for domain+action', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: PRODUCT_MANAGEMENT { can_view: true, can_create: false, ... }
 
       // Call checkPermission(roleId, 'PRODUCT_MANAGEMENT', 'create')
@@ -301,7 +304,7 @@ describe('T049: RoleService Unit Tests', () => {
     })
 
     it('should return false for missing domain (implicit deny)', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: No entry in role_permissions for UNKNOWN_DOMAIN
 
       // Call checkPermission(roleId, 'UNKNOWN_DOMAIN', 'view')
@@ -319,10 +322,10 @@ describe('T049: RoleService Unit Tests', () => {
 
   describe('Audit logging integration', () => {
     it('should log permission update with affected members count', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 5 members
 
-      const update = {
+      const _update = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,
@@ -346,10 +349,10 @@ describe('T049: RoleService Unit Tests', () => {
 
   describe('Transaction safety', () => {
     it('should roll back cascade on member update failure', async () => {
-      const roleId = randomUUID()
+      const _roleId = randomUUID()
       // Setup: 5 members, but one update constraint violation
 
-      const update = {
+      const _update = {
         domain: 'PRODUCT_MANAGEMENT',
         can_view: true,
         can_create: true,

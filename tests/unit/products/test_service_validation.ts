@@ -218,7 +218,7 @@ describe('T061: Product Service Validation Unit Tests', () => {
     })
 
     it('should accept max length slug', () => {
-      const maxLength = 'a'.repeat(100) + '-' + 'b'.repeat(100)
+      const maxLength = `${'a'.repeat(100)}-${'b'.repeat(100)}`
       const result = validateSlug(maxLength)
       expect(result).toBe(true)
     })

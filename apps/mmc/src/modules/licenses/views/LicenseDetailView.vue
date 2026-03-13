@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { Badge } from '@zidney/ui/components/shadcn-vue/badge'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@zidney/ui/components/shadcn-vue/card'
 import { computed, onMounted, ref } from 'vue'
 import type { License } from '@/types/license'
 
@@ -16,9 +8,9 @@ import type { License } from '@/types/license'
  */
 
 const license = ref<License | null>(null)
-const loading = ref(false)
+const _loading = ref(false)
 
-const statusColor = computed(() => {
+const _statusColor = computed(() => {
   const colors: Record<string, string> = {
     ACTIVE: 'bg-green-100 text-green-800',
     SOFT_LOCKED: 'bg-yellow-100 text-yellow-800',

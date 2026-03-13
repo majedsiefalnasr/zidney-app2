@@ -85,16 +85,17 @@ export async function purgeAuditLogs(
       purged_count,
       purge_timestamp,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
     logger.error(
       {
         license_id,
         requester_id,
-        error: error.message,
+        error: msg,
         action: 'purge_failed',
       },
       'Failed to purge audit logs'
     )
-    return { success: false, error: error.message }
+    return { success: false, error: msg }
   }
 }

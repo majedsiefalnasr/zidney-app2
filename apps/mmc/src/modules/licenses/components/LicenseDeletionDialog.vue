@@ -85,7 +85,6 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import JobStatusMonitor from './JobStatusMonitor.vue'
 
 interface Props {
   isopen: boolean
@@ -103,7 +102,7 @@ const phraseError = ref<string | null>(null)
 const twoFaCode = ref('')
 const twoFaError = ref<string | null>(null)
 const isDeleting = ref(false)
-const jobId = ref<string | null>(null)
+const _jobId = ref<string | null>(null)
 
 onMounted(async () => {
   if (props.isopen) {
@@ -113,22 +112,23 @@ onMounted(async () => {
       // const data = await response.json()
       // confirmationPhrase.value = data.confirmation_phrase
       // biome-ignore lint/correctness/noUnreachable: catch block retained as error boundary for pending TODO implementation
-    } catch (err: any) {
-      phraseError.value = err.message
+    } catch (err: unknown) {
+      const e = err as { message?: string }
+      phraseError.value = e.message ?? String(err)
     }
   }
 })
 
-function validatePhrase() {
+function _validatePhrase() {
   phraseError.value = phraseMatches.value ? null : 'Phrase does not match'
 }
 
-function proceedToTwoFa() {
+function _proceedToTwoFa() {
   if (!phraseMatches.value) return
   step.value = 2
 }
 
-async function completeDeletion() {
+async function _completeDeletion() {
   if (twoFaCode.value.length !== 6) return
 
   try {
@@ -144,14 +144,15 @@ async function completeDeletion() {
 
     step.value = 3
     // jobId.value = response.job_id
-  } catch (err: any) {
-    twoFaError.value = err.message
+  } catch (err: unknown) {
+    const e = err as { message?: string }
+    twoFaError.value = e.message ?? String(err)
   } finally {
     isDeleting.value = false
   }
 }
 
-function close() {
+function _close() {
   userInput.value = ''
   twoFaCode.value = ''
   phraseError.value = null

@@ -318,7 +318,7 @@ export async function cleanupAllFixtures(db: Pool): Promise<void> {
   for (const table of tables) {
     try {
       await db.query(`TRUNCATE TABLE ${table} CASCADE`)
-    } catch (error) {
+    } catch (_error) {
       // Table may not exist, which is fine
     }
   }

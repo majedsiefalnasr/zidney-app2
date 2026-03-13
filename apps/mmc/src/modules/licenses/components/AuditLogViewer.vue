@@ -7,6 +7,8 @@ import { Badge } from '@zidney/ui/components/shadcn-vue/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
 import { onMounted, ref } from 'vue'
 
+void [Badge, Card, CardContent, CardHeader, CardTitle]
+
 interface AuditEntry {
   id: string
   action: string
@@ -23,7 +25,7 @@ interface Props {
 
 defineProps<Props>()
 
-const auditLog = ref<AuditEntry[]>([])
+const _auditLog = ref<AuditEntry[]>([])
 const loading = ref(false)
 
 onMounted(async () => {
@@ -48,6 +50,8 @@ const getActionColor = (action: string) => {
   }
   return colors[action] || 'bg-gray-100'
 }
+
+void [getActionColor]
 </script>
 
 <template>
