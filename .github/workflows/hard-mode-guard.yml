@@ -23,9 +23,9 @@ jobs:
       # ── 2. Resolve stage directory from branch name ────────────────────
       - name: Resolve stage directory
         id: stage
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
-          BRANCH="${{ github.head_ref || github.ref_name }}"
-
           STRIPPED_BRANCH="${BRANCH#spec/}"
 
           # Allowed patterns:
@@ -42,9 +42,11 @@ jobs:
           STAGE_DIR="specs/runtime/${STRIPPED_BRANCH}"
           STATE_FILE="${STAGE_DIR}/.workflow-state.json"
 
-          echo "stage_dir=${STAGE_DIR}" >> "$GITHUB_OUTPUT"
-          echo "state_file=${STATE_FILE}" >> "$GITHUB_OUTPUT"
-          echo "branch=${STRIPPED_BRANCH}" >> "$GITHUB_OUTPUT"
+          {
+            echo "stage_dir=${STAGE_DIR}"
+            echo "state_file=${STATE_FILE}"
+            echo "branch=${STRIPPED_BRANCH}"
+          } >> "$GITHUB_OUTPUT"
 
           echo "✅ Branch  : $BRANCH"
           echo "✅ Stage branch : $STRIPPED_BRANCH"

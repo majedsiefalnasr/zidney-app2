@@ -47,8 +47,7 @@ jobs:
       - name: Test ai-context:generate command
         run: |
           echo "🧪 Testing ai-context:generate command..."
-          bun run ai-context:generate
-          if [ $? -ne 0 ]; then
+          if ! bun run ai-context:generate; then
             echo "❌ ai-context:generate command failed"
             exit 1
           fi
@@ -58,8 +57,7 @@ jobs:
       - name: Test ai-context:refresh command
         run: |
           echo "🧪 Testing ai-context:refresh command..."
-          bun run ai-context:refresh
-          if [ $? -ne 0 ]; then
+          if ! bun run ai-context:refresh; then
             echo "❌ ai-context:refresh command failed"
             exit 1
           fi
@@ -69,8 +67,7 @@ jobs:
       - name: Test ai-context:validate command
         run: |
           echo "🧪 Testing ai-context:validate command..."
-          bun run ai-context:validate
-          if [ $? -ne 0 ]; then
+          if ! bun run ai-context:validate; then
             echo "❌ ai-context:validate command failed"
             exit 1
           fi
@@ -80,8 +77,7 @@ jobs:
       - name: Test ai-context:generate alias
         run: |
           echo "🧪 Testing ai-context:generate alias..."
-          bun run ai-context:generate
-          if [ $? -ne 0 ]; then
+          if ! bun run ai-context:generate; then
             echo "❌ ai-context:generate alias failed"
             exit 1
           fi
@@ -146,6 +142,7 @@ jobs:
       # ── 10. Check artifact sizes ───────────────────────────────────────
       - name: Summarize artifact sizes
         run: |
+          # shellcheck disable=SC2086,SC2012,SC2129
           echo "📊 AI Context Artifacts Summary:"
           echo ""
           du -h docs/ai/context/ai-*.* | sort -h
@@ -159,10 +156,16 @@ jobs:
       - name: Generate summary
         if: success()
         run: |
-          echo "## ✅ AI Context Validation Passed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "All AI context generation scripts executed successfully and produced valid artifacts." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Generated Artifacts:" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          ls -lh docs/ai/context/ai-*.* | awk '{print "- " $9 " (" $5 ")"}' >> $GITHUB_STEP_SUMMARY
+          # shellcheck disable=SC2086,SC2012,SC2129
+          echo "## ✅ AI Context Validation Passed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "All AI context generation scripts executed successfully and produced valid artifacts." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Generated Artifacts:" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          for f in docs/ai/context/ai-*.*; do
+            if [ -f "$f" ]; then
+              size=$(du -h "$f" | awk '{print $1}')
+              printf -- '- %s (%s)\n' "$f" "$size" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done

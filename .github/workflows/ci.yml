@@ -106,11 +106,12 @@ jobs:
       - name: Assert all skip markers are annotated
         run: |
           UNANNOTATED=""
-          for f in $(grep -rl '\.skip(' tests/ packages/ apps/ --include='*.test.ts' --include='*.spec.ts' 2>/dev/null); do
+          while IFS= read -r -d '' f; do
             if ! grep -q 'SKIP REASON\|QUARANTINE' "$f"; then
               UNANNOTATED="$UNANNOTATED\n  $f"
             fi
-          done
+          done < <(grep -rl --include='*.test.ts' --include='*.spec.ts' -Z '\.skip(' tests/ packages/ apps/ 2>/dev/null)
+
           if [ -n "$UNANNOTATED" ]; then
             printf "ERROR: Files with .skip() but no SKIP REASON or QUARANTINE annotation:%b\n" "$UNANNOTATED"
             exit 1

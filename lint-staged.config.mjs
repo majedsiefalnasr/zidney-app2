@@ -9,10 +9,9 @@ export default {
   // yamllint: validates YAML syntax and style. Graceful skip if not installed.
   // Workflow files (*.yml under .github/) also match this pattern and run yamllint
   // first, then actionlint below — intentional dual-layer validation.
-  '*.{yml,yaml}': [
-    'bash -c "command -v yamllint > /dev/null 2>&1 && yamllint \\"$@\\" || (echo \\"⚠️  yamllint not installed — skipping. Install: brew install yamllint\\" && exit 0)" --',
-  ],
+  '*.{yml,yaml}': ['bash scripts/ci/yaml_lint.sh'],
 
-  // actionlint: validates GitHub Actions workflow syntax (runs on top of yamllint above).
-  '.github/workflows/*.yml': ['actionlint'],
+  // actionlint: validates GitHub Actions workflow syntax (runs on top of yaml-lint above).
+  // Guard so commits don't fail on machines without actionlint installed.
+  '.github/workflows/*.yml': ['bash scripts/ci/actionlint_wrapper.sh'],
 }

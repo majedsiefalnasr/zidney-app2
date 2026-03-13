@@ -74,28 +74,37 @@ jobs:
       - name: Publish Architecture Summary
         if: always()
         run: |
-          echo "## Zidney Architecture Governance Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          # Build a concise architecture summary and append once to the step summary
+          {
+            echo "## Zidney Architecture Governance Report"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ -f docs/architecture/audit/infra-audit-report.json ]; then
-            echo "### Infrastructure Audit" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
-            cat docs/architecture/audit/infra-audit-report.json >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            {
+              echo "### Infrastructure Audit"
+              echo "~~~json"
+              cat docs/architecture/audit/infra-audit-report.json
+              echo "~~~"
+            } >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Infrastructure audit report not found." >> $GITHUB_STEP_SUMMARY
+            echo "Infrastructure audit report not found." >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [ -f docs/architecture/graph/infra-dependency-graph.json ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Dependency Graph Snapshot" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
-            cat docs/architecture/graph/infra-dependency-graph.json >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            {
+              echo ""
+              echo "### Dependency Graph Snapshot"
+              echo "~~~json"
+              cat docs/architecture/graph/infra-dependency-graph.json
+              echo "~~~"
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [ -f docs/architecture/health/architecture-health-summary.md ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Architecture Health" >> $GITHUB_STEP_SUMMARY
-            cat docs/architecture/health/architecture-health-summary.md >> $GITHUB_STEP_SUMMARY
+            {
+              echo ""
+              echo "### Architecture Health"
+              cat docs/architecture/health/architecture-health-summary.md
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
