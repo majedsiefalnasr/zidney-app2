@@ -3,10 +3,10 @@
  * Script: CI Performance Benchmarking
  * Purpose: Measure and analyze GitHub Actions CI pipeline duration
  * Tasks: T091, T092, T093, T094, T095
- * 
+ *
  * Usage:
  *   bun scripts/dev/benchmark-ci-duration.ts
- * 
+ *
  * This script:
  * 1. Reads CI run history from GitHub API
  * 2. Calculates baseline (before) and optimized (after) metrics
@@ -15,52 +15,49 @@
  * 5. Generates performance report
  */
 
-import { readFileSync, writeFileSync } from "fs";
-import { execSync } from "child_process";
-
 interface CIRunMetrics {
-  duration: number; // seconds
-  jobsCount: number;
-  criticalPath: number;
-  cacheHits: number;
+  duration: number // seconds
+  jobsCount: number
+  criticalPath: number
+  cacheHits: number
   jobDetails: {
-    name: string;
-    duration: number;
-    parallelGroup?: number;
-  }[];
+    name: string
+    duration: number
+    parallelGroup?: number
+  }[]
 }
 
 interface PerformanceReport {
-  baseline: CIRunMetrics;
-  optimized: CIRunMetrics;
+  baseline: CIRunMetrics
+  optimized: CIRunMetrics
   savings: {
-    duration: number;
-    percentReduction: number;
-    perJob: number;
-  };
+    duration: number
+    percentReduction: number
+    perJob: number
+  }
   criticalPath: {
-    before: number;
-    after: number;
-    reduction: number;
-  };
+    before: number
+    after: number
+    reduction: number
+  }
   cacheEffectiveness: {
-    hitRatio: number;
-    timeSavedPerJob: number;
-  };
+    hitRatio: number
+    timeSavedPerJob: number
+  }
   parallelizationEfficiency: {
-    theoreticalMinimum: number;
-    actualMinimum: number;
-    efficiency: number;
-  };
+    theoreticalMinimum: number
+    actualMinimum: number
+    efficiency: number
+  }
   jobStatus: {
-    name: string;
-    status: "✓" | "✗";
-    duration: number;
-  }[];
+    name: string
+    status: '✓' | '✗'
+    duration: number
+  }[]
 }
 
 async function generateCIPerformanceReport(): Promise<void> {
-  console.log("🔍 Analyzing CI Pipeline Performance...\n");
+  console.log('🔍 Analyzing CI Pipeline Performance...\n')
 
   // Simulated baseline metrics (from Phase 4 initial analysis)
   const baseline: CIRunMetrics = {
@@ -69,17 +66,17 @@ async function generateCIPerformanceReport(): Promise<void> {
     criticalPath: 900, // 15 minutes critical path
     cacheHits: 0,
     jobDetails: [
-      { name: "lint", duration: 240, parallelGroup: 1 },
-      { name: "typecheck", duration: 240, parallelGroup: 1 },
-      { name: "arch-guard", duration: 60, parallelGroup: 1 },
-      { name: "unit-tests", duration: 360, parallelGroup: 2 },
-      { name: "integration-tests", duration: 600, parallelGroup: 2 },
-      { name: "coverage-validation", duration: 360, parallelGroup: 2 },
-      { name: "e2e-mmc", duration: 900, parallelGroup: 3 },
-      { name: "e2e-backoffice", duration: 900, parallelGroup: 3 },
-      { name: "e2e-frontoffice", duration: 900, parallelGroup: 3 },
+      { name: 'lint', duration: 240, parallelGroup: 1 },
+      { name: 'typecheck', duration: 240, parallelGroup: 1 },
+      { name: 'arch-guard', duration: 60, parallelGroup: 1 },
+      { name: 'unit-tests', duration: 360, parallelGroup: 2 },
+      { name: 'integration-tests', duration: 600, parallelGroup: 2 },
+      { name: 'coverage-validation', duration: 360, parallelGroup: 2 },
+      { name: 'e2e-mmc', duration: 900, parallelGroup: 3 },
+      { name: 'e2e-backoffice', duration: 900, parallelGroup: 3 },
+      { name: 'e2e-frontoffice', duration: 900, parallelGroup: 3 },
     ],
-  };
+  }
 
   // Optimized metrics (post-refactoring)
   const optimized: CIRunMetrics = {
@@ -89,29 +86,29 @@ async function generateCIPerformanceReport(): Promise<void> {
     cacheHits: 0.75, // 75% cache hit ratio
     jobDetails: [
       // Group 1: 0-5 min (parallel)
-      { name: "lint", duration: 180, parallelGroup: 1 },
-      { name: "typecheck", duration: 180, parallelGroup: 1 },
-      { name: "arch-guard", duration: 60, parallelGroup: 1 },
+      { name: 'lint', duration: 180, parallelGroup: 1 },
+      { name: 'typecheck', duration: 180, parallelGroup: 1 },
+      { name: 'arch-guard', duration: 60, parallelGroup: 1 },
       // Group 2: 5-13 min (parallel with group 1)
-      { name: "unit-tests", duration: 240, parallelGroup: 2 },
-      { name: "integration-tests", duration: 360, parallelGroup: 2 },
-      { name: "coverage-validation", duration: 240, parallelGroup: 2 },
+      { name: 'unit-tests', duration: 240, parallelGroup: 2 },
+      { name: 'integration-tests', duration: 360, parallelGroup: 2 },
+      { name: 'coverage-validation', duration: 240, parallelGroup: 2 },
       // Group 3: 13-28 min (parallel with groups 1+2)
-      { name: "e2e-mmc", duration: 600, parallelGroup: 3 },
-      { name: "e2e-backoffice", duration: 600, parallelGroup: 3 },
-      { name: "e2e-frontoffice", duration: 600, parallelGroup: 3 },
+      { name: 'e2e-mmc', duration: 600, parallelGroup: 3 },
+      { name: 'e2e-backoffice', duration: 600, parallelGroup: 3 },
+      { name: 'e2e-frontoffice', duration: 600, parallelGroup: 3 },
       // Group 4: Early (parallel with all)
-      { name: "build-verification", duration: 180, parallelGroup: 1 },
-      { name: "ci-success", duration: 10, parallelGroup: 4 },
+      { name: 'build-verification', duration: 180, parallelGroup: 1 },
+      { name: 'ci-success', duration: 10, parallelGroup: 4 },
     ],
-  };
+  }
 
   // Calculate savings
-  const durationSavings = baseline.duration - optimized.duration;
-  const percentReduction = (durationSavings / baseline.duration) * 100;
+  const durationSavings = baseline.duration - optimized.duration
+  const percentReduction = (durationSavings / baseline.duration) * 100
 
   // Calculate critical path
-  const optimizedCriticalPath = Math.max(
+  const _optimizedCriticalPath = Math.max(
     // Group 1 max time
     Math.max(
       180, // lint
@@ -127,11 +124,11 @@ async function generateCIPerformanceReport(): Promise<void> {
       ),
     // Group 3 max time (after group 2)
     13 * 60 + Math.max(600, 600, 600) // e2e tests
-  );
+  )
 
   // Calculate parallelization efficiency
-  const totalSerialTime = baseline.jobDetails.reduce((sum, j) => sum + j.duration, 0);
-  const parallelizationEfficiency = (optimized.criticalPath / totalSerialTime) * 100;
+  const totalSerialTime = baseline.jobDetails.reduce((sum, j) => sum + j.duration, 0)
+  const _parallelizationEfficiency = (optimized.criticalPath / totalSerialTime) * 100
 
   const report: PerformanceReport = {
     baseline,
@@ -157,15 +154,15 @@ async function generateCIPerformanceReport(): Promise<void> {
     },
     jobStatus: optimized.jobDetails.map((j) => ({
       name: j.name,
-      status: "✓" as const,
+      status: '✓' as const,
       duration: j.duration,
     })),
-  };
+  }
 
   // Generate markdown report
   const reportContent = `# CI Pipeline Performance Report
 
-**Date:** ${new Date().toISOString().split("T")[0]}  
+**Date:** ${new Date().toISOString().split('T')[0]}  
 **Phase:** 4: CI Pipeline Optimization (T091-T095)  
 **Baseline Duration:** 12-18 minutes  
 **Target Duration:** <8 minutes
@@ -400,21 +397,21 @@ Group 4: build reports at end = 19 min total (or earlier if desired)
 ---
 
 Generated: ${new Date().toISOString()}
-`;
+`
 
   // Write report
-  const reportPath = "docs/reports/CI_PERFORMANCE_REPORT.md";
-  writeFileSync(reportPath, reportContent);
-  console.log(`✅ CI Performance Report: ${reportPath}\n`);
+  const reportPath = 'docs/reports/CI_PERFORMANCE_REPORT.md'
+  writeFileSync(reportPath, reportContent)
+  console.log(`✅ CI Performance Report: ${reportPath}\n`)
 
   // Also create a dashboard JSON
   const dashboardData = {
     generatedAt: new Date().toISOString(),
-    phase: "4: CI Pipeline Optimization",
+    phase: '4: CI Pipeline Optimization',
     baselineMinutes: Math.round(baseline.duration / 60),
     optimizedMinutes: Math.round(optimized.duration / 60),
     savingsPercent: report.savings.percentReduction,
-    status: "COMPLETE",
+    status: 'COMPLETE',
     metrics: {
       parallelGroups: 4,
       totalJobs: 11,
@@ -422,35 +419,41 @@ Generated: ${new Date().toISOString()}
       cacheHitRatio: optimized.cacheHits,
     },
     jobGroups: {
-      group1: { name: "Code Quality", duration: 5, jobs: ["lint", "typecheck", "arch-guard"] },
+      group1: { name: 'Code Quality', duration: 5, jobs: ['lint', 'typecheck', 'arch-guard'] },
       group2: {
-        name: "Tests",
+        name: 'Tests',
         duration: 8,
-        jobs: ["unit-tests", "integration-tests", "coverage-validation"],
+        jobs: ['unit-tests', 'integration-tests', 'coverage-validation'],
       },
-      group3: { name: "E2E", duration: 10, jobs: ["e2e-mmc", "e2e-backoffice", "e2e-frontoffice"] },
-      group4: { name: "Build", duration: 3, jobs: ["build-verification"] },
+      group3: { name: 'E2E', duration: 10, jobs: ['e2e-mmc', 'e2e-backoffice', 'e2e-frontoffice'] },
+      group4: { name: 'Build', duration: 3, jobs: ['build-verification'] },
     },
-  };
+  }
 
-  const dashboardPath = "docs/reports/CI_PERFORMANCE_DASHBOARD.md";
+  const dashboardPath = 'docs/reports/CI_PERFORMANCE_DASHBOARD.md'
   writeFileSync(
     dashboardPath,
     `# CI Performance Dashboard\n\n\`\`\`json\n${JSON.stringify(dashboardData, null, 2)}\n\`\`\`\n`
-  );
-  console.log(`✅ CI Performance Dashboard: ${dashboardPath}\n`);
+  )
+  console.log(`✅ CI Performance Dashboard: ${dashboardPath}\n`)
 
   // Print summary
-  console.log("📊 PERFORMANCE SUMMARY");
-  console.log("================================");
-  console.log(`Baseline Duration:      ${Math.round(baseline.duration / 60)} minutes`);
-  console.log(`Optimized Duration:     ${Math.round(optimized.duration / 60)} minutes`);
-  console.log(`Total Savings:          ${Math.round(durationSavings / 60)} minutes (${report.savings.percentReduction}%)`);
-  console.log(`Critical Path:          ${Math.round(baseline.criticalPath / 60)} → ${Math.round(optimized.criticalPath / 60)} min`);
-  console.log(`Parallel Groups:        1 → 4`);
-  console.log(`Cache Hit Ratio:        0% → ${Math.round(optimized.cacheHits * 100)}%`);
-  console.log(`Jobs Validated:         ${report.jobStatus.filter((j) => j.status === "✓").length}/${report.jobStatus.length}`);
-  console.log("\n✅ Phase 4 Complete: CI Pipeline Optimization\n");
+  console.log('📊 PERFORMANCE SUMMARY')
+  console.log('================================')
+  console.log(`Baseline Duration:      ${Math.round(baseline.duration / 60)} minutes`)
+  console.log(`Optimized Duration:     ${Math.round(optimized.duration / 60)} minutes`)
+  console.log(
+    `Total Savings:          ${Math.round(durationSavings / 60)} minutes (${report.savings.percentReduction}%)`
+  )
+  console.log(
+    `Critical Path:          ${Math.round(baseline.criticalPath / 60)} → ${Math.round(optimized.criticalPath / 60)} min`
+  )
+  console.log(`Parallel Groups:        1 → 4`)
+  console.log(`Cache Hit Ratio:        0% → ${Math.round(optimized.cacheHits * 100)}%`)
+  console.log(
+    `Jobs Validated:         ${report.jobStatus.filter((j) => j.status === '✓').length}/${report.jobStatus.length}`
+  )
+  console.log('\n✅ Phase 4 Complete: CI Pipeline Optimization\n')
 }
 
-generateCIPerformanceReport().catch(console.error);
+generateCIPerformanceReport().catch(console.error)
