@@ -167,6 +167,51 @@ The analysis must include:
 - Generated-output cleanup must be paired with ignore-policy or regeneration-policy review where applicable.
 - Protected governance authority files default to no-change unless required for consistent migration.
 
+## Routing And Template Authority Registry (Preventive Control)
+
+To prevent future repository-sanitization stages from being blocked by ambiguous routing surfaces, this stage must establish a single authoritative registry that declares the canonical locations for agents, prompts, and templates.
+
+The registry must be created at:
+
+```
+docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md
+```
+
+The registry must explicitly declare the authoritative source for each routing surface.
+
+Example structure:
+
+```
+Agents
+Authoritative Root: .agents/agents/
+Legacy Surface: .github/agents/
+Migration Policy: legacy mirror retained only for compatibility until fully retired
+
+Prompts
+Authoritative Root: .agents/prompts/
+Legacy Surface: .github/prompts/
+Migration Policy: legacy mirror removed after contributor tooling migration
+
+Templates
+Authoritative Root: specs/templates/
+Legacy Surface: .specify/templates/
+Migration Policy: shell entrypoints updated to canonical templates
+```
+
+Rules enforced by this registry:
+
+- Every routing surface must have exactly one declared authoritative root.
+- Any legacy or mirrored surface must include a documented migration or compatibility policy.
+- Future cleanup stages may delete a legacy surface only if it is declared non-authoritative in this registry and no active tooling depends on it.
+
+This registry becomes the **single source of truth** for routing decisions and must be consulted by:
+
+- future sanitization stages
+- architecture audits
+- repository cleanup scripts
+
+By introducing this registry, the repository prevents future cleanup stages from being blocked by routing ambiguity between duplicate surfaces.
+
 ## Validation Requirements
 
 At minimum this stage must re-run and record:
