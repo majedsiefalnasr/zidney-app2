@@ -1,0 +1,24 @@
+{
+  "stage": "STAGE_INFRA_21_SUPPORT_SURFACE_ROUTING_AND_TEMPLATE_MIGRATION",
+  "phase": "01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-021-support-surface-routing-and-template-migration",
+  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_21_SUPPORT_SURFACE_ROUTING_AND_TEMPLATE_MIGRATION.md",
+  "branch": "spec/infra-021-support-surface-routing-and-template-migration",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-14T11:04:59Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/infra-021-support-surface-routing-and-template-migration",
+      "timestamp": "2026-03-14T11:04:59Z"
+    }
+  ]
+}
