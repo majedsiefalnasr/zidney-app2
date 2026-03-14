@@ -1788,39 +1788,19 @@
     },
     {
       "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
       "to": "packages/types"
     },
     {
       "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
       "to": "packages/types"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
     },
     {
       "from": "apps/worker",
@@ -1833,6 +1813,54 @@
     {
       "from": "apps/worker",
       "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
     },
     {
       "from": "apps/worker",
@@ -1849,7 +1877,7 @@
   ],
   "centrality": {
     "packages/job-queue": 4,
-    "packages/logger": 235,
+    "packages/logger": 242,
     "packages/types": 100,
     "packages/config": 0,
     "packages/redis-utils": 3,

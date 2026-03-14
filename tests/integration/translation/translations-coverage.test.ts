@@ -15,6 +15,14 @@ import { describe, expect, it, vi } from 'vitest'
 import { translationRouter } from '../../../apps/api/src/routes/backoffice/translations/index'
 import type { BackofficeEnv } from '../../../apps/api/src/routes/backoffice/types'
 
+const COVERAGE_RESULT = {
+  entity_type: 'question',
+  language_code: 'ar',
+  total_entities: 5,
+  translated_count: 8,
+  coverage_percent: 80,
+}
+
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
@@ -27,12 +35,6 @@ const DEFAULT_SETTINGS_ROW = {
     default_language: 'en',
     supported_languages: ['en', 'ar', 'fr'],
   },
-}
-
-const COVERAGE_DB_RESULT = {
-  covered: 8,
-  total: 10,
-  percentage: 80,
 }
 
 // ---------------------------------------------------------------------------
@@ -48,7 +50,7 @@ function createTestApp(
   const mockRedis = {
     get: vi.fn(async () => {
       if (redisError) throw new Error('Redis error')
-      return cacheHit ? JSON.stringify(COVERAGE_DB_RESULT) : null
+      return cacheHit ? JSON.stringify(COVERAGE_RESULT) : null
     }),
     set: vi.fn().mockResolvedValue('OK'),
     del: vi.fn().mockResolvedValue(1),
@@ -66,7 +68,12 @@ function createTestApp(
 
         // Coverage aggregation
         if (sql.includes('COUNT') && sql.includes('translations')) {
-          const rows = dbRows ?? [COVERAGE_DB_RESULT]
+          const rows = dbRows ?? [
+            {
+              total_entities: String(COVERAGE_RESULT.total_entities),
+              translated_count: String(COVERAGE_RESULT.translated_count),
+            },
+          ]
           return { rows, rowCount: rows.length }
         }
 
@@ -126,7 +133,7 @@ describe('GET /api/v1/backoffice/workspace/translations/coverage', () => {
     const app = new Hono<BackofficeEnv>()
 
     const mockRedis = {
-      get: vi.fn().mockResolvedValue(JSON.stringify(COVERAGE_DB_RESULT)),
+      get: vi.fn().mockResolvedValue(JSON.stringify(COVERAGE_RESULT)),
       set: vi.fn(),
       del: vi.fn(),
       scan: vi.fn(),
@@ -139,7 +146,15 @@ describe('GET /api/v1/backoffice/workspace/translations/coverage', () => {
         }
         if (sql.includes('COUNT') && sql.includes('translations')) {
           dbMockTracker.coverageCalled = true
-          return { rows: [COVERAGE_DB_RESULT], rowCount: 1 }
+          return {
+            rows: [
+              {
+                total_entities: String(COVERAGE_RESULT.total_entities),
+                translated_count: String(COVERAGE_RESULT.translated_count),
+              },
+            ],
+            rowCount: 1,
+          }
         }
         return { rows: [], rowCount: 0 }
       }),
@@ -178,10 +193,10 @@ describe('GET /api/v1/backoffice/workspace/translations/coverage', () => {
 
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.data).toMatchObject({ covered: 8, total: 10, percentage: 80 })
+    expect(body.data).toMatchObject(COVERAGE_RESULT)
   })
 
-  it('returns null data when entity type has no translations', async () => {
+  it('returns zeroed coverage when entity type has no translations', async () => {
     const app = createTestApp({ dbRows: [] })
     const res = await app.request(
       '/api/v1/backoffice/workspace/translations/coverage?entity_type=question&language_code=ar',
@@ -190,7 +205,13 @@ describe('GET /api/v1/backoffice/workspace/translations/coverage', () => {
 
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.data).toBeNull()
+    expect(body.data).toMatchObject({
+      entity_type: 'question',
+      language_code: 'ar',
+      total_entities: 0,
+      translated_count: 0,
+      coverage_percent: 0,
+    })
   })
 
   it('returns 422 when entity_type is missing', async () => {

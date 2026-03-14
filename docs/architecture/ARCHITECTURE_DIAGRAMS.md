@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-03-12T23:06:40.914Z
-Git SHA: 4289a917d2fbe4134d1a2ad196a09d0216a046b6
+Generated: 2026-03-14T14:27:00.186Z
+Git SHA: ef7bcc79bd073d7d46f6e37ef18abb7730f0ee1a
 
 ---
 
@@ -472,18 +472,25 @@ graph LR
   apps_worker --> packages_types
   apps_worker --> packages_types
   apps_worker --> packages_types
+  apps_worker --> packages_logger
   apps_worker --> packages_types
+  apps_worker --> packages_logger
   apps_worker --> packages_types
-  apps_worker --> packages_types
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
   apps_worker --> packages_logger
   apps_worker --> packages_logger
   apps_worker --> packages_types
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_types
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
   apps_worker --> packages_domain_core
   apps_worker --> packages_logger
   apps_worker --> packages_types
@@ -928,18 +935,25 @@ graph TD
   apps_worker --> packages_types
   apps_worker --> packages_types
   apps_worker --> packages_types
+  apps_worker --> packages_logger
   apps_worker --> packages_types
+  apps_worker --> packages_logger
   apps_worker --> packages_types
-  apps_worker --> packages_types
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
-  apps_worker --> packages_logger
   apps_worker --> packages_logger
   apps_worker --> packages_logger
   apps_worker --> packages_types
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_types
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_logger
   apps_worker --> packages_domain_core
   apps_worker --> packages_logger
   apps_worker --> packages_types

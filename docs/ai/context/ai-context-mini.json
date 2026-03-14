@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-03-12T23:06:41.078Z",
+  "generated_at": "2026-03-14T14:27:00.229Z",
   "layers": [
     {
       "name": "infrastructure",
@@ -35,9 +35,17 @@
       "packages/api-client",
       "packages/validation"
     ],
-    "infrastructure": ["packages/logger", "packages/config", "packages/redis-utils"],
-    "ui": ["packages/ui-system"],
-    "domain": ["packages/domain-core"]
+    "infrastructure": [
+      "packages/logger",
+      "packages/config",
+      "packages/redis-utils"
+    ],
+    "ui": [
+      "packages/ui-system"
+    ],
+    "domain": [
+      "packages/domain-core"
+    ]
   },
   "rules": {},
   "critical_violations": [],

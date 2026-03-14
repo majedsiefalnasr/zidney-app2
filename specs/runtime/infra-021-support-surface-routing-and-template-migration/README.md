@@ -15,8 +15,21 @@
 | Plan      | ✅        | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
 | Tasks     | ✅        | tasks.md                    | reports/TASKS_REPORT.md     |
 | Analyze   | ✅ Passed | (read-only analysis)        | audits/ANALYZE_REPORT.md    |
-| Implement | ⬜        | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
+| Implement | ✅        | tasks.md (tasks marked [X]) | audits/VALIDATION_REPORT.md |
 | Closure   | ⬜        | -                           | reports/CLOSURE_REPORT.md   |
+
+## INFRA-21 Authority Set
+
+Implementation for this stage must consult the following artifacts before any routing, template,
+compatibility, retirement, or cleanup change is accepted:
+
+- `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md`
+- `reports/routing-authority-decisions.md`
+- `reports/support-surface-inventory.md`
+- `reports/blast-radius-evidence.md`
+- `reports/template-consumer-parity-matrix.md`
+- `audits/migration-batches.md`
+- `audits/VALIDATION_REPORT.md`
 
 ## Stage Artifacts
 

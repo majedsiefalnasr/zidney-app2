@@ -10,10 +10,8 @@ import type { RouteRecordRaw } from 'vue-router'
 
 // Known routes that do NOT require authentication (explicitly allowed)
 const KNOWN_PUBLIC_ROUTE_NAMES = new Set([
-  'not-found',
   'mmc-login', // login page is public
-  'login',
-  'not-found',
+  'mmc-not-found',
 ])
 
 /**
@@ -36,7 +34,7 @@ import { licensesRoutes } from '../../../../../../apps/mmc/src/modules/licenses/
 
 const notFoundRoute: RouteRecordRaw = {
   path: '/:pathMatch(.*)*',
-  name: 'not-found',
+  name: 'mmc-not-found',
   component: () => Promise.resolve({}),
 }
 const mmcRoutes: RouteRecordRaw[] = [...dashboardRoutes, ...licensesRoutes, notFoundRoute]
@@ -69,14 +67,14 @@ describe('route coverage audit (mmc)', () => {
     const protectedRoutes = allRoutes.filter((r) => r.meta?.requiresAuth === true)
     // At minimum, the dashboard and licenses routes should be guarded
     const protectedNames = protectedRoutes.map((r) => r.name)
-    expect(protectedNames).toContain('dashboard')
-    expect(protectedNames).toContain('licenses')
-    expect(protectedNames).toContain('license-detail')
+    expect(protectedNames).toContain('mmc-dashboard')
+    expect(protectedNames).toContain('mmc-licenses')
+    expect(protectedNames).toContain('mmc-license-detail')
   })
 
   it('contains the not-found catch-all route', () => {
     const allRoutes = flattenRoutes(mmcRoutes)
-    const notFound = allRoutes.find((r) => r.name === 'not-found')
+    const notFound = allRoutes.find((r) => r.name === 'mmc-not-found')
     expect(notFound).toBeDefined()
     expect(notFound?.path).toBe('/:pathMatch(.*)*')
   })

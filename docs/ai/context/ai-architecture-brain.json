@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-03-12T23:06:41.078Z",
+  "generated_at": "2026-03-14T14:27:00.229Z",
   "metadata": {
     "total_modules": 14,
     "total_violations": 0,
     "generation_time_ms": 0,
     "source_hash": "6493a7d6",
-    "source_timestamp": "2026-03-12T23:06:41.072Z",
+    "source_timestamp": "2026-03-14T14:27:00.223Z",
     "generator_version": "1.0.0"
   },
   "layers": [
@@ -31,120 +31,49 @@
       "order": 4
     }
   ],
-  "modules": {
-    "apps/mmc": {
-      "layer": "runtime",
-      "type": "application",
-      "description": "Module: mmc",
-      "path": "apps/mmc",
-      "dependencies": []
-    },
-    "apps/frontoffice": {
-      "layer": "runtime",
-      "type": "application",
-      "description": "Module: frontoffice",
-      "path": "apps/frontoffice",
-      "dependencies": []
-    },
-    "apps/backoffice": {
-      "layer": "runtime",
-      "type": "application",
-      "description": "Module: backoffice",
-      "path": "apps/backoffice",
-      "dependencies": []
-    },
-    "apps/api": {
-      "layer": "runtime",
-      "type": "application",
-      "description": "Module: api",
-      "path": "apps/api",
-      "dependencies": []
-    },
-    "apps/worker": {
-      "layer": "runtime",
-      "type": "application",
-      "description": "Module: worker",
-      "path": "apps/worker",
-      "dependencies": []
-    },
-    "packages/job-queue": {
-      "layer": "runtime",
-      "type": "package",
-      "description": "Module: job-queue",
-      "path": "packages/job-queue",
-      "dependencies": []
-    },
-    "packages/types": {
-      "layer": "runtime",
-      "type": "package",
-      "description": "Module: types",
-      "path": "packages/types",
-      "dependencies": []
-    },
-    "packages/logger": {
-      "layer": "infrastructure",
-      "type": "package",
-      "description": "Module: logger",
-      "path": "packages/logger",
-      "dependencies": []
-    },
-    "packages/config": {
-      "layer": "infrastructure",
-      "type": "package",
-      "description": "Module: config",
-      "path": "packages/config",
-      "dependencies": []
-    },
-    "packages/redis-utils": {
-      "layer": "infrastructure",
-      "type": "package",
-      "description": "Module: redis-utils",
-      "path": "packages/redis-utils",
-      "dependencies": []
-    },
-    "packages/ui-system": {
-      "layer": "ui",
-      "type": "package",
-      "description": "Module: ui-system",
-      "path": "packages/ui-system",
-      "dependencies": []
-    },
-    "packages/api-client": {
-      "layer": "runtime",
-      "type": "package",
-      "description": "Module: api-client",
-      "path": "packages/api-client",
-      "dependencies": []
-    },
-    "packages/domain-core": {
-      "layer": "domain",
-      "type": "package",
-      "description": "Module: domain-core",
-      "path": "packages/domain-core",
-      "dependencies": []
-    },
-    "packages/validation": {
-      "layer": "runtime",
-      "type": "package",
-      "description": "Module: validation",
-      "path": "packages/validation",
-      "dependencies": []
-    }
-  },
+  "modules": [
+    "apps/mmc",
+    "apps/frontoffice",
+    "apps/backoffice",
+    "apps/api",
+    "apps/worker",
+    "packages/job-queue",
+    "packages/types",
+    "packages/logger",
+    "packages/config",
+    "packages/redis-utils",
+    "packages/ui-system",
+    "packages/api-client",
+    "packages/domain-core",
+    "packages/validation"
+  ],
   "rules": {},
   "dependencies": {
     "apps/mmc": {
-      "imports": ["packages/types", "packages/logger", "packages/api-client", "packages/ui-system"],
+      "imports": [
+        "packages/types",
+        "packages/logger",
+        "packages/api-client",
+        "packages/ui-system"
+      ],
       "imported_by": [],
       "violations": []
     },
     "apps/frontoffice": {
-      "imports": ["packages/types", "packages/logger", "packages/api-client"],
+      "imports": [
+        "packages/types",
+        "packages/logger",
+        "packages/api-client"
+      ],
       "imported_by": [],
       "violations": []
     },
     "apps/backoffice": {
-      "imports": ["packages/api-client", "packages/types", "packages/logger"],
+      "imports": [
+        "packages/api-client",
+        "packages/types",
+        "packages/logger"
+      ],
       "imported_by": [],
       "violations": []
     },
@@ -171,8 +100,13 @@
       "violations": []
     },
     "packages/job-queue": {
-      "imports": ["packages/logger"],
-      "imported_by": ["apps/api", "apps/worker"],
+      "imports": [
+        "packages/logger"
+      ],
+      "imported_by": [
+        "apps/api",
+        "apps/worker"
+      ],
       "violations": []
     },
     "packages/types": {
@@ -209,28 +143,51 @@
       "violations": []
     },
     "packages/redis-utils": {
-      "imports": ["packages/logger"],
-      "imported_by": ["apps/api"],
+      "imports": [
+        "packages/logger"
+      ],
+      "imported_by": [
+        "apps/api"
+      ],
       "violations": []
     },
     "packages/ui-system": {
       "imports": [],
-      "imported_by": ["apps/mmc"],
+      "imported_by": [
+        "apps/mmc"
+      ],
       "violations": []
     },
     "packages/api-client": {
       "imports": [],
-      "imported_by": ["apps/mmc", "apps/frontoffice", "apps/backoffice"],
+      "imported_by": [
+        "apps/mmc",
+        "apps/frontoffice",
+        "apps/backoffice"
+      ],
       "violations": []
     },
     "packages/domain-core": {
-      "imports": ["packages/logger", "packages/types", "packages/validation"],
-      "imported_by": ["apps/api", "apps/worker"],
+      "imports": [
+        "packages/logger",
+        "packages/types",
+        "packages/validation"
+      ],
+      "imported_by": [
+        "apps/api",
+        "apps/worker"
+      ],
       "violations": []
     },
     "packages/validation": {
-      "imports": ["packages/types", "packages/logger"],
-      "imported_by": ["packages/domain-core", "apps/api"],
+      "imports": [
+        "packages/types",
+        "packages/logger"
+      ],
+      "imported_by": [
+        "packages/domain-core",
+        "apps/api"
+      ],
       "violations": []
     }
   },
@@ -1965,39 +1922,19 @@
     },
     {
       "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
       "to": "packages/types"
     },
     {
       "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
       "to": "packages/types"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
     },
     {
       "from": "apps/worker",
@@ -2010,6 +1947,54 @@
     {
       "from": "apps/worker",
       "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
     },
     {
       "from": "apps/worker",
@@ -2032,7 +2017,7 @@
     "hotspots": [
       {
         "module": "packages/logger",
-        "violation_count": 235
+        "violation_count": 242
       },
       {
         "module": "packages/types",

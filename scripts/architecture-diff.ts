@@ -8,6 +8,8 @@
  * ARCHITECTURE_CONTRACT.json rules.
  *
  * Used in CI to prevent architecture drift.
+ * Support-surface routing authority remains governed separately by
+ * docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md.
  */
 
 import { execSync } from 'node:child_process'
@@ -161,6 +163,9 @@ function runArchitectureDiff() {
   }
 
   console.log('Architecture Diff: no violations detected.')
+  console.log(
+    'Architecture Diff: support-surface routing decisions must consult docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md.'
+  )
 }
 
 runArchitectureDiff()

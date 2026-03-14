@@ -12,9 +12,12 @@
  * - README governance checks
  * - Skipped / flaky / quarantined test detection
  * - Dependency boundary enforcement
+ * - Consultative support for routing-authority review
  *
  * NOTE:
  * CLI utility — exempt from service-layer logging standards.
+ * Support-surface routing decisions remain governed by
+ * docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md.
  */
 
 import { execSync } from 'node:child_process'
@@ -2196,6 +2199,9 @@ new vis.Network(container, data, options)
   console.log('Architecture history stored in docs/architecture/audits/history/')
   console.log('Audit report exported to docs/reports/')
   console.log('AI architecture context exported to docs/ai/context/')
+  console.log(
+    'Support-surface routing decisions must consult docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md'
+  )
 
   /* -------------------------------------------------------------------------- */
   /* CI Enforcement                                                             */

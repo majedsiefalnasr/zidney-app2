@@ -36,13 +36,17 @@ check_feature_branch "$CURRENT_BRANCH" "$HAS_GIT" || exit 1
 # Ensure the feature directory exists
 mkdir -p "$FEATURE_DIR"
 
-# Copy plan template if it exists
-TEMPLATE="$REPO_ROOT/.specify/templates/plan-template.md"
-if [[ -f "$TEMPLATE" ]]; then
-    cp "$TEMPLATE" "$IMPL_PLAN"
-    echo "Copied plan template to $IMPL_PLAN"
+# Copy the canonical plan template, falling back to the legacy compatibility surface only if needed.
+CANONICAL_TEMPLATE="$REPO_ROOT/specs/templates/plan-template.md"
+LEGACY_TEMPLATE="$REPO_ROOT/.specify/templates/plan-template.md"
+if [[ -f "$CANONICAL_TEMPLATE" ]]; then
+    cp "$CANONICAL_TEMPLATE" "$IMPL_PLAN"
+    echo "Copied canonical plan template to $IMPL_PLAN"
+elif [[ -f "$LEGACY_TEMPLATE" ]]; then
+    cp "$LEGACY_TEMPLATE" "$IMPL_PLAN"
+    echo "Copied legacy compatibility plan template to $IMPL_PLAN"
 else
-    echo "Warning: Plan template not found at $TEMPLATE"
+    echo "Warning: No plan template found at $CANONICAL_TEMPLATE or $LEGACY_TEMPLATE"
     # Create a basic plan file if template doesn't exist
     touch "$IMPL_PLAN"
 fi
@@ -58,4 +62,3 @@ else
     echo "BRANCH: $CURRENT_BRANCH"
     echo "HAS_GIT: $HAS_GIT"
 fi
-

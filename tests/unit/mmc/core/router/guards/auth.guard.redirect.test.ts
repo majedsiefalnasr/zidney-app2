@@ -111,14 +111,14 @@ describe('createAuthGuard — redirect preservation (mmc)', () => {
 
   // ── guestOnly route: authenticated user → redirect to dashboard ──────────
 
-  it('authenticated user accessing guest-only route → redirect to dashboard', () => {
+  it('authenticated user accessing public route → redirect to dashboard', () => {
     const guard = createAuthGuard({
       isAuthenticated: () => true,
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
     const to = makeRoute({
-      meta: { guestOnly: true },
+      meta: { public: true },
       name: LOGIN_ROUTE,
       fullPath: '/login',
     })

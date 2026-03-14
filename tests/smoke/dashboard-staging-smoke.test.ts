@@ -15,8 +15,10 @@ import { createClient } from './http-client'
  * Run after staging deployment completes
  */
 
-const API_URL = process.env.API_URL || 'https://staging-mmc-api.example.com'
-const JWT_TOKEN = process.env.JWT_TOKEN || 'test-token'
+const API_URL = process.env.API_URL ?? ''
+const JWT_TOKEN = process.env.JWT_TOKEN ?? ''
+const hasStagingEnv = Boolean(API_URL && JWT_TOKEN)
+const describeStaging = hasStagingEnv ? describe : describe.skip
 
 let _client: ReturnType<typeof createClient>
 
@@ -35,14 +37,19 @@ async function makeRequest(method: string, endpoint: string, body?: unknown, cus
   })
 
   const data = await response.json()
+  const headers: Record<string, string> = {}
+  response.headers.forEach((value, key) => {
+    headers[key] = value
+  })
+
   return {
     status: response.status,
     data,
-    headers: Object.fromEntries(response.headers),
+    headers,
   }
 }
 
-describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
+describeStaging('Staging Smoke Tests - MMC Dashboard Deployment', () => {
   // ────────────────────────────────────────────────────────────────────────
   // CONNECTIVITY TESTS
   // ────────────────────────────────────────────────────────────────────────
@@ -319,7 +326,7 @@ describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
 // DEPLOYMENT VALIDATION SUMMARY
 // ────────────────────────────────────────────────────────────────────────
 
-describe('Deployment Validation Summary', () => {
+describeStaging('Deployment Validation Summary', () => {
   it('All critical systems operational', async () => {
     const checks = {
       health: await makeRequest('GET', '/health'),
