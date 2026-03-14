@@ -334,20 +334,32 @@ The stage is complete when:
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
-Risk Level: UNKNOWN
-Initiated: 2026-03-14T00:00:00Z
+Step: specify
+Risk Level: MEDIUM
+Last Updated: 2026-03-14T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Repository size and performance optimization analysis
-- Script modularization strategy
-- AI context artifact optimization
-- CI/CD pipeline performance improvements
+- Repository Diagnostics — file/directory/artifact size analysis and script profiling methodology
+- Script Modularization — 7-domain structure (architecture, ai, governance, dev, ci, build, utilities)
+- AI Context Optimization — caching, parallelization, and streaming strategies for sub-2s generation
+- CI Pipeline Optimization — GitHub Actions parallelization reducing 12-18min to 5-6min
+- AI Skill System Consolidation — group by domain, ensure all <500 lines
+- Dependency Optimization — lock file auditing, unused package removal, transitive bloat analysis
+- Architecture Tool Performance — incremental analysis and caching for ai-guard, infra-audit, architecture-diff
+- Repository Health Metrics — performance dashboard and trend tracking
+
+Deferred Scope:
+
+- Major framework/tooling upgrades
+- Deep algorithmic performance profiling
+- User-facing feature changes
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — infrastructure stage, zero governance rule changes
+- No feature impact, no database isolation changes, no attempt engine impact
+- Specification approved for clarification phase
 
 Notes:
 Stage initialized. Specification in progress.
