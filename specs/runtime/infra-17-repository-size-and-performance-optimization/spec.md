@@ -147,6 +147,26 @@ All metrics below must be measured and reported in a **Repository Health Report*
 
 ---
 
+## Clarifications
+
+### Session 2026-03-14
+
+- Q1: CI caching strategy for GitHub Actions → A: C (GitHub Actions cache action with workflow context)
+- Q2: Artifact caching strategy (dependency-graph & brain generation hotspots) → A: B (Cache only dependency-graph and runtime-dependents)
+- Q3: Script modularization sequencing priority → A: B (Architecture tools first → AI context → governance tools)
+- Q4: Skill consolidation and line-count enforcement → A: B (Enforce <500 line limit per SKILL.md; split oversized skills into separate domain files)
+- Q5: Dependency removal strategy (conservative vs. aggressive) → A: A (Conservative: remove only clearly unused deps with zero import references)
+
+**Impact:**
+
+- Q1 reduces CI time by ~15-20% through smart caching
+- Q2 targets 30-40% artifact size reduction by selective caching of hotspo ts
+- Q3 sequences refactoring to maximize code reuse and minimize CI disruption (architecture tools have highest duplication)
+- Q4 maintains skill discoverability while enforcing maintainability (500-line limit is Zidney standard)
+- Q5 reduces risk of hidden dependency breakage during cleanup (aligns with stability-first mandate)
+
+---
+
 ## 1. Repository Diagnostics
 
 ### 1.1 File Size Analysis
@@ -170,8 +190,9 @@ All metrics below must be measured and reported in a **Repository Health Report*
 3. **Skills > 500 lines:**
    - Location: `.agents/skills/`
    - Candidates: Review each SKILL.md for line count
-   - Action: Split into separate skills or consolidate related skills into a single domain-grouped skill
-   - Threshold: SKILL.md > 500 lines violates readability and AI context guidelines
+   - **CLARIFICATION Q4 APPLIED:** Enforce 500-line limit per SKILL.md. For oversized skills, split into separate domain-focused files rather than consolidating into mega-skills. This maintains fine-grained skill discovery while ensuring maintainability.
+   - Action: For each SKILL.md > 500 lines, create separate skill files by subdomain (e.g., split `gitnexus/SKILL.md` into `gitnexus-exploring/SKILL.md`, `gitnexus-debugging/SKILL.md`, etc.)
+   - Threshold: SKILL.md files >500 lines must be split; target is all skill files <500 lines post-optimization
 
 **Diagnostic Output:**
 
@@ -437,6 +458,8 @@ scripts/
 
 ### 2.3 Implementation Plan
 
+**CLARIFICATION Q3 APPLIED:** Prioritize architecture tools (ai-guard, infra-audit, validate-brain) as Phase 1 + Phase 2 (combined effort) due to highest code duplication and frequent CI usage. AI context generators follow as Phase 3.
+
 **Phase 1: Extract Reusable Utilities (scripts/core/)**
 
 Target files to extract:
@@ -446,7 +469,7 @@ Target files to extract:
 3. `graph-analyzer.ts` — Graph utilities (DFS, cycle detection, topological sort)
 4. `performance-profiler.ts` — Timing utilities and statistics
 
-**Phase 2: Modularize Architecture Intelligence (scripts/architecture/)**
+**Phase 2: Modularize Architecture Intelligence (scripts/architecture/) — PRIORITY**
 
 Extract from:
 
@@ -575,9 +598,11 @@ Current status: ✓ Already ~40-50KB
 
 #### 3.2.3 Caching & Incremental Analysis
 
-**Problem:** Every `infra-audit` or `generate-ai-context` call rebuilds graph from scratch.
+**Problem:** Every `infra-audit` or `generate-ai-context` call rebuilds graph from scratch. Dependency-graph generation (2-3s) and brain generation (1-2s) are identified hotspots.
 
-**Solution:** Implement caching layer:
+**Solution:** Implement selective caching layer targeting hotspots only:
+
+**CLARIFICATION Q2 APPLIED:** Cache only high-impact artifacts (dependency-graph and runtime-dependents). Skip caching for module-map.json and brain.json to reduce cache management complexity while capturing the biggest performance gains.
 
 ```typescript
 interface CacheEntry {
@@ -586,11 +611,12 @@ interface CacheEntry {
   artifact: object;
 }
 
-// Cached artifacts:
+// Cached artifacts (Q2 selective strategy):
 const cache = {
-  "module-map.json": CacheEntry,
-  "dependency-graph.json": CacheEntry,
-  "brain.json": CacheEntry,
+  "dependency-graph.json": CacheEntry, // CACHED (2-3s generation, 30-40% redundancy)
+  "runtime-dependents.json": CacheEntry, // CACHED (reverse graph computed from above)
+  // NOT CACHED: module-map.json (0.3s, low impact)
+  // NOT CACHED: brain.json (1-2s, evolved frequently)
 };
 
 // Check cache validity:
@@ -1168,38 +1194,66 @@ After Removal: -Z MB (estimated)
 
 ### 6.2 Dependency Cleanup
 
+**CLARIFICATION Q5 APPLIED:** Use conservative removal strategy. Only remove dependencies with zero import references across the entire workspace. Do NOT aggressively remove transitive dependencies without explicit import verification, as this risks breaking hidden dependencies or dynamic requires. This aligns with Zidney's stability-first mandate.
+
 **Steps:**
 
-1. **Remove unused dependencies:**
+1. **Identify unused dependencies (conservative criteria):**
+   - Package appears in package.json or bun.lock
+   - Grep entire workspace for all references: `grep -r "package-name" apps/ packages/`
+   - Only remove if ZERO results across all source files
+   - If removed dependency is re-imported somewhere, stop and document reason for keeping
 
    ```bash
-   bun remove unused-package
+   # Example: Verify no imports of unused-package before removal
+   grep -r "unused-package" apps/ packages/ scripts/ --include="*.ts" --include="*.js" || echo "Safe to remove"
    ```
 
-2. **Replace oversized dependencies:**
+2. **Replace oversized dependencies (with verification):**
+   - Identify alternative package
+   - Check API compatibility carefully
+   - Test all features using the new package before committing
 
    ```bash
    bun remove heavy-lib
    bun add light-lib
+   # Then run full test suite to verify no breakage
+   bun run test:ci
    ```
 
-3. **Deduplicate transitive versions:**
+3. **Deduplicate transitive versions (low-risk):**
 
    ```bash
    bun pm install  # Deduplicates lock file
    ```
 
-4. **Prune unreachable dependencies:**
+4. **Prune unreachable dependencies (verify first):**
 
    ```bash
+   # Only prune if no hidden imports exist
    bun pm prune
+   bun run type-check  # Verify no type errors
    ```
 
-5. **Validate build:**
+5. **Validate build (mandatory before merge):**
    ```bash
    bun run build
    bun run type-check
+   bun run test:ci  # Full integration test run
    ```
+
+**Removal Decision Tree:**
+
+```
+Is dependency in package.json?
+├─ No → Not candidate for removal
+├─ Yes: Search all imports in workspace
+    ├─ Found imports → Keep dependency
+    ├─ No imports found:
+        ├─ Is it a peer dependency of another package? → Keep
+        ├─ Is it documented as needed for type resolution? → Keep
+        └─ truly unused → Safe to remove (conservative approach)
+```
 
 ### 6.3 Lock File Optimization
 

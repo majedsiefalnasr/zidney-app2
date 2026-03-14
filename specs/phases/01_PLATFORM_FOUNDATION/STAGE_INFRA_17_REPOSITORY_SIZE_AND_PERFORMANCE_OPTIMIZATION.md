@@ -334,20 +334,20 @@ The stage is complete when:
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: MEDIUM
 Last Updated: 2026-03-14T00:00:00Z
 
-Scope Defined:
+Scope Clarified:
 
 - Repository Diagnostics — file/directory/artifact size analysis and script profiling methodology
-- Script Modularization — 7-domain structure (architecture, ai, governance, dev, ci, build, utilities)
-- AI Context Optimization — caching, parallelization, and streaming strategies for sub-2s generation
-- CI Pipeline Optimization — GitHub Actions parallelization reducing 12-18min to 5-6min
-- AI Skill System Consolidation — group by domain, ensure all <500 lines
-- Dependency Optimization — lock file auditing, unused package removal, transitive bloat analysis
-- Architecture Tool Performance — incremental analysis and caching for ai-guard, infra-audit, architecture-diff
-- Repository Health Metrics — performance dashboard and trend tracking
+- Script Modularization — Priority: Architecture tools (ai-guard, infra-audit, architecture-diff) with highest ROI
+- AI Context Optimization — Strategy: Selective caching of dependency-graph + runtime-dependents via GitHub Actions
+- CI Pipeline Optimization — Cache strategy: GitHub Actions cache action (persists across runs, auto-invalidates)
+- AI Skill System Consolidation — Strategy: Split oversized files (enforce 500-line limit) maintaining discoverability
+- Dependency Optimization — Strategy: Conservative removal with import verification before deletion
+- Architecture Tool Performance — Targets confirmed: <1s (ai-guard), <3s (infra-audit)
+- Repository Health Metrics — Performance dashboard and trend tracking mechanism
 
 Deferred Scope:
 
@@ -357,9 +357,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — infrastructure stage, zero governance rule changes
-- No feature impact, no database isolation changes, no attempt engine impact
-- Specification approved for clarification phase
+- All clarifications recorded and approved — infrastructure stage
+- 5 key design decisions documented (cache strategy, artifact selection, modularization sequence, skill splitting, dependency safety)
+- Zero governance rule changes, no feature impact
+- Clarification phase complete — ready for technical planning
 
 Notes:
 Stage initialized. Specification in progress.
