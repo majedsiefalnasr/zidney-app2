@@ -5,15 +5,15 @@
   "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_16_REPOSITORY_SANITIZATION_AND_DEAD_CODE_ELIMINATION.md",
   "branch": "spec/infra-016-repository-sanitization-and-dead-code-elimination",
   "base_branch": "develop",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
   "tasks_total": null,
   "tasks_completed": null,
-  "last_updated": "2026-03-13T22:55:28Z",
+  "last_updated": "2026-03-13T22:58:31Z",
   "history": [
     {
       "event": "branch_created",
@@ -23,6 +23,10 @@
     {
       "event": "specify_complete",
       "timestamp": "2026-03-13T22:55:28Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "timestamp": "2026-03-13T22:58:31Z"
     }
   ]
 }
