@@ -91,6 +91,11 @@ Record every batch before applying it and keep rollback scoped to that batch onl
 
 After each meaningful batch, run the minimum affected validation gates before starting the next batch.
 
+Current stage outcome:
+
+- Batch 1 completed as `B01-finder-noise` and remains applied.
+- Later batches were deferred because the remaining candidates did not meet the zero-unresolved-reference standard or required a routing-sensitive consolidation outside this stage.
+
 ## Step 5: Run validation gates after each meaningful batch
 
 Minimum gate set:
@@ -129,3 +134,9 @@ The stage is ready for guardian validation when:
 - every duplicate group has one authoritative outcome or an explicit manual-review status
 - the minimum validation gate set passes, or any pre-existing baseline failures are documented as out of scope
 - no tenant, license, attempt, runtime, or module-boundary changes were introduced
+
+## Final Walkthrough Notes
+
+- The current workspace satisfies the conservative completion path for this stage: one safe cleanup batch applied, all higher-risk items documented, and baseline validation failures recorded without masking new regressions.
+- No support-surface reference fixes were required after removing the four Finder-noise files.
+- If a future batch targets `package.json`, routing prompts/agents, templates, or out-of-scope generated output, rerun the full validation sequence before applying any additional deletion.
