@@ -89,67 +89,67 @@ Completion of Phase 1 (baseline established)
 
 #### Utility Extraction & Core Module Creation
 
-- [ ] T011 Create core utility module at scripts/core/schema-validator.ts (extract JSON schema validation, used by 3+ scripts)
-- [ ] T012 [P] Create file analyzer utility at scripts/core/file-analyzer.ts (extract file size/line counting, used by 5+ scripts)
-- [ ] T013 [P] Create graph analyzer utility at scripts/core/graph-analyzer.ts (extract graph operations: DFS, cycle detection)
-- [ ] T014 [P] Create performance profiler utility at scripts/core/performance-profiler.ts (extract timing and statistics utilities)
-- [ ] T015 [P] Create artifact validator utility at scripts/core/artifact-validator.ts (extract JSON artifact validation schema)
-- [ ] T016 [P] Create module roster cache at scripts/core/module-roster.ts (implement ModuleRoster structure from data-model.md)
-- [ ] T017 [P] Create cache manager at scripts/core/cache-manager.ts (implement CacheEntry structure for selective caching per Q2)
-- [ ] T018 [P] Create logging factory at scripts/core/logger-factory.ts (shared logging configuration with structured fields)
+- [x] T011 Create core utility module at scripts/core/schema-validator.ts (extract JSON schema validation, used by 3+ scripts)
+- [x] T012 [P] Create file analyzer utility at scripts/core/file-analyzer.ts (extract file size/line counting, used by 5+ scripts)
+- [x] T013 [P] Create graph analyzer utility at scripts/core/graph-analyzer.ts (extract graph operations: DFS, cycle detection)
+- [x] T014 [P] Create performance profiler utility at scripts/core/performance-profiler.ts (extract timing and statistics utilities)
+- [x] T015 [P] Create artifact validator utility at scripts/core/artifact-validator.ts (extract JSON artifact validation schema)
+- [x] T016 [P] Create module roster cache at scripts/core/module-roster.ts (implement ModuleRoster structure from data-model.md)
+- [x] T017 [P] Create cache manager at scripts/core/cache-manager.ts (implement CacheEntry structure for selective caching per Q2)
+- [x] T018 [P] Create logging factory at scripts/core/logger-factory.ts (shared logging configuration with structured fields)
 
 #### Architecture Tools Refactoring
 
-- [ ] T019 Refactor ai-guard.ts to use extracted utilities at scripts/architecture/ai-guard.ts (remove duplicate logic, use schema-validator and performance-profiler)
-- [ ] T020 [P] Refactor infra-audit.ts to use extracted utilities at scripts/architecture/infra-audit.ts (use graph-analyzer, file-analyzer, cache-manager per Q2)
-- [ ] T021 [P] Refactor architecture-diff.ts to use extracted utilities at scripts/architecture/architecture-diff.ts (use schema-validator, performance-profiler)
-- [ ] T022 [P] Create audit-engine module at scripts/architecture/core/audit-engine.ts (extracted from infra-audit.ts, handles full repository audit logic)
-- [ ] T023 [P] Create rule-engine module at scripts/architecture/core/rule-engine.ts (extracted from ai-guard.ts, handles rule validation)
-- [ ] T024 [P] Create diff-engine module at scripts/architecture/core/diff-engine.ts (extracted from architecture-diff.ts, handles diff generation)
+- [x] T019 Refactor ai-guard.ts to use extracted utilities at scripts/architecture/ai-guard.ts (remove duplicate logic, use schema-validator and performance-profiler)
+- [x] T020 [P] Refactor infra-audit.ts to use extracted utilities at scripts/architecture/infra-audit.ts (use graph-analyzer, file-analyzer, cache-manager per Q2)
+- [x] T021 [P] Refactor architecture-diff.ts to use extracted utilities at scripts/architecture/architecture-diff.ts (use schema-validator, performance-profiler)
+- [x] T022 [P] Create audit-engine module at scripts/architecture/core/audit-engine.ts (extracted from infra-audit.ts, handles full repository audit logic)
+- [x] T023 [P] Create rule-engine module at scripts/architecture/core/rule-engine.ts (extracted from ai-guard.ts, handles rule validation)
+- [x] T024 [P] Create diff-engine module at scripts/architecture/core/diff-engine.ts (extracted from architecture-diff.ts, handles diff generation)
 
 #### AI Context Tools Refactoring
 
-- [ ] T025 Create ai-context orchestrator at scripts/ai-context/orchestrator.ts (main entry point for ai-context generation)
-- [ ] T026 [P] Create mini-context generator at scripts/ai-context/generators/mini-generator.ts (generates ai-context-mini.json only)
-- [ ] T027 [P] Create module-map generator at scripts/ai-context/generators/module-map-generator.ts (generates ai-module-map.json)
-- [ ] T028 [P] Create dependency-graph generator at scripts/ai-context/generators/dependency-graph-generator.ts (generates ai-dependency-graph.json with caching per Q2)
-- [ ] T029 [P] Create runtime-map generator at scripts/ai-context/generators/runtime-map-generator.ts (generates ai-runtime-map.json)
-- [ ] T030 [P] Create runtime-dependents generator at scripts/ai-context/generators/runtime-dependents-generator.ts (generates ai-runtime-dependents.json with cache per Q2)
-- [ ] T031 [P] Create architecture-brain generator at scripts/ai-context/generators/architecture-brain-generator.ts (generates ai-architecture-brain.json)
-- [ ] T032 [P] Create architecture-diff generator at scripts/ai-context/generators/architecture-diff-generator.ts (generates ai-architecture-diff.json)
+- [x] T025 Create ai-context orchestrator at scripts/ai-context/orchestrator.ts (main entry point for ai-context generation)
+- [x] T026 [P] Create mini-context generator at scripts/ai-context/generators/mini-generator.ts (generates ai-context-mini.json only)
+- [x] T027 [P] Create module-map generator at scripts/ai-context/generators/module-map-generator.ts (generates ai-module-map.json)
+- [x] T028 [P] Create dependency-graph generator at scripts/ai-context/generators/dependency-graph-generator.ts (generates ai-dependency-graph.json with caching per Q2)
+- [x] T029 [P] Create runtime-map generator at scripts/ai-context/generators/runtime-map-generator.ts (generates ai-runtime-map.json)
+- [x] T030 [P] Create runtime-dependents generator at scripts/ai-context/generators/runtime-dependents-generator.ts (generates ai-runtime-dependents.json with cache per Q2)
+- [x] T031 [P] Create architecture-brain generator at scripts/ai-context/generators/architecture-brain-generator.ts (generates ai-architecture-brain.json)
+- [x] T032 [P] Create architecture-diff generator at scripts/ai-context/generators/architecture-diff-generator.ts (generates ai-architecture-diff.json)
 
 #### Governance Tools Refactoring
 
-- [ ] T033 Refactor type-safety-guard.ts at scripts/governance/type-safety-guard.ts (use schema-validator, performance-profiler utilities)
-- [ ] T034 [P] Refactor validate-architecture-brain.ts at scripts/governance/validate-architecture-brain.ts (use artifact-validator utility)
-- [ ] T035 [P] Create governance validator module at scripts/governance/core/governance-validator.ts (consolidate validation logic)
+- [x] T033 Refactor type-safety-guard.ts at scripts/governance/type-safety-guard.ts (use schema-validator, performance-profiler utilities)
+- [x] T034 [P] Refactor validate-architecture-brain.ts at scripts/governance/validate-architecture-brain.ts (use artifact-validator utility)
+- [x] T035 [P] Create governance validator module at scripts/governance/core/governance-validator.ts (consolidate validation logic)
 
 #### Development Tools Refactoring
 
-- [ ] T036 Move generate-ai-context.ts to scripts/dev/generate-ai-context.ts (development utility, not critical path)
-- [ ] T037 [P] Move check-store-cycles.ts to scripts/dev/check-store-cycles.ts (development utility)
-- [ ] T038 [P] Move seed-dashboard-test-data.ts to scripts/dev/seed-dashboard-test-data.ts (development utility)
+- [x] T036 Move generate-ai-context.ts to scripts/dev/generate-ai-context.ts (development utility, not critical path)
+- [x] T037 [P] Move check-store-cycles.ts to scripts/dev/check-store-cycles.ts (development utility)
+- [x] T038 [P] Move seed-dashboard-test-data.ts to scripts/dev/seed-dashboard-test-data.ts (development utility)
 
 #### CI/Build Tools Refactoring
 
-- [ ] T039 Move deploy-production.sh to scripts/ci/deploy-production.sh (CI deployment script)
-- [ ] T040 [P] Move deploy-staging.sh to scripts/ci/deploy-staging.sh (CI deployment script)
-- [ ] T041 [P] Move run-all-tests.sh to scripts/ci/run-all-tests.sh (CI testing orchestrator)
-- [ ] T042 [P] Move run-staging-smoke-tests.sh to scripts/ci/run-staging-smoke-tests.sh (CI smoke test script)
+- [x] T039 Move deploy-production.sh to scripts/ci/deploy-production.sh (CI deployment script)
+- [x] T040 [P] Move deploy-staging.sh to scripts/ci/deploy-staging.sh (CI deployment script)
+- [x] T041 [P] Move run-all-tests.sh to scripts/ci/run-all-tests.sh (CI testing orchestrator)
+- [x] T042 [P] Move run-staging-smoke-tests.sh to scripts/ci/run-staging-smoke-tests.sh (CI smoke test script)
 
 #### Build & Utilities Refactoring
 
-- [ ] T043 Move check-tsconfig-strict.sh to scripts/build/check-tsconfig-strict.sh (TypeScript build validation)
-- [ ] T044 [P] Move cleanup-test-env.sh to scripts/build/cleanup-test-env.sh (test environment cleanup)
-- [ ] T045 [P] Move init-test-db.sh to scripts/build/init-test-db.sh (test database initialization)
-- [ ] T046 [P] Move reset-test-redis.sh to scripts/build/reset-test-redis.sh (test redis reset)
-- [ ] T047 [P] Move verify-test-env.sh to scripts/build/verify-test-env.sh (test environment verification)
+- [x] T043 Move check-tsconfig-strict.sh to scripts/build/check-tsconfig-strict.sh (TypeScript build validation)
+- [x] T044 [P] Move cleanup-test-env.sh to scripts/build/cleanup-test-env.sh (test environment cleanup)
+- [x] T045 [P] Move init-test-db.sh to scripts/build/init-test-db.sh (test database initialization)
+- [x] T046 [P] Move reset-test-redis.sh to scripts/build/reset-test-redis.sh (test redis reset)
+- [x] T047 [P] Move verify-test-env.sh to scripts/build/verify-test-env.sh (test environment verification)
 
 #### Performance Validation Tasks
 
-- [ ] T048 Profile ai-guard.ts execution (10 runs) and validate <1s target at scripts/dev/profile-ai-guard.ts
-- [ ] T049 [P] Profile infra-audit.ts execution (10 runs) and validate <3s target at scripts/dev/profile-infra-audit.ts
-- [ ] T050 [P] Validate script duplication <5% using code diff analysis at scripts/dev/validate-script-duplication.ts
+- [x] T048 Profile ai-guard.ts execution (10 runs) and validate <1s target at scripts/dev/profile-ai-guard.ts
+- [x] T049 [P] Profile infra-audit.ts execution (10 runs) and validate <3s target at scripts/dev/profile-infra-audit.ts
+- [x] T050 [P] Validate script duplication <5% using code diff analysis at scripts/dev/validate-script-duplication.ts
 
 ---
 
