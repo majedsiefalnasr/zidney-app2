@@ -3,15 +3,15 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-03-14T12:10:00Z
+Last Updated: 2026-03-14T12:20:00Z
 
 Scope Defined:
 
-- Canonical authorities locked to `.agents/agents/`, `.agents/prompts/`, and `specs/templates/`
-- Legacy `.github/*` and `.specify/templates/` surfaces retained only as compatibility paths pending same-batch migration
-- Blast-radius evidence and same-batch migration constraints remain mandatory
+- Canonical routing roots remain `.agents/agents/`, `.agents/prompts/`, and `specs/templates/`
+- Compatibility-preserving migration batches defined for authority declaration, consumer rewiring, parity gating, hardening, and retirement
+- Blast-radius evidence, parity gates, and full governance validation codified in plan artifacts
 
 Deferred Scope:
 
@@ -19,10 +19,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved - planning authorized
+- Technical plan compliant - task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ## Purpose
 
