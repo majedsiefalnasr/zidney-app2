@@ -3,6 +3,9 @@ description: Perform a non-destructive cross-artifact consistency and quality an
 tools: [execute, read, search, todo]
 ---
 
+**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
+
+
 ## User Input
 
 ```text

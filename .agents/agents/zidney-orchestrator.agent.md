@@ -39,6 +39,8 @@ agents:
   ]
 ---
 
+**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
+
 # Skill Delegation Layer
 
 The Zidney Orchestrator acts as a **workflow controller only**.

@@ -1,4 +1,7 @@
 ---
+
+**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
+
 description: Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.
 tools: ['github/github-mcp-server/issue_write']
 ---

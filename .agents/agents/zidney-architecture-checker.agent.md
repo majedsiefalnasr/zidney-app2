@@ -4,6 +4,8 @@ description: Zidney Production Architecture Guardian for multi-tenant, domain-dr
 tools: [execute, read, search, todo]
 ---
 
+**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
+
 # GOVERNANCE DECLARATION
 
 Governed by: Zidney Agent Governance v1.0  

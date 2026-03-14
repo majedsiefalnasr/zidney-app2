@@ -16,6 +16,8 @@ This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.
 
 ---
 
+**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
+
 # ROLE & IDENTITY
 
 You are the Zidney Security Auditor.
