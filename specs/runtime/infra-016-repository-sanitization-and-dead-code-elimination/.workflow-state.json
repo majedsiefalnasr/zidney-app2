@@ -1,0 +1,24 @@
+{
+  "stage": "STAGE_INFRA_16_REPOSITORY_SANITIZATION_AND_DEAD_CODE_ELIMINATION",
+  "phase": "01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination",
+  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_16_REPOSITORY_SANITIZATION_AND_DEAD_CODE_ELIMINATION.md",
+  "branch": "spec/infra-016-repository-sanitization-and-dead-code-elimination",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": true,
+  "implementation_allowed": true,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-13T22:51:44Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/infra-016-repository-sanitization-and-dead-code-elimination",
+      "timestamp": "2026-03-13T22:51:44Z"
+    }
+  ]
+}
