@@ -3,26 +3,33 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-03-14T12:20:00Z
+Last Updated: 2026-03-14T12:30:00Z
 
 Scope Defined:
 
 - Canonical routing roots remain `.agents/agents/`, `.agents/prompts/`, and `specs/templates/`
-- Compatibility-preserving migration batches defined for authority declaration, consumer rewiring, parity gating, hardening, and retirement
-- Blast-radius evidence, parity gates, and full governance validation codified in plan artifacts
+- Atomic task graph generated for evidence collection, registry authoring, parity creation, consumer rewiring, compatibility hardening, and validation
+- Full governance validation and routing-entrypoint verification captured as required task work
 
 Deferred Scope:
 
 - Runtime, tenant, license, and attempt-engine redesign
 
+Tasks Generated:
+
+- Total: 26 atomic tasks
+- Evidence and setup: 8 tasks
+- Routing authority and support-artifact implementation: 9 tasks
+- Consumer rewiring, compatibility hardening, and validation: 9 tasks
+
 Constitutional Compliance:
 
-- Technical plan compliant - task generation authorized
+- Task set compliant - drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ## Purpose
 
