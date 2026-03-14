@@ -8,39 +8,14 @@
   },
   "chat.tools.terminal.autoApprove": {
     ".specify/scripts/bash/": true,
-    ".specify/scripts/powershell/": true,
     "mkdir": true,
-    "/^bash \\.specify\\/scripts\\/bash\\/check-prerequisites\\.sh(\\s+.*)?$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "bun": true,
-    "/^bash \\.specify\\/scripts\\/bash\\/setup-plan\\.sh(\\s+.*)?$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^bash \\.specify\\/scripts\\/bash\\/update-agent-context\\.sh(\\s+.*)?$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^\\.specify\\/scripts\\/bash\\/check-prerequisites\\.sh(\\s+.*)?$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^\\.specify\\/scripts\\/bash\\/setup-plan\\.sh(\\s+.*)?$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^\\.specify\\/scripts\\/bash\\/update-agent-context\\.sh(\\s+.*)?$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "npx eslint": true,
-    "npx tsc": true,
     "act": true,
     "gh": true,
-    "git stash": true,
-    "git checkout": true,
+    "git": true,
+    "git commit": false,
+    "rtk": true,
+    "rtk git commit": false,
+    "bun": true,
     "bunx": true,
   },
   "css.lint.unknownAtRules": "ignore",
@@ -57,10 +32,20 @@
     "Zidney"
   ],
   "typescript.tsserver.experimental.enableProjectDiagnostics": true,
-  "[typescript]": { "editor.defaultFormatter": "biomejs.biome" },
-  "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
-  "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
-  "[vue]": { "editor.defaultFormatter": "biomejs.biome" },
-  "[json]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "editor.formatOnSave": true
 }
