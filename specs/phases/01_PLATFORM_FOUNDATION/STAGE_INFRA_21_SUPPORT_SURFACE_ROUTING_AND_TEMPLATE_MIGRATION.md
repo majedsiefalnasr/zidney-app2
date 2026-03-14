@@ -3,23 +3,26 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: HIGH
-Initiated: 2026-03-14T11:04:59Z
+Last Updated: 2026-03-14T12:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Root support artifact cleanup beyond the INFRA-16 governed cleanup roots
-- Prompt and agent routing consolidation across `.github/*` and `.agents/*`
-- Template system migration between `.specify/templates/*` and `specs/templates/*`
+- Widened support-surface inventory and dispositioning for deferred INFRA-16 artifacts
+- Canonical routing authority model for agents, prompts, and templates
+- Lossless migration rules for contributor entrypoints and guidance
+
+Deferred Scope:
+
+- Runtime, tenant, license, and attempt-engine redesign
 
 Constitutional Compliance:
 
-- Pending constitutional audit
-- Must preserve architecture governance, Hard Mode workflow integrity, and contributor-routing safety
+- Specification drafted - constitutional audit pending
 
 Notes:
-Follow-up stage opened to supersede the blocked cleanup boundary from INFRA-16 without widening INFRA-16 in place.
+Specification complete. Clarification step pending.
 
 ## Purpose
 
