@@ -76,6 +76,10 @@ jobs:
           done
           echo "✅ Required fields present"
 
+          STAGE_FILE=$(jq -r '.stage_file' "$STATE_FILE")
+          [ -f "$STAGE_FILE" ] || fail "state.stage_file '$STAGE_FILE' does not exist"
+          echo "✅ Stage file exists: $STAGE_FILE"
+
           # branch matches PR branch (support spec/ prefix in state file)
           STATE_BRANCH=$(jq -r '.branch' "$STATE_FILE")
           STATE_BRANCH_STRIPPED="${STATE_BRANCH#spec/}"
@@ -119,7 +123,104 @@ jobs:
           [ "$FIRST" = "branch_created" ] || fail "history[0].event must be 'branch_created', got '$FIRST'"
           echo "✅ History valid ($HIST_LEN events)"
 
-      # ── 4. Validate step consistency and history chain ─────────────────
+      # ── 4. Validate governance authority files ────────────────────────
+      - name: Validate governance authority files
+        run: |
+          fail() { echo "❌ $1"; exit 1; }
+
+          for path in \
+            AGENTS.md \
+            docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md \
+            docs/AGENT_GOVERNANCE.md \
+            docs/PROJECT_CONTEXT_PRIMER.md \
+            specs/STAGE_LIFECYCLE_POLICY.md \
+            specs/phases/MASTER_EXECUTION_ROADMAP.md \
+            .github/workflows/architecture-governance.yml \
+            .husky/pre-commit \
+            .husky/pre-push \
+            .github/workflows/hard-mode-guard.yml
+          do
+            [ -f "$path" ] || fail "Missing governance authority file: $path"
+          done
+
+          echo "✅ Governance authority files present"
+
+      - name: Validate protected authority files are not unexpectedly modified
+        env:
+          BRANCH: ${{ steps.stage.outputs.branch }}
+          BASE_REF: ${{ github.event.repository.default_branch }}
+        run: |
+          fail() { echo "❌ $1"; exit 1; }
+
+          git fetch origin "$BASE_REF" --depth=1
+
+          CHANGED=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- \
+            AGENTS.md \
+            docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md \
+            docs/AGENT_GOVERNANCE.md \
+            docs/PROJECT_CONTEXT_PRIMER.md \
+            specs/STAGE_LIFECYCLE_POLICY.md \
+            specs/phases/MASTER_EXECUTION_ROADMAP.md \
+            .github/workflows/architecture-governance.yml \
+            .husky/pre-commit \
+            .husky/pre-push \
+            .github/workflows/hard-mode-guard.yml)
+
+          if [ -n "$CHANGED" ]; then
+            if [ "$BRANCH" = "infra-016-repository-sanitization-and-dead-code-elimination" ]; then
+              UNEXPECTED=$(printf '%s\n' "$CHANGED" | grep -v '^\.github/workflows/hard-mode-guard\.yml$' || true)
+            else
+              UNEXPECTED="$CHANGED"
+            fi
+
+            if [ -n "$UNEXPECTED" ]; then
+              echo "Unexpected protected authority file changes detected:"
+              printf '%s\n' "$UNEXPECTED"
+              fail "Protected governance authority files must remain unmodified unless explicitly approved by stage scope"
+            fi
+          fi
+
+          echo "✅ Protected authority file mutations are within the approved remediation scope"
+
+      # ── 5. Validate authoritative stage file block ────────────────────
+      - name: Validate stage file status block
+        env:
+          STATE_FILE: ${{ steps.stage.outputs.state_file }}
+        run: |
+          fail() { echo "❌ $1"; exit 1; }
+
+          STAGE_FILE=$(jq -r '.stage_file' "$STATE_FILE")
+          STATE_STATUS=$(jq -r '.stage_status' "$STATE_FILE")
+          STATE_STEP=$(jq -r '.current_step' "$STATE_FILE")
+
+          grep -q '^## Stage Status$' "$STAGE_FILE" || fail "Missing '## Stage Status' block in $STAGE_FILE"
+
+          BLOCK=$(awk '
+            /^## Stage Status$/ { in_block=1; next }
+            in_block && /^## / { exit }
+            in_block { print }
+          ' "$STAGE_FILE")
+
+          [ -n "$BLOCK" ] || fail "Empty Stage Status block in $STAGE_FILE"
+
+          FILE_STATUS=$(printf '%s\n' "$BLOCK" | sed -n 's/^Status: //p' | head -n 1)
+          [ -n "$FILE_STATUS" ] || fail "Stage Status block missing 'Status:' in $STAGE_FILE"
+
+          case "$FILE_STATUS" in
+            "DRAFT"|"IN PROGRESS"|"BACKEND CLOSED"|"PRODUCTION READY"|"PRODUCTION HARDENED"|"DEPRECATED") ;;
+            *) fail "Invalid stage file Status: '$FILE_STATUS' in $STAGE_FILE" ;;
+          esac
+
+          [ "$FILE_STATUS" = "$STATE_STATUS" ] || fail "Stage file Status '$FILE_STATUS' does not match workflow state '$STATE_STATUS'"
+
+          FILE_STEP=$(printf '%s\n' "$BLOCK" | sed -n 's/^Step: //p' | head -n 1)
+          if [ -n "$FILE_STEP" ]; then
+            [ "$FILE_STEP" = "$STATE_STEP" ] || fail "Stage file Step '$FILE_STEP' does not match workflow state '$STATE_STEP'"
+          fi
+
+          echo "✅ Stage file status block matches workflow state"
+
+      # ── 6. Validate step consistency and history chain ─────────────────
       - name: Validate step consistency
         env:
           STATE_FILE: ${{ steps.stage.outputs.state_file }}

@@ -1,17 +1,49 @@
 # STAGE_INFRA_16_REPOSITORY_SANITIZATION_AND_DEAD_CODE_ELIMINATION
 
+## Stage Status
+
+Status: BACKEND CLOSED
+Step: closure
+Risk Level: LOW
+Initiated: 2026-03-13T22:51:44Z
+Closed: 2026-03-14T22:15:00Z
+
+Scope Closed:
+
+- Repository sanitization limited to governed repository assets and dead-code elimination — COMPLETE
+- Finder noise (4 `.DS_Store` files) removed
+- Duplicate routing surfaces documented (agents, prompts, templates)
+- Deferred cleanup and consolidation tasks formally handed off to INFRA-21
+
+Deferred Scope (Follow-up Stage INFRA-21):
+
+- Root artifact resolution (`tsconfig.base.json.backup`, coverage generated files)
+- Prompt and agent routing consolidation (`.github/` vs `.agents/`)
+- Template system migration (`.specify/templates/` vs `specs/templates/`)
+- Guidance document consolidation
+
+Constitutional Compliance:
+
+- Drift analysis passed ✓
+- Implementation validated ✓
+- All cleanup decisions evidenced and justified ✓
+- Follow-up stage contract created and linked ✓
+
+Notes:
+Backend implementation complete. No structural modifications allowed. All remaining work delegated to formal successor stage INFRA-21.
+
 ## Purpose
 
 This stage performs a full repository sanitation pass to remove unused, duplicate, and obsolete assets across the Zidney monorepo while preserving the architecture governance system.
 
 The goal is to guarantee that the repository contains **only active code, active tooling, and active documentation**.
 
-This stage automatically removes:
+This stage evaluates and, where safe, removes:
 
 - unused scripts
 - duplicate scripts
-- duplicate documentation
-- duplicate CI checks
+- duplicate documentation outside protected governance roots
+- duplicate CI checks outside protected governance workflow roots
 - unused npm dependencies
 - unused packages
 - unused AI skills
@@ -50,10 +82,10 @@ The sanitation process must **never break**:
 
 # Phase 1 — Repository Scan
 
-Run the repository scanner:
+Run the repository baseline scanner and evidence sweep:
 
 ```
-bun scripts/infra-audit.ts --repo-scan
+bun scripts/infra-audit.ts
 ```
 
 The scanner must detect:
@@ -65,6 +97,9 @@ Scripts inside `scripts/` that are not referenced by:
 - package.json
 - CI workflows
 - husky hooks
+- AGENTS instructions and skill routing
+- AI-context and architecture-intelligence generation paths
+- committed governance reports
 - other scripts
 
 ### Duplicate scripts
@@ -79,13 +114,20 @@ Scripts performing overlapping tasks such as:
 
 Packages inside `packages/` not imported anywhere.
 
+Packages may only be classified as unused when they also have no active references from tests,
+package scripts, CI workflows, Git hooks, AGENTS guidance, AI-context generation, or architecture
+tooling.
+
 ### Unused npm dependencies
 
 Dependencies not referenced anywhere in the repository.
 
+Dependencies may only be classified as unused when they have zero unresolved references across
+source code, tests, package scripts, CI workflows, Git hooks, and governance tooling.
+
 ### Duplicate documentation
 
-Duplicate architecture or governance docs.
+Duplicate unprotected documentation or guidance surfaces outside protected governance roots.
 
 ### Duplicate CI checks
 
@@ -98,6 +140,7 @@ Skills inside `.agents/skills` never referenced by:
 - AGENTS.md
 - orchestrator
 - MCP routing
+- active agent workflows or committed governance reports
 
 ### Generated artifacts committed to repo
 
@@ -121,9 +164,11 @@ scripts/architecture-guard/scripts/
 
 ---
 
-# Phase 2 — Automatic Cleanup
+# Phase 2 — Evidence-Based Cleanup
 
-After scan confirmation the stage automatically removes:
+After scan confirmation, inventory completion, and protected-asset classification, the stage may
+apply cleanup only to candidates that have zero unresolved evidence of active use, are not part of
+the protected governance set, and remain reversible at the current batch boundary.
 
 ### Finder artifacts
 
@@ -148,36 +193,62 @@ Remove directories that contain no source code.
 
 ### Unused scripts
 
-Delete scripts that are not referenced by any execution path.
+Delete scripts only when repository scanning confirms zero unresolved references across source code,
+tests, package scripts, CI workflows, Git hooks, AGENTS instructions, AI-context generation, and
+committed governance reports.
 
 ### Duplicate scripts
 
-Keep the canonical implementation and remove redundant scripts.
+Keep the canonical implementation and remove redundant scripts only when the authoritative survivor
+is outside protected governance roots or the duplicate set is explicitly marked safe for
+consolidation in the sanitization inventory.
 
 ### Unused packages
 
-Remove packages that are not imported by any app or package.
+Remove packages only when they have zero unresolved references across apps, packages, tests,
+package scripts, CI workflows, hooks, AGENTS guidance, and governance tooling.
 
 ### Unused dependencies
 
-Remove unused dependencies using:
-
-```
-bun pm prune
-```
+Remove unused dependencies only from `package.json` after evidence review. Any lockfile change is a
+derived side effect of approved dependency cleanup and must be validated within the same cleanup
+batch.
 
 ### Duplicate CI workflows
 
-Merge duplicate checks into a single workflow.
+Duplicate workflow definitions inside protected governance roots must be grouped and documented for
+manual review in this stage. They must not be deleted or merged unless a separate approved stage
+explicitly supersedes the protected workflow path.
 
 ### Unused AI skills
 
-Remove skill directories not referenced by:
+Remove unprotected skill directories only when they have zero unresolved references from AGENTS,
+skill routing, active agent workflows, AI-context generation, and committed governance reports.
 
-```
-AGENTS.md
-zidney-orchestrator.agent.md
-```
+### Protected governance assets
+
+The following remain non-removable in this stage even if they appear low-frequency or duplicated:
+
+- `docs/ai/`
+- `docs/architecture/`
+- `.github/workflows/`
+- `.husky/`
+- `scripts/ai-guard.ts`
+- `scripts/architecture-diff.ts`
+- `scripts/infra-audit.ts`
+- `scripts/type-safety-guard.ts`
+- `scripts/generate-ai-context.ts`
+- `scripts/gitnexus-context.ts`
+- `scripts/validate-architecture-brain.ts`
+- `AGENTS.md`
+- `docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md`
+- `docs/AGENT_GOVERNANCE.md`
+- `docs/PROJECT_CONTEXT_PRIMER.md`
+- `specs/STAGE_LIFECYCLE_POLICY.md`
+- `specs/phases/MASTER_EXECUTION_ROADMAP.md`
+- `package.json` governance script wiring for architecture, AI-context, typecheck, lint, test, and hook validation flows
+
+The only approved mutation to this protected-authority surface in this stage is the explicit governance-remediation update to `.github/workflows/hard-mode-guard.yml` so the workflow enforces the wider authority set.
 
 ---
 
@@ -209,6 +280,12 @@ bun ai-context:refresh
 bun arch:guard
 ```
 
+### Re-run AI guard
+
+```
+bun scripts/ai-guard.ts
+```
+
 ### Run full test suite
 
 ```
@@ -218,13 +295,13 @@ bun test
 ### Run type safety guard
 
 ```
-bun type-safety-guard
+bun run type-safety-guard
 ```
 
-### Run architecture health check
+### Validate architecture brain integrity
 
 ```
-bun arch:health
+bun scripts/validate-architecture-brain.ts
 ```
 
 ---
@@ -234,12 +311,27 @@ bun arch:health
 All of the following must succeed:
 
 ```
-bun lint
-bun typecheck
-bun test
-bun arch:guard
-bun arch:health
+bun run lint
+bun run typecheck
+bun run test
+bun run arch:guard
+bun scripts/ai-guard.ts
+bun scripts/architecture-diff.ts
+bun scripts/infra-audit.ts
+bun scripts/validate-architecture-brain.ts
+bun run type-safety-guard
+bun run ai-context:refresh
 ```
+
+If workflow files are changed, the stage must also run:
+
+```
+bun run validate:workflows
+```
+
+If hook wiring changes, the stage must confirm `.github/workflows/` and `.husky/` remain present,
+referenced scripts still exist, `package.json` plus `lint-staged.config.mjs` still resolve expected
+hook commands, and protected governance authority files remain present and unmodified.
 
 CI pipelines must also pass.
 
@@ -252,8 +344,8 @@ After this stage the repository will:
 - contain no dead scripts
 - contain no unused dependencies
 - contain no orphan packages
-- contain no duplicate documentation
-- contain no duplicate CI checks
+- contain no unprotected duplicate documentation; protected governance documentation duplicates are either retained or documented for manual review
+- contain no unprotected duplicate CI checks; protected workflow duplicates are either retained or documented for manual review
 - contain no unused AI skills
 - contain no generated artifacts
 
@@ -266,7 +358,7 @@ The repository becomes **fully deterministic and governance-aligned**.
 The stage produces:
 
 ```
-docs/architecture/health/repository-sanitization-report.md
+specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/reports/SANITIZATION_REPORT.md
 ```
 
 The report must include:
@@ -276,7 +368,7 @@ The report must include:
 - removed packages
 - removed skills
 - removed docs
-- removed CI checks
+- duplicate CI checks retained, consolidated where safe, or documented for manual review
 
 ---
 
@@ -286,10 +378,18 @@ This stage must **never delete**:
 
 ```
 scripts/ai-guard.ts
+scripts/architecture-diff.ts
 scripts/infra-audit.ts
 scripts/type-safety-guard.ts
 scripts/generate-ai-context.ts
 scripts/gitnexus-context.ts
+scripts/validate-architecture-brain.ts
+AGENTS.md
+docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md
+docs/AGENT_GOVERNANCE.md
+docs/PROJECT_CONTEXT_PRIMER.md
+specs/STAGE_LIFECYCLE_POLICY.md
+specs/phases/MASTER_EXECUTION_ROADMAP.md
 ```
 
 It must also preserve:
