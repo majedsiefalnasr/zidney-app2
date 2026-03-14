@@ -46,7 +46,15 @@ This stage remains inside repository-governance scope.
 
 ## Clarifications
 
-No clarification questions were required for this specification. The stage file already defines the widened scope, safety rules, validation expectations, and non-goals tightly enough to specify the work without unresolved decisions.
+### Session 2026-03-14
+
+No interactive clarification questions were required for this specification. The stage file, current repository references, and Hard Mode governance guidance already constrain the authority model tightly enough to lock the canonical routing roots without widening scope.
+
+This clarify pass locks the canonical routing authority model for the stage as follows:
+
+- Agents: `.agents/agents/` is the authoritative root; `.github/agents/` remains a legacy compatibility surface only until all affected contributor-loading paths are migrated in the same batch.
+- Prompts: `.agents/prompts/` is the authoritative root; `.github/prompts/` remains a legacy compatibility surface only until all affected contributor-loading paths are migrated in the same batch.
+- Templates: `specs/templates/` is the authoritative root; `.specify/templates/` remains a legacy execution-compatibility surface only until `.specify/scripts/bash/*` and any other live consumers are migrated in the same batch.
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -134,12 +142,12 @@ As a contributor using SpecKit and repository governance tooling, I want routing
 - **FR-001**: The stage MUST inventory every widened-scope support surface named in the stage file and classify each item as retained, migrated, mirrored for compatibility, removed, regenerated-and-ignored, or escalated.
 - **FR-002**: The stage MUST require blast-radius evidence for every root support artifact candidate, routing surface, template bootstrap entrypoint, and contributor-facing or governance-facing document changed by the migration.
 - **FR-003**: The stage MUST classify a root support artifact as removable only when there are zero unresolved references or a complete documented replacement path.
-- **FR-004**: The stage MUST define one authoritative routing root for each of the following categories: agents, prompts, and templates.
+- **FR-004**: The stage MUST define one authoritative routing root for each of the following categories: agents, prompts, and templates. For this stage, the authoritative roots are `.agents/agents/`, `.agents/prompts/`, and `specs/templates/` respectively.
 - **FR-005**: The stage MUST create `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md` as the single source of truth for routing authority decisions.
-- **FR-006**: The routing authority registry MUST record the authoritative root, any legacy surface, and the migration or compatibility policy for each routing category.
+- **FR-006**: The routing authority registry MUST record the authoritative root, any legacy surface, and the migration or compatibility policy for each routing category, including `.github/agents/`, `.github/prompts/`, and `.specify/templates/` as legacy compatibility surfaces until same-batch consumer migration is complete.
 - **FR-007**: The stage MUST preserve contributor-routing safety by updating all affected contributor entrypoints, shell entrypoints, documentation references, and automation references in the same migration batch whenever authority changes.
 - **FR-008**: The stage MUST require the template migration outcome to align shell entrypoints, governance guidance, and contributor documentation to the same authoritative template system.
-- **FR-009**: The stage MUST prevent silent divergence between `.specify/templates/` and `specs/templates/` by defining either one authoritative template root with aligned consumers or an explicit documented split with non-overlapping roles.
+- **FR-009**: The stage MUST prevent silent divergence between `.specify/templates/` and `specs/templates/` by treating `specs/templates/` as the canonical template root and `.specify/templates/` as a temporary compatibility surface only until all live shell and automation consumers are migrated in the same batch.
 - **FR-010**: The stage MUST preserve Hard Mode workflow integrity and MUST NOT weaken `.github/workflows/hard-mode-guard.yml`, `.github/workflows/architecture-governance.yml`, `.husky/pre-commit`, `.husky/pre-push`, `AGENTS.md`, `docs/AGENT_GOVERNANCE.md`, `docs/PROJECT_CONTEXT_PRIMER.md`, or `specs/STAGE_LIFECYCLE_POLICY.md` unless a minimal, explicitly justified migration update is required.
 - **FR-011**: The stage MUST consolidate overlapping governance or contributor guidance losslessly through consolidation, redirect references, or documented purpose separation.
 - **FR-012**: The stage MUST pair generated-output cleanup decisions with ignore-policy or regeneration-policy review when the artifact is not intended to remain committed.

@@ -3,15 +3,15 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: HIGH
-Last Updated: 2026-03-14T12:00:00Z
+Last Updated: 2026-03-14T12:10:00Z
 
 Scope Defined:
 
-- Widened support-surface inventory and dispositioning for deferred INFRA-16 artifacts
-- Canonical routing authority model for agents, prompts, and templates
-- Lossless migration rules for contributor entrypoints and guidance
+- Canonical authorities locked to `.agents/agents/`, `.agents/prompts/`, and `specs/templates/`
+- Legacy `.github/*` and `.specify/templates/` surfaces retained only as compatibility paths pending same-batch migration
+- Blast-radius evidence and same-batch migration constraints remain mandatory
 
 Deferred Scope:
 
@@ -19,10 +19,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted - constitutional audit pending
+- Clarifications resolved - planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ## Purpose
 
