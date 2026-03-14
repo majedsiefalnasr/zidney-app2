@@ -11,9 +11,8 @@
  */
 
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { glob } from 'glob'
 
 export interface CacheEntry {
   timestamp: string
@@ -58,9 +57,11 @@ export class CacheManager {
     const hashes: Record<string, string> = {}
 
     for (const pattern of patterns) {
-      const files = await glob(pattern, { ignore: ['node_modules/**', 'dist/**', '.git/**'] })
+      // Simple glob matching: support patterns like 'packages/*/package.json'
+      const parts = pattern.split('/')
+      const results = this.matchPattern(parts, '')
 
-      for (const file of files) {
+      for (const file of results) {
         if (existsSync(file)) {
           try {
             const content = readFileSync(file, 'utf-8')
@@ -73,6 +74,52 @@ export class CacheManager {
     }
 
     return hashes
+  }
+
+  /**
+   * Simple glob pattern matching
+   */
+  private matchPattern(parts: string[], basePath: string): string[] {
+    if (parts.length === 0) return []
+
+    const [first, ...rest] = parts
+    const currentPath = basePath ? `${basePath}/${first}` : first
+
+    if (first === '*') {
+      // Wildcard: match any directory at this level
+      try {
+        if (!existsSync(basePath)) return []
+        const entries = readdirSync(basePath, { withFileTypes: true })
+        const results: string[] = []
+
+        for (const entry of entries) {
+          if (!['node_modules', 'dist', '.git', '.cache'].includes(entry.name)) {
+            const subPath = join(basePath, entry.name)
+            if (rest.length > 0) {
+              results.push(...this.matchPattern(rest, subPath))
+            } else {
+              results.push(subPath)
+            }
+          }
+        }
+
+        return results
+      } catch {
+        return []
+      }
+    } else {
+      // Exact match
+      if (rest.length > 0) {
+        return this.matchPattern(rest, currentPath)
+      }
+
+      // Check if file exists
+      if (existsSync(currentPath)) {
+        return [currentPath]
+      }
+
+      return []
+    }
   }
 
   /**

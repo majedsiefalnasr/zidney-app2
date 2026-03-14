@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "artifact_types": [
+    "dependency-graph",
+    "runtime-dependents"
+  ],
+  "cache_key_strategy": {
+    "primary_inputs": [
+      "packages/*/package.json",
+      "apps/*/package.json",
+      "tsconfig.json",
+      "tsconfig.base.json",
+      "bun.lock"
+    ],
+    "hash_algorithm": "SHA256",
+    "example_key": "ai-context-cache-${{ hashFiles(\"packages/*/package.json\", \"apps/*/package.json\", \"tsconfig.json\") }}"
+  },
+  "cache_paths": [
+    "docs/ai/context/.cache/"
+  ],
+  "ttl_seconds": 86400,
+  "expected_hit_ratio": ">80%",
+  "io_savings_percent": 70
+}
