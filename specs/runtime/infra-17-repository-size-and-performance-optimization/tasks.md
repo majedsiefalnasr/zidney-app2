@@ -182,51 +182,51 @@ Completion of Phase 2 (refactored generators in place)
 
 #### Artifact Size Optimization
 
-- [x] T051 Optimize ai-context-mini.json generation to <50KB at scripts/ai-context/generators/mini-generator.ts
-- [x] T052 [P] Optimize ai-module-map.json to <200KB at scripts/ai-context/generators/module-map-generator.ts
-- [x] T053 [P] Remove bidirectional edge redundancy from ai-dependency-graph.json at scripts/ai-context/generators/dependency-graph-generator.ts (compute reverse edges on-demand)
-- [x] T054 [P] Optimize ai-runtime-dependents.json generation to <200KB (use graph inversion from dependency-graph instead of generating separately)
-- [x] T055 [P] Optimize ai-architecture-brain.json to <400KB by refactoring merged structure at scripts/ai-context/generators/architecture-brain-generator.ts
-- [x] T056 [P] Optimize ai-architecture-diff.json to <100KB at scripts/ai-context/generators/architecture-diff-generator.ts
-- [x] T057 [P] Optimize ai-layer-model.json to <100KB at scripts/ai-context/generators/layer-model-generator.ts
-- [x] T058 [P] Optimize ai-runtime-map.json to <50KB at scripts/ai-context/generators/runtime-map-generator.ts
-- [x] T059 [P] Validate all artifact compressions achieve >6x gzip ratio at scripts/dev/validate-artifact-compression.ts
+- [ ] T051 Optimize ai-context-mini.json generation to <50KB at scripts/ai-context/generators/mini-generator.ts
+- [ ] T052 [P] Optimize ai-module-map.json to <200KB at scripts/ai-context/generators/module-map-generator.ts
+- [ ] T053 [P] Remove bidirectional edge redundancy from ai-dependency-graph.json at scripts/ai-context/generators/dependency-graph-generator.ts (compute reverse edges on-demand)
+- [ ] T054 [P] Optimize ai-runtime-dependents.json generation to <200KB (use graph inversion from dependency-graph instead of generating separately)
+- [ ] T055 [P] Optimize ai-architecture-brain.json to <400KB by refactoring merged structure at scripts/ai-context/generators/architecture-brain-generator.ts
+- [ ] T056 [P] Optimize ai-architecture-diff.json to <100KB at scripts/ai-context/generators/architecture-diff-generator.ts
+- [ ] T057 [P] Optimize ai-layer-model.json to <100KB at scripts/ai-context/generators/layer-model-generator.ts
+- [ ] T058 [P] Optimize ai-runtime-map.json to <50KB at scripts/ai-context/generators/runtime-map-generator.ts
+- [ ] T059 [P] Validate all artifact compressions achieve >6x gzip ratio at scripts/dev/validate-artifact-compression.ts
 
 #### Cache Implementation (Q2 Strategy)
 
-- [x] T060 Implement caching strategy for ai-dependency-graph.json in dependency-graph-generator.ts (cache only, no artifact size loss)
-- [x] T061 [P] Implement caching strategy for ai-runtime-dependents.json in runtime-dependents-generator.ts (cache computation, use cache-manager)
-- [x] T062 [P] Implement file hash-based cache invalidation in scripts/core/cache-manager.ts (track source file hashes)
-- [x] T063 [P] Validate cache hit ratio (>80%) in warm run scenarios at scripts/dev/validate-cache-effectiveness.ts
-- [x] T064 [P] Update cache-manager.ts to implement TTL-based expiry (configurable, default 24h) at scripts/core/cache-manager.ts
+- [ ] T060 Implement caching strategy for ai-dependency-graph.json in dependency-graph-generator.ts (cache only, no artifact size loss)
+- [ ] T061 [P] Implement caching strategy for ai-runtime-dependents.json in runtime-dependents-generator.ts (cache computation, use cache-manager)
+- [ ] T062 [P] Implement file hash-based cache invalidation in scripts/core/cache-manager.ts (track source file hashes)
+- [ ] T063 [P] Validate cache hit ratio (>80%) in warm run scenarios at scripts/dev/validate-cache-effectiveness.ts
+- [ ] T064 [P] Update cache-manager.ts to implement TTL-based expiry (configurable, default 24h) at scripts/core/cache-manager.ts
 
 #### Archive Management
 
-- [x] T065 Create archive strategy for historical snapshots (keep latest 2, archive rest to docs/ai/context/archive/) at scripts/dev/archive-snapshot-strategy.ts
-- [x] T066 [P] Implement snapshot archival automation in scripts/ai-context/orchestrator.ts (remove snapshots >7 days old from docs/ai/context/)
-- [x] T067 [P] Create archive index at docs/ai/context/ARCHIVE_INDEX.md (list archived snapshots with dates)
+- [ ] T065 Create archive strategy for historical snapshots (keep latest 2, archive rest to docs/ai/context/archive/) at scripts/dev/archive-snapshot-strategy.ts
+- [ ] T066 [P] Implement snapshot archival automation in scripts/ai-context/orchestrator.ts (remove snapshots >7 days old from docs/ai/context/)
+- [ ] T067 [P] Create archive index at docs/ai/context/ARCHIVE_INDEX.md (list archived snapshots with dates)
 
 #### GitHub Actions Cache Integration (Q1 Strategy)
 
-- [x] T068 Configure GitHub Actions cache action in .github/workflows/ci.yml (cache dependency-graph and runtime-dependents artifacts)
-- [x] T069 [P] Update AI context generation to use cache restore in .github/workflows/ (restore step before generation)
-- [x] T070 [P] Add cache invalidation trigger to GitHub Actions (e.g., on package.json changes in .github/workflows/)
-- [x] T071 [P] Document cache strategy in docs/ci-cd-integration/ARTIFACT_CACHING_STRATEGY.md
+- [ ] T068 Configure GitHub Actions cache action in .github/workflows/ci.yml (cache dependency-graph and runtime-dependents artifacts)
+- [ ] T069 [P] Update AI context generation to use cache restore in .github/workflows/ (restore step before generation)
+- [ ] T070 [P] Add cache invalidation trigger to GitHub Actions (e.g., on package.json changes in .github/workflows/)
+- [ ] T071 [P] Document cache strategy in docs/ci-cd-integration/ARTIFACT_CACHING_STRATEGY.md
 
 #### Performance Validation & Benchmarking
 
-- [x] T072 Benchmark cold ai-context generation start-to-finish at scripts/dev/benchmark-ai-context-cold.ts (target <2s)
-- [x] T073 [P] Benchmark warm ai-context generation (with cache) at scripts/dev/benchmark-ai-context-warm.ts (target <500ms)
-- [x] T074 [P] Profile individual generator performance (mini, module-map, dependency-graph, etc.) at scripts/dev/profile-generators.ts
-- [x] T075 [P] Validate ai-context-mini.json remains <50KB across 10 builds at scripts/dev/validate-mini-size-consistency.ts
-- [x] T076 [P] Create artifact size tracking dashboard at docs/reports/ARTIFACT_SIZE_TRACKING.md (auto-updated by CI)
-- [x] T077 [P] Add artifact generation metrics to repository health report in scripts/dev/generate-baseline-report.ts
+- [ ] T072 Benchmark cold ai-context generation start-to-finish at scripts/dev/benchmark-ai-context-cold.ts (target <2s)
+- [ ] T073 [P] Benchmark warm ai-context generation (with cache) at scripts/dev/benchmark-ai-context-warm.ts (target <500ms)
+- [ ] T074 [P] Profile individual generator performance (mini, module-map, dependency-graph, etc.) at scripts/dev/profile-generators.ts
+- [ ] T075 [P] Validate ai-context-mini.json remains <50KB across 10 builds at scripts/dev/validate-mini-size-consistency.ts
+- [ ] T076 [P] Create artifact size tracking dashboard at docs/reports/ARTIFACT_SIZE_TRACKING.md (auto-updated by CI)
+- [ ] T077 [P] Add artifact generation metrics to repository health report in scripts/dev/generate-baseline-report.ts
 
 #### Migration & Deprecation
 
-- [x] T078 Update generate-ai-context.ts (old location) to delegate to new orchestrator at scripts/generate-ai-context.ts
-- [x] T079 [P] Deprecate old artifact generation code with cleanup notes in scripts/ai-context/MIGRATION_NOTES.md
-- [x] T080 [P] Update CI to use new ai-context orchestrator in .github/workflows/ci.yml
+- [ ] T078 Update generate-ai-context.ts (old location) to delegate to new orchestrator at scripts/generate-ai-context.ts
+- [ ] T079 [P] Deprecate old artifact generation code with cleanup notes in scripts/ai-context/MIGRATION_NOTES.md
+- [ ] T080 [P] Update CI to use new ai-context orchestrator in .github/workflows/ci.yml
 
 ---
 
@@ -265,22 +265,22 @@ Completion of Phase 3 (caching infrastructure in place)
 
 #### Cache Integration
 
-- [ ] T086 Integrate artifact cache restore to ai-context generation step in ci.yml at .github/workflows/ci.yml
-- [ ] T087 [P] Add cache save step for artifacts after generation in ci.yml at .github/workflows/ci.yml
-- [ ] T088 [P] Configure cache key strategy (use package.json hash + source file hash) in ci.yml at .github/workflows/ci.yml
+- [x] T086 Integrate artifact cache restore to ai-context generation step in ci.yml at .github/workflows/ci.yml
+- [x] T087 [P] Add cache save step for artifacts after generation in ci.yml at .github/workflows/ci.yml
+- [x] T088 [P] Configure cache key strategy (use package.json hash + source file hash) in ci.yml at .github/workflows/ci.yml
 
 #### Redundancy Elimination
 
-- [ ] T089 Identify and remove duplicate type-check steps across jobs (lint + type-check combo?) in ci.yml at .github/workflows/ci.yml
-- [ ] T090 [P] Remove any redundant artifact generation steps (should run once, not per job) in ci.yml at .github/workflows/ci.yml
+- [x] T089 Identify and remove duplicate type-check steps across jobs (lint + type-check combo?) in ci.yml at .github/workflows/ci.yml
+- [x] T090 [P] Remove any redundant artifact generation steps (should run once, not per job) in ci.yml at .github/workflows/ci.yml
 
 #### Performance Validation
 
-- [ ] T091 Benchmark new CI workflow duration (measure end-to-end) at scripts/dev/benchmark-ci-duration.ts
-- [ ] T092 [P] Compare before/after CI times and report savings in docs/reports/CI_PERFORMANCE_REPORT.md
-- [ ] T093 [P] Monitor CI job parallelization efficiency (identify critical path) in scripts/dev/analyze-ci-critical-path.ts
-- [ ] T094 [P] Validate all checks still run (no skipped validations) in scripts/dev/validate-ci-completeness.ts
-- [ ] T095 [P] Create CI performance dashboard at docs/reports/CI_PERFORMANCE_DASHBOARD.md (auto-updated by CI)
+- [x] T091 Benchmark new CI workflow duration (measure end-to-end) at scripts/dev/benchmark-ci-duration.ts
+- [x] T092 [P] Compare before/after CI times and report savings in docs/reports/CI_PERFORMANCE_REPORT.md
+- [x] T093 [P] Monitor CI job parallelization efficiency (identify critical path) in scripts/dev/analyze-ci-critical-path.ts
+- [x] T094 [P] Validate all checks still run (no skipped validations) in scripts/dev/validate-ci-completeness.ts
+- [x] T095 [P] Create CI performance dashboard at docs/reports/CI_PERFORMANCE_DASHBOARD.md (auto-updated by CI)
 
 ---
 

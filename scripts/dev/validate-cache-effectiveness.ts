@@ -11,8 +11,7 @@
  * Success: >80% cache hit ratio achieved in warm scenarios
  */
 
-import { unlinkSync, existsSync, writeFileSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync } from 'node:fs'
 import { createCacheManager } from '../core/cache-manager'
 import { createLogger } from '../core/logger-factory'
 
@@ -46,7 +45,7 @@ async function testColdRun(): Promise<CacheEffectivenessReport> {
 
   const results: CacheEffectivenessReport[] = []
   const depGraphCache = createCacheManager('dependency-graph')
-  const runtimeDepCache = createCacheManager('runtime-dependents')
+  const _runtimeDepCache = createCacheManager('runtime-dependents')
 
   // Simulate multiple cold runs
   for (let i = 0; i < 3; i++) {
@@ -83,8 +82,7 @@ async function testColdRun(): Promise<CacheEffectivenessReport> {
   }
 
   // Return summary
-  const avgDuration =
-    results.reduce((sum, r) => sum + r.avgGenerationTimeMs, 0) / results.length
+  const avgDuration = results.reduce((sum, r) => sum + r.avgGenerationTimeMs, 0) / results.length
   return {
     scenario: 'cold-run',
     hitRatio: 0, // Cold runs should have 0% hit ratio
@@ -101,7 +99,7 @@ async function testWarmRun(): Promise<CacheEffectivenessReport> {
 
   // DON'T clear caches - use the ones from cold run
   const depGraphCache = createCacheManager('dependency-graph')
-  const runtimeDepCache = createCacheManager('runtime-dependents')
+  const _runtimeDepCache = createCacheManager('runtime-dependents')
 
   const results: CacheEffectivenessReport[] = []
   const patterns = ['packages/*/package.json', 'apps/*/package.json', 'tsconfig.json']
@@ -183,7 +181,9 @@ async function main() {
 
     // Overall status
     const allPass = warmRunReport.hitRatio >= 0.8
-    console.log(`\n${allPass ? '✓ CACHE EFFECTIVENESS VALIDATED' : '✗ CACHE EFFECTIVENESS BELOW TARGET'}`)
+    console.log(
+      `\n${allPass ? '✓ CACHE EFFECTIVENESS VALIDATED' : '✗ CACHE EFFECTIVENESS BELOW TARGET'}`
+    )
 
     process.exit(allPass ? 0 : 1)
   } catch (error) {

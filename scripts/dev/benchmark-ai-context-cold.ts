@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * AI Context Cold Run Benchmark (T072)
  *
@@ -12,9 +13,9 @@
  * 4. Record metrics
  */
 
-import { performance } from 'node:perf_hooks'
-import { rmSync, existsSync, writeFileSync } from 'node:fs'
 import { execSync } from 'node:child_process'
+import { existsSync, rmSync, writeFileSync } from 'node:fs'
+import { performance } from 'node:perf_hooks'
 import { createLogger } from '../core/logger-factory'
 
 const logger = createLogger('benchmark-cold-generation')
@@ -102,7 +103,9 @@ async function main() {
 
   // Overall result
   const overallPass = p95Duration <= TARGET_MS
-  console.log(`\nStatus: ${overallPass ? '✓ PASS' : '✗ FAIL'} (95th percentile ${overallPass ? '<=' : '>'} ${TARGET_MS}ms)`)
+  console.log(
+    `\nStatus: ${overallPass ? '✓ PASS' : '✗ FAIL'} (95th percentile ${overallPass ? '<=' : '>'} ${TARGET_MS}ms)`
+  )
 
   // Save results
   const reportPath = 'docs/reports/cold-generation-benchmark.json'

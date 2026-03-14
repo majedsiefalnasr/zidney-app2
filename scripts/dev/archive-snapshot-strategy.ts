@@ -10,7 +10,7 @@
  * Usage: bun scripts/dev/archive-snapshot-strategy.ts  [--prune] [--verbose]
  */
 
-import { readdirSync, statSync, mkdirSync, renameSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { createLogger } from '../core/logger-factory'
 
@@ -50,8 +50,9 @@ async function main() {
   mkdirSync(ARCHIVE_DIR, { recursive: true })
 
   // Find all artifact JSON files
-  const allFiles = readdirSync(CONTEXT_DIR)
-    .filter((f) => f.endsWith('.json') && !f.startsWith('.') && f !== 'archive')
+  const allFiles = readdirSync(CONTEXT_DIR).filter(
+    (f) => f.endsWith('.json') && !f.startsWith('.') && f !== 'archive'
+  )
 
   // Sort by modification time (newest first)
   const filesByTime = allFiles
@@ -85,7 +86,12 @@ async function main() {
 
   if (verbose) {
     console.log(`\n📊 Archive analysis:`)
-    console.log(`  Keep (live): ${filesByTime.slice(0, KEEP_LIVE).map((f) => f.filename).join(', ')}`)
+    console.log(
+      `  Keep (live): ${filesByTime
+        .slice(0, KEEP_LIVE)
+        .map((f) => f.filename)
+        .join(', ')}`
+    )
     console.log(`  Archive candidates: ${toArchive.length}`)
     console.log(`  Prune candidates (>7 days old): ${toPrune.length}`)
   }

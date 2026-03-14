@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * Validate AI Context Artifact Sizes (T051-T059)
  *
@@ -16,10 +17,10 @@
  * Success: All artifacts within targets + gzip compression >6x
  */
 
-import { readFileSync, statSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { gzipSync } from 'node:zlib'
+import { readFileSync, statSync } from 'node:fs'
 import { basename } from 'node:path'
+import { gzipSync } from 'node:zlib'
 import { createLogger } from '../core/logger-factory'
 
 const logger = createLogger('artifact-size-validator')
@@ -104,7 +105,9 @@ async function validateArtifactSize(target: ArtifactTarget): Promise<ValidationR
       issues.push(`Size ${sizeKb.toFixed(1)}KB exceeds ${target.maxSizeKb}KB`)
     }
     if (!compressionStatus && sizeBytes >= 10240) {
-      issues.push(`Compression ${compressionRatio.toFixed(1)}x below ${target.minCompressionRatio}x`)
+      issues.push(
+        `Compression ${compressionRatio.toFixed(1)}x below ${target.minCompressionRatio}x`
+      )
     }
 
     return {
@@ -117,7 +120,7 @@ async function validateArtifactSize(target: ArtifactTarget): Promise<ValidationR
       checksum,
       message: `✗ ${issues.join(', ')}`,
     }
-  } catch (error) {
+  } catch (_error) {
     return {
       artifact: name,
       exists: false,
@@ -142,9 +145,7 @@ async function main() {
 
   // Generate report
   console.log('\n📊 ARTIFACT SIZE VALIDATION REPORT\n')
-  console.log(
-    '| Artifact | Status | Size (KB) | Target (KB) | Compression | Checksum |'
-  )
+  console.log('| Artifact | Status | Size (KB) | Target (KB) | Compression | Checksum |')
   console.log('|----------|--------|-----------|-------------|-------------|----------|')
 
   let passCount = 0

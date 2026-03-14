@@ -1,22 +1,22 @@
 #!/usr/bin/env bun
 /**
  * GitHub Actions Cache Configuration (T068)
- * 
+ *
  * Purpose: Document and validate GitHub Actions caching strategy for AI context artifacts
- * 
+ *
  * Strategy (Q1):
  * - Cache selective artifacts: dependency-graph and runtime-dependents (hotspots)
  * - Use GitHub Actions cache with hash-based invalidation
  * - Cache key: include package.json + tsconfig.json hash for auto-invalidation
  * - Cache paths: docs/ai/context/.cache/
- * 
+ *
  * Expected Improvements (from clarification Q2):
  * - Dependency-graph generation: 2.5s → <500ms (cache hit)
  * - Runtime-dependents generation: 2s → <400ms (cache hit)
  * - Overall ai-context generation: 5-8s → <2s (with cache)
  */
 
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { createLogger } from '../core/logger-factory'
 
 const logger = createLogger('github-actions-cache-config')
@@ -48,7 +48,8 @@ function generateCacheConfig(): CacheConfig {
         'bun.lock',
       ],
       hash_algorithm: 'SHA256',
-      example_key: 'ai-context-cache-${{ hashFiles("packages/*/package.json", "apps/*/package.json", "tsconfig.json") }}',
+      example_key:
+        `ai-context-cache-\${{ hashFiles("packages/*/package.json", "apps/*/package.json", "tsconfig.json") }}`,
     },
     cache_paths: ['docs/ai/context/.cache/'],
     ttl_seconds: 86400, // 24 hours
@@ -100,7 +101,7 @@ function generateWorkflowYaml(): string {
     else
       echo "✓ Cache miss (first run on branch)"
     fi
-`;
+`
 
   return yaml
 }
@@ -207,7 +208,7 @@ Example: \`ai-context-cache-a1b2c3d4e5f6...\`
 - T061: Implement cache in runtime-dependents-generator
 - T062: File hash-based invalidation in cache-manager
 - T063: Validate >80% cache hit ratio
-`;
+`
 
   return strategy
 }
@@ -217,7 +218,7 @@ async function main() {
 
   // Create cache config
   const config = generateCacheConfig()
-  
+
   // Create documentation directory
   mkdirSync('docs/ci-cd-integration', { recursive: true })
 
@@ -226,7 +227,7 @@ async function main() {
   writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8')
   logger.info('Cache configuration written', { path: configPath })
 
-  // Write cache strategy documentation  
+  // Write cache strategy documentation
   const strategyPath = 'docs/ci-cd-integration/ARTIFACT_CACHING_STRATEGY.md'
   writeFileSync(strategyPath, generateCacheStrategy(), 'utf-8')
   logger.info('Cache strategy documentation written', { path: strategyPath })

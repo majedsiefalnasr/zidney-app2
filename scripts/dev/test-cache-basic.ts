@@ -6,7 +6,6 @@
  * without regenerating when source files are unchanged
  */
 
-import { unlinkSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { createCacheManager } from '../core/cache-manager'
 import { createLogger } from '../core/logger-factory'
 
@@ -20,7 +19,7 @@ async function main() {
   // Clear any existing cache
   try {
     cacheManager.clear()
-  } catch (e) {
+  } catch (_e) {
     // ignore
   }
 
@@ -68,7 +67,7 @@ async function main() {
 
   const rtData = {
     timestamp: Date.now(),
-    dependents: { 'pkg1': ['pkg2', 'pkg3'] },
+    dependents: { pkg1: ['pkg2', 'pkg3'] },
     moduleCount: 1,
     totalDependentEdges: 2,
   }
@@ -89,7 +88,9 @@ async function main() {
   const depGraphStats = cacheManager.getStats()
   const overallSuccess = depGraphStats.hitratio > 0 && rtStats.hits > 0
 
-  console.log(`\n${overallSuccess ? '✓' : '✗'} CACHE FUNCTIONALITY ${overallSuccess ? 'WORKING' : 'NEEDS DEBUGGING'}`)
+  console.log(
+    `\n${overallSuccess ? '✓' : '✗'} CACHE FUNCTIONALITY ${overallSuccess ? 'WORKING' : 'NEEDS DEBUGGING'}`
+  )
 
   process.exit(overallSuccess ? 0 : 1)
 }
