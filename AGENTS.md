@@ -1107,6 +1107,36 @@ GitNexus is the authoritative internal code context.
 | Tools, resources, schema reference           | `.agents/skills/gitnexus/gitnexus-guide/SKILL.md`           |
 | Index, status, clean, wiki CLI commands      | `.agents/skills/gitnexus/gitnexus-cli/SKILL.md`             |
 
+### Skill Organization & Discovery
+
+**Skill Location**: All skills are in `.agents/skills/` organized by domain:
+
+- `.agents/skills/architecture/` — Architecture reasoning and governance
+- `.agents/skills/gitnexus/` — GitNexus knowledge graph specialized skills (6 skills)
+- `.agents/skills/aws-skills/` — AWS serverless and cloud expertise
+- `.agents/skills/` — Governance, testing, terminal, MCP routing skills
+
+**Comprehensive Skill Index**: See [.agents/skills/SKILLS_INDEX.md](.agents/skills/SKILLS_INDEX.md) for:
+
+- All 30+ available skills with descriptions
+- Line counts and compliance status
+- Auto-loading dependencies and relationships
+- Skill domain grouping and discovery
+
+**Quality Standards** (Phase 5 Optimization):
+
+- ✅ All SKILL.md files enforce <500 line limit (Q4 requirement)
+- ✅ Oversized skills split into domain-focused files
+- ✅ Pre-commit validation enforces compliance (`scripts/ci/validate-skill-sizes.sh`)
+- ✅ Skills designed for focused, single-purpose expertise
+
+**How to Use Skills**:
+
+1. For common tasks, match your request to the Skills table above
+2. For specialized domains (AWS, refactoring, debugging), check SKILLS_INDEX.md
+3. For auto-loaded context, see prompt-loaded skills in SKILLS_INDEX.md
+4. Read the target SKILL.md file to understand workflow and requirements
+
 <!-- gitnexus:end -->
 
 <!-- rtk-instructions v2 -->

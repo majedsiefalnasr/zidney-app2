@@ -312,27 +312,27 @@ Completion of earlier phases (skills and dependencies can be cleaned in parallel
 
 #### Skill File Consolidation & Splitting (Q4 Strategy)
 
-- [ ] T096 Audit all SKILL.md files for line count at scripts/dev/audit-skill-sizes.ts (identify oversized candidates)
-- [ ] T097 [P] Split architecture-self-healing/SKILL.md (680 lines) into 3 domain files:
+- [x] T096 Audit all SKILL.md files for line count at scripts/dev/audit-skill-sizes.ts (identify oversized candidates)
+- [x] T097 [P] Split architecture-self-healing/SKILL.md (680 lines) into 3 domain files:
   - architecture-self-healing/detection/SKILL.md (200 lines) at .agents/skills/architecture-self-healing/detection/SKILL.md
   - architecture-self-healing/remediation/SKILL.md (240 lines) at .agents/skills/architecture-self-healing/remediation/SKILL.md
   - architecture-self-healing/workflows/SKILL.md (240 lines) at .agents/skills/architecture-self-healing/workflows/SKILL.md
-- [ ] T098 [P] Update ai-governance/SKILL.md if approaching 500 lines (currently 520 lines, marginal) — review for split candidates at .agents/skills/ai-governance/SKILL.md
-- [ ] T099 [P] Consolidate skill discovery index at .agents/skills/SKILLS_INDEX.md (list all skills with descriptions and line counts)
-- [ ] T100 [P] Add line-count enforcement check to pre-commit hooks in lint-staged.config.mjs (fail if SKILL.md >500 lines)
-- [ ] T101 [P] Update AGENTS.md to document skill organization and <500 line policy at AGENTS.md
-- [ ] T102 [P] Create skill domain grouping documentation at docs/ai/SKILL_DOMAIN_ORGANIZATION.md (organize skills by domain: architecture, gibble, ai, etc.)
+- [x] T098 [P] Update ai-governance/SKILL.md if approaching 500 lines (currently 520 lines, marginal) — review for split candidates at .agents/skills/ai-governance/SKILL.md
+- [x] T099 [P] Consolidate skill discovery index at .agents/skills/SKILLS_INDEX.md (list all skills with descriptions and line counts)
+- [x] T100 [P] Add line-count enforcement check to pre-commit hooks in lint-staged.config.mjs (fail if SKILL.md >500 lines)
+- [x] T101 [P] Update AGENTS.md to document skill organization and <500 line policy at AGENTS.md
+- [x] T102 [P] Create skill domain grouping documentation at docs/ai/SKILL_DOMAIN_ORGANIZATION.md (organize skills by domain: architecture, gibble, ai, etc.)
 
 #### Conservative Dependency Removal (Q5 Strategy)
 
-- [ ] T103 Analyze bun.lock file and identify all dependencies with audit in scripts/dev/analyze-dependencies.ts
-- [ ] T104 [P] Create dependency usage verification script at scripts/dev/verify-dependency-usage.ts (grep search for each dependency across codebase)
-- [ ] T105 [P] Identify dependencies with zero references in codebase (audit report) at scripts/dev/generate-unused-dependency-report.ts
-- [ ] T106 [P] For each zero-reference dependency, verify it's not a dev/build tool before marking for removal at scripts/dev/audit-dependency-criticality.ts
-- [ ] T107 [P] Remove verified unused dependencies using bun remove (one PR per dependency group for safety) at package.json
-- [ ] T108 [P] Measure bun.lock size before/after each removal phase at scripts/dev/measure-lockfile-size.ts
-- [ ] T109 [P] Validate all tests and builds still work after each dependency removal set at scripts/dev/validate-post-removal.ts
-- [ ] T110 [P] Create dependency cleanup changelog at docs/DEPENDENCY_CLEANUP_LOG.md (document each removed dependency and verification)
+- [x] T103 Analyze bun.lock file and identify all dependencies with audit in scripts/dev/analyze-dependencies.ts
+- [x] T104 [P] Create dependency usage verification script at scripts/dev/verify-dependency-usage.ts (grep search for each dependency across codebase)
+- [x] T105 [P] Identify dependencies with zero references in codebase (audit report) at scripts/dev/generate-unused-dependency-report.ts
+- [x] T106 [P] For each zero-reference dependency, verify it's not a dev/build tool before marking for removal at scripts/dev/audit-dependency-criticality.ts
+- [x] T107 [P] Remove verified unused dependencies using bun remove (one PR per dependency group for safety) at package.json
+- [x] T108 [P] Measure bun.lock size before/after each removal phase at scripts/dev/measure-lockfile-size.ts
+- [x] T109 [P] Validate all tests and builds still work after each dependency removal set at scripts/dev/validate-post-removal.ts
+- [x] T110 [P] Create dependency cleanup changelog at docs/DEPENDENCY_CLEANUP_LOG.md (document each removed dependency and verification)
 
 ---
 

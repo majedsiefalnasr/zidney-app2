@@ -1,0 +1,221 @@
+{
+  "timestamp": "2026-03-14T22:42:47.289Z",
+  "totalFiles": 30,
+  "oversizedCount": 1,
+  "marginalCount": 1,
+  "okCount": 28,
+  "targetMetric": "All SKILL.md <500 lines",
+  "achievedStatus": "NEEDS_REMEDIATION",
+  "audits": [
+    {
+      "path": ".agents/skills/aws-skills/serverless-eda/skills/aws-serverless-eda/SKILL.md",
+      "name": "aws-serverless-eda",
+      "lineCount": 805,
+      "oversized": true,
+      "status": "OVERSIZED"
+    },
+    {
+      "path": ".agents/skills/Playwright/SKILL.md",
+      "name": "Playwright",
+      "lineCount": 454,
+      "oversized": false,
+      "status": "MARGINAL"
+    },
+    {
+      "path": ".agents/skills/ai-terminal/SKILL.md",
+      "name": "ai-terminal",
+      "lineCount": 439,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/aws-skills/aws-cost-ops/skills/aws-cost-operations/SKILL.md",
+      "name": "aws-cost-operations",
+      "lineCount": 369,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/aws-skills/aws-cdk/skills/aws-cdk-development/SKILL.md",
+      "name": "aws-cdk-development",
+      "lineCount": 316,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/tool-advisor/SKILL.md",
+      "name": "tool-advisor",
+      "lineCount": 297,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/vibe-testing-main/SKILL.md",
+      "name": "vibe-testing-main",
+      "lineCount": 273,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/typescript-governance/SKILL.md",
+      "name": "typescript-governance",
+      "lineCount": 265,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/Figma Implement Design/SKILL.md",
+      "name": "Figma Implement Design",
+      "lineCount": 264,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/architecture-intelligence/SKILL.md",
+      "name": "architecture-intelligence",
+      "lineCount": 264,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/git-governance/SKILL.md",
+      "name": "git-governance",
+      "lineCount": 256,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/analysis-retry-engine/SKILL.md",
+      "name": "analysis-retry-engine",
+      "lineCount": 231,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/architecture-self-healing/SKILL.md",
+      "name": "architecture-self-healing",
+      "lineCount": 226,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/precommit-diagnostics/SKILL.md",
+      "name": "precommit-diagnostics",
+      "lineCount": 222,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/rtk-execution-layer/SKILL.md",
+      "name": "rtk-execution-layer",
+      "lineCount": 215,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/package-manager-governance/SKILL.md",
+      "name": "package-manager-governance",
+      "lineCount": 209,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/mcp-routing/SKILL.md",
+      "name": "mcp-routing",
+      "lineCount": 198,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/aws-skills/aws-common/skills/aws-mcp-setup/SKILL.md",
+      "name": "aws-mcp-setup",
+      "lineCount": 190,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/subagent-parallelization/SKILL.md",
+      "name": "subagent-parallelization",
+      "lineCount": 175,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/terminal-safety/SKILL.md",
+      "name": "terminal-safety",
+      "lineCount": 173,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/aws-skills/aws-agentic-ai/skills/aws-agentic-ai/SKILL.md",
+      "name": "aws-agentic-ai",
+      "lineCount": 143,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/gitnexus/gitnexus-refactoring/SKILL.md",
+      "name": "gitnexus-refactoring",
+      "lineCount": 122,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/gitnexus/gitnexus-impact-analysis/SKILL.md",
+      "name": "gitnexus-impact-analysis",
+      "lineCount": 98,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/gitnexus/gitnexus-debugging/SKILL.md",
+      "name": "gitnexus-debugging",
+      "lineCount": 90,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/gitnexus/gitnexus-cli/SKILL.md",
+      "name": "gitnexus-cli",
+      "lineCount": 83,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/gitnexus/gitnexus-exploring/SKILL.md",
+      "name": "gitnexus-exploring",
+      "lineCount": 79,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/GH Fix CI/SKILL.md",
+      "name": "GH Fix CI",
+      "lineCount": 71,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/gitnexus/gitnexus-guide/SKILL.md",
+      "name": "gitnexus-guide",
+      "lineCount": 65,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/Figma MCP/SKILL.md",
+      "name": "Figma MCP",
+      "lineCount": 49,
+      "oversized": false,
+      "status": "OK"
+    },
+    {
+      "path": ".agents/skills/specrate-main/SKILL.md",
+      "name": "specrate-main",
+      "lineCount": 45,
+      "oversized": false,
+      "status": "OK"
+    }
+  ]
+}
