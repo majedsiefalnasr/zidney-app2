@@ -27,6 +27,10 @@
     {
       "event": "clarifications_locked",
       "timestamp": "2026-03-14T00:00:00Z"
+    },
+    {
+      "event": "plan_complete",
+      "timestamp": "2026-03-14T00:00:00Z"
     }
   ]
 }

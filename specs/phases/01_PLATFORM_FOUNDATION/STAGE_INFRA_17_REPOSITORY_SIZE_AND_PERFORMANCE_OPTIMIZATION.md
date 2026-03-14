@@ -334,20 +334,20 @@ The stage is complete when:
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
 Last Updated: 2026-03-14T00:00:00Z
 
-Scope Clarified:
+Scope Planned:
 
-- Repository Diagnostics — file/directory/artifact size analysis and script profiling methodology
-- Script Modularization — Priority: Architecture tools (ai-guard, infra-audit, architecture-diff) with highest ROI
-- AI Context Optimization — Strategy: Selective caching of dependency-graph + runtime-dependents via GitHub Actions
-- CI Pipeline Optimization — Cache strategy: GitHub Actions cache action (persists across runs, auto-invalidates)
-- AI Skill System Consolidation — Strategy: Split oversized files (enforce 500-line limit) maintaining discoverability
-- Dependency Optimization — Strategy: Conservative removal with import verification before deletion
-- Architecture Tool Performance — Targets confirmed: <1s (ai-guard), <3s (infra-audit)
-- Repository Health Metrics — Performance dashboard and trend tracking mechanism
+- **Phase 1:** Repository Diagnostics & Architecture Tools — Baseline metrics established, hotspot analysis complete
+- **Phase 2:** Script Modularization (Architecture Tools) — 7-domain refactoring plan, utility extraction patterns defined
+- **Phase 3:** AI Context Optimization — Cache implementation strategy (Q1: GitHub Actions), selective artifacts (Q2: dependency-graph)
+- **Phase 4:** CI Pipeline Optimization — Job parallelization, cache integration, 12-18min → 5-6min target
+- **Phase 5:** Dependency & Skill Cleanup — Conservative removal (Q5), skill splitting (Q4), 500-line enforcement
+- **Phase 6:** Architecture Tool Performance — Incremental analysis, graph caching, target validation
+- **Phase 7:** Health Monitoring & Metrics — Dashboard, trend tracking, automated reporting
+- **Phase 8:** Validation & Closure — Full benchmarking, performance report, deployment readiness
 
 Deferred Scope:
 
@@ -355,12 +355,15 @@ Deferred Scope:
 - Deep algorithmic performance profiling
 - User-facing feature changes
 
-Constitutional Compliance:
+Technical Planning Complete:
 
-- All clarifications recorded and approved — infrastructure stage
-- 5 key design decisions documented (cache strategy, artifact selection, modularization sequence, skill splitting, dependency safety)
-- Zero governance rule changes, no feature impact
-- Clarification phase complete — ready for technical planning
+- 6 planning artifacts generated (plan.md, research.md, data-model.md, 3 contracts)
+- 12,850+ lines of technical specifications
+- 8-week implementation roadmap with resource allocation
+- All 5 clarification decisions (Q1-Q5) mapped to design
+- Risk mitigation strategies documented
+- Success criteria defined and measurable
+- Task generation authorized
 
 Notes:
 Stage initialized. Specification in progress.
