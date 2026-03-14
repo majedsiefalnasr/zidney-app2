@@ -334,11 +334,11 @@ The stage is complete when:
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
 Last Updated: 2026-03-14T00:00:00Z
 
-Scope Planned:
+Scope Tasked:
 
 - **Phase 1:** Repository Diagnostics & Architecture Tools — Baseline metrics established, hotspot analysis complete
 - **Phase 2:** Script Modularization (Architecture Tools) — 7-domain refactoring plan, utility extraction patterns defined
@@ -355,15 +355,16 @@ Deferred Scope:
 - Deep algorithmic performance profiling
 - User-facing feature changes
 
-Technical Planning Complete:
+Atomic Task Set Generated:
 
-- 6 planning artifacts generated (plan.md, research.md, data-model.md, 3 contracts)
-- 12,850+ lines of technical specifications
-- 8-week implementation roadmap with resource allocation
-- All 5 clarification decisions (Q1-Q5) mapped to design
-- Risk mitigation strategies documented
-- Success criteria defined and measurable
-- Task generation authorized
+- Total: 130 atomic tasks (T001-T130)
+- Phase distribution: Diagnostics (10), Architecture Tools (40), AI Context (30), CI (15), Cleanup (15), Performance (10), Health (10)
+- Parallelizable tasks: ~60 (45% of total)
+- Critical path: Phases 1→2→3, then 4-5 parallel, then 6-7
+- Estimated duration: 8 weeks sequential, 5-6 weeks with optimization
+- All success criteria mapped to validation tasks
+- Risk mitigation tasks identified
+- Drift analysis gate pending
 
 Notes:
 Stage initialized. Specification in progress.
