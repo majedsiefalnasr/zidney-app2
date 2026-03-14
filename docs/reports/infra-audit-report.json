@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-03-12T23:06:40.911Z",
-  "gitSha": "4289a917d2fbe4134d1a2ad196a09d0216a046b6",
+  "timestamp": "2026-03-14T14:27:00.179Z",
+  "gitSha": "ef7bcc79bd073d7d46f6e37ef18abb7730f0ee1a",
   "vitestConfigs": [
     {
       "path": "vitest.workspace.ts",
@@ -2110,39 +2110,19 @@
       },
       {
         "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
         "to": "packages/types"
       },
       {
         "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
         "to": "packages/types"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/types"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
       },
       {
         "from": "apps/worker",
@@ -2155,6 +2135,54 @@
       {
         "from": "apps/worker",
         "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
       },
       {
         "from": "apps/worker",
@@ -3961,39 +3989,19 @@
       },
       {
         "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
         "to": "packages/types"
       },
       {
         "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
         "to": "packages/types"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/types"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/logger"
       },
       {
         "from": "apps/worker",
@@ -4006,6 +4014,54 @@
       {
         "from": "apps/worker",
         "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
       },
       {
         "from": "apps/worker",
@@ -4022,7 +4078,7 @@
     ],
     "centrality": {
       "packages/job-queue": 4,
-      "packages/logger": 235,
+      "packages/logger": 242,
       "packages/types": 100,
       "packages/config": 0,
       "packages/redis-utils": 3,

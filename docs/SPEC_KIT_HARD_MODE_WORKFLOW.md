@@ -10,6 +10,21 @@ This document defines the mandatory SpecKit execution order for Zidney.
 
 No stage may be implemented outside this workflow. No shortcuts allowed.
 
+## Routing Authority Consultation
+
+When a stage touches support-surface routing or template authority, contributors must consult
+`docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md` before changing `.agents/*`,
+`.github/*`, `.specify/templates/*`, or `specs/templates/*`.
+
+Rules:
+
+- `specs/templates/` remains the canonical template root.
+- `.agents/agents/` and `.agents/prompts/` remain the canonical routing roots.
+- Legacy compatibility surfaces must be migrated in the same batch as any touched first-party
+  consumer.
+- Retirement or cleanup of a compatibility surface is forbidden until the routing registry says the
+  retirement criteria are satisfied and the required validation cadence has been completed.
+
 ---
 
 ## Execution Order (Hard Mode)

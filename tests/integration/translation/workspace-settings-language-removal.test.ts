@@ -52,6 +52,11 @@ const REMOVE_ARABIC_BODY = {
   supported_languages: ['en', 'fr'], // 'ar' is removed
 }
 
+const REMOVE_ARABIC_REQUEST = {
+  config_version: 2,
+  settings: REMOVE_ARABIC_BODY,
+}
+
 // ---------------------------------------------------------------------------
 // App factory
 // ---------------------------------------------------------------------------
@@ -153,7 +158,7 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — sync language r
     const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(REMOVE_ARABIC_BODY),
+      body: JSON.stringify(REMOVE_ARABIC_REQUEST),
     })
 
     expect(res.status).toBe(200)
@@ -167,7 +172,7 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — sync language r
     const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(REMOVE_ARABIC_BODY),
+      body: JSON.stringify(REMOVE_ARABIC_REQUEST),
     })
 
     expect(res.status).toBe(200)
@@ -183,7 +188,7 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — sync language r
     await app.request('/api/v1/backoffice/workspace/settings/language', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(REMOVE_ARABIC_BODY),
+      body: JSON.stringify(REMOVE_ARABIC_REQUEST),
     })
 
     const drainJobEnqueued = redisSpy.mock.calls.some(
@@ -197,7 +202,7 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — sync language r
     const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(REMOVE_ARABIC_BODY),
+      body: JSON.stringify(REMOVE_ARABIC_REQUEST),
     })
 
     expect(res.status).toBe(200)
@@ -214,7 +219,7 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — async language 
     const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(REMOVE_ARABIC_BODY),
+      body: JSON.stringify(REMOVE_ARABIC_REQUEST),
     })
 
     expect(res.status).toBe(409)
@@ -234,7 +239,7 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — async language 
     await app.request('/api/v1/backoffice/workspace/settings/language', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(REMOVE_ARABIC_BODY),
+      body: JSON.stringify(REMOVE_ARABIC_REQUEST),
     })
 
     const drainJobEnqueued = redisSpy.mock.calls.some(
@@ -248,7 +253,7 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — async language 
     const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(REMOVE_ARABIC_BODY),
+      body: JSON.stringify(REMOVE_ARABIC_REQUEST),
     })
 
     const body = await res.json()
@@ -267,8 +272,11 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — no language rem
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        default_language: 'en',
-        supported_languages: ['en', 'ar', 'fr'], // Same as current
+        config_version: 2,
+        settings: {
+          default_language: 'en',
+          supported_languages: ['en', 'ar', 'fr'],
+        },
       }),
     })
 

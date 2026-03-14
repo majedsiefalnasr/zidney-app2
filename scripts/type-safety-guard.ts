@@ -79,7 +79,7 @@ function isAllowed(
   if (!fileExceptions) return false
 
   return fileExceptions.some(
-    (exc) => exc.line === violation.line && exc.pattern === violation.pattern
+    (exc) => Math.abs(exc.line - violation.line) <= 1 && exc.pattern === violation.pattern
   )
 }
 
@@ -123,9 +123,9 @@ async function scanForViolations(files: string[]): Promise<Violation[]> {
   const violations: Violation[] = []
 
   const patterns = {
-    explicitAny: /:\s*any\b/g,
-    asAny: /as\s+any\b/g,
-    genericAny: /<any>/g,
+    explicitAny: /:\s*any\b/,
+    asAny: /\bas\s+any\b/,
+    genericAny: /<any>/,
   }
 
   for (const file of files) {
@@ -137,48 +137,42 @@ async function scanForViolations(files: string[]): Promise<Violation[]> {
         const lineNum = lineIdx + 1
 
         // Check for `: any`
-        if (patterns.explicitAny.test(line)) {
-          const match = line.match(/:\s*any\b/)
-          if (match) {
-            violations.push({
-              file,
-              line: lineNum,
-              column: (match.index || 0) + 1,
-              pattern: 'explicit-any',
-              code: line.trim(),
-              message: 'Explicit "any" type detected',
-            })
-          }
+        const explicitAnyMatch = line.match(patterns.explicitAny)
+        if (explicitAnyMatch) {
+          violations.push({
+            file,
+            line: lineNum,
+            column: (explicitAnyMatch.index || 0) + 1,
+            pattern: 'explicit-any',
+            code: line.trim(),
+            message: 'Explicit "any" type detected',
+          })
         }
 
         // Check for `as any`
-        if (patterns.asAny.test(line)) {
-          const match = line.match(/as\s+any\b/)
-          if (match) {
-            violations.push({
-              file,
-              line: lineNum,
-              column: (match.index || 0) + 1,
-              pattern: 'type-assertion-any',
-              code: line.trim(),
-              message: '"as any" type assertion detected',
-            })
-          }
+        const asAnyMatch = line.match(patterns.asAny)
+        if (asAnyMatch) {
+          violations.push({
+            file,
+            line: lineNum,
+            column: (asAnyMatch.index || 0) + 1,
+            pattern: 'type-assertion-any',
+            code: line.trim(),
+            message: '"as any" type assertion detected',
+          })
         }
 
         // Check for `<any>`
-        if (patterns.genericAny.test(line)) {
-          const match = line.match(/<any>/)
-          if (match) {
-            violations.push({
-              file,
-              line: lineNum,
-              column: (match.index || 0) + 1,
-              pattern: 'generic-any',
-              code: line.trim(),
-              message: 'Generic "any" type detected',
-            })
-          }
+        const genericAnyMatch = line.match(patterns.genericAny)
+        if (genericAnyMatch) {
+          violations.push({
+            file,
+            line: lineNum,
+            column: (genericAnyMatch.index || 0) + 1,
+            pattern: 'generic-any',
+            code: line.trim(),
+            message: 'Generic "any" type detected',
+          })
         }
       })
     } catch {

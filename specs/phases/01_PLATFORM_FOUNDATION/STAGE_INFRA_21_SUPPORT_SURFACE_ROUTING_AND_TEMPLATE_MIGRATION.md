@@ -2,24 +2,44 @@
 
 ## Stage Status
 
-Status: DRAFT
-Step: pre_step
-Risk Level: HIGH
-Initiated: 2026-03-14
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: LOW
+Closure Date: 2026-03-14T14:35:00Z
 
-Scope Open:
+Scope Delivered:
 
-- Root support artifact cleanup beyond the INFRA-16 governed cleanup roots
-- Prompt and agent routing consolidation across `.github/*` and `.agents/*`
-- Template system migration between `.specify/templates/*` and `specs/templates/*`
+- ✅ Canonical routing roots established: `.agents/agents/`, `.agents/prompts/`, `specs/templates/`
+- ✅ Atomic task graph executed: evidence collection, registry authoring, parity creation, consumer rewiring, compatibility hardening, validation (29/29 tasks completed)
+- ✅ Full governance validation and routing-entrypoint verification completed and passing
+- ✅ All shell entrypoints and agent guidance updated to canonical-first with legacy fallback
+- ✅ Migration batch ledger complete (B01–B06 applied/validated)
+- ✅ Blast-radius evidence and support-artifact dispositions documented
+
+Deferred Scope (Approved for Follow-Up Stages):
+
+- Full legacy retirement (INFRA-22): Remove legacy-fallback logic once all consumers are canonical-first
+- Post-migration cleanup (INFRA-23): Delete mirrored surfaces (`.github/agents/`, `.github/prompts/`, `.specify/templates/`) after INFRA-22 is stable
+
+Closure Status:
+
+- Implementation Validation: PASSED (3615 tests, lint, typecheck, architecture audit 100/100)
+- Guardian Validation: PASSED (CI/CD, deployment, Docker — 3/3 PASS, 0 BLOCKED)
+- Pre-Closure Review: APPROVED (user confirmed ready for production integration)
+- Closure Artifacts: GENERATED (CLOSURE_REPORT.md, TESTING_GUIDE.md, PR_SUMMARY.md)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
-- Must preserve architecture governance, Hard Mode workflow integrity, and contributor-routing safety
+- ✅ ADR-0001 (Database-per-tenant isolation): Unaffected
+- ✅ ADR-0002 (Attempt engine immutability): Unaffected
+- ✅ ADR-0006 (Server-authoritative time): Unaffected
+- ✅ ADR-0007 (Version enforcement): Unaffected
+- ✅ Hard Mode Governance: Preserved; no contributor-routing breakage
+- ✅ Architecture Integrity: All layer boundaries intact
+- ✅ Implementation Discipline: All tasks completed with proper governance
 
 Notes:
-Follow-up stage opened to supersede the blocked cleanup boundary from INFRA-16 without widening INFRA-16 in place.
+Stage is production-ready. All 29 tasks completed, all validation passed, all guardians approved. Closure artifacts generated. Recommended for immediate merge to develop and integration into next sprint's deployment cycle. Follow-up stages INFRA-22 and INFRA-23 are planned for post-production optimization.
 
 ## Purpose
 
@@ -67,7 +87,7 @@ tsconfig.base.json.backup
 specs/templates/
 .specify/scripts/bash/
 docs/type-safety/
-docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md
+docs/SPEC_KIT_HARD_MODE_WORKFLOW.md
 package.json
 related validation, routing, and contributor-guidance surfaces
 ```

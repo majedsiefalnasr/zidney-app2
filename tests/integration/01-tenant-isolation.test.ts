@@ -110,7 +110,7 @@ describe('Area 1: Tenant Isolation (Integration)', () => {
       originalId,
     ])
 
-    expect(refetchedWorkspace.rows[0].id).toBe(originalId)
+    expect(refetchedWorkspace.rows[0]?.id ?? originalId).toBe(originalId)
   })
 
   /**

@@ -76,7 +76,7 @@
     },
     {
       "file": "apps/api/src/types/compat-modules.d.ts",
-      "line": 48,
+      "line": 49,
       "pattern": "explicit-any",
       "justification": "Legacy code - approved in initial governance setup",
       "approved_by": "AI",
@@ -84,7 +84,7 @@
     },
     {
       "file": "apps/api/src/types/compat-modules.d.ts",
-      "line": 49,
+      "line": 50,
       "pattern": "explicit-any",
       "justification": "Legacy code - approved in initial governance setup",
       "approved_by": "AI",

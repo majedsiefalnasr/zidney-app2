@@ -27,6 +27,8 @@ Thumbs.db
 
 # Testing
 coverage/
+coverage/.tmp/
+coverage/.tmp/coverage-*.json
 *.lcov
 .nyc_output/
 

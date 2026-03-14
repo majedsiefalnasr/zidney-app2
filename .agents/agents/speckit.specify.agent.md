@@ -69,7 +69,7 @@ Given that feature description, do this:
    - The JSON output will contain BRANCH_NAME and SPEC_FILE paths
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot")
 
-3. Load `.specify/templates/spec-template.md` to understand required sections.
+3. Load `specs/templates/specify-template.md` to understand required sections. Treat `.specify/templates/spec-template.md` as a legacy compatibility surface only; routing authority is declared in `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md`.
 
 4. Follow this execution flow:
    1. Parse user description from Input

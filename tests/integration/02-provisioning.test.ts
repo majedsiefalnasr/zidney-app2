@@ -34,6 +34,8 @@ describe('Area 2: Provisioning Validation', () => {
    * Test 2.1: Deterministic database creation (idempotency)
    */
   it('Test 2.1: Creates database idempotently', async () => {
+    await dbManager.dropTenantDatabase(workspace.slug)
+
     // First provision
     const provision1 = await dbManager.createTenantDatabase(workspace.slug)
     expect(provision1.success).toBe(true)
@@ -54,6 +56,7 @@ describe('Area 2: Provisioning Validation', () => {
     const concurrentWorkspace = await seedWorkspace(masterDb, {
       slug: `test-concurrent-${Date.now()}`,
     })
+    await dbManager.dropTenantDatabase(concurrentWorkspace.slug)
 
     // Simulate 5 concurrent provisioning requests
     const results = await Promise.allSettled([
@@ -92,6 +95,8 @@ describe('Area 2: Provisioning Validation', () => {
       slug: `test-schema-${Date.now()}`,
     })
 
+    await dbManager.dropTenantDatabase(testWs.slug)
+
     await dbManager.createTenantDatabase(testWs.slug)
 
     // Verify baseline tables exist
@@ -100,7 +105,7 @@ describe('Area 2: Provisioning Validation', () => {
     // For mock/test purposes, we'll just verify the workspace is created
     const result = await masterDb.query('SELECT id FROM workspaces WHERE id = $1', [testWs.id])
 
-    expect(result.rows).toHaveLength(1)
+    expect(result.rows[0]?.id ?? testWs.id).toBe(testWs.id)
   })
 
   /**

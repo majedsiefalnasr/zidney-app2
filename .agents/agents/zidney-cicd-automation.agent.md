@@ -3,7 +3,11 @@ name: Zidney CI/CD Automation
 description: Zidney Production CI/CD Guardian for multi-tenant B2B2C SaaS. Designs secure, migration-safe, observable, performance-aware GitHub Actions pipelines.
 tools: [execute, read, search, todo]
 ---
+# (CI/CD automation guardian)
 
+**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
+
+# (CI/CD automation guardian)
 # GOVERNANCE DECLARATION
 
 Governed by: Zidney Agent Governance v1.0  

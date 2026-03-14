@@ -81,6 +81,13 @@ npm run test:coverage
 
 Outputs: `coverage/index.html`
 
+### Coverage Temp Output Policy
+
+- `coverage/.tmp/coverage-*.json` is regenerated temporary coverage output.
+- These temp fragments must not be committed.
+- If the directory reappears after local runs, delete the temp files or rerun coverage tooling;
+  the canonical committed artifacts remain outside `coverage/.tmp/`.
+
 ### Run Single Test File
 
 ```bash

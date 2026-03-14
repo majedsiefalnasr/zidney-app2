@@ -7,6 +7,8 @@ handoffs:
     prompt: Create a plan for the spec. I am building with...
 ---
 
+**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
+
 ## User Input
 
 ```text

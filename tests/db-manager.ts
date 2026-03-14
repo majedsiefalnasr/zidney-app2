@@ -94,7 +94,14 @@ export class DbManager {
     }
 
     try {
-      await masterDb.query(`DROP DATABASE IF EXISTS "${dbName}"`)
+      await masterDb.query(
+        `SELECT pg_terminate_backend(pid)
+         FROM pg_stat_activity
+         WHERE datname = $1
+           AND pid <> pg_backend_pid()`,
+        [dbName]
+      )
+      await masterDb.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`)
     } catch (_error) {
       // Ignore errors
     }

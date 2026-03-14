@@ -280,9 +280,16 @@ fi
 FEATURE_DIR="$SPECS_DIR/$BRANCH_NAME"
 mkdir -p "$FEATURE_DIR"
 
-TEMPLATE="$REPO_ROOT/.specify/templates/spec-template.md"
+CANONICAL_TEMPLATE="$REPO_ROOT/specs/templates/specify-template.md"
+LEGACY_TEMPLATE="$REPO_ROOT/.specify/templates/spec-template.md"
 SPEC_FILE="$FEATURE_DIR/spec.md"
-if [ -f "$TEMPLATE" ]; then cp "$TEMPLATE" "$SPEC_FILE"; else touch "$SPEC_FILE"; fi
+if [ -f "$CANONICAL_TEMPLATE" ]; then
+    cp "$CANONICAL_TEMPLATE" "$SPEC_FILE"
+elif [ -f "$LEGACY_TEMPLATE" ]; then
+    cp "$LEGACY_TEMPLATE" "$SPEC_FILE"
+else
+    touch "$SPEC_FILE"
+fi
 
 # Set the SPECIFY_FEATURE environment variable for the current session
 export SPECIFY_FEATURE="$BRANCH_NAME"

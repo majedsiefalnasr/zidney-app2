@@ -15,6 +15,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { translationRouter } from '../../../apps/api/src/routes/backoffice/translations/index'
 import type { BackofficeEnv } from '../../../apps/api/src/routes/backoffice/types'
 
+const QUESTION_ID = '11111111-1111-4111-8111-111111111111'
+
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
@@ -23,7 +25,7 @@ function makeTranslationRow(id: string) {
   return {
     id,
     entity_type: 'question',
-    entity_id: 'q-001',
+    entity_id: QUESTION_ID,
     field_name: 'text',
     language_code: 'ar',
     translated_value: `Translation ${id}`,
@@ -90,7 +92,7 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
   it('returns 200 with empty items when no translations exist', async () => {
     const app = createTestApp({ rows: [] })
     const res = await app.request(
-      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=q-001',
+      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=11111111-1111-4111-8111-111111111111',
       { method: 'GET' }
     )
 
@@ -110,7 +112,7 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
 
     const app = createTestApp({ rows })
     const res = await app.request(
-      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=q-001&page_size=20',
+      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=11111111-1111-4111-8111-111111111111&page_size=20',
       { method: 'GET' }
     )
 
@@ -124,7 +126,7 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
     const rows = Array.from({ length: 5 }, (_, i) => makeTranslationRow(`tr-00${i + 1}`))
     const app = createTestApp({ rows })
     const res = await app.request(
-      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=q-001',
+      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=11111111-1111-4111-8111-111111111111',
       { method: 'GET' }
     )
 
@@ -135,7 +137,7 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
   it('accepts optional language_code filter', async () => {
     const app = createTestApp({ rows: [makeTranslationRow('tr-001')] })
     const res = await app.request(
-      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=q-001&language_code=ar',
+      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=11111111-1111-4111-8111-111111111111&language_code=ar',
       { method: 'GET' }
     )
     expect(res.status).toBe(200)
@@ -145,7 +147,7 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
     const rows = [makeTranslationRow('tr-011'), makeTranslationRow('tr-012')]
     const app = createTestApp({ rows })
     const res = await app.request(
-      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=q-001&cursor=tr-010',
+      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=11111111-1111-4111-8111-111111111111&cursor=tr-010',
       { method: 'GET' }
     )
     expect(res.status).toBe(200)
@@ -155,9 +157,12 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
 
   it('returns 422 when entity_type is missing', async () => {
     const app = createTestApp()
-    const res = await app.request('/api/v1/backoffice/workspace/translations?entity_id=q-001', {
-      method: 'GET',
-    })
+    const res = await app.request(
+      '/api/v1/backoffice/workspace/translations?entity_id=11111111-1111-4111-8111-111111111111',
+      {
+        method: 'GET',
+      }
+    )
     expect(res.status).toBe(422)
     const body = await res.json()
     expect(body.success).toBe(false)
@@ -176,7 +181,7 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
   it('response shape has success, data, error fields', async () => {
     const app = createTestApp({ rows: [] })
     const res = await app.request(
-      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=q-001',
+      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=11111111-1111-4111-8111-111111111111',
       { method: 'GET' }
     )
     const body = await res.json()
@@ -188,7 +193,7 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
   it('returns 500 on DB error with standard error shape', async () => {
     const app = createTestApp({ dbError: true })
     const res = await app.request(
-      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=q-001',
+      '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=11111111-1111-4111-8111-111111111111',
       { method: 'GET' }
     )
     expect(res.status).toBe(500)

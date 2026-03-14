@@ -78,7 +78,8 @@ AGY_FILE="$REPO_ROOT/.agent/rules/specify-rules.md"
 BOB_FILE="$REPO_ROOT/AGENTS.md"
 
 # Template file
-TEMPLATE_FILE="$REPO_ROOT/.specify/templates/agent-file-template.md"
+TEMPLATE_FILE="$REPO_ROOT/specs/templates/agent-file-template.md"
+LEGACY_TEMPLATE_FILE="$REPO_ROOT/.specify/templates/agent-file-template.md"
 
 # Global variables for parsed plan data
 NEW_LANG=""
@@ -143,9 +144,9 @@ validate_environment() {
         exit 1
     fi
     
-    # Check if template exists (needed for new files)
-    if [[ ! -f "$TEMPLATE_FILE" ]]; then
-        log_warning "Template file not found at $TEMPLATE_FILE"
+    # Check if a template exists (needed for new files)
+    if [[ ! -f "$TEMPLATE_FILE" && ! -f "$LEGACY_TEMPLATE_FILE" ]]; then
+        log_warning "Template file not found at $TEMPLATE_FILE or $LEGACY_TEMPLATE_FILE"
         log_warning "Creating new agent files will fail"
     fi
 }
@@ -273,20 +274,25 @@ create_new_agent_file() {
     local temp_file="$2"
     local project_name="$3"
     local current_date="$4"
+    local source_template="$TEMPLATE_FILE"
+
+    if [[ ! -f "$source_template" && -f "$LEGACY_TEMPLATE_FILE" ]]; then
+        source_template="$LEGACY_TEMPLATE_FILE"
+    fi
     
-    if [[ ! -f "$TEMPLATE_FILE" ]]; then
-        log_error "Template not found at $TEMPLATE_FILE"
+    if [[ ! -f "$source_template" ]]; then
+        log_error "Template not found at $TEMPLATE_FILE or $LEGACY_TEMPLATE_FILE"
         return 1
     fi
     
-    if [[ ! -r "$TEMPLATE_FILE" ]]; then
-        log_error "Template file is not readable: $TEMPLATE_FILE"
+    if [[ ! -r "$source_template" ]]; then
+        log_error "Template file is not readable: $source_template"
         return 1
     fi
     
     log_info "Creating new agent context file from template..."
     
-    if ! cp "$TEMPLATE_FILE" "$temp_file"; then
+    if ! cp "$source_template" "$temp_file"; then
         log_error "Failed to copy template file"
         return 1
     fi
@@ -807,4 +813,3 @@ main() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     main "$@"
 fi
-

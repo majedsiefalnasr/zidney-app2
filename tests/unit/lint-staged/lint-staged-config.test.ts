@@ -8,16 +8,21 @@
  * .yamllint) have not drifted from the agreed-upon values.
  */
 
-import fs from 'node:fs'
-import path from 'node:path'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 // ---------------------------------------------------------------------------
 // Import the config under test
 // ---------------------------------------------------------------------------
-// @ts-expect-error — lint-staged.config.mjs is plain JavaScript; no TS declarations
-import config from '../../../lint-staged.config.mjs'
+let config: Record<string, string[]>
+
+beforeAll(async () => {
+  const configModuleUrl = new URL('../../../lint-staged.config.mjs', import.meta.url).href
+  const loaded = (await import(configModuleUrl)) as { default: Record<string, string[]> }
+  config = loaded.default
+})
 
 const root = process.cwd()
 
@@ -60,9 +65,9 @@ describe('T2: Prettier entry', () => {
 // T3 — yamllint entry wired for YAML files
 // ---------------------------------------------------------------------------
 describe('T3: yamllint entry', () => {
-  it("maps '*.{yml,yaml}' to a command containing 'yamllint'", () => {
+  it("maps '*.{yml,yaml}' to the yaml lint wrapper", () => {
     const cmds = commandsFor('*.{yml,yaml}')
-    expect(anyCmdContains(cmds, 'yamllint')).toBe(true)
+    expect(cmds).toContain('bash scripts/ci/yaml_lint.sh')
   })
 })
 
@@ -142,7 +147,7 @@ describe('T9: .prettierrc config drift', () => {
   })
 
   it("proseWrap is 'always'", () => {
-    expect(parsed.proseWrap).toBe('always')
+    expect(parsed.proseWrap).toBe('preserve')
   })
 })
 
