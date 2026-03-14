@@ -7,23 +7,34 @@
 
 ## Workflow Progress
 
-| Step      | Status | SpecKit Output              | Orchestrator Output         |
-| --------- | ------ | --------------------------- | --------------------------- |
-| Pre-Step  | ✅     | -                           | -                           |
-| Specify   | ✅     | spec.md, checklists/        | reports/SPECIFY_REPORT.md   |
-| Clarify   | ✅     | spec.md (updated in-place)  | reports/CLARIFY_REPORT.md   |
-| Plan      | ✅     | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
-| Tasks     | ✅     | tasks.md                    | reports/TASKS_REPORT.md     |
-| Analyze   | ⬜     | (read-only analysis)        | audits/ANALYZE_REPORT.md    |
-| Implement | ⬜     | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
-| Closure   | ⬜     | -                           | reports/CLOSURE_REPORT.md   |
+| Step      | Status    | SpecKit Output              | Orchestrator Output         |
+| --------- | --------- | --------------------------- | --------------------------- |
+| Pre-Step  | ✅        | -                           | -                           |
+| Specify   | ✅        | spec.md, checklists/        | reports/SPECIFY_REPORT.md   |
+| Clarify   | ✅        | spec.md (updated in-place)  | reports/CLARIFY_REPORT.md   |
+| Plan      | ✅        | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
+| Tasks     | ✅        | tasks.md                    | reports/TASKS_REPORT.md     |
+| Analyze   | ✅ Passed | (read-only analysis)        | audits/ANALYZE_REPORT.md    |
+| Implement | ⬜        | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
+| Closure   | ⬜        | -                           | reports/CLOSURE_REPORT.md   |
 
 ## Stage Artifacts
 
-| Artifact          | Owner        | Path                                                                                        | Generated At |
-| ----------------- | ------------ | ------------------------------------------------------------------------------------------- | ------------ |
-| PR Summary        | Orchestrator | PR_SUMMARY.md                                                                               | Step 7       |
-| Testing Guide     | Orchestrator | guides/TESTING_GUIDE.md                                                                     | Step 7       |
-| Validation Report | Orchestrator | audits/VALIDATION_REPORT.md                                                                 | Step 6       |
-| Spec Checklist    | SpecKit      | checklists/requirements.md                                                                  | Step 1       |
-| Workflow State    | Orchestrator | specs/runtime/infra-021-support-surface-routing-and-template-migration/.workflow-state.json | Pre-Step     |
+| Artifact          | Owner        | Path                                                                                        | Generated At                                                                                                       |
+| ----------------- | ------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Specify Report    | Orchestrator | reports/SPECIFY_REPORT.md                                                                   | Step 1                                                                                                             |
+| Clarify Report    | Orchestrator | reports/CLARIFY_REPORT.md                                                                   | Step 2                                                                                                             |
+| Plan Report       | Orchestrator | reports/PLAN_REPORT.md                                                                      | Step 3                                                                                                             |
+| Tasks Report      | Orchestrator | reports/TASKS_REPORT.md                                                                     | Step 4                                                                                                             |
+| Routing Decisions | Stage        | reports/routing-authority-decisions.md                                                      | User Story 1                                                                                                       |
+| Support Decisions | Stage        | reports/support-artifact-decisions.md                                                       | User Story 2                                                                                                       |
+| PR Summary        | Orchestrator | PR_SUMMARY.md                                                                               | Step 7                                                                                                             |
+| Testing Guide     | Orchestrator | guides/TESTING_GUIDE.md                                                                     | Step 7                                                                                                             |
+| Analyze Report    | Orchestrator | audits/ANALYZE_REPORT.md                                                                    | Step 5                                                                                                             |
+| Validation Report | Stage        | audits/VALIDATION_REPORT.md                                                                 | Setup, authority/parity batches, User Story 3 rewiring/hardening, retirement batches, and post-cleanup final state |
+| Inventory Report  | Stage        | reports/support-surface-inventory.md                                                        | Setup / Foundational                                                                                               |
+| Blast Radius      | Stage        | reports/blast-radius-evidence.md                                                            | Setup / Foundational                                                                                               |
+| Parity Matrix     | Stage        | reports/template-consumer-parity-matrix.md                                                  | Setup / Foundational                                                                                               |
+| Migration Batches | Stage        | audits/migration-batches.md                                                                 | Foundational                                                                                                       |
+| Spec Checklist    | SpecKit      | checklists/requirements.md                                                                  | Step 1                                                                                                             |
+| Workflow State    | Orchestrator | specs/runtime/infra-021-support-surface-routing-and-template-migration/.workflow-state.json | Pre-Step                                                                                                           |

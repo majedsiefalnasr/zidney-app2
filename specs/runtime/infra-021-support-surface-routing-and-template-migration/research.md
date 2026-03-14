@@ -36,7 +36,7 @@
 - Put routing authority notes only in the stage spec: Rejected because later stages need a reusable operational control outside a single stage document.
 - Store the registry in `.specify/`: Rejected because template execution tooling is part of the migration subject and should not own the authority model.
 
-## Decision: Sequence migration as registry first, consumer rewiring second, compatibility hardening third, and retirement last
+## Decision: Sequence migration as registry first, template parity second, consumer rewiring third, compatibility hardening fourth, retirement fifth, and authorized cleanup last
 
 **Rationale**: Current consumers still point at legacy paths. The safe order is to declare authority, update all touched first-party consumers in the same batch, preserve the legacy surfaces as compatibility paths, validate, and only then evaluate retirement. This sequence satisfies the clarified spec’s same-batch migration rule without forcing premature deletion.
 

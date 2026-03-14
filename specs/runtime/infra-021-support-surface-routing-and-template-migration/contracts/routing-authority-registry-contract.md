@@ -18,7 +18,7 @@ The registry must contain exactly one record for each routing category:
 - `Authoritative Root`: canonical repository path
 - `Legacy Compatibility Surfaces`: one or more non-authoritative paths, or `none`
 - `Consumer Classes`: list of scripts, docs, loaders, or generated indexes affected by changes
-- `Direct Consumer Map`: file-by-file mapping for every live consumer that still points at a legacy surface when the category is `templates`
+- `Direct Consumer Map`: file-by-file mapping for every live consumer that still points at a legacy surface when the category is `templates`, and for every overlapping legacy-mirrored prompt file plus any intentional legacy-absent prompt when the category is `prompts`
 - `Migration Policy`: how consumers move to the authoritative root
 - `Retirement Criteria`: explicit proof required before a legacy surface can be removed
 - `Validation Evidence`: commands and direct entrypoint checks required before retirement
@@ -45,6 +45,11 @@ The registry must contain exactly one record for each routing category:
 - Must list each live script, agent guidance file, or loader that still references `.specify/templates/*`.
 - Must identify the exact canonical target file or explicit compatibility policy for that consumer.
 - A consumer map entry is incomplete if it names only a routing category without a concrete file path.
+
+For the `prompts` routing category, when `.github/prompts/` remains as a compatibility surface:
+
+- the map must list each overlapping legacy-mirrored Speckit prompt file and its authoritative `.agents/prompts/*` source
+- the map must record any intentional Zidney-only prompt as `legacy_absent` rather than leaving the compatibility expectation implicit
 
 ### Retirement Criteria
 

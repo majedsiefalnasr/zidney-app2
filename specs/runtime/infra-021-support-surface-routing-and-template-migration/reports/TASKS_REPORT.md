@@ -8,7 +8,7 @@
 
 ## Summary
 
-The task generation step produced a 26-task, dependency-ordered execution graph for the support-surface migration. The task set stays inside repository-governance scope and sequences setup evidence, routing authority declaration, support-artifact decisions, canonical template parity, direct consumer rewiring, compatibility hardening, and final validation without widening into runtime or tenant behavior.
+The task generation step produced a 29-task, dependency-ordered execution graph for the support-surface migration. The task set stays inside repository-governance scope and sequences setup evidence, routing authority declaration, support-artifact decisions, canonical template parity, direct consumer rewiring, prompt-surface synchronization, compatibility hardening, recurring validation gates, retirement decisions, authorized cleanup, and final reconciliation without widening into runtime or tenant behavior.
 
 ---
 
@@ -22,15 +22,15 @@ The task generation step produced a 26-task, dependency-ordered execution graph 
 
 ## Task Breakdown
 
-| Category       | Count  | Notes                                                                                                       |
-| -------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
-| Infrastructure | 24     | Inventory, evidence matrices, registry, parity files, rewiring, compatibility hardening, and reconciliation |
-| API            | 0      | No runtime API or endpoint changes are planned                                                              |
-| Worker         | 0      | No worker behavior changes are planned                                                                      |
-| Frontend       | 0      | No UI or frontend application changes are planned                                                           |
-| Observability  | 0      | No standalone observability implementation tasks are required beyond governance validation capture          |
-| Testing        | 2      | Validation and direct routing-entrypoint verification tasks (`T024`, `T025`)                                |
-| **Total**      | **26** | Repository-governance migration work only                                                                   |
+| Category       | Count  | Notes                                                                                                                                                    |
+| -------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Infrastructure | 27     | Inventory, evidence matrices, registry, parity files, rewiring, prompt synchronization, compatibility hardening, retirement, cleanup, and reconciliation |
+| API            | 0      | No runtime API or endpoint changes are planned                                                                                                           |
+| Worker         | 0      | No worker behavior changes are planned                                                                                                                   |
+| Frontend       | 0      | No UI or frontend application changes are planned                                                                                                        |
+| Observability  | 0      | No standalone observability implementation tasks are required beyond governance validation capture                                                       |
+| Testing        | 2      | Validation and direct routing-entrypoint verification tasks (`T025`, `T026`)                                                                             |
+| **Total**      | **29** | Repository-governance migration work only                                                                                                                |
 
 ---
 

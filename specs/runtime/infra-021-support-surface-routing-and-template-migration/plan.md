@@ -28,7 +28,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 - PASS: The stage is repository-governance-only and does not touch database-per-tenant isolation, tenant resolution, or license middleware ordering. ADR-0001 and ADR-0007 remain unchanged.
 - PASS: The stage does not alter attempt snapshotting, grading authority, worker responsibility, or server-authoritative time. ADR-0002 and ADR-0006 remain unchanged.
 - PASS: The stage does not introduce new app/package imports, dependency exceptions, or layer changes. Existing architecture contracts remain authoritative.
-- PASS: The stage file is `DRAFT` but explicitly marks planning as authorized after clarification, so SpecKit planning is allowed without implementation drift.
+- PASS: The stage remains in `DRAFT` through planning and task generation; Analyze is the explicit gate that authorizes implementation and promotes the stage once drift checks pass.
 
 ### Post-Design Re-Check
 
@@ -110,24 +110,27 @@ Each governed support surface must be backed by evidence from four sources befor
 - `specs/templates/specify-template.md` exists, but `.specify/scripts/bash/create-new-feature.sh` currently consumes `.specify/templates/spec-template.md`, so the consumer rewiring batch must either add a canonical `specs/templates/spec-template.md` equivalent or update the script and compatibility layer to map `specify-template.md` explicitly without ambiguity.
 - `specs/templates/tasks-template.md` exists, but active agent guidance still references `.specify/templates/tasks-template.md` in `.agents/agents/speckit.tasks.agent.md` and `.agents/agents/speckit.constitution.agent.md`, plus their `.github/agents/*` compatibility mirrors.
 - `specs/templates/` does not yet contain canonical equivalents for `.specify/templates/checklist-template.md`, `.specify/templates/constitution-template.md`, or `.specify/templates/agent-file-template.md`, so the migration plan must treat those as parity-gated consumers: either add canonical equivalents under `specs/templates/` first or keep `.specify/templates/` mirrored as an explicit compatibility implementation until parity is created.
+- `.agents/agents/speckit.constitution.agent.md` and `.github/agents/speckit.constitution.agent.md` contain stale references to `.specify/templates/commands/*.md`, but that command-template tree does not exist in the current repository, so the migration must remove or rewrite those stale guidance references instead of inventing parity for a nonexistent surface.
 
-### Direct Consumer Map
+### Direct Consumer And Compatibility Map
 
 The migration cannot rely on routing-category summaries alone. The following file-level consumers must be treated as first-class migration targets:
 
-| Consumer Path                                   | Current Dependency                                                                                     | Canonical Target                                                                                          | Required Batch Behavior                                                          |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `.specify/scripts/bash/create-new-feature.sh`   | `.specify/templates/spec-template.md`                                                                  | `specs/templates/spec-template.md` or explicit canonical mapping to `specs/templates/specify-template.md` | Rewire only after canonical parity is created and verified                       |
-| `.specify/scripts/bash/setup-plan.sh`           | `.specify/templates/plan-template.md`                                                                  | `specs/templates/plan-template.md`                                                                        | Update in `consumer_rewiring` batch                                              |
-| `.specify/scripts/bash/update-agent-context.sh` | `.specify/templates/agent-file-template.md`                                                            | `specs/templates/agent-file-template.md` after parity creation                                            | Keep compatibility behavior until canonical equivalent exists                    |
-| `.agents/agents/speckit.specify.agent.md`       | `.specify/templates/spec-template.md`                                                                  | canonical spec template location declared in registry                                                     | Rewrite guidance in the same batch as script rewiring                            |
-| `.github/agents/speckit.specify.agent.md`       | `.specify/templates/spec-template.md`                                                                  | compatibility mirror of canonical guidance                                                                | Update alongside `.agents/agents/*`                                              |
-| `.agents/agents/speckit.tasks.agent.md`         | `.specify/templates/tasks-template.md`                                                                 | `specs/templates/tasks-template.md`                                                                       | Rewrite guidance in the same batch as authority declaration or consumer rewiring |
-| `.github/agents/speckit.tasks.agent.md`         | `.specify/templates/tasks-template.md`                                                                 | compatibility mirror of canonical guidance                                                                | Update alongside `.agents/agents/*`                                              |
-| `.agents/agents/speckit.checklist.agent.md`     | `.specify/templates/checklist-template.md`                                                             | `specs/templates/checklist-template.md` after parity creation                                             | Parity-gated; do not retire legacy path first                                    |
-| `.github/agents/speckit.checklist.agent.md`     | `.specify/templates/checklist-template.md`                                                             | compatibility mirror of canonical guidance                                                                | Update alongside `.agents/agents/*`                                              |
-| `.agents/agents/speckit.constitution.agent.md`  | `.specify/templates/{constitution,plan,spec,tasks}-template.md` and `.specify/templates/commands/*.md` | canonical `specs/templates/*` set after parity creation                                                   | Requires file-by-file mapping and staged guidance rewrite                        |
-| `.github/agents/speckit.constitution.agent.md`  | `.specify/templates/{constitution,plan,spec,tasks}-template.md` and `.specify/templates/commands/*.md` | compatibility mirror of canonical guidance                                                                | Update alongside `.agents/agents/*`                                              |
+| Consumer Path                                   | Current Dependency                                                                                                     | Canonical Target                                                                                                    | Required Batch Behavior                                                                                                                                  |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.specify/scripts/bash/create-new-feature.sh`   | `.specify/templates/spec-template.md`                                                                                  | `specs/templates/spec-template.md` or explicit canonical mapping to `specs/templates/specify-template.md`           | Rewire only after canonical parity is created and verified                                                                                               |
+| `.specify/scripts/bash/setup-plan.sh`           | `.specify/templates/plan-template.md`                                                                                  | `specs/templates/plan-template.md`                                                                                  | Update in `consumer_rewiring` batch                                                                                                                      |
+| `.specify/scripts/bash/update-agent-context.sh` | `.specify/templates/agent-file-template.md`                                                                            | `specs/templates/agent-file-template.md` after parity creation                                                      | Keep compatibility behavior until canonical equivalent exists                                                                                            |
+| `.agents/agents/speckit.specify.agent.md`       | `.specify/templates/spec-template.md`                                                                                  | canonical spec template location declared in registry                                                               | Rewrite guidance in the same batch as script rewiring                                                                                                    |
+| `.github/agents/speckit.specify.agent.md`       | `.specify/templates/spec-template.md`                                                                                  | compatibility mirror of canonical guidance                                                                          | Update alongside `.agents/agents/*`                                                                                                                      |
+| `.agents/agents/speckit.tasks.agent.md`         | `.specify/templates/tasks-template.md`                                                                                 | `specs/templates/tasks-template.md`                                                                                 | Rewrite guidance in the same batch as authority declaration or consumer rewiring                                                                         |
+| `.github/agents/speckit.tasks.agent.md`         | `.specify/templates/tasks-template.md`                                                                                 | compatibility mirror of canonical guidance                                                                          | Update alongside `.agents/agents/*`                                                                                                                      |
+| `.agents/agents/speckit.checklist.agent.md`     | `.specify/templates/checklist-template.md`                                                                             | `specs/templates/checklist-template.md` after parity creation                                                       | Parity-gated; do not retire legacy path first                                                                                                            |
+| `.github/agents/speckit.checklist.agent.md`     | `.specify/templates/checklist-template.md`                                                                             | compatibility mirror of canonical guidance                                                                          | Update alongside `.agents/agents/*`                                                                                                                      |
+| `.agents/agents/speckit.constitution.agent.md`  | `.specify/templates/{constitution,plan,spec,tasks}-template.md` plus stale `.specify/templates/commands/*.md` guidance | canonical `specs/templates/*` set after parity creation; stale command-template references removed                  | Requires file-by-file mapping and staged guidance rewrite                                                                                                |
+| `.github/agents/speckit.constitution.agent.md`  | `.specify/templates/{constitution,plan,spec,tasks}-template.md` plus stale `.specify/templates/commands/*.md` guidance | compatibility mirror of canonical guidance; stale command-template references removed                               | Update alongside `.agents/agents/*`                                                                                                                      |
+| `.agents/prompts/*.prompt.md`                   | authoritative prompt routing surface                                                                                   | `.agents/prompts/`                                                                                                  | Keep as canonical prompt surface and record compatibility sync rules                                                                                     |
+| `.github/prompts/*.prompt.md`                   | legacy prompt compatibility surface for the overlapping Speckit prompt subset only                                     | compatibility mirror of matching `.agents/prompts/*.prompt.md` files; Zidney-only prompts remain authoritative-only | Synchronize only overlapping prompt files, mark the legacy tree non-authoritative, and record any intentional legacy-absent prompts in the parity matrix |
 
 1. Contributor and governance guidance evidence
 
@@ -141,7 +144,7 @@ The migration cannot rely on routing-category summaries alone. The following fil
 1. Structural inventory evidence
 
 - `.agents/agents/` and `.agents/prompts/` contain the full Zidney-local agent and prompt surface.
-- `.github/agents/` and `.github/prompts/` still contain active Speckit compatibility assets.
+- `.github/agents/` and `.github/prompts/` still contain active Speckit compatibility assets, but `.github/prompts/` is expected to mirror only the overlapping Speckit subset rather than every Zidney-local prompt.
 - `coverage/.tmp/` contains a large numbered JSON set consistent with generated temporary coverage output.
 
 ### Support-Surface Classification Model
@@ -180,6 +183,12 @@ Each routing category entry must record:
 
 The registry is a preventive governance control, not just migration documentation. Future cleanup stages may only retire a legacy routing surface when the registry marks it non-authoritative and the recorded retirement criteria are satisfied.
 
+For INFRA-21, the concrete consultation points that must be aligned to the registry are:
+
+- future sanitization-stage operator guidance in `docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md`
+- architecture audit entrypoints and related guidance in `scripts/infra-audit.ts`, `scripts/architecture-diff.ts`, and `specs/templates/audits/analyze-report-template.md`
+- repository cleanup helpers or guides that make routing-surface decisions during cleanup execution
+
 ### Compatibility-Preserving Migration Sequence
 
 The migration should execute in bounded batches:
@@ -190,18 +199,20 @@ The migration should execute in bounded batches:
 - Publish the support-surface inventory and dispositions.
 - Do not retire any legacy surface in this batch.
 
+1. Template parity batch
+
+- Create or formally map canonical equivalents for `.specify/templates/checklist-template.md`, `.specify/templates/constitution-template.md`, and `.specify/templates/agent-file-template.md` under `specs/templates/`.
+- Resolve the spec-template mismatch by mapping `.specify/templates/spec-template.md` explicitly to the existing canonical `specs/templates/specify-template.md` or by documenting a canonical alias without creating a second competing authority.
+- Record a file-by-file parity matrix in the routing authority registry so each legacy template has one canonical target.
+- If any template family still lacks canonical parity after analysis, keep `.specify/templates/` as an explicit compatibility implementation for that family and mark retirement as blocked.
+
 1. Consumer rewiring batch
 
 - Update `.specify/scripts/bash/setup-plan.sh` and `.specify/scripts/bash/create-new-feature.sh` to resolve canonical templates from `specs/templates/`.
 - Update `.specify/scripts/bash/update-agent-context.sh` to align agent output and template loading with the authoritative routing model while preserving compatibility behavior.
 - Update affected Speckit agent/prompt guidance that still hardcodes legacy template roots.
+- Synchronize `.agents/prompts/*.prompt.md` and `.github/prompts/*.prompt.md` so prompt routing follows the same canonical-versus-compatibility model as agents.
 - Do not rewire a consumer until the exact canonical target file exists in `specs/templates/` and the registry records the compatibility rule for any remaining legacy path.
-
-1. Template parity batch
-
-- Create or formally map canonical equivalents for `.specify/templates/spec-template.md`, `.specify/templates/checklist-template.md`, `.specify/templates/constitution-template.md`, and `.specify/templates/agent-file-template.md` under `specs/templates/`.
-- Record a file-by-file parity matrix in the routing authority registry so each legacy template has one canonical target.
-- If any template family still lacks canonical parity after analysis, keep `.specify/templates/` as an explicit compatibility implementation for that family and mark retirement as blocked.
 
 1. Compatibility hardening batch
 
@@ -209,15 +220,30 @@ The migration should execute in bounded batches:
 - Add explicit redirect or mirroring rules so legacy consumers cannot silently diverge from the canonical roots.
 - Confirm contributor docs and governance docs point to the same authority model.
 - Keep `.agents/*` and `.github/*` Speckit guidance synchronized for any file whose instructions mention template paths until `.github/*` retirement criteria are satisfied.
+- Mark `.github/prompts/*` as compatibility-only and ensure any mirrored prompt file can be traced back to one authoritative `.agents/prompts/*` source.
 
 1. Retirement decision batch
 
 - Only after the previous batches validate cleanly, assess whether any compatibility surface can move from `mirror_for_compatibility` to `remove`.
 - If evidence is incomplete, retain the compatibility surface and record deferred retirement criteria rather than forcing cleanup.
 
+1. Artifact cleanup batch
+
+- Execute only after retirement decisions and their required validations are complete.
+- Limit this batch to cleanup work that is already authorized by the registry, support-artifact decisions, and residual compatibility records.
+- Do not use cleanup to introduce new routing decisions.
+
 ### Validation Coverage
 
-The minimum post-migration gate set is:
+Validation runs in two cadences:
+
+1. Per-batch smoke validation for any routing-affecting batch
+
+- direct execution or resolution checks for touched `.specify/scripts/bash/*` entrypoints
+- direct path-resolution checks for touched `.agents/*`, `.github/*`, `.agents/prompts/*`, and `.github/prompts/*` loading paths
+- update the stage validation ledger with pass/fail evidence and any deferred retirement conditions
+
+1. Full governance validation after consumer rewiring and compatibility hardening are complete, again before any retirement or cleanup batch that removes or mutates a legacy surface, and once more after the final cleanup state is applied
 
 - `bun run lint`
 - `bun run typecheck`
@@ -236,9 +262,19 @@ If routing or template entrypoints change, also verify:
 - `.specify/scripts/bash/create-new-feature.sh`
 - `.specify/scripts/bash/setup-plan.sh`
 - `.specify/scripts/bash/update-agent-context.sh`
-- the affected `.github/*` and `.agents/*` loading paths
+- the affected `.github/*`, `.agents/*`, `.agents/prompts/*`, and `.github/prompts/*` loading paths
 
 Validation is considered complete only when both the governance chain and the touched contributor entrypoints resolve the same authority model.
+
+### Analyze Gate Criteria
+
+The Analyze gate for this stage must explicitly evaluate:
+
+- routing authority registry completeness and consultation points
+- template parity closure for every live `.specify/templates/*` consumer
+- prompt-surface synchronization between `.agents/prompts/*` and `.github/prompts/*`
+- stale guidance-reference removal for nonexistent `.specify/templates/commands/*.md` paths
+- shell-entrypoint resolution safety for touched `.specify/scripts/bash/*` files
 
 ### Risk Controls And Boundaries
 

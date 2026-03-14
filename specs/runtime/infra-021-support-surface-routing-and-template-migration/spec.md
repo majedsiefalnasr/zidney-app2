@@ -12,7 +12,7 @@
 - **Stage File**: `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_21_SUPPORT_SURFACE_ROUTING_AND_TEMPLATE_MIGRATION.md`
 - **Feature Directory**: `specs/runtime/infra-021-support-surface-routing-and-template-migration`
 - **Stage Status**: DRAFT
-- **Workflow Step**: Specify
+- **Workflow Step**: Tasks
 
 ## Scope Boundaries
 
@@ -144,7 +144,7 @@ As a contributor using SpecKit and repository governance tooling, I want routing
 - **FR-003**: The stage MUST classify a root support artifact as removable only when there are zero unresolved references or a complete documented replacement path.
 - **FR-004**: The stage MUST define one authoritative routing root for each of the following categories: agents, prompts, and templates. For this stage, the authoritative roots are `.agents/agents/`, `.agents/prompts/`, and `specs/templates/` respectively.
 - **FR-005**: The stage MUST create `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md` as the single source of truth for routing authority decisions.
-- **FR-006**: The routing authority registry MUST record the authoritative root, any legacy surface, and the migration or compatibility policy for each routing category, including `.github/agents/`, `.github/prompts/`, and `.specify/templates/` as legacy compatibility surfaces until same-batch consumer migration is complete.
+- **FR-006**: The routing authority registry MUST record the authoritative root, any legacy surface, and the migration or compatibility policy for each routing category, including `.github/agents/`, `.github/prompts/`, and `.specify/templates/` as legacy compatibility surfaces until same-batch consumer migration is complete. For prompts, the compatibility policy MUST distinguish the overlapping Speckit prompt subset that is mirrored into `.github/prompts/*` from any intentional Zidney-only prompts that remain authoritative-only under `.agents/prompts/*`.
 - **FR-007**: The stage MUST preserve contributor-routing safety by updating all affected contributor entrypoints, shell entrypoints, documentation references, and automation references in the same migration batch whenever authority changes.
 - **FR-008**: The stage MUST require the template migration outcome to align shell entrypoints, governance guidance, and contributor documentation to the same authoritative template system.
 - **FR-009**: The stage MUST prevent silent divergence between `.specify/templates/` and `specs/templates/` by treating `specs/templates/` as the canonical template root and `.specify/templates/` as a temporary compatibility surface only until all live shell and automation consumers are migrated in the same batch.

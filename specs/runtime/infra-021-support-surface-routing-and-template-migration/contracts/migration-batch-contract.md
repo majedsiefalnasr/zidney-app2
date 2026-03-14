@@ -7,6 +7,7 @@ Define the minimum contents for any INFRA-21 implementation batch that changes r
 ## Required Batch Types
 
 - `authority_declaration`
+- `template_parity`
 - `consumer_rewiring`
 - `compatibility_hardening`
 - `retirement_decision`
@@ -30,6 +31,12 @@ Define the minimum contents for any INFRA-21 implementation batch that changes r
 
 - Must create or update the routing authority registry.
 - Must not remove any legacy surface.
+
+### Template Parity Batch
+
+- Must establish the canonical target or explicit alias for every live `.specify/templates/*` consumer before rewiring begins.
+- Must remove or rewrite stale guidance references to nonexistent template trees instead of inventing parity for them.
+- Must record parity proof in the routing authority registry and the stage parity matrix.
 
 ### Consumer Rewiring Batch
 
@@ -57,7 +64,15 @@ Define the minimum contents for any INFRA-21 implementation batch that changes r
 
 ## Validation Scope
 
-Every routing-affecting batch must run:
+Every routing-affecting batch must run direct smoke validation for touched consumers and capture the results in the validation ledger.
+
+Required per-batch checks:
+
+- direct verification of touched `.specify/scripts/bash/*` entrypoints
+- direct path-resolution checks for touched `.agents/*`, `.github/*`, `.agents/prompts/*`, and `.github/prompts/*` surfaces
+- registry and compatibility checks proving touched consumers still resolve one authority model
+
+The full governance suite must run after `consumer_rewiring` and `compatibility_hardening` are complete, again before any `retirement_decision` or `artifact_cleanup` batch that removes or mutates a legacy surface, and again after the final cleanup state is applied:
 
 - `bun run lint`
 - `bun run typecheck`
@@ -70,8 +85,6 @@ Every routing-affecting batch must run:
 - `bun run type-safety-guard`
 - `bun run ai-context:refresh`
 - `bun run validate:workflows`
-
-If the batch touches routing entrypoints, it must also directly verify the affected `.specify/scripts/bash/*` or loader paths.
 
 ## Rollback Rules
 

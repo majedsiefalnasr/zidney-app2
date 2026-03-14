@@ -29,8 +29,10 @@
 - `authoritative_root`: Canonical repository path
 - `legacy_surfaces`: List of compatibility paths
 - `consumer_classes`: `shell_scripts | contributor_docs | agent_loaders | prompt_loaders | governance_docs | generated_indexes`
+- `direct_consumer_map`: File-level consumers and the authority path each one must resolve through
 - `migration_policy`: Short description of how consumers move to the authority
 - `retirement_criteria`: Explicit proof required before legacy removal
+- `validation_evidence`: Required smoke checks, governance reruns, and report locations that prove the record is safe
 
 **Validation rules**:
 
@@ -82,10 +84,13 @@
 **Fields**:
 
 - `batch_id`: Unique identifier
-- `batch_type`: `authority_declaration | consumer_rewiring | compatibility_hardening | retirement_decision | artifact_cleanup`
+- `batch_type`: `authority_declaration | template_parity | consumer_rewiring | compatibility_hardening | retirement_decision | artifact_cleanup`
 - `touched_surfaces`: List of support surface identifiers
+- `consumer_classes_affected`: Which consumer groups are impacted by the batch
 - `preconditions`: Required evidence and registry state before execution
+- `compatibility_behavior`: `no_live_change | mirror_and_retain | rewire_with_compatibility_notice | retire_after_validation`
 - `validation_scope`: Commands and direct entrypoints that must pass before the batch is accepted
+- `exit_condition`: Explicit success criteria before the next batch may begin
 - `rollback_strategy`: `revert_batch | restore_compatibility_surface | reclassify_surface`
 - `status`: `planned | applied | validated | deferred | rolled_back`
 

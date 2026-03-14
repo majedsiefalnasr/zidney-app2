@@ -42,7 +42,7 @@ The technical plan stays inside repository-governance scope and defines a compat
 | --- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | 1   | Keep `.agents/agents/`, `.agents/prompts/`, and `specs/templates/` as the only authoritative routing roots                     | Removes routing ambiguity while preserving the clarified stage scope                                       |
 | 2   | Require a file-level Direct Consumer Map and template parity gate before rewiring or retiring `.specify/templates/*` consumers | Prevents breaking live Speckit shell scripts and agent guidance that still depend on legacy template paths |
-| 3   | Sequence work as authority declaration, consumer rewiring, template parity, compatibility hardening, and retirement decision   | Preserves same-batch migration safety and prevents silent divergence                                       |
+| 3   | Sequence work as authority declaration, template parity, consumer rewiring, compatibility hardening, and retirement decision   | Preserves same-batch migration safety and prevents silent divergence                                       |
 | 4   | Treat `.github/*` and `.specify/templates/*` as explicit compatibility surfaces until retirement criteria are met              | Keeps contributor and automation workflows intact while migration proceeds                                 |
 
 ---
