@@ -3,10 +3,10 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: LOW
 Initiated: 2026-03-13T22:51:44Z
-Last Updated: 2026-03-13T22:51:44Z
+Last Updated: 2026-03-13T22:55:28Z
 
 Scope Defined:
 
@@ -21,10 +21,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted; constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ## Purpose
 
