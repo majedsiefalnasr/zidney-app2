@@ -1,0 +1,24 @@
+{
+  "stage": "Repository Size and Performance Optimization",
+  "phase": "01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-17-repository-size-and-performance-optimization",
+  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_17_REPOSITORY_SIZE_AND_PERFORMANCE_OPTIMIZATION.md",
+  "branch": "spec/infra-17-repository-size-and-performance-optimization",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-14T00:00:00Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/infra-17-repository-size-and-performance-optimization",
+      "timestamp": "2026-03-14T00:00:00Z"
+    }
+  ]
+}
