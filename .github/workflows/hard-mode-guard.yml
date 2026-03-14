@@ -130,7 +130,7 @@ jobs:
 
           for path in \
             AGENTS.md \
-            docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md \
+            docs/SPEC_KIT_HARD_MODE_WORKFLOW.md \
             docs/AGENT_GOVERNANCE.md \
             docs/PROJECT_CONTEXT_PRIMER.md \
             specs/STAGE_LIFECYCLE_POLICY.md \
@@ -156,7 +156,7 @@ jobs:
 
           CHANGED=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- \
             AGENTS.md \
-            docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md \
+            docs/SPEC_KIT_HARD_MODE_WORKFLOW.md \
             docs/AGENT_GOVERNANCE.md \
             docs/PROJECT_CONTEXT_PRIMER.md \
             specs/STAGE_LIFECYCLE_POLICY.md \

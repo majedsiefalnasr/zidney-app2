@@ -87,7 +87,7 @@ tsconfig.base.json.backup
 specs/templates/
 .specify/scripts/bash/
 docs/type-safety/
-docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md
+docs/SPEC_KIT_HARD_MODE_WORKFLOW.md
 package.json
 related validation, routing, and contributor-guidance surfaces
 ```

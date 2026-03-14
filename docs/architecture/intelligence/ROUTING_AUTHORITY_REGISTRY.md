@@ -131,7 +131,7 @@ These prompts are `legacy_absent` by design and must not be inferred as mirror d
 
 The following surfaces must consult this registry before making routing or cleanup decisions:
 
-- `docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md`
+- `docs/SPEC_KIT_HARD_MODE_WORKFLOW.md`
 - `specs/templates/audits/analyze-report-template.md`
 - `scripts/infra-audit.ts`
 - `scripts/architecture-diff.ts`
