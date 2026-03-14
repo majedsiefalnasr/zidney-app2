@@ -45,19 +45,19 @@ None (foundational phase)
 
 #### Setup & Measurement Tasks
 
-- [ ] T001 Create audits/ directory structure with audit-helpers utility in tests/audit-helpers.ts at workspace root
-- [ ] T002 [P] Create FILE_SIZE_ANALYSIS.md template at docs/audit-reports/FILE_SIZE_ANALYSIS.md
-- [ ] T003 [P] Create DIRECTORY_SIZE_ANALYSIS.md template at docs/audit-reports/DIRECTORY_SIZE_ANALYSIS.md
-- [ ] T004 [P] Create AI_CONTEXT_ARTIFACT_ANALYSIS.md template at docs/audit-reports/AI_CONTEXT_ARTIFACT_ANALYSIS.md
-- [ ] T005 [P] Create SCRIPT_PERFORMANCE_PROFILE.md template at docs/audit-reports/SCRIPT_PERFORMANCE_PROFILE.md
+- [x] T001 Create audits/ directory structure with audit-helpers utility in tests/audit-helpers.ts at workspace root
+- [x] T002 [P] Create FILE_SIZE_ANALYSIS.md template at docs/audit-reports/FILE_SIZE_ANALYSIS.md
+- [x] T003 [P] Create DIRECTORY_SIZE_ANALYSIS.md template at docs/audit-reports/DIRECTORY_SIZE_ANALYSIS.md
+- [x] T004 [P] Create AI_CONTEXT_ARTIFACT_ANALYSIS.md template at docs/audit-reports/AI_CONTEXT_ARTIFACT_ANALYSIS.md
+- [x] T005 [P] Create SCRIPT_PERFORMANCE_PROFILE.md template at docs/audit-reports/SCRIPT_PERFORMANCE_PROFILE.md
 
 #### Diagnostic Script Development
 
-- [ ] T006 Generate file size analysis script at scripts/dev/analyze-file-sizes.ts (identify all files >2000 lines, >1000 MB)
-- [ ] T007 [P] Generate directory size measurement script at scripts/dev/analyze-directory-sizes.ts (use du -sh on key directories)
-- [ ] T008 [P] Generate AI context artifact analysis script at scripts/dev/analyze-ai-context-artifacts.ts (measure sizes, compression, redundancy)
-- [ ] T009 [P] Generate script performance profiler at scripts/dev/profile-script-performance.ts (10 runs per script, calculate statistics)
-- [ ] T010 [P] Generate initial baseline report generator at scripts/dev/generate-baseline-report.ts (consolidates all diagnostics into BASELINE_REPORT.md)
+- [x] T006 Generate file size analysis script at scripts/dev/analyze-file-sizes.ts (identify all files >2000 lines, >1000 MB)
+- [x] T007 [P] Generate directory size measurement script at scripts/dev/analyze-directory-sizes.ts (use du -sh on key directories)
+- [x] T008 [P] Generate AI context artifact analysis script at scripts/dev/analyze-ai-context-artifacts.ts (measure sizes, compression, redundancy)
+- [x] T009 [P] Generate script performance profiler at scripts/dev/profile-script-performance.ts (10 runs per script, calculate statistics)
+- [x] T010 [P] Generate initial baseline report generator at scripts/dev/generate-baseline-report.ts (consolidates all diagnostics into BASELINE_REPORT.md)
 
 ---
 
