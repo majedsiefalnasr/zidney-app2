@@ -1,7 +1,4 @@
 ---
-
-**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
-
 description: Execute the implementation planning workflow using the plan template to generate design artifacts.
 tools: [execute, read, edit, search, agent, todo]
 handoffs:
@@ -13,6 +10,8 @@ handoffs:
     agent: speckit.checklist
     prompt: Create a checklist for the following domain...
 ---
+
+**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
 
 ## User Input
 
