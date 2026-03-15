@@ -293,23 +293,18 @@ This stage establishes the **stable hygiene baseline for the Zidney monorepo**.
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-15T00:03:00.000Z
+Last Updated: 2026-03-15T00:04:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Routing authority verification against ROUTING_AUTHORITY_REGISTRY.md
-- Template system consolidation check
-- Dead script detection — flagged in report only (no removal tooling)
-- Unused dependency detection — root + all workspace packages
-- Workspace package usage validation
-- Skill surface validation (.agents/skills/)
-- CI workflow hygiene (duplicate/redundant pipelines)
-- AI context integrity — SKIP if script missing, WARNING on artifact errors, FAIL on validation errors
-- Architecture guard — pre-existing violations documented only; not blocking
-- Final hygiene report: docs/reports/REPOSITORY_HYGIENE_REPORT.md (committed to source control)
-- Orchestrator at scripts/dev/hygiene-report-generator.ts + 9 task helpers
+- Total: 22 atomic tasks
+- Phase 1: 1 task (shared types)
+- Phase 2: 9 tasks (parallel check modules)
+- Phase 3: 1 task (orchestrator)
+- Phase 4: 3 tasks (unit tests, parallel)
+- Phase 5: 8 tasks (integration + gates)
 
 Deferred Scope:
 
@@ -318,12 +313,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Checker: VERDICT PASS
-- API Designer: VERDICT PASS
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 Notes:
 All specification ambiguities resolved. Ready for technical planning.
