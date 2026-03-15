@@ -399,13 +399,17 @@ The new step is inserted **after** the `module-boundary-validation` step and **b
     key: ai-context-${{ hashFiles('package.json', 'bun.lock', 'scripts/ai-context/**/*') }}
 ```
 
-**After (with new step inserted):**
+**After (with two new steps inserted):**
 
 ```yaml
 - name: module-boundary-validation
   run: bun run arch:guard
 
-- name: AI Runtime Validation
+- name: Generate ai-context on cache miss
+  if: steps.cache-ai-context.outputs.cache-hit != 'true'
+  run: bun run ai-context:refresh
+
+- name: AI Agent Runtime Status Check
   run: bun ai-runtime:status
 
 - name: Save ai-context artifacts cache (T087)
@@ -415,6 +419,12 @@ The new step is inserted **after** the `module-boundary-validation` step and **b
     path: docs/ai/context/
     key: ai-context-${{ hashFiles('package.json', 'bun.lock', 'scripts/ai-context/**/*') }}
 ```
+
+> **Cache-miss safety:** The conditional `Generate ai-context on cache miss` step ensures that
+> `docs/ai/context/` artifacts are present before `bun ai-runtime:status` runs. Without this
+> step, a cold cache would cause `checkContextLoader` to report 2 missing artifacts (exit 1),
+> blocking all downstream Group 2 tests as a false positive. This guard ensures the status
+> check only fails on genuine runtime environment problems, not on CI infrastructure state.
 
 ### 3.4 Why This Placement
 
@@ -487,13 +497,15 @@ import {
 
 #### `checkArchitectureIntelligence`
 
-| Test Name                                                     | Setup                                                 | Expected                                          |
-| ------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------- |
-| returns ok when brain valid and ARCHITECTURE_MAP.json present | existsSync → true; readFileSync → valid JSON          | `status: 'ok'`                                    |
-| returns error when brain absent                               | existsSync → false for brain path                     | `status: 'error'`, suggestion `bun arch:audit`    |
-| returns error when brain JSON is unparseable                  | readFileSync → throws SyntaxError                     | `status: 'error'`, suggestion `bun arch:audit`    |
-| returns warning when brain edges contain relative paths       | readFileSync → JSON with edges `[{from:'./pkg',...}]` | `status: 'warning'`                               |
-| returns error when ARCHITECTURE_MAP.json absent               | existsSync → true for brain, false for map            | `status: 'error'`, suggestion `bun arch:generate` |
+| Test Name                                                          | Setup                                                             | Expected                                          |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------------- |
+| returns ok when brain valid and ARCHITECTURE_MAP.json present      | existsSync → true; readFileSync → valid JSON                      | `status: 'ok'`                                    |
+| returns error when brain absent                                    | existsSync → false for brain path                                 | `status: 'error'`, suggestion `bun arch:audit`    |
+| returns error when brain JSON is unparseable                       | readFileSync → throws SyntaxError                                 | `status: 'error'`, suggestion `bun arch:audit`    |
+| returns error when brain is empty object {}                        | readFileSync → `'{}'`                                             | `status: 'error'`, suggestion `bun arch:audit`    |
+| returns warning when brain edges contain relative paths            | readFileSync → JSON with edges `[{from:'./pkg',...}]`             | `status: 'warning'`                               |
+| returns warning when brain edges contain segment-beyond-root paths | readFileSync → JSON with edges `[{from:'srcvue/test-utils',...}]` | `status: 'warning'`                               |
+| returns error when ARCHITECTURE_MAP.json absent                    | existsSync → true for brain, false for map                        | `status: 'error'`, suggestion `bun arch:generate` |
 
 #### `checkMcpRouting`
 
