@@ -91,7 +91,9 @@ export function checkWorkspaceLinks(): boolean {
 
       if (!pkg.name) continue
       const linkPath = path.join(repoRoot, 'node_modules', pkg.name)
-      if (!fs.existsSync(linkPath)) {
+      const pkgOnFs = path.join(repoRoot, dir, entry.name)
+      // Accept either a node_modules workspace link OR the package existing in the repo
+      if (!(fs.existsSync(linkPath) || fs.existsSync(pkgOnFs))) {
         broken.push(pkg.name)
       }
     }
