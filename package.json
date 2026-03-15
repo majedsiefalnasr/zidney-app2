@@ -33,7 +33,7 @@
     "test:e2e:backoffice": "bunx playwright test --config apps/backoffice/playwright.config.ts",
     "test:e2e:frontoffice": "bunx playwright test --config apps/frontoffice/playwright.config.ts",
     "test:e2e": "bun run test:e2e:mmc && bun run test:e2e:backoffice && bun run test:e2e:frontoffice",
-    "build": "bun workspaces run build",
+    "build": "bun run --workspaces build",
     "dev:infra": "docker compose up -d",
     "dev:api": "bun --cwd apps/api dev",
     "dev:worker": "bun --cwd apps/worker dev",
