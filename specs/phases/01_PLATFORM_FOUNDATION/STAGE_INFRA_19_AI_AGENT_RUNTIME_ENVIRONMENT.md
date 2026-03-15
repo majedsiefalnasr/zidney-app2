@@ -3,32 +3,30 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-15T00:03:00.000Z
+Last Updated: 2026-03-15T00:04:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- `scripts/ai-runtime/runtime-status.ts` implements 9 diagnostic checks across 5 runtime layers
-- 3 `package.json` script entries: `ai-runtime:status`, `ai-runtime:refresh`, `ai-runtime:validate`
-- CI step added to `arch-guard` job in `.github/workflows/ci.yml`
-- Unit tests: `tests/unit/ai-runtime/runtime-status.test.ts`
-- Integration tests: `tests/integration/ai-runtime/runtime-status.integration.test.ts`
+- Total: 17 atomic tasks
+- T001–T008: Script implementation (scaffold, 5 check functions, formatter, main)
+- T009–T010: Configuration (package.json scripts, ci.yml step) — parallel eligible
+- T011–T012: Test files (unit mocked fs, integration real fs) — parallel eligible
+- T013–T017: Validation gate (runtime, lint, typecheck, tests) — parallel eligible
 
 Deferred Scope:
 
-- Changes to existing skill files (already complete)
-- New packages or apps under packages/ or apps/
-- MCP server configuration changes
+- None — full feature scope captured and tasked
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Checker: PASS (all 6 checks clean)
-- Developer tooling only — no tenant/DB/attempt interaction
+- Task set compliant — drift analysis required before implementation
+- No DB writes, no DDD modules, no cross-layer imports
+- All validation tasks included in T013–T017
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
