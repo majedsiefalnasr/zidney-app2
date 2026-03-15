@@ -3,20 +3,30 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-15T00:00:00Z
+Last Updated: 2026-03-15T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- scripts/dev/repo-doctor.ts — diagnostic runner
+- scripts/dev/repo-fix.ts — automated repair runner
+- scripts/dev/repo-onboard.ts — onboarding automation runner
+- scripts/dev/repo-status.ts — repository status reporter
+- Root package.json script registrations (4 new entries)
+- CI integration step for repo:doctor
+- README developer quick-start section update
+
+Deferred Scope:
+
+- No items deferred
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
