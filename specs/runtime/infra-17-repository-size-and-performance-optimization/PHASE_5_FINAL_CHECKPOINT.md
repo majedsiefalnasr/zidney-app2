@@ -131,7 +131,7 @@
 #### T106: Dependency Criticality Audit ✅
 
 - **Script**: `scripts/dev/analyze-dependency-criticality.ts`
-- **Report**: `.dependency-removal-report.json`
+- **Report**: `reports/.dependency-removal-report.json`
 - **Finding**: All 22 dependencies essential
 - **Recommendation**: Conservative approach, NO REMOVALS
 - **Status**: ✅ COMPLETE

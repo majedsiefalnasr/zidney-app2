@@ -105,7 +105,7 @@ async function auditSkillFiles(): Promise<void> {
   }
 
   // Write audit report
-  const reportPath = './.skill-audit-report.json'
+  const reportPath = './reports/.skill-audit-report.json'
   const report = {
     timestamp: new Date().toISOString(),
     totalFiles: audits.length,

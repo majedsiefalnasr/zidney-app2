@@ -104,8 +104,8 @@ async function analyzeDependencies(): Promise<void> {
       ],
     }
 
-    await Bun.write('.dependency-analysis-report.json', JSON.stringify(report, null, 2))
-    console.log(`\n📄 Analysis report saved to: .dependency-analysis-report.json\n`)
+    await Bun.write('reports/dependency-analysis-report.json', JSON.stringify(report, null, 2))
+    console.log(`\n📄 Analysis report saved to: reports/dependency-analysis-report.json\n`)
 
     console.log('✅ T103 Complete: Dependency analysis baseline established\n')
 

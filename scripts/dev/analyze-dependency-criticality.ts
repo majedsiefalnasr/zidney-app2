@@ -146,8 +146,8 @@ async function conservativeDependencyAnalysis(): Promise<void> {
     analysis,
   }
 
-  await Bun.write('.dependency-removal-report.json', JSON.stringify(report, null, 2))
-  console.log('📄 Report saved to: .dependency-removal-report.json\n')
+  await Bun.write('reports/.dependency-removal-report.json', JSON.stringify(report, null, 2))
+  console.log('📄 Report saved to: reports/.dependency-removal-report.json\n')
 
   process.exit(0)
 }

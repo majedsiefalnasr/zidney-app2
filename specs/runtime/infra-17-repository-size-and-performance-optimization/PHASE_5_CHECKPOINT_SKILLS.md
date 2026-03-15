@@ -16,7 +16,7 @@
   - Created `scripts/dev/audit-skill-sizes.ts` audit script
   - Discovered 1 oversized file (aws-serverless-eda: 805 lines)
   - Identified 1 marginal file (Playwright: 454 lines)
-  - Generated `.skill-audit-report.json`
+  - Generated `reports/.skill-audit-report.json`
 - **Result**: ✅ Identified 805-line oversized skill for splitting
 
 ### T097: AWS Serverless Skill Split (COMPLETE)
