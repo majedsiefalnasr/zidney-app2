@@ -88,7 +88,7 @@ No data model changes in this stage.
 ### Session 2026-03-15
 
 - Q: Does each orchestration run write to a uniquely-named file (e.g., `{execution_id}.json`) or append to a shared rolling log file? → A: Each run writes to its own file named `{execution_id}.json` under `docs/architecture/health/ai-execution-logs/`. No shared log file is used. This makes concurrent invocations for different tasks inherently safe without file locking.
-- Q: Which specific packages may `scripts/ai-engine/` import from — all of `packages/*` or only specific ones? → A: Only `packages/logger` and `packages/config` are permitted. No other packages from `packages/*` may be imported by `scripts/ai-engine/`.
+- Q: Which specific packages may `scripts/ai-engine/` import from — all of `packages/*` or only specific ones? → A: Only `packages/logger` is permitted (for structured logging). `packages/config` is **not** permitted — it imports `DATABASE_URL`, `REDIS_URL`, and `JWT_SECRET` from the server environment; importing it in a CLI script causes a crash when those variables are absent. No other packages from `packages/*` may be imported by `scripts/ai-engine/`. (See Research Decision 2 in research.md.)
 - Q: What criterion defines `ai-architecture-brain.json` as "stale" (vs absent) for the purposes of `ai:validate` detection? → A: The file is considered stale if its filesystem mtime predates the most recently modified TypeScript source file under `packages/` or `apps/`. If no source file is newer than the brain artifact, it is considered fresh. Absent means the file does not exist at the expected path.
 - Q: Since FR-011 forbids `console.log` and routes all output to log files, how does the CI step produce visible output for reviewers? → A: Orchestration scripts produce zero stdout/stderr output. The CI job adds a dedicated post-step that reads the JSON artifact and appends a summary to `$GITHUB_STEP_SUMMARY` (matching the `architecture-governance.yml` pattern). The validation artifact is also published via `actions/upload-artifact@v4`, both matching existing CI conventions.
 - Q: What are the per-command timeout budget values for `ai:run` and `ai:plan`? SC-010 defines `ai:validate` at 90 s (local) / 120 s (CI) but leaves these two unspecified. → A: `ai:plan` timeout = 120 s (local and CI). `ai:run` timeout = 300 s (local and CI). These values are enforced inside the scripts; a structured error artifact is written before termination if the budget is exceeded.
@@ -155,16 +155,16 @@ Not applicable to this stage. The orchestration CLI scripts are developer-local 
 
 ## Layer Separation Confirmation
 
-| Rule                                                                                     | Status                                           |
-| ---------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Frontend contains no business logic                                                      | Unaffected                                       |
-| API contains no grading logic                                                            | Unaffected                                       |
-| Worker contains no HTTP logic                                                            | Unaffected                                       |
-| MMC does not access tenant DB                                                            | Unaffected                                       |
-| No direct DB creation outside provisioning                                               | Confirmed — this stage creates no DB connections |
-| `scripts/ai-engine/` imports only from `packages/logger` and `packages/config` or stdlib | Required — import boundaries enforced            |
+| Rule                                                               | Status                                           |
+| ------------------------------------------------------------------ | ------------------------------------------------ |
+| Frontend contains no business logic                                | Unaffected                                       |
+| API contains no grading logic                                      | Unaffected                                       |
+| Worker contains no HTTP logic                                      | Unaffected                                       |
+| MMC does not access tenant DB                                      | Unaffected                                       |
+| No direct DB creation outside provisioning                         | Confirmed — this stage creates no DB connections |
+| `scripts/ai-engine/` imports only from `packages/logger` or stdlib | Required — import boundaries enforced            |
 
-Layer separation is not violated. `scripts/ai-engine/` may import ONLY from `packages/logger` (for structured logging) and `packages/config` (for configuration constants). No imports from any other package under `packages/*` or from `apps/*` are permitted.
+Layer separation is not violated. `scripts/ai-engine/` may import ONLY from `packages/logger` (for structured logging). `packages/config` is explicitly excluded because it reads server-only environment variables (`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`) at import time, which crashes in CLI contexts. No imports from any other package under `packages/*` or from `apps/*` are permitted. (See Research Decision 2.)
 
 ---
 
@@ -275,7 +275,7 @@ As a CI pipeline maintainer, I need an AI Execution Validation step in CI so any
 - **FR-011**: Orchestration scripts MUST NOT use `console.log`; all output MUST be structured JSON to log files.
 - **FR-012**: Each execution run MUST generate a unique execution ID (timestamp + task hash) and MUST NOT create duplicate log entries for the same run ID.
 - **FR-013**: All three orchestration scripts MUST enforce per-command timeout budgets and MUST terminate with a structured error artifact if a budget is exceeded. Budget values: `ai:plan` = 120 s; `ai:run` = 300 s; `ai:validate` = 120 s (CI) / 90 s (local) per SC-010.
-- **FR-014**: The `scripts/ai-engine/` module MUST import only from `packages/logger` and `packages/config` (or Node/Bun stdlib); imports from any other package under `packages/*` or from `apps/*` are forbidden.
+- **FR-014**: The `scripts/ai-engine/` module MUST import only from `packages/logger` (or Node/Bun stdlib); imports from `packages/config` or any other package under `packages/*` or from `apps/*` are forbidden. (`packages/config` reads server-only env vars at import time and must not be used in CLI scripts — see Research Decision 2.)
 - **FR-015**: The CI pipeline MUST include an "AI Execution Validation" step that invokes `bun ai:validate`; the step MUST fail the CI job on non-zero exit.
 - **FR-016**: The CI validation step MUST publish the resulting validation artifact as a CI artifact for reviewer inspection.
 - **FR-017**: The system MUST preserve database-per-tenant isolation and MUST NOT introduce row-based multi-tenancy, cross-tenant joins, shared tenant data, or tenant overrides from request body.
@@ -310,7 +310,7 @@ As a CI pipeline maintainer, I need an AI Execution Validation step in CI so any
 - **SC-008**: 0 new HTTP endpoints, API routes, queue consumers, or database tables are introduced by this stage.
 - **SC-009**: 100% of CI validation runs publish a validation artifact accessible to reviewers.
 - **SC-010**: 95% of local `ai:validate` runs on a compliant repository complete within 90 seconds; 95% of CI `ai:validate` runs complete within 120 seconds during validation.
-- **SC-011**: 100% of orchestration scripts enforce import boundaries: no imports from `apps/*` or from any `packages/*` other than `packages/logger` and `packages/config` are present in `scripts/ai-engine/`.
+- **SC-011**: 100% of orchestration scripts enforce import boundaries: no imports from `apps/*` or from any `packages/*` other than `packages/logger` are present in `scripts/ai-engine/`. (`packages/config` is specifically excluded — see FR-014.)
 - **SC-012**: 100% of execution log writes use atomic (temp-file-then-rename) writes, with zero partial log artifacts observable after any single run.
 
 ---
@@ -322,7 +322,7 @@ As a CI pipeline maintainer, I need an AI Execution Validation step in CI so any
 - Existing runtime enforcement for tenant resolution, license checks, compatibility validation, server-authoritative time, attempt snapshots, and worker-finalized grading is unchanged by this stage.
 - The architecture intelligence artifacts under `docs/ai/context/` are maintained by `bun scripts/infra-audit.ts` and are assumed to exist or be regenerable before orchestration scripts are invoked.
 - The project already has `bun arch:guard`, `bun type-safety-guard`, and `bun arch:health` commands available; `ai:validate` orchestrates them rather than reimplementing their logic.
-- No new packages are introduced; `scripts/ai-engine/` imports only from `packages/logger`, `packages/config`, and Node/Bun stdlib.
+- No new packages are introduced; `scripts/ai-engine/` imports only from `packages/logger` and Node/Bun stdlib. (`packages/config` is excluded — see FR-014 and Research Decision 2.)
 
 ---
 

@@ -5,18 +5,21 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-15T00:02:00.000Z
+Last Updated: 2026-03-15T00:03:00.000Z
 
-Scope Defined:
+Scope Planned:
 
 - Three orchestration CLI scripts: `run-task.ts`, `plan-task.ts`, `validate-execution.ts`
 - Three package.json scripts: `ai:run` (300 s timeout), `ai:plan` (120 s), `ai:validate` (90 s local / 120 s CI)
+- 8 shared modules + 3 entry points + 10 test files under `scripts/ai-engine/`
 - Structured JSON execution logging: one `{execution_id}.json` per run in `docs/architecture/health/ai-execution-logs/`
-- CI pipeline "AI Execution Validation" step with `$GITHUB_STEP_SUMMARY` + artifact upload
-- Imports restricted to `packages/logger`, `packages/config`, and stdlib only
-- Staleness detection: mtime comparison against most-recently-changed `.ts` under `packages/` / `apps/`
+- Plan documents: `{task_id}.md` in `docs/architecture/health/ai-plans/`
+- CI pipeline steps 11–13 in `architecture-governance.yml`
+- Imports: `packages/logger` + stdlib only (`packages/config` excluded)
+- Execution ID: `${Date.now()}-${sha256(task).slice(0,8)}` — monotonic + unique per task
+- Atomic writes: tmp→rename; exit codes 0/1/2/3/4 across all three commands
 
 Deferred Scope:
 
@@ -26,10 +29,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Architecture Checker PASS, API Designer PASS. Task breakdown in progress.
 
 ---
 
