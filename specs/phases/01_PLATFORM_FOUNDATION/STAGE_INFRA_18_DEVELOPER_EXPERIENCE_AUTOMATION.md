@@ -3,19 +3,17 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-15T00:00:00Z
+Last Updated: 2026-03-15T01:00:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- scripts/dev/repo-doctor.ts — 7-check diagnostic runner
-- scripts/dev/repo-fix.ts — 5-step automated repair runner
-- scripts/dev/repo-onboard.ts — 7-step onboarding automation
-- scripts/dev/repo-status.ts — repository health summary reporter
-- Root package.json: 4 script entries + engines.bun field
-- .github/workflows/ci.yml: repo-doctor job in Group 1
-- README.md: Developer Quick Commands section
+- Total: 12 atomic tasks
+- Foundation: T001 (shared formatter)
+- Scripts: T002–T005 (4 parallel dev scripts)
+- Tests: T006–T009 (4 parallel test files)
+- Config/Docs: T010–T012 (package.json, CI, README)
 
 Deferred Scope:
 
@@ -23,11 +21,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 - Guardian validation: Architecture Checker PASS, API Designer PASS
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
