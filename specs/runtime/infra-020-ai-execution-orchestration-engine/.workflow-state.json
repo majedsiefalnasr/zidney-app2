@@ -5,7 +5,7 @@
   "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_20_AI_EXECUTION_ORCHESTRATION_ENGINE.md",
   "branch": "spec/infra-020-ai-execution-orchestration-engine",
   "base_branch": "develop",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
@@ -13,12 +13,16 @@
   "plan_completed": false,
   "tasks_total": null,
   "tasks_completed": null,
-  "last_updated": "2026-03-15T00:00:00.000Z",
+  "last_updated": "2026-03-15T00:01:00.000Z",
   "history": [
     {
       "event": "branch_created",
       "branch": "spec/infra-020-ai-execution-orchestration-engine",
       "timestamp": "2026-03-15T00:00:00.000Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-03-15T00:01:00.000Z"
     }
   ]
 }

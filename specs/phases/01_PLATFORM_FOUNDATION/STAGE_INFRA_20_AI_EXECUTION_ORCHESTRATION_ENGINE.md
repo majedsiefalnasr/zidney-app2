@@ -5,20 +5,30 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-15T00:00:00.000Z
+Last Updated: 2026-03-15T00:01:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Three orchestration CLI scripts: `run-task.ts`, `plan-task.ts`, `validate-execution.ts`
+- Three package.json scripts: `ai:run`, `ai:plan`, `ai:validate`
+- Structured JSON execution logging to `docs/architecture/health/ai-execution-logs/`
+- CI pipeline "AI Execution Validation" step
+- Idempotent, atomic execution log artifact management
+
+Deferred Scope:
+
+- LLM integrations / AI inference logic
+- Persistent external log storage (DB, log service)
+- New tenant-facing UI, API endpoints, or worker queue consumers
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
