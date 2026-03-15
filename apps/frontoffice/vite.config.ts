@@ -11,6 +11,10 @@ export default defineConfig({
         find: '@zidney/ui',
         replacement: resolve(__dirname, '../../packages/ui-system/src'),
       },
+      {
+        find: '@zidney/logger',
+        replacement: resolve(__dirname, '../../packages/logger/src'),
+      },
     ],
   },
 })

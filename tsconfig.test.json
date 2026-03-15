@@ -5,7 +5,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node", "vitest/globals"],
+    "types": ["node", "bun", "vitest/globals"],
     "paths": {
       "@/*": ["./apps/backoffice/src/*", "./apps/frontoffice/src/*", "./apps/mmc/src/*"],
       "@zidney/app/*": ["./apps/*/src"],

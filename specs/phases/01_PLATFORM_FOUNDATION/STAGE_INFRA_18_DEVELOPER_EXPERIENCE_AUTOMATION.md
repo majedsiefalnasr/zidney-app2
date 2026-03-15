@@ -1,5 +1,46 @@
 # STAGE_INFRA_18_DEVELOPER_EXPERIENCE_AUTOMATION
 
+## Stage Status
+
+Status: PRODUCTION READY
+Risk Level: LOW
+Closure Date: 2025-07-15
+
+Scope Closed:
+
+- T001 `scripts/dev/formatter.ts` — shared output formatter
+- T002 `scripts/dev/repo-doctor.ts` — 7-check repository health diagnostic
+- T003 `scripts/dev/repo-fix.ts` — 5-step automated repair runner
+- T004 `scripts/dev/repo-onboard.ts` — 7-step developer onboarding
+- T005 `scripts/dev/repo-status.ts` — read-only health summary
+- T006–T009 Unit tests for all 4 scripts (81 tests total, 100% pass)
+- T010 `package.json` — engines.bun + 4 repo:\* scripts
+- T011 `.github/workflows/ci.yml` — repo-doctor CI job
+- T012 `README.md` — Developer Quick Commands table
+- T013 Integration smoke test for repo:doctor
+- 13 / 13 tasks completed
+
+Deferred Scope:
+
+- JSON output mode for commands (deferred to future stage)
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced — N/A (no DB access)
+- ADR-0002 Snapshot immutability enforced — N/A (no attempt engine)
+- ADR-0006 Server-authoritative time enforced — N/A
+- ADR-0007 Version compatibility enforced — N/A (no workspace routing)
+- ADR-0008 Semantic versioning enforced: `engines.bun: ">=1.3.9"`
+- console.log absent — process.stdout.write used throughout
+- Security contracts H-01, H-02, M-01, M-02, L-01 implemented and tested
+- Import boundaries respected (packages/types + Node built-ins only)
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
+
+---
+
 ## Purpose
 
 This stage introduces a **Developer Experience (DX) automation layer** for the Zidney monorepo.

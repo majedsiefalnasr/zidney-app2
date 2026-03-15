@@ -23,6 +23,7 @@
     "check:store-cycles": "bun scripts/check-store-cycles.ts",
     "test": "vitest run",
     "test:unit": "vitest run --project mmc --project backoffice --project frontoffice --project api-client --project domain-core --project logger --project config --project redis-utils --project types --project ui-system --project validation",
+    "test:unit:debug": "vitest run --reporter verbose --project mmc --project backoffice --project frontoffice --project api-client --project domain-core --project logger --project config --project redis-utils --project types --project ui-system --project validation",
     "test:unit:boundaries": "vitest run tests/static/module-boundaries.test.ts tests/unit/infra-audit/infra-audit-boundaries.test.ts tests/unit/ai-guard/ai-guard-boundaries.test.ts",
     "test:integration": "vitest run --dir tests/integration --fileParallelism=false",
     "test:performance": "vitest run --dir tests/performance",
@@ -32,7 +33,7 @@
     "test:e2e:backoffice": "bunx playwright test --config apps/backoffice/playwright.config.ts",
     "test:e2e:frontoffice": "bunx playwright test --config apps/frontoffice/playwright.config.ts",
     "test:e2e": "bun run test:e2e:mmc && bun run test:e2e:backoffice && bun run test:e2e:frontoffice",
-    "build": "bun workspaces run build",
+    "build": "bun run --workspaces build",
     "dev:infra": "docker compose up -d",
     "dev:api": "bun --cwd apps/api dev",
     "dev:worker": "bun --cwd apps/worker dev",
@@ -58,7 +59,11 @@
     "validate:types": "bun typecheck && bun type-safety-guard --json",
     "ai-context:generate": "bun scripts/generate-ai-context.ts",
     "ai-context:refresh": "bun scripts/generate-ai-context.ts --force",
-    "ai-context:validate": "bun scripts/generate-ai-context.ts --validate"
+    "ai-context:validate": "bun scripts/generate-ai-context.ts --validate",
+    "repo:doctor": "bun scripts/dev/repo-doctor.ts",
+    "repo:fix": "bun scripts/dev/repo-fix.ts",
+    "repo:onboard": "bun scripts/dev/repo-onboard.ts",
+    "repo:status": "bun scripts/dev/repo-status.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
@@ -82,6 +87,9 @@
     "vue-router": "4.6.4",
     "wait-on": "^9.0.4",
     "yaml-lint": "^1.7.0"
+  },
+  "engines": {
+    "bun": ">=1.3.9"
   },
   "dependencies": {
     "@types/bun": "^1.3.10"

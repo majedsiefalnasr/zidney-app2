@@ -11,7 +11,7 @@
     "./schemas/rate-limiting": "./src/schemas/rate-limiting.ts"
   },
   "scripts": {
-    "build": "bun build src/index.ts",
+    "build": "bun build src/index.ts --target=node",
     "test": "vitest"
   },
   "dependencies": {
