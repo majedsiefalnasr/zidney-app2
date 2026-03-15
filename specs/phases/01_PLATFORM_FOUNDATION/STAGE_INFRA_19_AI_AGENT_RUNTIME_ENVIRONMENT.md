@@ -3,16 +3,16 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: LOW
-Last Updated: 2026-03-15T00:01:00.000Z
+Last Updated: 2026-03-15T00:02:00.000Z
 
 Scope Defined:
 
-- `scripts/ai-runtime/runtime-status.ts` — AI runtime diagnostics script
+- `scripts/ai-runtime/runtime-status.ts` — AI runtime diagnostics script (9 checks, 5 layers)
 - `package.json` scripts: `ai-runtime:status`, `ai-runtime:refresh`, `ai-runtime:validate`
-- CI GitHub Actions step: `bun ai-runtime:status`
-- 5-layer runtime model documented in spec
+- CI: step added within `arch-guard` job in `.github/workflows/ci.yml`
+- Unit tests: `tests/unit/ai-runtime/`; Integration tests: `tests/integration/ai-runtime/`
 
 Deferred Scope:
 
@@ -22,11 +22,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
-- Developer tooling only — no tenant, DB, or attempt engine interaction
+- Clarifications resolved — planning authorized
+- Developer tooling only — no tenant/DB/attempt interaction
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

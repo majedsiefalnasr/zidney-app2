@@ -540,3 +540,61 @@ Compliant with Zidney Constitution v1.2.0 — No violations detected.
 This stage introduces developer tooling only. It operates entirely outside the tenant isolation, license enforcement, attempt engine, and worker models. No architectural boundaries are crossed. All changes are additive. All file operations within the script are read-only.
 
 Architecture Trust Chain is unaffected: Isolation → License → Authentication → Attempt → Runtime → Frontoffice.
+
+---
+
+## Clarifications
+
+### Session 2026-03-15
+
+The following ambiguities were identified and resolved during the `speckit.clarify` scan on 2026-03-15. All five questions are self-resolved from codebase inspection; no human input was required. No new `[NEEDS CLARIFICATION]` markers were introduced.
+
+---
+
+**Q1: Which specific `.github/workflows/` file should receive the `AI Runtime Validation` step?**
+
+The Architecture Impact table states "`.github/workflows/` (existing workflow file)" without naming which of the 5 discovered workflow files (`ci.yml`, `architecture-governance.yml`, `ai-context-validation.yml`, `ci-type-safety.yml`, `hard-mode-guard.yml`) should be modified.
+
+**Resolved:** The `AI Runtime Validation` step belongs in **`ci.yml`** — the main CI pipeline. `ci.yml` is the only workflow that:
+
+- Runs on push to all feature/fix/infra branches (not just `main`/`develop`), making it the correct gate for all development work
+- Already contains the `arch-guard` Group 1 job, which provisions the `docs/ai/context/` artifacts cache that `ai-runtime:status` depends on
+- Has a clear Group 1 (code quality) → Group 2 (tests/build) pipeline boundary where this step fits naturally
+
+---
+
+**Q2: Should the `AI Runtime Validation` be a new standalone job in `ci.yml` or an additional step within the existing `arch-guard` job?**
+
+The spec refers to "a GitHub Actions step" (not "a job"). The `arch-guard` job in `ci.yml` already restores the `docs/ai/context/` artifact cache — which `bun ai-runtime:status` depends on — and installs dependencies.
+
+**Resolved:** Add as an **additional step within the existing `arch-guard` job** in `ci.yml`, placed after the `module-boundary-validation` step. This:
+
+- Reuses the existing `docs/ai/context/` cache restore — no duplicate cache action needed
+- Keeps all AI/architecture validation steps logically co-located in one job
+- Avoids duplicating Checkout + Setup Bun + Install dependencies overhead in a new job
+- Aligns with the spec's "step" (not "job") phrasing in the Architecture Impact table
+
+---
+
+**Q3: The Layer 1 Context Loader table documents 8 artifacts, but the "Required artifact list for Context Loader check" enumerates only 6. Are `ai-architecture-diff.json`, `ai-runtime-dependents.json`, and `ai-architecture-summary.md` intentionally excluded from the error-level check?**
+
+**Resolved:** Yes, intentional. The Layer 1 table documents all artifacts the architecture intelligence system can produce. The 6-item "Required artifact list" defines the **minimum set whose absence constitutes an error-level check failure**. The 3 excluded artifacts (`ai-architecture-diff.json`, `ai-runtime-dependents.json`, `ai-architecture-summary.md`) are supplementary: their absence does not block core AI agent operation. If checked, their absence should be treated as warning-level at most — they must **not** be added to the error-level required list for this stage.
+
+---
+
+**Q4: `arch:validate-brain` does not currently appear in `ci.yml` or `architecture-governance.yml`. Does the spec's "runs after arch:guard AND arch:validate-brain" require that `arch:validate-brain` be added to `ci.yml` as a prerequisite to this stage?**
+
+Codebase inspection confirmed: `bun arch:validate-brain` maps to `scripts/governance/validate-architecture-brain.ts` (exists locally), but is not invoked in any current CI workflow file.
+
+**Resolved:** No prerequisite CI change is required. The spec's placement description ("after existing architecture validation steps — `arch:guard`, `arch:validate-brain`") is **conceptual ordering** indicating where `ai-runtime:status` fits in the validation family — not a strict `needs:` dependency on a currently-absent CI job. For implementation, the step depends only on the existing `arch-guard` job. Adding `arch:validate-brain` to `ci.yml` as a standalone CI job is a separate future concern and is explicitly outside this stage's scope.
+
+---
+
+**Q5: The test strategy section specifies test types but not file paths. Where should unit and integration tests for `runtime-status.ts` be located?**
+
+**Resolved (from established codebase conventions):** Following the pattern for governance script tests referenced in the `test:unit:boundaries` npm script (`tests/unit/infra-audit/`, `tests/unit/ai-guard/`):
+
+- Unit tests: `tests/unit/ai-runtime/runtime-status.test.ts`
+- Integration tests: `tests/integration/ai-runtime/runtime-status.integration.test.ts`
+
+This mirrors the directory structure used for analogous governance scripts and will be registered in the applicable `vitest` project configuration.
