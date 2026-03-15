@@ -293,30 +293,31 @@ This stage establishes the **stable hygiene baseline for the Zidney monorepo**.
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-15T00:00:00.000Z
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-03-15T00:02:00.000Z
 
 Scope Defined:
 
-- Routing authority verification (ROUTING_AUTHORITY_REGISTRY.md)
+- Routing authority verification against ROUTING_AUTHORITY_REGISTRY.md
 - Template system consolidation check
-- Dead script detection and flagging
-- Unused dependency and workspace package detection
+- Dead script detection — flagged in report only (no removal tooling)
+- Unused dependency detection — root + all workspace packages
+- Workspace package usage validation
 - Skill surface validation (.agents/skills/)
-- CI workflow hygiene check
-- AI context integrity validation
-- Architecture guard full pipeline execution
-- Final hygiene report: docs/reports/REPOSITORY_HYGIENE_REPORT.md
+- CI workflow hygiene (duplicate/redundant pipelines)
+- AI context integrity — SKIP if script missing, WARNING on artifact errors, FAIL on validation errors
+- Architecture guard — pre-existing violations documented only; not blocking
+- Final hygiene report: docs/reports/REPOSITORY_HYGIENE_REPORT.md (committed to source control)
 
 Deferred Scope:
 
-- Destructive cleanup (script deletion, dependency removal) — deferred to human review after report
-- ADR generation — not required for this stage
+- Destructive cleanup (deferred to human review after report)
+- ADR generation (not required)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
