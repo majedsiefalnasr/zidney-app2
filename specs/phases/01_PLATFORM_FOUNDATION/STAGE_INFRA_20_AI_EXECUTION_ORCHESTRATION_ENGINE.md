@@ -5,21 +5,20 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-15T00:03:00.000Z
+Last Updated: 2026-03-15T00:04:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Three orchestration CLI scripts: `run-task.ts`, `plan-task.ts`, `validate-execution.ts`
-- Three package.json scripts: `ai:run` (300 s timeout), `ai:plan` (120 s), `ai:validate` (90 s local / 120 s CI)
-- 8 shared modules + 3 entry points + 10 test files under `scripts/ai-engine/`
-- Structured JSON execution logging: one `{execution_id}.json` per run in `docs/architecture/health/ai-execution-logs/`
-- Plan documents: `{task_id}.md` in `docs/architecture/health/ai-plans/`
-- CI pipeline steps 11–13 in `architecture-governance.yml`
-- Imports: `packages/logger` + stdlib only (`packages/config` excluded)
-- Execution ID: `${Date.now()}-${sha256(task).slice(0,8)}` — monotonic + unique per task
-- Atomic writes: tmp→rename; exit codes 0/1/2/3/4 across all three commands
+- Total: 34 atomic tasks across 7 phases
+- Phase 1 — Setup (4 tasks): directory creation + Vitest registration
+- Phase 2 — Types + utilities (9 tasks): types.ts + 4 utility modules + 4 unit tests
+- Phase 3 — US1 ai:run (8 tasks): 3 prerequisite modules + 1 entry point + 4 unit tests
+- Phase 4 — US2 ai:plan (2 tasks): entry point + unit test
+- Phase 5 — US3 ai:validate (3 tasks): entry point + unit test + integration test
+- Phase 6 — US4 CI (4 tasks): package.json scripts + 3 CI workflow steps
+- Phase 7 — Polish (4 tasks): console.log audit + import boundary audit + test run + lint/type-check
 
 Deferred Scope:
 
@@ -29,10 +28,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Architecture Checker PASS, API Designer PASS. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
