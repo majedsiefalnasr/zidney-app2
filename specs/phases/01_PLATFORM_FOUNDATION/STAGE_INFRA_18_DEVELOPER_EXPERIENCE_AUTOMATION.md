@@ -1,5 +1,25 @@
 # STAGE_INFRA_18_DEVELOPER_EXPERIENCE_AUTOMATION
 
+## Stage Status
+
+Status: DRAFT
+Step: pre_step
+Risk Level: UNKNOWN
+Initiated: 2026-03-15T00:00:00Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
+
+---
+
 ## Purpose
 
 This stage introduces a **Developer Experience (DX) automation layer** for the Zidney monorepo.
