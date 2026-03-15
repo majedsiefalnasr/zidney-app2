@@ -3,16 +3,17 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-15T00:02:00.000Z
+Last Updated: 2026-03-15T00:03:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- `scripts/ai-runtime/runtime-status.ts` — AI runtime diagnostics script (9 checks, 5 layers)
-- `package.json` scripts: `ai-runtime:status`, `ai-runtime:refresh`, `ai-runtime:validate`
-- CI: step added within `arch-guard` job in `.github/workflows/ci.yml`
-- Unit tests: `tests/unit/ai-runtime/`; Integration tests: `tests/integration/ai-runtime/`
+- `scripts/ai-runtime/runtime-status.ts` implements 9 diagnostic checks across 5 runtime layers
+- 3 `package.json` script entries: `ai-runtime:status`, `ai-runtime:refresh`, `ai-runtime:validate`
+- CI step added to `arch-guard` job in `.github/workflows/ci.yml`
+- Unit tests: `tests/unit/ai-runtime/runtime-status.test.ts`
+- Integration tests: `tests/integration/ai-runtime/runtime-status.integration.test.ts`
 
 Deferred Scope:
 
@@ -22,11 +23,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Architecture Checker: PASS (all 6 checks clean)
 - Developer tooling only — no tenant/DB/attempt interaction
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
