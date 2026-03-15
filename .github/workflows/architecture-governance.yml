@@ -109,7 +109,6 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
           fi
 
-
       # ── 11. Run AI Execution Validation ───────────────────────────────
       - name: Run AI Execution Validation
         run: bun ai:validate --ci
