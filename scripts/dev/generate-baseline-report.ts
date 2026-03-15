@@ -40,7 +40,7 @@ const scripts = [
   'scripts/infra-audit.ts',
   'scripts/type-safety-guard.ts',
   'scripts/architecture-diff.ts',
-  'scripts/validate-architecture-brain.ts',
+  'scripts/governance/validate-architecture-brain.ts',
 ]
 const scriptProfiles = ScriptPerformanceProfiler.profileMultipleScripts(scripts, 3)
 

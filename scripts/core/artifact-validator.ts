@@ -122,7 +122,7 @@ export function validateArtifactFile(
 /**
  * Validate artifact-specific content
  */
-function validateArtifactContent(data: unknown, artifactType: ArtifactType): boolean {
+export function validateArtifactContent(data: unknown, artifactType: ArtifactType): boolean {
   if (typeof data !== 'object' || data === null) {
     return false
   }

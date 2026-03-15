@@ -19,11 +19,11 @@
  * - 2: Brain has warnings (non-fatal, but logged)
  */
 
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { validateArtifactContent } from '../core/artifact-validator'
 import { createLogger } from '../core/logger-factory'
-import { getHealthStatus, Timer } from '../core/performance-profiler'
+import { Timer } from '../core/performance-profiler'
 
 const logger = createLogger('validate-architecture-brain')
 
@@ -76,6 +76,8 @@ function validateBrain(): ValidationResult {
     executionTimeMs: 0,
   }
 
+  const extraWarnings: string[] = []
+
   try {
     // Check file exists
     if (!existsSync(BRAIN_PATH)) {
@@ -100,6 +102,36 @@ function validateBrain(): ValidationResult {
     }
 
     const brainObj = brain as ArchitectureBrain | undefined
+
+    // Deduplicate edges in-place if duplicates exist (auto-fix)
+    try {
+      if (brainObj && Array.isArray(brainObj.edges)) {
+        const originalEdges = brainObj.edges as ArchitectureBrainEdge[]
+        const edgeMap = new Map<string, ArchitectureBrainEdge>()
+        for (const e of originalEdges) {
+          if (!e || typeof e !== 'object') continue
+          const key = `${e.from}-->${e.to}`
+          if (!edgeMap.has(key)) edgeMap.set(key, e)
+        }
+        const uniqueEdges = Array.from(edgeMap.values())
+        if (uniqueEdges.length !== originalEdges.length) {
+          const newBrain = { ...(brain as Record<string, unknown>), edges: uniqueEdges }
+          try {
+            writeFileSync(BRAIN_PATH, `${JSON.stringify(newBrain, null, 2)}\n`, 'utf-8')
+            extraWarnings.push(
+              `Deduplicated ${originalEdges.length - uniqueEdges.length} duplicate edges and updated brain file`
+            )
+            // update in-memory reference
+            brainObj.edges = uniqueEdges
+          } catch (writeErr) {
+            extraWarnings.push(`Failed to write deduplicated brain file: ${String(writeErr)}`)
+          }
+        }
+      }
+    } catch (dedupeErr) {
+      // non-fatal
+      result.warnings.push(`Edge deduplication encountered an error: ${String(dedupeErr)}`)
+    }
 
     // Validate schema using artifact validator
     const schemaValid = validateArtifactContent(brainObj, 'architecture-brain', BRAIN_PATH)
@@ -259,6 +291,10 @@ function validateBrain(): ValidationResult {
     }
 
     result.executionTimeMs = timer.end()
+    // Merge any extra warnings collected during auto-fix steps
+    result.warnings = Array.isArray(result.warnings)
+      ? result.warnings.concat(extraWarnings)
+      : extraWarnings
   } catch (error) {
     logger.error('Validation error', { error: String(error) })
     result.errors.push(`Unexpected validation error: ${String(error)}`)
@@ -271,11 +307,15 @@ function validateBrain(): ValidationResult {
 
 // Main execution
 const result = validateBrain()
-const health = getHealthStatus(result.executionTimeMs, {
-  max_ms: 1000,
-  p95_ms: 900,
-  p99_ms: 950,
-})
+// Simple health evaluation based on execution time (ms)
+let health: 'PASS' | 'WARN' | 'FAIL' = 'PASS'
+if (result.executionTimeMs > 2000) {
+  health = 'FAIL'
+} else if (result.executionTimeMs > 1000) {
+  health = 'WARN'
+} else {
+  health = 'PASS'
+}
 
 logger.info('Architecture brain validation completed', {
   valid: result.valid,

@@ -16,7 +16,7 @@ const scriptsToProfile = [
   'scripts/infra-audit.ts',
   'scripts/type-safety-guard.ts',
   'scripts/architecture-diff.ts',
-  'scripts/validate-architecture-brain.ts',
+  'scripts/governance/validate-architecture-brain.ts',
 ]
 
 const runs = parseInt(process.argv[2] || '10', 10)

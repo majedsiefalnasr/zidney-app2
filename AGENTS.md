@@ -919,7 +919,7 @@ AI agents should assume the following validation pipeline exists locally and in 
 ```
 bun scripts/ai-guard.ts
 bun scripts/infra-audit.ts
-bun scripts/validate-architecture-brain.ts
+bun scripts/governance/validate-architecture-brain.ts
 ```
 
 If violations occur, AI must reason about the architecture graph and correct the structure before
