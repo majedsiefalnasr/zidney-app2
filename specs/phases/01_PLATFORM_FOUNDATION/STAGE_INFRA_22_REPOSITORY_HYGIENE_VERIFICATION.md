@@ -293,11 +293,11 @@ This stage establishes the **stable hygiene baseline for the Zidney monorepo**.
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-15T00:02:00.000Z
+Last Updated: 2026-03-15T00:03:00.000Z
 
-Scope Defined:
+Scope Planned:
 
 - Routing authority verification against ROUTING_AUTHORITY_REGISTRY.md
 - Template system consolidation check
@@ -309,6 +309,7 @@ Scope Defined:
 - AI context integrity — SKIP if script missing, WARNING on artifact errors, FAIL on validation errors
 - Architecture guard — pre-existing violations documented only; not blocking
 - Final hygiene report: docs/reports/REPOSITORY_HYGIENE_REPORT.md (committed to source control)
+- Orchestrator at scripts/dev/hygiene-report-generator.ts + 9 task helpers
 
 Deferred Scope:
 
@@ -317,7 +318,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Architecture Checker: VERDICT PASS
+- API Designer: VERDICT PASS
+
+Notes:
+Technical plan complete. Task breakdown in progress.
 
 Notes:
 All specification ambiguities resolved. Ready for technical planning.
