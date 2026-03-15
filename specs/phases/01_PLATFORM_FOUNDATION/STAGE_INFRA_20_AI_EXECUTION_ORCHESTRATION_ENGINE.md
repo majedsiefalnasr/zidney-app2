@@ -5,30 +5,31 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-15T00:01:00.000Z
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-03-15T00:02:00.000Z
 
 Scope Defined:
 
 - Three orchestration CLI scripts: `run-task.ts`, `plan-task.ts`, `validate-execution.ts`
-- Three package.json scripts: `ai:run`, `ai:plan`, `ai:validate`
-- Structured JSON execution logging to `docs/architecture/health/ai-execution-logs/`
-- CI pipeline "AI Execution Validation" step
-- Idempotent, atomic execution log artifact management
+- Three package.json scripts: `ai:run` (300 s timeout), `ai:plan` (120 s), `ai:validate` (90 s local / 120 s CI)
+- Structured JSON execution logging: one `{execution_id}.json` per run in `docs/architecture/health/ai-execution-logs/`
+- CI pipeline "AI Execution Validation" step with `$GITHUB_STEP_SUMMARY` + artifact upload
+- Imports restricted to `packages/logger`, `packages/config`, and stdlib only
+- Staleness detection: mtime comparison against most-recently-changed `.ts` under `packages/` / `apps/`
 
 Deferred Scope:
 
 - LLM integrations / AI inference logic
-- Persistent external log storage (DB, log service)
+- Persistent external log storage
 - New tenant-facing UI, API endpoints, or worker queue consumers
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
