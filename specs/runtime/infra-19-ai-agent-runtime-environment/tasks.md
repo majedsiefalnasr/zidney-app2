@@ -54,7 +54,7 @@ Tasks follow a strict sequential order with explicit parallel opportunities mark
 
 > Create the new script directory. Required before any script file can be authored.
 
-- [ ] T001 Create directory `scripts/ai-runtime/` (mirrors `scripts/dev/`, `scripts/governance/`, `scripts/architecture/` conventions)
+- [x] T001 Create directory `scripts/ai-runtime/`
 
 ---
 
@@ -63,19 +63,19 @@ Tasks follow a strict sequential order with explicit parallel opportunities mark
 > Implement `scripts/ai-runtime/runtime-status.ts` incrementally. Tasks T002–T008 are
 > all modifications to the same file and must execute sequentially.
 
-- [ ] T002 Create `scripts/ai-runtime/runtime-status.ts` with file scaffold: `node:fs` and `node:path` imports; define `CheckStatus` type (`"ok" | "warning" | "error"`); define **discriminated union** `CheckResult` type — `type OkResult = { label: string; status: 'ok'; message: string }; type WarnResult = { label: string; status: 'warning'; message: string; suggestion: string }; type ErrorResult = { label: string; status: 'error'; message: string; suggestion: string }; export type CheckResult = OkResult | WarnResult | ErrorResult;` (TypeScript-enforced suggestion presence on non-ok results — prevents formatter printing "→ run: undefined"); module-level constants (`DEFAULT_THRESHOLD_MS`, `CONTEXT_ARTIFACTS` array of 6 paths, `SKILL_NAMES` array of 7 names, `GOVERNANCE_SCRIPTS` array of 5 paths, `MCP_MATRIX_PATH`); and `getFreshnessThreshold()` helper reading `AI_RUNTIME_FRESHNESS_THRESHOLD_MS` env var with fallback to 24 h default
+- [x] T002 Create `scripts/ai-runtime/runtime-status.ts` with file scaffold
 
-- [ ] T003 Implement and export `checkContextLoader(root: string): CheckResult` in `scripts/ai-runtime/runtime-status.ts` — checks existence of all 6 required `docs/ai/context/` artifacts using `existsSync`; on all-present, checks freshness of `ai-context-mini.json` via `statSync().mtimeMs` against threshold; returns `error` (with `suggestion: 'bun ai-runtime:refresh'`) if any artifact absent, `warning` if stale, `ok` if all present and fresh; wraps entire body in `try/catch` returning error status on exception
+- [x] T003 Implement and export `checkContextLoader(root: string): CheckResult`
 
-- [ ] T004 Implement and export `checkSkillLoader(root: string): CheckResult` in `scripts/ai-runtime/runtime-status.ts` — checks `existsSync` for each of the 7 required `.agents/skills/<name>/SKILL.md` paths; counts present vs. missing; returns `error` (listing missing paths, `suggestion: 'Restore missing skill directories under .agents/skills/'`) if any missing, `ok` with `'Core skills present (7/7)'` message if all present; wraps in `try/catch`
+- [x] T004 Implement and export `checkSkillLoader(root: string): CheckResult`
 
-- [ ] T005 Implement and export `checkArchitectureIntelligence(root: string): CheckResult` in `scripts/ai-runtime/runtime-status.ts` — use **independent try/catch blocks per sub-check** (not a single outer try/catch) so both sub-checks always execute even if sub-check 3a throws an unexpected OS-level error; sub-check 3a (independent try/catch): verifies `docs/ai/context/ai-architecture-brain.json` exists and is parseable non-empty JSON via `readFileSync` + `JSON.parse`; if parsed successfully, samples the first 200 edges of `dependencyGraph.edges` and validates each edge's `from` and `to` against the positive pattern `^(packages|apps)/[^/]+$` using `RegExp.test()` — any edge endpoint failing this pattern is a violation (catches `'./'`-prefixed paths, segment-beyond-root paths like `/src/`/`/dist/`, AND malformed concatenations like `srcvue/test-utils` per AGENTS.md §Architecture Brain Validation); reports violation count with `suggestion: 'bun arch:validate-brain'`; sub-check 3b (independent try/catch): verifies `docs/architecture/intelligence/ARCHITECTURE_MAP.json` exists (error with `suggestion: 'bun arch:generate'`); aggregates sub-check results: `error` if brain absent/unparseable or map absent, `warning` if edge violations detected, `ok` otherwise
+- [x] T005 Implement and export `checkArchitectureIntelligence(root: string): CheckResult`
 
-- [ ] T006 Implement and export `checkMcpRouting(root: string): CheckResult` in `scripts/ai-runtime/runtime-status.ts` — checks `existsSync` for `docs/ai/MCP_ACTIVATION_MATRIX.md`; returns `warning` (`'MCP activation matrix absent'`, `suggestion: 'Restore docs/ai/MCP_ACTIVATION_MATRIX.md'`) if absent, `ok` (`'MCP activation matrix present'`) if present; wraps in `try/catch`
+- [x] T006 Implement and export `checkMcpRouting(root: string): CheckResult`
 
-- [ ] T007 Implement and export `checkDeterministicExecution(root: string): CheckResult` in `scripts/ai-runtime/runtime-status.ts` — checks `existsSync` for all 5 governance scripts: `scripts/ai-guard.ts`, `scripts/infra-audit.ts`, `scripts/governance/validate-architecture-brain.ts`, `scripts/architecture-guard/architecture-guard.ts`, `scripts/type-safety-guard.ts`; returns `error` (listing missing paths, `suggestion: 'Restore missing governance scripts'`) if any absent, `ok` (`'Runtime governance scripts present'`) if all present; wraps in `try/catch`
+- [x] T007 Implement and export `checkDeterministicExecution(root: string): CheckResult`
 
-- [ ] T008 Implement output formatter and `main()` entry point in `scripts/ai-runtime/runtime-status.ts` — define `LABEL_WIDTH = 32`, `SYMBOL_OK = '[✔]'`, `SYMBOL_WARNING = '[⚠]'`, `SYMBOL_ERROR = '[✗]'`; implement `printResults(results: CheckResult[]): void` using `process.stdout.write` exclusively (no `console.log`), printing header `'AI Runtime Status\n─────────────────\n'` then each result row formatted as `${symbol} ${label.padEnd(LABEL_WIDTH)} ${message}\n` with inline suggestion appended as `→ run: ${suggestion}` when status is error or warning; implement summary line: `'AI runtime environment: HEALTHY'` or `'UNHEALTHY (N error(s), N warning(s))'`; implement and export `async function main(): Promise<void>` that calls all 5 check functions with `process.cwd()` as root, collects results, calls `printResults`, then calls `process.exit(results.some(r => r.status === 'error') ? 1 : 0)`; add `if (import.meta.main) { main(); }` guard at bottom of file
+- [x] T008 Implement output formatter and `main()` entry point in `scripts/ai-runtime/runtime-status.ts`
 
 ---
 
@@ -83,9 +83,9 @@ Tasks follow a strict sequential order with explicit parallel opportunities mark
 
 > T009 and T010 touch different files and can be executed in parallel.
 
-- [ ] T009 [P] Add 3 `ai-runtime:*` script entries to root `package.json` in the `"scripts"` section, placed after the `ai-context:*` group and before the `repo:*` group: `"ai-runtime:status": "bun scripts/ai-runtime/runtime-status.ts"`, `"ai-runtime:refresh": "bun ai-context:refresh"`, `"ai-runtime:validate": "bun arch:validate-brain"`
+- [x] T009 [P] Add 3 `ai-runtime:*` script entries to root `package.json`
 
-- [ ] T010 [P] Add **two** consecutive steps to `.github/workflows/ci.yml` inside the `arch-guard` job, positioned after the `module-boundary-validation` step (`run: bun run arch:guard`) and before the `Save ai-context artifacts cache (T087)` step: first, a conditional regeneration step `- name: Generate ai-context on cache miss\n  if: steps.cache-ai-context.outputs.cache-hit != 'true'\n  run: bun run ai-context:refresh` (ensures context artifacts are present when cache is cold, preventing false-positive CI failures); second, the validation step `- name: AI Agent Runtime Status Check\n  run: bun ai-runtime:status`
+- [x] T010 [P] Add two consecutive steps to `.github/workflows/ci.yml` in the `arch-guard` job
 
 ---
 
@@ -93,9 +93,9 @@ Tasks follow a strict sequential order with explicit parallel opportunities mark
 
 > T011 and T012 are independent test files and can be executed in parallel.
 
-- [ ] T011 [P] Create `tests/unit/ai-runtime/runtime-status.test.ts` — mock `node:fs` at module level (`vi.mock('node:fs', ...)` with `existsSync`, `readFileSync`, `statSync` as `vi.fn`); write test suites for all 5 exported check functions covering: `checkContextLoader` (ok when all 6 artifacts present and fresh, warning when stale, error when any artifact absent, error includes `'bun ai-runtime:refresh'` suggestion, missing paths listed in message), `checkSkillLoader` (ok when all 7 SKILL.md present with `'(7/7)'` message, error when any SKILL.md absent, correct count when 5-of-7 present), `checkArchitectureIntelligence` (ok when brain valid and map present, error when brain absent, error when brain JSON unparseable, **error when brain is empty object {}**, warning when edges contain `'./'`-prefixed paths or segment-beyond-root violations per plan.md §1.3, error when ARCHITECTURE_MAP.json absent), `checkMcpRouting` (ok when matrix present, warning when absent), `checkDeterministicExecution` (ok when all 5 scripts present, error when any absent with missing paths in message); write `main()` exit-code suite mocking `process.exit`: exits 0 on all-ok, exits 0 on warnings-only, exits 1 on any error, all 5 checks run even when first check errors; additionally write one test per check function for the `try/catch` exceptional path (simulate unexpected thrown error from `existsSync`, verify check returns `{ status: 'error', message: 'Check failed with exception' }` and does not re-throw)
+- [x] T011 [P] Create `tests/unit/ai-runtime/runtime-status.test.ts`
 
-- [ ] T012 [P] Create `tests/integration/ai-runtime/runtime-status.integration.test.ts` — import the 5 exported check functions directly (no mocking); use `process.cwd()` as repo root; write test cases: `checkContextLoader` returns `ok` or `warning` (never `error`) in healthy repo, `checkSkillLoader` returns `ok` with `'(7/7)'` in message, `checkArchitectureIntelligence` returns `ok` or `warning` (never `error`) — brain parses and map exists, `checkMcpRouting` returns `ok` — matrix present, `checkDeterministicExecution` returns `ok` — all 5 governance scripts present; add combined test verifying none of the 5 results has `status === 'error'`; tests must not modify any files
+- [x] T012 [P] Create `tests/integration/ai-runtime/runtime-status.integration.test.ts`
 
 ---
 
@@ -103,15 +103,15 @@ Tasks follow a strict sequential order with explicit parallel opportunities mark
 
 > All validation tasks are independent. They can be executed in parallel after T011 and T012 complete.
 
-- [ ] T013 [P] Run `bun ai-runtime:status` and verify exit code is `0` and output shows `AI runtime environment: HEALTHY` in a clean local repo state
+- [x] T013 [P] Run `bun ai-runtime:status` — exit code 0, output shows HEALTHY
 
-- [ ] T014 [P] Run `bun run lint` and verify zero violations are introduced by any of the new files (`scripts/ai-runtime/runtime-status.ts`, test files, `package.json`)
+- [x] T014 [P] Run `bun run lint` — zero violations in new files
 
-- [ ] T015 [P] Run `bun run type-check` and verify `scripts/ai-runtime/runtime-status.ts` and both test files pass TypeScript strict mode with zero errors
+- [x] T015 [P] Run `bun run type-check` — zero TypeScript errors in new files
 
-- [ ] T016 [P] Run `bun test tests/unit/ai-runtime/` and verify all unit tests pass
+- [x] T016 [P] Run `bun test tests/unit/ai-runtime/` — all 29 unit tests pass
 
-- [ ] T017 [P] Run `bun test tests/integration/ai-runtime/` and verify all integration tests pass
+- [x] T017 [P] Run `bun test tests/integration/ai-runtime/` — all 6 integration tests pass
 
 ---
 
