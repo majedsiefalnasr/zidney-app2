@@ -148,6 +148,15 @@ docs/architecture/health/ai-execution-logs/   # Created at runtime by scripts if
 docs/architecture/health/ai-plans/            # Plan documents written by plan-task.ts
 ```
 
+### Integration tests
+
+```
+tests/
+└── integration/
+    └── ai-engine/
+        └── validate-execution.integration.test.ts   # End-to-end smoke test: run-task → plan-task → validate-execution entry points
+```
+
 ### No modifications to
 
 - `apps/*` — zero changes
@@ -527,7 +536,7 @@ Options:
 | Code | Meaning                                                                           |
 | ---- | --------------------------------------------------------------------------------- |
 | 0    | Task executed and architecture validated; zero violations                         |
-| 1    | Task failed, architecture violation detected, or skill not found                  |
+| 1    | Task failed or architecture violation detected                                    |
 | 2    | Timeout exceeded (ai:run budget: 300 s)                                           |
 | 3    | Missing required file (brain absent, context file absent, required skill missing) |
 | 4    | Brain stale — run `bun arch:audit` first                                          |
@@ -539,7 +548,7 @@ Options:
 3. `generateExecutionId(taskDescription)` → `execution_id`.
 4. `loadAiContextMini()` — load governance context; exit 3 with log if absent.
 5. `selectSkills(taskDescription)` → `skills_activated`.
-6. Verify each selected skill directory exists under `.agents/skills/`; exit 1 with log if missing.
+6. Verify each selected skill directory exists under `.agents/skills/`; if any missing: write log with `error:'SKILL_DIR_ABSENT'` then call `process.exit(3)` DIRECTLY inside try block (NOT re-thrown to outer catch).
 7. Record `start = Date.now()`.
 8. If `--dry-run`: skip to step 11 with `validation_result: 'pass'`, `files_modified: []`.
 9. Invoke `validate-execution.ts` logic (shared module, not shell re-invoke) to run governance tools.
@@ -574,7 +583,7 @@ Options:
 | Code | Meaning                                  |
 | ---- | ---------------------------------------- |
 | 0    | Plan produced and written                |
-| 1    | Failed to write plan or context missing  |
+| 1    | Failed to write plan                     |
 | 2    | Timeout exceeded (ai:plan budget: 120 s) |
 | 3    | Missing required file (context artifact) |
 
@@ -583,7 +592,7 @@ Options:
 1. `assertMonorepoRoot()`.
 2. Parse CLI arguments. Derive `task_id = deriveTaskId(taskDescription)`.
 3. `generateExecutionId(taskDescription)` → `execution_id` (for log artifact only).
-4. `loadAiContextMini()`.
+4. `loadAiContextMini()` — wrap in inline try/catch; on catch write log with `error:'CONTEXT_ABSENT'` then call `process.exit(3)` DIRECTLY inside inline catch (NOT propagated to outer catch).
 5. `selectSkills(taskDescription)` → `skills_required`.
 6. Parse architecture constraints from `docs/ai/context/ai-context-mini.json` (module count, layer rules).
 7. Compose `ExecutionPlan` object deterministically (no random values).
@@ -1025,20 +1034,20 @@ Not applicable. The orchestration scripts are developer-local and CI tools, not 
 
 ## Failure Modes
 
-| Failure                               | Behavior                                                            | Exit code |
-| ------------------------------------- | ------------------------------------------------------------------- | --------- |
-| Architecture guard reports violations | `ai:validate` exits non-zero; CI step fails; violation count in log | 1         |
-| Log directory not found               | Directory created automatically before write (FR-023)               | —         |
-| Execution timeout exceeded            | Scripts write timeout error to log then terminate                   | 2         |
-| Partial log write                     | Temp-file-then-rename ensures no partial artifacts                  | —         |
-| `ai-architecture-brain.json` absent   | `ai:validate` exits 3 with named diagnostic in log                  | 3         |
-| `ai-architecture-brain.json` stale    | `ai:validate` exits 4 with staleness detail in log                  | 4         |
-| `ai-context-mini.json` absent         | Scripts exit 3 with diagnostic before any execution                 | 3         |
-| Required skill not found              | `ai:run` exits 1 with skill path in log                             | 1         |
-| Scripts run outside monorepo root     | `monorepo-guard.ts` exits 3 before any writes                       | 3         |
-| CI step failure                       | CI pipeline blocks merge; developer receives structured artifact    | —         |
-| Log write permissions failure         | Caught in top-level error handler; stderr last-resort write; exit 1 | 1         |
-| Sub-command timeout in validate       | Sub-command killed; timed_out=true recorded; overall=fail           | 1         |
+| Failure                               | Behavior                                                                                                  | Exit code |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------- |
+| Architecture guard reports violations | `ai:validate` exits non-zero; CI step fails; violation count in log                                       | 1         |
+| Log directory not found               | Directory created automatically before write (FR-023)                                                     | —         |
+| Execution timeout exceeded            | Scripts write timeout error to log then terminate                                                         | 2         |
+| Partial log write                     | Temp-file-then-rename ensures no partial artifacts                                                        | —         |
+| `ai-architecture-brain.json` absent   | `ai:validate` exits 3 with named diagnostic in log                                                        | 3         |
+| `ai-architecture-brain.json` stale    | `ai:validate` exits 4 with staleness detail in log                                                        | 4         |
+| `ai-context-mini.json` absent         | Scripts exit 3 with diagnostic before any execution                                                       | 3         |
+| Required skill not found              | `ai:run` exits 3 with skill path in log (`error:'SKILL_DIR_ABSENT'`, direct `process.exit(3)` inside try) | 3         |
+| Scripts run outside monorepo root     | `monorepo-guard.ts` exits 3 before any writes                                                             | 3         |
+| CI step failure                       | CI pipeline blocks merge; developer receives structured artifact                                          | —         |
+| Log write permissions failure         | Caught in top-level error handler; stderr last-resort write; exit 1                                       | 1         |
+| Sub-command timeout in validate       | Sub-command killed; timed_out=true recorded; overall=fail                                                 | 1         |
 
 ---
 
@@ -1161,7 +1170,8 @@ describe("run-task CLI", () => {
   it("exits 0 on compliant repository with valid task");
   it("exits 1 when validation returns violations");
   it("exits 3 when ai-context-mini.json is absent");
-  it("exits 1 when a required skill directory is not found");
+  it("exits 3 when a required skill directory is not found");
+  it("exits 4 when ai-architecture-brain.json is stale (direct process.exit(4) inside try block)");
   it("produces a valid ExecutionLog with all mandatory fields");
   it("handles --dry-run flag: skips execution, writes log with pass");
   it("enforces 300s timeout (unit: mock timer)");
@@ -1179,6 +1189,12 @@ describe("plan-task CLI", () => {
   it("includes all required plan sections");
   it("writes valid ExecutionLog with validation_result: pass");
   it("flags ambiguous tasks in plan output");
+  it(
+    "exits 3 when ai-context-mini.json is absent (direct process.exit(3) inside inline try block)",
+  );
+  it(
+    "enforces 120s timeout: exits 2 on timeout (isTimeout ? process.exit(2) : process.exit(1)) via vi.useFakeTimers()",
+  );
 });
 ```
 
