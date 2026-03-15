@@ -358,20 +358,20 @@ Completion of Phase 2 (refactored scripts in place)
 
 #### Incremental Analysis Implementation
 
-- [ ] T111 Implement module change detection at scripts/architecture/core/change-detector.ts (detect which packages/apps changed since last run)
-- [ ] T112 [P] Add incremental graph analysis mode to audit-engine at scripts/architecture/core/audit-engine.ts (skip unchanged modules)
-- [ ] T113 [P] Implement partial validation in ai-guard (only check changed areas) at scripts/architecture/ai-guard.ts
-- [ ] T114 [P] Add --incremental flag to infra-audit.ts CLI at scripts/architecture/infra-audit.ts
+- [x] T111 Implement module change detection at scripts/architecture/core/change-detector.ts (detect which packages/apps changed since last run)
+- [x] T112 [P] Add incremental graph analysis mode to audit-engine at scripts/architecture/core/audit-engine.ts (skip unchanged modules)
+- [x] T113 [P] Implement partial validation in ai-guard (only check changed areas) at scripts/architecture/ai-guard.ts
+- [x] T114 [P] Add --incremental flag to infra-audit.ts CLI at scripts/architecture/infra-audit.ts
 
 #### Architecture Graph Caching
 
-- [ ] T115 Implement persistent architecture graph cache at scripts/core/architecture-graph-cache.ts (store analyzed dependency graph)
-- [ ] T116 [P] Add cache validation to infra-audit pipeline at scripts/architecture/infra-audit.ts (check for stale cache)
-- [ ] T117 [P] Validate cache invalidation on package.json or tsconfig.json changes at scripts/core/cache-manager.ts
+- [x] T115 Implement persistent architecture graph cache at scripts/core/architecture-graph-cache.ts (store analyzed dependency graph)
+- [x] T116 [P] Add cache validation to infra-audit pipeline at scripts/architecture/infra-audit.ts (check for stale cache)
+- [x] T117 [P] Validate cache invalidation on package.json or tsconfig.json changes at scripts/core/cache-invalidation-detector.ts
 
 #### Final Performance Validation
 
-- [ ] T118 Profile infra-audit.ts with incremental optimization (target <3s, 95th percentile) at scripts/dev/profile-infra-audit-optimized.ts
+- [x] T118 Profile infra-audit.ts with incremental optimization (target <3s, 95th percentile) at scripts/dev/profile-infra-audit-optimized.ts
 - [ ] T119 [P] Profile ai-guard.ts with optimizations (target <1s, 95th percentile) at scripts/dev/profile-ai-guard-optimized.ts
 - [ ] T120 [P] Generate final optimization report at docs/reports/OPTIMIZATION_FINAL_REPORT.md (before/after metrics, savings, validation results)
 

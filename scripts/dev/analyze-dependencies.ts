@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * T103: Analyze bun.lock file and identify all dependencies
  *

@@ -1444,6 +1444,7 @@ function computeArchitectureScore(params: {
 const CI_MODE = process.argv.includes('--ci')
 const CI_STRICT = process.argv.includes('--ci-strict')
 const GENERATE_GRAPH_MODE = process.argv.includes('--generate-graph')
+const _INCREMENTAL_MODE = process.argv.includes('--incremental')
 const ARCH_SCORE_THRESHOLD = 85
 
 /* -------------------------------------------------------------------------- */

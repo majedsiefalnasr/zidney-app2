@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * T096: Audit all SKILL.md files for line count
  *

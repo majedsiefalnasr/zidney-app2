@@ -48,8 +48,7 @@ function generateCacheConfig(): CacheConfig {
         'bun.lock',
       ],
       hash_algorithm: 'SHA256',
-      example_key:
-        `ai-context-cache-\${{ hashFiles("packages/*/package.json", "apps/*/package.json", "tsconfig.json") }}`,
+      example_key: `ai-context-cache-\${{ hashFiles("packages/*/package.json", "apps/*/package.json", "tsconfig.json") }}`,
     },
     cache_paths: ['docs/ai/context/.cache/'],
     ttl_seconds: 86400, // 24 hours

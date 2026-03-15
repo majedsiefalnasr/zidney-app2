@@ -34,6 +34,14 @@ export interface AuditReport {
   cycles?: string[][]
   oversizedModules?: string[]
   score: number
+  analysisScope?: 'full' | 'incremental'
+  modulesAnalyzed?: number
+}
+
+export interface IncrementalAuditOptions {
+  changedModules: string[]
+  allModules: string[]
+  includeTransitiveDependencies: boolean
 }
 
 /**
@@ -191,4 +199,108 @@ export function formatAuditReport(report: AuditReport): string {
   }
 
   return lines.join('\n')
+}
+
+/**
+ * Run incremental audit on changed modules only
+ *
+ * Strategy:
+ * 1. Identify changed modules + their transitive dependents
+ * 2. Audit only those modules
+ * 3. Report findings scoped to changed area
+ * 4. Skip unchanged modules entirely
+ */
+export function runIncrementalAudit(
+  edges: GraphEdge[],
+  options: IncrementalAuditOptions,
+  _oversizeThreshold: number = 2000
+): AuditReport {
+  const findings: AuditFinding[] = []
+  const timestamp = Date.now()
+
+  // Build module set to analyze (changed + transitive dependents)
+  const modulesToAnalyze = new Set(options.changedModules)
+
+  if (options.includeTransitiveDependencies) {
+    // Find all modules that depend on changed modules
+    const dependents = new Set<string>()
+    for (const changed of options.changedModules) {
+      for (const edge of edges) {
+        // If this edge points to a changed module, the source depends on it
+        if (edge.to === changed) {
+          dependents.add(edge.from)
+        }
+      }
+    }
+    dependents.forEach((d) => {
+      modulesToAnalyze.add(d)
+    })
+  }
+
+  // Filter edges to only include those between modules we're analyzing
+  const relevantEdges = edges.filter(
+    (edge) => modulesToAnalyze.has(edge.from) || modulesToAnalyze.has(edge.to)
+  )
+
+  // Check for cycles in relevant edges
+  const cycleResult = detectCycles(relevantEdges)
+  if (cycleResult.hasCycle && cycleResult.cycle) {
+    findings.push({
+      type: 'error',
+      module: cycleResult.cycle.join(' → '),
+      message: `Circular dependency detected in changed area: ${cycleResult.cycle.join(' → ')}`,
+      severity: 'critical',
+    })
+  }
+
+  // Check for orphaned modules in changed set
+  const referencedModules = new Set<string>()
+  for (const edge of relevantEdges) {
+    referencedModules.add(edge.from)
+    referencedModules.add(edge.to)
+  }
+
+  for (const module of modulesToAnalyze) {
+    if (!referencedModules.has(module) && options.changedModules.includes(module)) {
+      findings.push({
+        type: 'info',
+        module,
+        message: `Module ${module} (changed) has no dependencies in analyzed scope`,
+        severity: 'low',
+      })
+    }
+  }
+
+  // Check for strongly connected components in incremental scope
+  const scc = findStronglyConnectedComponents(relevantEdges)
+  for (const component of scc) {
+    if (component.size > 1) {
+      const moduleList = Array.from(component).join(', ')
+      if (Array.from(component).some((m) => options.changedModules.includes(m))) {
+        findings.push({
+          type: 'error',
+          module: moduleList,
+          message: `Strongly connected component in changed area (potential cycle)`,
+          severity: 'high',
+        })
+      }
+    }
+  }
+
+  // Calculate score based on findings
+  const criticalCount = findings.filter((f) => f.severity === 'critical').length
+  const highCount = findings.filter((f) => f.severity === 'high').length
+  const score = Math.max(0, 100 - criticalCount * 25 - highCount * 10)
+
+  return {
+    timestamp,
+    moduleCount: options.allModules.length,
+    edgeCount: relevantEdges.length,
+    findings,
+    cycleDetected: cycleResult.hasCycle,
+    cycles: cycleResult.cycle ? [cycleResult.cycle] : undefined,
+    analysisScope: 'incremental',
+    modulesAnalyzed: modulesToAnalyze.size,
+    score,
+  }
 }

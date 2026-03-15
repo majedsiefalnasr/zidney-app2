@@ -237,7 +237,7 @@ export const DirectorySizeAnalyzer = {
   analyzeDirectory(dirPath: string): DirectorySizeReport {
     try {
       const output = execSync(`du -sh "${dirPath}"`, { encoding: 'utf-8' }).trim()
-      const [sizeStr] = output.split('\t')
+      const [sizeStr = '0K'] = output.split('\t')
 
       // Parse human-readable size to bytes
       const sizeBytes = DirectorySizeAnalyzer.parseHumanSize(sizeStr)
@@ -281,8 +281,9 @@ export const DirectorySizeAnalyzer = {
     const match = sizeStr.toUpperCase().match(/^([\d.]+)([KMGT])$/)
     if (!match) return 0
 
-    const [, num, unit] = match
-    return Math.round(parseFloat(num) * units[unit])
+    const num = match[1]!
+    const unit = match[2]!
+    return Math.round(parseFloat(num) * (units[unit] ?? 1))
   },
 
   /**
@@ -415,7 +416,7 @@ export const ScriptPerformanceProfiler = {
       minTimeMs: Math.min(...times),
       maxTimeMs: Math.max(...times),
       avgTimeMs: times.reduce((a, b) => a + b, 0) / times.length,
-      p95TimeMs: sorted[p95Index],
+      p95TimeMs: sorted[p95Index] ?? 0,
     }
   },
 

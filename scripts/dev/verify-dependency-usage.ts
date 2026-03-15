@@ -12,8 +12,8 @@
  * Success criteria: Usage map for all dependencies (T105 analysis)
  */
 
+import { readFileSync } from 'node:fs'
 import { $ } from 'bun'
-import { readFileSync } from 'fs'
 
 interface DependencyUsage {
   name: string
