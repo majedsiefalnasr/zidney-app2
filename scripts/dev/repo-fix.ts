@@ -34,10 +34,7 @@ export type FixStep = {
  * Takes first line only, strips control chars, limits to 120 chars.
  */
 export function sanitizeDetail(raw: string): string {
-  return raw
-    .split('\n')[0]
-    .replace(/[^\x20-\x7E]/g, '')
-    .slice(0, 120)
+  return (raw.split('\n')[0] ?? '').replace(/[^\x20-\x7E]/g, '').slice(0, 120)
 }
 
 /**

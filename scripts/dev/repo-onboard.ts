@@ -24,10 +24,7 @@ type ProcessResult = {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function sanitizeDetail(raw: string): string {
-  return raw
-    .split('\n')[0]
-    .replace(/[^\x20-\x7E]/g, '')
-    .slice(0, 120)
+  return (raw.split('\n')[0] ?? '').replace(/[^\x20-\x7E]/g, '').slice(0, 120)
 }
 
 function spawnStep(cmd: string[]): ProcessResult {
@@ -72,7 +69,7 @@ export async function checkTcp(host: string, port: number): Promise<boolean> {
  * Parse failure returns true (warn-and-continue; never hard-abort on bad version string).
  */
 export function satisfiesSemver(detected: string, required: string): boolean {
-  const clean = (v: string) => v.split('-')[0]
+  const clean = (v: string) => v.split('-')[0] ?? ''
   const parse = (v: string): [number, number, number] | null => {
     const parts = clean(v).split('.').map(Number)
     if (parts.length !== 3 || parts.some(Number.isNaN)) return null
