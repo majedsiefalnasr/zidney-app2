@@ -86,15 +86,15 @@ Runs automated checks across the repository health surface and reports pass/warn
 
 **Checks performed:**
 
-| Check                             | Action                                                          |
-| --------------------------------- | --------------------------------------------------------------- |
-| Missing dependencies              | Detect uninstalled or mismatched workspace dependencies         |
-| Broken workspace links            | Identify broken package references in monorepo workspaces       |
-| Outdated architecture context     | Detect staleness in `docs/ai/context/` artifacts                |
-| Invalid AI context artifacts      | Validate structure and schema of AI context JSON files          |
-| Missing environment configuration | Verify required `.env` keys are declared (not values)           |
-| Stale generated artifacts         | Identify build outputs or context files out of sync with source |
-| Invalid TypeScript configuration  | Detect `tsconfig.json` configuration issues across workspaces   |
+| Check                             | Action                                                                                                                                                                                               |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Missing dependencies              | Detect uninstalled or mismatched workspace dependencies                                                                                                                                              |
+| Broken workspace links            | Identify broken package references in monorepo workspaces                                                                                                                                            |
+| Outdated architecture context     | Detect staleness in `docs/ai/context/` artifacts                                                                                                                                                     |
+| Invalid AI context artifacts      | Validate structure and schema of AI context JSON files                                                                                                                                               |
+| Missing environment configuration | Verify required `.env` keys exist by comparing against `.env.example` reference (key names only; values are never read, stored, or logged); if `.env.example` is absent, emit warning and skip check |
+| Stale generated artifacts         | Identify build outputs or context files out of sync with source                                                                                                                                      |
+| Invalid TypeScript configuration  | Detect `tsconfig.json` configuration issues across workspaces                                                                                                                                        |
 
 **Internal execution chain:**
 
@@ -151,15 +151,15 @@ Prepares a complete local development environment for a new contributor in a sin
 
 **Steps performed in order:**
 
-| Step | Check                          | Action on failure                        |
-| ---- | ------------------------------ | ---------------------------------------- |
-| 1    | Verify Bun installation        | Print install instructions; abort        |
-| 2    | Install dependencies           | Run `bun install`                        |
-| 3    | Setup Husky hooks              | Run Husky install                        |
-| 4    | Verify PostgreSQL availability | Print `docker compose up postgres`; warn |
-| 5    | Verify Redis availability      | Print `docker compose up redis`; warn    |
-| 6    | Generate AI context            | Run `bun ai-context:refresh`             |
-| 7    | Run architecture validation    | Run `bun arch:guard`                     |
+| Step | Check                                                                              | Action on failure                                     |
+| ---- | ---------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 1    | Verify Bun installation (minimum version per `engines.bun` in root `package.json`) | Print version and install/upgrade instructions; abort |
+| 2    | Install dependencies                                                               | Run `bun install`                                     |
+| 3    | Setup Husky hooks                                                                  | Run Husky install                                     |
+| 4    | Verify PostgreSQL availability                                                     | Print `docker compose up postgres`; warn              |
+| 5    | Verify Redis availability                                                          | Print `docker compose up redis`; warn                 |
+| 6    | Generate AI context                                                                | Run `bun ai-context:refresh`                          |
+| 7    | Run architecture validation                                                        | Run `bun arch:guard`                                  |
 
 **Expected output format:**
 
@@ -283,13 +283,14 @@ This ensures new contributors can immediately understand how to interact with th
 
 DX automation scripts must use structured output for machine-parseable results where applicable.
 
-| Requirement                 | Rule                                                                    |
-| --------------------------- | ----------------------------------------------------------------------- |
-| Structured logging          | Scripts must NOT use `console.log` for diagnostic output                |
-| Output format               | Use a consistent structured output format (symbol + label + status)     |
-| Error messages              | Provide actionable guidance (e.g., the command to run to fix the issue) |
-| Exit codes                  | Non-zero exit indicates at least one error-level check failed           |
-| No sensitive data in output | Scripts must not print secrets, tokens, or database credentials         |
+| Requirement                 | Rule                                                                                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Structured logging          | Scripts must NOT use `console.log` for diagnostic output                                                                                                            |
+| Output mechanism            | Scripts use `process.stdout.write` with an inline symbol+label+status formatter defined within each script; `packages/logger` must not be imported (backend-scoped) |
+| Output format               | Use a consistent structured output format (symbol + label + status)                                                                                                 |
+| Error messages              | Provide actionable guidance (e.g., the command to run to fix the issue)                                                                                             |
+| Exit codes                  | Non-zero exit indicates at least one error-level check failed                                                                                                       |
+| No sensitive data in output | Scripts must not print secrets, tokens, or database credentials                                                                                                     |
 
 ---
 
@@ -301,7 +302,7 @@ DX automation scripts must use structured output for machine-parseable results w
 ✓ No license middleware interaction
 ✓ No tenant resolver involvement
 ✓ No attempt engine interaction
-✓ No cross-layer imports (scripts may only import from `packages/` utilities)
+✓ No cross-layer imports — scripts may only import from `packages/types` (shared type definitions); all domain, service, and backend packages (`packages/domain-core`, `packages/api-client`, `packages/job-queue`, `packages/redis-utils`, `packages/logger`, `packages/ui-system`) are forbidden imports
 ✓ UI layers unaffected
 
 ---
@@ -320,14 +321,14 @@ DX automation scripts must use structured output for machine-parseable results w
 
 ## Failure Modes & Recovery
 
-| Failure Scenario                      | Expected Behavior                                        |
-| ------------------------------------- | -------------------------------------------------------- |
-| External tool unavailable (e.g., Bun) | Print actionable installation instructions and exit      |
-| Architecture guard script fails       | Propagate exit code; report error in doctor output       |
-| AI context generation fails           | Report failure in doctor output; suggest `repo:fix`      |
-| `repo:fix` fails mid-run              | Report which step failed; remaining steps continue       |
-| PostgreSQL/Redis unavailable          | Warn (do not error); print start-up command              |
-| CI `repo:doctor` step fails           | CI pipeline blocked; developer must resolve before merge |
+| Failure Scenario                      | Expected Behavior                                                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| External tool unavailable (e.g., Bun) | Print actionable installation instructions and exit                                                                            |
+| Architecture guard script fails       | Propagate exit code; report error in doctor output                                                                             |
+| AI context generation fails           | Report failure in doctor output; suggest `repo:fix`                                                                            |
+| `repo:fix` fails mid-run              | Report which step failed; remaining steps continue; final exit code is non-zero if any step encountered an error-level failure |
+| PostgreSQL/Redis unavailable          | Warn (do not error); print start-up command                                                                                    |
+| CI `repo:doctor` step fails           | CI pipeline blocked; developer must resolve before merge                                                                       |
 
 ---
 
@@ -373,3 +374,21 @@ All criteria are technology-agnostic and measurable without knowledge of impleme
 ## Final Constitutional Compliance Statement
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-15
+
+Context: This is a developer tooling stage (DX automation layer). Scripts live under `scripts/dev/` and are pure local developer tooling with no tenant DB access, no license middleware, and no attempt engine involvement. Resolutions below apply that lens.
+
+- Q: What is the exit code strategy for `repo:fix` when some steps fail and remaining steps continue? → A: Exit non-zero if **any** step fails. Final exit code reflects whether any step encountered an error-level failure, regardless of how many steps succeeded. This is consistent with `repo:doctor` behaviour and ensures CI and test assertions have a deterministic contract.
+
+- Q: What minimum Bun version should `repo:onboard` step 1 verify, and how is the version sourced? → A: Verify against the `engines.bun` field in root `package.json`. If the detected Bun version is below the declared minimum, print a clear version mismatch message with upgrade instructions and abort. The `engines.bun` field must be populated before implementation of this step.
+
+- Q: How does `repo:doctor` verify required `.env` keys without risking accidental value exposure in output or logs? → A: Use `.env.example` as the sole canonical reference for required key names. Parse `.env` for key **existence** only — values are never read, compared, stored, or emitted. If `.env.example` is absent, emit a warning (not an error) and skip this check rather than failing.
+
+- Q: What output mechanism replaces `console.log` for `scripts/dev/` scripts, given both `console.log` is banned and JSON mode is deferred? → A: Scripts use `process.stdout.write` with a lightweight inline symbol+label+status formatter defined within each script file. `packages/logger` carries backend service dependencies and must **not** be imported into `scripts/dev/`. Machine-parseable JSON output mode remains deferred to a future enhancement.
+
+- Q: Which specific `packages/` modules are permitted imports for `scripts/dev/` scripts? → A: Scripts may import only from `packages/types` for shared compile-time type definitions. All domain, service, and backend runtime packages — including `packages/domain-core`, `packages/api-client`, `packages/job-queue`, `packages/redis-utils`, `packages/logger`, `packages/validation`, and `packages/ui-system` — are forbidden imports. If no types from `packages/types` are needed, scripts have zero external package imports.

@@ -3,8 +3,8 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: LOW
 Last Updated: 2026-03-15T00:00:00Z
 
 Scope Defined:
@@ -19,14 +19,14 @@ Scope Defined:
 
 Deferred Scope:
 
-- No items deferred
+- JSON output mode for commands (deferred to future stage)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
