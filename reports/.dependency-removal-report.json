@@ -1,0 +1,213 @@
+{
+  "timestamp": "2026-03-14T22:52:51.086Z",
+  "phase": "T105-T106: Conservative Dependency Removal (Q5)",
+  "summary": {
+    "total": 22,
+    "critical": 8,
+    "risky": 6,
+    "safe": 8,
+    "candidates": 0
+  },
+  "strategy": "Conservative: Only remove if 0 usage found AND utility-only (from Q5)",
+  "assessment": "NO_CHANGES_RECOMMENDED",
+  "analysis": [
+    {
+      "name": "@biomejs/biome",
+      "version": "^2.4.6",
+      "type": "dev",
+      "category": "BUILD",
+      "removalRisk": "CRITICAL",
+      "recommendation": "KEEP",
+      "reason": "Build system or code quality tool"
+    },
+    {
+      "name": "hono",
+      "version": "4.12.3",
+      "type": "dev",
+      "category": "CRITICAL",
+      "removalRisk": "CRITICAL",
+      "recommendation": "KEEP",
+      "reason": "Core runtime or framework dependency"
+    },
+    {
+      "name": "pinia",
+      "version": "2.2.6",
+      "type": "dev",
+      "category": "CRITICAL",
+      "removalRisk": "CRITICAL",
+      "recommendation": "KEEP",
+      "reason": "Core runtime or framework dependency"
+    },
+    {
+      "name": "prettier",
+      "version": "^3",
+      "type": "dev",
+      "category": "BUILD",
+      "removalRisk": "CRITICAL",
+      "recommendation": "KEEP",
+      "reason": "Build system or code quality tool"
+    },
+    {
+      "name": "typescript",
+      "version": "latest",
+      "type": "dev",
+      "category": "CRITICAL",
+      "removalRisk": "CRITICAL",
+      "recommendation": "KEEP",
+      "reason": "Core runtime or framework dependency"
+    },
+    {
+      "name": "vite-tsconfig-paths",
+      "version": "4.3.2",
+      "type": "dev",
+      "category": "BUILD",
+      "removalRisk": "CRITICAL",
+      "recommendation": "KEEP",
+      "reason": "Build system or code quality tool"
+    },
+    {
+      "name": "vitest",
+      "version": "^1.0.0",
+      "type": "dev",
+      "category": "BUILD",
+      "removalRisk": "CRITICAL",
+      "recommendation": "KEEP",
+      "reason": "Build system or code quality tool"
+    },
+    {
+      "name": "vue-router",
+      "version": "4.6.4",
+      "type": "dev",
+      "category": "CRITICAL",
+      "removalRisk": "CRITICAL",
+      "recommendation": "KEEP",
+      "reason": "Core runtime or framework dependency"
+    },
+    {
+      "name": "@playwright/test",
+      "version": "^1.58.2",
+      "type": "dev",
+      "category": "TESTING",
+      "removalRisk": "RISKY",
+      "recommendation": "KEEP",
+      "reason": "Testing framework or tool"
+    },
+    {
+      "name": "@vitest/coverage-v8",
+      "version": "^1.0.0",
+      "type": "dev",
+      "category": "TESTING",
+      "removalRisk": "RISKY",
+      "recommendation": "KEEP",
+      "reason": "Testing framework or tool"
+    },
+    {
+      "name": "husky",
+      "version": "^9.0.0",
+      "type": "dev",
+      "category": "QUALITY",
+      "removalRisk": "RISKY",
+      "recommendation": "KEEP",
+      "reason": "Code quality enforcement (pre-commit, linting)"
+    },
+    {
+      "name": "jsdom",
+      "version": "^28.1.0",
+      "type": "dev",
+      "category": "TESTING",
+      "removalRisk": "RISKY",
+      "recommendation": "KEEP",
+      "reason": "Testing framework or tool"
+    },
+    {
+      "name": "lint-staged",
+      "version": "^15.0.0",
+      "type": "dev",
+      "category": "QUALITY",
+      "removalRisk": "RISKY",
+      "recommendation": "KEEP",
+      "reason": "Code quality enforcement (pre-commit, linting)"
+    },
+    {
+      "name": "madge",
+      "version": "^8.0.0",
+      "type": "dev",
+      "category": "QUALITY",
+      "removalRisk": "RISKY",
+      "recommendation": "KEEP",
+      "reason": "Code quality enforcement (pre-commit, linting)"
+    },
+    {
+      "name": "@types/bun",
+      "version": "^1.3.10",
+      "type": "prod",
+      "category": "UTILITY",
+      "removalRisk": "SAFE",
+      "recommendation": "REVIEW",
+      "reason": "Utility library - could potentially be reviewed"
+    },
+    {
+      "name": "@types/node",
+      "version": "^25.3.2",
+      "type": "dev",
+      "category": "UTILITY",
+      "removalRisk": "SAFE",
+      "recommendation": "REVIEW",
+      "reason": "Utility library - could potentially be reviewed"
+    },
+    {
+      "name": "@types/pg",
+      "version": "^8.16.0",
+      "type": "dev",
+      "category": "UTILITY",
+      "removalRisk": "SAFE",
+      "recommendation": "REVIEW",
+      "reason": "Utility library - could potentially be reviewed"
+    },
+    {
+      "name": "concurrently",
+      "version": "^8.2.0",
+      "type": "dev",
+      "category": "UTILITY",
+      "removalRisk": "SAFE",
+      "recommendation": "REVIEW",
+      "reason": "Utility library - could potentially be reviewed"
+    },
+    {
+      "name": "ioredis",
+      "version": "^5.3.0",
+      "type": "dev",
+      "category": "UTILITY",
+      "removalRisk": "SAFE",
+      "recommendation": "REVIEW",
+      "reason": "Utility library - could potentially be reviewed"
+    },
+    {
+      "name": "pg",
+      "version": "^8.18.0",
+      "type": "dev",
+      "category": "UTILITY",
+      "removalRisk": "SAFE",
+      "recommendation": "REVIEW",
+      "reason": "Utility library - could potentially be reviewed"
+    },
+    {
+      "name": "wait-on",
+      "version": "^9.0.4",
+      "type": "dev",
+      "category": "UTILITY",
+      "removalRisk": "SAFE",
+      "recommendation": "REVIEW",
+      "reason": "Utility library - could potentially be reviewed"
+    },
+    {
+      "name": "yaml-lint",
+      "version": "^1.7.0",
+      "type": "dev",
+      "category": "UTILITY",
+      "removalRisk": "SAFE",
+      "recommendation": "REVIEW",
+      "reason": "Utility library - could potentially be reviewed"
+    }
+  ]
+}

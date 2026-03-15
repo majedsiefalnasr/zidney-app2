@@ -62,7 +62,7 @@ BRAIN_FILES=$(echo "$STAGED_FILES" | grep -E 'docs/ai/context/ai-architecture-br
 if [ -n "$BRAIN_FILES" ]; then
   echo "Validating architecture brain integrity…"
   set +e  # Temporarily disable exit-on-error to capture exit code
-  bun scripts/validate-architecture-brain.ts
+  bun scripts/governance/validate-architecture-brain.ts
   BRAIN_EXIT=$?
   set -e  # Re-enable exit-on-error
 

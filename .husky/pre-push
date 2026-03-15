@@ -61,7 +61,7 @@ bun scripts/infra-audit.ts --quick || {
 
 # ── Architecture Brain Validation (blocking) ─────────────────────────────────
 echo "Validating architecture brain integrity..."
-bun scripts/validate-architecture-brain.ts || {
+bun scripts/governance/validate-architecture-brain.ts || {
   echo "❌ Architecture brain validation failed — push blocked."
   echo "   Run: bun scripts/infra-audit.ts to regenerate a valid brain."
   exit 1

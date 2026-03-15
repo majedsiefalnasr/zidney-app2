@@ -1,0 +1,9 @@
+{
+  "updated_at": "2026-03-14T22:15:52.792Z",
+  "total_archived": 0,
+  "entries": [],
+  "retention_policy": {
+    "keep_live": 2,
+    "archive_threshold_days": 7
+  }
+}

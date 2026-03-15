@@ -52,7 +52,7 @@ export const ALLOWED_COMMANDS: Record<GovernanceTool, GovernanceCommandSpec> = {
   arch_validate_brain: {
     tool: 'arch_validate_brain',
     executable: BUN,
-    args: ['scripts/validate-architecture-brain.ts'],
+    args: ['scripts/governance/validate-architecture-brain.ts'],
     timeout_ms: 30_000,
     output_format: 'text',
   },
