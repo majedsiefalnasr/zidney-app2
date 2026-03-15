@@ -50,6 +50,17 @@ If the audit passes, your environment is correctly configured.
 
 ## Quick Start (Developers)
 
+### Developer Quick Commands
+
+| Command            | Purpose                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| `bun repo:onboard` | First-time setup: checks Bun version, installs dependencies, activates Husky hooks, verifies services |
+| `bun repo:doctor`  | Diagnose repository health: dependencies, workspace links, architecture, TypeScript                   |
+| `bun repo:fix`     | Auto-repair common issues: re-install, regenerate architecture artifacts, prune unused packages       |
+| `bun repo:status`  | Print a quick health summary (CI status, architecture, AI context, type safety)                       |
+
+---
+
 ### Prerequisites
 
 - Bun (stable 1.x)
