@@ -23,6 +23,7 @@
     "check:store-cycles": "bun scripts/check-store-cycles.ts",
     "test": "vitest run",
     "test:unit": "vitest run --project mmc --project backoffice --project frontoffice --project api-client --project domain-core --project logger --project config --project redis-utils --project types --project ui-system --project validation",
+    "test:unit:debug": "vitest run --reporter verbose --project mmc --project backoffice --project frontoffice --project api-client --project domain-core --project logger --project config --project redis-utils --project types --project ui-system --project validation",
     "test:unit:boundaries": "vitest run tests/static/module-boundaries.test.ts tests/unit/infra-audit/infra-audit-boundaries.test.ts tests/unit/ai-guard/ai-guard-boundaries.test.ts",
     "test:integration": "vitest run --dir tests/integration --fileParallelism=false",
     "test:performance": "vitest run --dir tests/performance",
