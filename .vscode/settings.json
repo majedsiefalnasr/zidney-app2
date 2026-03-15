@@ -7,7 +7,7 @@
     "speckit.implement": true
   },
   "chat.tools.terminal.autoApprove": {
-    ".specify/scripts/bash/": true,
+    ".specify/scripts/**": true,
     "mkdir": true,
     "act": true,
     "gh": true,
@@ -16,7 +16,7 @@
     "rtk": true,
     "rtk git commit": false,
     "bun": true,
-    "bunx": true,
+    "bunx": true
   },
   "css.lint.unknownAtRules": "ignore",
   "css.customData": [
