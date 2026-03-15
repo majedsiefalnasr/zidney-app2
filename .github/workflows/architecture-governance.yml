@@ -108,3 +108,37 @@ jobs:
               cat docs/architecture/health/architecture-health-summary.md
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+
+
+      # ── 11. Run AI Execution Validation ───────────────────────────────
+      - name: Run AI Execution Validation
+        run: bun ai:validate --ci
+
+      # ── 12. Upload AI Execution Artifact ──────────────────────────────
+      - name: Upload AI Execution Validation Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-execution-validation-artifact
+          path: docs/architecture/health/ai-execution-logs/
+
+      # ── 13. Publish AI Execution Summary ──────────────────────────────
+      - name: Publish AI Execution Summary
+        if: always()
+        run: |
+          {
+            echo "## AI Execution Validation Report"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          LATEST=$(find docs/architecture/health/ai-execution-logs -maxdepth 1 -name "*.json" 2>/dev/null | sort | tail -1)
+          if [ -n "$LATEST" ]; then
+            {
+              echo "### Latest Execution Log"
+              echo "~~~json"
+              cat "$LATEST"
+              echo "~~~"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No AI execution log artifacts found." >> "$GITHUB_STEP_SUMMARY"
+          fi
