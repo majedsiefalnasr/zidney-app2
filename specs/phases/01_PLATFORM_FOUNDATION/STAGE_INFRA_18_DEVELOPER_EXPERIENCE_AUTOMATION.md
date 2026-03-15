@@ -3,19 +3,19 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
 Last Updated: 2026-03-15T00:00:00Z
 
-Scope Defined:
+Scope Planned:
 
-- scripts/dev/repo-doctor.ts — diagnostic runner
-- scripts/dev/repo-fix.ts — automated repair runner
-- scripts/dev/repo-onboard.ts — onboarding automation runner
-- scripts/dev/repo-status.ts — repository status reporter
-- Root package.json script registrations (4 new entries)
-- CI integration step for repo:doctor
-- README developer quick-start section update
+- scripts/dev/repo-doctor.ts — 7-check diagnostic runner
+- scripts/dev/repo-fix.ts — 5-step automated repair runner
+- scripts/dev/repo-onboard.ts — 7-step onboarding automation
+- scripts/dev/repo-status.ts — repository health summary reporter
+- Root package.json: 4 script entries + engines.bun field
+- .github/workflows/ci.yml: repo-doctor job in Group 1
+- README.md: Developer Quick Commands section
 
 Deferred Scope:
 
@@ -23,10 +23,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian validation: Architecture Checker PASS, API Designer PASS
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
