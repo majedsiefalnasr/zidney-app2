@@ -188,9 +188,10 @@ reaches error level.
 
 - Algorithm:
   1. Read `.env.example`; if absent → `warn` and skip (not an error).
-  2. Extract key names only (split on `=`, take left side; strip comments and blank lines).
+  2. Extract key names only (split on `=`, take left side; strip comments and blank lines;
+     strip leading `export ` and `declare -x ` prefixes before comparison).
   3. Read `.env`; if absent → `error`.
-  4. Extract key names from `.env` (same method).
+  4. Extract key names from `.env` (same method — strip prefixes, strip comments).
   5. For each key in `.env.example` that is absent from `.env` → `error`.
   6. Values are **never** read, stored, compared, or emitted.
 - Actionable message: `"Copy .env.example to .env and fill in required values"`.
@@ -219,6 +220,30 @@ All external commands are spawned as child processes using `Bun.spawnSync` or No
 `child_process.spawnSync`. stdout/stderr are captured and suppressed from terminal output unless
 the check fails and the message is diagnostic (in which case a condensed first line is shown). The
 subprocess stdout is **not** forwarded raw to prevent output contamination.
+
+**Subprocess output sanitization contract (H-02):**
+
+The "condensed first line" detail is defined as:
+
+1. Capture the first line of stderr (not stdout) only.
+2. Truncate to maximum 120 characters.
+3. Strip all control characters: `/[\x00-\x1F\x7F]/g`.
+4. Never forward raw subprocess stdout or stderr as-is.
+5. The sanitized string becomes `result.errorMessage` in `ProcessResult`.
+
+```typescript
+type ProcessResult = {
+  exitCode: number;
+  errorMessage: string; // first line of stderr, control chars stripped, max 120 chars
+};
+
+function sanitizeDetail(raw: string): string {
+  return raw
+    .split("\n")[0] // first line only
+    .replace(/[\x00-\x1F\x7F]/g, "") // strip control characters
+    .slice(0, 120); // max 120 chars
+}
+```
 
 ---
 
@@ -269,6 +294,34 @@ Key properties:
 - Step 5 (stale artifact cleanup) uses `fs.rmSync` with `{ recursive: true, force: true }` on
   `dist/` subdirectories and `.nuxt/`. Source files, schema files, and governance artifacts are
   never touched.
+
+**Path canonicalization safety contract (M-02):**
+
+Before any `fs.rmSync` call in Step 5, the implementation MUST:
+
+1. Resolve the real path using `fs.realpathSync`.
+2. Verify the resolved path begins with the repository root (`process.cwd() + path.sep`).
+3. If the resolved path falls outside the repo root → emit `warn` and skip deletion (do not abort).
+4. This guard prevents symlink traversal attacks where a build output symlink points outside the repo.
+
+```typescript
+function safeDel(label: string, target: string): void {
+  const repoRoot = process.cwd();
+  const abs = path.resolve(repoRoot, target);
+  try {
+    const real = fs.realpathSync(abs);
+    if (!real.startsWith(repoRoot + path.sep) && real !== repoRoot) {
+      line(label, "warn", `skipped — resolves outside repo root`);
+      return;
+    }
+    fs.rmSync(real, { recursive: true, force: true });
+    line(label, "ok");
+  } catch {
+    // target does not exist — idempotent no-op
+    line(label, "ok");
+  }
+}
+```
 
 ### Expected terminal output
 
@@ -333,6 +386,35 @@ if (!required) {
 
 `satisfiesSemver` is a minimal inline implementation operating on major.minor.patch triplets only
 (no range operators beyond `>=`). No external semver package is imported.
+
+**`satisfiesSemver` contract (M-01):**
+
+```typescript
+function satisfiesSemver(detected: string, required: string): boolean {
+  // Strip pre-release suffix (e.g. "1.3.9-canary.1" → "1.3.9")
+  const clean = (v: string) => v.split("-")[0];
+  const parse = (v: string): [number, number, number] | null => {
+    const parts = clean(v).split(".").map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return null;
+    return parts as [number, number, number];
+  };
+  const d = parse(detected);
+  const r = parse(required.replace(/^[>=]+/, ""));
+  // On parse failure: warn-and-continue (do NOT hard-abort on bad version string)
+  if (!d || !r) return true;
+  if (d[0] !== r[0]) return d[0] > r[0];
+  if (d[1] !== r[1]) return d[1] > r[1];
+  return d[2] >= r[2];
+}
+```
+
+Contract rules:
+
+- Pre-release suffixes are stripped before comparison (split on `-`, take `[0]`).
+- Each segment is compared using `parseInt` (i.e. numeric ordering, not lexicographic).
+- A version string that cannot be parsed → returns `true` (warn-and-continue; never hard-abort on
+  parse failure, only on confirmed version mismatch).
+- Only the `>=` operator is supported.
 
 ### Step 3 — Husky activation
 
@@ -410,8 +492,30 @@ Print a human-readable, read-only summary of current repository health. No side 
 
 - Check for existence of `.cache/ci-status.json` (written by a future CI artifact script).
 - If absent → show `"Unknown (no cached state)"`.
-- If present → read `status` field (string); display as-is.
+- If present → read `status` field (string); **sanitize before display** (see contract below).
 - This is purely advisory; failure to read this file is not an error.
+
+**`ci-status.json` sanitization contract (H-01):**
+
+The `status` field must be sanitized before being written to `process.stdout`:
+
+```typescript
+const KNOWN_STATUSES = ["Passing", "Failing", "Pending", "Skipped", "Unknown"] as const;
+
+function safeStatus(raw: unknown): string {
+  if (typeof raw !== "string") return "Unknown (invalid)";
+  // Strip all non-printable-ASCII characters (removes ANSI/OSC sequences)
+  const stripped = raw
+    .replace(/[^\x20-\x7E]/g, "")
+    .trim()
+    .slice(0, 32);
+  return (KNOWN_STATUSES as readonly string[]).includes(stripped)
+    ? stripped
+    : "Unknown (unrecognised)";
+}
+```
+
+This prevents terminal injection attacks via ANSI/OSC escape sequences inserted into the cache file.
 
 ### Output rendering
 
