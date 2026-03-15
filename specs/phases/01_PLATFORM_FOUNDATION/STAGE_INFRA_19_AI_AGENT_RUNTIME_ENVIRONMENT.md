@@ -3,20 +3,30 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
-Risk Level: UNKNOWN
-Initiated: 2026-03-15T00:00:00.000Z
+Step: specify
+Risk Level: LOW
+Last Updated: 2026-03-15T00:01:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- `scripts/ai-runtime/runtime-status.ts` — AI runtime diagnostics script
+- `package.json` scripts: `ai-runtime:status`, `ai-runtime:refresh`, `ai-runtime:validate`
+- CI GitHub Actions step: `bun ai-runtime:status`
+- 5-layer runtime model documented in spec
+
+Deferred Scope:
+
+- Changes to existing skill files (already complete)
+- New packages or apps under packages/ or apps/
+- MCP server configuration changes
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
+- Developer tooling only — no tenant, DB, or attempt engine interaction
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
