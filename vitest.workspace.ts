@@ -160,6 +160,25 @@ export default defineWorkspace([
   'apps/api/vitest.config.ts',
   'apps/worker/vitest.config.ts',
 
+  // AI Engine orchestration scripts
+  defineProject({
+    plugins: [tsconfigPaths()],
+    resolve: {
+      alias: [
+        {
+          find: '@zidney/logger',
+          replacement: path.resolve(__dirname, 'packages/logger/src/index.ts'),
+        },
+      ],
+    },
+    test: {
+      name: 'ai-engine',
+      globals: true,
+      environment: 'node',
+      include: ['scripts/ai-engine/__tests__/**/*.test.ts'],
+    },
+  }),
+
   // Shared packages
   'packages/api-client/vitest.config.ts',
   'packages/domain-core/vitest.config.ts',

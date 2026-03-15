@@ -78,3 +78,7 @@ tests/ai-context/
 
 # Development plans
 plans/
+
+# AI engine runtime logs (generated output files — not for version control)
+docs/architecture/health/ai-execution-logs/*.json
+docs/architecture/health/ai-plans/*.md
