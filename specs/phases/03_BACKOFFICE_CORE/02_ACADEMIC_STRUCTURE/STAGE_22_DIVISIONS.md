@@ -10,20 +10,30 @@ Status: Critical Academic Scope Layer
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-16T00:00:00Z
+Last Updated: 2026-03-16T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Division CRUD (create, read, update, toggle status, delete)
+- Staff multi-division assignment via staff_divisions join table
+- Disable-divisions transactional operation
+- Division filtering enforcement on all content queries
+- Feature toggle: multi-division vs. single-division mode
+
+Deferred Scope:
+
+- Frontoffice visibility enforcement (future stage)
+- Analytics segmentation by division
+- Live session division filtering
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
