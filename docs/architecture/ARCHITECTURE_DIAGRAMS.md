@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-03-14T14:27:00.186Z
-Git SHA: ef7bcc79bd073d7d46f6e37ef18abb7730f0ee1a
+Generated: 2026-03-15T23:26:58.130Z
+Git SHA: be724fb46dbaadd0b158a55d70df9a2b664cb7e6
 
 ---
 
