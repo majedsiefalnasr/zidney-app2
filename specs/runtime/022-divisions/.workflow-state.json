@@ -1,0 +1,24 @@
+{
+  "stage": "Divisions",
+  "phase": "03_BACKOFFICE_CORE / 02_ACADEMIC_STRUCTURE",
+  "stage_dir": "specs/runtime/022-divisions",
+  "stage_file": "specs/phases/03_BACKOFFICE_CORE/02_ACADEMIC_STRUCTURE/STAGE_22_DIVISIONS.md",
+  "branch": "spec/022-divisions",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-16T00:00:00Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/022-divisions",
+      "timestamp": "2026-03-16T00:00:00Z"
+    }
+  ]
+}
