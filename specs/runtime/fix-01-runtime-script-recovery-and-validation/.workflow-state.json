@@ -1,0 +1,24 @@
+{
+  "stage": "Runtime Script Recovery and Validation",
+  "phase": "0X_FIXES",
+  "stage_dir": "specs/runtime/fix-01-runtime-script-recovery-and-validation",
+  "stage_file": "specs/phases/0X_FIXES/STAGE_FIX_01_RUNTIME_SCRIPT_RECOVERY_AND_VALIDATION.md",
+  "branch": "spec/fix-01-runtime-script-recovery-and-validation",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-17T00:00:00.000Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/fix-01-runtime-script-recovery-and-validation",
+      "timestamp": "2026-03-17T00:00:00.000Z"
+    }
+  ]
+}
