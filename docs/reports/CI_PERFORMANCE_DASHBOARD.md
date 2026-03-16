@@ -18,36 +18,22 @@
     "group1": {
       "name": "Code Quality",
       "duration": 5,
-      "jobs": [
-        "lint",
-        "typecheck",
-        "arch-guard"
-      ]
+      "jobs": ["lint", "typecheck", "arch-guard"]
     },
     "group2": {
       "name": "Tests",
       "duration": 8,
-      "jobs": [
-        "unit-tests",
-        "integration-tests",
-        "coverage-validation"
-      ]
+      "jobs": ["unit-tests", "integration-tests", "coverage-validation"]
     },
     "group3": {
       "name": "E2E",
       "duration": 10,
-      "jobs": [
-        "e2e-mmc",
-        "e2e-backoffice",
-        "e2e-frontoffice"
-      ]
+      "jobs": ["e2e-mmc", "e2e-backoffice", "e2e-frontoffice"]
     },
     "group4": {
       "name": "Build",
       "duration": 3,
-      "jobs": [
-        "build-verification"
-      ]
+      "jobs": ["build-verification"]
     }
   }
 }

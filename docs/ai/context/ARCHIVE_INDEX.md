@@ -11,11 +11,11 @@
 ## Archived Snapshots
 
 | Filename | Size (KB) | Created | Age (days) |
-|----------|-----------|---------|-----------|
+| -------- | --------- | ------- | ---------- |
 
 ## Live Snapshots
 
-| Filename | Size (KB) | Modified |
-|----------|-----------|----------|
-| ai-layer-model.json | 0.5 | 2026-03-14 |
-| ai-architecture-brain.json | 39.3 | 2026-03-14 |
+| Filename                   | Size (KB) | Modified   |
+| -------------------------- | --------- | ---------- |
+| ai-layer-model.json        | 0.5       | 2026-03-14 |
+| ai-architecture-brain.json | 39.3      | 2026-03-14 |
