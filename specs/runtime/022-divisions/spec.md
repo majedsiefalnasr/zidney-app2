@@ -78,7 +78,7 @@ No exceptions requiring an ADR were detected for this stage.
   - `divisions` — new table in tenant DB
   - `staff_divisions` — new join table in tenant DB
   - `students` — `division_id` FK column added (must reference `divisions.id`, NOT NULL)
-  - `staff_users` — no structural change in this stage (join table handles the relationship)
+  - `backoffice_staff_users` — no structural change in this stage (join table handles the relationship)
 
 **Confirmed:** No shared tenant data. No cross-tenant joins. No global division singleton.
 
@@ -293,8 +293,7 @@ both are returned. Remove one, confirm only one remains.
 
 - **FR-001**: The system MUST store divisions within the tenant DB in a `divisions` table with
   columns: `id`, `name`, `description`, `is_default`, `status`, `created_at`, `updated_at`.
-- **FR-002**: Division `name` MUST be unique per tenant workspace (case-insensitive comparison
-  enforced at API layer; unique index enforced at DB layer).
+- **FR-002**: Division `name` MUST be unique per tenant workspace (case-insensitive comparison enforced at API layer; case-insensitive functional unique index on `LOWER(name)` enforced at DB layer to prevent duplicate case-variant names under concurrent creation).
 - **FR-003**: Exactly one row in `divisions` MUST have `is_default = true` at all times.
 - **FR-004**: The default division MUST always have `status = ENABLED`.
 - **FR-005**: `is_default` MUST be immutable after row creation (except during system migration by
@@ -336,6 +335,7 @@ both are returned. Remove one, confirm only one remains.
   triggering user id, timestamp, and per-entity-type affected record count.
 - **FR-023**: All API responses MUST conform to the platform error contract:
   `{ success: boolean, data: object | null, error: { code: string, message: string } | null }`.
+- **FR-023a** (Approved Extension): Division API error responses extend the platform `error` object with an additional `correlationId` field: `{ code: string, message: string, correlationId: string }`. The `correlationId` is propagated from the incoming request header for distributed tracing without exposing internal error details.
 - **FR-024**: Re-enabling the divisions feature after a disable-divisions operation MUST be blocked
   at the API layer with 423 Locked and `DIVISIONS_FEATURE_LOCKED`.
 - **FR-025**: Adding a duplicate staff-division assignment (same `staff_id` + `division_id`) MUST
@@ -370,8 +370,7 @@ both are returned. Remove one, confirm only one remains.
   division produce results scoped only to the default division.
 - **SC-007**: The workspace can operate in single-division mode with zero user-visible errors for
   all standard academic workflows.
-- **SC-008**: All division operations produce structured audit log entries within the same
-  transaction as the mutation.
+- **SC-008**: All division operations produce structured audit log entries before the handler returns a success response. Audit log calls MUST execute outside the database transaction block (after COMMIT, outside the try/catch) so that logger failures do not trigger false rollbacks or return HTTP 500 responses on already-committed mutations.
 - **SC-009**: No division data or identifiers from tenant A are accessible from tenant B under
   any circumstances.
 - **SC-010**: The disable-divisions operation rejects duplicate or concurrent invocations
@@ -383,20 +382,20 @@ both are returned. Remove one, confirm only one remains.
 
 ### Table: `divisions`
 
-| Column        | Type                    | Nullable | Default             | Notes                               |
-| ------------- | ----------------------- | -------- | ------------------- | ----------------------------------- |
-| `id`          | UUID                    | NO       | `gen_random_uuid()` | Primary key                         |
-| `name`        | VARCHAR(255)            | NO       | —                   | Unique per workspace (unique index) |
-| `description` | TEXT                    | YES      | NULL                |                                     |
-| `is_default`  | BOOLEAN                 | NO       | `false`             | Exactly one row must be `true`      |
-| `status`      | ENUM(ENABLED, DISABLED) | NO       | `ENABLED`           | Default division always `ENABLED`   |
-| `created_at`  | TIMESTAMPTZ             | NO       | `now()`             | Server-set; client time not trusted |
-| `updated_at`  | TIMESTAMPTZ             | NO       | `now()`             | Server-set on every update          |
+| Column        | Type         | Nullable | Default             | Notes                                                                                               |
+| ------------- | ------------ | -------- | ------------------- | --------------------------------------------------------------------------------------------------- |
+| `id`          | UUID         | NO       | `gen_random_uuid()` | Primary key                                                                                         |
+| `name`        | VARCHAR(255) | NO       | —                   | Unique per workspace (unique index)                                                                 |
+| `description` | TEXT         | YES      | NULL                |                                                                                                     |
+| `is_default`  | BOOLEAN      | NO       | `false`             | Exactly one row must be `true`                                                                      |
+| `status`      | VARCHAR(20)  | NO       | `ENABLED`           | Default division always `ENABLED`; `CHECK (status IN ('ENABLED','DISABLED'))` enforced in migration |
+| `created_at`  | TIMESTAMPTZ  | NO       | `now()`             | Server-set; client time not trusted                                                                 |
+| `updated_at`  | TIMESTAMPTZ  | NO       | `now()`             | Server-set on every update                                                                          |
 
 **Constraints:**
 
 - `PRIMARY KEY (id)`
-- `UNIQUE (name)` — case-insensitive enforcement at API layer; unique index at DB layer
+- `UNIQUE (LOWER(name))` — functional unique index enforcing case-insensitive uniqueness at DB layer (prevents concurrent case-variant duplicates such as "Grade 10A" and "GRADE 10A")
 - `CHECK (status IN ('ENABLED', 'DISABLED'))`
 - Application-level invariant: exactly one row with `is_default = true`
 - Application-level invariant: row with `is_default = true` must always have `status = ENABLED`
@@ -405,27 +404,28 @@ both are returned. Remove one, confirm only one remains.
 
 - `idx_divisions_status` on `(status)`
 - `idx_divisions_is_default` on `(is_default)`
+- `idx_divisions_created_at_id` on `(created_at ASC, id ASC)` — keyset pagination composite index
 
 ---
 
 ### Table: `staff_divisions`
 
-| Column        | Type        | Nullable | Default | Notes                                   |
-| ------------- | ----------- | -------- | ------- | --------------------------------------- |
-| `staff_id`    | UUID        | NO       | —       | FK → `staff_users.id` ON DELETE CASCADE |
-| `division_id` | UUID        | NO       | —       | FK → `divisions.id` ON DELETE RESTRICT  |
-| `assigned_at` | TIMESTAMPTZ | NO       | `now()` | Server-set assignment timestamp         |
+| Column        | Type        | Nullable | Default | Notes                                              |
+| ------------- | ----------- | -------- | ------- | -------------------------------------------------- |
+| `staff_id`    | UUID        | NO       | —       | FK → `backoffice_staff_users.id` ON DELETE CASCADE |
+| `division_id` | UUID        | NO       | —       | FK → `divisions.id` ON DELETE RESTRICT             |
+| `assigned_at` | TIMESTAMPTZ | NO       | `now()` | Server-set assignment timestamp                    |
 
 **Constraints:**
 
 - `PRIMARY KEY (staff_id, division_id)` (composite)
-- `FOREIGN KEY (staff_id) REFERENCES staff_users(id) ON DELETE CASCADE`
+- `FOREIGN KEY (staff_id) REFERENCES backoffice_staff_users(id) ON DELETE CASCADE`
 - `FOREIGN KEY (division_id) REFERENCES divisions(id) ON DELETE RESTRICT`
 
 **Indexes:**
 
-- `idx_staff_divisions_staff_id` on `(staff_id)`
-- `idx_staff_divisions_division_id` on `(division_id)`
+- `idx_staff_divisions_division_id` on `(division_id)` — covers division-in-use guard
+- No separate `idx_staff_divisions_staff_id` — the composite PK `(staff_id, division_id)` has `staff_id` as leading column and covers all staff-prefix queries
 
 ---
 
@@ -675,7 +675,7 @@ full-set reassignment of division references.
 
 List all divisions assigned to a specific staff member.
 
-**Authorization:** Backoffice staff with `can_view` on Staff module.
+**Authorization:** Backoffice staff with `can_view` on Divisions module (`ACADEMIC_STRUCTURE`).
 
 **Response 200:**
 
@@ -695,7 +695,7 @@ List all divisions assigned to a specific staff member.
 
 Assign a division to a staff member (idempotent).
 
-**Authorization:** Backoffice staff with `can_edit` on Staff module.
+**Authorization:** Backoffice staff with `can_edit` on Divisions module (`ACADEMIC_STRUCTURE`).
 
 **Request body:**
 
@@ -719,7 +719,7 @@ Assign a division to a staff member (idempotent).
 
 Remove a division assignment from a staff member.
 
-**Authorization:** Backoffice staff with `can_edit` on Staff module.
+**Authorization:** Backoffice staff with `can_edit` on Divisions module (`ACADEMIC_STRUCTURE`).
 
 **Response 200:** Updated list of staff's remaining divisions.
 
@@ -858,12 +858,13 @@ Every mutating division operation MUST produce a structured log entry with:
 
 1. Create `divisions` table with all columns, constraints, and indexes.
 2. Create `staff_divisions` join table with all columns, constraints, and indexes.
-3. Add `division_id` column to `students` (nullable initially).
-4. Backfill `students.division_id` with the default division ID (requires default division to exist,
+3. Add `divisions_enabled` boolean column to `workspace_settings` (`NOT NULL DEFAULT true`).
+4. Add `division_id` column to `students` (nullable initially).
+5. Backfill `students.division_id` with the default division ID (requires default division to exist,
    per STAGE_17_TENANT_BOOTSTRAP guarantee).
-5. Alter `students.division_id` to NOT NULL.
-6. Add FK constraint: `students.division_id REFERENCES divisions(id) ON DELETE RESTRICT`.
-7. Increment `schema_version`.
+6. Alter `students.division_id` to NOT NULL.
+7. Add FK constraint: `students.division_id REFERENCES divisions(id) ON DELETE RESTRICT`.
+8. Increment `schema_version`.
 
 **Dependencies:**
 
@@ -895,7 +896,7 @@ Every mutating division operation MUST produce a structured log entry with:
    part of tenant provisioning. This spec does not re-specify that bootstrap step.
 2. **Workspace settings table exists:** A `workspace_settings` or equivalent table with a
    `divisions_enabled` boolean column is available (specified in STAGE_18_WORKSPACE_SETTINGS).
-3. **`staff_users` table exists:** The `staff_users` table from STAGE_17/STAGE_21 is in place.
+3. **`backoffice_staff_users` table exists:** The `backoffice_staff_users` table from STAGE_17/STAGE_21 is in place.
 4. **`students` table exists prior to migration:** The migration must handle partial backfill
    safely if students were created before this migration runs (non-production only scenario).
 5. **Re-enabling divisions after disable-divisions is explicitly out-of-scope:** Such a flow

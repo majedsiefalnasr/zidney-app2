@@ -98,10 +98,16 @@ export async function up(client: PoolClient): Promise<void> {
         updated_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
 
         CONSTRAINT divisions_pkey
-          PRIMARY KEY (id),
-        CONSTRAINT divisions_name_unique
-          UNIQUE (name)
+          PRIMARY KEY (id)
       )
+    `);
+
+    // Case-insensitive functional unique index on divisions.name.
+    // Replaces a plain UNIQUE(name) constraint — prevents concurrent case-variant duplicates
+    // such as "Grade 10A" and "GRADE 10A" that a case-sensitive unique index cannot catch.
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS divisions_name_lower_unique
+        ON divisions (LOWER(name))
     `);
 
     // Index: filter by status (list enabled/disabled divisions)
@@ -114,6 +120,13 @@ export async function up(client: PoolClient): Promise<void> {
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_divisions_is_default
         ON divisions (is_default)
+    `);
+
+    // Composite index: keyset pagination cursor (created_at, id) used by listDivisions.
+    // Required for the (created_at, id) > ($cursor_ts, $cursor_id) row-value condition.
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_divisions_created_at_id
+        ON divisions (created_at ASC, id ASC)
     `);
 
     // -------------------------------------------------------------------------
@@ -142,11 +155,10 @@ export async function up(client: PoolClient): Promise<void> {
       )
     `);
 
-    // Index: list all divisions for a staff member (staff profile endpoint)
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_staff_divisions_staff_id
-        ON staff_divisions (staff_id)
-    `);
+    // Composite PK (staff_id, division_id) already provides a B-tree index with staff_id
+    // as the leading column — a separate idx_staff_divisions_staff_id is redundant and adds
+    // unnecessary write overhead. The composite PK covers all staff_id prefix queries.
+    // (No separate staff_id index created.)
 
     // Index: count/list staff members in a division (used by DIVISION_IN_USE guard)
     await client.query(`
@@ -276,16 +288,7 @@ export async function down(_client: PoolClient): Promise<void> {
  * ✓ password_hash / sensitive columns never exposed (not applicable here)
  */
 
-import {
-  boolean,
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { boolean, index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 // ---------------------------------------------------------------------------
 // divisions
@@ -317,12 +320,21 @@ export const divisions = pgTable(
     updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
-    /** Case-sensitive unique index — case-insensitive uniqueness enforced at API layer. */
-    nameUnique: uniqueIndex("divisions_name_unique").on(table.name),
+    /**
+     * Case-insensitive functional unique index — handled by migration (LOWER(name)).
+     * Drizzle does not generate the functional index; the migration step creates
+     * `CREATE UNIQUE INDEX divisions_name_lower_unique ON divisions (LOWER(name))`.
+     * No uniqueIndex() declared here to avoid Drizzle generating a conflicting constraint.
+     */
     /** Filter divisions by status (list active/disabled). */
     statusIdx: index("idx_divisions_status").on(table.status),
     /** Fast lookup of the single default division row. */
     isDefaultIdx: index("idx_divisions_is_default").on(table.is_default),
+    /**
+     * Keyset pagination composite index (created_at, id).
+     * Handled by migration: `CREATE INDEX idx_divisions_created_at_id ON divisions (created_at ASC, id ASC)`.
+     * Not declared via Drizzle index() to keep the Drizzle definition clean and avoid conflicts.
+     */
   }),
 );
 
@@ -383,8 +395,11 @@ export const staffDivisions = pgTable(
   (table) => ({
     /** Composite PK enforces uniqueness of (staff_id, division_id) at DB level. */
     pk: primaryKey({ columns: [table.staff_id, table.division_id] }),
-    /** List all divisions for a staff member. */
-    staffIdIdx: index("idx_staff_divisions_staff_id").on(table.staff_id),
+    /**
+     * idx_staff_divisions_staff_id is intentionally NOT declared here.
+     * The composite PK (staff_id, division_id) has staff_id as leading column,
+     * so PostgreSQL can use it for all staff_id lookups without a separate index.
+     */
     /** Count/list staff members in a division (DIVISION_IN_USE guard). */
     divisionIdIdx: index("idx_staff_divisions_division_id").on(table.division_id),
   }),
@@ -456,7 +471,7 @@ workspace_settings (singleton)
 
 divisions
   ├── id (PK)
-  ├── name (UNIQUE)
+  ├── name (UNIQUE via LOWER(name) functional idx — NOT a plain UNIQUE constraint)
   ├── description
   ├── is_default (exactly one true)
   ├── status (ENABLED | DISABLED)
@@ -476,15 +491,15 @@ divisions
 
 ## 7. Index Summary
 
-| Table             | Index name                        | Columns                   | Purpose                    |
-| ----------------- | --------------------------------- | ------------------------- | -------------------------- |
-| `divisions`       | `divisions_name_unique`           | `(name)`                  | Uniqueness constraint      |
-| `divisions`       | `idx_divisions_status`            | `(status)`                | Filter by ENABLED/DISABLED |
-| `divisions`       | `idx_divisions_is_default`        | `(is_default)`            | Default division lookup    |
-| `staff_divisions` | composite PK                      | `(staff_id, division_id)` | Uniqueness + PK            |
-| `staff_divisions` | `idx_staff_divisions_staff_id`    | `(staff_id)`              | Staff's divisions list     |
-| `staff_divisions` | `idx_staff_divisions_division_id` | `(division_id)`           | Division's staff list      |
-| `students`        | `idx_students_division_id`        | `(division_id)`           | Students in division       |
+| Table             | Index name                        | Columns                    | Purpose                              |
+| ----------------- | --------------------------------- | -------------------------- | ------------------------------------ |
+| `divisions`       | `divisions_name_lower_unique`     | `(LOWER(name))`            | Case-insensitive uniqueness (unique) |
+| `divisions`       | `idx_divisions_status`            | `(status)`                 | Filter by ENABLED/DISABLED           |
+| `divisions`       | `idx_divisions_is_default`        | `(is_default)`             | Default division lookup              |
+| `divisions`       | `idx_divisions_created_at_id`     | `(created_at ASC, id ASC)` | Keyset pagination cursor             |
+| `staff_divisions` | composite PK                      | `(staff_id, division_id)`  | Uniqueness + PK + staff_id prefix    |
+| `staff_divisions` | `idx_staff_divisions_division_id` | `(division_id)`            | Division's staff list                |
+| `students`        | `idx_students_division_id`        | `(division_id)`            | Students in division                 |
 
 ---
 

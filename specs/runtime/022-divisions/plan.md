@@ -65,15 +65,15 @@ STEP 8  UPDATE schema_version SET version = '1.5.0'
 
 Full source in `data-model.md §2`. Key columns:
 
-| Drizzle field | DB column     | Type                                     | Notable                                       |
-| ------------- | ------------- | ---------------------------------------- | --------------------------------------------- |
-| `id`          | `id`          | `uuid PK DEFAULT gen_random_uuid()`      | `primaryKey().defaultRandom()`                |
-| `name`        | `name`        | `varchar(255) NOT NULL UNIQUE`           | `uniqueIndex('divisions_name_unique')`        |
-| `description` | `description` | `text nullable`                          | No `.notNull()`, no `.default(null)`          |
-| `is_default`  | `is_default`  | `boolean NOT NULL DEFAULT false`         | `boolean().notNull().default(false)`          |
-| `status`      | `status`      | `varchar(20) NOT NULL DEFAULT 'ENABLED'` | CHECK in migration only                       |
-| `created_at`  | `created_at`  | `timestamptz NOT NULL DEFAULT now()`     | `timestamp({withTimezone:true}).defaultNow()` |
-| `updated_at`  | `updated_at`  | `timestamptz NOT NULL DEFAULT now()`     | Same pattern                                  |
+| Drizzle field | DB column     | Type                                     | Notable                                                                                                |
+| ------------- | ------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `id`          | `id`          | `uuid PK DEFAULT gen_random_uuid()`      | `primaryKey().defaultRandom()`                                                                         |
+| `name`        | `name`        | `varchar(255) NOT NULL`                  | No `uniqueIndex()` — functional `LOWER(name)` index owned by migration (`divisions_name_lower_unique`) |
+| `description` | `description` | `text nullable`                          | No `.notNull()`, no `.default(null)`                                                                   |
+| `is_default`  | `is_default`  | `boolean NOT NULL DEFAULT false`         | `boolean().notNull().default(false)`                                                                   |
+| `status`      | `status`      | `varchar(20) NOT NULL DEFAULT 'ENABLED'` | CHECK in migration only                                                                                |
+| `created_at`  | `created_at`  | `timestamptz NOT NULL DEFAULT now()`     | `timestamp({withTimezone:true}).defaultNow()`                                                          |
+| `updated_at`  | `updated_at`  | `timestamptz NOT NULL DEFAULT now()`     | Same pattern                                                                                           |
 
 Exported types: `Division`, `NewDivision`.
 
@@ -446,13 +446,20 @@ export async function createDivision(
   input: CreateDivisionInput,
   audit: AuditContext,
 ): Promise<DivisionRow> {
-  const enabled = await isDivisionsEnabled(db);
-  if (!enabled) {
-    throw new DivisionsError("DIVISIONS_FEATURE_DISABLED", "Workspace is in single-division mode.");
-  }
-
+  let division!: DivisionRow;
   await db.query("BEGIN");
   try {
+    // Feature flag inside transaction — prevents TOCTOU with disable-divisions (SC-Performance)
+    const settings = await db.query<{ divisions_enabled: boolean }>(
+      `SELECT divisions_enabled FROM workspace_settings LIMIT 1 FOR SHARE`,
+    );
+    if (!settings.rows[0]?.divisions_enabled) {
+      throw new DivisionsError(
+        "DIVISIONS_FEATURE_DISABLED",
+        "Workspace is in single-division mode.",
+      );
+    }
+
     // Case-insensitive name conflict check
     const conflict = await db.query<{ id: string }>(
       `SELECT id FROM divisions WHERE LOWER(name) = LOWER($1) LIMIT 1`,
@@ -471,23 +478,22 @@ export async function createDivision(
        RETURNING id, name, description, is_default, status, created_at, updated_at`,
       [input.name.trim(), input.description ?? null],
     );
-    const division = result.rows[0]!;
+    division = result.rows[0]!;
 
     await db.query("COMMIT");
-
-    logger.info("DIVISION_CREATED", {
-      workspace_slug: audit.workspace_slug,
-      workspace_id: audit.workspace_id,
-      user_id: audit.user_id,
-      correlation_id: audit.request_id,
-      division_id: division.id,
-    });
-
-    return division;
   } catch (err) {
     await db.query("ROLLBACK");
     throw err;
   }
+  // Audit log outside try/catch — SC-008: logger failures must not affect committed mutations
+  logger.info("DIVISION_CREATED", {
+    workspace_slug: audit.workspace_slug,
+    workspace_id: audit.workspace_id,
+    user_id: audit.user_id,
+    correlation_id: audit.request_id,
+    division_id: division.id,
+  });
+  return division;
 }
 
 // ---------------------------------------------------------------------------
@@ -500,13 +506,20 @@ export async function updateDivision(
   input: UpdateDivisionInput,
   audit: AuditContext,
 ): Promise<DivisionRow> {
-  const enabled = await isDivisionsEnabled(db);
-  if (!enabled) {
-    throw new DivisionsError("DIVISIONS_FEATURE_DISABLED", "Workspace is in single-division mode.");
-  }
-
+  let updatedDivision!: DivisionRow;
   await db.query("BEGIN");
   try {
+    // Feature flag inside transaction — prevents TOCTOU with disable-divisions (SC-Performance)
+    const settings = await db.query<{ divisions_enabled: boolean }>(
+      `SELECT divisions_enabled FROM workspace_settings LIMIT 1 FOR SHARE`,
+    );
+    if (!settings.rows[0]?.divisions_enabled) {
+      throw new DivisionsError(
+        "DIVISIONS_FEATURE_DISABLED",
+        "Workspace is in single-division mode.",
+      );
+    }
+
     const existing = await db.query<DivisionRow>(
       `SELECT id, is_default FROM divisions WHERE id = $1 FOR UPDATE`,
       [id],
@@ -533,22 +546,22 @@ export async function updateDivision(
         RETURNING id, name, description, is_default, status, created_at, updated_at`,
       [input.name.trim(), input.description ?? null, id],
     );
+    updatedDivision = result.rows[0]!;
 
     await db.query("COMMIT");
-
-    logger.info("DIVISION_UPDATED", {
-      workspace_slug: audit.workspace_slug,
-      workspace_id: audit.workspace_id,
-      user_id: audit.user_id,
-      correlation_id: audit.request_id,
-      division_id: id,
-    });
-
-    return result.rows[0]!;
   } catch (err) {
     await db.query("ROLLBACK");
     throw err;
   }
+  // Audit log outside try/catch — SC-008: logger failures must not affect committed mutations
+  logger.info("DIVISION_UPDATED", {
+    workspace_slug: audit.workspace_slug,
+    workspace_id: audit.workspace_id,
+    user_id: audit.user_id,
+    correlation_id: audit.request_id,
+    division_id: id,
+  });
+  return updatedDivision;
 }
 
 // ---------------------------------------------------------------------------
@@ -561,13 +574,20 @@ export async function updateDivisionStatus(
   input: UpdateDivisionStatusInput,
   audit: AuditContext,
 ): Promise<DivisionRow> {
-  const enabled = await isDivisionsEnabled(db);
-  if (!enabled) {
-    throw new DivisionsError("DIVISIONS_FEATURE_DISABLED", "Workspace is in single-division mode.");
-  }
-
+  let updatedDivision!: DivisionRow;
   await db.query("BEGIN");
   try {
+    // Feature flag inside transaction — prevents TOCTOU with disable-divisions (SC-Performance)
+    const settings = await db.query<{ divisions_enabled: boolean }>(
+      `SELECT divisions_enabled FROM workspace_settings LIMIT 1 FOR SHARE`,
+    );
+    if (!settings.rows[0]?.divisions_enabled) {
+      throw new DivisionsError(
+        "DIVISIONS_FEATURE_DISABLED",
+        "Workspace is in single-division mode.",
+      );
+    }
+
     const existing = await db.query<DivisionRow>(
       `SELECT id, is_default FROM divisions WHERE id = $1 FOR UPDATE`,
       [id],
@@ -589,23 +609,23 @@ export async function updateDivisionStatus(
         RETURNING id, name, description, is_default, status, created_at, updated_at`,
       [input.status, id],
     );
+    updatedDivision = result.rows[0]!;
 
     await db.query("COMMIT");
-
-    logger.info("DIVISION_STATUS_UPDATED", {
-      workspace_slug: audit.workspace_slug,
-      workspace_id: audit.workspace_id,
-      user_id: audit.user_id,
-      correlation_id: audit.request_id,
-      division_id: id,
-      new_status: input.status,
-    });
-
-    return result.rows[0]!;
   } catch (err) {
     await db.query("ROLLBACK");
     throw err;
   }
+  // Audit log outside try/catch — SC-008: logger failures must not affect committed mutations
+  logger.info("DIVISION_STATUS_UPDATED", {
+    workspace_slug: audit.workspace_slug,
+    workspace_id: audit.workspace_id,
+    user_id: audit.user_id,
+    correlation_id: audit.request_id,
+    division_id: id,
+    new_status: input.status,
+  });
+  return updatedDivision;
 }
 
 // ---------------------------------------------------------------------------
@@ -613,13 +633,19 @@ export async function updateDivisionStatus(
 // ---------------------------------------------------------------------------
 
 export async function deleteDivision(db: DbClient, id: string, audit: AuditContext): Promise<void> {
-  const enabled = await isDivisionsEnabled(db);
-  if (!enabled) {
-    throw new DivisionsError("DIVISIONS_FEATURE_DISABLED", "Workspace is in single-division mode.");
-  }
-
   await db.query("BEGIN");
   try {
+    // Feature flag inside transaction — prevents TOCTOU with disable-divisions (SC-Performance)
+    const settings = await db.query<{ divisions_enabled: boolean }>(
+      `SELECT divisions_enabled FROM workspace_settings LIMIT 1 FOR SHARE`,
+    );
+    if (!settings.rows[0]?.divisions_enabled) {
+      throw new DivisionsError(
+        "DIVISIONS_FEATURE_DISABLED",
+        "Workspace is in single-division mode.",
+      );
+    }
+
     const existing = await db.query<DivisionRow>(
       `SELECT id, is_default FROM divisions WHERE id = $1 FOR UPDATE`,
       [id],
@@ -647,18 +673,18 @@ export async function deleteDivision(db: DbClient, id: string, audit: AuditConte
 
     await db.query(`DELETE FROM divisions WHERE id = $1`, [id]);
     await db.query("COMMIT");
-
-    logger.info("DIVISION_DELETED", {
-      workspace_slug: audit.workspace_slug,
-      workspace_id: audit.workspace_id,
-      user_id: audit.user_id,
-      correlation_id: audit.request_id,
-      division_id: id,
-    });
   } catch (err) {
     await db.query("ROLLBACK");
     throw err;
   }
+  // Audit log outside try/catch — SC-008: logger failures must not affect committed mutations
+  logger.info("DIVISION_DELETED", {
+    workspace_slug: audit.workspace_slug,
+    workspace_id: audit.workspace_id,
+    user_id: audit.user_id,
+    correlation_id: audit.request_id,
+    division_id: id,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -677,6 +703,9 @@ export async function disableDivisions(
     throw new DivisionsError("DIVISIONS_FEATURE_LOCKED", "Divisions feature is already locked.");
   }
 
+  let studentsReassigned = 0;
+  let staffDivisionsReassigned = 0;
+  let divisionsDisabled = 0;
   // SERIALIZABLE isolation prevents phantom reads during full-set reassignment
   await db.query("BEGIN");
   await db.query("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
@@ -700,7 +729,7 @@ export async function disableDivisions(
        ) SELECT COUNT(*) AS count FROM updated`,
       [defaultId],
     );
-    const studentsReassigned = parseInt(studentsResult.rows[0]?.count ?? "0");
+    studentsReassigned = parseInt(studentsResult.rows[0]?.count ?? "0");
 
     // 3. Delete non-default staff_divisions, re-insert for those staff on default
     //    Uses CTE to capture affected staff_ids before deletion, then idempotent INSERT
@@ -720,7 +749,7 @@ export async function disableDivisions(
        SELECT COUNT(*) AS count FROM deleted`,
       [defaultId],
     );
-    const staffDivisionsReassigned = parseInt(staffResult.rows[0]?.count ?? "0");
+    staffDivisionsReassigned = parseInt(staffResult.rows[0]?.count ?? "0");
 
     // 4. Disable all non-default divisions
     const disabledResult = await db.query<{ count: string }>(
@@ -731,28 +760,12 @@ export async function disableDivisions(
           RETURNING id
        ) SELECT COUNT(*) AS count FROM updated`,
     );
-    const divisionsDisabled = parseInt(disabledResult.rows[0]?.count ?? "0");
+    divisionsDisabled = parseInt(disabledResult.rows[0]?.count ?? "0");
 
     // 5. Set workspace feature flag
     await db.query(`UPDATE workspace_settings SET divisions_enabled = false, updated_at = NOW()`);
 
     await db.query("COMMIT");
-
-    logger.info("DIVISIONS_FEATURE_DISABLED", {
-      workspace_slug: audit.workspace_slug,
-      workspace_id: audit.workspace_id,
-      user_id: audit.user_id,
-      correlation_id: audit.request_id,
-      students_reassigned: studentsReassigned,
-      staff_divisions_reassigned: staffDivisionsReassigned,
-      divisions_disabled: divisionsDisabled,
-    });
-
-    return {
-      students_reassigned: studentsReassigned,
-      staff_divisions_reassigned: staffDivisionsReassigned,
-      divisions_disabled: divisionsDisabled,
-    };
   } catch (err) {
     await db.query("ROLLBACK");
     logger.error("DIVISIONS_FEATURE_DISABLE_FAILED", {
@@ -763,6 +776,21 @@ export async function disableDivisions(
     });
     throw err;
   }
+  // Audit log outside try/catch — SC-008: logger failures must not affect committed mutations
+  logger.info("DIVISIONS_FEATURE_DISABLED", {
+    workspace_slug: audit.workspace_slug,
+    workspace_id: audit.workspace_id,
+    user_id: audit.user_id,
+    correlation_id: audit.request_id,
+    students_reassigned: studentsReassigned,
+    staff_divisions_reassigned: staffDivisionsReassigned,
+    divisions_disabled: divisionsDisabled,
+  });
+  return {
+    students_reassigned: studentsReassigned,
+    staff_divisions_reassigned: staffDivisionsReassigned,
+    divisions_disabled: divisionsDisabled,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -791,13 +819,19 @@ export async function assignStaffDivision(
   divisionId: string,
   audit: AuditContext,
 ): Promise<DivisionRow[]> {
-  const enabled = await isDivisionsEnabled(db);
-  if (!enabled) {
-    throw new DivisionsError("DIVISIONS_FEATURE_DISABLED", "Workspace is in single-division mode.");
-  }
-
   await db.query("BEGIN");
   try {
+    // Feature flag inside transaction — prevents TOCTOU with disable-divisions (SC-Performance)
+    const settings = await db.query<{ divisions_enabled: boolean }>(
+      `SELECT divisions_enabled FROM workspace_settings LIMIT 1 FOR SHARE`,
+    );
+    if (!settings.rows[0]?.divisions_enabled) {
+      throw new DivisionsError(
+        "DIVISIONS_FEATURE_DISABLED",
+        "Workspace is in single-division mode.",
+      );
+    }
+
     const division = await db.query<DivisionRow>(`SELECT id, status FROM divisions WHERE id = $1`, [
       divisionId,
     ]);
@@ -817,21 +851,20 @@ export async function assignStaffDivision(
     );
 
     await db.query("COMMIT");
-
-    logger.info("STAFF_DIVISION_ASSIGNED", {
-      workspace_slug: audit.workspace_slug,
-      workspace_id: audit.workspace_id,
-      user_id: audit.user_id,
-      correlation_id: audit.request_id,
-      staff_id: staffId,
-      division_id: divisionId,
-    });
-
-    return getStaffDivisions(db, staffId);
   } catch (err) {
     await db.query("ROLLBACK");
     throw err;
   }
+  // Audit log outside try/catch — SC-008: logger failures must not affect committed mutations
+  logger.info("STAFF_DIVISION_ASSIGNED", {
+    workspace_slug: audit.workspace_slug,
+    workspace_id: audit.workspace_id,
+    user_id: audit.user_id,
+    correlation_id: audit.request_id,
+    staff_id: staffId,
+    division_id: divisionId,
+  });
+  return getStaffDivisions(db, staffId);
 }
 
 // ---------------------------------------------------------------------------
@@ -865,12 +898,12 @@ export async function removeStaffDivision(
       );
     }
 
-    // Min-one guard
-    const countResult = await db.query<{ count: string }>(
-      `SELECT COUNT(*) AS count FROM staff_divisions WHERE staff_id = $1`,
+    // Min-one guard with row-level lock — prevents concurrent removes reaching 0 (SC-Performance)
+    const lockedRows = await db.query<{ division_id: string }>(
+      `SELECT division_id FROM staff_divisions WHERE staff_id = $1 FOR UPDATE`,
       [staffId],
     );
-    if (parseInt(countResult.rows[0]?.count ?? "0") <= 1) {
+    if (lockedRows.rows.length <= 1) {
       throw new DivisionsError(
         "STAFF_MINIMUM_DIVISION_REQUIRED",
         "Staff members must be assigned to at least one division.",
@@ -883,21 +916,20 @@ export async function removeStaffDivision(
     ]);
 
     await db.query("COMMIT");
-
-    logger.info("STAFF_DIVISION_REMOVED", {
-      workspace_slug: audit.workspace_slug,
-      workspace_id: audit.workspace_id,
-      user_id: audit.user_id,
-      correlation_id: audit.request_id,
-      staff_id: staffId,
-      division_id: divisionId,
-    });
-
-    return getStaffDivisions(db, staffId);
   } catch (err) {
     await db.query("ROLLBACK");
     throw err;
   }
+  // Audit log outside try/catch — SC-008: logger failures must not affect committed mutations
+  logger.info("STAFF_DIVISION_REMOVED", {
+    workspace_slug: audit.workspace_slug,
+    workspace_id: audit.workspace_id,
+    user_id: audit.user_id,
+    correlation_id: audit.request_id,
+    staff_id: staffId,
+    division_id: divisionId,
+  });
+  return getStaffDivisions(db, staffId);
 }
 ```
 
