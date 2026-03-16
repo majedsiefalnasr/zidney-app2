@@ -11,7 +11,7 @@
  * RBAC: ACADEMIC_STRUCTURE can_view
  */
 
-import { listDivisions } from '@zidney/domain-core/divisions'
+import { type DivisionStatus, listDivisions } from '@zidney/domain-core/divisions'
 import { listDivisionsQuerySchema } from '@zidney/validation'
 import type { Context } from 'hono'
 import type { BackofficeEnv } from '../types'
@@ -50,7 +50,7 @@ export async function handleGetListDivisions(c: Context<BackofficeEnv>): Promise
     const result = await listDivisions(db, {
       limit,
       cursor,
-      status: status as 'ENABLED' | 'DISABLED' | 'all',
+      status: status as DivisionStatus | 'all',
     })
 
     return c.json({ success: true, data: result, error: null }, 200)

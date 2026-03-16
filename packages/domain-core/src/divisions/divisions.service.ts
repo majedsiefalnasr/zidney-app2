@@ -157,10 +157,11 @@ export async function getDivisionById(db: DbClient, id: string): Promise<Divisio
        WHERE id = $1`,
     [id]
   )
-  if (result.rows.length === 0) {
+  const row = result.rows[0]
+  if (!row) {
     throw new DivisionsError('DIVISION_NOT_FOUND')
   }
-  return result.rows[0]
+  return row
 }
 
 // ---------------------------------------------------------------------------
@@ -646,13 +647,21 @@ export async function assignStaffDivision(
     )
   }
 
+  const row = result.rows[0]
+  if (!row) {
+    throw new DivisionsError(
+      'STAFF_DIVISION_ASSIGNMENT_FAILED',
+      'Failed to assign staff to division.'
+    )
+  }
+
   logger.info('Staff division assigned', {
     staff_id: staffId,
     division_id: divisionId,
     ...audit,
   })
 
-  return result.rows[0]
+  return row
 }
 
 // ---------------------------------------------------------------------------
