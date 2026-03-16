@@ -10,15 +10,15 @@ Status: Critical Academic Scope Layer
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-16T00:00:00Z
+Step: clarify
+Risk Level: MEDIUM
+Last Updated: 2026-03-16T00:02:00Z
 
 Scope Defined:
 
 - Division CRUD (create, read, update, toggle status, delete)
 - Staff multi-division assignment via staff_divisions join table
-- Disable-divisions transactional operation
+- Disable-divisions transactional operation (SERIALIZABLE isolation)
 - Division filtering enforcement on all content queries
 - Feature toggle: multi-division vs. single-division mode
 
@@ -30,10 +30,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

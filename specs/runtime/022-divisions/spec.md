@@ -569,6 +569,7 @@ Toggle division status between `ENABLED` and `DISABLED`.
 
 - 404 `DIVISION_NOT_FOUND`
 - 422 `DEFAULT_DIVISION_IMMUTABLE` — attempt to disable the default division
+- 422 `VALIDATION_ERROR` — `status` field is not one of `ENABLED | DISABLED`
 - 423 `DIVISIONS_FEATURE_DISABLED`
 
 ---
@@ -599,7 +600,7 @@ Hard-delete a non-default, non-referenced division.
 Disable the divisions feature for the entire workspace. Transactionally reassigns all references to
 the default division and locks single-division mode.
 
-**Authorization:** Backoffice super-administrator only (elevated permission).
+**Authorization:** `WORKSPACE_ADMIN` role (highest Backoffice role; no separate super-admin permission exists).
 
 **Request body:**
 
@@ -630,11 +631,14 @@ The `confirmation` value must be the exact string `"DISABLE_DIVISIONS"` to proce
 - 422 `DESTRUCTIVE_CONFIRMATION_REQUIRED` — confirmation token missing or incorrect
 - 423 `DIVISIONS_FEATURE_LOCKED` — feature already locked (re-invocation blocked)
 
+**Transaction isolation level:** `SERIALIZABLE` — required to prevent phantom reads during the
+full-set reassignment of division references.
+
 **Transactional guarantees:**
 
 1. Reassign `students.division_id` → default division ID for all non-default-division students
-2. Delete all `staff_divisions` rows where `division_id != default_id` and insert default
-   assignments for any affected staff members
+2. Delete all `staff_divisions` rows where `division_id != default_id`, then execute:
+   `INSERT INTO staff_divisions (staff_id, division_id, assigned_at) SELECT DISTINCT staff_id, :default_id, now() FROM deleted_rows ON CONFLICT (staff_id, division_id) DO NOTHING` — atomic, idempotent, no pre-check required
 3. Set `status = DISABLED` for all non-default divisions
 4. Set workspace settings `divisions_enabled = false`
 5. Write structured audit log entry
@@ -696,6 +700,7 @@ Remove a division assignment from a staff member.
 
 **Error responses:**
 
+- 404 `DIV_STAFF_ASSIGNMENT_NOT_FOUND` — `division_id` is not in the staff member's current assignments
 - 404 `DIVISION_NOT_FOUND`
 - 422 `STAFF_MINIMUM_DIVISION_REQUIRED` — removing the staff member's last division
 
@@ -703,15 +708,15 @@ Remove a division assignment from a staff member.
 
 ## Transaction Boundaries
 
-| Operation                       | Transactional? | Notes                                                           |
-| ------------------------------- | -------------- | --------------------------------------------------------------- |
-| Create division                 | Yes            | Insert + potential unique constraint conflict                   |
-| Update division                 | Yes            | Idempotent read-then-write; single row update                   |
-| Toggle division status          | Yes            | Single row update; default-check within same transaction        |
-| Delete division                 | Yes            | FK check + delete within single transaction                     |
-| Assign staff division           | Yes            | Upsert on `staff_divisions`; idempotent by composite PK         |
-| Remove staff division           | Yes            | Min-one check + delete; atomic                                  |
-| **Disable-divisions operation** | **Yes (full)** | All reassignments, disables, and flag update in one transaction |
+| Operation                       | Transactional? | Notes                                                                                              |
+| ------------------------------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| Create division                 | Yes            | Insert + potential unique constraint conflict                                                      |
+| Update division                 | Yes            | Idempotent read-then-write; single row update                                                      |
+| Toggle division status          | Yes            | Single row update; default-check within same transaction                                           |
+| Delete division                 | Yes            | FK check + delete within single transaction                                                        |
+| Assign staff division           | Yes            | Upsert on `staff_divisions`; idempotent by composite PK                                            |
+| Remove staff division           | Yes            | Min-one check + delete; atomic                                                                     |
+| **Disable-divisions operation** | **Yes (full)** | All reassignments, disables, and flag update in one transaction; `SERIALIZABLE` isolation required |
 
 - All writes use server-authoritative timestamps (`now()` server-side only).
 - Retry policy: client must retry on serialization failures (HTTP 503/conflict hint); server does
@@ -721,19 +726,20 @@ Remove a division assignment from a staff member.
 
 ## Error Codes Reference
 
-| Code                                | HTTP Status | Description                                                        |
-| ----------------------------------- | ----------- | ------------------------------------------------------------------ |
-| `DIVISION_NOT_FOUND`                | 404         | No division with the given ID exists in this workspace             |
-| `DIVISION_NAME_CONFLICT`            | 409         | A division with the same name already exists                       |
-| `DEFAULT_DIVISION_IMMUTABLE`        | 422         | Cannot delete or disable the default division                      |
-| `DIVISION_IN_USE`                   | 422         | Division has active student or staff assignments; cannot delete    |
-| `DIVISION_DISABLED`                 | 422         | Attempt to assign an entity to a `DISABLED` division               |
-| `DIVISION_REQUIRED`                 | 422         | Student record missing required `division_id`                      |
-| `STAFF_MINIMUM_DIVISION_REQUIRED`   | 422         | Removing this division would leave staff with zero divisions       |
-| `DESTRUCTIVE_CONFIRMATION_REQUIRED` | 422         | Disable-divisions called without required confirmation token       |
-| `DIVISIONS_FEATURE_DISABLED`        | 423         | Workspace is in single-division mode; operation not permitted      |
-| `DIVISIONS_FEATURE_LOCKED`          | 423         | Divisions feature is locked; re-enable requires operator migration |
-| `VALIDATION_ERROR`                  | 422         | Request body failed field-level validation                         |
+| Code                                | HTTP Status | Description                                                             |
+| ----------------------------------- | ----------- | ----------------------------------------------------------------------- |
+| `DIVISION_NOT_FOUND`                | 404         | No division with the given ID exists in this workspace                  |
+| `DIV_STAFF_ASSIGNMENT_NOT_FOUND`    | 404         | The specified division is not in the staff member's current assignments |
+| `DIVISION_NAME_CONFLICT`            | 409         | A division with the same name already exists                            |
+| `DEFAULT_DIVISION_IMMUTABLE`        | 422         | Cannot delete or disable the default division                           |
+| `DIVISION_IN_USE`                   | 422         | Division has active student or staff assignments; cannot delete         |
+| `DIVISION_DISABLED`                 | 422         | Attempt to assign an entity to a `DISABLED` division                    |
+| `DIVISION_REQUIRED`                 | 422         | Student record missing required `division_id`                           |
+| `STAFF_MINIMUM_DIVISION_REQUIRED`   | 422         | Removing this division would leave staff with zero divisions            |
+| `DESTRUCTIVE_CONFIRMATION_REQUIRED` | 422         | Disable-divisions called without required confirmation token            |
+| `DIVISIONS_FEATURE_DISABLED`        | 423         | Workspace is in single-division mode; operation not permitted           |
+| `DIVISIONS_FEATURE_LOCKED`          | 423         | Divisions feature is locked; re-enable requires operator migration      |
+| `VALIDATION_ERROR`                  | 422         | Request body failed field-level validation                              |
 
 All error responses conform to:
 
@@ -761,8 +767,10 @@ All error responses conform to:
 - Write operations (create, update, toggle) require `can_create` / `can_edit` on the Divisions
   module.
 - Delete requires `can_delete` on the Divisions module.
-- The disable-divisions operation requires an elevated super-administrator permission distinct from
-  standard division management.
+- The disable-divisions operation requires the `WORKSPACE_ADMIN` role — the same as standard
+  division mutating operations. No separate super-admin role is introduced. The operation is
+  additionally protected by: (1) rate limit of 1 req/min/workspace, (2) required `confirmation:
+"DISABLE_DIVISIONS"` parameter in the request body, and (3) workspace must have `ACTIVE` status.
 - All permission checks execute server-side via the RBAC middleware defined in STAGE_21.
 
 ### Input Validation
@@ -896,3 +904,15 @@ Every mutating division operation MUST produce a structured log entry with:
 ---
 
 ## Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-16
+
+- Q: Staff_divisions PK collision during disable-divisions transaction → A: Use `INSERT INTO staff_divisions (staff_id, division_id, assigned_at) SELECT DISTINCT staff_id, :default_id, now() FROM deleted_rows ON CONFLICT (staff_id, division_id) DO NOTHING`. This is atomic, idempotent, requires no pre-check, and is consistent with the POST /staff/:id/divisions idempotency contract.
+- Q: Transaction isolation level for disable-divisions → A: `SERIALIZABLE` isolation level is required. Rationale: the operation reads the full set of non-default divisions (to reassign FKs) and deletes them; concurrent inserts of new references to those divisions between the read and delete would create integrity violations. SERIALIZABLE prevents phantom reads and ensures the full reassignment is atomic and consistent.
+- Q: RBAC permission identifier for disable-divisions → A: The disable-divisions operation requires the `WORKSPACE_ADMIN` role (same as division mutating operations). There is no additional elevated permission — it is already the highest Backoffice role. The operation is additionally protected by: (1) rate limit: 1 req/min/workspace, (2) explicit confirmation parameter in request body (`confirmation: "DISABLE_DIVISIONS"`), and (3) soft-lock check (workspace must be ACTIVE). No separate super-admin role is introduced.
+- Q: PATCH /divisions/:id/status missing VALIDATION_ERROR for invalid status values → A: `VALIDATION_ERROR` (422 Unprocessable Entity) added to the PATCH /divisions/:id/status error responses. Triggered when `status` field is not one of `ENABLED | DISABLED`. Aligns with the global validation error contract.
+- Q: DELETE /staff/:staff_id/divisions/:division_id — unassigned division behavior → A: If the `division_id` does not exist in the staff's current assignments, return `DIV_STAFF_ASSIGNMENT_NOT_FOUND` (404). Consistent with the existing error contract and prevents silent no-ops that could mask client bugs. Additionally, if the deletion would leave the staff member with zero divisions, reject with `STAFF_MINIMUM_DIVISION_REQUIRED` (422) — this constraint was already in the error codes table but was missing from the endpoint's documented error responses.
