@@ -17,6 +17,9 @@
 
 import { z } from 'zod'
 
+// Division status enum (must match DivisionStatus in domain)
+const DivisionStatusEnum = z.enum(['ENABLED', 'DISABLED']) as z.ZodType<'ENABLED' | 'DISABLED'>
+
 // ---------------------------------------------------------------------------
 // Shared Schemas
 // ---------------------------------------------------------------------------
@@ -46,10 +49,26 @@ export const updateDivisionBodySchema = z.object({
 
 /** PATCH /divisions/:id/status — Update Division Status */
 export const updateDivisionStatusBodySchema = z.object({
-  status: z.enum(['ENABLED', 'DISABLED'], {
-    errorMap: () => ({ message: 'Status must be ENABLED or DISABLED' }),
-  }),
+  status: DivisionStatusEnum,
 })
+
+// ---------------------------------------------------------------------------
+// List Divisions Query Schema
+// ---------------------------------------------------------------------------
+
+/** GET /divisions — List Divisions with cursor pagination */
+export const listDivisionsQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  cursor: z.string().uuid().nullish().optional(),
+  status: z.enum(['ENABLED', 'DISABLED', 'all']).default('all'),
+})
+
+// ---------------------------------------------------------------------------
+// Delete Division Schema
+// ---------------------------------------------------------------------------
+
+/** DELETE /divisions/:id — Delete Division */
+export const deleteDivisionParamsSchema = divisionIdParamSchema
 
 // ---------------------------------------------------------------------------
 // Staff-Division Schemas
@@ -61,7 +80,9 @@ export const staffDivisionsParamsSchema = z.object({
   staffId: z.string().uuid('Invalid staff ID format'),
 })
 
-export const assignStaffDivisionBodySchema = z.object({})
+export const assignStaffDivisionBodySchema = z.object({
+  division_id: z.string().uuid('Invalid division ID format'),
+})
 
 /** DELETE /divisions/:divisionId/staff/:staffId — Remove Staff Assignment */
 export const removeStaffDivisionParamsSchema = z.object({
@@ -90,3 +111,5 @@ export type CreateDivisionInput = z.infer<typeof createDivisionBodySchema>
 export type UpdateDivisionInput = z.infer<typeof updateDivisionBodySchema>
 export type UpdateDivisionStatusInput = z.infer<typeof updateDivisionStatusBodySchema>
 export type DisableDivisionsInput = z.infer<typeof disableDivisionsBodySchema>
+export type ListDivisionsQuery = z.infer<typeof listDivisionsQuerySchema>
+export type AssignStaffDivisionInput = z.infer<typeof assignStaffDivisionBodySchema>

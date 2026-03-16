@@ -24,12 +24,16 @@ export {
 } from './attempt-schemas'
 // Divisions domain validation
 export {
+  type AssignStaffDivisionInput,
   assignStaffDivisionBodySchema,
   type CreateDivisionInput,
   createDivisionBodySchema,
   type DisableDivisionsInput,
+  deleteDivisionParamsSchema,
   disableDivisionsBodySchema,
   divisionParamsSchema,
+  type ListDivisionsQuery,
+  listDivisionsQuerySchema,
   removeStaffDivisionParamsSchema,
   staffDivisionsParamsSchema,
   type UpdateDivisionInput,

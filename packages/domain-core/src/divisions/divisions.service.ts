@@ -335,8 +335,8 @@ export async function updateDivisionStatus(
       throw new DivisionsError('DIVISION_NOT_FOUND')
     }
 
-    const lockedDivision = lockResult.rows[0]
-    if (lockedDivision.is_default && input.status === DivisionStatus.DISABLED) {
+    const lockedRow = lockResult.rows[0]
+    if (lockedRow.is_default && input.status === DivisionStatus.DISABLED) {
       await db.query('ROLLBACK', [])
       throw new DivisionsError(
         'DEFAULT_DIVISION_IMMUTABLE',
@@ -399,8 +399,8 @@ export async function deleteDivision(db: DbClient, id: string, audit: AuditConte
       throw new DivisionsError('DIVISION_NOT_FOUND')
     }
 
-    const deletableDiv = lockResult.rows[0]
-    if (deletableDiv.is_default) {
+    const div = lockResult.rows[0]
+    if (div.is_default) {
       await db.query('ROLLBACK', [])
       throw new DivisionsError(
         'DEFAULT_DIVISION_IMMUTABLE',
@@ -618,8 +618,8 @@ export async function assignStaffDivision(
   if (divisionResult.rows.length === 0) {
     throw new DivisionsError('DIVISION_NOT_FOUND')
   }
-  const division = divisionResult.rows[0]
-  if (division.status === DivisionStatus.DISABLED) {
+  const div = divisionResult.rows[0]
+  if (div.status === DivisionStatus.DISABLED) {
     throw new DivisionsError('DIVISION_DISABLED')
   }
 

@@ -29,7 +29,7 @@ export async function handleDeleteDivision(c: Context<BackofficeEnv>): Promise<R
           error: {
             code: 'VALIDATION_ERROR',
             message: parseResult.error.errors
-              .map((e) => `${e.path.join('.')}: ${e.message}`)
+              .map((e: { path: string[]; message: string }) => `${e.path.join('.')}: ${e.message}`)
               .join('; '),
           },
         },
@@ -40,7 +40,7 @@ export async function handleDeleteDivision(c: Context<BackofficeEnv>): Promise<R
     await deleteDivision(db, parseResult.data.id, audit)
 
     return c.json({ success: true, data: { deleted: true }, error: null }, 200)
-  } catch (err) {
+  } catch (err: unknown) {
     return divisionErrorResponse(c, err)
   }
 }

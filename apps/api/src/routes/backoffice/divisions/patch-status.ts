@@ -55,7 +55,12 @@ export async function handleUpdateDivisionStatus(c: Context<BackofficeEnv>): Pro
       )
     }
 
-    const division = await updateDivisionStatus(db, paramsResult.data.id, bodyResult.data, audit)
+    const division = await updateDivisionStatus(
+      db,
+      paramsResult.data.id,
+      { status: bodyResult.data.status as 'ENABLED' | 'DISABLED' },
+      audit
+    )
 
     return c.json({ success: true, data: division, error: null }, 200)
   } catch (err) {

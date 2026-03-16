@@ -37,7 +37,7 @@ export async function handleGetListDivisions(c: Context<BackofficeEnv>): Promise
           error: {
             code: 'VALIDATION_ERROR',
             message: parseResult.error.errors
-              .map((e) => `${e.path.join('.')}: ${e.message}`)
+              .map((e: { path: string[]; message: string }) => `${e.path.join('.')}: ${e.message}`)
               .join('; '),
           },
         },
@@ -50,7 +50,7 @@ export async function handleGetListDivisions(c: Context<BackofficeEnv>): Promise
     const result = await listDivisions(db, { limit, cursor, status })
 
     return c.json({ success: true, data: result, error: null }, 200)
-  } catch (err) {
+  } catch (err: unknown) {
     return divisionErrorResponse(c, err)
   }
 }
