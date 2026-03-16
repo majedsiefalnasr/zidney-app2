@@ -12,16 +12,15 @@
 
 export * from './divisions.errors'
 export * from './divisions.service'
-export type {
-  AuditContext,
-  CreateDivisionInput,
-  DisableDivisionsResult,
-  DivisionRow,
+export {
+  type AuditContext,
+  type CreateDivisionInput,
+  type DisableDivisionsResult,
+  type DivisionRow,
   DivisionStatus,
-  ListDivisionsInput,
-  ListDivisionsResult,
-  StaffDivisionRow,
-  UpdateDivisionInput,
-  UpdateDivisionStatusInput,
+  type ListDivisionsInput,
+  type ListDivisionsResult,
+  type StaffDivisionRow,
+  type UpdateDivisionInput,
+  type UpdateDivisionStatusInput,
 } from './divisions.types'
-export { DivisionStatus } from './divisions.types'

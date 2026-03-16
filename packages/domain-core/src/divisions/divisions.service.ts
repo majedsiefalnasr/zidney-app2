@@ -346,7 +346,7 @@ export async function updateDivisionStatus(
          RETURNING id, name, description, is_default, status, created_at, updated_at`,
       [input.status, id]
     )
-    const row = result.rows[0]
+    const row = result.rows[0]!
     await db.query('COMMIT', [])
 
     logger.info('Division status updated', {
@@ -628,13 +628,17 @@ export async function assignStaffDivision(
     [staffId, divisionId]
   )
 
+  if (result.rows.length === 0) {
+    throw new DivisionsError('CONSTRAINT_VIOLATION', 'Failed to assign staff to division.')
+  }
+
   logger.info('Staff division assigned', {
     staff_id: staffId,
     division_id: divisionId,
     ...audit,
   })
 
-  return result.rows[0]
+  return result.rows[0]!
 }
 
 // ---------------------------------------------------------------------------

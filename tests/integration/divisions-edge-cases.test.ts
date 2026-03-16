@@ -54,7 +54,7 @@ function createEdgeApp(config: EdgeTestAppConfig = {}) {
     const mockPool = {
       query: vi.fn(async (sql: string, params?: unknown[]) => {
         if (config.queryCalls) {
-          config.queryCalls.push(sql.trimStart().split('\n')[0])
+          config.queryCalls.push(sql.trimStart().split('\n')[0]!)
         }
 
         // RBAC guard queries
