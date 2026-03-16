@@ -293,7 +293,7 @@ This stage establishes the **stable hygiene baseline for the Zidney monorepo**.
 ## Stage Status
 
 Status: PRODUCTION READY
-Step: closure
+Step: stage_production_ready
 Risk Level: LOW
 Closure Date: 2025-01-15
 
