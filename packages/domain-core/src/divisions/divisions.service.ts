@@ -88,9 +88,10 @@ export async function listDivisions(
       'SELECT created_at, id FROM divisions WHERE id = $1',
       [input.cursor]
     )
-    if (cursorResult.rows.length > 0) {
-      cursorCreatedAt = cursorResult.rows[0]!.created_at
-      cursorId = cursorResult.rows[0]!.id
+    const cursorRow = cursorResult.rows[0]
+    if (cursorRow) {
+      cursorCreatedAt = cursorRow.created_at
+      cursorId = cursorRow.id
     }
   }
 
@@ -204,7 +205,8 @@ export async function createDivision(
          RETURNING id, name, description, is_default, status, created_at, updated_at`,
       [input.name, input.description ?? null]
     )
-    const row = result.rows[0]!
+    const row = result.rows[0]
+    if (!row) throw new Error('INSERT returned no rows')
     await db.query('COMMIT', [])
 
     logger.info('Division created', {
@@ -258,7 +260,9 @@ export async function updateDivision(
     }
 
     // Case-insensitive name conflict — skip if name is unchanged
-    if (lockResult.rows[0]!.name.toLowerCase() !== input.name.toLowerCase()) {
+    const lockedRow = lockResult.rows[0]
+    if (!lockedRow) throw new Error('FOR UPDATE returned no rows')
+    if (lockedRow.name.toLowerCase() !== input.name.toLowerCase()) {
       const conflictCheck = await db.query<{ id: string }>(
         'SELECT id FROM divisions WHERE LOWER(name) = LOWER($1) AND id != $2 LIMIT 1',
         [input.name, id]
@@ -281,7 +285,8 @@ export async function updateDivision(
          RETURNING id, name, description, is_default, status, created_at, updated_at`,
       [input.name, input.description ?? null, id]
     )
-    const row = result.rows[0]!
+    const row = result.rows[0]
+    if (!row) throw new Error('UPDATE returned no rows')
     await db.query('COMMIT', [])
 
     logger.info('Division updated', { division_id: id, ...audit })
@@ -330,7 +335,8 @@ export async function updateDivisionStatus(
       throw new DivisionsError('DIVISION_NOT_FOUND')
     }
 
-    if (lockResult.rows[0]!.is_default && input.status === DivisionStatus.DISABLED) {
+    const lockedDivision = lockResult.rows[0]
+    if (lockedDivision.is_default && input.status === DivisionStatus.DISABLED) {
       await db.query('ROLLBACK', [])
       throw new DivisionsError(
         'DEFAULT_DIVISION_IMMUTABLE',
@@ -346,7 +352,8 @@ export async function updateDivisionStatus(
          RETURNING id, name, description, is_default, status, created_at, updated_at`,
       [input.status, id]
     )
-    const row = result.rows[0]!
+    const row = result.rows[0]
+    if (!row) throw new Error('UPDATE returned no rows')
     await db.query('COMMIT', [])
 
     logger.info('Division status updated', {
@@ -392,7 +399,8 @@ export async function deleteDivision(db: DbClient, id: string, audit: AuditConte
       throw new DivisionsError('DIVISION_NOT_FOUND')
     }
 
-    if (lockResult.rows[0]!.is_default) {
+    const deletableDiv = lockResult.rows[0]
+    if (deletableDiv.is_default) {
       await db.query('ROLLBACK', [])
       throw new DivisionsError(
         'DEFAULT_DIVISION_IMMUTABLE',
@@ -405,7 +413,8 @@ export async function deleteDivision(db: DbClient, id: string, audit: AuditConte
       'SELECT COUNT(*)::text AS cnt FROM students WHERE division_id = $1',
       [id]
     )
-    if (parseInt(studentCount.rows[0]!.cnt, 10) > 0) {
+    const studentCnt = studentCount.rows[0]?.cnt ?? '0'
+    if (parseInt(studentCnt, 10) > 0) {
       await db.query('ROLLBACK', [])
       throw new DivisionsError(
         'DIVISION_IN_USE',
@@ -418,7 +427,8 @@ export async function deleteDivision(db: DbClient, id: string, audit: AuditConte
       'SELECT COUNT(*)::text AS cnt FROM staff_divisions WHERE division_id = $1',
       [id]
     )
-    if (parseInt(staffCount.rows[0]!.cnt, 10) > 0) {
+    const staffCnt = staffCount.rows[0]?.cnt ?? '0'
+    if (parseInt(staffCnt, 10) > 0) {
       await db.query('ROLLBACK', [])
       throw new DivisionsError(
         'DIVISION_IN_USE',
@@ -473,7 +483,7 @@ export async function disableDivisions(
       await db.query('ROLLBACK', [])
       throw new DivisionsError('DIVISION_REQUIRED', 'No default division found.')
     }
-    const defaultDivisionId = defaultResult.rows[0]!.id
+    const defaultDivisionId = defaultResult.rows[0].id
 
     // Lock all other divisions to prevent concurrent modification
     await db.query(`SELECT id FROM divisions WHERE is_default = false FOR UPDATE`, [])
@@ -608,7 +618,8 @@ export async function assignStaffDivision(
   if (divisionResult.rows.length === 0) {
     throw new DivisionsError('DIVISION_NOT_FOUND')
   }
-  if (divisionResult.rows[0]!.status === DivisionStatus.DISABLED) {
+  const division = divisionResult.rows[0]
+  if (division.status === DivisionStatus.DISABLED) {
     throw new DivisionsError('DIVISION_DISABLED')
   }
 
@@ -641,7 +652,7 @@ export async function assignStaffDivision(
     ...audit,
   })
 
-  return result.rows[0]!
+  return result.rows[0]
 }
 
 // ---------------------------------------------------------------------------
