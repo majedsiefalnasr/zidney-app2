@@ -48,7 +48,7 @@ export async function handleDisableDivisions(c: Context<BackofficeEnv>): Promise
     const result = await disableDivisions(db, audit)
 
     return c.json({ success: true, data: result, error: null }, 200)
-  } catch (err) {
+  } catch (err: unknown) {
     return divisionErrorResponse(c, err)
   }
 }

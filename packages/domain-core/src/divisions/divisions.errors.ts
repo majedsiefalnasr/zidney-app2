@@ -31,6 +31,7 @@ export type DivisionsErrorCode =
   | 'DIVISION_IN_USE' // 422
   | 'DIVISION_DISABLED' // 422
   | 'DIVISION_REQUIRED' // 422
+  | 'STAFF_DIVISION_ASSIGNMENT_FAILED' // 422
   | 'STAFF_MINIMUM_DIVISION_REQUIRED' // 422
   | 'DESTRUCTIVE_CONFIRMATION_REQUIRED' // 422
   | 'DIVISIONS_FEATURE_DISABLED' // 423
@@ -50,6 +51,7 @@ export const DIVISIONS_ERROR_HTTP_STATUS: Record<DivisionsErrorCode, number> = {
   DIVISION_IN_USE: 422,
   DIVISION_DISABLED: 422,
   DIVISION_REQUIRED: 422,
+  STAFF_DIVISION_ASSIGNMENT_FAILED: 422,
   STAFF_MINIMUM_DIVISION_REQUIRED: 422,
   DESTRUCTIVE_CONFIRMATION_REQUIRED: 422,
   DIVISIONS_FEATURE_DISABLED: 423,
@@ -70,6 +72,7 @@ export const DIVISIONS_ERROR_MESSAGES: Record<DivisionsErrorCode, string> = {
   DIVISION_IN_USE: 'Division is in use and cannot be deleted.',
   DIVISION_DISABLED: 'Division is disabled and not accepting new assignments.',
   DIVISION_REQUIRED: 'A division assignment is required.',
+  STAFF_DIVISION_ASSIGNMENT_FAILED: 'Failed to assign staff to division.',
   STAFF_MINIMUM_DIVISION_REQUIRED: 'Staff member must remain in at least one division.',
   DESTRUCTIVE_CONFIRMATION_REQUIRED:
     "Confirmation value 'DISABLE_DIVISIONS' is required for this destructive operation.",

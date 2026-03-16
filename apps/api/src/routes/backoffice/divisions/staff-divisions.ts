@@ -57,7 +57,7 @@ export async function handleGetStaffDivisions(c: Context<BackofficeEnv>): Promis
     const assignments = await getStaffDivisions(db, paramsResult.data.staffId)
 
     return c.json({ success: true, data: { divisions: assignments }, error: null }, 200)
-  } catch (err) {
+  } catch (err: unknown) {
     return divisionErrorResponse(c, err)
   }
 }
@@ -116,7 +116,7 @@ export async function handleAssignStaffDivision(c: Context<BackofficeEnv>): Prom
     )
 
     return c.json({ success: true, data: assignment, error: null }, 201)
-  } catch (err) {
+  } catch (err: unknown) {
     return divisionErrorResponse(c, err)
   }
 }
@@ -153,7 +153,7 @@ export async function handleRemoveStaffDivision(c: Context<BackofficeEnv>): Prom
     await removeStaffDivision(db, paramsResult.data.staffId, paramsResult.data.divisionId, audit)
 
     return c.json({ success: true, data: null, error: null }, 200)
-  } catch (err) {
+  } catch (err: unknown) {
     return divisionErrorResponse(c, err)
   }
 }

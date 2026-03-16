@@ -58,7 +58,7 @@ export async function handleUpdateDivision(c: Context<BackofficeEnv>): Promise<R
     const division = await updateDivision(db, paramsResult.data.id, bodyResult.data, audit)
 
     return c.json({ success: true, data: division, error: null }, 200)
-  } catch (err) {
+  } catch (err: unknown) {
     return divisionErrorResponse(c, err)
   }
 }

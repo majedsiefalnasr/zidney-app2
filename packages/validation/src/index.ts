@@ -22,6 +22,21 @@ export {
   validateSubmitAttemptRequest,
   validateUpdateProgressRequest,
 } from './attempt-schemas'
+// Divisions domain validation
+export {
+  assignStaffDivisionBodySchema,
+  type CreateDivisionInput,
+  createDivisionBodySchema,
+  type DisableDivisionsInput,
+  disableDivisionsBodySchema,
+  divisionParamsSchema,
+  removeStaffDivisionParamsSchema,
+  staffDivisionsParamsSchema,
+  type UpdateDivisionInput,
+  type UpdateDivisionStatusInput,
+  updateDivisionBodySchema,
+  updateDivisionStatusBodySchema,
+} from './divisions-validation'
 // Master database input validation
 export {
   ValidationError,
@@ -30,7 +45,6 @@ export {
   validateCreateProductInput,
   validateCreateTenantRegistryInput,
 } from './master-db-schema'
-
 // Migration file validation
 export {
   calculateChecksum,
