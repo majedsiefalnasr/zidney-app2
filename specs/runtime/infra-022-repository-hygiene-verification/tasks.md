@@ -147,9 +147,9 @@ T001 (types.ts)
 
 Stage is complete when all 22 tasks are checked off AND:
 
-- [ ] `docs/reports/REPOSITORY_HYGIENE_REPORT.md` exists, is committed, and contains all ten task sections (T001–T010 results)
-- [ ] `bun run lint` passes with zero violations
-- [ ] `bun run typecheck` passes with zero errors
-- [ ] `bun run test` passes; T012–T014 all green
-- [ ] `git diff --name-only` confirms zero writes to `docs/architecture/`, ADR files, or `ROUTING_AUTHORITY_REGISTRY.md`
-- [ ] No destructive operations performed (no file deletions, no dependency removals, no schema changes)
+- [x] `docs/reports/REPOSITORY_HYGIENE_REPORT.md` exists, is committed, and contains all ten task sections (T001–T010 results)
+- [x] `bun run lint` passes with zero violations
+- [x] `bun run typecheck` passes with zero errors
+- [x] `bun run test` passes; T012–T014 all green
+- [x] `git diff --name-only` confirms zero writes to `docs/architecture/`, ADR files, or `ROUTING_AUTHORITY_REGISTRY.md`
+- [x] No destructive operations performed (no file deletions, no dependency removals, no schema changes)
