@@ -25,11 +25,17 @@ export {
 // Divisions domain validation
 export {
   type AssignStaffDivisionBody,
+  // Re-export with aliases for backward compatibility
+  type AssignStaffDivisionBody as AssignStaffDivisionInput,
   assignStaffDivisionBodySchema,
   type CreateDivisionBody,
+  // Re-export with aliases for backward compatibility
+  type CreateDivisionBody as CreateDivisionInput,
   createDivisionBodySchema,
   type DeleteDivisionParams,
   type DisableDivisionsBody,
+  // Re-export with aliases for backward compatibility
+  type DisableDivisionsBody as DisableDivisionsInput,
   type DivisionParams,
   deleteDivisionParamsSchema,
   disableDivisionsBodySchema,
@@ -41,17 +47,14 @@ export {
   type StaffDivisionsParams,
   staffDivisionsParamsSchema,
   type UpdateDivisionBody,
+  // Re-export with aliases for backward compatibility
+  type UpdateDivisionBody as UpdateDivisionInput,
   type UpdateDivisionStatusBody,
+  // Re-export with aliases for backward compatibility
+  type UpdateDivisionStatusBody as UpdateDivisionStatusInput,
   updateDivisionBodySchema,
   updateDivisionStatusBodySchema,
 } from './backoffice/divisions.schemas'
-
-// Type aliases for backward compatibility
-export type CreateDivisionInput = CreateDivisionBody
-export type UpdateDivisionInput = UpdateDivisionBody
-export type UpdateDivisionStatusInput = UpdateDivisionStatusBody
-export type DisableDivisionsInput = DisableDivisionsBody
-export type AssignStaffDivisionInput = AssignStaffDivisionBody
 // Master database input validation
 export {
   ValidationError,
