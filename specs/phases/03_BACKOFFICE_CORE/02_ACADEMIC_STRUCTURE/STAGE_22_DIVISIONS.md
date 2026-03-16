@@ -10,17 +10,19 @@ Status: Critical Academic Scope Layer
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-03-16T00:02:00Z
+Last Updated: 2026-03-16T00:03:00Z
 
-Scope Defined:
+Scope Planned:
 
 - Division CRUD (create, read, update, toggle status, delete)
 - Staff multi-division assignment via staff_divisions join table
 - Disable-divisions transactional operation (SERIALIZABLE isolation)
-- Division filtering enforcement on all content queries
+- Cursor-based pagination on GET /divisions list endpoint
 - Feature toggle: multi-division vs. single-division mode
+- 10 API endpoints at /api/v1/backoffice/workspace/divisions/...
+- schema_version bump: 1.4.0 → 1.5.0
 
 Deferred Scope:
 
@@ -30,10 +32,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian Architecture Checker: PASS
+- Guardian API Designer: PASS (after namespace + pagination + Redis fail-closed fixes)
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 

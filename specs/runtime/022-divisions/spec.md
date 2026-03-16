@@ -340,6 +340,16 @@ both are returned. Remove one, confirm only one remains.
   at the API layer with 423 Locked and `DIVISIONS_FEATURE_LOCKED`.
 - **FR-025**: Adding a duplicate staff-division assignment (same `staff_id` + `division_id`) MUST
   be idempotent — the API returns success without creating a duplicate row.
+- **FR-026**: The `GET /api/v1/backoffice/workspace/divisions` endpoint MUST support cursor-based
+  pagination with optional `limit` (integer, default 20, max 100), `cursor` (opaque string — UUID
+  of the last item on the previous page), and `status` (`ENABLED | DISABLED | all`, default `all`)
+  query parameters.
+- **FR-027**: The list endpoint response MUST use the shape `{ items, nextCursor, total }` where
+  `nextCursor` is `null` when no further pages exist, and `total` reflects the full count matching
+  the `status` filter independently of the current page cursor.
+- **FR-028**: The `disable-divisions` rate-limiting mechanism MUST be fail-closed: if Redis is
+  unavailable the request MUST be rejected with 503 Service Unavailable. Rate limiting on
+  destructive endpoints must not be bypassed.
 
 ---
 
@@ -443,11 +453,19 @@ All division endpoints require:
 
 ---
 
-### `GET /api/backoffice/divisions`
+### `GET /api/v1/backoffice/workspace/divisions`
 
-List all divisions for the workspace.
+List all divisions for the workspace. Supports cursor-based pagination.
 
 **Authorization:** Backoffice staff with `can_view` on Divisions module.
+
+**Query parameters:**
+
+| Parameter | Type    | Required | Default | Notes                                              |
+| --------- | ------- | -------- | ------- | -------------------------------------------------- |
+| `limit`   | integer | No       | `20`    | Maximum items per page. Max: `100`.                |
+| `cursor`  | string  | No       | —       | Opaque cursor from previous response `nextCursor`. |
+| `status`  | string  | No       | `all`   | Filter by status: `ENABLED`, `DISABLED`, or `all`. |
 
 **Response 200:**
 
@@ -455,7 +473,7 @@ List all divisions for the workspace.
 {
   "success": true,
   "data": {
-    "divisions": [
+    "items": [
       {
         "id": "uuid",
         "name": "Default",
@@ -465,15 +483,22 @@ List all divisions for the workspace.
         "created_at": "2026-01-01T00:00:00Z",
         "updated_at": "2026-01-01T00:00:00Z"
       }
-    ]
+    ],
+    "nextCursor": null,
+    "total": 1
   },
   "error": null
 }
 ```
 
+**Cursor implementation:** The `nextCursor` value is the `id` (UUID) of the last item returned.
+Pass it as the `cursor` query parameter to fetch the next page. Results are ordered by
+`created_at ASC, id ASC` for stable, deterministic pagination. `total` reflects the full count
+matching the `status` filter, independent of the current page cursor.
+
 ---
 
-### `GET /api/backoffice/divisions/:id`
+### `GET /api/v1/backoffice/workspace/divisions/:id`
 
 Retrieve a single division by ID.
 
@@ -493,7 +518,7 @@ Retrieve a single division by ID.
 
 ---
 
-### `POST /api/backoffice/divisions`
+### `POST /api/v1/backoffice/workspace/divisions`
 
 Create a new division.
 
@@ -518,7 +543,7 @@ Create a new division.
 
 ---
 
-### `PUT /api/backoffice/divisions/:id`
+### `PUT /api/v1/backoffice/workspace/divisions/:id`
 
 Update an existing division's name and/or description.
 
@@ -549,7 +574,7 @@ Update an existing division's name and/or description.
 
 ---
 
-### `PATCH /api/backoffice/divisions/:id/status`
+### `PATCH /api/v1/backoffice/workspace/divisions/:id/status`
 
 Toggle division status between `ENABLED` and `DISABLED`.
 
@@ -574,7 +599,7 @@ Toggle division status between `ENABLED` and `DISABLED`.
 
 ---
 
-### `DELETE /api/backoffice/divisions/:id`
+### `DELETE /api/v1/backoffice/workspace/divisions/:id`
 
 Hard-delete a non-default, non-referenced division.
 
@@ -595,7 +620,7 @@ Hard-delete a non-default, non-referenced division.
 
 ---
 
-### `POST /api/backoffice/divisions/disable-divisions`
+### `POST /api/v1/backoffice/workspace/divisions/disable-divisions`
 
 Disable the divisions feature for the entire workspace. Transactionally reassigns all references to
 the default division and locks single-division mode.
@@ -646,7 +671,7 @@ full-set reassignment of division references.
 
 ---
 
-### `GET /api/backoffice/staff/:staff_id/divisions`
+### `GET /api/v1/backoffice/workspace/staff/:staff_id/divisions`
 
 List all divisions assigned to a specific staff member.
 
@@ -666,7 +691,7 @@ List all divisions assigned to a specific staff member.
 
 ---
 
-### `POST /api/backoffice/staff/:staff_id/divisions`
+### `POST /api/v1/backoffice/workspace/staff/:staff_id/divisions`
 
 Assign a division to a staff member (idempotent).
 
@@ -690,7 +715,7 @@ Assign a division to a staff member (idempotent).
 
 ---
 
-### `DELETE /api/backoffice/staff/:staff_id/divisions/:division_id`
+### `DELETE /api/v1/backoffice/workspace/staff/:staff_id/divisions/:division_id`
 
 Remove a division assignment from a staff member.
 
@@ -769,8 +794,9 @@ All error responses conform to:
 - Delete requires `can_delete` on the Divisions module.
 - The disable-divisions operation requires the `WORKSPACE_ADMIN` role — the same as standard
   division mutating operations. No separate super-admin role is introduced. The operation is
-  additionally protected by: (1) rate limit of 1 req/min/workspace, (2) required `confirmation:
-"DISABLE_DIVISIONS"` parameter in the request body, and (3) workspace must have `ACTIVE` status.
+  additionally protected by: (1) rate limit of 1 req/min/workspace via Redis (fail-closed — 503 if
+  Redis unavailable), (2) required `confirmation: "DISABLE_DIVISIONS"` parameter in the request
+  body, and (3) workspace must have `ACTIVE` status.
 - All permission checks execute server-side via the RBAC middleware defined in STAGE_21.
 
 ### Input Validation
@@ -784,10 +810,10 @@ All error responses conform to:
 
 ### Rate Limiting
 
-| Endpoint Category             | Limit                                               |
-| ----------------------------- | --------------------------------------------------- |
-| Standard division CRUD        | Governed by Backoffice API rate limits (STAGE_08)   |
-| `disable-divisions` operation | 1 request per minute per workspace (destructive op) |
+| Endpoint Category             | Limit                                                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Standard division CRUD        | Governed by Backoffice API rate limits (STAGE_08)                                                            |
+| `disable-divisions` operation | 1 request per minute per workspace (destructive op); Redis required — fail-closed (503 if Redis unavailable) |
 
 ### Audit Logging
 
