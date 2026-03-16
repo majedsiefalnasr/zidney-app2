@@ -24,6 +24,9 @@ import {
 } from '../divisions.service'
 import type { AuditContext, DbClient } from '../divisions.types'
 
+// Type helper for casting mock functions
+type MockFn = ReturnType<typeof vi.fn>
+
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
@@ -73,7 +76,8 @@ describe('createDivision', () => {
   it('creates a division with valid input', async () => {
     const created = { ...NON_DEFAULT_DIVISION, id: 'new-div-001', name: 'Math Class' }
 
-    vi.mocked(mockDb.query)
+    const mockQuery = mockDb.query as MockFn
+    mockQuery
       // isDivisionsEnabled
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       // case-insensitive name conflict check
@@ -92,7 +96,7 @@ describe('createDivision', () => {
   })
 
   it('throws DIVISION_NAME_CONFLICT on case-insensitive duplicate', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // isDivisionsEnabled
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       // name conflict — finds an existing division
@@ -106,7 +110,7 @@ describe('createDivision', () => {
   })
 
   it('throws DIVISIONS_FEATURE_DISABLED when workspace locked', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // isDivisionsEnabled — false
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: false }], rowCount: 1 })
 
@@ -118,7 +122,7 @@ describe('createDivision', () => {
   })
 
   it('rolls back and rethrows on INSERT error', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // isDivisionsEnabled
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       // no conflict
@@ -135,7 +139,7 @@ describe('createDivision', () => {
     ).rejects.toThrow('DB insert failure')
 
     // Verify ROLLBACK was called (5th query call)
-    const calls = vi.mocked(mockDb.query).mock.calls
+    const calls = (mockDb.query as MockFn).mock.calls
     const lastSql = calls[calls.length - 1]?.[0]
     expect(lastSql).toBe('ROLLBACK')
   })
@@ -159,7 +163,7 @@ describe('updateDivision', () => {
   it('updates name and description successfully', async () => {
     const updated = { ...NON_DEFAULT_DIVISION, name: 'Grade 11', description: 'Updated desc' }
 
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // isDivisionsEnabled
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       // BEGIN
@@ -187,7 +191,7 @@ describe('updateDivision', () => {
     // Verify no UPDATE with is_default= in the query calls
     const updated = { ...NON_DEFAULT_DIVISION }
 
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       .mockResolvedValueOnce({ rows: [NON_DEFAULT_DIVISION], rowCount: 1 })
@@ -203,7 +207,7 @@ describe('updateDivision', () => {
 
     // The UPDATE SET clause must not assign is_default (is_default = <value>).
     // Note: is_default may legitimately appear in SELECT/RETURNING column lists — that is fine.
-    const sqlCalls = vi.mocked(mockDb.query).mock.calls.map(([sql]) => sql as string)
+    const sqlCalls = (mockDb.query as MockFn).mock.calls.map(([sql]) => sql as string)
     const anyUpdatesIsDefault = sqlCalls.some(
       (sql) => sql.includes('UPDATE') && /\bis_default\s*=/i.test(sql)
     )
@@ -211,7 +215,7 @@ describe('updateDivision', () => {
   })
 
   it('throws DIVISION_NOT_FOUND when division does not exist', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE returns empty
@@ -231,7 +235,7 @@ describe('updateDivision', () => {
   })
 
   it('throws DIVISION_NAME_CONFLICT on name collision with another division', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE — div exists with DIFFERENT name (triggers conflict check)
@@ -271,7 +275,7 @@ describe('updateDivisionStatus', () => {
   it('disables a non-default division', async () => {
     const disabled = { ...NON_DEFAULT_DIVISION, status: 'DISABLED' }
 
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE lock
@@ -295,7 +299,7 @@ describe('updateDivisionStatus', () => {
     const existingDisabled = { ...NON_DEFAULT_DIVISION, status: 'DISABLED' }
     const reEnabled = { ...NON_DEFAULT_DIVISION, status: 'ENABLED' }
 
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       .mockResolvedValueOnce({ rows: [existingDisabled], rowCount: 1 })
@@ -313,7 +317,7 @@ describe('updateDivisionStatus', () => {
   })
 
   it('throws DEFAULT_DIVISION_IMMUTABLE when trying to disable the default division', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE returns default division
@@ -336,7 +340,7 @@ describe('updateDivisionStatus', () => {
   })
 
   it('throws DIVISION_NOT_FOUND for unknown id', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE returns empty
@@ -369,7 +373,7 @@ describe('deleteDivision', () => {
   })
 
   it('deletes a non-default division with no students or staff', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE — non-default
@@ -390,7 +394,7 @@ describe('deleteDivision', () => {
   })
 
   it('throws DEFAULT_DIVISION_IMMUTABLE when deleting the default division', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE — is_default = true
@@ -404,7 +408,7 @@ describe('deleteDivision', () => {
   })
 
   it('throws DIVISION_IN_USE when students are assigned', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       .mockResolvedValueOnce({
@@ -422,7 +426,7 @@ describe('deleteDivision', () => {
   })
 
   it('throws DIVISION_IN_USE when staff members are assigned', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       .mockResolvedValueOnce({
@@ -458,7 +462,7 @@ describe('disableDivisions', () => {
   })
 
   it('reassigns all students to default, clears staff, disables non-defaults, returns correct counts', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // BEGIN
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
@@ -496,7 +500,7 @@ describe('disableDivisions', () => {
   })
 
   it('returns zero counts when no non-default divisions or students exist', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // BEGIN
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
@@ -524,7 +528,7 @@ describe('disableDivisions', () => {
   })
 
   it('performs full rollback on partial failure', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // BEGIN
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
@@ -540,13 +544,13 @@ describe('disableDivisions', () => {
 
     await expect(disableDivisions(mockDb, AUDIT)).rejects.toThrow('serialization failure')
 
-    const calls = vi.mocked(mockDb.query).mock.calls
+    const calls = (mockDb.query as MockFn).mock.calls
     const lastSql = calls[calls.length - 1]?.[0]
     expect(lastSql).toBe('ROLLBACK')
   })
 
   it('throws DIVISION_REQUIRED if no default division exists', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // BEGIN
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
@@ -578,7 +582,7 @@ describe('getDivisionById', () => {
   })
 
   it('returns the division row when found', async () => {
-    vi.mocked(mockDb.query).mockResolvedValueOnce({
+    ;(mockDb.query as MockFn).mockResolvedValueOnce({
       rows: [NON_DEFAULT_DIVISION],
       rowCount: 1,
     })
@@ -588,7 +592,7 @@ describe('getDivisionById', () => {
   })
 
   it('throws DIVISION_NOT_FOUND when division does not exist', async () => {
-    vi.mocked(mockDb.query).mockResolvedValueOnce({ rows: [], rowCount: 0 })
+    ;(mockDb.query as MockFn).mockResolvedValueOnce({ rows: [], rowCount: 0 })
 
     const err = await getDivisionById(mockDb, 'nonexistent').catch((e) => e)
     expect(err).toBeInstanceOf(DivisionsError)
@@ -618,7 +622,7 @@ describe('assignStaffDivision', () => {
       assigned_at: new Date(),
     }
 
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // isDivisionsEnabled
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       // division existence check
@@ -643,7 +647,7 @@ describe('assignStaffDivision', () => {
       assigned_at: new Date(),
     }
 
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({
         rows: [{ id: NON_DEFAULT_DIVISION.id, status: 'ENABLED' }],
@@ -659,7 +663,7 @@ describe('assignStaffDivision', () => {
   })
 
   it('throws DIVISION_NOT_FOUND when division does not exist', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       // division check returns empty
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
@@ -670,7 +674,7 @@ describe('assignStaffDivision', () => {
   })
 
   it('throws DIVISION_DISABLED when division is disabled', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [{ divisions_enabled: true }], rowCount: 1 })
       .mockResolvedValueOnce({
         rows: [{ id: NON_DEFAULT_DIVISION.id, status: 'DISABLED' }],
@@ -688,7 +692,7 @@ describe('assignStaffDivision', () => {
   })
 
   it('throws DIVISIONS_FEATURE_DISABLED when feature is disabled', async () => {
-    vi.mocked(mockDb.query).mockResolvedValueOnce({
+    ;(mockDb.query as MockFn).mockResolvedValueOnce({
       rows: [{ divisions_enabled: false }],
       rowCount: 1,
     })
@@ -720,7 +724,7 @@ describe('removeStaffDivision', () => {
   })
 
   it('removes a staff member assignment when they have multiple divisions', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // BEGIN
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE — assignment exists
@@ -738,7 +742,7 @@ describe('removeStaffDivision', () => {
   })
 
   it('throws DIV_STAFF_ASSIGNMENT_NOT_FOUND when assignment does not exist', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // BEGIN
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE — no row
@@ -753,7 +757,7 @@ describe('removeStaffDivision', () => {
   })
 
   it('throws STAFF_MINIMUM_DIVISION_REQUIRED when staff only has one division', async () => {
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       // BEGIN
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       // FOR UPDATE — assignment exists
@@ -777,7 +781,7 @@ describe('removeStaffDivision', () => {
   it('throws DIVISION_NOT_FOUND when division itself is missing (no assignment is same error code)', async () => {
     // When division doesn't exist, the staff_divisions FOR UPDATE won't find the row
     // → DIV_STAFF_ASSIGNMENT_NOT_FOUND (the service checks assignment existence, not division existence)
-    vi.mocked(mockDb.query)
+    ;(mockDb.query as MockFn)
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
