@@ -179,6 +179,17 @@ export default defineWorkspace([
     },
   }),
 
+  // Repository hygiene checks
+  defineProject({
+    plugins: [tsconfigPaths()],
+    test: {
+      name: 'hygiene-checks',
+      globals: true,
+      environment: 'node',
+      include: ['scripts/dev/hygiene-checks/__tests__/**/*.test.ts'],
+    },
+  }),
+
   // Shared packages
   'packages/api-client/vitest.config.ts',
   'packages/domain-core/vitest.config.ts',

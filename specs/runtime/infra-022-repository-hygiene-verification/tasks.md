@@ -33,7 +33,7 @@ independent of each other and can be executed concurrently.
 
 Must be completed before any check module is implemented. All Phase 2 modules import from this file.
 
-- [ ] T001 [SETUP] Create shared `TaskStatus`, `TaskFinding`, and `TaskResult` type definitions — `scripts/dev/hygiene-checks/types.ts`
+- [x] T001 [SETUP] Create shared `TaskStatus`, `TaskFinding`, and `TaskResult` type definitions — `scripts/dev/hygiene-checks/types.ts`
 
 ---
 
@@ -44,15 +44,15 @@ can be implemented in parallel.
 
 Spec verification tasks referenced in parentheses reflect the naming in `spec.md` and `plan.md`.
 
-- [ ] T002 [P] [CHK] Create Routing Authority Verification check module (spec T001) — reads `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md`; confirms one authoritative root per surface pair (agents, prompts, templates); returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/routing-authority-check.ts`
-- [ ] T003 [P] [CHK] Create Template System Consolidation check module (spec T002) — scans `.specify/scripts/bash/`, `.github/workflows/`, `docs/**`, `AGENTS.md` for legacy `.specify/templates/` path references; checks template parity gap between `.specify/templates/` and `specs/templates/`; returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/template-consolidation-check.ts`
-- [ ] T004 [P] [CHK] Create Dead Script Detection check module (spec T003) — enumerates all `**/*.ts` and `**/*.sh` under `scripts/`; builds reference corpus from `package.json`, `.github/workflows/*.yml`, `docs/**/*.md`, shell script invocations, and `specs/runtime/infra-022-*/`; classifies each as ACTIVE, DUPLICATE_ROOT_STUB, or POTENTIALLY_DEAD; flags-in-report only (no deletion); returns `TaskResult` — `scripts/dev/hygiene-checks/dead-script-check.ts`
-- [ ] T005 [P] [CHK] Create Dependency Hygiene check module (spec T004) — collects all workspace roots (root + `packages/*` + `apps/*`); for each root with a `package.json`, scans `.ts`/`.tsx`/`.vue` source files for import usage of each declared dependency; invokes `scripts/dev/verify-dependency-usage.ts` as subprocess where applicable; groups unused and duplicate packages per workspace; returns `TaskResult` with FLAG if any unused found — `scripts/dev/hygiene-checks/dependency-hygiene-check.ts`
-- [ ] T006 [P] [CHK] Create Workspace Package Validation check module (spec T005) — enumerates all `packages/*/package.json` entries; confirms each package appears as a dependency in at least one `apps/*/package.json` or has an import in `apps/*/src/**`; classifies each as ACTIVE or ORPHANED; returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/workspace-package-check.ts`
-- [ ] T007 [P] [CHK] Create Skill Surface Validation check module (spec T006) — enumerates all immediate subdirectories of `.agents/skills/`; checks each against `SKILLS_INDEX.md` and `AGENTS.md` files; flags directories absent from both surfaces; flags stale index entries (in index but no directory on disk); parent container dirs without root `SKILL.md` (`aws-skills/`, `gitnexus/`) are not flagged; returns `TaskResult` — `scripts/dev/hygiene-checks/skill-surface-check.ts`
-- [ ] T008 [P] [CHK] Create CI Workflow Hygiene check module (spec T007) — reads all `.github/workflows/*.yml`; extracts and normalises `run:` step commands; builds duplicate-step matrix; flags commands and step labels appearing in more than one workflow; lists consolidation candidates (no changes made); returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/ci-workflow-check.ts`
-- [ ] T009 [P] [CHK] Create AI Context Integrity check module (spec T008) — spawns `bun run ai-context:validate`; applies SKIP if ENOENT or missing-script exit, WARNING if exit non-zero with artifact-error output, PASS if exit 0; captures stdout/stderr in findings; returns `TaskResult` with PASS, WARNING, or SKIP status — `scripts/dev/hygiene-checks/ai-context-check.ts`
-- [ ] T010 [P] [CHK] Create Architecture Guard Verification check module (spec T009) — spawns `bun run arch:guard` and `bun run arch:health` (120 s timeout each); captures stdout, stderr, exit codes; classifies all violations as pre-existing (stage introduces no code changes); status = PASS if both exit 0 with no violations, FLAG (not FAIL) otherwise; records output under "Architecture Guard — Pre-existing Violations Found"; does not block stage — `scripts/dev/hygiene-checks/arch-guard-check.ts`
+- [x] T002 [P] [CHK] Create Routing Authority Verification check module (spec T001) — reads `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md`; confirms one authoritative root per surface pair (agents, prompts, templates); returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/routing-authority-check.ts`
+- [x] T003 [P] [CHK] Create Template System Consolidation check module (spec T002) — scans `.specify/scripts/bash/`, `.github/workflows/`, `docs/**`, `AGENTS.md` for legacy `.specify/templates/` path references; checks template parity gap between `.specify/templates/` and `specs/templates/`; returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/template-consolidation-check.ts`
+- [x] T004 [P] [CHK] Create Dead Script Detection check module (spec T003) — enumerates all `**/*.ts` and `**/*.sh` under `scripts/`; builds reference corpus from `package.json`, `.github/workflows/*.yml`, `docs/**/*.md`, shell script invocations, and `specs/runtime/infra-022-*/`; classifies each as ACTIVE, DUPLICATE_ROOT_STUB, or POTENTIALLY_DEAD; flags-in-report only (no deletion); returns `TaskResult` — `scripts/dev/hygiene-checks/dead-script-check.ts`
+- [x] T005 [P] [CHK] Create Dependency Hygiene check module (spec T004) — collects all workspace roots (root + `packages/*` + `apps/*`); for each root with a `package.json`, scans `.ts`/`.tsx`/`.vue` source files for import usage of each declared dependency; invokes `scripts/dev/verify-dependency-usage.ts` as subprocess where applicable; groups unused and duplicate packages per workspace; returns `TaskResult` with FLAG if any unused found — `scripts/dev/hygiene-checks/dependency-hygiene-check.ts`
+- [x] T006 [P] [CHK] Create Workspace Package Validation check module (spec T005) — enumerates all `packages/*/package.json` entries; confirms each package appears as a dependency in at least one `apps/*/package.json` or has an import in `apps/*/src/**`; classifies each as ACTIVE or ORPHANED; returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/workspace-package-check.ts`
+- [x] T007 [P] [CHK] Create Skill Surface Validation check module (spec T006) — enumerates all immediate subdirectories of `.agents/skills/`; checks each against `SKILLS_INDEX.md` and `AGENTS.md` files; flags directories absent from both surfaces; flags stale index entries (in index but no directory on disk); parent container dirs without root `SKILL.md` (`aws-skills/`, `gitnexus/`) are not flagged; returns `TaskResult` — `scripts/dev/hygiene-checks/skill-surface-check.ts`
+- [x] T008 [P] [CHK] Create CI Workflow Hygiene check module (spec T007) — reads all `.github/workflows/*.yml`; extracts and normalises `run:` step commands; builds duplicate-step matrix; flags commands and step labels appearing in more than one workflow; lists consolidation candidates (no changes made); returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/ci-workflow-check.ts`
+- [x] T009 [P] [CHK] Create AI Context Integrity check module (spec T008) — spawns `bun run ai-context:validate`; applies SKIP if ENOENT or missing-script exit, WARNING if exit non-zero with artifact-error output, PASS if exit 0; captures stdout/stderr in findings; returns `TaskResult` with PASS, WARNING, or SKIP status — `scripts/dev/hygiene-checks/ai-context-check.ts`
+- [x] T010 [P] [CHK] Create Architecture Guard Verification check module (spec T009) — spawns `bun run arch:guard` and `bun run arch:health` (120 s timeout each); captures stdout, stderr, exit codes; classifies all violations as pre-existing (stage introduces no code changes); status = PASS if both exit 0 with no violations, FLAG (not FAIL) otherwise; records output under "Architecture Guard — Pre-existing Violations Found"; does not block stage — `scripts/dev/hygiene-checks/arch-guard-check.ts`
 
 ---
 
@@ -60,7 +60,7 @@ Spec verification tasks referenced in parentheses reflect the naming in `spec.md
 
 Depends on all Phase 2 check modules (T002–T010) being importable.
 
-- [ ] T011 [REPORT] Create hygiene report orchestrator — imports and invokes T001–T009 check modules in sequence; collects `TaskResult[]`; determines overall verdict (CLEAN if all PASS/SKIP, ATTENTION REQUIRED otherwise); renders full markdown report per format specification in `plan.md`; writes to `docs/reports/REPOSITORY_HYGIENE_REPORT.md`; exits with code 0 regardless of findings — `scripts/dev/hygiene-report-generator.ts`
+- [x] T011 [REPORT] Create hygiene report orchestrator — imports and invokes T001–T009 check modules in sequence; collects `TaskResult[]`; determines overall verdict (CLEAN if all PASS/SKIP, ATTENTION REQUIRED otherwise); renders full markdown report per format specification in `plan.md`; writes to `docs/reports/REPOSITORY_HYGIENE_REPORT.md`; exits with code 0 regardless of findings — `scripts/dev/hygiene-report-generator.ts`
 
 ---
 
@@ -70,9 +70,9 @@ Unit tests for the three checks with the most deterministic internal logic. Can 
 parallel once Phase 2 modules are available. All tests use local fixture directories for determinism
 (not the real repo workspace files).
 
-- [ ] T012 [P] [TEST] Create unit tests for Routing Authority Verification check — covers: PASS when registry + both authoritative dirs exist; FLAG when authoritative dir missing on disk; FLAG when registry has no `Authoritative Root:` entry for a surface; no FLAG for correctly-classified legacy/compatibility dir — `scripts/dev/hygiene-checks/__tests__/routing-authority-check.test.ts`
-- [ ] T013 [P] [TEST] Create unit tests for Dead Script Detection check — covers: ACTIVE when path appears in `package.json` scripts value; POTENTIALLY_DEAD when absent from all reference surfaces; DUPLICATE_ROOT_STUB when root-level file shares basename with a subdir file; no throw on empty `scripts/` directory — `scripts/dev/hygiene-checks/__tests__/dead-script-check.test.ts`
-- [ ] T014 [P] [TEST] Create unit tests for Workspace Package Validation check — covers: PASS when all `packages/` dirs appear as deps in at least one `apps/` package.json; FLAG with orphaned package name when no consumer found; no throw on empty `packages/` directory — `scripts/dev/hygiene-checks/__tests__/workspace-package-check.test.ts`
+- [x] T012 [P] [TEST] Create unit tests for Routing Authority Verification check — covers: PASS when registry + both authoritative dirs exist; FLAG when authoritative dir missing on disk; FLAG when registry has no `Authoritative Root:` entry for a surface; no FLAG for correctly-classified legacy/compatibility dir — `scripts/dev/hygiene-checks/__tests__/routing-authority-check.test.ts`
+- [x] T013 [P] [TEST] Create unit tests for Dead Script Detection check — covers: ACTIVE when path appears in `package.json` scripts value; POTENTIALLY_DEAD when absent from all reference surfaces; DUPLICATE_ROOT_STUB when root-level file shares basename with a subdir file; no throw on empty `scripts/` directory — `scripts/dev/hygiene-checks/__tests__/dead-script-check.test.ts`
+- [x] T014 [P] [TEST] Create unit tests for Workspace Package Validation check — covers: PASS when all `packages/` dirs appear as deps in at least one `apps/` package.json; FLAG with orphaned package name when no consumer found; no throw on empty `packages/` directory — `scripts/dev/hygiene-checks/__tests__/workspace-package-check.test.ts`
 
 ---
 
@@ -80,14 +80,14 @@ parallel once Phase 2 modules are available. All tests use local fixture directo
 
 Execute sequentially; T015 must precede T017; T017 must complete before T018–T022.
 
-- [ ] T015 [GATE] Add `"hygiene:report": "bun scripts/dev/hygiene-report-generator.ts"` script entry to root `package.json`
-- [ ] T016 [GATE] Ensure `docs/reports/` directory exists and create initial `REPOSITORY_HYGIENE_REPORT.md` placeholder file (will be overwritten by T017 with live report content) — `docs/reports/REPOSITORY_HYGIENE_REPORT.md`
-- [ ] T017 [GATE] Run full integration smoke — `bun run hygiene:report`; confirms all nine checks execute without throws; produces final `docs/reports/REPOSITORY_HYGIENE_REPORT.md` containing all ten task sections (T001–T010); exits with code 0 — output: `docs/reports/REPOSITORY_HYGIENE_REPORT.md`
-- [ ] T018 [GATE] Run `bun run lint` — confirm zero lint violations introduced by new scripts
-- [ ] T019 [GATE] Run `bun run typecheck` — confirm zero TypeScript errors in new files
-- [ ] T020 [GATE] Run `bun run test` — confirm unit tests T012–T014 pass; no pre-existing tests regressed
-- [ ] T021 [GATE] Verify `git diff --name-only` — confirm zero writes to `docs/architecture/`, any ADR files, or `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md`; confirm zero destructive operations (no file deletions, no dependency removals)
-- [ ] T022 [GATE] Commit `docs/reports/REPOSITORY_HYGIENE_REPORT.md` as tracked stage artifact (source-controlled; not ephemeral)
+- [x] T015 [GATE] Add `"hygiene:report": "bun scripts/dev/hygiene-report-generator.ts"` script entry to root `package.json`
+- [x] T016 [GATE] Ensure `docs/reports/` directory exists and create initial `REPOSITORY_HYGIENE_REPORT.md` placeholder file (will be overwritten by T017 with live report content) — `docs/reports/REPOSITORY_HYGIENE_REPORT.md`
+- [x] T017 [GATE] Run full integration smoke — `bun run hygiene:report`; confirms all nine checks execute without throws; produces final `docs/reports/REPOSITORY_HYGIENE_REPORT.md` containing all ten task sections (T001–T010); exits with code 0 — output: `docs/reports/REPOSITORY_HYGIENE_REPORT.md`
+- [x] T018 [GATE] Run `bun run lint` — confirm zero lint violations introduced by new scripts
+- [x] T019 [GATE] Run `bun run typecheck` — confirm zero TypeScript errors in new files
+- [x] T020 [GATE] Run `bun run test` — confirm unit tests T012–T014 pass; no pre-existing tests regressed
+- [x] T021 [GATE] Verify `git diff --name-only` — confirm zero writes to `docs/architecture/`, any ADR files, or `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md`; confirm zero destructive operations (no file deletions, no dependency removals)
+- [x] T022 [GATE] Commit `docs/reports/REPOSITORY_HYGIENE_REPORT.md` as tracked stage artifact (source-controlled; not ephemeral)
 
 ---
 

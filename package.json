@@ -69,7 +69,8 @@
     "repo:doctor": "bun scripts/dev/repo-doctor.ts",
     "repo:fix": "bun scripts/dev/repo-fix.ts",
     "repo:onboard": "bun scripts/dev/repo-onboard.ts",
-    "repo:status": "bun scripts/dev/repo-status.ts"
+    "repo:status": "bun scripts/dev/repo-status.ts",
+    "hygiene:report": "bun scripts/dev/hygiene-report-generator.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
