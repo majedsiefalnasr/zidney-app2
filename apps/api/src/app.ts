@@ -41,6 +41,7 @@ import { tenantResolver } from './middleware/tenant-resolver'
 import { registerStage06Routes } from './routes/attempts/index-stage06'
 import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
 import { backofficeContextRouter } from './routes/backoffice/context'
+import { divisionsRouter } from './routes/backoffice/divisions/index'
 import { rolesRouter } from './routes/backoffice/roles'
 import { workspaceSettingsRouter } from './routes/backoffice/settings'
 import { translationRouter } from './routes/backoffice/translations/index'
@@ -142,6 +143,9 @@ app.route('/api/v1/backoffice/workspace', workflowRouter)
 
 // Role & Permission endpoints — Stage 021, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', rolesRouter)
+
+// Divisions endpoints — Stage 022, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', divisionsRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade

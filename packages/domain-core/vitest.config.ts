@@ -46,6 +46,7 @@ export default defineProject({
       './tests/unit/**/*.spec.ts',
       './tests/unit/**/*.test.ts',
       './tests/license/**/*.test.ts',
+      './src/**/__tests__/**/*.test.ts',
     ],
   },
 })

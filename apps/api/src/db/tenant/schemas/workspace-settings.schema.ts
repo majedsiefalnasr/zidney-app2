@@ -15,7 +15,17 @@
  * ✓ Tenant DB only — no master DB references
  */
 
-import { index, integer, jsonb, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core'
 
 import type {
   BrandingSettings,
@@ -47,6 +57,10 @@ export const workspaceSettings = pgTable(
     branding_settings: jsonb('branding_settings').notNull().default({}).$type<BrandingSettings>(),
     payment_settings: jsonb('payment_settings').notNull().default({}).$type<PaymentSettings>(),
     security_settings: jsonb('security_settings').notNull().default({}).$type<SecuritySettings>(),
+
+    // STAGE_22_DIVISIONS: Feature flag — default true (existing tenants stay divisions-enabled).
+    // Set to false by the disable-divisions operation.
+    divisions_enabled: boolean('divisions_enabled').notNull().default(true),
 
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
