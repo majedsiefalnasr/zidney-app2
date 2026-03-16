@@ -82,7 +82,7 @@ export async function handleAssignStaffDivision(c: Context<BackofficeEnv>): Prom
           error: {
             code: 'VALIDATION_ERROR',
             message: paramsResult.error.errors
-              .map((e) => `${e.path.join('.')}: ${e.message}`)
+              .map((e) => `${String(e.path.join('.'))}: ${e.message}`)
               .join('; '),
           },
         },
@@ -100,7 +100,7 @@ export async function handleAssignStaffDivision(c: Context<BackofficeEnv>): Prom
           error: {
             code: 'VALIDATION_ERROR',
             message: bodyResult.error.errors
-              .map((e) => `${e.path.join('.')}: ${e.message}`)
+              .map((e) => `${String(e.path.join('.'))}: ${e.message}`)
               .join('; '),
           },
         },
@@ -142,7 +142,7 @@ export async function handleRemoveStaffDivision(c: Context<BackofficeEnv>): Prom
           error: {
             code: 'VALIDATION_ERROR',
             message: paramsResult.error.errors
-              .map((e) => `${e.path.join('.')}: ${e.message}`)
+              .map((e) => `${String(e.path.join('.'))}: ${e.message}`)
               .join('; '),
           },
         },

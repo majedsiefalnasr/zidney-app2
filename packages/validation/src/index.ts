@@ -24,23 +24,34 @@ export {
 } from './attempt-schemas'
 // Divisions domain validation
 export {
-  type AssignStaffDivisionInput,
+  type AssignStaffDivisionBody,
   assignStaffDivisionBodySchema,
-  type CreateDivisionInput,
+  type CreateDivisionBody,
   createDivisionBodySchema,
-  type DisableDivisionsInput,
+  type DeleteDivisionParams,
+  type DisableDivisionsBody,
+  type DivisionParams,
   deleteDivisionParamsSchema,
   disableDivisionsBodySchema,
   divisionParamsSchema,
   type ListDivisionsQuery,
   listDivisionsQuerySchema,
+  type RemoveStaffDivisionParams,
   removeStaffDivisionParamsSchema,
+  type StaffDivisionsParams,
   staffDivisionsParamsSchema,
-  type UpdateDivisionInput,
-  type UpdateDivisionStatusInput,
+  type UpdateDivisionBody,
+  type UpdateDivisionStatusBody,
   updateDivisionBodySchema,
   updateDivisionStatusBodySchema,
-} from './divisions-validation'
+} from './backoffice/divisions.schemas'
+
+// Type aliases for backward compatibility
+export type CreateDivisionInput = CreateDivisionBody
+export type UpdateDivisionInput = UpdateDivisionBody
+export type UpdateDivisionStatusInput = UpdateDivisionStatusBody
+export type DisableDivisionsInput = DisableDivisionsBody
+export type AssignStaffDivisionInput = AssignStaffDivisionBody
 // Master database input validation
 export {
   ValidationError,
