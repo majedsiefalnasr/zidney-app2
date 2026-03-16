@@ -22,6 +22,39 @@ export {
   validateSubmitAttemptRequest,
   validateUpdateProgressRequest,
 } from './attempt-schemas'
+// Divisions domain validation
+export {
+  type AssignStaffDivisionBody,
+  // Re-export with aliases for backward compatibility
+  type AssignStaffDivisionBody as AssignStaffDivisionInput,
+  assignStaffDivisionBodySchema,
+  type CreateDivisionBody,
+  // Re-export with aliases for backward compatibility
+  type CreateDivisionBody as CreateDivisionInput,
+  createDivisionBodySchema,
+  type DeleteDivisionParams,
+  type DisableDivisionsBody,
+  // Re-export with aliases for backward compatibility
+  type DisableDivisionsBody as DisableDivisionsInput,
+  type DivisionParams,
+  deleteDivisionParamsSchema,
+  disableDivisionsBodySchema,
+  divisionParamsSchema,
+  type ListDivisionsQuery,
+  listDivisionsQuerySchema,
+  type RemoveStaffDivisionParams,
+  removeStaffDivisionParamsSchema,
+  type StaffDivisionsParams,
+  staffDivisionsParamsSchema,
+  type UpdateDivisionBody,
+  // Re-export with aliases for backward compatibility
+  type UpdateDivisionBody as UpdateDivisionInput,
+  type UpdateDivisionStatusBody,
+  // Re-export with aliases for backward compatibility
+  type UpdateDivisionStatusBody as UpdateDivisionStatusInput,
+  updateDivisionBodySchema,
+  updateDivisionStatusBodySchema,
+} from './backoffice/divisions.schemas'
 // Master database input validation
 export {
   ValidationError,
@@ -30,7 +63,6 @@ export {
   validateCreateProductInput,
   validateCreateTenantRegistryInput,
 } from './master-db-schema'
-
 // Migration file validation
 export {
   calculateChecksum,

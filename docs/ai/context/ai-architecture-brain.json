@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-03-15T23:26:58.156Z",
+  "generated_at": "2026-03-16T15:40:03.913Z",
   "metadata": {
     "total_modules": 14,
     "total_violations": 0,
     "generation_time_ms": 0,
     "source_hash": "6493a7d6",
-    "source_timestamp": "2026-03-15T23:26:58.153Z",
+    "source_timestamp": "2026-03-16T15:40:03.908Z",
     "generator_version": "1.0.0"
   },
   "layers": [
@@ -309,7 +309,7 @@
     "hotspots": [
       {
         "module": "packages/logger",
-        "violation_count": 242
+        "violation_count": 245
       },
       {
         "module": "packages/types",
@@ -317,15 +317,15 @@
       },
       {
         "module": "packages/domain-core",
-        "violation_count": 77
+        "violation_count": 87
+      },
+      {
+        "module": "packages/validation",
+        "violation_count": 18
       },
       {
         "module": "packages/api-client",
         "violation_count": 17
-      },
-      {
-        "module": "packages/validation",
-        "violation_count": 10
       },
       {
         "module": "packages/job-queue",

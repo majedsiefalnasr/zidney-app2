@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-03-15T23:26:58.131Z",
-  "gitSha": "be724fb46dbaadd0b158a55d70df9a2b664cb7e6",
+  "generatedAt": "2026-03-16T15:40:03.888Z",
+  "gitSha": "f6d8e8acab2d8d51bd473413488d75b6345a5e12",
   "architectureScore": 100,
   "modules": [
     "packages/job-queue",
@@ -63,7 +63,7 @@
     "packages/redis-utils": "LOW",
     "packages/ui-system": "LOW",
     "packages/api-client": "LOW",
-    "packages/domain-core": "LOW",
+    "packages/domain-core": "MEDIUM",
     "packages/validation": "LOW",
     "apps/mmc": "LOW",
     "apps/frontoffice": "LOW",
@@ -159,6 +159,10 @@
     {
       "from": "packages/domain-core",
       "to": "packages/types"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "packages/logger"
     },
     {
       "from": "packages/domain-core",
@@ -1319,6 +1323,86 @@
     {
       "from": "apps/api",
       "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
     },
     {
       "from": "apps/api",

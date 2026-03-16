@@ -1,6 +1,6 @@
 # Repository Hygiene Report
 
-> **Generated:** 2026-03-15T23:26:25.165Z
+> **Generated:** 2026-03-16T15:39:30.455Z
 > **Overall Verdict:** ⚑ ATTENTION REQUIRED
 
 ---
@@ -10,11 +10,11 @@
 | Check                             | Status | Summary                                                                      |
 | --------------------------------- | ------ | ---------------------------------------------------------------------------- |
 | ✅ Routing Authority Verification | `PASS` | All 3 routing surfaces have valid authoritative roots                        |
-| ⚑ Template System Consolidation   | `FLAG` | 18 legacy consumer(s) and 2 parity gap(s) found                              |
-| ⚑ Dead Script Detection           | `FLAG` | 168 scripts scanned: 167 active, 16 duplicate-root-stubs, 1 potentially dead |
+| ⚑ Template System Consolidation   | `FLAG` | 38 legacy consumer(s) and 2 parity gap(s) found                              |
+| ⚑ Dead Script Detection           | `FLAG` | 168 scripts scanned: 168 active, 16 duplicate-root-stubs, 0 potentially dead |
 | ⚑ Dependency Hygiene              | `FLAG` | 77 unused and 15 version-conflict(s) found across 15 workspaces (advisory)   |
 | ⚑ Workspace Package Validation    | `FLAG` | 1 orphaned package(s) found: @zidney/config                                  |
-| ⚑ Skill Surface Validation        | `FLAG` | 20 skill surface issue(s) found                                              |
+| ⚑ Skill Surface Validation        | `FLAG` | 23 skill surface issue(s) found                                              |
 | ⚑ CI Workflow Hygiene             | `FLAG` | 5 duplicate run: command(s) and 2 step label overlap(s) across 5 workflows   |
 | ✅ AI Context Freshness           | `PASS` | AI context artifacts are current                                             |
 | ✅ Architecture Guard             | `PASS` | Architecture checks passed: arch:guard ✓, arch:health ✓                      |
@@ -31,7 +31,7 @@
 
 ### ⚑ Template System Consolidation `[FLAG]`
 
-**Summary:** 18 legacy consumer(s) and 2 parity gap(s) found
+**Summary:** 38 legacy consumer(s) and 2 parity gap(s) found
 
 **Findings:**
 
@@ -53,14 +53,25 @@
 - `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:126` — Legacy template consumer: "| `.github/agents/speckit.checklist.agent.md` | `.specify/templates/checklist-template.md` | `s"
 - `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:127` — Legacy template consumer: "| `.agents/agents/speckit.constitution.agent.md` | `.specify/templates/{constitution,plan,spec,tasks}-template.md` | `s"
 - `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:128` — Legacy template consumer: "| `.github/agents/speckit.constitution.agent.md` | `.specify/templates/{constitution,plan,spec,tasks}-template.md` | `s"
-- `.specify/templates/README.md` — Template parity gap — file exists in legacy root but not in specs/templates/
-- `.specify/templates/spec-template.md` — Template parity gap — file exists in legacy root but not in specs/templates/
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:38` — Legacy template consumer: "- `.specify/scripts/bash/setup-plan.sh:41` — Legacy template consumer: "LEGACY_TEMPLATE="$REPO_ROOT/.specify/templates/p"
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:39` — Legacy template consumer: "- `.specify/scripts/bash/update-agent-context.sh:82` — Legacy template consumer: "LEGACY_TEMPLATE_FILE="$REPO_ROOT/.spec"
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:40` — Legacy template consumer: "- `.specify/scripts/bash/create-new-feature.sh:284` — Legacy template consumer: "LEGACY_TEMPLATE="$REPO_ROOT/.specify/te"
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:41` — Legacy template consumer: "- `docs/SPEC_KIT_HARD_MODE_WORKFLOW.md:17` — Legacy template consumer: "`.github/*`, `.specify/templates/*`, or `specs/t"
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:42` — Legacy template consumer: "- `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:98` — Legacy template consumer: "- Legacy Compatibility "
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:43` — Legacy template consumer: "- `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:101` — Legacy template consumer: "`.specify/templates/` "
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:44` — Legacy template consumer: "- `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:105` — Legacy template consumer: "- no contributor or au"
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:45` — Legacy template consumer: "- `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:118` — Legacy template consumer: "| `.specify/scripts/ba"
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:46` — Legacy template consumer: "- `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:119` — Legacy template consumer: "| `.specify/scripts/ba"
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:47` — Legacy template consumer: "- `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:120` — Legacy template consumer: "| `.specify/scripts/ba"
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:48` — Legacy template consumer: "- `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:121` — Legacy template consumer: "| `.agents/agents/spec"
+- `docs/reports/REPOSITORY_HYGIENE_REPORT.md:49` — Legacy template consumer: "- `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md:122` — Legacy template consumer: "| `.github/agents/spec"
+- _…and 10 more_
 
 ---
 
 ### ⚑ Dead Script Detection `[FLAG]`
 
-**Summary:** 168 scripts scanned: 167 active, 16 duplicate-root-stubs, 1 potentially dead
+**Summary:** 168 scripts scanned: 168 active, 16 duplicate-root-stubs, 0 potentially dead
 
 **Findings:**
 
@@ -80,14 +91,13 @@
 - `scripts/run-staging-smoke-tests.sh` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/ci/run-staging-smoke-tests.sh (flagged for human review)
 - `scripts/generate-ai-context.ts` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/dev/generate-ai-context.ts (flagged for human review)
 - `scripts/check-store-cycles.ts` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/dev/check-store-cycles.ts (flagged for human review)
-- `scripts/architecture-health/architecture-guard-types.ts` — POTENTIALLY_DEAD — not referenced in package.json, workflows, docs, or shell scripts (flagged for human review)
 
 <details><summary>Raw output</summary>
 
 ```
-Active: 167
+Active: 168
 Duplicate Root Stubs: 16
-Potentially Dead: 1
+Potentially Dead: 0
 ```
 
 </details>
@@ -146,10 +156,13 @@ Potentially Dead: 1
 
 ### ⚑ Skill Surface Validation `[FLAG]`
 
-**Summary:** 20 skill surface issue(s) found
+**Summary:** 23 skill surface issue(s) found
 
 **Findings:**
 
+- `.agents/skills/zidney-frontend-engineering` — Skill directory not referenced in SKILLS_INDEX.md or any AGENTS.md
+- `.agents/skills/shadcn-vue-ui-system` — Skill directory not referenced in SKILLS_INDEX.md or any AGENTS.md
+- `.agents/skills/tailwind-design-system` — Skill directory not referenced in SKILLS_INDEX.md or any AGENTS.md
 - `--------` — STALE INDEX ENTRY — mentioned in SKILLS_INDEX.md but no directory found at .agents/skills/--------
 - `-------` — STALE INDEX ENTRY — mentioned in SKILLS_INDEX.md but no directory found at .agents/skills/-------
 - `-----------` — STALE INDEX ENTRY — mentioned in SKILLS_INDEX.md but no directory found at .agents/skills/-----------

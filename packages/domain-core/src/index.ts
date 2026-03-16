@@ -13,6 +13,8 @@ export * from './attempts/attempt-init'
 export * from './audit/attempt-event-logger'
 // Auth module
 export * from './auth/index'
+// Divisions module (Stage 022)
+export * from './divisions'
 // Job hash utility
 export * from './job-hash'
 // License module
@@ -33,7 +35,6 @@ export * from './tenant-resolver/version-check'
 export * from './translation/coverage.service'
 export * from './translation/translatable-fields'
 export type { TranslationErrorCode } from './translation/translation.errors'
-// Translation errors — named imports to avoid conflicts with workflow errors
 export {
   batchValidationFailed,
   defaultLanguageWrite,
