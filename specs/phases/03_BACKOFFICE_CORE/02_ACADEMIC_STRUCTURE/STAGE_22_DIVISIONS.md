@@ -10,19 +10,19 @@ Status: Critical Academic Scope Layer
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-03-16T00:03:00Z
+Last Updated: 2026-03-16T00:04:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Division CRUD (create, read, update, toggle status, delete)
-- Staff multi-division assignment via staff_divisions join table
-- Disable-divisions transactional operation (SERIALIZABLE isolation)
-- Cursor-based pagination on GET /divisions list endpoint
-- Feature toggle: multi-division vs. single-division mode
-- 10 API endpoints at /api/v1/backoffice/workspace/divisions/...
-- schema_version bump: 1.4.0 → 1.5.0
+- Total: 36 atomic tasks
+- Phase 0: 7 pre-condition checks (read-only)
+- Phase 1: 5 data layer tasks (migration + schemas)
+- Phase 2: 5 domain layer tasks
+- Phase 3: 2 validation layer tasks
+- Phase 4: 11 API layer tasks
+- Phase 5: 3 test tasks
 
 Deferred Scope:
 
@@ -32,12 +32,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Guardian Architecture Checker: PASS
-- Guardian API Designer: PASS (after namespace + pagination + Redis fail-closed fixes)
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
