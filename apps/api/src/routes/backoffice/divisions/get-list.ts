@@ -37,7 +37,7 @@ export async function handleGetListDivisions(c: Context<BackofficeEnv>): Promise
           error: {
             code: 'VALIDATION_ERROR',
             message: parseResult.error.errors
-              .map((e) => `${e.path.join('.')}: ${e.message}`)
+              .map((e) => `${String(e.path.join('.'))}: ${e.message}`)
               .join('; '),
           },
         },

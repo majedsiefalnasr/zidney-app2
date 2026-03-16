@@ -29,7 +29,7 @@ export async function handleDeleteDivision(c: Context<BackofficeEnv>): Promise<R
           error: {
             code: 'VALIDATION_ERROR',
             message: parseResult.error.errors
-              .map((e) => `${e.path.join('.')}: ${e.message}`)
+              .map((e) => `${String(e.path.join('.'))}: ${e.message}`)
               .join('; '),
           },
         },
