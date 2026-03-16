@@ -3,21 +3,21 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-17T00:01:00.000Z
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-03-17T00:02:00.000Z
 
 Scope Defined:
 
-- Scan runtime specs for bun run script references
-- Build script inventory with status classification
+- Scan runtime specs for bun run script references (regex locked)
+- Build script inventory with status classification (missing/broken/duplicate/valid)
 - Reconstruct missing scripts under scripts/<domain>/
-- Eliminate duplicate script definitions
+- Eliminate duplicate scripts using superset-merge with apps/api precedence
 - Register canonical scripts in root package.json
-- Validate all scripts execute with exit code 0
+- Validate scripts with static analysis (no live infra required)
 - Create docs/scripts/ knowledge base
 - Update AGENTS.md governance rule
-- Add CI guard validate-runtime-scripts.ts
+- Add CI hard-blocking guard validate-runtime-scripts.ts
 
 Deferred Scope:
 
@@ -27,10 +27,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
