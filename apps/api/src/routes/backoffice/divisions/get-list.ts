@@ -47,7 +47,11 @@ export async function handleGetListDivisions(c: Context<BackofficeEnv>): Promise
 
     const { limit, cursor, status } = parseResult.data
 
-    const result = await listDivisions(db, { limit, cursor, status })
+    const result = await listDivisions(db, {
+      limit,
+      cursor,
+      status: status as 'ENABLED' | 'DISABLED' | 'all',
+    })
 
     return c.json({ success: true, data: result, error: null }, 200)
   } catch (err: unknown) {

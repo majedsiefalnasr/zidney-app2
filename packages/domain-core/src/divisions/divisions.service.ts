@@ -214,7 +214,7 @@ export async function createDivision(
       ...audit,
     })
 
-    return row
+    return row as DivisionRow
   } catch (err) {
     await db.query('ROLLBACK', [])
     // Re-throw unique constraint violation as domain error
@@ -335,7 +335,7 @@ export async function updateDivisionStatus(
       throw new DivisionsError('DIVISION_NOT_FOUND')
     }
 
-    const lockedRow = lockResult.rows[0]
+    const lockedRow = lockResult.rows[0] as DivisionRow
     if (lockedRow.is_default && input.status === DivisionStatus.DISABLED) {
       await db.query('ROLLBACK', [])
       throw new DivisionsError(
@@ -399,7 +399,7 @@ export async function deleteDivision(db: DbClient, id: string, audit: AuditConte
       throw new DivisionsError('DIVISION_NOT_FOUND')
     }
 
-    const div = lockResult.rows[0]
+    const div = lockResult.rows[0] as DivisionRow
     if (div.is_default) {
       await db.query('ROLLBACK', [])
       throw new DivisionsError(
@@ -483,7 +483,7 @@ export async function disableDivisions(
       await db.query('ROLLBACK', [])
       throw new DivisionsError('DIVISION_REQUIRED', 'No default division found.')
     }
-    const defaultDivisionId = defaultResult.rows[0].id
+    const defaultDivisionId = (defaultResult.rows[0] as { id: string }).id
 
     // Lock all other divisions to prevent concurrent modification
     await db.query(`SELECT id FROM divisions WHERE is_default = false FOR UPDATE`, [])
@@ -618,7 +618,7 @@ export async function assignStaffDivision(
   if (divisionResult.rows.length === 0) {
     throw new DivisionsError('DIVISION_NOT_FOUND')
   }
-  const div = divisionResult.rows[0]
+  const div = divisionResult.rows[0] as { id: string; status: string }
   if (div.status === DivisionStatus.DISABLED) {
     throw new DivisionsError('DIVISION_DISABLED')
   }

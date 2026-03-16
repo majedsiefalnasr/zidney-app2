@@ -8,7 +8,7 @@
  * RBAC: ACADEMIC_STRUCTURE can_edit
  */
 
-import { updateDivisionStatus } from '@zidney/domain-core/divisions'
+import { type DivisionStatus, updateDivisionStatus } from '@zidney/domain-core/divisions'
 import { divisionParamsSchema, updateDivisionStatusBodySchema } from '@zidney/validation'
 import type { Context } from 'hono'
 
@@ -58,7 +58,7 @@ export async function handleUpdateDivisionStatus(c: Context<BackofficeEnv>): Pro
     const division = await updateDivisionStatus(
       db,
       paramsResult.data.id,
-      { status: bodyResult.data.status as 'ENABLED' | 'DISABLED' },
+      { status: bodyResult.data.status as DivisionStatus },
       audit
     )
 
