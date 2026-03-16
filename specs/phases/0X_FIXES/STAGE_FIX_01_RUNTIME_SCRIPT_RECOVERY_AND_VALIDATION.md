@@ -3,20 +3,34 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-17T00:00:00.000Z
+Last Updated: 2026-03-17T00:01:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Scan runtime specs for bun run script references
+- Build script inventory with status classification
+- Reconstruct missing scripts under scripts/<domain>/
+- Eliminate duplicate script definitions
+- Register canonical scripts in root package.json
+- Validate all scripts execute with exit code 0
+- Create docs/scripts/ knowledge base
+- Update AGENTS.md governance rule
+- Add CI guard validate-runtime-scripts.ts
+
+Deferred Scope:
+
+- Application feature changes
+- Database schema changes
+- User-facing UI modifications
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
