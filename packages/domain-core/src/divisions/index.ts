@@ -5,8 +5,23 @@
  * Consumed via:
  *   - Root barrel: `export * from './divisions'` in domain-core/src/index.ts
  *   - Subpath:     `"./divisions"` entry in domain-core/package.json exports
+ *
+ * Note: DbClient is an internal structural type for service injection only.
+ * It is not re-exported to avoid naming conflicts.
  */
 
 export * from './divisions.errors'
 export * from './divisions.service'
-export * from './divisions.types'
+export type {
+  AuditContext,
+  CreateDivisionInput,
+  DisableDivisionsResult,
+  DivisionRow,
+  DivisionStatus,
+  ListDivisionsInput,
+  ListDivisionsResult,
+  StaffDivisionRow,
+  UpdateDivisionInput,
+  UpdateDivisionStatusInput,
+} from './divisions.types'
+export { DivisionStatus } from './divisions.types'

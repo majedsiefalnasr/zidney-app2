@@ -51,7 +51,7 @@ export enum DivisionStatus {
 // ---------------------------------------------------------------------------
 
 /** Full database row for the `divisions` table. */
-export interface DivisionRow {
+export interface DivisionRow extends Record<string, unknown> {
   id: string
   name: string
   description: string | null
@@ -62,7 +62,7 @@ export interface DivisionRow {
 }
 
 /** Full database row for the `staff_divisions` join table. */
-export interface StaffDivisionRow {
+export interface StaffDivisionRow extends Record<string, unknown> {
   staff_id: string
   division_id: string
   assigned_at: Date
