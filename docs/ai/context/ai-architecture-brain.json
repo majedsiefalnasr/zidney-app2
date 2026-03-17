@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-03-16T15:40:03.913Z",
+  "generated_at": "2026-03-17T10:57:15.659Z",
   "metadata": {
     "total_modules": 14,
     "total_violations": 0,
     "generation_time_ms": 0,
     "source_hash": "6493a7d6",
-    "source_timestamp": "2026-03-16T15:40:03.908Z",
+    "source_timestamp": "2026-03-17T10:57:15.647Z",
     "generator_version": "1.0.0"
   },
   "layers": [
@@ -317,7 +317,7 @@
       },
       {
         "module": "packages/domain-core",
-        "violation_count": 87
+        "violation_count": 88
       },
       {
         "module": "packages/validation",

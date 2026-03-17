@@ -257,6 +257,22 @@ console.log is forbidden.
 
 ---
 
+## Script Governance
+
+All runtime commands referenced in `specs/runtime` must correspond to an executable script
+registered in root `package.json`. Referencing non-existent scripts is forbidden.
+
+Rules:
+
+- Script implementations must live under `scripts/<domain>/`, not inside `packages/*/src/` or `apps/*/src/`.
+- Each script must be documented in `docs/scripts/<script>.md`.
+- Scripts must not be duplicated across packages.
+- Script keys in `package.json` must follow `<domain>:<action>` format (e.g., `db:pool-status`).
+- All scripts must include a JSDoc metadata header (`@script`, `@domain`, `@description`, `@mode`, `@dependencies`).
+- `validate-runtime-scripts` must pass before any spec referencing new scripts is merged.
+
+---
+
 ## Testing Requirements
 
 Mandatory per feature:
