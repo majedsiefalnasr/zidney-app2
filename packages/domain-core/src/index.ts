@@ -13,6 +13,8 @@ export * from './attempts/attempt-init'
 export * from './audit/attempt-event-logger'
 // Auth module
 export * from './auth/index'
+// Departments module (Stage 023)
+export * from './departments'
 // Divisions module (Stage 022)
 export * from './divisions'
 // Job hash utility

@@ -293,12 +293,12 @@ describe('POST /divisions/disable — already-disabled guard', () => {
     // pre-check the feature flag; the service does.
     // We stub the transaction to simulate the DIVISION_REQUIRED sentinel case
     // that maps to DIVISIONS_FEATURE_LOCKED via the error handler.
-    let defaultQuery = 0
+    let _defaultQuery = 0
     const app = createEdgeApp({
       divisionsEnabled: false,
       queryOverride: (sql) => {
         if (sql.includes('WHERE is_default = true') && sql.includes('FOR UPDATE')) {
-          defaultQuery++
+          _defaultQuery++
           return { rows: [], rowCount: 0 } // No default division → DIVISION_REQUIRED
         }
         return null

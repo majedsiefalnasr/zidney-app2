@@ -23,6 +23,7 @@
 
 import { index, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
+import { departments } from './departments.schema'
 import { divisions } from './divisions.schema'
 
 // ---------------------------------------------------------------------------
@@ -49,12 +50,21 @@ export const students = pgTable(
     division_id: uuid('division_id')
       .notNull()
       .references(() => divisions.id, { onDelete: 'restrict' }),
+    /**
+     * Department assignment — added by migration 20260317_001_departments.ts (STAGE_23).
+     * FK → departments(id) ON DELETE SET NULL:
+     *   deleting a department sets this column to null for previously assigned students.
+     * NULLABLE: no backfill required; existing students start with department_id = null.
+     */
+    department_id: uuid('department_id').references(() => departments.id, { onDelete: 'setNull' }),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     /** List all students in a division + FK traversal path. */
     divisionIdIdx: index('idx_students_division_id').on(table.division_id),
+    /** List all students in a department + FK traversal path. */
+    departmentIdIdx: index('idx_students_department_id').on(table.department_id),
     /** uniqueIndex on email is handled by DB bootstrap — not declared here. */
     externalIdIdx: index('idx_students_external_id').on(table.external_id),
   })

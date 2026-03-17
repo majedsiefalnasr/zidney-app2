@@ -22,6 +22,29 @@ export {
   validateSubmitAttemptRequest,
   validateUpdateProgressRequest,
 } from './attempt-schemas'
+// Departments domain validation
+export {
+  type AssignStaffDepartmentBody,
+  assignStaffDepartmentBodySchema,
+  type CreateDepartmentBody,
+  createDepartmentBodySchema,
+  type DeleteDepartmentParams,
+  type DepartmentChildrenParams,
+  type DepartmentTreeQuery,
+  deleteDepartmentParamsSchema,
+  departmentChildrenParamsSchema,
+  departmentTreeQuerySchema,
+  type GetDepartmentParams,
+  getDepartmentParamsSchema,
+  type ListDepartmentsQuery,
+  listDepartmentsQuerySchema,
+  type RemoveStaffDepartmentParams,
+  removeStaffDepartmentParamsSchema,
+  type StaffDepartmentsParams,
+  staffDepartmentsParamsSchema,
+  type UpdateDepartmentBody,
+  updateDepartmentBodySchema,
+} from './backoffice/departments.schemas'
 // Divisions domain validation
 export {
   type AssignStaffDivisionBody,

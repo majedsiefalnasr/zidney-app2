@@ -20,6 +20,7 @@
     "./tenant-resolver": "./src/tenant-resolver/version-check.ts",
     "./workers": "./src/workers/tasks/apply-migration.ts",
     "./rbac": "./src/rbac/index.ts",
+    "./departments": "./src/departments/index.ts",
     "./divisions": "./src/divisions/index.ts"
   },
   "scripts": {
