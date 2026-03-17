@@ -5,15 +5,15 @@
   "stage_file": "specs/phases/0X_FIXES/STAGE_FIX_01_RUNTIME_SCRIPT_RECOVERY_AND_VALIDATION.md",
   "branch": "spec/fix-01-runtime-script-recovery-and-validation",
   "base_branch": "develop",
-  "current_step": "plan",
+  "current_step": "tasks",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": true,
-  "tasks_total": null,
-  "tasks_completed": null,
-  "last_updated": "2026-03-17T00:03:00.000Z",
+  "tasks_total": 46,
+  "tasks_completed": 0,
+  "last_updated": "2026-03-17T00:04:00.000Z",
   "history": [
     {
       "event": "branch_created",
@@ -31,6 +31,11 @@
     {
       "event": "plan_complete",
       "timestamp": "2026-03-17T00:03:00.000Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 46,
+      "timestamp": "2026-03-17T00:04:00.000Z"
     }
   ]
 }

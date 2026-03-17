@@ -3,20 +3,19 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-17T00:03:00.000Z
+Last Updated: 2026-03-17T00:04:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Scan 83 unique bun run references across specs/runtime/ (T001–T003)
-- Eliminate 1 duplicate (seed-dashboard-test-data) via superset-merge (T004)
-- Reconstruct 10 missing TypeScript scripts across db/, validate/, maintenance/, generate/ (T005)
-- Register 33 script entries (32 missing + 1 dedup) in root package.json (T006)
-- Validate all scripts with static analysis, env-guarded execution (T007)
-- Create docs/scripts/ knowledge base: SCRIPT_REGISTRY.md, RUNBOOK.md, domain READMEs (T008–T010)
-- Add CI hard-blocking guard validate-runtime-scripts.ts (T011)
-- Update AGENTS.md governance rule (T012)
+- Total: 46 atomic tasks across 6 phases
+- Phase 1 (Setup): 2 tasks
+- Phase 2 (Foundational Scan Tooling): 5 tasks
+- Phase 3/US1 (Script Reconstruction & Registration): 14 tasks
+- Phase 4/US3 (CI Guard + Unit Tests): 4 tasks
+- Phase 5/US2 (Documentation & Generator): 14 tasks
+- Final Phase (Polish, Governance & Validation): 7 tasks
 
 Deferred Scope:
 
@@ -27,14 +26,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 - Guardian validation: Architecture Checker ✅ PASS, API Designer ✅ PASS
 
 Notes:
-Technical plan complete. Task breakdown in progress.
-
-Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
