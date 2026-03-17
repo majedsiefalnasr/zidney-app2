@@ -3,31 +3,35 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-17T00:02:00.000Z
+Last Updated: 2026-03-17T00:03:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Scan runtime specs for bun run script references (regex locked)
-- Build script inventory with status classification (missing/broken/duplicate/valid)
-- Reconstruct missing scripts under scripts/<domain>/
-- Eliminate duplicate scripts using superset-merge with apps/api precedence
-- Register canonical scripts in root package.json
-- Validate scripts with static analysis (no live infra required)
-- Create docs/scripts/ knowledge base
-- Update AGENTS.md governance rule
-- Add CI hard-blocking guard validate-runtime-scripts.ts
+- Scan 83 unique bun run references across specs/runtime/ (T001–T003)
+- Eliminate 1 duplicate (seed-dashboard-test-data) via superset-merge (T004)
+- Reconstruct 10 missing TypeScript scripts across db/, validate/, maintenance/, generate/ (T005)
+- Register 33 script entries (32 missing + 1 dedup) in root package.json (T006)
+- Validate all scripts with static analysis, env-guarded execution (T007)
+- Create docs/scripts/ knowledge base: SCRIPT_REGISTRY.md, RUNBOOK.md, domain READMEs (T008–T010)
+- Add CI hard-blocking guard validate-runtime-scripts.ts (T011)
+- Update AGENTS.md governance rule (T012)
 
 Deferred Scope:
 
 - Application feature changes
 - Database schema changes
 - User-facing UI modifications
+- Logging refactor of pre-existing seed-dashboard-test-data.ts (console.log pattern)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian validation: Architecture Checker ✅ PASS, API Designer ✅ PASS
+
+Notes:
+Technical plan complete. Task breakdown in progress.
 
 Notes:
 All specification ambiguities resolved. Ready for technical planning.

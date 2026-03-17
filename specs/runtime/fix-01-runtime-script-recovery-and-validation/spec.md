@@ -250,8 +250,15 @@ implementations inside `packages/*/src/` or `apps/*/src/`.
 ### FR-05 Required Package Imports
 
 Reconstructed and new scripts must use `packages/config`, `packages/logger`, and `packages/types`
-where applicable. `console.log` is forbidden in scripts; structured logging via `packages/logger`
-is required.
+where applicable. `console.log` is forbidden in scripts; structured logging is required.
+
+**Logging convention for the `scripts/` layer:** The established canonical pattern across `scripts/`
+is to use `scripts/core/logger-factory.ts` (a thin wrapper around `packages/logger`) rather than
+importing `packages/logger` directly. This is consistent with all existing scripts under
+`scripts/dev/`, `scripts/architecture/`, and `scripts/governance/`. Both `scripts/core/logger-factory`
+and direct `packages/logger` imports produce compliant structured output. The reference to
+`packages/logger` in this spec means "produce structured log output conforming to the logger
+contract" — using `scripts/core/logger-factory` satisfies this requirement.
 
 ### FR-06 Metadata Headers
 
