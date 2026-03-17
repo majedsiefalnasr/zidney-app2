@@ -552,9 +552,9 @@ Create a new department.
 **Error responses:**
 
 - 409 `DEPARTMENT_NAME_DUPLICATE` — name already exists within same parent scope
-- 422 `DEPARTMENT_NOT_FOUND` — `parent_id` references non-existent department
+- 404 `DEPARTMENT_NOT_FOUND` — `parent_id` references non-existent department
 - 422 `DEPARTMENT_DIVISION_MISMATCH` — division_id inconsistent with parent's division scope
-- 422 `VALIDATION_ERROR` — missing or invalid fields
+- 422 `VALIDATION_ERROR` — missing or invalid fields (includes invalid/non-existent division_id)
 
 ---
 
@@ -682,12 +682,16 @@ Retrieve the full hierarchical department tree for the workspace.
         "name": "Engineering",
         "type": "MAIN",
         "status": "ENABLED",
+        "parent_id": null,
+        "division_id": "uuid-or-null",
         "children": [
           {
             "id": "uuid",
             "name": "Software",
             "type": "SUB",
             "status": "ENABLED",
+            "parent_id": "uuid",
+            "division_id": "uuid-or-null",
             "children": []
           }
         ]

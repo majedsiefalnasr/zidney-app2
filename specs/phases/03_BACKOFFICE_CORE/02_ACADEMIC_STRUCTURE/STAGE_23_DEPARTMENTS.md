@@ -10,20 +10,22 @@ Status: Organizational-Academic Structure Layer
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-17T00:02:00Z
+Last Updated: 2026-03-17T00:03:00Z
 
-Scope Defined:
+Scope Planned:
 
-- departments table (CRUD + hierarchy + types)
+- departments table (CRUD + hierarchy + types + max_users)
 - staff_departments join table
-- unlimited-depth self-referencing hierarchy
-- division association (nullable FK)
-- max_users transactional enforcement (SELECT FOR UPDATE on departments row)
-- cycle detection via recursive SQL CTE within transaction
-- 10 API endpoints
-- parent_id null vs. absent semantics resolved
+- 24 new files across data, domain, validation, API, test layers
+- 6 files updated (students schema, barrel exports, app.ts, domain index, pkg.json, validation index)
+- Migration 20260317_001_departments (schema 1.5.0 → 1.6.0)
+- Cycle detection via recursive CTE inside write transaction
+- SELECT FOR UPDATE on departments row for max_users check
+- Explicit division_id existence check in createDepartment + updateDepartment
+- 10 API endpoints with 4-layer middleware chain
+- 5 test files (unit + integration + concurrent)
 
 Deferred Scope:
 
@@ -31,13 +33,16 @@ Deferred Scope:
 - Commercial structure integration
 - Bulk operations
 - Frontoffice display
+- max_users ejection logic for over-cap rollback
+- Subtree division consistency validation on reparent
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian validation PASSED (Architecture Checker + API Designer)
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. 3 API violations remediated before plan was finalized. Task breakdown in progress.
 
 ---
 

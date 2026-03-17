@@ -5,15 +5,15 @@
   "stage_file": "specs/phases/03_BACKOFFICE_CORE/02_ACADEMIC_STRUCTURE/STAGE_23_DEPARTMENTS.md",
   "branch": "spec/023-departments",
   "base_branch": "develop",
-  "current_step": "clarify",
+  "current_step": "plan",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
-  "plan_completed": false,
+  "plan_completed": true,
   "tasks_total": null,
   "tasks_completed": null,
-  "last_updated": "2026-03-17T00:02:00Z",
+  "last_updated": "2026-03-17T00:03:00Z",
   "history": [
     {
       "event": "branch_created",
@@ -27,6 +27,10 @@
     {
       "event": "clarifications_locked",
       "timestamp": "2026-03-17T00:02:00Z"
+    },
+    {
+      "event": "plan_complete",
+      "timestamp": "2026-03-17T00:03:00Z"
     }
   ]
 }
