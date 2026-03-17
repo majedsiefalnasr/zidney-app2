@@ -10,20 +10,33 @@ Status: Organizational-Academic Structure Layer
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-17T00:00:00Z
+Last Updated: 2026-03-17T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- departments table (CRUD + hierarchy + types)
+- staff_departments join table
+- unlimited-depth self-referencing hierarchy
+- division association (nullable FK)
+- max_users transactional enforcement
+- cycle detection at API layer
+- 10 API endpoints
+
+Deferred Scope:
+
+- Content visibility filtering (optional, future)
+- Commercial structure integration
+- Bulk operations
+- Frontoffice display
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
