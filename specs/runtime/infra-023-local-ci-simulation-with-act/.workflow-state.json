@@ -1,0 +1,24 @@
+{
+  "stage": "Local CI Simulation With Act",
+  "phase": "01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-023-local-ci-simulation-with-act",
+  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_23_LOCAL_CI_SIMULATION_WITH_ACT.md",
+  "branch": "spec/infra-023-local-ci-simulation-with-act",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-17T00:00:00.000Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/infra-023-local-ci-simulation-with-act",
+      "timestamp": "2026-03-17T00:00:00.000Z"
+    }
+  ]
+}
