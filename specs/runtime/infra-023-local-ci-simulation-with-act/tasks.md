@@ -99,8 +99,8 @@ can be independently tested.
 **Independent test criteria:** `bun run ci:local` exits 0 on a clean repository state; TypeScript compilation of `scripts/run-local-ci.ts` succeeds with `bun run type-check`.
 
 - [ ] T006 [P] [US-01] Audit all 5 GitHub workflow files for `act` compatibility — for each of `.github/workflows/ci.yml`, `.github/workflows/architecture-governance.yml`, `.github/workflows/ci-type-safety.yml`, `.github/workflows/hard-mode-guard.yml`, `.github/workflows/ai-context-validation.yml`: verify no YAML structural changes are needed, document per-workflow compatibility status (FULL/PARTIAL), and record known limitations (cache, artifacts, schedule trigger, branch context); all findings feed directly into T013 §Differences from GitHub CI — no workflow YAML files modified
-- [ ] T007 [US-01] Create `scripts/run-local-ci.ts` — the 7-step governance orchestrator; must include: (0) Docker fail-fast check via `docker info`, then steps (1–7) in order: `validate-runtime-scripts`, `validate:scripts-infra`, `generate-script-docs`, `arch:guard`, `type-safety-guard`, `lint`, `ci:local`; all 7 steps run regardless of individual failure; print `[STEP N/7] <name> ... PASS/FAIL` per step; suppress output for passing steps, forward full stdout/stderr for failed steps; print final summary table after all steps; exit 0 if all pass, exit 1 with first-failure identification if any fail; JSDoc metadata header MUST include `@script ci:run-local`, `@domain ci`, `@description`, `@mode manual,pre-closure`, `@dependencies node:child_process, node:process`
-- [ ] T008 [P] [US-01] Verify TypeScript compilation of `scripts/run-local-ci.ts` by running `bun run type-check` — confirms the orchestrator has no type errors; **this task is a test gate** — T007 must complete before T008 can run; no file changes, terminal verification only
+- [ ] T007 [US-01] Create `scripts/run-local-ci.ts` — the 7-step governance orchestrator; must include: (0) Docker fail-fast check via `docker info`, then steps (1–7) in order: `validate-runtime-scripts`, `validate:scripts-infra`, `generate-script-docs`, `arch:guard`, `type-safety-guard`, `lint`, `ci:local`; all 7 steps run regardless of individual failure; print `[STEP N/7] <name> ... PASS/FAIL` per step; suppress output for passing steps, forward full stdout/stderr for failed steps; print final summary table after all steps; exit 0 if all pass, exit 1 with first-failure identification if any fail; JSDoc metadata header MUST include `@script ci:run-local`, `@domain ci`, `@description`, `@mode manual,pre-closure`, `@dependencies node:child_process, node:process`; ALSO add `"ci:run-local": "bun scripts/run-local-ci.ts"` to the root `package.json` `"scripts"` block (additive-only, done after creating the file so validate-runtime-scripts passes)
+- [ ] T008 [US-01] Verify TypeScript compilation of `scripts/run-local-ci.ts` by running `bun run type-check` and then `bun run validate-runtime-scripts` — confirms (a) the orchestrator has no type errors and (b) the new `ci:run-local` key in `package.json` correctly resolves to the created script file; **this task is a sequential gate** — T007 must complete before T008 can run; no file changes, terminal verification only
 
 ---
 
@@ -163,8 +163,10 @@ can be independently tested.
 > Manual acceptance verification tasks that confirm all user stories are satisfied end-to-end.
 > These tasks produce no file changes — they validate the deliverables created in Phases 1–7.
 
-- [ ] T015 Verify all 5 GitHub workflows execute locally — run verification sequence: (1) `bun run ci:local:list` → confirm all 5 workflows appear; (2) `bun run ci:local` → confirm all non-E2E workflow jobs pass or expected failures are documented; (3) `bun run ci:local:full` → confirm with fresh images; (4) `bun run ci:local:workflow ci.yml` → confirm single-workflow execution; (5) `bun run ci:local:workflow architecture-governance.yml` → confirm targeted run; confirms AC-04, AC-05, AC-08 — manual execution task, no file changes
-- [ ] T016 Run failure simulation test — (1) introduce a deliberate lint error in a scratch test file (e.g., unused variable declaration); (2) run `bun run ci:local`; (3) confirm exit code is non-zero; (4) confirm failure output identifies the failing workflow job; (5) run `bun scripts/run-local-ci.ts` and confirm summary table shows FAIL for the affected step; (6) revert the deliberate error; (7) confirm `bun run ci:local` exits 0 again — confirms AC-11; manual execution task, all deliberate changes must be reverted before this task is marked complete
+- [ ] T015 Verify all 5 GitHub workflows execute locally — run verification sequence: (1) confirm `.act.secrets` exists locally before running (developer must create from docs/ci/local-ci.md §Configuration — verify with `[[ -f .act.secrets ]]`); (2) `git log --diff-filter=A -- .act.secrets` must return empty (AC-12 git-history check); (3) `bun run ci:local:list` → confirm all 5 workflows appear; (4) `bun run ci:local` → confirm all non-E2E workflow jobs pass or expected failures are documented; (5) `bun run ci:local:full` → confirm with fresh images; (6) `bun run ci:local:workflow ci.yml` → confirm single-workflow execution; (7) `bun run ci:local:workflow architecture-governance.yml` → confirm targeted run; confirms AC-04, AC-05, AC-08, AC-12 — manual execution task, no file changes
+- [ ] T016 Run failure simulation test — two sub-cases; **all deliberate changes must be reverted before this task is marked complete (confirm via `git diff` showing clean state)**:
+  - **Sub-case A — Lint failure (Step 6):** (1) Introduce a deliberate lint error in a scratch test file (e.g., unused variable declaration); (2) run `bun run ci:local`; (3) confirm exit code is non-zero; (4) run `bun scripts/run-local-ci.ts` and confirm summary table shows FAIL for the affected step; (5) revert the deliberate error via `git checkout`; (6) confirm `git diff` is clean; (7) confirm `bun run ci:local` exits 0 again
+  - **Sub-case B — `act`-specific failure (Step 7, AC-11):** (1) Add a temporary `exit 1` step to a non-critical position inside `.github/workflows/ci.yml` (e.g., after a passing step, guarded by a comment); (2) run `bun run ci:local:workflow ci.yml`; (3) confirm exit code is non-zero from `act`; (4) run `bun scripts/run-local-ci.ts` and confirm summary table shows FAIL specifically for Step 7 (`ci:local`); (5) revert the temporary `exit 1` via `git checkout`; (6) confirm `git diff` is clean; (7) confirm `bun run ci:local:workflow ci.yml` exits 0 again — this is the only path that directly validates AC-11 (closure blocked when any `act` workflow job fails)
 
 ---
 
@@ -271,20 +273,20 @@ mkdir -p docs/ci
 
 ## Acceptance Criteria Mapping
 
-| AC ID | Criterion                                                                    | Verified By      |
-| ----- | ---------------------------------------------------------------------------- | ---------------- |
-| AC-01 | `.actrc` exists at repository root with correct runner mapping               | T002             |
-| AC-02 | `.act.secrets` exists and is listed in `.gitignore`                          | T004             |
-| AC-03 | Four `ci:local*` script keys exist in root `package.json`                    | T003             |
-| AC-04 | `bun run ci:local` exits zero on a clean repository state                    | T015             |
-| AC-05 | `bun run ci:local:full` exits zero on a clean repository state               | T015             |
-| AC-06 | `scripts/run-local-ci.ts` exists with JSDoc metadata header                  | T007             |
-| AC-07 | Orchestrator closure gate includes `act` as mandatory, non-bypassable step   | T012             |
-| AC-08 | All `.github/workflows/` files can run locally or have documented exclusions | T006, T015       |
-| AC-09 | `docs/ci/local-ci.md` exists with all required sections                      | T013, T014       |
-| AC-10 | `AGENTS.md` includes the pre-closure `ci:local` enforcement rule             | T012             |
-| AC-11 | Closure is blocked when any `act` workflow job fails                         | T016             |
-| AC-12 | `.act.secrets` is not present in any git commit history                      | T004 (gitignore) |
+| AC ID | Criterion                                                                    | Verified By                                   |
+| ----- | ---------------------------------------------------------------------------- | --------------------------------------------- |
+| AC-01 | `.actrc` exists at repository root with correct runner mapping               | T002                                          |
+| AC-02 | `.act.secrets` exists and is listed in `.gitignore`                          | T004                                          |
+| AC-03 | Four `ci:local*` script keys exist in root `package.json`                    | T003                                          |
+| AC-04 | `bun run ci:local` exits zero on a clean repository state                    | T015                                          |
+| AC-05 | `bun run ci:local:full` exits zero on a clean repository state               | T015                                          |
+| AC-06 | `scripts/run-local-ci.ts` exists with JSDoc metadata header                  | T007                                          |
+| AC-07 | Orchestrator closure gate includes `act` as mandatory, non-bypassable step   | T012                                          |
+| AC-08 | All `.github/workflows/` files can run locally or have documented exclusions | T006, T015                                    |
+| AC-09 | `docs/ci/local-ci.md` exists with all required sections                      | T013, T014                                    |
+| AC-10 | `AGENTS.md` includes the pre-closure `ci:local` enforcement rule             | T012                                          |
+| AC-11 | Closure is blocked when any `act` workflow job fails                         | T016                                          |
+| AC-12 | `.act.secrets` is not present in any git commit history                      | T004 (gitignore), T015 (git log verification) |
 
 ---
 
@@ -292,7 +294,7 @@ mkdir -p docs/ci
 
 - **`.actrc` must not be overwritten** — T002 is verify-only; any task that writes to `.actrc` violates plan AD-06
 - **`.secrets` remains the primary file** — T004 only adds `.act.secrets` to `.gitignore`; the `--secret-file .secrets` reference in `.actrc` must not change
-- **5 script keys only** — T003 adds exactly: `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:list`, `validate:scripts-infra`; no `ci:check` or additional keys unless the plan explicitly calls for them
+- **6 script keys total** — T003 adds 5: `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:list`, `validate:scripts-infra`; T007 adds 1 additional: `ci:run-local` (registered after `scripts/run-local-ci.ts` is created so `validate-runtime-scripts` passes); `ci:local` maps to `act --pull=false` (not to `run-local-ci.ts` — these are separate commands)
 - **Root AGENTS.md only** — T012 updates `AGENTS.md` at repo root only; `apps/*/AGENTS.md` files are not touched (spec FR-12)
 - **scripts/ domain** — `run-local-ci.ts` lives under `scripts/`; no changes required to `ARCHITECTURE_MAP.json` (plan AD-01)
 - **No business logic** — this stage introduces zero database connections, zero API routes, zero domain logic

@@ -198,8 +198,11 @@ modifications. No version bump is required.
 
 ### FR-02 – Runner Image Mapping
 
-- An `.actrc` file must exist at the repository root
-- It must map `ubuntu-latest` to `ghcr.io/catthehacker/ubuntu:act-latest`
+- An `.actrc` file must exist at the repository root (confirmed existing — authoritative, do not overwrite)
+- It must map `ubuntu-latest`, `ubuntu-22.04`, and `ubuntu-20.04` to appropriate `catthehacker/ubuntu` images
+  - The existing authoritative mapping uses `catthehacker/ubuntu:act-22.04` (Docker Hub, pinned) for `ubuntu-latest` and `ubuntu-22.04`, and `catthehacker/ubuntu:act-20.04` for `ubuntu-20.04`
+  - This satisfies the requirement for a consistent, Apple Silicon-compatible runner mapping
+  - **Clarification (Step 2):** The literal `ghcr.io/catthehacker/ubuntu:act-latest` reference in the original requirement is superseded by the confirmed existing `.actrc` configuration — the existing Docker Hub pinned mapping (`catthehacker/ubuntu:act-22.04`) provides equivalent stable behavior and must be preserved
 - This mapping must be consistent across all developer machines and CI environments
 
 ### FR-03 – Script Commands
@@ -217,7 +220,7 @@ All keys follow the `domain:action` naming convention required by Zidney script 
 
 ### FR-04 – Secrets Strategy
 
-- An `.act.secrets` file must exist at the repository root for local simulation
+- An `.act.secrets` file must exist on each developer's local machine at the repository root for local simulation (developer-created, not committed — see `docs/ci/local-ci.md §Configuration`)
 - It must provide test-safe values for: `DATABASE_URL`, `REDIS_URL`, `NODE_ENV`
 - `.act.secrets` must be listed in `.gitignore` as an **explicit entry** (`.act.secrets`) — the
   existing `.secrets` rule in `.gitignore` does not cover this filename and cannot be relied upon
@@ -233,17 +236,18 @@ All keys follow the `domain:action` naming convention required by Zidney script 
 ### FR-06 – Local CI Orchestrator Script
 
 - A script `scripts/run-local-ci.ts` must exist
-- It must execute the following governance checks in order:
+- It must execute a **7-step governance sequence** in order (Step 0 is a Docker fail-fast check, Steps 1–7 are the governance checks):
+  - Step 0: Docker availability check via `docker info` (fail-fast — abort if Docker not running)
   1. `validate-runtime-scripts`
-  2. `validate-script-infrastructure`
+  2. `validate-script-infrastructure` (via `validate:scripts-infra`)
   3. `generate-script-docs`
   4. `architecture-guard`
   5. `type-safety-guard`
   6. `bun run lint` — full-repository Biome lint, all packages and apps in scope (no path restriction)
-- It must then execute `bun run ci:local`
+  7. `bun run ci:local` — local `act` CI execution (the final step that satisfies AC-11)
+- All 7 steps run even if earlier steps fail (fail-forward, not fail-fast — Step 0 is the only early-exit)
 - It must aggregate results and exit non-zero if any step fails
-- The script must include a JSDoc metadata header (`@script`, `@domain`, `@description`, `@mode`,
-  `@dependencies`)
+- The script must include a JSDoc metadata header (`@script ci:run-local`, `@domain ci`, `@description`, `@mode manual,pre-closure`, `@dependencies node:child_process, node:process`)
 
 ### FR-07 – Orchestrator Closure Gate
 
@@ -294,20 +298,20 @@ All keys follow the `domain:action` naming convention required by Zidney script 
 
 ## Acceptance Criteria (Stage-Level)
 
-| ID    | Criterion                                                                    | Verification Method             |
-| ----- | ---------------------------------------------------------------------------- | ------------------------------- |
-| AC-01 | `.actrc` exists at repository root with correct runner mapping               | File presence check             |
-| AC-02 | `.act.secrets` exists and is listed in `.gitignore`                          | File check + gitignore audit    |
-| AC-03 | Four `ci:local*` script keys exist in root `package.json`                    | JSON key check                  |
-| AC-04 | `bun run ci:local` exits zero on a clean repository state                    | Command execution               |
-| AC-05 | `bun run ci:local:full` exits zero on a clean repository state               | Command execution               |
-| AC-06 | `scripts/run-local-ci.ts` exists with JSDoc metadata header                  | File presence + header check    |
-| AC-07 | Orchestrator closure gate includes `act` as mandatory, non-bypassable step   | Orchestrator config review      |
-| AC-08 | All `.github/workflows/` files can run locally or have documented exclusions | Compatibility audit report      |
-| AC-09 | `docs/ci/local-ci.md` exists with all required sections                      | Section presence check          |
-| AC-10 | `AGENTS.md` includes the pre-closure `ci:local` enforcement rule             | Rule presence check             |
-| AC-11 | Closure is blocked when any `act` workflow job fails                         | Failure simulation test         |
-| AC-12 | `.act.secrets` is not present in any git commit history                      | `git log --diff-filter=A` check |
+| ID    | Criterion                                                                                                                                                            | Verification Method                   |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| AC-01 | `.actrc` exists at repository root with correct runner mapping                                                                                                       | File presence check                   |
+| AC-02 | `.act.secrets` is listed in `.gitignore`; developers create this file locally per `docs/ci/local-ci.md §Configuration` (not committed — verified at T015 acceptance) | Gitignore audit + developer doc check |
+| AC-03 | Four `ci:local*` script keys exist in root `package.json`                                                                                                            | JSON key check                        |
+| AC-04 | `bun run ci:local` exits zero on a clean repository state                                                                                                            | Command execution                     |
+| AC-05 | `bun run ci:local:full` exits zero on a clean repository state                                                                                                       | Command execution                     |
+| AC-06 | `scripts/run-local-ci.ts` exists with JSDoc metadata header                                                                                                          | File presence + header check          |
+| AC-07 | Orchestrator closure gate includes `act` as mandatory, non-bypassable step                                                                                           | Orchestrator config review            |
+| AC-08 | All `.github/workflows/` files can run locally or have documented exclusions                                                                                         | Compatibility audit report            |
+| AC-09 | `docs/ci/local-ci.md` exists with all required sections                                                                                                              | Section presence check                |
+| AC-10 | `AGENTS.md` includes the pre-closure `ci:local` enforcement rule                                                                                                     | Rule presence check                   |
+| AC-11 | Closure is blocked when any `act` workflow job fails                                                                                                                 | Failure simulation test               |
+| AC-12 | `.act.secrets` is not present in any git commit history                                                                                                              | `git log --diff-filter=A` check       |
 
 ---
 
@@ -352,7 +356,7 @@ All keys follow the `domain:action` naming convention required by Zidney script 
   implementation
 - Current workflows do not rely on GitHub-hosted secrets that cannot be mocked locally
 - `.gitignore` already exists and can be updated to exclude `.act.secrets`
-- Developers have network access to pull `ghcr.io/catthehacker/ubuntu:act-latest` at least once
+- Developers have network access to pull `catthehacker/ubuntu:act-22.04` (Docker Hub) at least once
   for the initial setup
 
 ---

@@ -29,15 +29,15 @@ closure when local CI fails.
 
 ### 1.1 Deliverables
 
-| File                      | Type          | Action                                  |
-| ------------------------- | ------------- | --------------------------------------- |
-| `.actrc`                  | Config        | Verify (already exists — comprehensive) |
-| `.act.secrets`            | Local secrets | Gitignore entry only (not committed)    |
-| `.gitignore`              | Config        | Modify (add entry)                      |
-| `package.json`            | Config        | Modify (add 5 script entries)           |
-| `scripts/run-local-ci.ts` | Orchestrator  | Create                                  |
-| `docs/ci/local-ci.md`     | Documentation | Create (new dir)                        |
-| `AGENTS.md` (root)        | Governance    | Modify (add pre-closure rule)           |
+| File                      | Type          | Action                                                              |
+| ------------------------- | ------------- | ------------------------------------------------------------------- |
+| `.actrc`                  | Config        | Verify (already exists — comprehensive)                             |
+| `.act.secrets`            | Local secrets | Gitignore entry only (not committed)                                |
+| `.gitignore`              | Config        | Modify (add entry)                                                  |
+| `package.json`            | Config        | Modify (add 6 script entries: 5 via T003 + `ci:run-local` via T007) |
+| `scripts/run-local-ci.ts` | Orchestrator  | Create                                                              |
+| `docs/ci/local-ci.md`     | Documentation | Create (new dir)                                                    |
+| `AGENTS.md` (root)        | Governance    | Modify (add pre-closure rule)                                       |
 
 Per-app `AGENTS.md` files (`apps/*/AGENTS.md`) are **not modified** by this stage (FR-12).
 
@@ -99,11 +99,13 @@ must not be changed.
 gitignored. T004 scope: add `.act.secrets` to `.gitignore` only. Do **not** modify `.actrc`'s
 `--secret-file` reference — it must continue to point to `.secrets`.
 
-### AD-07 — `run-local-ci.ts` Is Self-Validating
+### AD-07 — `run-local-ci.ts` Package.json Registration
 
-The orchestrator script itself is validated by `validate-runtime-scripts` (it will appear in
-`package.json` after T003 adds `ci:local`). Running `bun run validate-runtime-scripts` confirms
-the script file exists and parses. This satisfies the "scripts are self-validating" requirement.
+The orchestrator script `scripts/run-local-ci.ts` must be registered in `package.json` as
+`"ci:run-local": "bun scripts/run-local-ci.ts"`. T003 adds this key alongside the 5 `ci:local*`
+scripts. Running `bun run validate-runtime-scripts` then confirms the key exists and the script
+file parses. **Correction:** `ci:local` maps to `act --pull=false`, NOT to `run-local-ci.ts` —
+these are separate commands. `ci:run-local` is the key that invokes the orchestrator script.
 
 ---
 
@@ -125,8 +127,10 @@ Before implementation begins, the following must be confirmed:
 
 ## 4. Implementation Tasks
 
-Tasks map 1:1 to the stage file task list. Each task includes scope, file targets, and an
-implementation note.
+Tasks in this plan provide design-level context and scope. The authoritative implementation task
+list is **`tasks.md`** (16 tasks, T001–T016). Task IDs in this plan do not align 1:1 with
+`tasks.md` — `tasks.md` is more granular (3 additional verification gate tasks: T005, T008, T009).
+When implementing, always reference `tasks.md` as the controlling task document.
 
 ---
 
@@ -214,13 +218,15 @@ Add the following entries to the `"scripts"` block:
 
 ---
 
-### T004 – Create `.act.secrets`
+### T004 – Add `.act.secrets` to `.gitignore`
 
-**Type:** Local configuration (not committed)  
-**File:** `.act.secrets` (repo root)  
-**Risk:** Low — must never be committed
+**Type:** `.gitignore` modification only (gitignore entry — no file creation, no `.actrc` changes)  
+**File:** `.gitignore` (repo root)  
+**Risk:** Low — `.act.secrets` must never be committed
 
-**Content (test-safe values only):**
+**Action:** Add `.act.secrets` to `.gitignore` under the existing `# act` section.
+
+**Content documented for developer self-service (`.act.secrets` — local only, not committed):**
 
 ```
 DATABASE_URL=postgres://zidney_test:zidney_test@localhost:5432/zidney_master_test
@@ -233,21 +239,16 @@ NODE_ENV=test
 **Rules:**
 
 - Real production secrets must never appear in this file
-- File is created by the developer locally — it is not committed or tracked
-- Acts as the default secrets source for `act` invocations via `--secret-file .act.secrets`
+- `.act.secrets` is created by the developer locally — it is not committed or tracked
+- `.actrc` already references `.secrets` via `--secret-file .secrets` — do **NOT** modify `.actrc` (see AD-06)
+- `.act.secrets` is an optional secondary local secrets file documented for developer convenience in `docs/ci/local-ci.md`
 
-**Note on `ci:local` command and secrets file:** The `.actrc` can be extended with
-`--secret-file=.act.secrets` as an additional line so that all `act` invocations automatically
-load secrets. This is the recommended approach over requiring `--secret-file` on every call.
+> **AD-06 Note:** Per AD-06, `.actrc`'s `--secret-file .secrets` reference must not be changed.
+> The existing `.actrc` is comprehensive and authoritative. **No `.actrc` modifications are
+> performed in this task.** The "Updated `.actrc` content" block has been intentionally removed
+> to prevent accidental overwrite of the authoritative 8-line configuration.
 
-**Updated `.actrc` content (after this task):**
-
-```
--P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
---secret-file=.act.secrets
-```
-
-**Acceptance:** AC-02 — `.act.secrets` exists and is listed in `.gitignore`.
+**Acceptance:** AC-02 — `.act.secrets` is listed in `.gitignore` (developer creates the file locally per `docs/ci/local-ci.md §Configuration`).
 
 ---
 
@@ -807,7 +808,7 @@ This reduces noise for common case (all pass) while preserving full diagnosis fo
 
 ```typescript
 /**
- * @script ci:check
+ * @script ci:run-local
  * @domain ci
  * @description Full local CI governance orchestrator. Checks Docker availability, runs all
  *              governance validation steps (runtime-scripts, scripts-infra, docs generation,
@@ -908,20 +909,20 @@ runs.
 
 Mapped directly to `spec.md` Acceptance Criteria:
 
-| AC    | Criterion                                                                    | Verified By                                                                 |
-| ----- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| AC-01 | `.actrc` exists at repository root with correct runner mapping               | `test -f .actrc && grep "catthehacker" .actrc`                              |
-| AC-02 | `.act.secrets` exists and is listed in `.gitignore`                          | `git check-ignore -v .act.secrets`                                          |
-| AC-03 | Four `ci:local*` script keys exist in root `package.json`                    | `jq '.scripts \| keys \| map(select(startswith("ci:local")))' package.json` |
-| AC-04 | `bun run ci:local` exits zero on clean repository state                      | Command execution + exit code check                                         |
-| AC-05 | `bun run ci:local:full` exits zero on clean repository state                 | Command execution + exit code check                                         |
-| AC-06 | `scripts/run-local-ci.ts` exists with JSDoc metadata header                  | `head -10 scripts/run-local-ci.ts \| grep @script`                          |
-| AC-07 | Orchestrator closure gate includes `act` as mandatory, non-bypassable step   | AGENTS.md rule presence check                                               |
-| AC-08 | All `.github/workflows/` files can run locally or have documented exclusions | Workflow compatibility audit (T005) — all 5 runnable                        |
-| AC-09 | `docs/ci/local-ci.md` exists with all required sections                      | Section headers presence check                                              |
-| AC-10 | `AGENTS.md` includes the pre-closure `ci:local` enforcement rule             | `grep "ci:local" AGENTS.md`                                                 |
-| AC-11 | Closure is blocked when any `act` workflow job fails                         | Failure simulation test (T011)                                              |
-| AC-12 | `.act.secrets` is not present in any git commit history                      | `git log --diff-filter=A -- .act.secrets`                                   |
+| AC    | Criterion                                                                                                | Verified By                                                                 |
+| ----- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| AC-01 | `.actrc` exists at repository root with correct runner mapping                                           | `test -f .actrc && grep "catthehacker" .actrc`                              |
+| AC-02 | `.act.secrets` is listed in `.gitignore` (gitignore entry only — file is developer-local, not committed) | `git check-ignore -v .act.secrets`                                          |
+| AC-03 | Four `ci:local*` script keys exist in root `package.json`                                                | `jq '.scripts \| keys \| map(select(startswith("ci:local")))' package.json` |
+| AC-04 | `bun run ci:local` exits zero on clean repository state                                                  | Command execution + exit code check                                         |
+| AC-05 | `bun run ci:local:full` exits zero on clean repository state                                             | Command execution + exit code check                                         |
+| AC-06 | `scripts/run-local-ci.ts` exists with JSDoc metadata header                                              | `head -10 scripts/run-local-ci.ts \| grep @script`                          |
+| AC-07 | Orchestrator closure gate includes `act` as mandatory, non-bypassable step                               | AGENTS.md rule presence check                                               |
+| AC-08 | All `.github/workflows/` files can run locally or have documented exclusions                             | Workflow compatibility audit (T005) — all 5 runnable                        |
+| AC-09 | `docs/ci/local-ci.md` exists with all required sections                                                  | Section headers presence check                                              |
+| AC-10 | `AGENTS.md` includes the pre-closure `ci:local` enforcement rule                                         | `grep "ci:local" AGENTS.md`                                                 |
+| AC-11 | Closure is blocked when any `act` workflow job fails                                                     | Failure simulation test (T011)                                              |
+| AC-12 | `.act.secrets` is not present in any git commit history                                                  | `git log --diff-filter=A -- .act.secrets`                                   |
 
 ---
 
@@ -936,10 +937,10 @@ T002 → T003 → T004 → T007 (gitignore) → T005 (audit documented) → T006
 
 Simplified linear sequence:
 
-1. **T002** — Create `.actrc`
+1. **T002** — Verify `.actrc` (VERIFY/NO-OP — existing config is authoritative, do not overwrite)
 2. **T003** — Add `package.json` script entries (ci:local\*, validate:scripts-infra)
-3. **T004** — Create `.act.secrets` (local only)
-4. **Gitignore** — Add `.act.secrets` to `.gitignore`
+3. **T004** — Add `.act.secrets` to `.gitignore` (gitignore-only — no `.actrc` changes per AD-06)
+4. **Developer note** — `.act.secrets` content is documented in `docs/ci/local-ci.md §Configuration` for local self-service creation
 5. **T006** — Write `scripts/run-local-ci.ts`
 6. **T012** — Write `docs/ci/local-ci.md`
 7. **T013** — Update root `AGENTS.md`
@@ -947,6 +948,11 @@ Simplified linear sequence:
 9. **T011** — Run failure simulation test
 10. **T001/T008/T009** — Remaining documentation tasks (covered by T012/T013)
 11. **T007** — Confirm orchestrator gate documentation complete
+
+> **Verification Gates (tasks.md only):** `tasks.md` adds 3 quality-gate micro-tasks not present
+> in this plan: T005 (`validate:scripts-infra` gate after T003), T008 (TypeScript type-check of
+> `run-local-ci.ts` after T007), T009 (verify `ci:local:list` and `ci:local:workflow ci.yml` after
+> T006). These gates improve correctness and are part of the authoritative implementation sequence.
 
 ---
 
