@@ -971,3 +971,108 @@ The following items are explicitly excluded from this stage:
 | Concurrency safety        | max_users check uses SELECT FOR UPDATE (or equivalent) to prevent race conditions                                                     |
 | No console.log            | All output through packages/logger                                                                                                    |
 | No secrets in code        | All environment-scoped configuration only                                                                                             |
+
+---
+
+## Clarifications
+
+### Session 2026-03-17
+
+**Q1: What algorithm must be used for cycle detection — a recursive SQL CTE or an application-layer ancestor walk?**
+
+The spec mandates cycle detection at the API layer but leaves the implementation strategy open. An
+implementer needs a definitive approach because a recursive CTE executed inside the write transaction
+and an application-layer loop have different locking and correctness semantics in deep hierarchies.
+
+Resolution: Cycle detection MUST use a recursive SQL CTE executed inside the same database
+transaction as the update, before the row is written. The canonical form is:
+
+```sql
+WITH RECURSIVE ancestors AS (
+  SELECT id, parent_id FROM departments WHERE id = $proposed_parent_id
+  UNION ALL
+  SELECT d.id, d.parent_id FROM departments d
+  JOIN ancestors a ON d.id = a.parent_id
+)
+SELECT id FROM ancestors WHERE id = $current_department_id
+```
+
+If any row is returned, the update MUST be rejected with `DEPARTMENT_CIRCULAR_REFERENCE`. This
+approach is preferred over an application-layer loop because it executes atomically within the
+transaction, prevents TOCTOU races on concurrent hierarchy changes, and handles arbitrary-depth trees
+in a single round-trip. Application-layer traversal is NOT acceptable.
+
+---
+
+**Q2: What should happen when an admin reduces `max_users` to a value below the current number of assigned students?**
+
+FR-011 and FR-012 specify max_users enforcement for new assignments only. No rule covers the inverse
+operation — reducing the limit after the cap has already been exceeded by existing assignments (e.g.,
+dept has 40 students, admin sets max_users = 20). An implementer cannot determine whether to reject
+the update, allow it silently, or issue a warning.
+
+Resolution: Reducing `max_users` below the current assigned student count is silently allowed. The
+`max_users` field is a forward-only cap on new assignments; it does not retroactively invalidate
+existing ones. After the update, existing student records remain unchanged. New assignments will be
+blocked until the enrolled count drops below the new limit. No error code or warning is returned by
+the update operation. Implementers MUST NOT add a validation check comparing the new `max_users`
+value against the current student count during a department update.
+
+---
+
+**Q3: When reparenting a department that has children with explicit `division_id` values, must division consistency be re-validated recursively across the entire subtree, or only for the direct parent-child relationship?**
+
+FR-004 constrains the moved node against its new parent but is silent about the moved node's
+descendants. If department A (division X) has children B and C (also division X) and is reparented
+under a new parent with division Y, the spec validates A vs. new parent, but it is ambiguous whether
+B and C must also be re-validated against A's new ancestor chain.
+
+Resolution: Division consistency during reparenting validates the **moved node only** against its
+new immediate parent per FR-004. Child departments of the moved node are NOT re-validated
+recursively. The division_id invariant is upheld at creation and update time of each individual
+node; cascading re-validation across the subtree is not required and would be O(subtree size).
+Existing children's division_id values were legal when those children were created and remain legal
+under reparenting because the parent-child division constraint is evaluated bottom-up only (child
+must be compatible with its parent, not the other way around). Implementers MUST NOT add subtree
+re-validation on reparent.
+
+---
+
+**Q4: For concurrent `max_users` enforcement, which row must the `SELECT FOR UPDATE` lock target — the `departments` row or rows in the `students` table?**
+
+The spec specifies "SELECT FOR UPDATE or equivalent row lock" but does not identify the locked row.
+Locking a count result has no direct equivalent; the implementer must decide whether to lock the
+`departments` row (serializing all concurrent assignments to the same department) or to issue a
+locking count query against `students`.
+
+Resolution: The `SELECT FOR UPDATE` lock MUST be placed on the **`departments` row itself**. The
+implementer MUST issue:
+
+```sql
+SELECT id, max_users FROM departments WHERE id = $department_id FOR UPDATE
+```
+
+as the first statement inside the assignment transaction, before counting assigned students. This
+serializes all concurrent assignment requests for the same department through a single row lock.
+After acquiring the lock, a plain (non-locking) `SELECT COUNT(*)` against `students` is executed to
+check the current occupancy. If count ≥ max_users, the transaction is rolled back and
+`DEPARTMENT_MAX_USERS_EXCEEDED` is returned. Locking individual student rows is NOT the intended
+approach and would not prevent the race condition correctly.
+
+---
+
+**Q5: When `parent_id` is included in a PUT request body with an explicit `null` value, does it mean "reparent to root" (set parent_id = NULL) or is it treated as field absence (no change)?**
+
+The PUT endpoint is documented as "all fields optional; only provided fields updated." JSON `null`
+and field absence are distinct in JSON payloads, but the spec does not state whether `null` triggers
+the reparent-to-root operation or is treated the same as omitting the field. This directly affects
+whether cycle detection and division consistency checks must run.
+
+Resolution: An explicit `null` value for `parent_id` in the PUT body MUST be interpreted as
+"reparent to root" — i.e., `parent_id` is set to `NULL` in the database. Omitting the `parent_id`
+key entirely means "no change to parent_id." The API handler MUST distinguish these two cases by
+inspecting whether the key is present in the parsed request body, not by checking whether its value
+is null. When `parent_id` is explicitly set to null: (a) no cycle detection is needed (a null parent
+has no ancestors and cannot create a cycle), (b) division consistency MUST still be re-validated
+because moving a department to root level removes it from a parent-scoped division context, and
+(c) name uniqueness within the null-parent scope MUST be re-evaluated.

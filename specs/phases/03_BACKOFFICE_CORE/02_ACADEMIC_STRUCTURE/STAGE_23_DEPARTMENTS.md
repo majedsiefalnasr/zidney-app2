@@ -10,9 +10,9 @@ Status: Organizational-Academic Structure Layer
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-17T00:00:00Z
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-03-17T00:02:00Z
 
 Scope Defined:
 
@@ -20,9 +20,10 @@ Scope Defined:
 - staff_departments join table
 - unlimited-depth self-referencing hierarchy
 - division association (nullable FK)
-- max_users transactional enforcement
-- cycle detection at API layer
+- max_users transactional enforcement (SELECT FOR UPDATE on departments row)
+- cycle detection via recursive SQL CTE within transaction
 - 10 API endpoints
+- parent_id null vs. absent semantics resolved
 
 Deferred Scope:
 
@@ -33,10 +34,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
