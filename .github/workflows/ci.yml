@@ -60,6 +60,12 @@ jobs:
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
+      - name: Install redis CLI (redis-tools)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y redis-tools
+        shell: bash
+
       - name: Run Biome lint + format check
         run: bun run lint
 
