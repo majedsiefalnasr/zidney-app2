@@ -136,7 +136,9 @@ modifications. No version bump is required.
 
 **Acceptance Criteria:**
 
-- `bun run ci:local:workflow` targets `.github/workflows` for focused execution
+- `bun run ci:local:workflow` accepts an optional workflow filename argument and runs that single
+  workflow via `act -W .github/workflows/<filename>`; when no argument is provided it defaults to
+  running all workflows in `.github/workflows/`
 - `bun run ci:local:list` lists all available workflows without executing them
 - Both commands complete without error on a correctly configured machine
 
@@ -204,12 +206,12 @@ modifications. No version bump is required.
 
 The root `package.json` must expose four script commands:
 
-| Script Key          | Behavior                                                      |
-| ------------------- | ------------------------------------------------------------- |
-| `ci:local`          | Runs `act --pull=false` — fast, default profile               |
-| `ci:local:full`     | Runs `act` — full profile, pulls latest images                |
-| `ci:local:workflow` | Runs `act -W .github/workflows` — targeted workflow execution |
-| `ci:local:list`     | Runs `act -l` — lists available workflows without executing   |
+| Script Key          | Behavior                                                                                                                                                                                                                |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci:local`          | Runs `act --pull=false` — fast, default profile                                                                                                                                                                         |
+| `ci:local:full`     | Runs `act` — full profile, pulls latest images                                                                                                                                                                          |
+| `ci:local:workflow` | Runs `act -W .github/workflows/<file>` when a workflow filename is passed; defaults to `act -W .github/workflows/` (all workflows) when no argument is given — supports single-workflow isolation for focused debugging |
+| `ci:local:list`     | Runs `act -l` — lists available workflows without executing                                                                                                                                                             |
 
 All keys follow the `domain:action` naming convention required by Zidney script governance.
 
@@ -217,7 +219,8 @@ All keys follow the `domain:action` naming convention required by Zidney script 
 
 - An `.act.secrets` file must exist at the repository root for local simulation
 - It must provide test-safe values for: `DATABASE_URL`, `REDIS_URL`, `NODE_ENV`
-- `.act.secrets` must be listed in `.gitignore` and never committed to version control
+- `.act.secrets` must be listed in `.gitignore` as an **explicit entry** (`.act.secrets`) — the
+  existing `.secrets` rule in `.gitignore` does not cover this filename and cannot be relied upon
 - Real production secrets must never appear in `.act.secrets`
 
 ### FR-05 – Workflow Compatibility Audit
@@ -236,6 +239,7 @@ All keys follow the `domain:action` naming convention required by Zidney script 
   3. `generate-script-docs`
   4. `architecture-guard`
   5. `type-safety-guard`
+  6. `bun run lint` — full-repository Biome lint, all packages and apps in scope (no path restriction)
 - It must then execute `bun run ci:local`
 - It must aggregate results and exit non-zero if any step fails
 - The script must include a JSDoc metadata header (`@script`, `@domain`, `@description`, `@mode`,
@@ -278,10 +282,13 @@ All keys follow the `domain:action` naming convention required by Zidney script 
 
 ### FR-12 – AGENTS.md Rule
 
-- `AGENTS.md` must include a rule in the pre-closure enforcement section stating:
+- The **root** `AGENTS.md` (at the repository root) must include a rule in the pre-closure
+  enforcement section stating:
   - Before closure, `bun run ci:local` must be run
   - All workflows must pass
   - This step must not be bypassed
+- Per-app `AGENTS.md` files (under `apps/*/`) are **not** required to be updated; the rule is a
+  repository-level governance concern, not an app-specific one
 
 ---
 
@@ -369,8 +376,11 @@ All keys follow the `domain:action` naming convention required by Zidney script 
 This stage introduces no new runtime observability requirements. The `scripts/run-local-ci.ts`
 script must:
 
-- Print structured status output for each governance check and workflow job
-- Exit with a non-zero code and a clear error message when any step fails
+- Print a per-step status line for each governance check (step name + PASS/FAIL) and for each
+  workflow job executed by `act` (workflow name + job name + PASS/FAIL)
+- Print a final summary table listing all steps/jobs with their outcomes after all execution completes
+- Forward full `act` output only for **failed** jobs (suppressed for passing jobs to reduce noise)
+- Exit with a non-zero code and a clear error message identifying the first or most critical failure
 - Produce output that is readable in both interactive terminal and CI log contexts
 
 No `correlation_id`, `workspace_slug`, or `attempt_id` fields are required — this is developer
@@ -432,3 +442,19 @@ wrappers, and documentation, not business logic modules.
 ## Final Constitutional Compliance Statement
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-17
+
+- Q: Should `.act.secrets` be added to `.gitignore` as an explicit dedicated entry or can the existing `.secrets` rule cover it? → A: Explicit entry (`.act.secrets`). The existing `.secrets` rule in `.gitignore` matches only a file literally named `.secrets` and does not cover `.act.secrets`. An explicit `.act.secrets` line must be added to prevent accidental commit. (Applied to FR-04.)
+
+- Q: Should `run-local-ci.ts` include a `bun run lint` (Biome) step in the governance check sequence, and what is its scope? → A: Yes — add `bun run lint` (full-repository scope, covering all packages and apps) as step 6 in the governance check sequence, after `type-safety-guard` and before `bun run ci:local`. This aligns with the AGENTS.md validation pipeline which mandates lint before CI passes. (Applied to FR-06.)
+
+- Q: Should `ci:local:workflow` accept an optional workflow filename argument (for single-workflow debugging) or always run all workflows in `.github/workflows/`? → A: Accept an optional workflow filename argument. When provided, the command runs `act -W .github/workflows/<filename>`; when omitted it defaults to `act -W .github/workflows/` (all workflows). This resolves the contradiction between US-03 ("run a single workflow in isolation") and the original FR-03 definition which always targeted the full directory. (Applied to FR-03 and US-03 Acceptance Criteria.)
+
+- Q: How should `scripts/run-local-ci.ts` report failed workflows — exit code only, or structured output with per-job detail? → A: Per-step status line (PASS/FAIL) for each governance check and each `act` workflow job; a final summary table after all execution; full `act` output forwarded only for failed jobs (suppressed for passing jobs). Always exits non-zero with a clear identifying message on failure. (Applied to Observability Requirements.)
+
+- Q: Is the AGENTS.md pre-closure rule update scoped to the root `AGENTS.md` only or also to per-app `AGENTS.md` files? → A: Root `AGENTS.md` only. The `ci:local` enforcement is a repository-level governance concern, not an app-specific one. Per-app `AGENTS.md` files (under `apps/*/`) are not updated by this stage. (Applied to FR-12.)

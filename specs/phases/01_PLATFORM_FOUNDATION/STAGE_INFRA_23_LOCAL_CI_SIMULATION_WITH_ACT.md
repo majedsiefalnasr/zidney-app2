@@ -3,21 +3,18 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-17T00:00:00.000Z
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-03-17T00:02:00.000Z
 
 Scope Defined:
 
-- Local CI simulation via `act`
-- `.actrc` runner image mapping
-- Script wrappers (ci:local, ci:local:full, ci:local:workflow, ci:local:list)
-- Secrets strategy (.act.secrets — never committed)
-- Workflow compatibility audit
-- `scripts/run-local-ci.ts` orchestrator script
-- Mandatory orchestrator closure gate
-- CI parity contract enforcement
-- Developer documentation (docs/ci/local-ci.md, AGENTS.md update)
+- All 5 clarification ambiguities resolved
+- `.act.secrets` explicit `.gitignore` entry required
+- `run-local-ci.ts` includes `bun run lint` before `bun run ci:local`
+- `ci:local:workflow` accepts optional workflow filename arg
+- Failure output: per-step PASS/FAIL + summary table
+- AGENTS.md update scoped to root only
 
 Deferred Scope:
 
@@ -27,10 +24,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ## Purpose
 
