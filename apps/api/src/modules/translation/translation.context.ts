@@ -14,6 +14,14 @@ import type { TranslationOperationContext } from '@zidney/domain-core'
 import type { Context } from 'hono'
 import { languageSettingsInternalSchema } from '../workspace-settings/workspace-settings.validation'
 
+function getDefaultLanguageSettings() {
+  return {
+    default_language: 'en',
+    supported_languages: ['en'],
+    language_status: {},
+  }
+}
+
 interface DbClient {
   query: <T = unknown>(
     sql: string,
@@ -41,14 +49,15 @@ export async function buildTranslationContext(
     language_settings: unknown
   }>(`SELECT language_settings FROM workspace_settings WHERE singleton_key = 'SETTINGS' LIMIT 1`)
 
-  const rawSettings = settingsResult.rows[0]?.language_settings
+  const rawSettings = settingsResult.rows[0]?.language_settings ?? getDefaultLanguageSettings()
 
-  if (!rawSettings) {
-    throw new Error('Workspace language settings not found')
+  // Parse internal schema (includes language_status). If parsing fails, throw a clear error
+  let parsed
+  try {
+    parsed = languageSettingsInternalSchema.parse(rawSettings)
+  } catch (err) {
+    throw new Error(`Invalid workspace language settings: ${(err as Error).message}`)
   }
-
-  // Parse internal schema (includes language_status)
-  const parsed = languageSettingsInternalSchema.parse(rawSettings)
 
   const ctx: TranslationOperationContext = {
     workspace_id: tenant.id,
