@@ -127,7 +127,7 @@ The plan proceeds in five phases:
  */
 ```
 
-**Pre-existing logging note:** The existing `seed-dashboard-test-data.ts` uses `console.log` with a CORRELATION_ID prefix rather than `createLogger`. Refactoring to structured logging is **out of scope** for this fix stage (which is scoped to deduplication and script registration, not source rewrites). The `console.log` usage is a pre-existing condition in the repository and is tracked separately.
+**Logging migration (FR-05 compliance):** The source `seed-dashboard-test-data.ts` uses `console.log` with a CORRELATION_ID prefix. Per spec FR-05, `console.log` is unconditionally forbidden in scripts. Since T009 creates `scripts/seed/dashboard-test-data.ts` as a new deliverable of this stage, the output file must comply with FR-05. Migration is mechanical: replace all `console.log(msg, ...)` calls with `createLogger('seed:dashboard-test-data')` structured equivalents — the CORRELATION_ID prefix maps directly to the `correlationId` field. Add `import { createLogger } from '../core/logger-factory'` and replace each log call with `logger.info/error/warn(msg, { correlationId, service: 'seed:dashboard-test-data', ...fields })`.
 
 ---
 
@@ -272,14 +272,13 @@ main();
  */
 import { createLogger } from "../core/logger-factory";
 import { randomUUID } from "node:crypto";
-import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 const logger = createLogger("db:migrate");
 const correlationId = randomUUID();
 
-const REPO_ROOT = new URL("../../../", import.meta.url).pathname;
+const REPO_ROOT = process.cwd();
 const MASTER_MIGRATIONS = join(REPO_ROOT, "apps/api/src/db/master/migrations");
 const TENANT_MIGRATIONS = join(REPO_ROOT, "apps/api/src/db/tenant/migrations");
 
@@ -332,9 +331,9 @@ main();
 /**
  * @script db:console
  * @domain db
- * @description Open an interactive PostgreSQL console for the specified workspace database
+ * @description Open an interactive PostgreSQL console using the DATABASE_URL environment variable
  * @mode manual
- * @dependencies DATABASE_URL,packages/config,packages/logger,psql
+ * @dependencies DATABASE_URL,packages/logger,psql
  */
 import { createLogger } from "../core/logger-factory";
 import { randomUUID } from "node:crypto";
@@ -344,9 +343,7 @@ const logger = createLogger("db:console");
 const correlationId = randomUUID();
 
 async function main(): Promise<void> {
-  const workspace = process.argv.find((a) => a.startsWith("--workspace="))?.split("=")[1];
-
-  logger.info("Opening database console", { correlationId, service: "db:console", workspace });
+  logger.info("Opening database console", { correlationId, service: "db:console" });
 
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
@@ -369,10 +366,8 @@ async function main(): Promise<void> {
     process.exit(0);
   }
 
-  const connectUrl = workspace ? databaseUrl.replace(/\/[^/]+$/, `/${workspace}`) : databaseUrl;
-
-  logger.info("Launching psql", { correlationId, service: "db:console", workspace });
-  spawnSync("psql", [connectUrl], { stdio: "inherit" });
+  logger.info("Launching psql", { correlationId, service: "db:console" });
+  spawnSync("psql", [databaseUrl], { stdio: "inherit" });
 }
 
 main();
@@ -400,7 +395,7 @@ import { join } from "node:path";
 const logger = createLogger("validate:ai-context-fresh");
 const correlationId = randomUUID();
 
-const REPO_ROOT = new URL("../../../", import.meta.url).pathname;
+const REPO_ROOT = process.cwd();
 const CONTEXT_FILE = join(REPO_ROOT, "docs/ai/context/ai-context-mini.json");
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -460,7 +455,7 @@ import { join } from "node:path";
 const logger = createLogger("validate:ai-context-schemas");
 const correlationId = randomUUID();
 
-const REPO_ROOT = new URL("../../../", import.meta.url).pathname;
+const REPO_ROOT = process.cwd();
 const CONTEXT_DIR = join(REPO_ROOT, "docs/ai/context");
 
 const REQUIRED_ARTIFACTS = [
@@ -531,7 +526,7 @@ import { join } from "node:path";
 const logger = createLogger("maintenance:cache-clean");
 const correlationId = randomUUID();
 
-const REPO_ROOT = new URL("../../../", import.meta.url).pathname;
+const REPO_ROOT = process.cwd();
 
 const CACHE_DIRS = [
   ".turbo",
@@ -836,7 +831,7 @@ export function loadRegisteredScripts(packageJsonPath: string): Set<string> {
 }
 
 async function main(): Promise<void> {
-  const repoRoot = new URL("../../../", import.meta.url).pathname;
+  const repoRoot = process.cwd();
   const specsDir = join(repoRoot, "specs/runtime");
   const packageJsonPath = join(repoRoot, "package.json");
 
@@ -954,6 +949,9 @@ function validateScriptName(key: string): boolean {
     "check:store-cycles",
     "check:tsconfig",
     "type-safety-guard",
+    "generate-script-docs",
+    "validate-runtime-scripts",
+    "seed-dashboard-test-data",
   ]);
   if (LEGACY_ALLOWLIST.has(key)) return true;
   return DOMAIN_ACTION_RE.test(key);

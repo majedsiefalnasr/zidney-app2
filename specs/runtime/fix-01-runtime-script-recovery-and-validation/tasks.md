@@ -86,7 +86,7 @@ validating all Phase 3 work.
 #### Seed Script Deduplication (T004 — plan phase 1)
 
 - [ ] T008 [US1] Compare `scripts/seed-dashboard-test-data.ts` vs `scripts/dev/seed-dashboard-test-data.ts` line-by-line; confirm `scripts/dev/` version is canonical (superset per Task T038 move note); document merge rationale in JSDoc header — scripts/dev/seed-dashboard-test-data.ts
-- [ ] T009 [US1] Create `scripts/seed/dashboard-test-data.ts` by moving canonical content from `scripts/dev/seed-dashboard-test-data.ts`; add JSDoc merge header documenting absorbed-from sources; preserve existing console.log usage (out of scope for this stage) — scripts/seed/dashboard-test-data.ts
+- [ ] T009 [US1] Create `scripts/seed/dashboard-test-data.ts` by moving canonical content from `scripts/dev/seed-dashboard-test-data.ts`; add JSDoc merge header documenting absorbed-from sources; replace all `console.log` calls with `createLogger('seed:dashboard-test-data')` structured equivalents per spec FR-05 (CORRELATION_ID prefix maps to `correlationId` field) — scripts/seed/dashboard-test-data.ts
 - [ ] T010 [US1] Delete `scripts/seed-dashboard-test-data.ts` (root-level duplicate, post-move verification required) — scripts/seed-dashboard-test-data.ts
 - [ ] T011 [US1] Delete `scripts/dev/seed-dashboard-test-data.ts` (prior location, now superseded by scripts/seed/) — scripts/dev/seed-dashboard-test-data.ts
 
@@ -95,7 +95,7 @@ validating all Phase 3 work.
 - [ ] T012 [P] [US1] Create `scripts/db/pool-status.ts` — JSDoc metadata header, `createLogger` via `../core/logger-factory`, `randomUUID` correlationId, `DATABASE_URL` infra-absent exit-0 pattern, dynamic `pg.Pool` connect/ping/release, structured logs for all branches — scripts/db/pool-status.ts
 - [ ] T013 [P] [US1] Create `scripts/db/validate-licenses.ts` — JSDoc metadata header, `createLogger` via `../core/logger-factory`, correlationId, `DATABASE_URL` infra-absent exit-0 pattern, GROUP BY status license query, structured summary log — scripts/db/validate-licenses.ts
 - [ ] T014 [US1] Check/fix `scripts/db/migrate.ts` — verify file exists; if missing, create per plan.md §T005/Group A spec; if exists, audit imports for `../core/logger-factory` pattern and infra-absent path; add/fix JSDoc metadata header; service: `db:migrate` — scripts/db/migrate.ts
-- [ ] T015 [P] [US1] Create `scripts/db/console.ts` — JSDoc metadata header, `createLogger`, correlationId, `DATABASE_URL` infra-absent exit-0, `spawnSync('which', ['psql'])` availability check, `spawnSync('psql', [connectUrl], { stdio: 'inherit' })` launcher, `--workspace=` arg parsing — scripts/db/console.ts
+- [ ] T015 [P] [US1] Create `scripts/db/console.ts` — JSDoc metadata header, `createLogger('db:console')`, correlationId, `DATABASE_URL` infra-absent exit-0, `spawnSync('which', ['psql'])` availability check, `spawnSync('psql', [databaseUrl], { stdio: 'inherit' })` launcher (no --workspace= arg; caller sets DATABASE_URL directly) — scripts/db/console.ts
 
 #### Validate Domain Scripts — New Implementations (T005/Group B — plan phase 1)
 
@@ -135,7 +135,7 @@ validating all Phase 3 work.
 
 - [ ] T022 [US3] Create `scripts/validate/runtime-scripts.ts` — JSDoc metadata header, `createLogger('validate-runtime-scripts')`, correlationId, export `SCRIPT_REGEX`, `EXCLUDED_NAMES`, `walkMarkdownFiles`, `extractScriptReferences`, `loadRegisteredScripts`; `main()` walks `specs/runtime/`, computes missing set, logs each missing script as structured error, exits 1 on any missing, exits 0 when all registered — scripts/validate/runtime-scripts.ts
 - [ ] T023 [US3] Register `validate-runtime-scripts` in root `package.json` scripts block: `"validate-runtime-scripts": "bun run scripts/validate/runtime-scripts.ts"` — package.json
-- [ ] T024 [US3] Create `scripts/validate/__tests__/runtime-scripts.test.ts` — six Vitest test cases covering: standard extraction, excluded-name filter, CLI-flag non-match, loadRegisteredScripts set return, missing-script detection, all-registered no-error — scripts/validate/**tests**/runtime-scripts.test.ts
+- [ ] T024 [US3] Create `scripts/validate/__tests__/runtime-scripts.test.ts` — six Vitest test cases covering: standard extraction, excluded-name filter, CLI-flag non-match, loadRegisteredScripts set return, missing-script detection, all-registered no-error; also add a `scripts/validate` project entry to `vitest.workspace.ts` matching the ai-engine/hygiene-checks precedent so the test file is discovered by the workspace runner — scripts/validate/**tests**/runtime-scripts.test.ts, vitest.workspace.ts
 - [ ] T025 [US3] Run unit tests for runtime-scripts: `bun run test:unit` scoped to `scripts/validate/__tests__/runtime-scripts.test.ts` → verify all 6 tests pass
 
 ---
@@ -165,11 +165,11 @@ validating all Phase 3 work.
 - [ ] T027 [P] [US2] Write `docs/scripts/db-pool-status.md` — all 8 required sections: Command, Purpose, Why It Exists, When to Run, Execution Mode, Dependencies, Example Usage, Known Failure Modes — docs/scripts/db-pool-status.md
 - [ ] T028 [P] [US2] Write `docs/scripts/db-validate-licenses.md` — all 8 required sections — docs/scripts/db-validate-licenses.md
 - [ ] T029 [P] [US2] Write `docs/scripts/db-migrate.md` — all 8 required sections; note `--workspace=` and `--migration=` CLI args — docs/scripts/db-migrate.md
-- [ ] T030 [P] [US2] Write `docs/scripts/db-console.md` — all 8 required sections; note `--workspace=` arg and psql PATH dependency — docs/scripts/db-console.md
+- [ ] T030 [P] [US2] Write `docs/scripts/db-console.md` — all 8 required sections; note psql PATH dependency (no `--workspace=` arg — connects to DATABASE_URL directly) — docs/scripts/db-console.md
 - [ ] T031 [P] [US2] Write `docs/scripts/validate-ai-context-fresh.md` — all 8 required sections; note 24h staleness threshold — docs/scripts/validate-ai-context-fresh.md
 - [ ] T032 [P] [US2] Write `docs/scripts/validate-ai-context-schemas.md` — all 8 required sections; list the 5 required artifacts — docs/scripts/validate-ai-context-schemas.md
 - [ ] T033 [P] [US2] Write `docs/scripts/maintenance-cache-clean.md` — all 8 required sections; list CACHE_DIRS — docs/scripts/maintenance-cache-clean.md
-- [ ] T034 [P] [US2] Write `docs/scripts/seed-dashboard-test-data.md` — all 8 required sections; note DATABASE_URL infra-dependency and pre-existing console.log usage — docs/scripts/seed-dashboard-test-data.md
+- [ ] T034 [P] [US2] Write `docs/scripts/seed-dashboard-test-data.md` — all 8 required sections; note DATABASE_URL infra-dependency and structured logging via createLogger — docs/scripts/seed-dashboard-test-data.md
 - [ ] T035 [P] [US2] Write `docs/scripts/validate-runtime-scripts.md` — all 8 required sections; note exit-1 hard-block behavior, scan regex, exclusion list — docs/scripts/validate-runtime-scripts.md
 - [ ] T036 [P] [US2] Write `docs/scripts/generate-script-docs.md` — all 8 required sections; document metadata header format, naming convention validation, legacy allowlist — docs/scripts/generate-script-docs.md
 
