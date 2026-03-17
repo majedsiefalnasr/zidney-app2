@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-03-16T15:40:03.887Z
-Git SHA: f6d8e8acab2d8d51bd473413488d75b6345a5e12
+Generated: 2026-03-17T10:57:15.599Z
+Git SHA: 4790c3e26cfb95f64435a29b2787d6eb0df95521
 
 ---
 
@@ -355,6 +355,7 @@ graph LR
   apps_api --> packages_types
   apps_api --> packages_domain_core
   apps_api --> packages_validation
+  apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_domain_core
@@ -839,6 +840,7 @@ graph TD
   apps_api --> packages_types
   apps_api --> packages_domain_core
   apps_api --> packages_validation
+  apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_domain_core

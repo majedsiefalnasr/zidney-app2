@@ -1,0 +1,511 @@
+{
+  "generatedAt": "2026-03-17T10:44:02.891Z",
+  "correlationId": "696df990-9431-43f8-9851-2f95c7b8b2dc",
+  "summary": {
+    "total": 83,
+    "valid": 83,
+    "missing": 0,
+    "unregistered": 0,
+    "aliasNeeded": 0
+  },
+  "entries": [
+    {
+      "name": "ai-context:generate",
+      "status": "VALID",
+      "occurrences": 3,
+      "packageJsonValue": "bun scripts/generate-ai-context.ts"
+    },
+    {
+      "name": "ai-context:refresh",
+      "status": "VALID",
+      "occurrences": 18,
+      "packageJsonValue": "bun scripts/generate-ai-context.ts --force"
+    },
+    {
+      "name": "ai-context:status",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun scripts/ai-runtime/runtime-status.ts"
+    },
+    {
+      "name": "ai-context:validate",
+      "status": "VALID",
+      "occurrences": 7,
+      "packageJsonValue": "bun scripts/generate-ai-context.ts --validate"
+    },
+    {
+      "name": "ai-guard",
+      "status": "VALID",
+      "occurrences": 13,
+      "packageJsonValue": "bun scripts/ai-guard.ts"
+    },
+    {
+      "name": "ai-runtime:status",
+      "status": "VALID",
+      "occurrences": 5,
+      "packageJsonValue": "bun scripts/ai-runtime/runtime-status.ts"
+    },
+    {
+      "name": "ai:plan",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun scripts/ai-engine/plan-task.ts"
+    },
+    {
+      "name": "ai:run",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun scripts/ai-engine/run-task.ts"
+    },
+    {
+      "name": "ai:validate",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "bun scripts/ai-engine/validate-execution.ts"
+    },
+    {
+      "name": "arch:add-module",
+      "status": "VALID",
+      "occurrences": 8,
+      "packageJsonValue": "bun scripts/architecture/add-module.ts"
+    },
+    {
+      "name": "arch:audit",
+      "status": "VALID",
+      "occurrences": 21,
+      "packageJsonValue": "bun scripts/infra-audit.ts"
+    },
+    {
+      "name": "arch:fix",
+      "status": "VALID",
+      "occurrences": 4,
+      "packageJsonValue": "bun scripts/infra-audit.ts --fix-map"
+    },
+    {
+      "name": "arch:generate",
+      "status": "VALID",
+      "occurrences": 3,
+      "packageJsonValue": "bun scripts/architecture/generate-architecture-map.ts"
+    },
+    {
+      "name": "arch:guard",
+      "status": "VALID",
+      "occurrences": 37,
+      "packageJsonValue": "bun scripts/architecture-guard/architecture-guard.ts"
+    },
+    {
+      "name": "arch:guard:changed",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "bun scripts/architecture-guard/architecture-guard.ts --changed"
+    },
+    {
+      "name": "arch:guard:ci",
+      "status": "VALID",
+      "occurrences": 13,
+      "packageJsonValue": "bun scripts/architecture-guard/architecture-guard.ts --ci"
+    },
+    {
+      "name": "arch:health",
+      "status": "VALID",
+      "occurrences": 10,
+      "packageJsonValue": "bun scripts/architecture-health/architecture-health.ts"
+    },
+    {
+      "name": "arch:health:ci",
+      "status": "VALID",
+      "occurrences": 3,
+      "packageJsonValue": "bun scripts/architecture-health/architecture-health.ts --ci"
+    },
+    {
+      "name": "arch:refresh",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "bun scripts/infra-audit.ts && bun scripts/gitnexus-context.ts"
+    },
+    {
+      "name": "arch:validate-brain",
+      "status": "VALID",
+      "occurrences": 4,
+      "packageJsonValue": "bun scripts/governance/validate-architecture-brain.ts"
+    },
+    {
+      "name": "arch:visualize",
+      "status": "VALID",
+      "occurrences": 8,
+      "packageJsonValue": "bun scripts/architecture/visualize.ts"
+    },
+    {
+      "name": "biome",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "biome"
+    },
+    {
+      "name": "build",
+      "status": "VALID",
+      "occurrences": 18,
+      "packageJsonValue": "bun run --workspaces build"
+    },
+    {
+      "name": "build:api",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun --cwd apps/api build"
+    },
+    {
+      "name": "build:packages",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun run --filter './packages/*' build"
+    },
+    {
+      "name": "cache-clean",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun run maintenance:cache-clean"
+    },
+    {
+      "name": "check:store-cycles",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun scripts/check-store-cycles.ts"
+    },
+    {
+      "name": "ci:test",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "vitest run --reporter=verbose"
+    },
+    {
+      "name": "db:console",
+      "status": "VALID",
+      "occurrences": 4,
+      "packageJsonValue": "bun scripts/db/console.ts"
+    },
+    {
+      "name": "db:migrate",
+      "status": "VALID",
+      "occurrences": 11,
+      "packageJsonValue": "bun scripts/db/migrate.ts"
+    },
+    {
+      "name": "db:pool-status",
+      "status": "VALID",
+      "occurrences": 3,
+      "packageJsonValue": "bun scripts/db/pool-status.ts"
+    },
+    {
+      "name": "db:validate-licenses",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "bun scripts/db/validate-licenses.ts"
+    },
+    {
+      "name": "dev",
+      "status": "VALID",
+      "occurrences": 7,
+      "packageJsonValue": "bun run dev:all"
+    },
+    {
+      "name": "dev:all",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "concurrently \"bun run dev:api\" \"bun run dev:worker\" \"bun run dev:mmc\" \"bun run dev:backoffice\" \"bun run dev:frontoffice\""
+    },
+    {
+      "name": "dev:api",
+      "status": "VALID",
+      "occurrences": 9,
+      "packageJsonValue": "bun --cwd apps/api dev"
+    },
+    {
+      "name": "dev:backoffice",
+      "status": "VALID",
+      "occurrences": 5,
+      "packageJsonValue": "bun --cwd apps/backoffice dev"
+    },
+    {
+      "name": "dev:frontoffice",
+      "status": "VALID",
+      "occurrences": 4,
+      "packageJsonValue": "bun --cwd apps/frontoffice dev"
+    },
+    {
+      "name": "dev:mmc",
+      "status": "VALID",
+      "occurrences": 6,
+      "packageJsonValue": "bun --cwd apps/mmc dev"
+    },
+    {
+      "name": "dev:worker",
+      "status": "VALID",
+      "occurrences": 4,
+      "packageJsonValue": "bun --cwd apps/worker dev"
+    },
+    {
+      "name": "format",
+      "status": "VALID",
+      "occurrences": 7,
+      "packageJsonValue": "bun run format:biome && bun run format:md"
+    },
+    {
+      "name": "format:biome",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "biome format --write ."
+    },
+    {
+      "name": "format:check",
+      "status": "VALID",
+      "occurrences": 9,
+      "packageJsonValue": "bun run format:check:biome && bun run format:check:md"
+    },
+    {
+      "name": "format:check:md",
+      "status": "VALID",
+      "occurrences": 6,
+      "packageJsonValue": "prettier --check '**/*.md'"
+    },
+    {
+      "name": "format:md",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "prettier --write '**/*.md'"
+    },
+    {
+      "name": "generate-script-docs",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "bun scripts/generate/script-docs.ts"
+    },
+    {
+      "name": "generate:ai-context",
+      "status": "VALID",
+      "occurrences": 8,
+      "packageJsonValue": "bun scripts/generate-ai-context.ts"
+    },
+    {
+      "name": "hygiene:report",
+      "status": "VALID",
+      "occurrences": 8,
+      "packageJsonValue": "bun scripts/dev/hygiene-report-generator.ts"
+    },
+    {
+      "name": "infra-audit",
+      "status": "VALID",
+      "occurrences": 4,
+      "packageJsonValue": "bun scripts/infra-audit.ts"
+    },
+    {
+      "name": "infra-audit:check",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun scripts/infra-audit.ts --check"
+    },
+    {
+      "name": "lint",
+      "status": "VALID",
+      "occurrences": 131,
+      "packageJsonValue": "biome check ."
+    },
+    {
+      "name": "lint:fix",
+      "status": "VALID",
+      "occurrences": 8,
+      "packageJsonValue": "biome check --write ."
+    },
+    {
+      "name": "maintenance:cache-clean",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun scripts/maintenance/cache-clean.ts"
+    },
+    {
+      "name": "migrate",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun run db:migrate"
+    },
+    {
+      "name": "prepare",
+      "status": "VALID",
+      "occurrences": 5,
+      "packageJsonValue": "husky"
+    },
+    {
+      "name": "run-staging-smoke-tests",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bash scripts/ci/run-staging-smoke-tests.sh"
+    },
+    {
+      "name": "seed-dashboard-test-data",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "bun scripts/seed/dashboard-test-data.ts"
+    },
+    {
+      "name": "test",
+      "status": "VALID",
+      "occurrences": 48,
+      "packageJsonValue": "vitest run"
+    },
+    {
+      "name": "test:ci",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "vitest run --reporter=verbose"
+    },
+    {
+      "name": "test:coverage",
+      "status": "VALID",
+      "occurrences": 6,
+      "packageJsonValue": "vitest run --coverage"
+    },
+    {
+      "name": "test:e2e",
+      "status": "VALID",
+      "occurrences": 4,
+      "packageJsonValue": "bun run test:e2e:mmc && bun run test:e2e:backoffice && bun run test:e2e:frontoffice"
+    },
+    {
+      "name": "test:e2e:backoffice",
+      "status": "VALID",
+      "occurrences": 3,
+      "packageJsonValue": "bunx playwright test --config apps/backoffice/playwright.config.ts"
+    },
+    {
+      "name": "test:e2e:frontoffice",
+      "status": "VALID",
+      "occurrences": 3,
+      "packageJsonValue": "bunx playwright test --config apps/frontoffice/playwright.config.ts"
+    },
+    {
+      "name": "test:e2e:mmc",
+      "status": "VALID",
+      "occurrences": 3,
+      "packageJsonValue": "bunx playwright test --config apps/mmc/playwright.config.ts"
+    },
+    {
+      "name": "test:integration",
+      "status": "VALID",
+      "occurrences": 7,
+      "packageJsonValue": "vitest run --dir tests/integration --fileParallelism=false"
+    },
+    {
+      "name": "test:static",
+      "status": "VALID",
+      "occurrences": 11,
+      "packageJsonValue": "vitest run --dir tests/static"
+    },
+    {
+      "name": "test:unit",
+      "status": "VALID",
+      "occurrences": 33,
+      "packageJsonValue": "vitest run --project mmc --project backoffice --project frontoffice --project api-client --project domain-core --project logger --project config --project redis-utils --project types --project ui-system --project validation"
+    },
+    {
+      "name": "test:unit:boundaries",
+      "status": "VALID",
+      "occurrences": 5,
+      "packageJsonValue": "vitest run tests/static/module-boundaries.test.ts tests/unit/infra-audit/infra-audit-boundaries.test.ts tests/unit/ai-guard/ai-guard-boundaries.test.ts"
+    },
+    {
+      "name": "tsc",
+      "status": "VALID",
+      "occurrences": 13,
+      "packageJsonValue": "bun run typecheck:src"
+    },
+    {
+      "name": "type-check",
+      "status": "VALID",
+      "occurrences": 30,
+      "packageJsonValue": "bun run typecheck"
+    },
+    {
+      "name": "type-coverage",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun run validate:types"
+    },
+    {
+      "name": "type-safety-guard",
+      "status": "VALID",
+      "occurrences": 13,
+      "packageJsonValue": "bun scripts/type-safety-guard.ts"
+    },
+    {
+      "name": "typecheck",
+      "status": "VALID",
+      "occurrences": 90,
+      "packageJsonValue": "bun typecheck:src && bun typecheck:tests"
+    },
+    {
+      "name": "typecheck:src",
+      "status": "VALID",
+      "occurrences": 12,
+      "packageJsonValue": "tsc --noEmit"
+    },
+    {
+      "name": "typecheck:tests",
+      "status": "VALID",
+      "occurrences": 8,
+      "packageJsonValue": "tsc --noEmit -p tsconfig.test.json"
+    },
+    {
+      "name": "validate-runtime-scripts",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "bun scripts/validate/runtime-scripts.ts"
+    },
+    {
+      "name": "validate:ai-context-fresh",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "bun scripts/validate/ai-context-fresh.ts"
+    },
+    {
+      "name": "validate:ai-context-schemas",
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "bun scripts/validate/ai-context-schemas.ts"
+    },
+    {
+      "name": "validate:architecture",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun scripts/infra-audit.ts"
+    },
+    {
+      "name": "validate:types",
+      "status": "VALID",
+      "occurrences": 12,
+      "packageJsonValue": "bun typecheck && bun type-safety-guard --json"
+    },
+    {
+      "name": "validate:workflows",
+      "status": "VALID",
+      "occurrences": 14,
+      "packageJsonValue": "find .github/workflows -type f \\( -name '*.yml' -o -name '*.yaml' \\) | xargs actionlint"
+    },
+    {
+      "name": "validate:yaml",
+      "status": "VALID",
+      "occurrences": 3,
+      "packageJsonValue": "yamllint ."
+    },
+    {
+      "name": "vitest",
+      "status": "VALID",
+      "occurrences": 10,
+      "packageJsonValue": "vitest"
+    },
+    {
+      "name": "worker",
+      "status": "VALID",
+      "occurrences": 1,
+      "packageJsonValue": "bun run dev:worker"
+    }
+  ]
+}

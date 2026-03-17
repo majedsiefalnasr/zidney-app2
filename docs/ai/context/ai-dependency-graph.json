@@ -1,8 +1,8 @@
 {
   "schema_version": "2",
-  "generated_at": "2026-03-16T15:40:03.912Z",
+  "generated_at": "2026-03-17T10:57:15.658Z",
   "source_metadata": {
-    "infra_audit_timestamp": "2026-03-16T15:40:03.888Z"
+    "infra_audit_timestamp": "2026-03-17T10:57:15.603Z"
   },
   "modules": {
     "apps/mmc": {
@@ -1437,6 +1437,10 @@
     {
       "from": "apps/api",
       "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
     },
     {
       "from": "apps/api",

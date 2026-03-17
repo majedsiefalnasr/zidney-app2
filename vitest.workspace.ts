@@ -199,4 +199,15 @@ export default defineWorkspace([
   'packages/types/vitest.config.ts',
   'packages/ui-system/vitest.config.ts',
   'packages/validation/vitest.config.ts',
+
+  // Validate scripts (runtime script CI guard)
+  defineProject({
+    plugins: [tsconfigPaths()],
+    test: {
+      name: 'validate-scripts',
+      globals: true,
+      environment: 'node',
+      include: ['scripts/validate/__tests__/**/*.test.ts'],
+    },
+  }),
 ])

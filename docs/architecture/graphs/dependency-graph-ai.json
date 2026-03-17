@@ -1324,6 +1324,10 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/logger"
     },
     {
@@ -1967,7 +1971,7 @@
     "packages/redis-utils": 3,
     "packages/ui-system": 1,
     "packages/api-client": 17,
-    "packages/domain-core": 87,
+    "packages/domain-core": 88,
     "packages/validation": 18,
     "apps/mmc": 0,
     "apps/frontoffice": 0,

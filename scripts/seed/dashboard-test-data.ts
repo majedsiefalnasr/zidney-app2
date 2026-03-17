@@ -1,14 +1,20 @@
 /**
- * MMC Dashboard Test Data Seeding Script
+ * @script seed-dashboard-test-data
+ * @domain seed
+ * @description Seed realistic MMC dashboard test data into master_db for dashboard testing
+ * @mode manual
+ * @dependencies pg,packages/config,node:crypto
+ *
+ * Merge Header: Canonical content absorbed from:
+ *   - scripts/seed-dashboard-test-data.ts (root-level duplicate, Task T005)
+ *   - scripts/dev/seed-dashboard-test-data.ts (dev/ location, Task T038 move note)
+ * Decision: scripts/dev/ version was the intentional canonical destination per T038 task comment.
+ * Forward-only canonical path: scripts/seed/dashboard-test-data.ts
  *
  * Purpose: Generate realistic test data in master_db for dashboard testing
  * - 1000 test licenses across 3 statuses (ACTIVE, SOFT_LOCKED, ARCHIVED)
  * - 100 revenue records with diverse products and countries
  * - 20 affiliates with 200 usage records
- *
- * File: scripts/seed-dashboard-test-data.ts
- * Task: T005
- * Phase: 0 - Setup & Preparation
  *
  * Environmental Requirements:
  * - DATABASE_URL must point to master_db (test environment)
@@ -18,38 +24,45 @@
  * Constitutional Compliance:
  * ✓ Master DB only (zero tenant DB access)
  * ✓ Forward-only data (no deletes of existing production data)
- * ✓ Structured logging with correlation_id
+ * ✓ Structured logging via createLogger (FR-05 compliant)
  * ✓ Monetary values in cents (integers)
  *
  * Usage:
  * ```sh
- * npx ts-node scripts/seed-dashboard-test-data.ts
+ * bun run seed-dashboard-test-data
  * ```
  *
  * Execution Time: ~5-10 seconds for 1320 records
  */
 
-import * as console from 'node:console'
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
+import { createLogger } from '../core/logger-factory'
 
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
 
-const CORRELATION_ID = randomUUID()
+const correlationId = randomUUID()
+const logger = createLogger('seed:dashboard-test-data')
+logger.setContext({ correlationId })
+
 const ENVIRONMENT = process.env.NODE_ENV || 'development'
 const DATABASE_URL = process.env.DATABASE_URL
 
 // Safety check: prevent running in production
 if (ENVIRONMENT === 'production') {
-  console.error(`❌ ABORT: seed-dashboard-test-data cannot run in production environment`)
+  logger.error('ABORT: seed-dashboard-test-data cannot run in production environment', {
+    environment: ENVIRONMENT,
+  })
   process.exit(1)
 }
 
 if (!DATABASE_URL) {
-  console.error('❌ DATABASE_URL environment variable not set')
-  process.exit(1)
+  logger.warn('Infrastructure dependency unavailable: DATABASE_URL not set', {
+    service: 'seed:dashboard-test-data',
+  })
+  process.exit(0)
 }
 
 // ============================================================================
@@ -114,7 +127,7 @@ async function seedDashboardTestData(): Promise<void> {
   const client = await pool.connect()
 
   try {
-    console.log(`[${CORRELATION_ID}] Starting dashboard test data seeding... (ENV: ${ENVIRONMENT})`)
+    logger.info('Starting dashboard test data seeding', { environment: ENVIRONMENT })
 
     // Check if test data already exists
     const existingLicenses = await client.query(
@@ -123,17 +136,15 @@ async function seedDashboardTestData(): Promise<void> {
     )
 
     if (existingLicenses.rows[0].count > 0) {
-      console.log(
-        `[${CORRELATION_ID}] ⚠️ Test data already exists (${existingLicenses.rows[0].count} licenses found)`
-      )
-      console.log(
-        `[${CORRELATION_ID}] To re-seed, run: npm run seed:clean && npm run seed:dashboard`
-      )
+      logger.warn('Test data already exists', {
+        count: existingLicenses.rows[0].count,
+        hint: 'To re-seed, run: bun run seed:clean && bun run seed:dashboard',
+      })
       return
     }
 
     // Phase 1: Seed products
-    console.log(`[${CORRELATION_ID}] [1/4] Seeding products...`)
+    logger.info('Seeding products', { phase: '1/4' })
     for (const product of PRODUCT_NAMES) {
       await client.query(
         `INSERT INTO products (id, name, slug, description, enabled_modules)
@@ -151,10 +162,10 @@ async function seedDashboardTestData(): Promise<void> {
         ]
       )
     }
-    console.log(`[${CORRELATION_ID}] ✓ Seeded ${PRODUCT_NAMES.length} products`)
+    logger.info('Products seeded', { count: PRODUCT_NAMES.length })
 
     // Phase 2: Seed licenses (1000 licenses across 3 statuses)
-    console.log(`[${CORRELATION_ID}] [2/4] Seeding 1000 licenses...`)
+    logger.info('Seeding licenses', { phase: '2/4', target: 1000 })
     const licenseStatuses = ['ACTIVE', 'SOFT_LOCKED', 'ARCHIVED']
     let licenseCount = 0
 
@@ -193,17 +204,21 @@ async function seedDashboardTestData(): Promise<void> {
       licenseCount++
 
       if ((i + 1) % 200 === 0) {
-        console.log(`[${CORRELATION_ID}]   ~ Seeded ${i + 1} licenses so far...`)
+        logger.info('License seeding progress', { seeded: i + 1, total: 1000 })
       }
     }
-    console.log(
-      `[${CORRELATION_ID}] ✓ Seeded ${licenseCount} licenses (ACTIVE:${licenseCount / 3}, SOFT_LOCKED:${licenseCount / 3}, ARCHIVED:${licenseCount / 3})`
-    )
+    logger.info('Licenses seeded', {
+      count: licenseCount,
+      distribution: {
+        ACTIVE: licenseCount / 3,
+        SOFT_LOCKED: licenseCount / 3,
+        ARCHIVED: licenseCount / 3,
+      },
+    })
 
     // Phase 3: Seed revenue records (100 records)
-    console.log(`[${CORRELATION_ID}] [3/4] Seeding 100 revenue records...`)
+    logger.info('Seeding revenue records', { phase: '3/4', target: 100 })
 
-    // First, get a sample of licenses to create revenue against
     const licenseResults = await client.query(
       'SELECT id, workspace_id, product_id FROM licenses WHERE deleted_at IS NULL LIMIT 100'
     )
@@ -213,7 +228,7 @@ async function seedDashboardTestData(): Promise<void> {
       const license = sampleLicenses[i % sampleLicenses.length] || sampleLicenses[0]
       const product = PRODUCT_NAMES[i % PRODUCT_NAMES.length]
       const country = COUNTRIES[i % COUNTRIES.length]
-      const amountCents = Math.floor(Math.random() * 500000) + 50000 // $500 to $5500
+      const amountCents = Math.floor(Math.random() * 500000) + 50000
 
       await client.query(
         `INSERT INTO revenue_records (id, license_id, product_id, workspace_id, amount_cents, currency, billing_country, created_at)
@@ -226,16 +241,14 @@ async function seedDashboardTestData(): Promise<void> {
           amountCents,
           'USD',
           country,
-          new Date(
-            Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000 // Last 90 days
-          ),
+          new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
         ]
       )
     }
-    console.log(`[${CORRELATION_ID}] ✓ Seeded 100 revenue records`)
+    logger.info('Revenue records seeded', { count: 100 })
 
     // Phase 4: Seed affiliates and affiliate usages (20 affiliates, 200 usages)
-    console.log(`[${CORRELATION_ID}] [4/4] Seeding 20 affiliates with 200 usages...`)
+    logger.info('Seeding affiliates and usages', { phase: '4/4', affiliates: 20, usages: 200 })
 
     const affiliateIds: string[] = []
 
@@ -276,31 +289,28 @@ async function seedDashboardTestData(): Promise<void> {
           license.product_id,
           'REFERRAL',
           amountCents,
-          new Date(
-            Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000 // Last 90 days
-          ),
+          new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
         ]
       )
     }
-    console.log(`[${CORRELATION_ID}] ✓ Seeded 20 affiliates with 200 usage records`)
+    logger.info('Affiliates and usages seeded', { affiliates: 20, usages: 200 })
 
     // Summary
-    console.log(`[${CORRELATION_ID}] `)
-    console.log(`[${CORRELATION_ID}] ✅ SEEDING COMPLETE - Dashboard test data ready!`)
-    console.log(`[${CORRELATION_ID}] `)
-    console.log(`[${CORRELATION_ID}] Test Data Summary:`)
-    console.log(`[${CORRELATION_ID}]   • 3 Products`)
-    console.log(`[${CORRELATION_ID}]   • 1000 Licenses (ACTIVE/SOFT_LOCKED/ARCHIVED mix)`)
-    console.log(`[${CORRELATION_ID}]   • 100 Revenue Records (across 10 countries)`)
-    console.log(`[${CORRELATION_ID}]   • 20 Affiliates with 200 Usage Records`)
-    console.log(`[${CORRELATION_ID}] `)
-    console.log(`[${CORRELATION_ID}] Dashboard API is now ready for testing with realistic data.`)
-    console.log(`[${CORRELATION_ID}] Run: npm run dev:api`)
+    logger.info('SEEDING COMPLETE — Dashboard test data ready', {
+      summary: {
+        products: 3,
+        licenses: 1000,
+        licenseDistribution: 'ACTIVE/SOFT_LOCKED/ARCHIVED mix',
+        revenueRecords: 100,
+        countries: 10,
+        affiliates: 20,
+        affiliateUsages: 200,
+      },
+    })
   } catch (error) {
-    console.error(
-      `[${CORRELATION_ID}] ❌ Seeding failed:`,
-      error instanceof Error ? error.message : error
-    )
+    logger.error('Seeding failed', {
+      error: error instanceof Error ? error.message : String(error),
+    })
     throw error
   } finally {
     client.release()
@@ -314,10 +324,10 @@ async function seedDashboardTestData(): Promise<void> {
 
 seedDashboardTestData()
   .then(() => {
-    console.log(`[${CORRELATION_ID}] Process complete.`)
+    logger.info('Process complete')
     process.exit(0)
   })
   .catch((error) => {
-    console.error(`[${CORRELATION_ID}] Fatal error:`, error)
+    logger.error('Fatal error', { error: error instanceof Error ? error.message : String(error) })
     process.exit(1)
   })
