@@ -3,20 +3,21 @@
 ## Stage Status
 
 Status: IN PROGRESS
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-17T00:03:00.000Z
+Last Updated: 2026-03-17T00:04:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- 13 atomic implementation tasks defined (T001–T013)
-- `.actrc` confirmed existing — verified, not overwritten (Apple Silicon support preserved)
-- `.secrets` confirmed as primary secrets file; `.act.secrets` gitignore-only addition
-- 5 new `package.json` script keys: `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:list`, `validate:scripts-infra`
-- `scripts/run-local-ci.ts` — 7-step CI orchestrator with per-step PASS/FAIL + summary table
-- `docs/ci/local-ci.md` — new documentation directory
-- Root `AGENTS.md` update — pre-closure gate rule
-- All 5 workflows verified runnable via `act` without YAML modifications
+- Total: 16 atomic tasks
+- Phase 1 Setup: T001–T002 (verify act + .actrc, no-op)
+- Phase 2 Foundational: T003–T005 (package.json scripts, .gitignore, gate test)
+- Phase 3 US-01/02: T006–T008 (workflow audit, run-local-ci.ts, TypeScript check)
+- Phase 4 US-03: T009 (list/targeted workflow acceptance)
+- Phase 5 US-04: T010 (CI parity contract enforcement)
+- Phase 6 US-05: T011–T012 (closure gate spec + root AGENTS.md)
+- Phase 7 US-06: T013–T014 (docs/ci/local-ci.md + developer workflow)
+- Phase 8 Acceptance: T015–T016 (live execution + failure simulation)
 
 Deferred Scope:
 
@@ -26,12 +27,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Checker VERDICT: PASS (3 corrections applied to plan.md)
-- Zero architecture layer violations
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ## Purpose
 
