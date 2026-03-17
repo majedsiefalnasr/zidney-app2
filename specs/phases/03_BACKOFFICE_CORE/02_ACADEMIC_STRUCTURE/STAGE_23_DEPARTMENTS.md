@@ -9,21 +9,23 @@ Status: Organizational-Academic Structure Layer
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: LOW
-Last Updated: 2026-03-17T00:04:00Z
+Last Updated: 2026-03-17T03:00:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all 9/9 criteria)
+Implementation: AUTHORIZED
 
-- Total: 29 atomic tasks
-- Group 1 — Data Layer: T001–T005 (5 tasks)
-- Group 2 — Domain Package: T006–T011 (6 tasks)
-- Group 3 — Validation: T012–T013 (2 tasks)
-- Group 4 — API Routes: T014–T023 (10 tasks)
-- Group 5 — Route Registration: T024 (1 task)
-- Group 6 — Tests: T025–T029 (5 tasks)
-- 8 [P] parallel tasks in routes group + 5 [P] parallel test tasks
+Scope Authorized:
+
+- 30 atomic implementation tasks (T001–T030)
+- Group 1 — Data Layer: T001–T005 (migration, Drizzle schemas, students FK)
+- Group 2 — Domain Package: T006–T011 (service, types, errors)
+- Group 3 — Validation: T012–T013 (Zod schemas)
+- Group 4 — API Routes: T014–T023 (helpers, 8 route handlers, barrel)
+- Group 5 — Route Registration: T024 (app.ts mount)
+- Group 6 — Tests: T025–T030 (unit + integration + auth/RBAC)
 
 Deferred Scope:
 
@@ -36,10 +38,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed — implementation authorized
+- 5 guardian audits passed (speckit.analyze, Security, Performance, QA, Code Reviewer)
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed across 3 audit rounds. Implementation gate open.
 
 ---
 

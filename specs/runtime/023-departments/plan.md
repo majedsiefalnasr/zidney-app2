@@ -148,7 +148,7 @@ export interface DbClient {
 // AuditContext — same shape as divisions AuditContext
 export interface AuditContext {
   user_id: string;
-  request_id: string;
+  correlation_id: string; // renamed from request_id — must match logging contract (AGENTS.md §Logging Rules)
   workspace_slug: string;
   workspace_id: string;
 }
@@ -242,6 +242,15 @@ packages/domain-core/src/departments/departments.service.ts
 
 All service functions use injected `DbClient`. No `Pool` import. All writes are transactional.
 
+Module-level declarations (top of file):
+
+```typescript
+import { createLogger } from "@zidney/logger";
+const logger = createLogger("departments-service");
+```
+
+All mutating functions use `logger` to emit structured audit events with `correlation_id`, `workspace_slug`, `workspace_id`, and `user_id`.
+
 **Functions to implement**:
 
 #### `listDepartments(db, input): Promise<ListDepartmentsResult>`
@@ -321,7 +330,8 @@ Inside `BEGIN … COMMIT`:
 2. Check `status = ENABLED` — throws `DEPARTMENT_DISABLED`
 3. If department has `division_id ≠ null`: check staff member's `staff_divisions` includes that division — throws `DEPARTMENT_DIVISION_MISMATCH`
 4. `INSERT INTO staff_departments … ON CONFLICT (staff_id, department_id) DO NOTHING` (idempotent)
-5. Return fetched/updated assignment row
+   4b. `SELECT * FROM staff_departments WHERE staff_id = $1 AND department_id = $2` — always retrieve the row regardless of whether step 4 inserted or skipped (handles both insert and idempotent-skip paths)
+5. Return the row fetched in step 4b
 6. Log `DEPARTMENT_STAFF_ASSIGNED`
 
 #### `removeStaffDepartment(db, staffId, departmentId, audit): Promise<void>`
@@ -333,6 +343,8 @@ Inside `BEGIN … COMMIT`:
 3. Log `DEPARTMENT_STAFF_REMOVED`
 
 #### `checkDepartmentCapacity(db, departmentId): Promise<void>` _(internal helper used by student assignment)_
+
+> **@internal** — For use by student-assignment domain only. Not a stable public API surface. Add `/** @internal — for use by student-assignment domain only */` JSDoc in the implementation file and on the barrel re-export.
 
 Inside caller's open transaction:
 
@@ -357,6 +369,7 @@ export * from "./departments.service";
 export {
   type AuditContext,
   type CreateDepartmentInput,
+  type DbClient, // exported so future consumers (student-assignment) can type the db parameter
   DepartmentStatus,
   DepartmentType,
   type DepartmentRow,
@@ -458,7 +471,7 @@ apps/api/src/routes/backoffice/departments/
 ```typescript
 // Same structure as divisions/helpers.ts
 // getDb(c): returns c.get('tenant').pool
-// buildAuditCtx(c): returns AuditContext with user_id, request_id, workspace_slug, workspace_id
+// buildAuditCtx(c): returns AuditContext with user_id, correlation_id, workspace_slug, workspace_id
 // departmentErrorResponse(c, err): maps DepartmentsError → JSON envelope; unknown → 500
 // isValidUuid(s): UUID format guard (reuse UUID_PATTERN from divisions)
 ```
@@ -750,12 +763,16 @@ describe('deleteDepartment — guards')
 
 ### 6.3 Concurrent max_users Race Condition Test
 
-**File**: `tests/api/departments/departments-concurrent.test.ts` _(NEW)_
+**File**: `packages/domain-core/src/departments/__tests__/departments-concurrent.test.ts` _(NEW)_
+
+> **Note:** `checkDepartmentCapacity` has no HTTP endpoint in Stage 23. This is a **domain service unit test**, not an HTTP integration test. The test invokes `checkDepartmentCapacity` directly via two parallel DB client instances (structurally typed `DbClient`).
 
 ```
-✓ Two simultaneous assignment requests for the last slot: only one succeeds,
-  the other receives 422 DEPARTMENT_MAX_USERS_EXCEEDED
-  (Test uses Promise.all with two racing requests; asserts exactly one 200 and one 422)
+✓ Two concurrent calls to checkDepartmentCapacity for the last slot:
+  only one succeeds (returns without throwing),
+  the other throws DEPARTMENT_MAX_USERS_EXCEEDED.
+  (Test uses Promise.all with two in-process DB clients against the same tenant schema;
+   SELECT … FOR UPDATE serializes execution — asserts exactly one success and one error)
 ```
 
 ---
@@ -802,32 +819,32 @@ registered in `ARCHITECTURE_MAP.json`.
 
 ## Files to Create
 
-| File                                                                         | Type |
-| ---------------------------------------------------------------------------- | ---- |
-| `apps/api/src/db/tenant/migrations/20260317_001_departments.ts`              | NEW  |
-| `apps/api/src/db/tenant/schemas/departments.schema.ts`                       | NEW  |
-| `apps/api/src/db/tenant/schemas/staff-departments.schema.ts`                 | NEW  |
-| `apps/api/src/routes/backoffice/departments/helpers.ts`                      | NEW  |
-| `apps/api/src/routes/backoffice/departments/list-departments.ts`             | NEW  |
-| `apps/api/src/routes/backoffice/departments/create-department.ts`            | NEW  |
-| `apps/api/src/routes/backoffice/departments/get-department.ts`               | NEW  |
-| `apps/api/src/routes/backoffice/departments/update-department.ts`            | NEW  |
-| `apps/api/src/routes/backoffice/departments/delete-department.ts`            | NEW  |
-| `apps/api/src/routes/backoffice/departments/children-department.ts`          | NEW  |
-| `apps/api/src/routes/backoffice/departments/tree-departments.ts`             | NEW  |
-| `apps/api/src/routes/backoffice/departments/staff-departments.ts`            | NEW  |
-| `apps/api/src/routes/backoffice/departments/index.ts`                        | NEW  |
-| `packages/domain-core/src/departments/departments.errors.ts`                 | NEW  |
-| `packages/domain-core/src/departments/departments.types.ts`                  | NEW  |
-| `packages/domain-core/src/departments/departments.service.ts`                | NEW  |
-| `packages/domain-core/src/departments/index.ts`                              | NEW  |
-| `packages/validation/src/departments/departments.validation.ts`              | NEW  |
-| `tests/api/departments/departments-crud.test.ts`                             | NEW  |
-| `tests/api/departments/departments-hierarchy.test.ts`                        | NEW  |
-| `tests/api/departments/departments-staff.test.ts`                            | NEW  |
-| `tests/api/departments/departments-auth.test.ts`                             | NEW  |
-| `tests/api/departments/departments-concurrent.test.ts`                       | NEW  |
-| `packages/domain-core/src/departments/__tests__/departments.service.test.ts` | NEW  |
+| File                                                                            | Type |
+| ------------------------------------------------------------------------------- | ---- |
+| `apps/api/src/db/tenant/migrations/20260317_001_departments.ts`                 | NEW  |
+| `apps/api/src/db/tenant/schemas/departments.schema.ts`                          | NEW  |
+| `apps/api/src/db/tenant/schemas/staff-departments.schema.ts`                    | NEW  |
+| `apps/api/src/routes/backoffice/departments/helpers.ts`                         | NEW  |
+| `apps/api/src/routes/backoffice/departments/list-departments.ts`                | NEW  |
+| `apps/api/src/routes/backoffice/departments/create-department.ts`               | NEW  |
+| `apps/api/src/routes/backoffice/departments/get-department.ts`                  | NEW  |
+| `apps/api/src/routes/backoffice/departments/update-department.ts`               | NEW  |
+| `apps/api/src/routes/backoffice/departments/delete-department.ts`               | NEW  |
+| `apps/api/src/routes/backoffice/departments/children-department.ts`             | NEW  |
+| `apps/api/src/routes/backoffice/departments/tree-departments.ts`                | NEW  |
+| `apps/api/src/routes/backoffice/departments/staff-departments.ts`               | NEW  |
+| `apps/api/src/routes/backoffice/departments/index.ts`                           | NEW  |
+| `packages/domain-core/src/departments/departments.errors.ts`                    | NEW  |
+| `packages/domain-core/src/departments/departments.types.ts`                     | NEW  |
+| `packages/domain-core/src/departments/departments.service.ts`                   | NEW  |
+| `packages/domain-core/src/departments/index.ts`                                 | NEW  |
+| `packages/validation/src/departments/departments.validation.ts`                 | NEW  |
+| `tests/api/departments/departments-crud.test.ts`                                | NEW  |
+| `tests/api/departments/departments-hierarchy.test.ts`                           | NEW  |
+| `tests/api/departments/departments-staff.test.ts`                               | NEW  |
+| `tests/api/departments/departments-auth.test.ts`                                | NEW  |
+| `packages/domain-core/src/departments/__tests__/departments-concurrent.test.ts` | NEW  |
+| `packages/domain-core/src/departments/__tests__/departments.service.test.ts`    | NEW  |
 
 ---
 

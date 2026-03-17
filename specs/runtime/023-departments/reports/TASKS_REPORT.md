@@ -8,10 +8,15 @@
 
 ## Summary
 
-29 atomic, dependency-ordered tasks generated across 6 groups. All tasks written to
+30 atomic, dependency-ordered tasks generated across 6 groups. All tasks written to
 `specs/runtime/023-departments/tasks.md`. Tasks follow the plan.md phase structure.
 Service agent deviation note: plan describes "8 functions" but authoritative plan source
 defines 10 — task T008 covers all 10 functions correctly.
+
+> **Amended during Step 5 Analyze:** T030 (auth/RBAC integration test) added; T026 expanded
+> with cross-tenant isolation, edge-case reparent, and idempotent-delete scenarios;
+> T028 HTTP status corrected to 200; T029 restructured as domain unit test.
+> tasks_total updated from 29 → 30.
 
 ---
 
@@ -34,8 +39,8 @@ defines 10 — task T008 covers all 10 functions correctly.
 | 3 — Validation         | 2      | T012–T013 | Sequential within group                                      |
 | 4 — API Routes         | 10     | T014–T023 | T014 (helpers) sequential; T015–T022 [P] parallel; T023 last |
 | 5 — Route Registration | 1      | T024      | Requires all routes complete                                 |
-| 6 — Tests              | 5      | T025–T029 | All [P] — full parallelization available                     |
-| **Total**              | **29** |           |                                                              |
+| 6 — Tests              | 6      | T025–T030 | All [P] — full parallelization available                     |
+| **Total**              | **30** |           | T030 added during Step 5 Analyze remediation                 |
 
 ---
 
@@ -77,7 +82,8 @@ defines 10 — task T008 covers all 10 functions correctly.
 
 1. **T002 Drizzle self-reference complexity** — `parent_id` requires `(): AnyPgColumn =>` deferred lambda; implementer must follow data-model.md precisely to avoid Drizzle circular reference compile error
 2. **T023 Router barrel ordering** — `GET /departments/tree` MUST be registered before `GET /departments/:id`; incorrect order will cause tree endpoint to never be reached
-3. **T025–T029 Test isolation** — All test files require clean tenant DB seeding; concurrent test (T029) requires two concurrent DB connections
+3. **T025–T030 Test isolation** — All test files require clean tenant DB seeding; concurrent test (T029) is a domain unit test invoking `checkDepartmentCapacity` directly via two parallel DB clients (no HTTP layer)
+4. **T030 RBAC test dependency** — requires seeded users with `can_view` and `can_edit` roles for ACADEMIC_STRUCTURE permission; license-state tests require workspace status fixtures
 
 ---
 
