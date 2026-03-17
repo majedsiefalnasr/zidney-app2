@@ -3,20 +3,34 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-17T00:00:00.000Z
+Last Updated: 2026-03-17T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Local CI simulation via `act`
+- `.actrc` runner image mapping
+- Script wrappers (ci:local, ci:local:full, ci:local:workflow, ci:local:list)
+- Secrets strategy (.act.secrets — never committed)
+- Workflow compatibility audit
+- `scripts/run-local-ci.ts` orchestrator script
+- Mandatory orchestrator closure gate
+- CI parity contract enforcement
+- Developer documentation (docs/ci/local-ci.md, AGENTS.md update)
+
+Deferred Scope:
+
+- Replacing GitHub CI (GitHub remains final authority)
+- Full parity with hosted runners (best-effort simulation only)
+- Managing production secrets
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ## Purpose
 
