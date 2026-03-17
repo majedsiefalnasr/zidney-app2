@@ -10,22 +10,20 @@ Status: Organizational-Academic Structure Layer
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-17T00:03:00Z
+Last Updated: 2026-03-17T00:04:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- departments table (CRUD + hierarchy + types + max_users)
-- staff_departments join table
-- 24 new files across data, domain, validation, API, test layers
-- 6 files updated (students schema, barrel exports, app.ts, domain index, pkg.json, validation index)
-- Migration 20260317_001_departments (schema 1.5.0 → 1.6.0)
-- Cycle detection via recursive CTE inside write transaction
-- SELECT FOR UPDATE on departments row for max_users check
-- Explicit division_id existence check in createDepartment + updateDepartment
-- 10 API endpoints with 4-layer middleware chain
-- 5 test files (unit + integration + concurrent)
+- Total: 29 atomic tasks
+- Group 1 — Data Layer: T001–T005 (5 tasks)
+- Group 2 — Domain Package: T006–T011 (6 tasks)
+- Group 3 — Validation: T012–T013 (2 tasks)
+- Group 4 — API Routes: T014–T023 (10 tasks)
+- Group 5 — Route Registration: T024 (1 task)
+- Group 6 — Tests: T025–T029 (5 tasks)
+- 8 [P] parallel tasks in routes group + 5 [P] parallel test tasks
 
 Deferred Scope:
 
@@ -38,11 +36,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Guardian validation PASSED (Architecture Checker + API Designer)
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. 3 API violations remediated before plan was finalized. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
