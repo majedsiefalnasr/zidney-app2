@@ -1904,7 +1904,106 @@ This is the final stage commit — make it complete and meaningful.
 
 Apply Git Hygiene Enforcement step 4 (Commit Hard Gate) to execute and handle the pre-commit hook result.
 
-## 7.8 — Output Final Closure Summary
+## 7.8 — Governance Metadata Lock (Validation Gate)
+
+**Purpose:** Ensure stage status file and workflow state file are synchronized before workflow exit. This gate prevents governance metadata drift and ensures accurate resumption state for future workflow sessions.
+
+### 7.8A — Stage Status Block Verification
+
+Open `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>` and verify the `## Stage Status` block contains:
+
+Checklist:
+
+- [ ] `Status:` field = `PRODUCTION READY`
+- [ ] `Risk Level:` populated (LOW / MEDIUM / HIGH)
+- [ ] `Closure Date:` = current ISO timestamp
+- [ ] `Scope Delivered:` section lists complete scope with ✅
+- [ ] `Constitutional Compliance:` section documents all ADR alignment
+- [ ] `Audit Results:` section documents all guardian audit verdicts (PASS)
+- [ ] `Notes:` section confirms "production ready"
+
+If ANY item is unchecked → STOP. Display the specific items missing. Remediate (update Step 7.3 and re-commit), then re-run 7.8A.
+
+### 7.8B — Workflow State Consistency Check
+
+Run the following validations against `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`:
+
+```bash
+# Validate status fields
+jq '.stage_status' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
+# Expected: "PRODUCTION READY"
+
+jq '.current_step' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
+# Expected: "stage_production_ready"
+
+# Validate task completion
+jq '.tasks_completed, .tasks_total' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
+# Expected: Both same (e.g., 30, 30)
+
+# Validate history completeness
+jq '.history | length' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
+# Expected: >= 9 (all events present)
+
+jq '.history | map(.event)' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
+# Expected array contains (in order):
+# "branch_created", "specify_complete", "clarifications_locked",
+# "plan_complete", "tasks_complete", "drift_analysis_passed",
+# "stage_backend_closed", "pre_closure_review_approved", "stage_production_ready"
+```
+
+**Block Criteria (STOP if ANY true):**
+
+- `stage_status` ≠ "PRODUCTION READY" → BLOCKED
+- `current_step` ≠ "stage_production_ready" → BLOCKED
+- `tasks_completed` ≠ `tasks_total` → BLOCKED
+- History contains < 9 events → BLOCKED
+
+If BLOCKED → Display exact mismatch, remediate (update Step 7.4 and re-commit), then re-run 7.8B.
+
+### 7.8C — Git Staging Validation
+
+Verify governance files are correctly staged:
+
+```bash
+git status --porcelain
+```
+
+Expected output (for governance-only re-commit after 7.8 validation fixes):
+
+```
+M  specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+M  specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
+```
+
+**No other files should be in the governance commit.** If unrelated files are staged:
+
+```bash
+git reset
+git add specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+git add specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
+git status --porcelain  # Verify clean
+```
+
+### 7.8D — Post-Validation State Confirmation
+
+Verify final state without staging:
+
+```bash
+# Read directly from working tree (not from git)
+jq '.stage_status' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
+# Should show: "PRODUCTION READY"
+
+jq '.current_step' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
+# Should show: "stage_production_ready"
+```
+
+If both match expected values → Governance gate PASSED. Proceed to Step 7.9.
+
+If any mismatch → Governance gate FAILED. Display exact values. STOP and remediate (update Step 7.3/7.4 and re-commit), then re-run entire 7.8.
+
+---
+
+## 7.9 — Output Final Closure Summary
 
 ```
 ✅ Zidney Hard Mode Workflow — COMPLETE
