@@ -1772,6 +1772,34 @@ Do NOT proceed to Step 7 until explicit approval is received.
 
 ---
 
+# Local CI Simulation Gate (Mandatory Pre-Closure)
+
+**Gate name:** Run Local CI Simulation (ACT)  
+**Command:** `bun run ci:local`  
+**Required outcome:** Exit code 0 (all workflow jobs pass)  
+**Failure behavior:** Block closure with message: "Local CI failed — see output above"  
+**Bypass:** None. This gate is not configurable or skippable.
+
+AI must:
+
+1. Run `bun run ci:local` from the repository root before marking any stage as PRODUCTION READY.
+2. Confirm all workflow jobs exit with code 0.
+3. Block closure if any job fails — report the failing workflow name and job name in the closure
+   block reason.
+4. This gate is non-bypassable — no flag, config option, or exceptional case permits skipping it.
+
+**CI Parity Contract:**
+
+Every file in `.github/workflows/*.yml` must be locally executable via `act`. Any workflow that
+cannot run locally must be adapted, mocked, or have its exclusion explicitly documented before PR
+merge. Violations block stage closure.
+
+**Governance note (INFRA-023):** This gate was introduced as part of Stage INFRA-023 (Local CI
+Simulation With Act). The `bun run ci:run-local` command is the full 7-step governance orchestrator
+that runs all validation checks AND the `act` simulation as its final step.
+
+---
+
 # Step 7 — Closure
 
 Only execute after explicit user approval at the Pre-Closure Review Gate.
