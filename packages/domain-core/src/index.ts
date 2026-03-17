@@ -14,9 +14,9 @@ export * from './audit/attempt-event-logger'
 // Auth module
 export * from './auth/index'
 // Departments module (Stage 023)
-export * from './departments'
+export * as departments from './departments'
 // Divisions module (Stage 022)
-export * from './divisions'
+export * as divisions from './divisions'
 // Job hash utility
 export * from './job-hash'
 // License module
