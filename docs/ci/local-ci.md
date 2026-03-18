@@ -75,11 +75,8 @@ committed and shared across all developer machines. **Do not modify `.actrc`.**
 Current content (for reference):
 
 ```
-# Platform (Apple Silicon M1/M2/M3 → emulate amd64)
---container-architecture linux/amd64
-
-# Runner images (catthehacker medium images, ~3GB)
--P ubuntu-latest=catthehacker/ubuntu:act-22.04
+# Runner images (~1.4 GB — multi-arch: arm64 + amd64)
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
 -P ubuntu-22.04=catthehacker/ubuntu:act-22.04
 -P ubuntu-20.04=catthehacker/ubuntu:act-20.04
 
@@ -90,10 +87,15 @@ Current content (for reference):
 # Artifact output
 --artifact-server-path /tmp/act-artifacts
 
-# Behavior
---pull=true
---rm
---reuse=false
+# Speed: bind workspace + reuse containers
+--bind
+--reuse
+
+# Terminal UX: suppress Docker pull noise
+--quiet
+
+# Default profile: skip image pull if image exists locally
+--pull=false
 ```
 
 > **Note:** `--secret-file` points to `.secrets` — this is the primary secrets file. For act-only
@@ -175,20 +177,130 @@ enforcement rule.
 
 ---
 
+## Performance Optimization
+
+Out of the box, `act` can be slow due to container cold starts, full image pulls, and repository
+cloning on every run. The configuration in `.actrc` already applies the three biggest wins, but
+knowing why each flag exists helps you tune further.
+
+### What `.actrc` enables by default
+
+| Flag               | Benefit                                                           | Trade-off                                                                                     |
+| ------------------ | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `--bind`           | Mounts your workspace directly into the container — no clone step | Container sees uncommitted changes; ensure workspace is clean before a final run              |
+| `--reuse`          | Keeps containers alive between runs (no cold-start overhead)      | State accumulates; reset with `docker ps -aq \| xargs docker rm -f` if you see stale failures |
+| `--quiet`          | Suppresses Docker pull noise; actual step output is preserved     | Slightly less verbosity for debugging Docker-level issues                                     |
+| `--pull=false`     | Uses locally cached runner images                                 | Images can drift from GitHub; use `ci:local:full` periodically                                |
+| `act-latest` image | ~1.4 GB vs 17 GB+ for `full-*` images                             | Fewer pre-installed tools (see Differences table)                                             |
+
+### Target a specific job (fastest feedback loop)
+
+When debugging a single failure, skip running all workflows:
+
+```bash
+# Run only a named job by its workflow job ID
+bun run ci:local:job -- typecheck
+bun run ci:local:job -- lint
+bun run ci:local:job -- architecture-guard
+
+# Or target a whole workflow file
+bun run ci:local:workflow ci.yml
+bun run ci:local:workflow ci-type-safety.yml
+```
+
+### Structured output for programmatic parsing
+
+Pipe `act --json` output through `jq` to get a clean pass/fail summary:
+
+```bash
+act --json | jq 'select(.status != "running") | {job: .name, status: .status}'
+```
+
+This is useful for CI dashboards or scripted checks that need machine-readable results.
+
+### Syntax validation without running containers
+
+Use `actionlint` (a static workflow checker) to catch syntax errors, missing secrets, and
+incorrect contexts instantly — no Docker required:
+
+```bash
+# Install once (macOS)
+brew install actionlint
+
+# Validate all workflows without spinning up any container
+bun run ci:local:dry
+# equivalent: actionlint .github/workflows/*.yml
+```
+
+`actionlint` catches most structural problems in under a second. Run it before `act` to avoid
+wasting a full container startup on a YAML syntax error.
+
+### Mount local Bun cache (skip reinstalls)
+
+By default, `actions/cache` is a no-op locally (act can't communicate with GitHub's cache server).
+The container reinstalls all Bun dependencies from scratch on every run. You can avoid this by
+mounting your host Bun cache directly into the container.
+
+Run this setup command **once** per machine — it appends the volume mount to `.actrc` with the
+path already expanded:
+
+```bash
+# macOS / Linux (expand $HOME at setup time)
+echo "--container-options=\"-v ${HOME}/.bun/install/cache:/root/.bun/install/cache:ro\"" >> .actrc
+```
+
+Verify your cache location first: `bun pm cache`
+
+> **Note:** `.actrc` does not support shell variable expansion (`~` or `$HOME`). The command above
+> expands `$HOME` in your current shell and writes the absolute path into `.actrc`.
+
+### File watcher: auto-run on file changes (`entr`)
+
+Combine `act` with `entr` to get an automatic local CI loop — every time a TypeScript file in a
+package changes, the relevant job reruns:
+
+```bash
+# Install entr (macOS)
+brew install entr
+
+# Auto-rerun typecheck job when any .ts file in packages/ changes
+find packages -name '*.ts' | entr -c bun run ci:local:job -- typecheck
+
+# Auto-rerun lint when any source file changes
+find apps packages -name '*.ts' -o -name '*.vue' | entr -c bun run ci:local:job -- lint
+```
+
+`-c` clears the terminal between runs for a clean output stream.
+
+### Full clean run (when you need fresh images and containers)
+
+For pre-release validation or debugging image-specific failures, explicitly override the `.actrc`
+defaults:
+
+```bash
+bun run ci:local:full
+# Runs: act --pull --reuse=false
+# Pulls the latest runner image + creates a fresh container (no bind cache, clean state)
+```
+
+---
+
 ## Troubleshooting
 
-| Symptom                                                             | Cause                                                                                  | Fix                                                                                                                                                                          |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `authentication required: Invalid username or token` on every job   | `GITHUB_TOKEN` not set — `act` cannot clone GitHub Actions (setup-bun, checkout, etc.) | Add `GITHUB_TOKEN=<your-PAT>` to `.secrets` (`.actrc` uses `--secret-file .secrets`). Create a [Personal Access Token](https://github.com/settings/tokens) with `repo` scope |
-| `Docker is not running`                                             | Docker Desktop is not started                                                          | Open Docker Desktop and wait for it to be ready                                                                                                                              |
-| `Cannot connect to the Docker daemon`                               | Docker socket permissions                                                              | Run `sudo systemctl start docker` (Linux) or restart Docker Desktop (macOS)                                                                                                  |
-| OCI image architecture mismatch (`exec format error`)               | Apple Silicon without `--container-architecture`                                       | Confirm `.actrc` has `--container-architecture linux/amd64`                                                                                                                  |
-| Missing secrets (`unset variable` in workflow)                      | `.secrets` or `.act.secrets` missing or incomplete                                     | Check that both files exist locally with the required keys                                                                                                                   |
-| E2E tests failing (`playwright` binary not found)                   | Container image does not have Playwright browsers                                      | E2E jobs require additional setup — see the Differences from GitHub CI section below                                                                                         |
-| `hard-mode-guard.yml` fails at "Validate protected authority files" | Step requires git SSH access to compare with remote                                    | Expected locally — this step cannot run without SSH key configured in the container                                                                                          |
-| `hard-mode-guard.yml` fails with branch context errors              | act uses a mock branch ref by default                                                  | Override: `act -W .github/workflows/hard-mode-guard.yml --env GITHUB_REF=refs/heads/<your-branch>`                                                                           |
-| Docker socket not available for job services                        | Docker-in-Docker not configured                                                        | Ensure Docker Desktop has "Allow the default Docker socket to be used" enabled                                                                                               |
-| `act` exits 137 (OOM kill)                                          | Container ran out of memory                                                            | Increase Docker Desktop memory limit to at least 8GB                                                                                                                         |
+| Symptom                                                             | Cause                                                                                  | Fix                                                                                                                                                                                                        |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `authentication required: Invalid username or token` on every job   | `GITHUB_TOKEN` not set — `act` cannot clone GitHub Actions (setup-bun, checkout, etc.) | Add `GITHUB_TOKEN=<your-PAT>` to `.secrets` (`.actrc` uses `--secret-file .secrets`). Create a [Personal Access Token](https://github.com/settings/tokens) with `repo` scope                               |
+| `Docker is not running`                                             | Docker Desktop is not started                                                          | Open Docker Desktop and wait for it to be ready                                                                                                                                                            |
+| `Cannot connect to the Docker daemon`                               | Docker socket permissions                                                              | Run `sudo systemctl start docker` (Linux) or restart Docker Desktop (macOS)                                                                                                                                |
+| OCI image architecture mismatch (`exec format error`)               | Running an amd64-only third-party action on Apple Silicon                              | The default `catthehacker/ubuntu:act-latest` is multi-arch — if you see this, a specific action's Docker image is amd64-only; uncomment `--container-architecture linux/amd64` in `.actrc` as a workaround |
+| Stale state from `--reuse` (e.g. lock file conflict, wrong env var) | `--reuse` keeps containers alive — a previous failed run left dirty state              | Reset containers: `docker ps -aq \| xargs docker rm -f`, then re-run                                                                                                                                       |
+| Workflow sees uncommitted files unexpectedly                        | `--bind` mounts your live workspace — untracked or dirty files are visible             | Expected behaviour. Commit or stash changes before runs that must mirror a clean git state                                                                                                                 |
+| Missing secrets (`unset variable` in workflow)                      | `.secrets` or `.act.secrets` missing or incomplete                                     | Check that both files exist locally with the required keys                                                                                                                                                 |
+| E2E tests failing (`playwright` binary not found)                   | Container image does not have Playwright browsers                                      | E2E jobs require additional setup — see the Differences from GitHub CI section below                                                                                                                       |
+| `hard-mode-guard.yml` fails at "Validate protected authority files" | Step requires git SSH access to compare with remote                                    | Expected locally — this step cannot run without SSH key configured in the container                                                                                                                        |
+| `hard-mode-guard.yml` fails with branch context errors              | act uses a mock branch ref by default                                                  | Override: `act -W .github/workflows/hard-mode-guard.yml --env GITHUB_REF=refs/heads/<your-branch>`                                                                                                         |
+| Docker socket not available for job services                        | Docker-in-Docker not configured                                                        | Ensure Docker Desktop has "Allow the default Docker socket to be used" enabled                                                                                                                             |
+| `act` exits 137 (OOM kill)                                          | Container ran out of memory                                                            | Increase Docker Desktop memory limit to at least 8GB                                                                                                                                                       |
 
 ---
 
@@ -197,17 +309,17 @@ enforcement rule.
 `act` simulation is best-effort. Some GitHub Actions features are unavailable or behave differently
 locally. The table below documents the known differences for the Zidney workflow suite.
 
-| Feature                        | GitHub CI           | `act` Local                           | Notes                                                                          |
-| ------------------------------ | ------------------- | ------------------------------------- | ------------------------------------------------------------------------------ |
-| `actions/cache@v4`             | Full cache service  | No-op (cache miss on every run)       | Expect slower runs due to repeated `bun install`                               |
-| `actions/upload-artifact@v4`   | GH artifact storage | Written to `/tmp/act-artifacts`       | Configured via `--artifact-server-path` in `.actrc`                            |
-| `actions/download-artifact@v4` | GH artifact storage | Read from `/tmp/act-artifacts`        | Same path as upload                                                            |
-| `$GITHUB_STEP_SUMMARY`         | Job summary page    | Simulated locally                     | Not visible in outputs                                                         |
-| `schedule:` trigger            | Executes on cron    | Not triggered automatically           | Use `act schedule` to simulate                                                 |
-| `GITHUB_REF` (branch context)  | Actual branch name  | Mock value (`refs/heads/master`)      | Override with `--env GITHUB_REF=refs/heads/<branch>` for `hard-mode-guard.yml` |
-| Pre-installed tools            | Full hosted runner  | catthehacker:act-22.04 (~3GB, medium) | Most tools present; Playwright browsers not included                           |
-| Docker service containers      | Isolated per-job    | Requires Docker socket pass-through   | Services work but require correct Docker Desktop settings                      |
-| E2E tests (Playwright)         | Fully supported     | Not supported in CI image             | E2E jobs expected to fail locally — excluded from pre-closure gate             |
+| Feature                        | GitHub CI           | `act` Local                         | Notes                                                                            |
+| ------------------------------ | ------------------- | ----------------------------------- | -------------------------------------------------------------------------------- |
+| `actions/cache@v4`             | Full cache service  | No-op (cache miss on every run)     | Expect slower runs due to repeated `bun install`                                 |
+| `actions/upload-artifact@v4`   | GH artifact storage | Written to `/tmp/act-artifacts`     | Configured via `--artifact-server-path` in `.actrc`                              |
+| `actions/download-artifact@v4` | GH artifact storage | Read from `/tmp/act-artifacts`      | Same path as upload                                                              |
+| `$GITHUB_STEP_SUMMARY`         | Job summary page    | Simulated locally                   | Not visible in outputs                                                           |
+| `schedule:` trigger            | Executes on cron    | Not triggered automatically         | Use `act schedule` to simulate                                                   |
+| `GITHUB_REF` (branch context)  | Actual branch name  | Mock value (`refs/heads/master`)    | Override with `--env GITHUB_REF=refs/heads/<branch>` for `hard-mode-guard.yml`   |
+| Pre-installed tools            | Full hosted runner  | catthehacker:act-latest (~1.4 GB)   | Multi-arch (arm64 + amd64); most tools present; Playwright browsers not included |
+| Docker service containers      | Isolated per-job    | Requires Docker socket pass-through | Services work but require correct Docker Desktop settings                        |
+| E2E tests (Playwright)         | Fully supported     | Not supported in CI image           | E2E jobs expected to fail locally — excluded from pre-closure gate               |
 
 ### CI Parity Contract
 
