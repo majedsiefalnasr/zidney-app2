@@ -13,21 +13,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # PLATFORM (Apple Silicon M1/M2/M3 → emulate amd64 for ubuntu-latest compat)
 # ─────────────────────────────────────────────────────────────────────────────
---container-architecture linux/amd64
+# --container-architecture linux/amd64
 
 # ─────────────────────────────────────────────────────────────────────────────
 # RUNNER IMAGE
-# Use a runner image that includes `node` and common tooling so action helper
-# scripts executed by `act` (e.g. actions/cache, actions/upload-artifact)
-# can run without `node` not found errors. For local development you may prefer
-# the smaller `act-22.04` image, but the full runner image mirrors GitHub's
-# environment and includes `node` and other binaries.
-# Set to `catthehacker/ubuntu:full-22.04` to ensure `node` is available.
-# WARNING: full image is large (~60GB) — use `act-22.04` for faster runs if
-# you prefer to install node manually in failing jobs.
 # ─────────────────────────────────────────────────────────────────────────────
--P ubuntu-latest=catthehacker/ubuntu:act-20.04
--P ubuntu-22.04=catthehacker/ubuntu:act-20.04
+-P ubuntu-latest=catthehacker/ubuntu:full-22.04
+-P ubuntu-22.04=catthehacker/ubuntu:full-22.04
 -P ubuntu-20.04=catthehacker/ubuntu:act-20.04
 
 # ─────────────────────────────────────────────────────────────────────────────
