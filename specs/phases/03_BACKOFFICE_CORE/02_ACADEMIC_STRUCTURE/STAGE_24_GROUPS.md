@@ -9,20 +9,31 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-19T00:00:00.000Z
+Last Updated: 2026-03-19T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Group CRUD (create, list, read, update, soft-delete)
+- Student single-group assignment with max_members SELECT FOR UPDATE
+- Staff multi-group assignment via staff_groups join table
+- Division boundary enforcement via department_id
+- Status lifecycle (ENABLED / DISABLED) with assignment blocking
+- Deletion guards: active assignments, exam targeting, ads targeting
+- Content visibility filter contract (backend-only enforcement)
+
+Deferred Scope:
+
+- Frontoffice group-based content filtering (downstream stage)
+- Group-based exam delivery in runtime (downstream stage)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
