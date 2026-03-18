@@ -79,7 +79,11 @@
       "environment": null,
       "globals": null,
       "coverageEnabled": true,
-      "reporters": ["text", "json", "html"],
+      "reporters": [
+        "text",
+        "json",
+        "html"
+      ],
       "isWorkspace": false
     },
     {

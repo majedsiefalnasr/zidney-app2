@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-03-17T10:57:15.603Z",
-  "gitSha": "4790c3e26cfb95f64435a29b2787d6eb0df95521",
+  "generatedAt": "2026-03-18T20:34:24.553Z",
+  "gitSha": "bdc7c0babf2e0b419a8a124dae0d8417564f6869",
   "architectureScore": 100,
   "moduleRisk": {
     "packages/job-queue": "LOW",
@@ -52,7 +52,7 @@
   "hotspots": [
     {
       "module": "packages/logger",
-      "score": 245
+      "score": 255
     },
     {
       "module": "packages/types",
@@ -60,11 +60,11 @@
     },
     {
       "module": "packages/domain-core",
-      "score": 88
+      "score": 97
     },
     {
       "module": "packages/validation",
-      "score": 18
+      "score": 25
     },
     {
       "module": "packages/api-client",
@@ -135,6 +135,10 @@
     {
       "from": "packages/domain-core",
       "to": "packages/validation"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "packages/logger"
     },
     {
       "from": "packages/domain-core",
@@ -1331,6 +1335,106 @@
     {
       "from": "apps/api",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
     },
     {
       "from": "apps/api",
