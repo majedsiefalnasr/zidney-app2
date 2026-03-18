@@ -21,6 +21,9 @@ on:
       - "docs/ai/**"
       - "package.json"
 
+env:
+  BUN_VERSION: "1.3.9"
+
 jobs:
   ai-context-validation:
     name: AI Context Generation & Validation
@@ -35,9 +38,9 @@ jobs:
 
       # ── 2. Setup Bun ───────────────────────────────────────────────────
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: ${{ env.BUN_VERSION }}
 
       # ── 3. Install dependencies ────────────────────────────────────────
       - name: Install dependencies

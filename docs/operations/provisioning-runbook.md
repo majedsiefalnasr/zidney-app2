@@ -546,7 +546,7 @@ done
 
 ## 9. References
 
-- **Architecture Decision Records**: `docs/architecture/adr/adr-0001.md` (database-per-tenant)
+- **Architecture Decision Records**: `docs/architecture/ADR/ADR-0001.md` (database-per-tenant)
 - **Provisioning Specification**: `specs/phases/04_runtime/STAGE_05_TENANT_PROVISIONING_SERVICE.md`
 - **Error Codes**: See `ErrorHandling.ts` for full PROV\_\* code reference
 - **Structured Logging**: All logs include correlation_id for tracing across services

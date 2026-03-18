@@ -5,16 +5,30 @@
 set -e
 
 DB_HOST="${DB_HOST:-localhost}"
-DB_PORT="${DB_PORT:-5433}"
+# Default to CI postgres service port and CI credentials when not overridden
+DB_PORT="${DB_PORT:-5432}"
 DB_USER="${DB_USER:-zidney_test}"
-DB_PASSWORD="${DB_PASSWORD:-test_password_secure_123}"
-MASTER_DB_NAME="master_db"
+DB_PASSWORD="${DB_PASSWORD:-zidney_test}"
+MASTER_DB_NAME="${MASTER_DB_NAME:-zidney_master_test}"
 
 echo "📦 Initializing test database..."
 
 # Function to run psql commands
 run_sql() {
-  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$@"
+  # If caller provided a -d/--dbname arg, honor it; otherwise default to the postgres maintenance DB
+  has_db_arg=false
+  for arg in "$@"; do
+    if [ "$arg" = "-d" ] || [ "$arg" = "--dbname" ]; then
+      has_db_arg=true
+      break
+    fi
+  done
+
+  if [ "$has_db_arg" = true ]; then
+    PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$@"
+  else
+    PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d postgres "$@"
+  fi
 }
 
 # Drop and recreate master database

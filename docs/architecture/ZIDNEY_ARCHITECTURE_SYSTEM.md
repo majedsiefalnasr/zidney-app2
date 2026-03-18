@@ -81,7 +81,7 @@ Architectural decisions are documented using ADRs.
 Location:
 
 ```
-docs/architecture/adr/
+docs/architecture/ADR/
 ```
 
 Examples include:

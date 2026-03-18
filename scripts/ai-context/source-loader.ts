@@ -71,7 +71,7 @@ interface DockerService {
 }
 
 /**
- * Load ADR files from docs/architecture/adr/
+ * Load ADR files from docs/architecture/ADR/
  */
 async function loadADRs(adrDir: string): Promise<ADRFile[]> {
   const files = await readdir(adrDir)
@@ -312,7 +312,7 @@ export async function loadSourceMetadata(repoRoot: string): Promise<SourceMetada
   const sourceTimestamp = new Date().toISOString()
 
   try {
-    const adrDir = join(repoRoot, 'docs/architecture/adr')
+    const adrDir = join(repoRoot, 'docs/architecture/ADR')
     const boundariesPath = join(repoRoot, 'docs/architecture/module-boundaries.json')
     const composePath = join(repoRoot, 'docker-compose.yml')
 

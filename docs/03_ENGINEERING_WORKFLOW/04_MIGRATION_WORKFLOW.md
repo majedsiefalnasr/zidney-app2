@@ -19,7 +19,7 @@ This document defines the only allowed migration workflow.
 
 Schema governance is defined in:
 
-- docs/architecture/adr/adr-0008-formalize-semantic-versioning-policy.md
+- docs/architecture/ADR/ADR-0008-formalize-semantic-versioning-policy.md
 
 ---
 

@@ -4,25 +4,26 @@
 # This file is used to configure act for local GitHub Actions execution.
 # Run workflows locally with: act [event] [flags]
 # Examples:
-#   act push                         # simulate a push event
-#   act pull_request                 # simulate a PR event
-#   act -W .github/workflows/typecheck.yml   # run a specific workflow
-#   act -j typecheck                         # run a specific job
-#   act -l                                   # list all workflows
+#   act push                                                 # simulate a push event
+#   act pull_request                                         # simulate a PR event
+#   act -W .github/workflows/typecheck.yml                   # run a specific workflow
+#   act -j typecheck                                         # run a specific job
+#   act -l                                                   # list all workflows
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PLATFORM (Apple Silicon M1/M2/M3 → emulate amd64 for ubuntu-latest compat)
+# PLATFORM
+# catthehacker/ubuntu:act-latest supports multi-arch (linux/amd64 + linux/arm64).
+# Docker Desktop on Apple Silicon will pull the native arm64 variant automatically.
+# Uncomment the line below ONLY if you encounter exec-format errors on amd64-only images.
 # ─────────────────────────────────────────────────────────────────────────────
---container-architecture linux/amd64
+# --container-architecture linux/amd64
 
 # ─────────────────────────────────────────────────────────────────────────────
 # RUNNER IMAGE
-# catthehacker/ubuntu:act-* is a full-featured image compatible with act.
-# Use `ubuntu-latest=catthehacker/ubuntu:act-22.04` (medium, ~3GB, includes
-# most tools). For a full image identical to GitHub's runners, use
-# catthehacker/ubuntu:full-22.04 (~60GB).
+# Act-tuned images (~1.4 GB each) — dramatically lighter than full images (17 GB+).
+# Multi-arch: linux/amd64 and linux/arm64 (Apple Silicon native — no emulation needed).
 # ─────────────────────────────────────────────────────────────────────────────
--P ubuntu-latest=catthehacker/ubuntu:act-22.04
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
 -P ubuntu-22.04=catthehacker/ubuntu:act-22.04
 -P ubuntu-20.04=catthehacker/ubuntu:act-20.04
 
@@ -40,13 +41,50 @@
 --artifact-server-path /tmp/act-artifacts
 
 # ─────────────────────────────────────────────────────────────────────────────
-# BEHAVIOR
+# SPEED — WORKSPACE BIND MOUNT
+# Mount the local workspace directly into the container instead of running
+# actions/checkout inside the container. This eliminates clone overhead and
+# makes every file change visible to the container instantly.
+# Works on Apple Silicon (arm64) and x86 Linux without modification.
 # ─────────────────────────────────────────────────────────────────────────────
-# Pull the runner image if not available locally
---pull=true
+--bind
 
-# Remove containers after a run (keeps Docker clean)
---rm
+# ─────────────────────────────────────────────────────────────────────────────
+# SPEED — CONTAINER REUSE
+# Keep containers alive between runs to avoid container cold-start overhead.
+# Successive invocations skip container creation entirely — state is preserved.
+#
+# If you hit stale-state failures (e.g. a previous failed run left a lock file),
+# reset with:  docker ps -aq | xargs docker rm -f
+#
+# Note: --rm is intentionally omitted here; it conflicts with --reuse.
+# Use `bun run ci:local:full` for a fully clean, fresh-container run.
+# ─────────────────────────────────────────────────────────────────────────────
+--reuse
 
-# Reuse containers between steps (set to true to speed up iterative runs)
---reuse=false
+# ─────────────────────────────────────────────────────────────────────────────
+# TERMINAL UX — QUIET MODE
+# Suppress Docker image pull progress and verbose act setup logs.
+# Actual workflow step output (stdout/stderr) is always preserved.
+# ─────────────────────────────────────────────────────────────────────────────
+--quiet
+
+# ─────────────────────────────────────────────────────────────────────────────
+# IMAGE PULL
+# Skip pulling the latest runner image if it already exists locally (default
+# fast profile). Override per-run with cli flags — see package.json for shortcuts.
+#   bun run ci:local        → --pull=false (this default)
+#   bun run ci:local:full   → --pull --reuse=false (fresh images + clean container)
+# ─────────────────────────────────────────────────────────────────────────────
+--pull=false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LOCAL DEPENDENCY CACHE (optional performance boost)
+# Mount your host bun cache into the container to skip full re-installs.
+# Shell variables are NOT expanded in .actrc — run the setup command below
+# once per machine instead of uncommenting this block directly:
+#
+#   echo "--container-options=\"-v ${HOME}/.bun/install/cache:/root/.bun/install/cache:ro\"" >> .actrc
+#
+# Verify your bun cache location first:  bun pm cache
+# ─────────────────────────────────────────────────────────────────────────────
