@@ -86,7 +86,7 @@
     "ai-context:status": "bun run ai-context:validate",
     "biome": "biome check .",
     "build:api": "bun --cwd apps/api build",
-    "build:packages": "bun run --workspaces build --filter='./packages/*'",
+    "build:packages": "bash -lc 'for d in packages/*; do if [ -f \"$d/package.json\" ]; then (cd \"$d\" && echo \"Building $d\" && bun run build); fi; done'",
     "ci:test": "vitest run --reporter=verbose",
     "dev": "bun run dev:all",
     "generate:ai-context": "bun run ai-context:generate",
