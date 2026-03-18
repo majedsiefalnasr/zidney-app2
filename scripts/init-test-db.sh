@@ -5,10 +5,11 @@
 set -e
 
 DB_HOST="${DB_HOST:-localhost}"
-DB_PORT="${DB_PORT:-5433}"
+# Default to CI postgres service port and CI credentials when not overridden
+DB_PORT="${DB_PORT:-5432}"
 DB_USER="${DB_USER:-zidney_test}"
-DB_PASSWORD="${DB_PASSWORD:-test_password_secure_123}"
-MASTER_DB_NAME="master_db"
+DB_PASSWORD="${DB_PASSWORD:-zidney_test}"
+MASTER_DB_NAME="${MASTER_DB_NAME:-zidney_master_test}"
 
 echo "📦 Initializing test database..."
 
