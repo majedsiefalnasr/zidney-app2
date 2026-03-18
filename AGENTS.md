@@ -1156,6 +1156,36 @@ GitNexus is the authoritative internal code context.
 3. For auto-loaded context, see prompt-loaded skills in SKILLS_INDEX.md
 4. Read the target SKILL.md file to understand workflow and requirements
 
+## GitNexus Context Artifact Usage Policy
+
+The `gitnexus-context.json` artifact at `docs/ai/context/gitnexus-context.json` provides
+machine-readable architecture state for AI orchestration and CI validation.
+
+### Script Keys
+
+| Script              | Command                     | Purpose                                       |
+| ------------------- | --------------------------- | --------------------------------------------- |
+| `gitnexus:context`  | `bun run gitnexus:context`  | Generate the context artifact                 |
+| `gitnexus:validate` | `bun run gitnexus:validate` | Validate the artifact against the JSON Schema |
+
+### When to Regenerate
+
+Regenerate `gitnexus-context.json` before:
+
+- Starting Step 6 (Implement) in any SpecKit workflow
+- Running CI gates that depend on architecture context
+- Any AI agent task that requires impact analysis or module discovery
+
+### Freshness Rule
+
+- Artifact older than 24h → run `bun run gitnexus:context` to refresh
+- CI gate `bun run gitnexus:validate` will warn about stale artifacts and fail on missing fields
+
+### Schema
+
+The artifact conforms to `docs/ai/gitnexus-context.schema.json` (JSON Schema Draft-07).
+Do not manually edit `gitnexus-context.json` — it is always regenerated from git state and the architecture brain.
+
 <!-- gitnexus:end -->
 
 <!-- rtk-instructions v2 -->

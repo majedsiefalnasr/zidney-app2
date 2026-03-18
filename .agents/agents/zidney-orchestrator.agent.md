@@ -1772,6 +1772,31 @@ Do NOT proceed to Step 7 until explicit approval is received.
 
 ---
 
+## GitNexus Context Bootstrap (Mandatory Pre-Implementation)
+
+**Purpose:** Ensure the `gitnexus-context.json` artifact is fresh and valid before Step 6 (Implement) begins.
+
+Before the orchestrator starts T006 or any implementation task that involves architecture navigation, the following precondition MUST be satisfied:
+
+1. Verify `docs/ai/context/gitnexus-context.json` exists and is ≤24h old.
+2. If stale or missing, regenerate:
+   ```bash
+   bun run gitnexus:context
+   ```
+3. Validate the artifact:
+   ```bash
+   bun run gitnexus:validate
+   ```
+4. If validation fails → STOP. Report the validation errors. Do NOT begin implementation.
+5. If validation passes → proceed to implementation.
+
+**Rationale:** The GitNexus context artifact is the machine-readable architecture snapshot consumed by AI orchestrators and CI gates. A stale or invalid artifact causes incorrect impact analysis and may permit architectural drift to go undetected.
+
+**Schema authority:** `docs/ai/gitnexus-context.schema.json`
+**Documentation:** `docs/ai/gitnexus.md`
+
+---
+
 # Local CI Simulation Gate (Mandatory Pre-Closure)
 
 **Gate name:** Run Local CI Simulation (ACT)  

@@ -44,7 +44,7 @@ Specification complete for INFRA-024 — GitNexus Context Integration and Agent 
 - FR-008: Agent execution policy updated in `AGENTS.md` to require GitNexus for impact/dependency/refactor tasks
 - FR-009: Deterministic test harness at `tests/gitnexus-context.test.ts` with 5 test cases
 - FR-010: Validation script `scripts/validate-gitnexus.ts` runs GitNexus, validates schema, checks required fields
-- FR-011: CI pipeline includes `bun run validate-gitnexus` gate; fails on schema/completeness failure
+- FR-011: CI pipeline includes `bun run gitnexus:validate` gate; fails on schema/completeness failure
 - FR-012: Feature documentation at `docs/ai/gitnexus.md`
 
 ---
