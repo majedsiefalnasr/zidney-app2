@@ -173,7 +173,7 @@ A strict JSON schema must be defined and published at `docs/ai/gitnexus-context.
   - `impactedModules` (array of module identifiers)
   - `dependencyGraph` (object mapping module → dependencies)
   - `architectureLayerMap` (object mapping module → layer name)
-  - `recentCommits` (array of commit objects with sha, message, author, timestamp)
+  - `recentCommits` (array of commit objects with hash, message, author, date)
   - `riskIndicators` (array of risk descriptor objects, each with shape: `{ module: string, riskScore: number, reason: string, affectedBy: string[] }`) — see Clarifications Q3
 - Schema includes type definitions, required fields, and description annotations
 - All GitNexus wrapper script outputs must validate against this schema

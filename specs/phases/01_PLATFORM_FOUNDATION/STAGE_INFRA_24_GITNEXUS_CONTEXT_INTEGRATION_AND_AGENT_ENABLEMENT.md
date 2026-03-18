@@ -3,31 +3,35 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-18T00:02:00.000Z
+Last Updated: 2026-03-18T14:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- 12 FRs + 6 NFRs captured
-- GitNexus installed as `devDependency` via `bun add -D gitnexus`
-- `scripts/gitnexus-context.ts`: full replacement (not extension)
-- Structured output written to `docs/ai/context/gitnexus-context.json`
-- `riskIndicators` field shape defined: module, riskScore (0-100), reason, affectedBy
-- CI fail criteria: non-zero exit, schema violation, or script error (empty arrays pass)
+- 7-phase implementation plan complete
+- Phase 1: JSON schema (9 fields including new `analysisMode`, extensible root)
+- Phase 2: `scripts/gitnexus-context.ts` full replacement (git + brain.json → structured JSON)
+- Phase 3: `scripts/validate/validate-gitnexus.ts` new validation script
+- Phase 4: Test harness (5 deterministic test cases, Vitest + vi.mock)
+- Phase 5: Orchestrator + AGENTS.md integration (additive only)
+- Phase 6: `package.json` scripts (`gitnexus:context`, `gitnexus:validate`)
+- Phase 7: Documentation (docs/ai/, docs/scripts/)
 
 Deferred Scope:
 
-- Full-repo beyond 4-domain scope
+- Full-repo scan beyond 4-domain scope (covered by `--all` flag mode)
 - GitNexus MCP configuration
-- `riskScore` exact range specification (implementation detail)
+- Actual CI YAML workflow changes (documentation reference sufficient for this stage)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Architecture Checker: VERDICT PASS (pre-implementation fixes applied)
+- API Designer: VERDICT PASS (3 blocking issues remediated: analysisMode added, additionalProperties extensible, riskScore type aligned)
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. 5 clarification Q&As encoded in spec.md. Ready for technical planning.
+Technical plan complete. All guardian validations passed after remediation. Task breakdown in progress.
 
 ---
 
