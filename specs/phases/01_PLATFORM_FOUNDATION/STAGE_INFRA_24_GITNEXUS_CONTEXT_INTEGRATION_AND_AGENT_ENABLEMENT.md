@@ -3,20 +3,35 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-18T00:00:00.000Z
+Last Updated: 2026-03-18T00:01:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- GitNexus installation and binary availability (FR-001)
+- Wrapper script `scripts/gitnexus-context.ts` — structured JSON output (FR-002)
+- Context scope: changed files, dependency graph, architecture map, git history (FR-003)
+- JSON schema contract `docs/ai/gitnexus-context.schema.json` (FR-004)
+- Orchestrator integration at 3 phases: pre-planning, mid-execution, pre-closure (FR-005–FR-007)
+- Agent execution policy update in `AGENTS.md` (FR-008)
+- Deterministic test harness `tests/gitnexus-context.test.ts` (FR-009)
+- Validation script `scripts/validate-gitnexus.ts` (FR-010)
+- CI gate `bun run validate-gitnexus` (FR-011)
+- Documentation `docs/ai/gitnexus.md` (FR-012)
+
+Deferred Scope:
+
+- Full-repo beyond 4-domain scope
+- GitNexus MCP server configuration
+- Replacement of existing AI-context or guard systems
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. 12 FRs, 6 NFRs captured. No [NEEDS CLARIFICATION] markers. Clarification step pending.
 
 ---
 
