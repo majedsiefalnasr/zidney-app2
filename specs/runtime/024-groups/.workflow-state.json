@@ -1,0 +1,24 @@
+{
+  "stage": "Groups",
+  "phase": "03_BACKOFFICE_CORE / 02_ACADEMIC_STRUCTURE",
+  "stage_dir": "specs/runtime/024-groups",
+  "stage_file": "specs/phases/03_BACKOFFICE_CORE/02_ACADEMIC_STRUCTURE/STAGE_24_GROUPS.md",
+  "branch": "spec/024-groups",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-19T00:00:00.000Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/024-groups",
+      "timestamp": "2026-03-19T00:00:00.000Z"
+    }
+  ]
+}
