@@ -42,8 +42,10 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # BEHAVIOR
 # ─────────────────────────────────────────────────────────────────────────────
-# Pull the runner image if not available locally
---pull=true
+# For local development (faster): don't pull Docker images if they exist
+# Use: bun run ci:local
+# Use: bun run ci:local:full  (to pull fresh images)
+--pull=false
 
 # Remove containers after a run (keeps Docker clean)
 --rm
