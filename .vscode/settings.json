@@ -31,7 +31,7 @@
     "uuidv",
     "Zidney"
   ],
-  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
   "[typescript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
@@ -45,7 +45,10 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "[json]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.formatOnSave": true
 }
