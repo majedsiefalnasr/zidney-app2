@@ -15,7 +15,20 @@ echo "📦 Initializing test database..."
 
 # Function to run psql commands
 run_sql() {
-  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$@"
+  # If caller provided a -d/--dbname arg, honor it; otherwise default to the postgres maintenance DB
+  has_db_arg=false
+  for arg in "$@"; do
+    if [ "$arg" = "-d" ] || [ "$arg" = "--dbname" ]; then
+      has_db_arg=true
+      break
+    fi
+  done
+
+  if [ "$has_db_arg" = true ]; then
+    PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$@"
+  else
+    PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d postgres "$@"
+  fi
 }
 
 # Drop and recreate master database
