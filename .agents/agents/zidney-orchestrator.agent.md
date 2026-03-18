@@ -217,7 +217,7 @@ During execution the orchestrator MUST prioritize context in this strict order:
 1. `docs/ai/context/ai-architecture-brain.json`
 2. `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
 3. `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
-4. ADR decisions inside `docs/architecture/adr/`
+4. ADR decisions inside `docs/architecture/ADR/`
 5. GitNexus knowledge graph
 6. Repository source code
 
@@ -293,7 +293,7 @@ Context selection priority:
    `ARCHITECTURE_MAP.json`
 
 5. Relevant ADR decisions  
-   `docs/architecture/adr/`
+   `docs/architecture/ADR/`
 
 Only the context required for the current step is injected into the AI reasoning environment.
 

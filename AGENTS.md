@@ -335,7 +335,7 @@ Violation of these rules is considered architectural failure.
 
 AI must treat:
 
-- `docs/architecture/adr/adr-*` as binding architectural decisions.
+- `docs/architecture/ADR/ADR-*` as binding architectural decisions.
 - `specs/phases/` as the feature behavior authority.
 - `docs/01_ENGINEERING_GOVERNANCE/` as enforcement authority.
 

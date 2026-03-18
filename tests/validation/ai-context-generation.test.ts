@@ -19,7 +19,7 @@ const mockMetadata: SourceMetadata = {
       number: 1,
       title: 'Database per Tenant',
       status: 'ACCEPTED',
-      path: 'docs/architecture/adr/adr-0001.md',
+      path: 'docs/architecture/ADR/ADR-0001.md',
       content: '# ADR-0001: Database per Tenant',
     },
   ],

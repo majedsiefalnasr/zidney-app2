@@ -190,7 +190,7 @@ bun run generate:ai-context
 jq . docs/architecture/module-boundaries.json
 
 # Check if ADR directory is readable
-ls -la docs/architecture/adr/ | head -5
+ls -la docs/architecture/ADR/ | head -5
 
 # Check app/package structure
 ls -la apps/
@@ -200,7 +200,7 @@ ls -la packages/
 **Solution:**
 
 1. Verify `module-boundaries.json` is valid JSON
-2. Ensure `docs/architecture/adr/` contains .md files
+2. Ensure `docs/architecture/ADR/` contains .md files
 3. Ensure all modules have `package.json`
 
 ### Issue: "Generation runs but validation fails"
