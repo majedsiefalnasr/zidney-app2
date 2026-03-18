@@ -3,20 +3,22 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-18T14:00:00.000Z
+Last Updated: 2026-03-18T15:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- 7-phase implementation plan complete
-- Phase 1: JSON schema (9 fields including new `analysisMode`, extensible root)
-- Phase 2: `scripts/gitnexus-context.ts` full replacement (git + brain.json → structured JSON)
-- Phase 3: `scripts/validate/validate-gitnexus.ts` new validation script
-- Phase 4: Test harness (5 deterministic test cases, Vitest + vi.mock)
-- Phase 5: Orchestrator + AGENTS.md integration (additive only)
-- Phase 6: `package.json` scripts (`gitnexus:context`, `gitnexus:validate`)
-- Phase 7: Documentation (docs/ai/, docs/scripts/)
+- Total: 17 atomic tasks across 8 phases (Phase 0 + Phases 1–7 + Validation)
+- Phase 0 (1 task): devDependency install
+- Phase 1 (4 tasks): JSON schema + 3 test fixtures
+- Phase 2 (1 task): Full replacement of scripts/gitnexus-context.ts
+- Phase 3 (1 task): scripts/validate/validate-gitnexus.ts
+- Phase 4 (1 task): tests/gitnexus-context.test.ts (5 test cases)
+- Phase 5 (2 tasks): Orchestrator + AGENTS.md integration (additive)
+- Phase 6 (2 tasks): package.json scripts + CI gate docs
+- Phase 7 (3 tasks): Documentation (docs/ai/, docs/scripts/)
+- Validation (2 tasks): Script governance check + test pass verification
 
 Deferred Scope:
 
@@ -26,12 +28,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Architecture Checker: VERDICT PASS (pre-implementation fixes applied)
-- API Designer: VERDICT PASS (3 blocking issues remediated: analysisMode added, additionalProperties extensible, riskScore type aligned)
-- Technical plan compliant — task generation authorized
+- Architecture Checker: VERDICT PASS
+- API Designer: VERDICT PASS (post-remediation)
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. All guardian validations passed after remediation. Task breakdown in progress.
+Atomic task set generated (17 tasks). Drift analysis gate pending.
 
 ---
 
