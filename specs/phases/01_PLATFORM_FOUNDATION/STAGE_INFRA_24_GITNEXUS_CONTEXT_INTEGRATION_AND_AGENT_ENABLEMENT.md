@@ -3,35 +3,31 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-18T00:01:00.000Z
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-03-18T00:02:00.000Z
 
 Scope Defined:
 
-- GitNexus installation and binary availability (FR-001)
-- Wrapper script `scripts/gitnexus-context.ts` — structured JSON output (FR-002)
-- Context scope: changed files, dependency graph, architecture map, git history (FR-003)
-- JSON schema contract `docs/ai/gitnexus-context.schema.json` (FR-004)
-- Orchestrator integration at 3 phases: pre-planning, mid-execution, pre-closure (FR-005–FR-007)
-- Agent execution policy update in `AGENTS.md` (FR-008)
-- Deterministic test harness `tests/gitnexus-context.test.ts` (FR-009)
-- Validation script `scripts/validate-gitnexus.ts` (FR-010)
-- CI gate `bun run validate-gitnexus` (FR-011)
-- Documentation `docs/ai/gitnexus.md` (FR-012)
+- 12 FRs + 6 NFRs captured
+- GitNexus installed as `devDependency` via `bun add -D gitnexus`
+- `scripts/gitnexus-context.ts`: full replacement (not extension)
+- Structured output written to `docs/ai/context/gitnexus-context.json`
+- `riskIndicators` field shape defined: module, riskScore (0-100), reason, affectedBy
+- CI fail criteria: non-zero exit, schema violation, or script error (empty arrays pass)
 
 Deferred Scope:
 
 - Full-repo beyond 4-domain scope
-- GitNexus MCP server configuration
-- Replacement of existing AI-context or guard systems
+- GitNexus MCP configuration
+- `riskScore` exact range specification (implementation detail)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. 12 FRs, 6 NFRs captured. No [NEEDS CLARIFICATION] markers. Clarification step pending.
+All specification ambiguities resolved. 5 clarification Q&As encoded in spec.md. Ready for technical planning.
 
 ---
 

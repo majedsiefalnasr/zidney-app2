@@ -174,7 +174,7 @@ A strict JSON schema must be defined and published at `docs/ai/gitnexus-context.
   - `dependencyGraph` (object mapping module → dependencies)
   - `architectureLayerMap` (object mapping module → layer name)
   - `recentCommits` (array of commit objects with sha, message, author, timestamp)
-  - `riskIndicators` (array of risk descriptor objects)
+  - `riskIndicators` (array of risk descriptor objects, each with shape: `{ module: string, riskScore: number, reason: string, affectedBy: string[] }`) — see Clarifications Q3
 - Schema includes type definitions, required fields, and description annotations
 - All GitNexus wrapper script outputs must validate against this schema
 - Schema version is declared in the schema file itself
@@ -192,8 +192,9 @@ The Zidney orchestrator agent (`.agents/agents/zidney-orchestrator.agent.md`) mu
   1. Before planning (step executed at workflow start)
   2. During execution (on-demand, when evaluating impacted scope)
   3. Before closure (validation confirmation)
-- The step specifies: execute `scripts/gitnexus-context.ts`, parse structured output, and use context to understand change scope, identify impacted modules, and guide execution decisions
+- The step specifies: execute `scripts/gitnexus-context.ts`, write output to `docs/ai/context/gitnexus-context.json`, and use that file as the authoritative context source for understanding change scope, identifying impacted modules, and guiding execution decisions (See Clarifications Q4.)
 - The orchestrator blocks execution if GitNexus context is unavailable and cannot be generated
+- A stale `docs/ai/context/gitnexus-context.json` from a prior session must not be trusted — regeneration is mandatory at each orchestrator session start
 
 ---
 
@@ -262,9 +263,10 @@ The validation script must be integrated into the CI pipeline as a required gate
 - Root `package.json` includes a script entry `validate-gitnexus` that executes `scripts/validate-gitnexus.ts`
 - CI configuration calls `bun run validate-gitnexus`
 - CI fails if:
-  - GitNexus command fails (exit code non-zero)
-  - Schema validation fails
-  - Required output fields are empty or missing
+  - GitNexus CLI command fails (non-zero exit code)
+  - Schema structure validation fails (invalid types, missing required keys)
+  - Script execution throws an unhandled error
+- CI does **not** fail if output arrays are empty (e.g., `changedFiles: []` on a clean tree) — empty arrays are a valid output state (See Clarifications Q5.)
 - CI gate is documented in `docs/ci/` or referenced from the existing CI documentation
 
 ---
@@ -518,10 +520,10 @@ This stage operates **outside** the runtime trust chain (Isolation → License �
 
 ## Assumptions
 
-1. GitNexus CLI is installable via `bun add` without licensing restrictions for the project version in use
+1. GitNexus CLI is installed as a project devDependency via `bun add -D gitnexus` and is listed in root `package.json` under `devDependencies`. Global installation is not used. (See Clarifications Q2.)
 2. The orchestrator agent file `.agents/agents/zidney-orchestrator.agent.md` exists and follows an additive modification pattern
 3. `docs/ai/context/ai-architecture-brain.json` is available locally at time of wrapper script execution
-4. The existing `scripts/gitnexus-context.ts` file (which currently provides architecture brain context) will be **extended** to also integrate GitNexus CLI context — this spec covers the full redesign of that script to meet the new contract
+4. The existing `scripts/gitnexus-context.ts` file (which currently provides architecture brain context) will be **fully replaced** with a new GitNexus CLI wrapper implementation. No legacy brain-reading logic is carried forward. The brain-reading functionality already exists in `scripts/generate-ai-context.ts` and is not duplicated here. (See Clarifications Q1.)
 5. CI pipeline already supports `bun run <script>` execution pattern
 6. No secrets or API keys are required for GitNexus local/project usage
 
@@ -532,3 +534,24 @@ This stage operates **outside** the runtime trust chain (Isolation → License �
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
 
 This stage is infrastructure tooling only. It introduces no tenant data access, no middleware modifications, no database schema changes, no attempt engine modifications, and no runtime trust chain violations. All scripts comply with Zidney script governance rules.
+
+---
+
+## Clarifications
+
+### Session 2026-03-18
+
+**Q1:** When updating `scripts/gitnexus-context.ts`, should the existing brain-reading functionality (reading `docs/ai/context/ai-architecture-brain.json`) be preserved alongside the new GitNexus CLI context generation, or should the script be fully replaced with the new GitNexus-centric implementation only?  
+**A1:** Full replacement. The existing brain-reading logic is already covered by `scripts/generate-ai-context.ts` and is redundant in this new context. The new script must exclusively wrap the GitNexus CLI and produce the structured JSON output defined by `docs/ai/gitnexus-context.schema.json`. No legacy brain-printing logic is carried forward.
+
+**Q2:** Should `gitnexus` be installed as a project devDependency (pinned in `package.json`) or as a global CLI tool?  
+**A2:** Project devDependency via `bun add -D gitnexus`. This is consistent with Zidney's `bun`-managed reproducibility model. The dependency must appear in root `package.json` under `devDependencies`, ensuring every developer and CI runner operates against the exact same pinned version without manual global installation steps.
+
+**Q3:** What fields must each object in the `riskIndicators` array contain in `docs/ai/gitnexus-context.schema.json`?  
+**A3:** Each risk descriptor object must contain: `{ module: string, riskScore: number, reason: string, affectedBy: string[] }`. `module` identifies the impacted module, `riskScore` is a numeric value (0–100) enabling sorting and thresholding, `reason` is a human-readable explanation for AI agent consumption, and `affectedBy` lists the contributing dependency chain (array of module identifier strings).
+
+**Q4:** How should the orchestrator deliver GitNexus context to sub-agents during execution?  
+**A4:** Write to a well-known file at `docs/ai/context/gitnexus-context.json`. This is consistent with the existing Zidney pattern (`ai-architecture-brain.json` already resides at `docs/ai/context/`). Sub-agents reference the context by file path. The orchestrator step must document this path explicitly. The file must be regenerated at each orchestrator session start — stale files from prior sessions must not be trusted.
+
+**Q5:** When `changedFiles` is empty (clean git tree, no staged or unstaged changes), should `scripts/validate-gitnexus.ts` exit 0 (pass) or non-zero (fail)?  
+**A5:** Exit 0. Empty arrays are a valid output state — a clean tree legitimately produces `changedFiles: []`. The CI gate (`bun run validate-gitnexus`) must fail only on: (a) non-zero exit code from the GitNexus CLI itself, (b) JSON schema structure violations (invalid types, missing required keys), or (c) script execution errors. An empty-but-structurally-valid output is always a passing condition.
