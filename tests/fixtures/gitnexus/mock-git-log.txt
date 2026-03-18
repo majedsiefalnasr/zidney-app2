@@ -1,0 +1,3 @@
+abc1234def5678901234567890abcdef12345678|feat(api): add exam grading endpoint|Alice Dev|2026-03-18T12:00:00+00:00
+def5678901234567890abcdef12345678abc1234|fix(domain-core): correct score calculation edge case|Bob Eng|2026-03-18T10:30:00+00:00
+1234567890abcdef12345678abc1234def56789a|chore(logger): add correlation-id context field|Carol Ops|2026-03-17T16:45:00+00:00

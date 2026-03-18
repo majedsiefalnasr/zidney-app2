@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://zidney.internal/schemas/gitnexus-context.schema.json",
+  "title": "GitNexus Context",
+  "description": "Structured repository intelligence context for AI agent consumption. Produced by scripts/gitnexus-context.ts and consumed by AI orchestrators and CI gates.",
+  "type": "object",
+  "version": "1.0.0",
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "analysisMode",
+    "changedFiles",
+    "impactedModules",
+    "dependencyGraph",
+    "architectureLayerMap",
+    "recentCommits",
+    "riskIndicators"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semantic version of this schema contract.",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "example": "1.0.0"
+    },
+    "generatedAt": {
+      "type": "string",
+      "description": "ISO 8601 timestamp of when the context was generated.",
+      "format": "date-time"
+    },
+    "analysisMode": {
+      "type": "string",
+      "description": "Whether the dependencyGraph is scoped to changed modules only or covers the full workspace.",
+      "enum": ["changed-only", "full"]
+    },
+    "changedFiles": {
+      "type": "array",
+      "description": "Relative file paths that have changed relative to the base ref. May be empty on a clean tree.",
+      "items": {
+        "type": "string",
+        "description": "Relative file path from workspace root. Must not begin with '/'."
+      }
+    },
+    "impactedModules": {
+      "type": "array",
+      "description": "Unique module paths impacted by the changes in changedFiles.",
+      "items": {
+        "type": "string",
+        "description": "Module path, must match apps/* or packages/* conventions.",
+        "pattern": "^(apps|packages)/"
+      }
+    },
+    "dependencyGraph": {
+      "type": "object",
+      "description": "Adjacency map of module dependencies. Keys are module paths; values are arrays of directly-dependent module paths. Scoped to impactedModules when analysisMode is 'changed-only'.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^(apps|packages)/"
+        }
+      }
+    },
+    "architectureLayerMap": {
+      "type": "object",
+      "description": "Maps each module path to its architecture layer classification.",
+      "additionalProperties": {
+        "type": "string",
+        "description": "Architecture layer name (e.g. 'domain', 'runtime', 'infrastructure', 'ui')."
+      }
+    },
+    "recentCommits": {
+      "type": "array",
+      "description": "Most recent git commits on the current branch (up to 10). Newest first.",
+      "items": {
+        "type": "object",
+        "required": ["hash", "message", "author", "date"],
+        "properties": {
+          "hash": {
+            "type": "string",
+            "description": "Full 40-character SHA-1 git commit hash.",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "message": {
+            "type": "string",
+            "description": "Commit subject line (first line of commit message)."
+          },
+          "author": {
+            "type": "string",
+            "description": "Committer display name."
+          },
+          "date": {
+            "type": "string",
+            "description": "ISO 8601 commit author date.",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "riskIndicators": {
+      "type": "array",
+      "description": "Risk scores for modules impacted by the current changes. May be empty.",
+      "items": {
+        "type": "object",
+        "required": ["module", "riskScore", "reason", "affectedBy"],
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "Module path matching apps/* or packages/* convention.",
+            "pattern": "^(apps|packages)/"
+          },
+          "riskScore": {
+            "type": "number",
+            "description": "Risk score in [0, 100]. Integer values only by convention. Higher means more risk.",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "reason": {
+            "type": "string",
+            "description": "Human-readable explanation of why this module is considered risky."
+          },
+          "affectedBy": {
+            "type": "array",
+            "description": "List of changed file paths that contribute to this module's risk score.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "modules": ["apps/api", "packages/domain-core", "packages/logger"],
+  "layers": {
+    "apps/api": "runtime",
+    "packages/domain-core": "domain",
+    "packages/logger": "infrastructure"
+  },
+  "dependencies": {
+    "apps/api": ["packages/domain-core", "packages/logger"],
+    "packages/domain-core": ["packages/logger"],
+    "packages/logger": []
+  },
+  "hotspots": [{ "module": "packages/logger", "score": 85 }],
+  "architectureScore": 98,
+  "gitSha": "abc1234def5678901234567890abcdef12345678"
+}

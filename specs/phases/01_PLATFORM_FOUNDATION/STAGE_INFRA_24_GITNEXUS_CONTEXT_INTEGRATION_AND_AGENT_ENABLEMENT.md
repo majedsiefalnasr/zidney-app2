@@ -2,7 +2,55 @@
 
 ## Stage Status
 
-DRAFT
+Status: PRODUCTION READY
+Step: closure
+Risk Level: LOW
+Closure Date: 2026-03-19T01:00:00.000Z
+
+Implementation: COMPLETE
+Tasks: 17 / 17 completed
+
+Scope Delivered:
+
+- T001: Install gitnexus@1.4.6 devDependency ✅
+- T002–T005: JSON schema + test fixtures ✅
+- T006: Full replacement of scripts/gitnexus-context.ts (8 pure functions, CLI, security) ✅
+- T007: scripts/validate/validate-gitnexus.ts (5-step validation pipeline) ✅
+- T008: tests/gitnexus-context.test.ts (15/15 passing) ✅
+- T009–T010: Orchestrator + AGENTS.md integration (additive) ✅
+- T011–T012: package.json scripts + CI gate docs ✅
+- T013–T015: Documentation (docs/ai/, docs/scripts/, docs/ci/) ✅
+- T016: validate-runtime-scripts — 0 INFRA-024 violations ✅
+- T017: All 15 unit tests passing ✅
+
+Deferred Scope:
+
+- None
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced (N/A — no DB access)
+- ADR-0002 Snapshot immutability enforced (N/A — no attempt engine)
+- ADR-0006 Server-authoritative time enforced (N/A — no time-sensitive domain logic)
+- ADR-0007 Version compatibility enforced (N/A — no workspace-bound routes)
+- ADR-0008 Semantic versioning enforced — script keys follow `domain:action` convention
+- import.meta.main guard prevents CLI execution on import
+- Security: execFileSync with array args, regex-validated input refs
+- console.log absent — only console.error + process.stdout.write used
+- Lint: 0 errors in INFRA-024 files
+- Type-check: exit 0
+
+Audit Results:
+
+- Structural drift audit: PASSED (all 9 criteria)
+- AI Guard: PASSED (no module boundary violations)
+- Security audit: PASSED (no injection vectors, no secrets exposure)
+- Performance audit: PASSED (N/A — offline tooling)
+- QA audit: PASSED (15/15 tests, 76/76 workspace)
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new stage.
 
 ---
 
@@ -228,7 +276,7 @@ Responsibilities:
 Add:
 
 ```
-bun run validate-gitnexus
+bun run gitnexus:validate
 ```
 
 CI must fail if:
