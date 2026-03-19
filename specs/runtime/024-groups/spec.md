@@ -404,7 +404,10 @@ group_id)` pair returns success without creating a duplicate row.
   return 422 with `GROUP_DIVISION_MISMATCH`.
 - **FR-022**: If `group.department_id` is set, and `department.division_id` is not null, any staff
   member assigned to the group MUST have that division in their effective division scope. Violation
-  MUST return 422 with `GROUP_DIVISION_MISMATCH`.
+  MUST return 422 with `GROUP_DIVISION_MISMATCH`. Staff division scope is resolved via the STAGE_21
+  staff profile model as a single `division_id` FK equality check. A staff member whose
+  `division_id` is `null` is treated as workspace-global and the mismatch check is skipped for
+  that assignment.
 - **FR-023**: Groups with `status = DISABLED` MUST NOT appear in any selection list or dropdown
   used for assignment. They MUST only appear in management list views when explicitly requested via
   filter.
@@ -720,6 +723,7 @@ Assign or reassign a student to a group. Replaces the student's current group at
 
 **Error responses:**
 
+- 404 `STUDENT_NOT_FOUND` — student_id does not exist in this workspace
 - 404 `GROUP_NOT_FOUND`
 - 422 `GROUP_DISABLED`
 - 422 `GROUP_MAX_MEMBERS_EXCEEDED`
@@ -745,6 +749,7 @@ Remove a student's current group assignment (set `student.group_id = null`).
 
 **Error responses:**
 
+- 404 `STUDENT_NOT_FOUND` — student_id does not exist in this workspace
 - 404 `GROUP_STUDENT_ASSIGNMENT_NOT_FOUND` — student has no current group assignment
 
 ---
@@ -787,6 +792,7 @@ Assign a group to a staff member (idempotent).
 
 **Error responses:**
 
+- 404 `STAFF_NOT_FOUND` — staff_id does not exist in this workspace
 - 404 `GROUP_NOT_FOUND`
 - 422 `GROUP_DISABLED`
 - 422 `GROUP_DIVISION_MISMATCH`
@@ -803,6 +809,7 @@ Remove a group assignment from a staff member.
 
 **Error responses:**
 
+- 404 `STAFF_NOT_FOUND` — staff_id does not exist in this workspace
 - 404 `GROUP_NOT_FOUND`
 - 404 `GROUP_STAFF_ASSIGNMENT_NOT_FOUND` — `group_id` is not in the staff member's current
   assignments
@@ -833,6 +840,8 @@ Remove a group assignment from a staff member.
 | Code                                 | HTTP Status | Description                                                                         |
 | ------------------------------------ | ----------- | ----------------------------------------------------------------------------------- |
 | `GROUP_NOT_FOUND`                    | 404         | No group with the given ID exists in this workspace (or it is soft-deleted)         |
+| `STUDENT_NOT_FOUND`                  | 404         | No student with the given ID exists in this workspace (path param validation)       |
+| `STAFF_NOT_FOUND`                    | 404         | No staff member with the given ID exists in this workspace (path param validation)  |
 | `GROUP_STUDENT_ASSIGNMENT_NOT_FOUND` | 404         | Student has no current group assignment                                             |
 | `GROUP_STAFF_ASSIGNMENT_NOT_FOUND`   | 404         | Staff member does not have the specified group in their current assignments         |
 | `GROUP_NAME_DUPLICATE`               | 409         | A group with the same name already exists within this workspace (case-insensitive)  |
@@ -935,7 +944,9 @@ Every mutating group operation MUST produce a structured log entry with:
 3. Add nullable `group_id` column to `students` table.
 4. Add FK constraint: `students.group_id REFERENCES groups(id) ON DELETE SET NULL`.
 5. Add index: `idx_students_group_id` on `students(group_id)`.
-6. Increment `schema_version`.
+6. Increment `schema_version` by +1 (monotonic integer; one increment per forward migration
+   file; exact pre-migration value is the value established by STAGE_23_DEPARTMENTS + all
+   intervening migrations; runtime rejects requests where `schema_version < required_minimum`).
 
 **Hard Dependencies:**
 
@@ -985,15 +996,17 @@ The `SELECT FOR UPDATE` lock MUST target the `groups` row, not a derived count r
 canonical transaction sequence for student group assignment is:
 
 ```sql
-BEGIN;
+BEGIN; -- READ COMMITTED isolation (PostgreSQL default); SELECT FOR UPDATE provides row-level serialization
 
 -- Lock the group row to serialize concurrent assignments
 SELECT id, max_members, status FROM groups
   WHERE id = $group_id AND deleted_at IS NULL
   FOR UPDATE;
 
--- Count current student members inside the locked transaction
-SELECT COUNT(*) FROM students WHERE group_id = $group_id;
+-- Count current student members inside the locked transaction.
+-- MUST exclude the student being assigned to support idempotent re-assignment
+-- at full capacity (prevents false GROUP_MAX_MEMBERS_EXCEEDED on same-group re-assign).
+SELECT COUNT(*) FROM students WHERE group_id = $group_id AND id != $student_id;
 
 -- If count >= max_members: ROLLBACK and return GROUP_MAX_MEMBERS_EXCEEDED
 -- Otherwise: proceed
@@ -1006,6 +1019,11 @@ COMMIT;
 
 This approach serializes all concurrent assignment attempts against the same group, preventing
 race conditions. Application-layer count caching or optimistic concurrency is NOT acceptable.
+
+**Isolation level:** READ COMMITTED (PostgreSQL default) is sufficient. The `SELECT FOR UPDATE`
+row lock on `groups` serializes all concurrent assignment attempts; no phantom rows are possible
+because the count is scoped to a specific `group_id` UUID with a held row lock. SERIALIZABLE is
+not required and would add unnecessary contention overhead.
 
 ---
 
@@ -1069,3 +1087,65 @@ group_id = student.group_id`) is defined in this spec as a contract but is NOT i
 ## Final Constitutional Compliance Statement
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-19
+
+> Ambiguity scan performed against risk areas: Transactions, Idempotency, Concurrency,
+> Version Enforcement, Middleware Order, Security/RBAC, Error Contract, Isolation Boundaries.
+> All 5 questions were self-resolved from spec context and Zidney Constitution v1.2.0 rules.
+
+- **Q: Does the `SELECT COUNT(*)` in the student assignment transaction need to exclude the student
+  being assigned, to prevent a false `GROUP_MAX_MEMBERS_EXCEEDED` when a student in a full-capacity
+  group is re-assigned to the same group?**  
+  → **A: Yes — critical correctness fix.** Without the exclusion, student A already in group G
+  (max_members = 1) triggers count = 1 ≥ max_members = 1 → incorrectly returns 422 on idempotent
+  re-assignment. The count query MUST be:
+  `SELECT COUNT(*) FROM students WHERE group_id = $group_id AND id != $student_id`.
+  The canonical SQL in the **Transaction Safety** section has been updated accordingly.
+
+- **Q: What PostgreSQL transaction isolation level applies to the SELECT FOR UPDATE student
+  assignment transaction?**  
+  → **A: READ COMMITTED** (PostgreSQL default). The `SELECT FOR UPDATE` row lock on the `groups`
+  row serializes all concurrent assignment requests. No phantom rows are possible within the
+  locked scope (count query is a point-in-time read inside a held row lock). SERIALIZABLE isolation
+  is not required and would add unnecessary overhead. The **Transaction Safety** section has been
+  annotated with this decision.
+
+- **Q: What 404 error codes apply when `student_id` or `staff_id` path parameters reference
+  non-existent tenant entities?**  
+  → **A: `STUDENT_NOT_FOUND` (404) and `STAFF_NOT_FOUND` (404)** — added to the Error Codes
+  Reference table and to the error response lists of all affected endpoints
+  (`PUT /students/:id/group`, `DELETE /students/:id/group`, `POST /staff/:id/groups`,
+  `DELETE /staff/:id/groups/:group_id`). These checks execute after tenant resolution and license
+  validation, before any group-level business logic.
+
+- **Q: How is a staff member's "effective division scope" resolved for FR-022
+  `GROUP_DIVISION_MISMATCH` enforcement?**  
+  → **A: Single `division_id` FK equality check** on the staff profile record (STAGE_21 model).
+  A staff member's effective division is their `division_id` field. If `division_id` is `null` on
+  the staff profile, the staff member is workspace-global and the mismatch check is bypassed for
+  that assignment. FR-022 has been updated with this resolution.
+
+- **Q: What is the schema_version increment mechanism — monotonic integer, semver, or other?**  
+  → **A: Monotonic integer, incremented by exactly +1 per forward migration file.** The exact
+  pre-migration value is whatever STAGE_23_DEPARTMENTS established plus any intervening migrations.
+  The runtime rejects tenant requests where `schema_version < required_minimum` (≥ check).
+  No semver is used. Migration step 6 in the **Migration Requirements** section has been updated
+  with this detail.
+
+**Coverage summary after this session:**
+
+| Taxonomy Category               | Status   | Notes                                                        |
+| ------------------------------- | -------- | ------------------------------------------------------------ |
+| Transactions                    | Resolved | Count exclusion bug fixed; isolation level documented        |
+| Idempotency                     | Resolved | Idempotent re-assign edge case explicitly handled via fix    |
+| Concurrency (SELECT FOR UPDATE) | Resolved | READ COMMITTED + row lock documented; SQL corrected          |
+| Version enforcement             | Resolved | Monotonic +1 integer strategy documented in migration step 6 |
+| Middleware order                | Clear    | Already unambiguous (tenant→license→JWT→RBAC)                |
+| RBAC / Security                 | Resolved | Staff division scope clarified in FR-022                     |
+| Error contract                  | Resolved | STUDENT_NOT_FOUND + STAFF_NOT_FOUND added                    |
+| Isolation boundaries            | Clear    | Fully specified; no cross-tenant risk detected               |

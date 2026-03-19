@@ -9,14 +9,14 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: LOW
 Last Updated: 2026-03-19T00:00:00.000Z
 
 Scope Defined:
 
 - Group CRUD (create, list, read, update, soft-delete)
-- Student single-group assignment with max_members SELECT FOR UPDATE
+- Student single-group assignment with idempotent re-assign and SELECT FOR UPDATE max_members
 - Staff multi-group assignment via staff_groups join table
 - Division boundary enforcement via department_id
 - Status lifecycle (ENABLED / DISABLED) with assignment blocking
@@ -30,10 +30,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

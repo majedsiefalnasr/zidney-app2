@@ -5,9 +5,9 @@
   "stage_file": "specs/phases/03_BACKOFFICE_CORE/02_ACADEMIC_STRUCTURE/STAGE_24_GROUPS.md",
   "branch": "spec/024-groups",
   "base_branch": "develop",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -22,6 +22,10 @@
     },
     {
       "event": "specify_complete",
+      "timestamp": "2026-03-19T00:00:00.000Z"
+    },
+    {
+      "event": "clarifications_locked",
       "timestamp": "2026-03-19T00:00:00.000Z"
     }
   ]
