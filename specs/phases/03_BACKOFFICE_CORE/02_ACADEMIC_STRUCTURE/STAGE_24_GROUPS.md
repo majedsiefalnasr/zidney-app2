@@ -9,19 +9,20 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
-Risk Level: LOW
-Last Updated: 2026-03-19T00:00:00.000Z
+Step: plan
+Risk Level: MEDIUM
+Last Updated: 2026-03-19T01:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Group CRUD (create, list, read, update, soft-delete)
-- Student single-group assignment with idempotent re-assign and SELECT FOR UPDATE max_members
-- Staff multi-group assignment via staff_groups join table
-- Division boundary enforcement via department_id
-- Status lifecycle (ENABLED / DISABLED) with assignment blocking
-- Deletion guards: active assignments, exam targeting, ads targeting
-- Content visibility filter contract (backend-only enforcement)
+- Group CRUD: `groups` table, 11 API endpoints (CRUD, student assignment, staff assignment)
+- `staff_groups` join table for multi-group staff membership
+- `students.group_id` nullable FK column (ON DELETE SET NULL)
+- Migration `20260319_001_groups.ts`: schema 1.6.0 → 1.7.0
+- SAVEPOINT-per-guard (AD-05) for safe deletion checks against `exam_group_targets` / `ads_group_targets`
+- SELECT FOR UPDATE on `groups` row for concurrent `max_members` enforcement (AD-03)
+- Idempotent student assignment (ON CONFLICT update) and staff assignment (ON CONFLICT DO NOTHING)
+- Service layer in `packages/domain-core/src/groups/`
 
 Deferred Scope:
 
@@ -30,10 +31,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Architecture Checker: VERDICT PASS (9/9 criteria)
+- API Designer: VERDICT PASS (7/7 criteria)
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Both guardian audits passed after AD-05 SAVEPOINT remediation and API spec alignment. Task breakdown in progress.
 
 ---
 

@@ -482,16 +482,16 @@ student.group_id`) MUST occur at the backend query layer only. Frontend MUST NOT
 
 ### Table: `staff_groups`
 
-| Column       | Type        | Nullable | Default | Notes                              |
-| ------------ | ----------- | -------- | ------- | ---------------------------------- |
-| `staff_id`   | UUID        | NO       | —       | FK → `users.id` ON DELETE CASCADE  |
-| `group_id`   | UUID        | NO       | —       | FK → `groups.id` ON DELETE CASCADE |
-| `created_at` | TIMESTAMPTZ | NO       | `now()` | Server-set assignment timestamp    |
+| Column       | Type        | Nullable | Default | Notes                                              |
+| ------------ | ----------- | -------- | ------- | -------------------------------------------------- |
+| `staff_id`   | UUID        | NO       | —       | FK → `backoffice_staff_users.id` ON DELETE CASCADE |
+| `group_id`   | UUID        | NO       | —       | FK → `groups.id` ON DELETE CASCADE                 |
+| `created_at` | TIMESTAMPTZ | NO       | `now()` | Server-set assignment timestamp                    |
 
 **Constraints:**
 
 - `PRIMARY KEY (staff_id, group_id)` (composite)
-- `FOREIGN KEY (staff_id) REFERENCES users(id) ON DELETE CASCADE`
+- `FOREIGN KEY (staff_id) REFERENCES backoffice_staff_users(id) ON DELETE CASCADE`
 - `FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE`
 
 **Indexes:**
@@ -573,7 +573,7 @@ cursor-based pagination.
 **Cursor implementation:** `nextCursor` is the `id` of the last item returned. Pass as `cursor`
 parameter to fetch the next page. Results are ordered by `created_at ASC, id ASC`. `total`
 reflects the full count matching all applied filters, independent of cursor. Soft-deleted records
-are excluded from all results.
+are excluded from all results. Pagination is **forward-only** — no previous-page cursor is supported.
 
 ---
 
@@ -689,7 +689,7 @@ Soft-delete a group that has no active assignments and no active targeting refer
 
 ---
 
-### `PUT /api/v1/backoffice/workspace/students/:student_id/group`
+### `PUT /api/v1/backoffice/workspace/students/:studentId/group`
 
 Assign or reassign a student to a group. Replaces the student's current group atomically.
 
@@ -731,7 +731,7 @@ Assign or reassign a student to a group. Replaces the student's current group at
 
 ---
 
-### `DELETE /api/v1/backoffice/workspace/students/:student_id/group`
+### `DELETE /api/v1/backoffice/workspace/students/:studentId/group`
 
 Remove a student's current group assignment (set `student.group_id = null`).
 
@@ -754,7 +754,48 @@ Remove a student's current group assignment (set `student.group_id = null`).
 
 ---
 
-### `GET /api/v1/backoffice/workspace/staff/:staff_id/groups`
+### `GET /api/v1/backoffice/workspace/students/:studentId/group`
+
+Read the group currently assigned to a student. Returns `data: null` if the student has no group.
+
+**Authorization:** Backoffice staff with `can_view` on Students module OR `can_view` on Groups module.
+
+**Response 200 (assigned):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "name": "Alpha cohort",
+    "status": "ENABLED",
+    "department_id": null,
+    "max_members": null,
+    "description": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-01T00:00:00Z"
+  },
+  "error": null
+}
+```
+
+**Response 200 (no group assigned):**
+
+```json
+{
+  "success": true,
+  "data": null,
+  "error": null
+}
+```
+
+**Error responses:**
+
+- 404 `STUDENT_NOT_FOUND` — studentId does not exist in this workspace
+
+---
+
+### `GET /api/v1/backoffice/workspace/staff/:staffId/groups`
 
 List all groups currently assigned to a specific staff member.
 
@@ -774,7 +815,7 @@ List all groups currently assigned to a specific staff member.
 
 ---
 
-### `POST /api/v1/backoffice/workspace/staff/:staff_id/groups`
+### `POST /api/v1/backoffice/workspace/staff/:staffId/groups`
 
 Assign a group to a staff member (idempotent).
 
@@ -788,30 +829,50 @@ Assign a group to a staff member (idempotent).
 }
 ```
 
-**Response 200:** Updated list of staff's assigned groups.
+**Response 200:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "groups": [{ "id": "uuid", "name": "Alpha cohort", "status": "ENABLED" }]
+  },
+  "error": null
+}
+```
 
 **Error responses:**
 
-- 404 `STAFF_NOT_FOUND` — staff_id does not exist in this workspace
+- 404 `STAFF_NOT_FOUND` — staffId does not exist in this workspace
 - 404 `GROUP_NOT_FOUND`
 - 422 `GROUP_DISABLED`
 - 422 `GROUP_DIVISION_MISMATCH`
 
 ---
 
-### `DELETE /api/v1/backoffice/workspace/staff/:staff_id/groups/:group_id`
+### `DELETE /api/v1/backoffice/workspace/staff/:staffId/groups/:groupId`
 
 Remove a group assignment from a staff member.
 
 **Authorization:** Backoffice staff with `can_edit` on Groups module.
 
-**Response 200:** Updated list of staff's remaining groups.
+**Response 200:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "groups": [{ "id": "uuid", "name": "Alpha cohort", "status": "ENABLED" }]
+  },
+  "error": null
+}
+```
 
 **Error responses:**
 
-- 404 `STAFF_NOT_FOUND` — staff_id does not exist in this workspace
+- 404 `STAFF_NOT_FOUND` — staffId does not exist in this workspace
 - 404 `GROUP_NOT_FOUND`
-- 404 `GROUP_STAFF_ASSIGNMENT_NOT_FOUND` — `group_id` is not in the staff member's current
+- 404 `GROUP_STAFF_ASSIGNMENT_NOT_FOUND` — `groupId` is not in the staff member's current
   assignments
 
 ---
