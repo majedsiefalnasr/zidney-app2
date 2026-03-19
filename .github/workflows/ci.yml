@@ -100,6 +100,11 @@ jobs:
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
+      - name: Build packages (lightweight)
+        run: |
+          export PATH="$PWD/node_modules/.bin:$PATH"
+          bun run build:packages
+
       - name: Type check source
         run: bun run typecheck:src
 
