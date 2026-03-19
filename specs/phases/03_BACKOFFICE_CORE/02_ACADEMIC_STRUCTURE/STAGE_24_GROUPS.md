@@ -8,35 +8,45 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: MEDIUM
-Last Updated: 2026-03-19T03:00:00.000Z
+Last Updated: 2026-03-19T12:00:00.000Z
 
-Drift Analysis: PASSED (all criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 29 / 29 completed
 
-Scope Authorized:
+Scope Closed:
 
-- Group CRUD: `groups` table, 11 API endpoints (CRUD, student assignment, staff assignment)
+- Group CRUD: `groups` table, 12 API endpoints (CRUD, student assignment, staff assignment)
 - `staff_groups` join table for multi-group staff membership
 - `students.group_id` nullable FK column (ON DELETE SET NULL)
 - Migration `20260319_001_groups.ts`: schema 1.6.0 → 1.7.0
-- SAVEPOINT-per-guard (AD-05) for safe deletion checks
-- SELECT FOR UPDATE on `groups` row for concurrent `max_members` enforcement (AD-03)
+- SAVEPOINT-per-guard for safe deletion checks
+- SELECT FOR UPDATE on `groups` row for concurrent `max_members` enforcement
 - Idempotent student assignment (UPDATE) and staff assignment (ON CONFLICT DO NOTHING)
-- Service (9 functions) + Repository layer in `packages/domain-core/src/groups/`
-- 29 atomic tasks across 5 phases
+- Domain layer: groups.types.ts, groups.errors.ts, groups.repository.ts, groups.service.ts
+- API routes: 12 handlers + helpers + router index
+- Validation schemas for all 9 endpoint inputs
+- Unit tests: 35 passing (groups domain service)
+- Integration tests: 48 passing (groups API endpoints)
+
+Deferred Scope:
+
+- None
 
 Constitutional Compliance:
 
+- ADR-0001: Database-per-tenant isolation enforced (DbClient injection, no global singleton)
+- ADR-0006: Server-authoritative time only (no client timestamps)
+- ADR-0008: Semantic versioning enforced (schema 1.6.0 → 1.7.0)
 - Architecture Checker: VERDICT PASS (9/9 criteria)
 - API Designer: VERDICT PASS (7/7 criteria)
-- Drift Audit: PASS (8/9 criteria + 1 N/A) — all cross-artifact issues remediated
-- All 7 cross-artifact inconsistencies resolved during analyze step
+- Drift Audit: PASS — all cross-artifact issues remediated
 
 Notes:
-Full drift analysis passed. Implementation gate open. 29 tasks ready for execution.
+Backend implementation complete. No structural backend modifications allowed.
+All 29 tasks implemented and committed across 4 governance commits.
 
 ---
 
