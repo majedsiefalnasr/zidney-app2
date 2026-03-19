@@ -3,7 +3,7 @@
 **Stage:** STAGE_24_GROUPS  
 **Phase:** 03_BACKOFFICE_CORE / 02_ACADEMIC_STRUCTURE  
 **Generated:** 2026-03-19  
-**Status:** PENDING IMPLEMENTATION  
+**Status:** IMPLEMENTED
 **Depends on:** STAGE_22_DIVISIONS, STAGE_23_DEPARTMENTS
 
 Tasks are ordered by execution dependency. Tasks marked `[P]` within a phase group are safe to
