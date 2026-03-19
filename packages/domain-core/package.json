@@ -21,7 +21,8 @@
     "./workers": "./src/workers/tasks/apply-migration.ts",
     "./rbac": "./src/rbac/index.ts",
     "./departments": "./src/departments/index.ts",
-    "./divisions": "./src/divisions/index.ts"
+    "./divisions": "./src/divisions/index.ts",
+    "./groups": "./src/groups/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",
