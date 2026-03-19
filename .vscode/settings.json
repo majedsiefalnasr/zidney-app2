@@ -16,7 +16,11 @@
     "rtk": true,
     "rtk git commit": false,
     "bun": true,
-    "bunx": true
+    "bunx": true,
+    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --paths-only 2>/dev/null \\|\\| echo \"SCRIPT_NOT_FOUND\"$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
   },
   "css.lint.unknownAtRules": "ignore",
   "css.customData": [
