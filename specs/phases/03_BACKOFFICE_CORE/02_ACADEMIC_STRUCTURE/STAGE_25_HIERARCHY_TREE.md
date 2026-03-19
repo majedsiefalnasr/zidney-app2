@@ -9,7 +9,7 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: PRODUCTION READY
-Step: closure
+Step: stage_production_ready
 Risk Level: MEDIUM
 Closure Date: 2026-03-19T18:00:00Z
 
