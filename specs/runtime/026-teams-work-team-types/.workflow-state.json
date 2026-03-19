@@ -1,0 +1,24 @@
+{
+  "stage": "Teams & Work Team Types",
+  "phase": "03_BACKOFFICE_CORE/02_ACADEMIC_STRUCTURE",
+  "stage_dir": "specs/runtime/026-teams-work-team-types",
+  "stage_file": "specs/phases/03_BACKOFFICE_CORE/02_ACADEMIC_STRUCTURE/STAGE_26_TEAMS.md",
+  "branch": "spec/026-teams-work-team-types",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-19T00:00:00.000Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/026-teams-work-team-types",
+      "timestamp": "2026-03-19T00:00:00.000Z"
+    }
+  ]
+}
