@@ -179,7 +179,25 @@ export function enforceLicenseStatus(license: LicenseRecord) {
 }
 
 function enforceProductVersion(license: LicenseRecord) {
-  if (!semver.satisfies(config.platformProductVersion, license.product_version)) {
+  // Validate product_version format before parsing
+  if (!license.product_version || !semver.valid(license.product_version)) {
+    logger.warn('Invalid product version format in license', {
+      product_version: license.product_version,
+      platform_version: config.platformProductVersion,
+    })
+    throw new Error('VERSION_MISMATCH')
+  }
+
+  try {
+    if (!semver.satisfies(config.platformProductVersion, `^${license.product_version}`)) {
+      throw new Error('VERSION_MISMATCH')
+    }
+  } catch (error: unknown) {
+    logger.error('Product version compatibility check failed', {
+      product_version: license.product_version,
+      platform_version: config.platformProductVersion,
+      error: error instanceof Error ? error.message : String(error),
+    })
     throw new Error('VERSION_MISMATCH')
   }
 }

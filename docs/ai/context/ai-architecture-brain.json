@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-03-18T20:34:24.551Z",
-  "gitSha": "bdc7c0babf2e0b419a8a124dae0d8417564f6869",
+  "generatedAt": "2026-03-19T11:48:58.496Z",
+  "gitSha": "f395ed4eceffca781df66dbb1e516a00bc42c0f4",
   "architectureScore": 100,
   "modules": [
     "packages/job-queue",
@@ -131,19 +131,19 @@
   "hotspots": [
     {
       "module": "packages/logger",
-      "score": 255
+      "score": 268
+    },
+    {
+      "module": "packages/domain-core",
+      "score": 109
     },
     {
       "module": "packages/types",
       "score": 100
     },
     {
-      "module": "packages/domain-core",
-      "score": 97
-    },
-    {
       "module": "packages/validation",
-      "score": 25
+      "score": 36
     },
     {
       "module": "packages/api-client",

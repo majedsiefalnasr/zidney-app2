@@ -39,6 +39,18 @@ export {
   type TokenBucketResult,
 } from './algorithms/token-bucket'
 
+// Safe operations
+export {
+  type RedisOpResult,
+  safeRedisDelete,
+  safeRedisExpire,
+  safeRedisLPush,
+  safeRedisOp,
+  safeRedisZAdd,
+  safeRedisZRangeByScore,
+  safeRedisZRemRangeByScore,
+} from './safe-operations'
+
 // Schemas
 export {
   formatRedisKey,

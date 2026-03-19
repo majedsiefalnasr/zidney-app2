@@ -166,14 +166,14 @@ export function checkEnvFile(): boolean {
     return false
   }
 
-  // .env absent → error
+  // .env absent → warn only (do not fail repo-doctor in public repos)
   if (!fs.existsSync(envPath)) {
     line(
       'environment variables',
-      'error',
+      'warn',
       '.env not found — copy .env.example to .env and fill in values'
     )
-    return true
+    return false
   }
 
   const parseKeys = (content: string): Set<string> => {
@@ -201,12 +201,13 @@ export function checkEnvFile(): boolean {
   }
 
   if (missing.length > 0) {
+    // Treat missing keys as a warning — many public forks omit a local .env intentionally.
     line(
       'environment variables',
-      'error',
+      'warn',
       `missing ${missing.length.toString()} key(s): ${missing.join(', ')} — copy .env.example to .env`
     )
-    return true
+    return false
   }
 
   line('environment variables', 'ok')

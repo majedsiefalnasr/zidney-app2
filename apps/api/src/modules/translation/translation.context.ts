@@ -52,22 +52,27 @@ export async function buildTranslationContext(
   const rawSettings = settingsResult.rows[0]?.language_settings ?? getDefaultLanguageSettings()
 
   // Parse internal schema (includes language_status). If parsing fails, throw a clear error
-  let parsed
   try {
-    parsed = languageSettingsInternalSchema.parse(rawSettings)
-  } catch (err) {
+    // `languageSettingsInternalSchema.parse` may return an untyped value from runtime
+    // validation; cast to a strongly-typed shape for the TranslationOperationContext.
+    const parsedSettings = languageSettingsInternalSchema.parse(rawSettings) as {
+      default_language: string
+      supported_languages: string[]
+      language_status: Record<string, 'active' | 'removing'>
+    }
+
+    const ctx: TranslationOperationContext = {
+      workspace_id: tenant.id,
+      workspace_slug: tenant.slug,
+      user_id: staffUser?.user_id ?? 'unknown',
+      correlation_id: correlationId,
+      default_language: parsedSettings.default_language,
+      supported_languages: parsedSettings.supported_languages,
+      language_status: parsedSettings.language_status,
+    }
+
+    return { ctx, db }
+  } catch (err: unknown) {
     throw new Error(`Invalid workspace language settings: ${(err as Error).message}`)
   }
-
-  const ctx: TranslationOperationContext = {
-    workspace_id: tenant.id,
-    workspace_slug: tenant.slug,
-    user_id: staffUser?.user_id ?? 'unknown',
-    correlation_id: correlationId,
-    default_language: parsed.default_language,
-    supported_languages: parsed.supported_languages,
-    language_status: parsed.language_status,
-  }
-
-  return { ctx, db }
 }
