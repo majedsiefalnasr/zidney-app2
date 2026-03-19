@@ -9,20 +9,19 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-03-19T01:00:00.000Z
+Last Updated: 2026-03-19T02:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Group CRUD: `groups` table, 11 API endpoints (CRUD, student assignment, staff assignment)
-- `staff_groups` join table for multi-group staff membership
-- `students.group_id` nullable FK column (ON DELETE SET NULL)
-- Migration `20260319_001_groups.ts`: schema 1.6.0 → 1.7.0
-- SAVEPOINT-per-guard (AD-05) for safe deletion checks against `exam_group_targets` / `ads_group_targets`
-- SELECT FOR UPDATE on `groups` row for concurrent `max_members` enforcement (AD-03)
-- Idempotent student assignment (ON CONFLICT update) and staff assignment (ON CONFLICT DO NOTHING)
-- Service layer in `packages/domain-core/src/groups/`
+- Total: 25 atomic tasks
+- Phase 0 (Infrastructure): T001–T004 (DB schema + migration)
+- Phase 1 (Domain Layer): T005–T009 (types, errors, repository, service, barrel)
+- Phase 2 (Validation): T010 (Zod schemas)
+- Phase 3 (API Routes): T011–T022 (11 handlers + router)
+- Phase 4 (Router Registration): T023 (backoffice mount)
+- Phase 5 (Tests): T024–T025 (unit + integration)
 
 Deferred Scope:
 
@@ -33,10 +32,10 @@ Constitutional Compliance:
 
 - Architecture Checker: VERDICT PASS (9/9 criteria)
 - API Designer: VERDICT PASS (7/7 criteria)
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Both guardian audits passed after AD-05 SAVEPOINT remediation and API spec alignment. Task breakdown in progress.
+Atomic task set generated. 25 tasks across 5 phases, 17 parallelisable. Drift analysis gate pending.
 
 ---
 
