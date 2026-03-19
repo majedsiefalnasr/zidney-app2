@@ -43,6 +43,7 @@ import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
 import { backofficeContextRouter } from './routes/backoffice/context'
 import { departmentsRouter } from './routes/backoffice/departments/index'
 import { divisionsRouter } from './routes/backoffice/divisions/index'
+import { groupsRouter } from './routes/backoffice/groups/index'
 import { rolesRouter } from './routes/backoffice/roles'
 import { workspaceSettingsRouter } from './routes/backoffice/settings'
 import { translationRouter } from './routes/backoffice/translations/index'
@@ -150,6 +151,9 @@ app.route('/api/v1/backoffice/workspace', divisionsRouter)
 
 // Departments endpoints — Stage 023, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', departmentsRouter)
+
+// Groups endpoints — Stage 024, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', groupsRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade

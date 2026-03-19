@@ -17,6 +17,8 @@ export * from './auth/index'
 export * as departments from './departments'
 // Divisions module (Stage 022)
 export * as divisions from './divisions'
+// Groups module (Stage 024)
+export * as groups from './groups'
 // Job hash utility
 export * from './job-hash'
 // License module
