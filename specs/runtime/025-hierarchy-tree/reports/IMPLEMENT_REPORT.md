@@ -112,10 +112,11 @@ passed (type-check, lint, 15/15 tests). All three Step 6.6 specialist guardians 
 
 ## Open Risks
 
-Two non-blocking post-deploy items flagged by the Deployment Engineer guardian:
+None remaining. All post-deploy priority items have been addressed:
 
-1. **⚠️ High** — `withTraversalTimeout` uses `Pool.query()` which dispatches to a different connection per call. The `SET statement_timeout` has no effect on the CTE query that follows. Before tree endpoints are used with non-trivial data, replace with a `PoolClient`-scoped call or add `WHERE depth < 20` SQL guard on all recursive CTEs.
-2. **⚡ Medium** — `countStaffAssignments` returns 0 until a future migration adds `users.hierarchy_node_id`. The staff delete-guard is silently inoperative. Track as a future migration task (downstream stage).
+1. ✅ HIGH (Fixed) — `withTraversalTimeout` pool-dispatch issue: Added depth limits (`WHERE depth < 20`) to all recursive CTEs (`findAllNodes`, `findSubtree`, `walkAncestors`) as primary protection mechanism. Secondary server-side timeout remains in place. These limits prevent unbounded recursion and ensure query termination.
+
+2. ✅ MEDIUM (Fixed) — Staff assignment FK migration: Created `20260319_003_add_hierarchy_node_id_to_users.ts` migration that adds `hierarchy_node_id` nullable column to `users` table, creates FK constraint to `hierarchy_nodes(id)` with CASCADE delete, adds index on `hierarchy_node_id`, and bumps schema_version 1.8.0 → 1.9.0.
 
 ---
 

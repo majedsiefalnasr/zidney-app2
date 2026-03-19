@@ -52,10 +52,10 @@ export async function buildTranslationContext(
   const rawSettings = settingsResult.rows[0]?.language_settings ?? getDefaultLanguageSettings()
 
   // Parse internal schema (includes language_status). If parsing fails, throw a clear error
-  let parsed
+  let parsed: unknown
   try {
     parsed = languageSettingsInternalSchema.parse(rawSettings)
-  } catch (err) {
+  } catch (err: unknown) {
     throw new Error(`Invalid workspace language settings: ${(err as Error).message}`)
   }
 

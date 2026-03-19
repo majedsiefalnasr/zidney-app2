@@ -74,13 +74,13 @@ export async function up(client: PoolClient): Promise<void> {
     `)
 
     await client.query('COMMIT')
-  } catch (err) {
+  } catch (err: unknown) {
     await client.query('ROLLBACK')
     throw err
   }
 }
 
-export async function down(_client: PoolClient): Promise<void> {
+export async function down(): Promise<void> {
   throw new Error(
     'STAGE_25_HIERARCHY_TREE migration is forward-only. ' +
       'Rollback must be performed via database snapshot restore.'

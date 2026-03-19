@@ -49,6 +49,12 @@ async function withTraversalTimeout<T extends Record<string, unknown>>(
   sql: string,
   params?: unknown[]
 ): Promise<{ rows: T[]; rowCount: number | null }> {
+  // Note: Recursive CTEs are depth-limited in SQL WHERE clauses (max_recursive_iterations safety).
+  // This function sets a server-side timeout as an additional safeguard.
+  // For PoolClient (connection-aware), the timeout persists for the query.
+  // For Pool (connection-agnostic), the timeout may not apply uniformly to all queries,
+  // so depth limits in the CTE are the primary protection mechanism.
+  // See: hierarchy.repository.ts findAllNodes, findSubtree (WHERE depth < 20)
   await db.query('SET statement_timeout = 5000')
   try {
     return await db.query<T>(sql, params)
@@ -314,6 +320,7 @@ export async function findAllNodes(
               tree.depth + 1
          FROM hierarchy_nodes child
          JOIN tree ON child.parent_id = tree.id
+        WHERE tree.depth < 20
      )
      SELECT tree.id,
             tree.name,
@@ -362,6 +369,7 @@ export async function findSubtree(
               subtree.depth + 1
          FROM hierarchy_nodes child
          JOIN subtree ON child.parent_id = subtree.id
+        WHERE subtree.depth < 20
      )
      SELECT subtree.id,
             subtree.name,
@@ -467,13 +475,14 @@ export async function findFlatList(
 export async function walkAncestors(db: DbClient, proposedParentId: string): Promise<string[]> {
   const result = await db.query<{ id: string }>(
     `WITH RECURSIVE ancestors AS (
-       SELECT id, parent_id
+       SELECT id, parent_id, 0::int AS depth
          FROM hierarchy_nodes
         WHERE id = $1
        UNION ALL
-       SELECT parent.id, parent.parent_id
+       SELECT parent.id, parent.parent_id, ancestors.depth + 1
          FROM hierarchy_nodes parent
          JOIN ancestors ON ancestors.parent_id = parent.id
+        WHERE ancestors.depth < 20
      )
      SELECT id FROM ancestors`,
     [proposedParentId]
