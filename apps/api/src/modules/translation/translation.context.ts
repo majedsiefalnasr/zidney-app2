@@ -58,7 +58,7 @@ export async function buildTranslationContext(
     const parsedSettings = languageSettingsInternalSchema.parse(rawSettings) as {
       default_language: string
       supported_languages: string[]
-      language_status: Record<string, unknown>
+      language_status: Record<string, 'active' | 'removing'>
     }
 
     const ctx: TranslationOperationContext = {
