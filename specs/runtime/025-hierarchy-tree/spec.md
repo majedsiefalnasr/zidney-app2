@@ -178,8 +178,8 @@ its parent.
 4. **Given** the same `name` used under two different parents, **When** each child is created
    under its respective parent, **Then** both creations succeed — uniqueness is per-parent-scope
    only.
-5. **Given** a `parent_id` equal to the new node's own `id` (self-reference), **Then** the API
-   returns 422 with `HIERARCHY_NODE_SELF_REFERENCE`.
+5. **Given** `parent_id = null`, **When** the node is created without a parent, **Then** the API
+   persists it as a root node.
 6. **Given** an ENABLED parent node, **When** multiple levels of children are created
    (grandchildren, great-grandchildren), **Then** each level is correctly persisted and visible in
    the tree traversal endpoint.
@@ -316,7 +316,7 @@ confirm it no longer appears in the list or tree endpoints.
    is sent, **Then** the deletion succeeds.
 5. **Given** a node with both children and staff assignments, **When** a delete request is sent,
    **Then** the API returns 422 with `HIERARCHY_NODE_HAS_CHILDREN` (children blocking takes
-   precedence; the response must enumerate all blocking conditions).
+   precedence; the response returns the single highest-priority blocking code).
 
 ---
 
@@ -348,8 +348,9 @@ confirm it no longer appears in the list or tree endpoints.
 - **FR-001**: The system MUST store hierarchy nodes within the tenant DB in a `hierarchy_nodes`
   table with columns: `id` (UUID, PK), `name` (varchar, NOT NULL), `parent_id` (UUID, nullable,
   FK → `hierarchy_nodes.id`, ON DELETE RESTRICT), `description` (text, nullable), `status`
-  (enum: `ENABLED` | `DISABLED`, NOT NULL, default `ENABLED`), `created_at` (timestamp),
-  `updated_at` (timestamp).
+  (`VARCHAR(20)` NOT NULL, default `'ENABLED'`, with a `CHECK (status IN ('ENABLED', 'DISABLED'))`
+  constraint — NOT a PostgreSQL native ENUM type), `created_at` (TIMESTAMPTZ), `updated_at`
+  (TIMESTAMPTZ).
 - **FR-002**: `name` MUST be unique within the same `parent_id` scope (case-insensitive) — i.e.,
   the unique constraint is on `(parent_id, lower(name))`. For root nodes (`parent_id IS NULL`),
   uniqueness is enforced among all root nodes.
@@ -358,8 +359,11 @@ confirm it no longer appears in the list or tree endpoints.
 - **FR-004**: A node's `parent_id` MUST NOT equal its own `id`. Self-reference is prohibited and
   MUST be rejected at the API layer with `HIERARCHY_NODE_SELF_REFERENCE`.
 - **FR-005**: Circular hierarchy MUST be strictly prohibited. The API MUST execute a cycle-
-  detection check before committing any create or update operation that sets or changes `parent_id`.
+  detection check before committing any update operation that changes `parent_id`.
   If a cycle is detected, the operation MUST be rejected with `HIERARCHY_NODE_CYCLE_DETECTED`.
+  Note: Cycle detection is not applicable at node creation time — a newly created node's `id` is
+  server-generated (UUID) and therefore cannot exist in the ancestor chain of any proposed
+  `parent_id` at the moment of creation.
 - **FR-006**: Cycle detection MUST be performed at the API layer (application code) — it MUST NOT
   rely solely on DB-level CHECK constraints. The algorithm MUST walk the ancestor chain of the
   proposed `parent_id` using DB queries inside the same transaction.
@@ -396,7 +400,9 @@ confirm it no longer appears in the list or tree endpoints.
 - **FR-020**: The `hierarchy_nodes` table MUST have indexes on `parent_id` and `status` to support
   efficient tree traversal and status filtering.
 - **FR-021**: All API responses MUST follow the error contract:
-  `{ success: boolean, data: object | null, error: { code: string, message: string } | null }`.
+  `{ success: boolean, data: object | null, error: { code: string, message: string, correlationId: string } | null }`.
+  The `correlationId` field in error sub-objects MUST be propagated from the request's
+  `X-Correlation-ID` header (or a generated UUID if absent) to allow log correlation.
 - **FR-022**: All service-layer logs MUST be structured and include: `timestamp`, `level`,
   `service`, `workspace_slug`, `workspace_id`, `user_id` (if available), `correlation_id`, and
   `hierarchy_node_id` (for node-specific operations). `console.log` is forbidden.
@@ -414,15 +420,15 @@ confirm it no longer appears in the list or tree endpoints.
 
 ### Table: `hierarchy_nodes` (Tenant DB)
 
-| Column        | Type                       | Nullable | Default           | Notes                                           |
-| ------------- | -------------------------- | -------- | ----------------- | ----------------------------------------------- |
-| `id`          | UUID                       | NO       | gen_random_uuid() | Primary key                                     |
-| `name`        | VARCHAR(255)               | NO       |                   | Trimmed before storage; unique per parent scope |
-| `parent_id`   | UUID                       | YES      | NULL              | FK → `hierarchy_nodes.id` ON DELETE RESTRICT    |
-| `description` | TEXT                       | YES      | NULL              |                                                 |
-| `status`      | ENUM('ENABLED','DISABLED') | NO       | 'ENABLED'         |                                                 |
-| `created_at`  | TIMESTAMPTZ                | NO       | now()             | Server-set only                                 |
-| `updated_at`  | TIMESTAMPTZ                | NO       | now()             | Server-set only; updated on every write         |
+| Column        | Type                                                  | Nullable | Default           | Notes                                                                             |
+| ------------- | ----------------------------------------------------- | -------- | ----------------- | --------------------------------------------------------------------------------- |
+| `id`          | UUID                                                  | NO       | gen_random_uuid() | Primary key                                                                       |
+| `name`        | VARCHAR(255)                                          | NO       |                   | Trimmed before storage; unique per parent scope                                   |
+| `parent_id`   | UUID                                                  | YES      | NULL              | FK → `hierarchy_nodes.id` ON DELETE RESTRICT                                      |
+| `description` | TEXT                                                  | YES      | NULL              |                                                                                   |
+| `status`      | VARCHAR(20) CHECK (status IN ('ENABLED', 'DISABLED')) | NO       | 'ENABLED'         | NOT a PostgreSQL ENUM type; uses VARCHAR + CHECK constraint for easier migrations |
+| `created_at`  | TIMESTAMPTZ                                           | NO       | now()             | Server-set only                                                                   |
+| `updated_at`  | TIMESTAMPTZ                                           | NO       | now()             | Server-set only; updated on every write                                           |
 
 **Constraints:**
 
@@ -457,7 +463,14 @@ Rules enforced by the downstream stage:
 
 ## API Endpoints
 
-### `POST /workspaces/:slug/hierarchy-nodes`
+**Canonical base path:** All hierarchy endpoints are mounted under
+`/api/v1/backoffice/workspace/hierarchy-nodes` at runtime. This mirrors the existing Backoffice
+mount pattern already used by translations, workflow, roles, divisions, departments, and groups in
+`apps/api/src/app.ts`. The short-form paths below (for example `POST /hierarchy-nodes`) describe
+the suffix registered by the hierarchy router; the full runtime URL always includes the
+`/api/v1/backoffice/workspace` prefix.
+
+### `POST /hierarchy-nodes`
 
 Create a new hierarchy node.
 
@@ -491,12 +504,11 @@ Create a new hierarchy node.
 ```
 
 **Error codes:** `VALIDATION_ERROR` (422), `HIERARCHY_NODE_NAME_DUPLICATE` (409),
-`HIERARCHY_NODE_PARENT_NOT_FOUND` (422), `HIERARCHY_NODE_SELF_REFERENCE` (422),
-`HIERARCHY_NODE_CYCLE_DETECTED` (422), `FORBIDDEN` (403), `LICENSE_REQUIRED` (423/403/404).
+`HIERARCHY_NODE_PARENT_NOT_FOUND` (422), `FORBIDDEN` (403), `LICENSE_REQUIRED` (423/403/404).
 
 ---
 
-### `GET /workspaces/:slug/hierarchy-nodes`
+### `GET /hierarchy-nodes`
 
 Flat list of all hierarchy nodes with optional filters and pagination.
 
@@ -531,7 +543,7 @@ Flat list of all hierarchy nodes with optional filters and pagination.
 
 ---
 
-### `GET /workspaces/:slug/hierarchy-nodes/tree`
+### `GET /hierarchy-nodes/tree`
 
 Full nested tree of all hierarchy nodes.
 
@@ -569,9 +581,12 @@ Full nested tree of all hierarchy nodes.
 
 ---
 
-### `GET /workspaces/:slug/hierarchy-nodes/:id/subtree`
+### `GET /hierarchy-nodes/:id/subtree`
 
 Nested subtree rooted at a specific node.
+
+**Query Parameters:** `status` (optional: `ENABLED` | `DISABLED`) — when supplied, DISABLED nodes
+and their entire subtrees are pruned from the response (subtree exclusion semantics).
 
 **Response 200:** Same shape as the full tree endpoint but rooted at the requested node.
 
@@ -579,7 +594,7 @@ Nested subtree rooted at a specific node.
 
 ---
 
-### `GET /workspaces/:slug/hierarchy-nodes/:id`
+### `GET /hierarchy-nodes/:id`
 
 Single node detail.
 
@@ -594,6 +609,7 @@ Single node detail.
     "parent_id": "uuid | null",
     "description": "string | null",
     "status": "ENABLED | DISABLED",
+    "depth": 0,
     "created_at": "ISO8601",
     "updated_at": "ISO8601"
   },
@@ -601,13 +617,18 @@ Single node detail.
 }
 ```
 
+Note: `depth` is 0 for root nodes, 1 for direct children of root, etc. Computed via ancestor-count
+query at read time (not stored).
+
 **Error codes:** `HIERARCHY_NODE_NOT_FOUND` (404).
 
 ---
 
-### `PUT /workspaces/:slug/hierarchy-nodes/:id`
+### `PATCH /hierarchy-nodes/:id`
 
-Update a hierarchy node (name, description, status, parent_id).
+Partially update a hierarchy node (name, description, status, parent_id). PATCH semantics:
+only fields explicitly provided in the request body are updated; omitted fields retain their
+current values.
 
 **Request Body:** Same shape as create; all fields optional; only provided fields are updated.
 
@@ -617,7 +638,7 @@ Update a hierarchy node (name, description, status, parent_id).
 
 ---
 
-### `DELETE /workspaces/:slug/hierarchy-nodes/:id`
+### `DELETE /hierarchy-nodes/:id`
 
 Delete a hierarchy node. Blocked if children exist or staff are assigned.
 
@@ -669,7 +690,7 @@ Delete a hierarchy node. Blocked if children exist or staff are assigned.
 
 1. Permission checks for hierarchy management are handled by the existing role-permission system
    (STAGE_21); the hierarchy endpoints do not implement their own permission model beyond
-   delegating to the permission middleware.
+   delegating to the shared Backoffice JWT middleware and the per-route RBAC guard.
 2. No global limit on the total number of hierarchy nodes per workspace is required in this stage.
 3. Cycle detection uses a recursive ancestor walk (iterative, using DB queries) rather than
    relying on a DB-native recursive CTE or triggers; this ensures the check and the write occur
@@ -684,6 +705,18 @@ Delete a hierarchy node. Blocked if children exist or staff are assigned.
 7. Case-insensitive name uniqueness is enforced via a functional unique index using `lower(name)`.
 8. The `ON DELETE RESTRICT` FK on `parent_id` is a backstop; the API layer must check for children
    before deletion and return the structured error code rather than surfacing a raw DB error.
+9. **Offset-based pagination (`page` / `per_page`) is the intentional choice for the flat-list
+   endpoint** (`GET /hierarchy-nodes`). This is a deliberate architectural deviation from the
+   platform cursor-based pagination standard: hierarchy node sets are workspace-scoped and
+   structurally bounded (well under 10 000 nodes per workspace). The `ORDER BY depth ASC,
+name ASC, id ASC` clause guarantees deterministic, stable page results without cursor
+   book-keeping. Cursor-based pagination adds implementation and API complexity with no
+   measurable P99 latency benefit at this entity scale. No ADR exception is required for
+   bounded internal entity sets. This assumption is the authoritative justification for
+   offset pagination in this stage.
+10. Reparenting operations must be serialized against both the node being moved and the proposed
+    parent row. The API layer achieves this by locking both rows in deterministic order before the
+    ancestor walk runs, preventing reciprocal concurrent moves from committing a cycle.
 
 ---
 
@@ -713,13 +746,13 @@ Delete a hierarchy node. Blocked if children exist or staff are assigned.
 
 ## Transaction Boundaries
 
-| Operation                  | Transactional? | Notes                                                                        |
-| -------------------------- | -------------- | ---------------------------------------------------------------------------- |
-| Create node                | Yes            | Includes name-uniqueness check + parent validation + cycle detection         |
-| Update node (rename)       | Yes            | Includes name-uniqueness check within same transaction                       |
-| Update node (reparent)     | Yes            | Includes cycle-detection ancestor walk + write in same transaction           |
-| Delete node                | Yes            | Includes children check + staff check before hard delete in same transaction |
-| Read (list, tree, subtree) | No             | Read-only; no transaction required                                           |
+| Operation                  | Transactional? | Notes                                                                                                 |
+| -------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- |
+| Create node                | Yes            | Includes name-uniqueness check + parent validation                                                    |
+| Update node (rename)       | Yes            | Includes name-uniqueness check within same transaction                                                |
+| Update node (reparent)     | Yes            | Includes deterministic dual-row locking, cycle-detection ancestor walk, and write in same transaction |
+| Delete node                | Yes            | Includes children check + staff check before hard delete in same transaction                          |
+| Read (list, tree, subtree) | No             | Read-only; no transaction required                                                                    |
 
 **Failure & Rollback:** Any error within a write transaction rolls back all changes. No partial
 state is written. Retry is safe for read operations; write retries are safe for idempotent update
@@ -729,8 +762,7 @@ payloads (last-write wins on non-conflicting fields).
 
 ## Authoritative Time Usage
 
-- `created_at` and `updated_at` are set by the API server using the server's clock at the time of
-  the DB write.
+- `created_at` and `updated_at` are set by the tenant database using `NOW()` at write time.
 - Client-supplied `created_at` or `updated_at` values in request bodies are ignored.
 - No timer or deadline behavior exists in this stage (no attempt engine involvement).
 
@@ -770,13 +802,31 @@ All service methods must emit structured logs using the platform's structured lo
 
 ## Rate Limiting & Abuse Protection
 
-| Endpoint class             | Classification      | Rate Limit Policy                               |
-| -------------------------- | ------------------- | ----------------------------------------------- |
-| CRUD write endpoints       | Authenticated staff | Standard authenticated rate limit per workspace |
-| Read / traversal endpoints | Authenticated staff | Standard authenticated rate limit per workspace |
+| Endpoint class             | Classification      | Rate Limit Policy                                                                                       |
+| -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------- |
+| CRUD write endpoints       | Authenticated staff | Standard authenticated rate limit per workspace                                                         |
+| Read / traversal endpoints | Authenticated staff | Standard authenticated rate limit per workspace + per-query `statement_timeout = 5000ms` DB-level guard |
 
 No public endpoints exist for hierarchy nodes. All endpoints require authenticated staff access
 with the appropriate workspace license check.
+
+The full-tree (`GET /hierarchy-nodes/tree`) and subtree (`GET /hierarchy-nodes/:id/subtree`)
+endpoints execute `WITH RECURSIVE` CTEs whose cost scales with tree depth and node count.
+A **5-second `statement_timeout`** MUST be applied to every connection used by these endpoints
+to prevent runaway queries from exhausting the tenant DB connection pool. If the query exceeds
+the timeout, the handler returns 503 with `HIERARCHY_TRAVERSAL_TIMEOUT`.
+
+**Pagination strategy (flat-list):** Offset-based pagination is used for `GET /hierarchy-nodes`
+rather than cursor-based because the hierarchy node set is workspace-scoped and expected to remain
+bounded (well under 10 000 nodes per workspace). Cursor-based pagination would add complexity with
+no meaningful performance benefit at this scale. This deviation from the platform default
+cursor strategy is intentional and documented here.
+
+**Auth clarification:** HTTP 401 is returned by the shared Backoffice JWT middleware when no valid
+staff JWT is present (unauthenticated). HTTP 403 is returned by the per-route RBAC guard
+(`createPermissionGuard(..., PermissionModule.ACADEMIC_STRUCTURE, ...)`) when the authenticated
+staff user lacks the required `can_view`, `can_create`, `can_edit`, or `can_delete` capability
+(unauthorized). These two codes apply at distinct middleware layers and are not interchangeable.
 
 ---
 
@@ -843,7 +893,7 @@ with the appropriate workspace license check.
 
 ### Idempotency Tests
 
-- Repeated `PUT` with same payload returns 200 and does not change `updated_at` erroneously.
+- Repeated `PATCH` with same payload returns 200 and does not change `updated_at` erroneously.
 
 ### Isolation Tests
 
@@ -864,14 +914,12 @@ Compliant with Zidney Constitution v1.2.0 — No violations detected.
 
 - Q: What locking strategy prevents a concurrent-reparent race where two simultaneous transactions
   both pass the cycle-detection ancestor walk and commit, potentially creating a cycle? → A:
-  Acquire `SELECT ... FOR UPDATE` on the node being updated at the very start of any transaction
-  that changes `parent_id`. This exclusive row lock forces concurrent update transactions targeting
-  the same node to serialize, eliminating the TOCTOU window between the ancestor walk and the
-  commit. Ancestor walk reads within the same transaction do not require additional locking because
-  the source node is already locked; the proposed `parent_id` chain is read at READ COMMITTED
-  isolation, which is sufficient given that the node whose lineage is being mutated is held
-  exclusively. Success Criteria #2 ("regardless of concurrency") is satisfiable with this
-  single-node lock strategy.
+  Acquire `SELECT ... FOR UPDATE` on both the node being updated and the proposed parent row at the
+  start of any transaction that changes `parent_id`, using deterministic lock order (lower UUID,
+  then higher UUID) to avoid deadlocks. This dual-row lock forces reciprocal concurrent reparent
+  operations (`A → B` and `B → A`) to serialize before the ancestor walk runs, eliminating the
+  TOCTOU window between cycle detection and commit. Success Criteria #2 ("regardless of
+  concurrency") requires this dual-row lock strategy rather than a single-row lock.
 
 - Q: Which tree and subtree traversal strategy is authoritative — application-level iterative DB
   queries (N+1 pattern) or a single PostgreSQL recursive CTE? → A: A single PostgreSQL recursive
@@ -886,12 +934,12 @@ Compliant with Zidney Constitution v1.2.0 — No violations detected.
 
 - Q: What is the canonical sort order for the flat-list endpoint, and is it stable enough to make
   offset-based pagination deterministic across sequential requests? → A: The flat-list endpoint
-  MUST sort results by `(depth ASC, name ASC)` as the stable, deterministic default order. Depth
-  is ascending (root nodes first), and within each depth level nodes are ordered alphabetically by
-  `name` case-insensitively. This ordering MUST be applied before applying the `OFFSET` / `LIMIT`
-  pagination slice, ensuring page boundaries are reproducible. No alternative sort order is
-  supported in this stage. The `ORDER BY` must be included in the recursive CTE or the final query
-  to guarantee stability.
+  MUST sort results by `(depth ASC, name ASC, id ASC)` as the stable, deterministic default order.
+  Depth is ascending (root nodes first), within each depth level nodes are ordered alphabetically
+  by `name` case-insensitively, and `id ASC` is the deterministic tiebreaker. This ordering MUST
+  be applied before applying the `OFFSET` / `LIMIT` pagination slice, ensuring page boundaries are
+  reproducible. No alternative sort order is supported in this stage. The `ORDER BY` must be
+  included in the recursive CTE or the final query to guarantee stability.
 
 - Q: When a `status=ENABLED` filter is applied to the nested-tree or subtree endpoints, should an
   ENABLED node whose immediate parent is DISABLED (a permitted data state per the Edge Cases
@@ -907,13 +955,13 @@ Compliant with Zidney Constitution v1.2.0 — No violations detected.
   semantics. The unfiltered full-tree endpoint (no `status` parameter) always returns every node
   regardless of status and always reflects per-node status accurately.
 
-- Q: Should `updated_at` be bumped on every accepted `PUT` write, or should the service perform a
+- Q: Should `updated_at` be bumped on every accepted `PATCH` write, or should the service perform a
   field-level diff and skip the DB write (leaving `updated_at` unchanged) when the incoming
-  payload matches the current stored state? → A: `updated_at` is updated on every accepted `PUT`
+  payload matches the current stored state? → A: `updated_at` is updated on every accepted `PATCH`
   write unconditionally — including when all payload fields match the current stored values.
   The idempotency test assertion "does not change `updated_at` erroneously" means the timestamp
   MUST be server-set and MUST NOT accept a client-supplied value; it does not mandate no-op
   suppression. The service MUST NOT implement field-level diff detection to skip DB writes. This
   aligns with the data model's "updated on every write" definition, avoids hidden diff complexity,
-  and ensures that every accepted PUT produces a predictable audit trail. Callers that require
-  last-seen-timestamp comparison must use `GET` before `PUT`.
+  and ensures that every accepted PATCH produces a predictable audit trail. Callers that require
+  last-seen-timestamp comparison must use `GET` before `PATCH`.

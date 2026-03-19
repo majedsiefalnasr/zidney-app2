@@ -9,29 +9,31 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-03-19T00:00:00.000Z
+Last Updated: 2026-03-19T13:07:11Z
 
-Scope Defined:
+Scope Planned:
 
 - Staff-only organizational hierarchy tree (unlimited depth, self-referencing)
 - CRUD + tree traversal (full-tree via recursive CTE, flat-list, subtree)
-- Cycle detection at API layer with SELECT FOR UPDATE serialization
+- Deterministic dual-row locking for safe reparenting under concurrency
 - Parent deletion guard; reparent with cycle validation in transaction
 - Status toggle with subtree pruning on ENABLEDFilter
+- Backoffice mount under `/api/v1/backoffice/workspace/hierarchy-nodes`
 - Tenant-isolated; license middleware mandatory
 
 Deferred Scope:
 
 - Staff assignment to hierarchy nodes — downstream stage concern
+- Frontend org-chart UI rendering — downstream stage concern
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
@@ -67,9 +69,9 @@ Columns:
 - name (varchar, required)
 - parent_id (UUID, nullable, self-reference)
 - description (text, nullable)
-- status (enum: ENABLED | DISABLED)
-- created_at (timestamp)
-- updated_at (timestamp)
+- status (VARCHAR(20) with CHECK constraint: ENABLED | DISABLED)
+- created_at (TIMESTAMPTZ)
+- updated_at (TIMESTAMPTZ)
 
 Constraints:
 
