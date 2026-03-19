@@ -9,20 +9,33 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-19T00:00:00.000Z
+Last Updated: 2026-03-19T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Team Types CRUD (name, description, status — ENABLED/DISABLED)
+- Teams CRUD (name, team_type_id nullable, max_members, description, status)
+- Staff-Team assignments via staff_teams join table (composite PK)
+- Transactional max_members enforcement with SELECT FOR UPDATE
+- Status behaviour rules (DISABLED blocks new assignments/type references)
+- Deletion guards (team: no members; type: no referencing teams)
+- Soft delete preferred; hard delete only after explicit checks
+- 30 functional requirements (FR-001 – FR-030)
+
+Deferred Scope:
+
+- No student assignment to teams
+- No exam visibility or content filtering via teams
+- No division/department boundary override
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
