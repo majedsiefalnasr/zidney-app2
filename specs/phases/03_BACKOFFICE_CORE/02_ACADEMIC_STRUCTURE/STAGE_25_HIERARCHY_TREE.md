@@ -8,16 +8,19 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: MEDIUM
-Last Updated: 2026-03-19T13:24:10Z
+Last Updated: 2026-03-19T14:14:34Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all criteria)
+Implementation: AUTHORIZED
 
-- Total: 21 atomic tasks
-- Categories: migration, domain, validation, API routes, router registration, testing
-- Parallel groups defined for domain primitives, route handlers, and test suites
+Scope Authorized:
+
+- Tenant-scoped `hierarchy_nodes` migration and schema-version bump to `1.8.0`
+- Domain hierarchy package, validation schemas, and Backoffice route surface
+- Unit and integration test coverage for CRUD, cycle detection, isolation, and traversal
 
 Deferred Scope:
 
@@ -26,10 +29,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed — implementation authorized
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed. Implementation gate open.
 
 ---
 
