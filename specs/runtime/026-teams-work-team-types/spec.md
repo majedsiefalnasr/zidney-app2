@@ -114,8 +114,11 @@ modifications to any academic visibility table (`students`, `groups`, `departmen
   - `NOT_FOUND` → 404 Not Found
 - **Limit enforcement required:** No global team-count limits in this stage; `max_members` per team
   is enforced transactionally at assignment time.
-- **`schema_version` checked:** Yes — migration increments schema version; runtime rejects
-  incompatible tenants.
+- **`schema_version` checked:** Yes — migration increments `schema_version` to the next value.
+  The middleware enforces `schema_version >= MIN_SCHEMA_VERSION` semantics (minimum version, not
+  exact equality). Tenants below the minimum receive HTTP 409 with error code
+  `SCHEMA_VERSION_MISMATCH` before any team business logic executes. Tenants at a higher schema
+  version remain forward-compatible.
 - **`product_version` checked:** Yes — enforced at request boundary per Constitution.
 
 ---
@@ -419,15 +422,18 @@ no longer exists in `staff_teams`.
 
 - **FR-001**: The system MUST store team types within the tenant DB in a `team_types` table with
   columns: `id`, `name`, `description`, `status`, `created_at`, `updated_at`.
-- **FR-002**: Team type `name` MUST be unique within the workspace (tenant-scoped). Unique index
-  enforced at the DB layer.
+- **FR-002**: Team type `name` MUST be unique within the workspace (tenant-scoped) among live
+  (non-soft-deleted) records only. A partial unique index (`WHERE deleted_at IS NULL`) is enforced
+  at the DB layer. Soft-deleted records do not participate in the constraint, allowing name reuse
+  after deletion.
 - **FR-003**: `team_types.status` MUST be one of `ENABLED` or `DISABLED`. The field is required
   and has no nullable default.
 - **FR-004**: The system MUST store teams within the tenant DB in a `teams` table with columns:
   `id`, `name`, `team_type_id`, `max_members`, `description`, `status`, `created_at`,
   `updated_at`.
-- **FR-005**: Team `name` MUST be unique within the workspace (tenant-scoped). Unique index
-  enforced at the DB layer.
+- **FR-005**: Team `name` MUST be unique within the workspace (tenant-scoped) among live
+  (non-soft-deleted) records only. A partial unique index (`WHERE deleted_at IS NULL`) is enforced
+  at the DB layer. Soft-deleted records do not participate in the constraint.
 - **FR-006**: `teams.team_type_id` MUST reference an existing `team_types.id` within the same
   tenant DB when provided. When `team_type_id` is provided, the referenced team type MUST have
   `status = ENABLED` at the time of team creation or re-assignment.
@@ -444,9 +450,13 @@ no longer exists in `staff_teams`.
   (`ON DELETE CASCADE`).
 - **FR-013**: Assigning a staff member to a team with `status = DISABLED` MUST be rejected with
   `TEAM_DISABLED`.
-- **FR-014**: If `max_members` is set on a team, staff assignment MUST check the current assigned
-  staff count inside a database transaction using `SELECT FOR UPDATE` on the `teams` row. If the
-  count equals `max_members`, the assignment MUST be rejected with `TEAM_MAX_MEMBERS_EXCEEDED`.
+- **FR-014**: Staff assignment MUST execute inside a transaction in this exact order: (1) `SELECT
+FOR UPDATE` on the `teams` row — unconditionally, even for idempotent re-assignments; (2) check
+  if `(staff_id, team_id)` already exists in `staff_teams` — if yes, commit and return success
+  (idempotent short-circuit); (3) check `teams.status = ENABLED`; (4) if `max_members` is set,
+  count current assignments and reject with `TEAM_MAX_MEMBERS_EXCEEDED` if
+  `count >= max_members`; (5) `INSERT INTO staff_teams ... ON CONFLICT (staff_id, team_id) DO
+NOTHING` as a DB-level safety net.
 - **FR-015**: `max_members` enforcement MUST be transactional; no cached counters; no client-side
   enforcement.
 - **FR-016**: Staff-team assignment MUST be idempotent — re-posting the same `(staff_id, team_id)`
@@ -479,6 +489,18 @@ no longer exists in `staff_teams`.
 - **FR-030**: All validations on input fields (`name`, `max_members`, FK references) MUST be
   applied at the API layer before persisting; invalid input MUST return 422 with
   `VALIDATION_ERROR` and descriptive field-level messages.
+- **FR-031**: Permission codes from STAGE_21 RBAC are required as follows: `team_types:manage`
+  gates all team type create/update/delete endpoints; `teams:manage` gates all team
+  create/update/delete endpoints; `staff_teams:assign` gates staff assignment and removal
+  endpoints. Holding `teams:manage` does NOT implicitly grant `staff_teams:assign`; both must be
+  explicitly held for their respective operations. The default Backoffice admin role holds all
+  three. Missing permission returns HTTP 403.
+- **FR-032**: When a path-param ID targets a non-existent or soft-deleted team type, the API MUST
+  return HTTP 404 with error code `TEAM_TYPE_NOT_FOUND`. When a path-param ID targets a
+  non-existent or soft-deleted team, the API MUST return HTTP 404 with error code
+  `TEAM_NOT_FOUND`. These codes apply to: GET detail, PUT update, and DELETE endpoints for both
+  entity types, and to assignment/removal endpoints when the team ID does not resolve to a live
+  record.
 
 ---
 
@@ -528,7 +550,7 @@ no longer exists in `staff_teams`.
 | `updated_at`  | timestamp               | NOT NULL, server-set              |
 | `deleted_at`  | timestamp               | Nullable (soft delete marker)     |
 
-Indexes: `unique(name)`, `index(status)`
+Indexes: `unique(name) WHERE deleted_at IS NULL` (partial), `index(status)`
 
 ### `teams`
 
@@ -544,7 +566,7 @@ Indexes: `unique(name)`, `index(status)`
 | `updated_at`   | timestamp               | NOT NULL, server-set                                |
 | `deleted_at`   | timestamp               | Nullable (soft delete marker)                       |
 
-Indexes: `unique(name)`, `index(team_type_id)`, `index(status)`
+Indexes: `unique(name) WHERE deleted_at IS NULL` (partial), `index(team_type_id)`, `index(status)`
 
 ### `staff_teams`
 
@@ -585,7 +607,10 @@ Composite primary key: `(staff_id, team_id)`
 **Idempotent operations:**
 
 - Staff-team assignment: re-posting the same `(staff_id, team_id)` pair returns success without
-  creating a duplicate row (upsert or conflict-ignore strategy).
+  creating a duplicate row. The `SELECT FOR UPDATE` lock on the `teams` row fires unconditionally
+  first; the existing-assignment check executes inside the same transaction before any capacity
+  check or insert. `INSERT ... ON CONFLICT (staff_id, team_id) DO NOTHING` is used as a final
+  DB-level safety net.
 
 **Failure & rollback:**
 
@@ -679,15 +704,16 @@ domain functions. UI layer displays results from API responses.
 
 ## Failure Modes & Recovery
 
-| Failure Mode                 | Handling                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------ |
-| DB connection failure        | Request fails with 503; transaction auto-rolls back; no partial state                |
-| License middleware failure   | 423/403/404 returned before any DB access; no state change                           |
-| Duplicate name on create     | Transaction rolls back; 409 returned with `TEAM_NAME_DUPLICATE` or equivalent        |
-| `max_members` race condition | `SELECT FOR UPDATE` prevents race; loser receives 422 `TEAM_MAX_MEMBERS_EXCEEDED`    |
-| Deletion reference violation | Transaction rolls back; 422 returned with specific error code                        |
-| Schema version mismatch      | Request rejected before DB access; tenant must be migrated first                     |
-| Partial transaction failure  | Full rollback; client receives error; client may safely retry (idempotent endpoints) |
+| Failure Mode                 | Handling                                                                                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DB connection failure        | Request fails with 503; transaction auto-rolls back; no partial state                                                                             |
+| License middleware failure   | 423/403/404 returned before any DB access; no state change                                                                                        |
+| Duplicate name on create     | Transaction rolls back; 409 returned with `TEAM_NAME_DUPLICATE` or equivalent                                                                     |
+| `max_members` race condition | `SELECT FOR UPDATE` prevents race; loser receives 422 `TEAM_MAX_MEMBERS_EXCEEDED`                                                                 |
+| Deletion reference violation | Transaction rolls back; 422 returned with specific error code                                                                                     |
+| Team or team type not found  | HTTP 404 with `TEAM_NOT_FOUND` or `TEAM_TYPE_NOT_FOUND`; no state change; applies to GET detail, PUT update, DELETE by path ID                    |
+| Schema version mismatch      | HTTP 409 `SCHEMA_VERSION_MISMATCH` returned before DB access; `schema_version >= MIN_SCHEMA_VERSION` check fails; tenant must run migration first |
+| Partial transaction failure  | Full rollback; client receives error; client may safely retry (idempotent endpoints)                                                              |
 
 ---
 
@@ -714,6 +740,9 @@ domain functions. UI layer displays results from API responses.
 - Soft delete: deleted team/type does not appear in list; count queries exclude it
 - License middleware: SOFT_LOCKED workspace → 423 on any team endpoint
 - License middleware: ARCHIVED workspace → 403 on any team endpoint
+- GET/PUT/DELETE non-existent team by ID → 404 `TEAM_NOT_FOUND`
+- GET/PUT/DELETE non-existent team type by ID → 404 `TEAM_TYPE_NOT_FOUND`
+- Schema version mismatch (tenant below MIN_SCHEMA_VERSION) → 409 `SCHEMA_VERSION_MISMATCH`
 
 ### Transaction Rollback Tests
 
@@ -775,3 +804,47 @@ domain functions. UI layer displays results from API responses.
 ## Final Constitutional Compliance Statement
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-19
+
+- Q: What are the canonical RBAC permission codes for team type management, team management, and
+  staff assignment — and how are they differentiated in STAGE_21?
+  → A: Three distinct codes: `team_types:manage` covers all team type CRUD; `teams:manage` covers
+  all team CRUD; `staff_teams:assign` covers assignment and removal of staff to/from teams.
+  Holding `teams:manage` does NOT implicitly grant `staff_teams:assign`. The default Backoffice
+  admin role holds all three; team coordinators may hold `staff_teams:assign` alone. Codified as
+  FR-031.
+
+- Q: In the idempotent staff-assignment flow, does the `SELECT FOR UPDATE` on the `teams` row fire
+  unconditionally or only after a non-locking pre-check for an existing assignment?
+  → A: Unconditionally first. Mandated transaction order: (1) `SELECT FOR UPDATE` on `teams`;
+  (2) check composite PK for existing assignment — if found, commit and return success (idempotent
+  short-circuit); (3) check team status; (4) enforce `max_members`; (5) `INSERT ... ON CONFLICT
+DO NOTHING`. This eliminates the TOCTOU risk of a separate non-locking pre-check path entirely.
+  Codified in FR-014 and the idempotent operations note.
+
+- Q: Do the `UNIQUE` indexes on `team_types.name` and `teams.name` include soft-deleted rows,
+  permanently blocking name reuse after soft-deletion?
+  → A: No. Both indexes must be partial (`WHERE deleted_at IS NULL`), scoping uniqueness to live
+  records only. Soft-deleted records do not block re-creation under the same name. The 409 error
+  codes (`TEAM_TYPE_NAME_DUPLICATE`, `TEAM_NAME_DUPLICATE`) fire only when a live row with that
+  name already exists. Codified in FR-002, FR-005, and the Data Model index definitions.
+
+- Q: What is the exact `schema_version` enforcement semantic — `>= MIN_SCHEMA_VERSION` or exact
+  equality — and what error code is returned on a mismatch?
+  → A: Minimum-version semantics (`>= MIN_SCHEMA_VERSION`). The migration for this stage
+  increments `schema_version`; the middleware constant is updated to require at least that version
+  before team/team-type endpoints are accessible. Tenants below the minimum receive HTTP 409 with
+  `SCHEMA_VERSION_MISMATCH` before any business logic executes. Tenants at a higher version are
+  forward-compatible and unaffected. Codified in License & Version Enforcement and Failure Modes.
+
+- Q: Are dedicated `TEAM_NOT_FOUND` and `TEAM_TYPE_NOT_FOUND` error codes defined for
+  GET/PUT/DELETE-by-ID operations when the path-param resource does not exist or is soft-deleted?
+  → A: These were missing. Both codes are now added as FR-032: `TEAM_TYPE_NOT_FOUND` (HTTP 404)
+  applies to GET/PUT/DELETE team type by ID path param; `TEAM_NOT_FOUND` (HTTP 404) applies to
+  GET/PUT/DELETE team by path ID and to assignment/removal endpoints when `team_id` does not
+  resolve to a live record. Codified in FR-032, Failure Modes, and Integration Tests.

@@ -9,20 +9,19 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: LOW
 Last Updated: 2026-03-19T00:00:00.000Z
 
 Scope Defined:
 
-- Team Types CRUD (name, description, status — ENABLED/DISABLED)
-- Teams CRUD (name, team_type_id nullable, max_members, description, status)
-- Staff-Team assignments via staff_teams join table (composite PK)
-- Transactional max_members enforcement with SELECT FOR UPDATE
-- Status behaviour rules (DISABLED blocks new assignments/type references)
-- Deletion guards (team: no members; type: no referencing teams)
-- Soft delete preferred; hard delete only after explicit checks
-- 30 functional requirements (FR-001 – FR-030)
+- Team Types CRUD (32 FRs after clarifications)
+- Teams CRUD with optional team_type_id FK
+- Staff-Team assignments with transactional max_members enforcement
+- Partial unique indexes for name (excludes soft-deleted rows)
+- RBAC: team_types:manage, teams:manage, staff_teams:assign (FR-031)
+- TEAM_NOT_FOUND / TEAM_TYPE_NOT_FOUND error codes (FR-032)
+- Schema version >= MIN check returning SCHEMA_VERSION_MISMATCH
 
 Deferred Scope:
 
@@ -32,10 +31,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
