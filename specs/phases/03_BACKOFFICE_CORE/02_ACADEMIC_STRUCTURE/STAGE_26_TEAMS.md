@@ -9,19 +9,19 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
 Last Updated: 2026-03-19T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Team Types CRUD (32 FRs after clarifications)
-- Teams CRUD with optional team_type_id FK
-- Staff-Team assignments with transactional max_members enforcement
-- Partial unique indexes for name (excludes soft-deleted rows)
-- RBAC: team_types:manage, teams:manage, staff_teams:assign (FR-031)
-- TEAM_NOT_FOUND / TEAM_TYPE_NOT_FOUND error codes (FR-032)
-- Schema version >= MIN check returning SCHEMA_VERSION_MISMATCH
+- Team Types CRUD — 5 routes, PATCH for partial updates
+- Teams CRUD — 5 routes, PATCH for partial updates
+- Staff-Team assignment — 3 sub-resource routes with cursor pagination on members list
+- 1 forward-only migration: schema_version 1.9.0 → 1.10.0
+- 8 explicit transaction boundaries documented
+- Domain module: packages/domain-core/src/teams/
+- API module: apps/api/src/routes/backoffice/teams/
 
 Deferred Scope:
 
@@ -31,10 +31,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian audits passed (Architecture Checker: PASS, API Designer: PASS after remediation)
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
