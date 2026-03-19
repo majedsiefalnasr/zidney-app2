@@ -2,7 +2,7 @@
  * Drizzle ORM Schema — Students (Tenant Database)
  *
  * File: apps/api/src/db/tenant/schemas/students.schema.ts
- * Stage: STAGE_22_DIVISIONS
+ * Stage: STAGE_22_DIVISIONS / STAGE_23_DEPARTMENTS / STAGE_24_GROUPS
  * Date: 2026-03-16
  *
  * Drizzle pgTable definition for the `students` table.
@@ -25,6 +25,7 @@ import { index, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
 import { departments } from './departments.schema'
 import { divisions } from './divisions.schema'
+import { groups } from './groups.schema'
 
 // ---------------------------------------------------------------------------
 // students
@@ -57,6 +58,15 @@ export const students = pgTable(
      * NULLABLE: no backfill required; existing students start with department_id = null.
      */
     department_id: uuid('department_id').references(() => departments.id, { onDelete: 'setNull' }),
+    /**
+     * Group assignment — added by migration 20260319_001_groups.ts (STAGE_24).
+     * FK → groups(id) ON DELETE SET NULL:
+     *   deleting a groups row sets this column to null (groups use soft-delete so
+     *   this fires only on manual hard-delete; it preserves student records).
+     * NULLABLE: no backfill required; existing students start with group_id = null.
+     * One student belongs to at most one group at a time.
+     */
+    group_id: uuid('group_id').references(() => groups.id, { onDelete: 'setNull' }),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -65,6 +75,8 @@ export const students = pgTable(
     divisionIdIdx: index('idx_students_division_id').on(table.division_id),
     /** List all students in a department + FK traversal path. */
     departmentIdIdx: index('idx_students_department_id').on(table.department_id),
+    /** List all students in a group + FK traversal path for assignment count. */
+    groupIdIdx: index('idx_students_group_id').on(table.group_id),
     /** uniqueIndex on email is handled by DB bootstrap — not declared here. */
     externalIdIdx: index('idx_students_external_id').on(table.external_id),
   })
