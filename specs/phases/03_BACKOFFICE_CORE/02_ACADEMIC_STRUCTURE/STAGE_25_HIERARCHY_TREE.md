@@ -9,19 +9,15 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-03-19T13:07:11Z
+Last Updated: 2026-03-19T13:24:10Z
 
-Scope Planned:
+Tasks Generated:
 
-- Staff-only organizational hierarchy tree (unlimited depth, self-referencing)
-- CRUD + tree traversal (full-tree via recursive CTE, flat-list, subtree)
-- Deterministic dual-row locking for safe reparenting under concurrency
-- Parent deletion guard; reparent with cycle validation in transaction
-- Status toggle with subtree pruning on ENABLEDFilter
-- Backoffice mount under `/api/v1/backoffice/workspace/hierarchy-nodes`
-- Tenant-isolated; license middleware mandatory
+- Total: 21 atomic tasks
+- Categories: migration, domain, validation, API routes, router registration, testing
+- Parallel groups defined for domain primitives, route handlers, and test suites
 
 Deferred Scope:
 
@@ -30,10 +26,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 

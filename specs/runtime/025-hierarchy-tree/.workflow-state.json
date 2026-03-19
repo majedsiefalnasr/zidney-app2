@@ -5,15 +5,15 @@
   "stage_file": "specs/phases/03_BACKOFFICE_CORE/02_ACADEMIC_STRUCTURE/STAGE_25_HIERARCHY_TREE.md",
   "branch": "spec/025-hierarchy-tree",
   "base_branch": "develop",
-  "current_step": "plan",
+  "current_step": "tasks",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": true,
-  "tasks_total": null,
-  "tasks_completed": null,
-  "last_updated": "2026-03-19T13:07:11Z",
+  "tasks_total": 21,
+  "tasks_completed": 0,
+  "last_updated": "2026-03-19T13:24:10Z",
   "history": [
     {
       "event": "branch_created",
@@ -31,6 +31,11 @@
     {
       "event": "plan_complete",
       "timestamp": "2026-03-19T13:07:11Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 21,
+      "timestamp": "2026-03-19T13:24:10Z"
     }
   ]
 }
