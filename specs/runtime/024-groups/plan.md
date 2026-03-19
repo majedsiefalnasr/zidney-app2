@@ -178,12 +178,13 @@ consistent with how `staff_departments` sub-routes live inside the departments r
 
 ### 3.3 New Files — Domain Package
 
-| File                                                | Type   | Description                                                              |
-| --------------------------------------------------- | ------ | ------------------------------------------------------------------------ |
-| `packages/domain-core/src/groups/groups.types.ts`   | CREATE | TypeScript types and interfaces (DbClient, AuditContext, GroupRow, etc.) |
-| `packages/domain-core/src/groups/groups.errors.ts`  | CREATE | GroupsError class, error codes, HTTP status mapping                      |
-| `packages/domain-core/src/groups/groups.service.ts` | CREATE | All 9 domain service functions                                           |
-| `packages/domain-core/src/groups/index.ts`          | CREATE | Public barrel — re-exports all public symbols                            |
+| File                                                   | Type   | Description                                                                                  |
+| ------------------------------------------------------ | ------ | -------------------------------------------------------------------------------------------- |
+| `packages/domain-core/src/groups/groups.types.ts`      | CREATE | TypeScript types and interfaces (DbClient, AuditContext, GroupRow, etc.)                     |
+| `packages/domain-core/src/groups/groups.errors.ts`     | CREATE | GroupsError class, error codes, HTTP status mapping                                          |
+| `packages/domain-core/src/groups/groups.repository.ts` | CREATE | Pure DB query functions: list, getById, create, update, softDelete, counts, SAVEPOINT guards |
+| `packages/domain-core/src/groups/groups.service.ts`    | CREATE | 9 domain service orchestration functions (calls repository)                                  |
+| `packages/domain-core/src/groups/index.ts`             | CREATE | Public barrel — re-exports all public symbols                                                |
 
 ### 3.4 Modified Files — Domain Package
 
@@ -200,17 +201,21 @@ consistent with how `staff_departments` sub-routes live inside the departments r
 
 ### 3.6 New Files — API Routes
 
-| File                                                     | Type   | Description                                                       |
-| -------------------------------------------------------- | ------ | ----------------------------------------------------------------- |
-| `apps/api/src/routes/backoffice/groups/helpers.ts`       | CREATE | `getDb`, `buildAuditCtx`, `groupErrorResponse`, `successResponse` |
-| `apps/api/src/routes/backoffice/groups/index.ts`         | CREATE | Router factory `createGroupsRouter()` + re-exports                |
-| `apps/api/src/routes/backoffice/groups/list-groups.ts`   | CREATE | `GET /groups` handler                                             |
-| `apps/api/src/routes/backoffice/groups/create-group.ts`  | CREATE | `POST /groups` handler                                            |
-| `apps/api/src/routes/backoffice/groups/get-group.ts`     | CREATE | `GET /groups/:id` handler                                         |
-| `apps/api/src/routes/backoffice/groups/update-group.ts`  | CREATE | `PUT /groups/:id` handler                                         |
-| `apps/api/src/routes/backoffice/groups/delete-group.ts`  | CREATE | `DELETE /groups/:id` handler                                      |
-| `apps/api/src/routes/backoffice/groups/student-group.ts` | CREATE | `PUT`, `DELETE`, `GET` for student group assignment               |
-| `apps/api/src/routes/backoffice/groups/staff-groups.ts`  | CREATE | `POST`, `DELETE`, `GET` for staff group assignment                |
+| File                                                            | Type   | Description                                                       |
+| --------------------------------------------------------------- | ------ | ----------------------------------------------------------------- |
+| `apps/api/src/routes/backoffice/groups/helpers.ts`              | CREATE | `getDb`, `buildAuditCtx`, `groupErrorResponse`, `successResponse` |
+| `apps/api/src/routes/backoffice/groups/index.ts`                | CREATE | Router factory `createGroupsRouter()` + re-exports                |
+| `apps/api/src/routes/backoffice/groups/list-groups.ts`          | CREATE | `GET /groups` handler                                             |
+| `apps/api/src/routes/backoffice/groups/create-group.ts`         | CREATE | `POST /groups` handler                                            |
+| `apps/api/src/routes/backoffice/groups/get-group.ts`            | CREATE | `GET /groups/:id` handler                                         |
+| `apps/api/src/routes/backoffice/groups/update-group.ts`         | CREATE | `PUT /groups/:id` handler                                         |
+| `apps/api/src/routes/backoffice/groups/delete-group.ts`         | CREATE | `DELETE /groups/:id` handler                                      |
+| `apps/api/src/routes/backoffice/groups/assign-student-group.ts` | CREATE | `PUT /students/:studentId/group` handler                          |
+| `apps/api/src/routes/backoffice/groups/remove-student-group.ts` | CREATE | `DELETE /students/:studentId/group` handler                       |
+| `apps/api/src/routes/backoffice/groups/get-student-group.ts`    | CREATE | `GET /students/:studentId/group` handler                          |
+| `apps/api/src/routes/backoffice/groups/assign-staff-group.ts`   | CREATE | `POST /staff/:staffId/groups` handler                             |
+| `apps/api/src/routes/backoffice/groups/remove-staff-group.ts`   | CREATE | `DELETE /staff/:staffId/groups/:groupId` handler                  |
+| `apps/api/src/routes/backoffice/groups/get-staff-groups.ts`     | CREATE | `GET /staff/:staffId/groups` handler                              |
 
 ### 3.7 Modified Files — API Router
 
@@ -220,10 +225,10 @@ consistent with how `staff_departments` sub-routes live inside the departments r
 
 ### 3.8 New Files — Tests
 
-| File                                                                         | Type   | Description                                |
-| ---------------------------------------------------------------------------- | ------ | ------------------------------------------ |
-| `packages/domain-core/src/groups/__tests__/groups.service.test.ts`           | CREATE | Unit tests for all service functions       |
-| `apps/api/src/routes/backoffice/groups/__tests__/groups.integration.test.ts` | CREATE | Integration tests for all 10 API endpoints |
+| File                                                                    | Type   | Description                                |
+| ----------------------------------------------------------------------- | ------ | ------------------------------------------ |
+| `packages/domain-core/src/groups/__tests__/groups.service.test.ts`      | CREATE | Unit tests for all service functions       |
+| `apps/api/src/routes/backoffice/groups/__tests__/groups.routes.test.ts` | CREATE | Integration tests for all 11 API endpoints |
 
 ---
 
@@ -821,7 +826,7 @@ Test each service function with a mock `DbClient`. No real database required.
 
 ### 8.2 Integration Tests
 
-**File:** `apps/api/src/routes/backoffice/groups/__tests__/groups.integration.test.ts`
+**File:** `apps/api/src/routes/backoffice/groups/__tests__/groups.routes.test.ts`
 
 Full HTTP request cycle against a real test database (tenant isolation per test run).
 
@@ -858,7 +863,7 @@ Full HTTP request cycle against a real test database (tenant isolation per test 
 | **License enforcement**             | SOFT_LOCKED → 423; ARCHIVED → 403                                             |
 | **RBAC enforcement**                | No `can_create` → 403; no `can_delete` → 403                                  |
 | **Audit logging**                   | Each mutation emits structured log with all required fields                   |
-| **Schema version**                  | Migration bumped to 1.7.0; runtime rejects tenant under 1.6.0                 |
+| **Schema version**                  | Migration bumped to 1.7.0; runtime rejects tenant under 1.7.0                 |
 | **max_members reduce**              | Reduce below current count; update succeeds; old assignments intact           |
 
 ### 8.3 Concurrency Test (max_members race)
@@ -953,8 +958,8 @@ Create `packages/domain-core/src/groups/__tests__/groups.service.test.ts`.
 Cover all service function branches (see §8.1).
 
 **Step 12: Integration Tests**  
-Create `apps/api/src/routes/backoffice/groups/__tests__/groups.integration.test.ts`.  
-Cover all 10 endpoints, all error codes, concurrency scenario (see §8.2).
+Create `apps/api/src/routes/backoffice/groups/__tests__/groups.routes.test.ts`.  
+Cover all 11 endpoints, all error codes, concurrency scenario (see §8.2).
 
 ---
 

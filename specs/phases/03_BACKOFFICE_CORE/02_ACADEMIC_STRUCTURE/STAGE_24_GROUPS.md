@@ -8,34 +8,35 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: MEDIUM
-Last Updated: 2026-03-19T02:00:00.000Z
+Last Updated: 2026-03-19T03:00:00.000Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all criteria)
+Implementation: AUTHORIZED
 
-- Total: 25 atomic tasks
-- Phase 0 (Infrastructure): T001–T004 (DB schema + migration)
-- Phase 1 (Domain Layer): T005–T009 (types, errors, repository, service, barrel)
-- Phase 2 (Validation): T010 (Zod schemas)
-- Phase 3 (API Routes): T011–T022 (11 handlers + router)
-- Phase 4 (Router Registration): T023 (backoffice mount)
-- Phase 5 (Tests): T024–T025 (unit + integration)
+Scope Authorized:
 
-Deferred Scope:
-
-- Frontoffice group-based content filtering (downstream stage)
-- Group-based exam delivery in runtime (downstream stage)
+- Group CRUD: `groups` table, 11 API endpoints (CRUD, student assignment, staff assignment)
+- `staff_groups` join table for multi-group staff membership
+- `students.group_id` nullable FK column (ON DELETE SET NULL)
+- Migration `20260319_001_groups.ts`: schema 1.6.0 → 1.7.0
+- SAVEPOINT-per-guard (AD-05) for safe deletion checks
+- SELECT FOR UPDATE on `groups` row for concurrent `max_members` enforcement (AD-03)
+- Idempotent student assignment (UPDATE) and staff assignment (ON CONFLICT DO NOTHING)
+- Service (9 functions) + Repository layer in `packages/domain-core/src/groups/`
+- 29 atomic tasks across 5 phases
 
 Constitutional Compliance:
 
 - Architecture Checker: VERDICT PASS (9/9 criteria)
 - API Designer: VERDICT PASS (7/7 criteria)
-- Task set compliant — drift analysis required before implementation
+- Drift Audit: PASS (8/9 criteria + 1 N/A) — all cross-artifact issues remediated
+- All 7 cross-artifact inconsistencies resolved during analyze step
 
 Notes:
-Atomic task set generated. 25 tasks across 5 phases, 17 parallelisable. Drift analysis gate pending.
+Full drift analysis passed. Implementation gate open. 29 tasks ready for execution.
 
 ---
 
