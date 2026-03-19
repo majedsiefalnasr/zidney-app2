@@ -9,19 +9,15 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
 Last Updated: 2026-03-19T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Team Types CRUD — 5 routes, PATCH for partial updates
-- Teams CRUD — 5 routes, PATCH for partial updates
-- Staff-Team assignment — 3 sub-resource routes with cursor pagination on members list
-- 1 forward-only migration: schema_version 1.9.0 → 1.10.0
-- 8 explicit transaction boundaries documented
-- Domain module: packages/domain-core/src/teams/
-- API module: apps/api/src/routes/backoffice/teams/
+- Total: 34 atomic tasks
+- Phase breakdown: Foundation (5) | Domain (11) | Routes (16) | Tests (2)
+- Parallel-safe: 19 tasks
 
 Deferred Scope:
 
@@ -31,11 +27,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Guardian audits passed (Architecture Checker: PASS, API Designer: PASS after remediation)
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
