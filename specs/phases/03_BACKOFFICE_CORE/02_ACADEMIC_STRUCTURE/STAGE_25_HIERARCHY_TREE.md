@@ -9,20 +9,31 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-19T00:00:00.000Z
+Last Updated: 2026-03-19T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Staff-only organizational hierarchy tree
+- Self-referencing hierarchy_nodes table (unlimited depth)
+- CRUD + tree traversal endpoints (full tree, flat list, subtree)
+- Cycle detection at API layer
+- Parent deletion guard when children exist
+- Reparenting with cycle validation
+- Status toggle (ENABLED / DISABLED)
+- Tenant-isolated; license middleware mandatory
+
+Deferred Scope:
+
+- Staff assignment (hierarchy_node_id on users) — downstream stage concern
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
