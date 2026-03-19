@@ -19,6 +19,8 @@ export * as departments from './departments'
 export * as divisions from './divisions'
 // Groups module (Stage 024)
 export * as groups from './groups'
+// Hierarchy module (Stage 025)
+export * as hierarchy from './hierarchy'
 // Job hash utility
 export * from './job-hash'
 // License module

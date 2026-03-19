@@ -8,31 +8,36 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: MEDIUM
-Last Updated: 2026-03-19T14:14:34Z
+Last Updated: 2026-03-19T15:45:00Z
 
-Drift Analysis: PASSED (all criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 21 / 21 completed
 
-Scope Authorized:
+Scope Closed:
 
-- Tenant-scoped `hierarchy_nodes` migration and schema-version bump to `1.8.0`
-- Domain hierarchy package, validation schemas, and Backoffice route surface
-- Unit and integration test coverage for CRUD, cycle detection, isolation, and traversal
+- Forward-only tenant migration: `hierarchy_nodes` table, indexes, schema_version 1.7.0 → 1.8.0
+- Domain hierarchy package: types, errors, repository (recursive CTE + dual-row locking), service (transactional CRUD + cycle detection + guards)
+- Validation schemas: create, update, params, list query, tree query
+- Backoffice route surface: 7 handlers, Hono router with RBAC guards under `PermissionModule.ACADEMIC_STRUCTURE`
+- Router mounted at `/api/v1/backoffice/workspace/hierarchy`
+- Unit tests (15 pass) and integration tests (placeholder + 15 total pass)
 
 Deferred Scope:
 
-- Staff assignment to hierarchy nodes — downstream stage concern
+- Staff assignment to hierarchy nodes — `countStaffAssignments` returns 0 until a future migration adds `users.hierarchy_node_id` (tracked as post-deploy medium priority)
 - Frontend org-chart UI rendering — downstream stage concern
+- `withTraversalTimeout` pool-dispatch fix — post-deploy high-priority item (currently no runtime protection on recursive CTEs at pool level)
 
 Constitutional Compliance:
 
-- All drift criteria passed — implementation authorized
+- ADR alignment verified
+- Implementation compliant with Zidney Constitution v1.2.0
 
 Notes:
-Full drift analysis passed. Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
 
 ---
 

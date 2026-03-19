@@ -22,7 +22,8 @@
     "./rbac": "./src/rbac/index.ts",
     "./departments": "./src/departments/index.ts",
     "./divisions": "./src/divisions/index.ts",
-    "./groups": "./src/groups/index.ts"
+    "./groups": "./src/groups/index.ts",
+    "./hierarchy": "./src/hierarchy/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",
