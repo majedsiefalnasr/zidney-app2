@@ -9,31 +9,29 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: MEDIUM
 Last Updated: 2026-03-19T00:00:00.000Z
 
 Scope Defined:
 
-- Staff-only organizational hierarchy tree
-- Self-referencing hierarchy_nodes table (unlimited depth)
-- CRUD + tree traversal endpoints (full tree, flat list, subtree)
-- Cycle detection at API layer
-- Parent deletion guard when children exist
-- Reparenting with cycle validation
-- Status toggle (ENABLED / DISABLED)
+- Staff-only organizational hierarchy tree (unlimited depth, self-referencing)
+- CRUD + tree traversal (full-tree via recursive CTE, flat-list, subtree)
+- Cycle detection at API layer with SELECT FOR UPDATE serialization
+- Parent deletion guard; reparent with cycle validation in transaction
+- Status toggle with subtree pruning on ENABLEDFilter
 - Tenant-isolated; license middleware mandatory
 
 Deferred Scope:
 
-- Staff assignment (hierarchy_node_id on users) — downstream stage concern
+- Staff assignment to hierarchy nodes — downstream stage concern
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

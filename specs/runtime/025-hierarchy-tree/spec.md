@@ -855,3 +855,65 @@ with the appropriate workspace license check.
 ## Final Constitutional Compliance Statement
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-19
+
+- Q: What locking strategy prevents a concurrent-reparent race where two simultaneous transactions
+  both pass the cycle-detection ancestor walk and commit, potentially creating a cycle? → A:
+  Acquire `SELECT ... FOR UPDATE` on the node being updated at the very start of any transaction
+  that changes `parent_id`. This exclusive row lock forces concurrent update transactions targeting
+  the same node to serialize, eliminating the TOCTOU window between the ancestor walk and the
+  commit. Ancestor walk reads within the same transaction do not require additional locking because
+  the source node is already locked; the proposed `parent_id` chain is read at READ COMMITTED
+  isolation, which is sufficient given that the node whose lineage is being mutated is held
+  exclusively. Success Criteria #2 ("regardless of concurrency") is satisfiable with this
+  single-node lock strategy.
+
+- Q: Which tree and subtree traversal strategy is authoritative — application-level iterative DB
+  queries (N+1 pattern) or a single PostgreSQL recursive CTE? → A: A single PostgreSQL recursive
+  CTE (`WITH RECURSIVE`) is the required strategy for all read traversal operations (full-tree,
+  subtree, and flat-list-with-depth endpoints). The recursive CTE fetches the entire relevant node
+  set in one DB round-trip; the API layer then assembles the nested `children` structure or `depth`
+  field in application memory. This is consistent with FR-020's `INDEX ON hierarchy_nodes
+(parent_id)` requirement, avoids N+1 query amplification for deep trees, and meets the
+  sub-2-second SLA for trees up to 500 nodes (Success Criteria #3). The "iterative approach" in
+  the Edge Cases section applies exclusively to cycle-detection ancestor walking inside write
+  transactions (FR-006, Assumption 3), not to read traversal.
+
+- Q: What is the canonical sort order for the flat-list endpoint, and is it stable enough to make
+  offset-based pagination deterministic across sequential requests? → A: The flat-list endpoint
+  MUST sort results by `(depth ASC, name ASC)` as the stable, deterministic default order. Depth
+  is ascending (root nodes first), and within each depth level nodes are ordered alphabetically by
+  `name` case-insensitively. This ordering MUST be applied before applying the `OFFSET` / `LIMIT`
+  pagination slice, ensuring page boundaries are reproducible. No alternative sort order is
+  supported in this stage. The `ORDER BY` must be included in the recursive CTE or the final query
+  to guarantee stability.
+
+- Q: When a `status=ENABLED` filter is applied to the nested-tree or subtree endpoints, should an
+  ENABLED node whose immediate parent is DISABLED (a permitted data state per the Edge Cases
+  section) appear in the response as a promoted root-level entry, or should it be excluded because
+  it is a descendant of a DISABLED subtree? → A: **Subtree exclusion is authoritative.** User
+  Story 3 Scenario 4 explicitly states "DISABLED nodes and their subtrees are excluded" when the
+  `status=ENABLED` filter is active. This means the tree builder MUST prune any node that is
+  DISABLED along with its entire descendant subtree, regardless of each descendant's individual
+  `status` value. An ENABLED node contained within a DISABLED subtree is NOT promoted to root
+  level; it is omitted entirely from the filtered response. The Edge Cases note ("Status is
+  per-node only") describes the data model storage rule — a DISABLED parent does not automatically
+  DISABLE its children's `status` column — but it does NOT override the tree-endpoint filter
+  semantics. The unfiltered full-tree endpoint (no `status` parameter) always returns every node
+  regardless of status and always reflects per-node status accurately.
+
+- Q: Should `updated_at` be bumped on every accepted `PUT` write, or should the service perform a
+  field-level diff and skip the DB write (leaving `updated_at` unchanged) when the incoming
+  payload matches the current stored state? → A: `updated_at` is updated on every accepted `PUT`
+  write unconditionally — including when all payload fields match the current stored values.
+  The idempotency test assertion "does not change `updated_at` erroneously" means the timestamp
+  MUST be server-set and MUST NOT accept a client-supplied value; it does not mandate no-op
+  suppression. The service MUST NOT implement field-level diff detection to skip DB writes. This
+  aligns with the data model's "updated on every write" definition, avoids hidden diff complexity,
+  and ensures that every accepted PUT produces a predictable audit trail. Callers that require
+  last-seen-timestamp comparison must use `GET` before `PUT`.
