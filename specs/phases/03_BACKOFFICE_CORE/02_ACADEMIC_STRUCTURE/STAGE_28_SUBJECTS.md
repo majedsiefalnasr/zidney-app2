@@ -10,19 +10,23 @@ Status: Critical
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-03-20T00:35:00.000Z
+Last Updated: 2026-03-20T00:45:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Tenant DB migration: `subjects` table, 8 indexes, 2 partial unique indexes, FK constraints (division_id → divisions.id, semester_id → semesters.id), schema_version 1.11.0 → 1.12.0
-- Drizzle ORM schema: `apps/api/src/db/tenant/schemas/subjects.schema.ts`
-- Domain package: `packages/domain-core/src/subjects/` (types, errors, dependency-registry, repository, service, index)
-- Validation schemas: `packages/validation/src/backoffice/subjects.schemas.ts` (5 schemas)
-- Route handlers: `apps/api/src/routes/backoffice/subjects/` (7 handlers + helpers + index)
-- Route registration: `apps/api/src/app.ts`
-- Unit tests + integration tests for all 7 endpoints
+- Total: 27 atomic tasks across 10 phases (A–J)
+- Migration (1): T001
+- Schema (1): T002
+- Domain core types/errors/registry (3): T003–T005 (parallel group B)
+- Repository (1): T006
+- Service layer (7): T007–T013
+- Validation schemas (1): T014
+- Route helpers (1): T015
+- Route handlers (7): T016–T022 (parallel group G)
+- Router assembly + app registration (2): T023–T024
+- Tests + validation gate (3): T025–T027
 
 Deferred Scope:
 
@@ -32,11 +36,13 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant with Zidney Constitution v1.2.0 — task generation authorized
-- No new ADR required: custom subjects state machine is an inline decision consistent with existing patterns
+- Task set compliant with Zidney Constitution v1.2.0 — drift analysis required before implementation
+- All write paths covered by transactional tasks (T008, T010, T011, T012)
+- Idempotency represented in T001 (IF NOT EXISTS), T011 (CAS), T012 (deleted_at guard)
+- State machine fully covered by T011, T025, T026
 
 Notes:
-Technical plan complete. Custom DRAFT→ACTIVE→ARCHIVED state machine designed inline (not via global WorkflowEngine). Compound indexes (division_id, status) and (semester_id, status) added to address performance checklist gaps. Task breakdown in progress.
+27 atomic tasks generated. Drift analysis gate pending. Critical ordering: GET /subjects/runtime (T018/T023) must be registered before GET /subjects/:id to prevent Hono path param collision.
 
 ---
 
