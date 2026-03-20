@@ -288,7 +288,7 @@ results and content creation selectors.
    terminal).
 4. **Given** a subject in `DRAFT` state, **When** an admin attempts to transition directly to
    `ARCHIVED`, **Then** the API returns 422 with `SUBJECT_INVALID_TRANSITION`.
-5. **Given** a staff member without workflow transition permission, **When** they attempt a
+5. **Given** a staff member without `subjects:manage` permission, **When** they attempt a
    transition, **Then** the API returns 403 Forbidden.
 6. **Given** an ACTIVE subject is ARCHIVED, **When** a runtime query requests available subjects,
    **Then** the archived subject is excluded from results without breaking historical content
@@ -344,8 +344,7 @@ coverage is reported as complete.
    language, **Then** the API returns 422 with `SUBJECT_MISSING_TRANSLATIONS`.
 3. **Given** `is_multilanguage = false`, **When** only `default_language` name is provided,
    **Then** the subject is created without translation requirements.
-4. **Given** a subject with `is_multilanguage = true`, **When** the fallback language (unresolved
-   translation) is requested, **Then** the API returns the `default_language` name as fallback.
+4. **Given** a subject with `is_multilanguage = true`, **When** the requested language has no translation entry, **Then** the API resolves via fallback chain: requested_language → `default_language` translation → `name` field. If the `default_language` translation is also absent (partial migration), the raw `name` field is returned. Translation gaps are emitted as structured log warnings but do not block the response.
 5. **Given** `default_language` is not in the workspace's configured language list, **Then** the
    API returns 422 with `SUBJECT_INVALID_DEFAULT_LANGUAGE`.
 
@@ -397,8 +396,7 @@ Confirm `division_id` is set to the default division ID in the persisted record.
    **Then** the API returns 422 with `SUBJECT_DIVISION_DISABLED`.
 3. **Given** divisions are re-enabled after being disabled, **When** existing subjects are queried,
    **Then** all previously auto-assigned subjects retain their `division_id` and remain valid.
-4. **Given** the division toggle is executed, **Then** the toggle operation is transactional;
-   no subject is left in an inconsistent FK state.
+4. **Given** the workspace settings service toggles the division-enabled flag, **Then** subject routes query workspace config at request time (reactive) and auto-assign the default division during subject create/update. The division toggle is owned by the workspace settings service; no event-driven coupling to subject records exists and no bulk subject update occurs on toggle.
 
 ---
 
@@ -406,36 +404,36 @@ Confirm `division_id` is set to the default division ID in the persisted record.
 
 ### Subject CRUD
 
-| Ref   | Requirement                                                                                          | Priority |
-| ----- | ---------------------------------------------------------------------------------------------------- | -------- |
-| FR-01 | The system shall allow authorized staff to create a subject with a unique name within the workspace  | P1       |
-| FR-02 | Subject `code`, when provided, must be unique within the workspace (partial unique index)            | P1       |
-| FR-03 | Subject `default_language` is mandatory and must match a language in the workspace language settings | P1       |
-| FR-04 | `division_id` is nullable; when divisions are disabled, the system auto-assigns default division     | P1       |
-| FR-05 | `semester_id` is nullable; when provided, must belong to the same division (if divisions enabled)    | P2       |
-| FR-06 | The system shall support full CRUD operations: Create, List, Read, Update, soft-Delete               | P1       |
-| FR-07 | Soft delete is the only permitted deletion mechanism; hard delete is prohibited                      | P1       |
-| FR-08 | Subject deletion is blocked when any dependent records reference the subject                         | P1       |
-| FR-09 | Soft-deleted subjects are excluded from all list, filter, and selection results                      | P1       |
+| Ref   | Requirement                                                                                                                                                                                                                                                               | Priority |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| FR-01 | The system shall allow authorized staff to create a subject with a unique name within the workspace                                                                                                                                                                       | P1       |
+| FR-02 | Subject `code`, when provided, must be unique within the workspace (partial unique index)                                                                                                                                                                                 | P1       |
+| FR-03 | Subject `default_language` is mandatory and must match a language in the workspace language settings                                                                                                                                                                      | P1       |
+| FR-04 | `division_id` is nullable; when divisions are disabled, the system auto-assigns default division                                                                                                                                                                          | P1       |
+| FR-05 | `semester_id` is nullable; when provided, must belong to the same division (if divisions enabled)                                                                                                                                                                         | P2       |
+| FR-06 | The system shall support full CRUD operations: Create, List, Read, Update, soft-Delete                                                                                                                                                                                    | P1       |
+| FR-07 | Soft delete is the only permitted deletion mechanism; hard delete is prohibited                                                                                                                                                                                           | P1       |
+| FR-08 | Subject deletion is blocked when any dependent records reference the subject. Guard uses a configurable dependency check registry; only tables present in the current migration state are checked. New dependencies are registered additively in their respective stages. | P1       |
+| FR-09 | Soft-deleted subjects are excluded from all list, filter, and selection results                                                                                                                                                                                           | P1       |
 
 ### Workflow Management
 
-| Ref   | Requirement                                                                               | Priority |
-| ----- | ----------------------------------------------------------------------------------------- | -------- |
-| FR-10 | Subject lifecycle follows DRAFT → ACTIVE → ARCHIVED via the global Status Workflow Engine | P1       |
-| FR-11 | Only ACTIVE subjects may be used in runtime content creation and exam configuration       | P1       |
-| FR-12 | DRAFT subjects are not visible in Frontoffice or runtime selection engines                | P1       |
-| FR-13 | ARCHIVED subjects are hidden but preserved; historical content references remain valid    | P1       |
-| FR-14 | ARCHIVED is a terminal state; no transition out of ARCHIVED is permitted                  | P1       |
-| FR-15 | Workflow transitions require explicit permission; unauthorized transitions return 403     | P1       |
+| Ref   | Requirement                                                                                                                                   | Priority |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| FR-10 | Subject lifecycle follows DRAFT → ACTIVE → ARCHIVED via the global Status Workflow Engine                                                     | P1       |
+| FR-11 | Only ACTIVE subjects may be used in runtime content creation and exam configuration                                                           | P1       |
+| FR-12 | DRAFT subjects are not visible in Frontoffice or runtime selection engines                                                                    | P1       |
+| FR-13 | ARCHIVED subjects are hidden but preserved; historical content references remain valid                                                        | P1       |
+| FR-14 | ARCHIVED is a terminal state; no transition out of ARCHIVED is permitted                                                                      | P1       |
+| FR-15 | Workflow transitions require `subjects:manage` permission (same unified scope used for all subject CRUD); unauthorized transitions return 403 | P1       |
 
 ### Multi-Language
 
-| Ref   | Requirement                                                                                            | Priority |
-| ----- | ------------------------------------------------------------------------------------------------------ | -------- |
-| FR-16 | When `is_multilanguage = true`, translation entries for all workspace-supported languages are required | P2       |
-| FR-17 | Fallback language resolution must return `default_language` name when a translation is missing         | P2       |
-| FR-18 | Translation coverage must be tracked and queryable                                                     | P3       |
+| Ref   | Requirement                                                                                                                                                                      | Priority |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| FR-16 | When `is_multilanguage = true`, translation entries for all workspace-supported languages are required                                                                           | P2       |
+| FR-17 | Fallback resolution chain: requested_language → default_language → name field. Translation gaps are surfaced as warnings in structured logs but must NOT block the API response. | P2       |
+| FR-18 | Translation coverage must be tracked and queryable                                                                                                                               | P3       |
 
 ### Visibility & Filtering
 
@@ -520,14 +518,14 @@ The Subjects feature is complete and ready for downstream stages when all of the
 
 ## Transaction Boundaries
 
-| Operation                | Transactional? | Notes                                                                                        |
-| ------------------------ | -------------- | -------------------------------------------------------------------------------------------- |
-| Subject create           | Yes            | Name/code uniqueness check + insert as single atomic unit                                    |
-| Subject update           | Yes            | Name/code uniqueness check + update as single atomic unit; validates semester-division match |
-| Workflow transition      | Yes            | State validation + status update + audit event as single atomic unit                         |
-| Subject soft delete      | Yes            | Dependency check + `deleted_at` set as single atomic unit                                    |
-| Division-disabled toggle | Yes            | All subjects auto-assignment updates within a single transaction                             |
-| Subject list / read      | No             | Read-only; snapshot isolation provides consistency                                           |
+| Operation                | Transactional? | Notes                                                                                                                                                                       |
+| ------------------------ | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Subject create           | Yes            | Name/code uniqueness check + insert as single atomic unit                                                                                                                   |
+| Subject update           | Yes            | Name/code uniqueness check + update as single atomic unit; validates semester-division match                                                                                |
+| Workflow transition      | Yes            | State validation + status update + audit event as single atomic unit                                                                                                        |
+| Subject soft delete      | Yes            | Dependency check + `deleted_at` set as single atomic unit                                                                                                                   |
+| Division-disabled toggle | N/A            | Toggle is owned by workspace settings service. Subject routes query workspace config at request time (reactive, not event-driven). No bulk subject update occurs on toggle. |
+| Subject list / read      | No             | Read-only; snapshot isolation provides consistency                                                                                                                          |
 
 **Failure handling:**
 
@@ -625,18 +623,18 @@ token header is required for synchronous CRUD operations.
 
 ## Failure Modes & Recovery
 
-| Failure Mode                         | Handling                                                                                        |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| DB connection failure on write       | Transaction rolls back; API returns 503 with `DB_UNAVAILABLE`                                   |
-| Schema version mismatch              | License middleware returns 409 `SCHEMA_VERSION_MISMATCH` before any handler executes            |
-| License not ACTIVE                   | License middleware returns 423/403 before any subject logic executes                            |
-| Uniqueness constraint violation      | Caught at DB layer, mapped to 409 with `SUBJECT_NAME_DUPLICATE` or `SUBJECT_CODE_DUPLICATE`     |
-| FK constraint violation (division)   | Caught at DB layer, mapped to 422 with `SUBJECT_DIVISION_NOT_FOUND`                             |
-| FK constraint violation (semester)   | Caught at DB layer, mapped to 422 with `SUBJECT_SEMESTER_NOT_FOUND`                             |
-| Dependency check failure on delete   | Pre-delete dependency query detects references; returns 422 `SUBJECT_HAS_DEPENDENT_CONTENT`     |
-| Invalid workflow transition          | State-machine validation returns 422 `SUBJECT_INVALID_TRANSITION` before any DB write           |
-| Partial transaction failure          | Full rollback; no partial state persisted                                                       |
-| Concurrent transition race condition | Last-write-wins within transaction; optimistic lock on `status` column prevents silent override |
+| Failure Mode                         | Handling                                                                                                                                                                                                              |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DB connection failure on write       | Transaction rolls back; API returns 503 with `DB_UNAVAILABLE`                                                                                                                                                         |
+| Schema version mismatch              | License middleware returns 409 `SCHEMA_VERSION_MISMATCH` before any handler executes                                                                                                                                  |
+| License not ACTIVE                   | License middleware returns 423/403 before any subject logic executes                                                                                                                                                  |
+| Uniqueness constraint violation      | Caught at DB layer, mapped to 409 with `SUBJECT_NAME_DUPLICATE` or `SUBJECT_CODE_DUPLICATE`                                                                                                                           |
+| FK constraint violation (division)   | Caught at DB layer, mapped to 422 with `SUBJECT_DIVISION_NOT_FOUND`                                                                                                                                                   |
+| FK constraint violation (semester)   | Caught at DB layer, mapped to 422 with `SUBJECT_SEMESTER_NOT_FOUND`                                                                                                                                                   |
+| Dependency check failure on delete   | Pre-delete dependency query (via configurable dependency check registry) detects references; returns 422 `SUBJECT_HAS_DEPENDENT_CONTENT`. Only tables present in current migration state are queried.                 |
+| Invalid workflow transition          | State-machine validation returns 422 `SUBJECT_INVALID_TRANSITION` before any DB write                                                                                                                                 |
+| Partial transaction failure          | Full rollback; no partial state persisted                                                                                                                                                                             |
+| Concurrent transition race condition | CAS update pattern: `UPDATE subjects SET status = ? WHERE id = ? AND status = <expected_current>`. Zero rows affected = conflict → 409 `SUBJECT_TRANSITION_CONFLICT`. No `version` column required; no schema change. |
 
 ---
 
@@ -660,8 +658,11 @@ The following assumptions are documented to avoid ambiguity during planning:
    requirements change, an ADR must be filed before the ARCHIVED → ACTIVE transition is added.
 5. **Downstream content tables do not exist yet.** At the time of this stage, MCQ questions,
    exams, etc. are not yet created. Dependency-blocked deletion tests will be executable only
-   after those stages land. For this stage, the dependency check must be designed to handle an
-   empty dependent table gracefully and must be extensible without schema changes.
+   after those stages land. For this stage, the dependency check is implemented as a **configurable
+   dependency check registry** — only tables present in the current migration state (divisions,
+   departments, semesters) are queried. Downstream content stages register their FK dependencies
+   into the registry additively; no schema changes to the `subjects` table or its migration are
+   required when new dependent entities are added.
 
 ---
 
@@ -705,3 +706,19 @@ The following assumptions are documented to avoid ambiguity during planning:
   migration advances to N without data loss.
 - **Isolation test:** Query subjects from tenant A while tenant B creates subjects concurrently;
   confirm zero data leakage.
+
+---
+
+## Clarifications
+
+### Session 2026-03-20
+
+- Q: What locking mechanism prevents concurrent workflow transition conflicts? → A: CAS update pattern — `UPDATE subjects SET status = ? WHERE id = ? AND status = <expected_current>`. Zero rows affected = conflict → 409 `SUBJECT_TRANSITION_CONFLICT`. No `version` column required; no schema change.
+- Q: Does "Subject Management" require a separate permission scope from "Workflow Transition"? → A: Single unified permission scope `subjects:manage` covers all subject operations including CRUD and workflow transitions. Consistent with divisions, departments, groups, and semesters pattern. No separate transition-specific permission.
+- Q: What is the fallback resolution chain when a translation is missing for the requested language? → A: Fallback chain is requested_language → default_language → name field. If the default_language translation is also missing (e.g., partial migration), return the raw `name` field. Translation gaps are surfaced as warnings in structured logs but must NOT block the API response.
+- Q: How should the deletion dependency guard handle downstream tables that do not yet exist in this stage? → A: Guard is implemented as a configurable dependency check registry. Only tables present in the current migration state are queried in STAGE_28. New dependencies are registered additively in their respective stages. Implementation must not use hardcoded queries.
+- Q: Who is responsible for the transactional division toggle, and does it couple to Subject records via events? → A: Division toggle is owned by the workspace settings service (separate stage). Subject routes query workspace config reactively at request time during create/update. No event-driven coupling; no bulk subject update on toggle.
+
+**Risk Level (post-clarification):** MEDIUM — No new schema columns required (CAS uses existing `status` column), single unified `subjects:manage` permission scope simplifies RBAC implementation, no event-driven integration reduces coupling complexity. Remaining risk areas: multi-language fallback validation coverage and extensible deletion guard registry design correctness.
+
+**Clarifications Status:** `clarifications_resolved: true`

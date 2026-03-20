@@ -10,9 +10,9 @@ Status: Critical
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-20T00:10:00.000Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-03-20T00:20:00.000Z
 
 Scope Defined:
 
@@ -20,9 +20,11 @@ Scope Defined:
 - Workflow transitions: DRAFT → ACTIVE → ARCHIVED (terminal)
 - Division boundary enforcement (auto-assign when divisions disabled)
 - Semester boundary enforcement (semester must match division)
-- Multi-language subject naming with translation coverage
-- Soft-delete with dependency guard (block if content exists)
+- Multi-language subject naming with translation coverage (3-tier fallback)
+- Soft-delete with dependency guard (configurable extensible registry)
 - Runtime visibility: server-enforced ACTIVE-only filter
+- CAS concurrency pattern for transition conflicts
+- Single `subjects:manage` RBAC permission scope
 
 Deferred Scope:
 
@@ -31,10 +33,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
