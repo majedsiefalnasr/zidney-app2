@@ -10,33 +10,33 @@ Status: Critical
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-03-20T00:20:00.000Z
+Last Updated: 2026-03-20T00:35:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Subject CRUD API (list, create, read, update, delete) — tenant-isolated
-- Workflow transitions: DRAFT → ACTIVE → ARCHIVED (terminal)
-- Division boundary enforcement (auto-assign when divisions disabled)
-- Semester boundary enforcement (semester must match division)
-- Multi-language subject naming with translation coverage (3-tier fallback)
-- Soft-delete with dependency guard (configurable extensible registry)
-- Runtime visibility: server-enforced ACTIVE-only filter
-- CAS concurrency pattern for transition conflicts
-- Single `subjects:manage` RBAC permission scope
+- Tenant DB migration: `subjects` table, 8 indexes, 2 partial unique indexes, FK constraints (division_id → divisions.id, semester_id → semesters.id), schema_version 1.11.0 → 1.12.0
+- Drizzle ORM schema: `apps/api/src/db/tenant/schemas/subjects.schema.ts`
+- Domain package: `packages/domain-core/src/subjects/` (types, errors, dependency-registry, repository, service, index)
+- Validation schemas: `packages/validation/src/backoffice/subjects.schemas.ts` (5 schemas)
+- Route handlers: `apps/api/src/routes/backoffice/subjects/` (7 handlers + helpers + index)
+- Route registration: `apps/api/src/app.ts`
+- Unit tests + integration tests for all 7 endpoints
 
 Deferred Scope:
 
 - Subject-count license limits (downstream limits stage)
 - Frontoffice direct subject CRUD (not in scope; frontoffice inherits via enrolled exam)
+- Downstream content FK dependencies (registered additively by downstream stages into the subjects dependency registry)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant with Zidney Constitution v1.2.0 — task generation authorized
+- No new ADR required: custom subjects state machine is an inline decision consistent with existing patterns
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Custom DRAFT→ACTIVE→ARCHIVED state machine designed inline (not via global WorkflowEngine). Compound indexes (division_id, status) and (semester_id, status) added to address performance checklist gaps. Task breakdown in progress.
 
 ---
 
