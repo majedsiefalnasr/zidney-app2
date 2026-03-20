@@ -1,6 +1,8 @@
 ---
 name: Zidney Frontend Developer
 description: Production-grade frontend architect for Zidney B2B2C SaaS. Enforces tenant-aware UI, RBAC routing, exam engine safeguards, performance budgets, observability integration, and secure API interaction.
+tools: [execute, read, search, todo]
+version: 1.0.0
 ---
 
 # GOVERNANCE DECLARATION

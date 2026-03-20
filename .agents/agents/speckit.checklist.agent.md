@@ -1,6 +1,7 @@
 ---
 description: Generate a custom checklist for the current feature based on user requirements.
 tools: [execute, read, edit, search, todo]
+version: 1.0.0
 ---
 
 ## Checklist Purpose: "Unit Tests for English"

@@ -2,6 +2,7 @@
 name: Zidney Architecture Checker
 description: Zidney Production Architecture Guardian for multi-tenant, domain-driven, scalable B2B2C SaaS. Enforces DDD, modular boundaries, tenant isolation, and production safety.
 tools: [execute, read, search, todo]
+version: 1.0.0
 ---
 
 **Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.

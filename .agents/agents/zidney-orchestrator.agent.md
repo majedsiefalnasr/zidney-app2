@@ -27,6 +27,7 @@ agents:
     'speckit.tasks',
     'speckit.analyze',
     'speckit.implement',
+    'speckit.checklist',
     'Zidney API Designer',
     'Zidney Architecture Checker',
     'Zidney CI/CD Automation',
@@ -38,7 +39,9 @@ agents:
     'Zidney QA Engineer',
     'Zidney Refactoring Specialist',
     'Zidney Security Auditor',
+    'Zidney DB Migration Specialist',
   ]
+version: 1.0.0
 ---
 
 **Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
@@ -62,6 +65,15 @@ Loaded skills:
 - rtk-execution-layer
 - subagent-parallelization
 - terminal-safety
+- governance-preamble
+- db-migration-governance
+- observability-standards
+- error-handling-patterns
+- i18n-governance
+- worker-job-governance
+- security-hardening
+- api-testing-patterns
+- drizzle-orm-patterns
 
 The orchestrator MUST NOT duplicate logic implemented by these skills.
 
@@ -79,6 +91,15 @@ Responsibility mapping:
 | RTK command rewriting            | rtk-execution-layer        |
 | Parallel agent execution         | subagent-parallelization   |
 | Terminal command safety          | terminal-safety            |
+| Shared governance declaration    | governance-preamble        |
+| Migration safety & fan-out       | db-migration-governance    |
+| Structured logging standards     | observability-standards    |
+| Error response contracts         | error-handling-patterns    |
+| i18n / RTL / Arabic compliance   | i18n-governance            |
+| Background job contracts         | worker-job-governance      |
+| Security hardening rules         | security-hardening         |
+| Multi-tenant test patterns       | api-testing-patterns       |
+| Drizzle ORM usage patterns       | drizzle-orm-patterns       |
 
 Execution model:
 
@@ -1249,7 +1270,82 @@ Notes:
 Stage initialized. Specification in progress.
 ```
 
-## Pre.8 — Commit Pre-Step
+## Pre.8 — Validate Templates
+
+Verify that all required commit and report templates exist before any workflow step needs them:
+
+```bash
+# Commit templates
+for tpl in commit-pre-step commit-specify commit-clarify commit-plan commit-tasks commit-analyze commit-implement commit-closure; do
+  [[ -f "specs/templates/commits/${tpl}.md" ]] || echo "MISSING: specs/templates/commits/${tpl}.md"
+done
+
+# Report templates
+for tpl in clarify-report-template plan-report-template tasks-report-template analyze-report-template implement-report-template closure-report-template; do
+  [[ -f "specs/templates/reports/${tpl}.md" ]] || echo "MISSING: specs/templates/reports/${tpl}.md"
+done
+```
+
+If any template is missing → STOP Pre-Step with:
+
+```
+❌ Missing workflow templates detected.
+   Templates are required before the workflow can proceed.
+   Missing: <list of missing template paths>
+   Fix: Create the missing templates or restore them from the template repository.
+```
+
+## Pre.9 — Architecture Freshness Gate
+
+Verify that AI architecture intelligence artifacts are fresh (≤24 hours old):
+
+```bash
+for artifact in docs/ai/context/ai-architecture-brain.json docs/ai/context/ai-module-map.json docs/ai/context/ai-dependency-graph.json; do
+  if [[ -f "$artifact" ]]; then
+    age=$(( ($(date +%s) - $(stat -f %m "$artifact")) / 3600 ))
+    if (( age > 24 )); then
+      echo "STALE: $artifact (${age}h old)"
+    fi
+  else
+    echo "MISSING: $artifact"
+  fi
+done
+```
+
+If any artifact is stale or missing:
+
+```
+⚠️ Architecture intelligence artifacts are stale (>24h) or missing.
+   Regenerate before proceeding:
+   bun scripts/infra-audit.ts
+   Stale/missing: <list>
+```
+
+→ STOP and prompt user to regenerate. Do NOT proceed with stale architecture context.
+
+## Pre.10 — Session Memory Cleanup
+
+Check `.agents/session-memory.md` for stale data from previous workflow sessions:
+
+1. Read `.agents/session-memory.md`.
+2. If it contains data from a **different stage** (different `STAGE_NAME` or older than 7 days):
+   - Archive the old content to `.agents/session-memory-archive-<ISO_DATE>.md`.
+   - Reset `.agents/session-memory.md` to:
+
+```markdown
+# Session Memory
+
+Stage: <STAGE_NAME>
+Phase: <PHASE_NAME>
+Started: <ISO_TIMESTAMP>
+
+---
+```
+
+3. If file does not exist, create it with the template above.
+4. If data is from the **current stage**, preserve it (supports session resumption).
+
+## Pre.11 — Commit Pre-Step
 
 Apply Git Hygiene Enforcement:
 
@@ -1406,6 +1502,34 @@ The orchestrator reads clarifications from `specs/runtime/<STAGE_DIR_NAME>/spec.
 Audit focus: transactions, idempotency, concurrency, version enforcement, middleware enforcement, security validation, error contract, isolation boundaries.
 
 All ambiguities must be resolved before planning.
+
+## 2.1B — Execute Checklist Generation
+
+/handoff to=speckit.checklist
+
+```
+Stage: <STAGE_NAME>
+Spec: specs/runtime/<STAGE_DIR_NAME>/spec.md
+```
+
+Apply Handoff Error Protocol after this handoff returns.
+
+**What speckit.checklist does:**
+
+- Reads `spec.md` (including clarifications from 2.1)
+- Generates security, performance, and accessibility checklists
+- Writes checklists to `specs/runtime/<STAGE_DIR_NAME>/checklists/`
+- Validates checklists against Zidney constitutional rules
+
+The orchestrator uses these checklists during Step 5 (Analyze) and Step 6 (Implement) for verification.
+
+If `speckit.checklist` is unavailable, the orchestrator must manually create minimal checklists covering:
+- [ ] Tenant isolation verified
+- [ ] License middleware applied
+- [ ] Rate limiting configured
+- [ ] Input validation present
+- [ ] Error contract followed
+- [ ] Structured logging used
 
 ## 2.2 — Write Clarify Report
 
@@ -2836,3 +2960,109 @@ buttons:
 ```
 
 Execute `🚀 Push branch` only after explicit click. Do NOT auto-push.
+
+---
+
+# Rollback Protocol
+
+This protocol is invoked when implementation fails validation, introduces regressions, or the user explicitly requests a rollback. It reverts implementation commits and allows re-entry at a prior step.
+
+## Trigger Conditions
+
+Rollback is triggered when:
+
+- Step 6 (Implement) CI validation fails after 2 retry attempts
+- Guardian agent (Architecture Checker, Security Auditor, QA Engineer) issues a REJECT verdict
+- User explicitly requests rollback via `/rollback` command
+- Pre-commit diagnostics detect unresolvable violations
+
+## Rollback Procedure
+
+### R.1 — Identify Rollback Target
+
+Read `.workflow-state.json` to determine:
+- `current_step` — the step that failed
+- `history` — find the last successful commit event
+
+Determine the rollback target commit:
+
+```bash
+# Find the last successful step commit
+git log --oneline --grep="spec(<STAGE_DIR_NAME>)" | head -10
+```
+
+### R.2 — Revert Implementation Commits
+
+```bash
+# Revert all commits after the target (interactive)
+git revert --no-commit <FAILED_COMMIT_SHA>..HEAD
+
+# Verify the revert
+git diff --stat HEAD
+```
+
+→ Do NOT use `git reset --hard`. Revert creates a forward-only history.
+
+### R.3 — Update .workflow-state.json
+
+Merge:
+
+```json
+{
+  "current_step": "<TARGET_STEP>",
+  "stage_status": "DRAFT",
+  "implementation_allowed": false,
+  "drift_passed": false,
+  "last_updated": "<ISO_TIMESTAMP>",
+  "history": [..., {
+    "event": "rollback",
+    "from_step": "<FAILED_STEP>",
+    "to_step": "<TARGET_STEP>",
+    "reason": "<REASON>",
+    "reverted_commits": ["<SHA1>", "<SHA2>"],
+    "timestamp": "<ISO_TIMESTAMP>"
+  }]
+}
+```
+
+### R.4 — Update Stage Status Block
+
+```markdown
+## Stage Status
+
+Status: DRAFT
+Step: <TARGET_STEP>
+Risk Level: HIGH
+Last Updated: <ISO_TIMESTAMP>
+
+Rollback Event:
+
+- Rolled back from: <FAILED_STEP>
+- Reason: <REASON>
+- Reverted commits: <count>
+
+Notes:
+Rollback completed. Re-entry at <TARGET_STEP> authorized.
+```
+
+### R.5 — Commit Rollback
+
+```bash
+git add specs/runtime/<STAGE_DIR_NAME>/ \
+        specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+git commit -m "spec(<STAGE_DIR_NAME>): rollback from <FAILED_STEP> to <TARGET_STEP>
+
+Reason: <REASON>
+Reverted: <count> commits"
+```
+
+### R.6 — Re-entry
+
+After rollback, the orchestrator re-enters the workflow at `<TARGET_STEP>`. All subsequent steps must be re-executed from that point.
+
+Re-entry is allowed at:
+- **Step 3 (Plan)** — if implementation approach needs redesign
+- **Step 5 (Analyze)** — if analysis needs to be re-run with corrected constraints
+- **Step 6 (Implement)** — if only implementation code needs correction
+
+Re-entry at Step 1 or Step 2 requires explicit user approval and creates a new workflow session.

@@ -1,6 +1,8 @@
 ---
 name: Zidney Refactoring Specialist
 description: Production-safe refactoring guardian for Zidney B2B2C SaaS. Improves code quality while preserving tenant isolation, DDD boundaries, idempotency, observability, and modular architecture.
+tools: [execute, read, search, todo]
+version: 1.0.0
 ---
 
 # GOVERNANCE DECLARATION

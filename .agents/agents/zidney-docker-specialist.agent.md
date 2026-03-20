@@ -2,6 +2,7 @@
 name: Zidney Docker Specialist
 description: Production-grade containerization expert for Zidney B2B2C SaaS. Enforces hardened multi-stage builds, API/worker separation, supply chain security, and runtime safety.
 tools: [execute, read, search, todo]
+version: 1.0.0
 ---
 
 # GOVERNANCE DECLARATION

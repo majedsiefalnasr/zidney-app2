@@ -208,6 +208,48 @@ No agent may operate outside this governance model.
 
 ---
 
+## 6B. Agent Concern Assignment (PRIMARY / SECONDARY)
+
+Each guardian agent has a PRIMARY enforcement concern and optional SECONDARY concerns. When multiple agents evaluate the same artifact, the PRIMARY agent's verdict takes precedence for its assigned domain.
+
+| Agent                   | PRIMARY Concern             | SECONDARY Concerns                         |
+| ----------------------- | --------------------------- | ------------------------------------------ |
+| Architecture Checker    | Architecture compliance     | Dependency boundaries, layer violations    |
+| Security Auditor        | Security hardening          | Input validation, auth/authz, secrets      |
+| QA Engineer             | Test coverage & correctness | Integration tests, regression checks       |
+| Code Reviewer           | Code quality & style        | Naming, structure, readability             |
+| Performance Optimizer   | Performance & scalability   | Query efficiency, caching, bundle size     |
+| API Designer            | API contract compliance     | Error format, versioning, idempotency      |
+| Frontend Developer      | UI implementation fidelity  | Component structure, accessibility, i18n   |
+| DB Migration Specialist | Migration safety            | Tenant fan-out, lock risk, backward compat |
+| CI/CD Automation        | Pipeline correctness        | Build steps, test gates, deploy safety     |
+| Deployment Engineer     | Deployment safety           | Environment configs, rollback readiness    |
+| Docker Specialist       | Container configuration     | Image security, compose correctness        |
+| Refactoring Specialist  | Refactor safety             | Blast radius, import boundaries            |
+
+### Conflict Resolution Rules
+
+When two agents issue conflicting verdicts:
+
+1. **PRIMARY wins for its domain.** Architecture Checker's verdict on layer violations overrides Code Reviewer's opinion on the same import.
+2. **BLOCKED always wins over PASS.** If any agent issues BLOCKED, the artifact is blocked regardless of other PASS verdicts.
+3. **Cross-domain conflicts escalate.** If Architecture Checker says PASS but Security Auditor says BLOCKED for the same code, both verdicts are preserved and the Orchestrator must resolve.
+4. **No agent may override another agent's PRIMARY concern.** Code Reviewer cannot override Security Auditor on auth issues.
+
+---
+
+## 6C. Skill Conflict Resolution
+
+When multiple skills provide overlapping guidance:
+
+1. **Domain-specific skill wins over general skill.** `db-migration-governance` overrides `governance-preamble` on migration topics.
+2. **Architecture skills win over implementation skills.** `architecture-intelligence` overrides `drizzle-orm-patterns` on structural decisions.
+3. **Security skill always takes precedence.** `security-hardening` guidance cannot be overridden by any other skill.
+4. **Skill loaded by orchestrator overrides unloaded skill.** Skills in the orchestrator's Skill Delegation Layer take precedence.
+5. **If conflict remains unresolvable**, the agent must STOP and escalate to the user.
+
+---
+
 ## 7. UI System Enforcement (Shadcn-Vue + Tailwind v4)
 
 All agents generating UI components, layouts, or styling MUST enforce the following rules without

@@ -2,6 +2,7 @@
 name: Zidney API Designer
 description: Zidney Production API Architect for multi-tenant B2B2C SaaS. Designs scalable, secure, observable, versioned APIs aligned with Zidney domain rules.
 tools: [execute, read, search, todo]
+version: 1.0.0
 ---
 
 **Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.

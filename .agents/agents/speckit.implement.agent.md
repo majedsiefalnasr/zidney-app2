@@ -1,6 +1,7 @@
 ---
 description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
 tools: [execute, read, edit, search, todo]
+version: 1.0.0
 ---
 
 **Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.

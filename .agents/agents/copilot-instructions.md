@@ -1,35 +1,90 @@
-# zidney-app2 Development Guidelines
+# Zidney Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-02-15
+Auto-generated from project configuration. Last updated: 2026-03-20
+
+## Platform Identity
+
+Zidney is a stability-first, exam-centric, white-label B2B2C Educational SaaS platform.
 
 ## Active Technologies
 
-- TypeScript (Node.js) + Bun runtime + Hono (web framework), PostgreSQL (via node-pg), Drizzle ORM, Zod (validation), Pino (structured logging), Redis (for user session state and rate limiting) (013-affiliates)
-- PostgreSQL master_db (new tables: `affiliates`, `affiliate_usages`, `affiliate_admin_audit`) (013-affiliates)
-
-- TypeScript/Bun + Hono, Postgres, Bun runtime (001-multi-tenancy-architecture)
+- **Runtime:** Bun
+- **Backend:** TypeScript + Hono (web framework)
+- **Database:** PostgreSQL (database-per-tenant) + Drizzle ORM
+- **Validation:** Zod
+- **Logging:** Pino (structured logging)
+- **Caching/Sessions:** Redis
+- **Frontend:** Vue 3 + TypeScript + Vite
+- **UI System:** shadcn-vue + Reka UI + Tailwind CSS v4
+- **Testing:** Vitest (unit/integration) + Playwright (E2E)
+- **Linting:** Biome
 
 ## Project Structure
 
 ```text
-backend/
-frontend/
-tests/
+apps/
+  api/          # Bun + Hono backend (server-side authority)
+  backoffice/   # Vue 3 institutional control panel
+  frontoffice/  # Vue 3 student runtime
+  mmc/          # Vue 3 platform control panel
+  worker/       # Background job processor
+
+packages/
+  api-client/   # Typed API client
+  config/       # Shared configuration
+  domain-core/  # Business logic (pure functions)
+  job-queue/    # Job queue abstraction
+  logger/       # Structured logging
+  redis-utils/  # Redis utilities
+  types/        # Shared TypeScript types
+  ui-system/    # shadcn-vue component library
+  validation/   # Zod validation schemas
+
+specs/          # SpecKit feature specifications
+scripts/        # Build, governance, and CI scripts
+tests/          # Integration and E2E tests
+docs/           # Architecture, ADRs, governance
 ```
 
 ## Commands
 
-npm test && npm run lint
+```bash
+bun run dev           # Start development servers
+bun run build         # Build all apps
+bun run typecheck     # TypeScript type checking
+bun run lint          # Biome lint
+bun run test          # Run Vitest tests
+bun run test:e2e      # Run Playwright E2E tests
+```
+
+## Architecture Rules
+
+- Database-per-tenant isolation (no row-based multi-tenancy)
+- Trust chain: Isolation → License → Authentication → Attempt → Runtime → Frontoffice
+- License middleware required on all workspace routes
+- Attempt configuration must be snapshotted at start
+- Server time is authoritative
+- All API responses: `{ success, data, error: { code, message } }`
+- Structured logging with correlation_id required
+
+## Import Boundaries
+
+- `apps/*` may import from `packages/*`
+- `packages/*` may import from `packages/*`
+- `apps/*` must NOT import from other `apps/*`
+- `packages/*` must NOT import from `apps/*`
+- UI must NOT access database schemas or backend logic
 
 ## Code Style
 
-TypeScript/Bun: Follow standard conventions
+- TypeScript strict mode
+- Biome for formatting and linting
+- shadcn-vue components for UI (no custom components when shadcn equivalent exists)
+- Tailwind CSS v4 utilities for layout and spacing
 
-## Recent Changes
+## Governance
 
-- 013-affiliates: Added TypeScript (Node.js) + Bun runtime + Hono (web framework), PostgreSQL (via node-pg), Drizzle ORM, Zod (validation), Pino (structured logging), Redis (for user session state and rate limiting)
-
-- 001-multi-tenancy-architecture: Added TypeScript/Bun + Hono, Postgres, Bun runtime
+All AI development follows SpecKit Hard Mode workflow. See `AGENTS.md` for full behavioral contract.
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

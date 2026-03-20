@@ -10,6 +10,7 @@ handoffs:
     agent: speckit.implement
     prompt: Start the implementation in phases
     send: true
+version: 1.0.0
 ---
 
 ## User Input

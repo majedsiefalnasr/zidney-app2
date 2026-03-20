@@ -1,18 +1,18 @@
 # Zidney AI Skills Index
 
 **Generated**: 2026-03-15  
-**Total Skills**: 30  
+**Total Skills**: 39 (30 active + 9 new audit skills; 8 AWS archived)  
 **Phase 5 Compliance**: All SKILL.md <500 lines ✓  
 
 ## Skill Directory Organization
 
 All skills are located in `.agents/skills/` with domain-based organization:
 
-- `architecture/*` - Architecture reasoning and governance skills
-- `ai/*` - AI workflow and execution skills
-- `gitnexus/*` - GitNexus knowledge graph skills
-- `aws-skills/*` - AWS expertise skills
-- Other domain skills organized by function
+- `architecture/*` — Architecture reasoning and governance skills
+- `ai/*` — AI workflow and execution skills
+- `gitnexus/*` — GitNexus knowledge graph skills
+- `_archived/aws-skills/*` — AWS skills (archived, not loaded)
+- Domain skills organized by function (db, i18n, security, observability, etc.)
 
 ---
 
@@ -43,17 +43,26 @@ All skills are located in `.agents/skills/` with domain-based organization:
 | Tooling | tool-advisor | 297 | Tool environment discovery and capability awareness | on-demand |
 | TypeScript | typescript-governance | 265 | TypeScript governance and strict mode rules | prompt-loaded |
 | Testing | vibe-testing-main | 273 | Testing and QA automation | on-demand |
-| Figma | Figma Implement Design | 264 | Figma design implementation | on-demand |
+| Figma | figma-implement-design | 264 | Figma design implementation | on-demand |
 | GitNexus | gitnexus-refactoring | 122 | Code refactoring with GitNexus | on-demand |
 | GitNexus | gitnexus-exploring | 79 | GitNexus codebase exploration | on-demand |
 | GitNexus | gitnexus-debugging | 90 | GitNexus debugging and error tracing | on-demand |
 | GitNexus | gitnexus-impact-analysis | 98 | GitNexus blast radius and impact analysis | on-demand |
 | GitNexus | gitnexus-cli | 83 | GitNexus CLI commands | on-demand |
 | GitNexus | gitnexus-guide | 65 | GitNexus tool reference and workflow | on-demand |
-| Other | Figma MCP | 49 | Figma MCP tool integration | on-demand |
+| Other | figma-mcp | 49 | Figma MCP tool integration | on-demand |
 | Other | specrate-main | 45 | SpecKit main orchestration | on-demand |
-| Other | GH Fix CI | 71 | GitHub Actions CI fixing | on-demand |
+| Other | gh-fix-ci | 71 | GitHub Actions CI fixing | on-demand |
 | Other | Playwright | 454 | End-to-end testing with Playwright | on-demand |
+| **New** | governance-preamble | ~60 | Pre-step governance context injection | on-demand |
+| **New** | db-migration-governance | ~140 | Migration safety, tenant fan-out, lock risk | on-demand |
+| **New** | observability-standards | ~130 | Structured logging, correlation, traces | on-demand |
+| **New** | error-handling-patterns | ~140 | Error contract, domain errors, API boundaries | on-demand |
+| **New** | i18n-governance | ~140 | i18n key governance, RTL, pluralization | on-demand |
+| **New** | worker-job-governance | ~130 | Job queue patterns, idempotency, DLQ | on-demand |
+| **New** | security-hardening | ~130 | OWASP, tenant isolation, secret management | on-demand |
+| **New** | api-testing-patterns | ~130 | API test structure, tenant fixtures, coverage | on-demand |
+| **New** | drizzle-orm-patterns | ~120 | Drizzle schema, migrations, query patterns | on-demand |
 
 ---
 
@@ -74,14 +83,20 @@ All skills are located in `.agents/skills/` with domain-based organization:
 - `tool-advisor` - Tool and capability discovery
 - `analysis-retry-engine` - Intelligent error recovery
 
-### Serverless & AWS (8 skills)
-- `aws-serverless-eda-foundational` - Design principles
-- `aws-serverless-eda-patterns` - Pattern implementations
-- `aws-serverless-eda-operations` - Operations & observability
-- `aws-mcp-setup` - MCP configuration
-- `aws-cdk-development` - CDK and IaC
-- `aws-cost-operations` - Cost optimization
-- `aws-agentic-ai` - Agentic AI patterns
+### Serverless & AWS (8 skills — ARCHIVED)
+- All AWS skills moved to `_archived/aws-skills/` (not loaded by default)
+- Restore with: `mv .agents/skills/_archived/aws-skills .agents/skills/aws-skills`
+
+### Domain Engineering (9 skills — NEW)
+- `governance-preamble` — Pre-step governance context injection
+- `db-migration-governance` — Migration safety, tenant fan-out, lock risk
+- `observability-standards` — Structured logging, correlation IDs, traces
+- `error-handling-patterns` — Error contract, domain errors, API boundaries
+- `i18n-governance` — i18n key governance, RTL, pluralization
+- `worker-job-governance` — Job queue patterns, idempotency, DLQ
+- `security-hardening` — OWASP, tenant isolation, secret management
+- `api-testing-patterns` — API test structure, tenant fixtures, coverage
+- `drizzle-orm-patterns` — Drizzle schema, migrations, query patterns
 
 ### Code Exploration & Refactoring (6 skills)
 - `gitnexus-exploring` - Codebase exploration
@@ -97,9 +112,9 @@ All skills are located in `.agents/skills/` with domain-based organization:
 - `analysis-retry-engine` - Test failure recovery
 
 ### Design & Deployment (3 skills)
-- `Figma Implement Design` - Design implementation
-- `Figma MCP` - Figma MCP tool
-- `GH Fix CI` - GitHub Actions CI
+- `figma-implement-design` — Design implementation
+- `figma-mcp` — Figma MCP tool
+- `gh-fix-ci` — GitHub Actions CI
 
 ### Orchestration & Meta (2 skills)
 - `specrate-main` - SpecKit orchestration

@@ -2,6 +2,7 @@
 name: Zidney Deployment Engineer
 description: Production-safe deployment engineer for Zidney B2B2C SaaS. Enforces zero-downtime migrations, tenant safety, observability gates, async stability, and rollback guarantees.
 tools: [execute, read, search, todo]
+version: 1.0.0
 ---
 
 # GOVERNANCE DECLARATION

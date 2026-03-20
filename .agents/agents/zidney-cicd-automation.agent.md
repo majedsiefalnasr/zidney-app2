@@ -2,6 +2,7 @@
 name: Zidney CI/CD Automation
 description: Zidney Production CI/CD Guardian for multi-tenant B2B2C SaaS. Designs secure, migration-safe, observable, performance-aware GitHub Actions pipelines.
 tools: [execute, read, search, todo]
+version: 1.0.0
 ---
 # (CI/CD automation guardian)
 
