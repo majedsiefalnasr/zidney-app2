@@ -8,36 +8,52 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
-Risk Level: HIGH
-Last Updated: 2026-03-20T00:32:00.000Z
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: MEDIUM
+Closure Date: 2026-03-20
 
-Drift Analysis: PASSED (all criteria)
-Implementation: AUTHORIZED
+Scope Delivered:
 
-Scope Authorized:
-
-- Semester CRUD (create, list, read, update, soft delete)
-- Soft delete with referential guard (students enrolled check)
-- Unique name per workspace (partial functional unique index on LOWER(name))
-- Date validation (end_date >= start_date when both provided, server-side)
-- Status ENABLED/DISABLED
-- Nullable semester_id FK on students table
-- 5 API endpoints under /api/v1/backoffice/workspace
-- 27 atomic tasks across 9 groups (A–I)
+- ✅ Semester CRUD (create, list, read, update, soft delete) — 5 endpoints
+- ✅ Soft delete with referential guard (students enrolled check via SELECT FOR UPDATE)
+- ✅ Unique name per workspace (partial functional unique index on LOWER(name) WHERE deleted_at IS NULL)
+- ✅ Date validation (end_date >= start_date when both provided, server-side)
+- ✅ Status ENABLED/DISABLED (VARCHAR(20) + CHECK constraint)
+- ✅ Nullable semester_id FK on students table (ON DELETE RESTRICT)
+- ✅ 5 REST endpoints under /api/v1/backoffice/workspace
+- ✅ 27/27 atomic tasks completed
+- ✅ 15 unit tests + 13 integration tests passing
 
 Deferred Scope:
 
 - subjects.semester_id column and FK (STAGE_28_SUBJECTS)
-- subjects guard in deleteSemester (STAGE_28)
+- subjects guard in deleteSemester (STAGE_28) — countSubjectsForSemester stub returns 0
 - Exam / content semester filtering (future modules)
 - Frontoffice semester display
 
 Constitutional Compliance:
 
-- All drift criteria passed — implementation authorized
+- ADR-0001 Database-per-tenant isolation enforced — all DB via tenant resolver context
+- ADR-0006 Server-authoritative time enforced — NOW() in SQL, no client timestamps
+- ADR-0007 Version compatibility enforced — schema_version bumped 1.10.0 → 1.11.0
+- ADR-0008 Semantic versioning enforced — minor bump for additive schema change
 - All 4 guardian audits: PASS (security, performance, QA, code review)
+- TypeScript: clean (zero errors)
+- Lint: clean (zero errors)
+
+Audit Results:
+
+- security_auditor: PASS
+- performance_optimizer: PASS
+- qa_engineer: PASS
+- code_reviewer: PASS
+- drift_analysis: PASSED (all criteria)
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
+
 - Architecture layer boundaries: PASS
 - Tenant isolation: PASS
 - License middleware: PASS
