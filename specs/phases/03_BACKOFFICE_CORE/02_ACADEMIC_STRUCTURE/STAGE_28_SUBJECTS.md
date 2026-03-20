@@ -10,20 +10,31 @@ Status: Critical
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-20T00:00:00.000Z
+Last Updated: 2026-03-20T00:10:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Subject CRUD API (list, create, read, update, delete) — tenant-isolated
+- Workflow transitions: DRAFT → ACTIVE → ARCHIVED (terminal)
+- Division boundary enforcement (auto-assign when divisions disabled)
+- Semester boundary enforcement (semester must match division)
+- Multi-language subject naming with translation coverage
+- Soft-delete with dependency guard (block if content exists)
+- Runtime visibility: server-enforced ACTIVE-only filter
+
+Deferred Scope:
+
+- Subject-count license limits (downstream limits stage)
+- Frontoffice direct subject CRUD (not in scope; frontoffice inherits via enrolled exam)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 

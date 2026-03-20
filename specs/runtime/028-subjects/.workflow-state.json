@@ -6,9 +6,9 @@
   "branch": "spec/028-subjects",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -20,11 +20,22 @@
   "current_parallel_group": null,
   "session_started_at": "2026-03-20T00:00:00.000Z",
   "last_updated": "2026-03-20T00:00:00.000Z",
-  "step_timings": {},
+  "step_timings": {
+    "specify": {
+      "started_at": "2026-03-20T00:00:00.000Z",
+      "completed_at": "2026-03-20T00:00:00.000Z"
+    }
+  },
   "history": [
     {
       "event": "branch_created",
       "branch": "spec/028-subjects",
+      "timestamp": "2026-03-20T00:00:00.000Z"
+    },
+    {
+      "event": "step_completed",
+      "step": "specify",
+      "outputs": ["spec.md", "checklists/requirements.md"],
       "timestamp": "2026-03-20T00:00:00.000Z"
     }
   ]
