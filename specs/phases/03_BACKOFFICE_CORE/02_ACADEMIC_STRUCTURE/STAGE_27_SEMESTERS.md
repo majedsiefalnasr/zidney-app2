@@ -9,21 +9,16 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-03-20T00:20:00.000Z
+Last Updated: 2026-03-20T00:25:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Tenant migration: semesters table + students.semester_id FK + schema_version 1.10.0 → 1.11.0
-- Drizzle schema: semesters.schema.ts + students.schema.ts updated
-- Domain package: packages/domain-core/src/semesters/ (types, errors, repository, service, index)
-- Validation schemas: packages/validation/src/backoffice/semesters.schemas.ts
-- Route handlers: 5 handlers + helpers + index under apps/api/src/routes/backoffice/semesters/
-- Route registration: app.ts updated
-- Package exports: domain-core/package.json adds ./semesters (and fixes missing ./teams)
-- Unit tests + integration tests
-- Total: 17 new files, 3 modified files
+- Total: 27 atomic tasks across 9 groups
+- 🔴 HIGH risk: T001 (migration), T007 (create TX), T010 (update TX), T011 (delete TX with FOR UPDATE lock)
+- 🟡 MEDIUM risk: T002, T003, T006, T013, T018–T025, T026, T027
+- 🟢 LOW risk: T004, T005, T008, T009, T012, T014–T017
 
 Deferred Scope:
 
@@ -34,15 +29,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Guardian verdicts: architecture-checker PASS, api-designer PASS
-- Migration naming and schema_version conventions confirmed
-- No cross-tenant logic; no global DB singleton; all writes transactional
-- SELECT FOR UPDATE concurrency guards included
+- Task set compliant — drift analysis required before implementation
+- Migration naming, schema_version, TX boundaries, logging all planned
 
 Notes:
-Technical plan complete. 17 new files, 3 modified. Pagination: page/limit (offset-based).
-Subjects guard deferred to STAGE_28. Task breakdown in progress.
+Atomic task set generated. 27 tasks. Drift analysis gate pending.
 
 Scope Defined:
 
