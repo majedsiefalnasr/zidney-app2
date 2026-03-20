@@ -27,15 +27,17 @@ agents:
     'speckit.tasks',
     'speckit.analyze',
     'speckit.implement',
-    'Zidney Architecture Checker',
     'Zidney API Designer',
-    'Zidney Security Auditor',
-    'Zidney Performance Optimizer',
-    'Zidney QA Engineer',
-    'Zidney Code Reviewer',
+    'Zidney Architecture Checker',
     'Zidney CI/CD Automation',
+    'Zidney Code Reviewer',
     'Zidney Deployment Engineer',
     'Zidney Docker Specialist',
+    'Zidney Frontend Developer',
+    'Zidney Performance Optimizer',
+    'Zidney QA Engineer',
+    'Zidney Refactoring Specialist',
+    'Zidney Security Auditor',
   ]
 ---
 
@@ -356,12 +358,13 @@ At the beginning of each step output, render this banner:
 ═══════════════════════════════════════
 ZIDNEY HARD MODE WORKFLOW
 ═══════════════════════════════════════
-Stage: <STAGE_NAME>
-Phase: <PHASE_NAME>
-Branch: <STAGE_DIR_NAME>
+Stage:       <STAGE_NAME>
+Phase:       <PHASE_NAME>
+Branch:      spec/<STAGE_DIR_NAME>
 Current Step: <current_step>
-Status: <displayed_status>
+Status:      <displayed_status>
 Package Mgr: <PKG_MANAGER>
+Started:     <session_started_at from .workflow-state.json>
 
 Progress:
 <STEP_INDEX>/<TOTAL_STEPS>: <current_step>
@@ -456,7 +459,13 @@ Workflow state lives at: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json` �
 
 **NEVER write orchestrator reports into SpecKit file locations or vice versa.**
 
-If any artifact is outside its designated location → STOP and correct before proceeding.
+If any artifact is outside its designated location:
+```
+❌ Artifact location violation — <file> found at <actual path>, expected at <correct path>.
+   Why it matters: Misplaced artifacts break SpecKit agent path resolution and report generation.
+   Fix: Move the file to its correct location before proceeding.
+```
+→ STOP and correct before proceeding.
 
 ---
 
@@ -526,6 +535,71 @@ The user should only see ONE logical next action at a time.
 
 ---
 
+## Sub-Agent Handoff Error Protocol
+
+Referenced throughout as **"Apply Handoff Error Protocol."**
+
+Every `/handoff` call is subject to failure. After every handoff the orchestrator MUST evaluate the response before proceeding:
+
+| Failure mode | Detection | Response |
+|---|---|---|
+| Agent returned no output | Empty or null response | STOP — display error below, present retry/abort |
+| Agent returned an error message | Response begins with ERROR or exception text | STOP — display full error, present retry/abort |
+| Agent timed out | No response within expected window | STOP — display timeout error, present retry/abort |
+| Agent returned partial output | Required sections missing from response | STOP — list missing sections, present retry/abort |
+| Agent returned BLOCKED verdict | Response contains `VERDICT: BLOCKED` | Follow the BLOCKED protocol for that step (do not treat as a handoff failure) |
+
+**On any handoff failure, display:**
+
+```
+❌ Sub-agent handoff failed — <agent name> did not return a valid response.
+   Why it matters: Workflow cannot continue without this agent's output.
+   Failure type: <no output | error | timeout | partial output>
+   Details: <raw error or missing sections>
+```
+
+Then present:
+
+```widget choice
+prompt: "How would you like to proceed?"
+options:
+  - label: "🔄 Retry handoff"
+    value: "retry"
+  - label: "🛑 Abort and save state"
+    value: "abort"
+```
+
+- `retry` → re-issue the same `/handoff` with identical context. Maximum 2 retries before escalating to abort.
+- `abort` → write current state to `.workflow-state.json` (preserve all completed work), then halt. The session can be resumed from the failed step.
+
+---
+
+## Skill Health Check
+
+Performed once at session start (new or resume), before any workflow step executes.
+
+For each skill in the loaded skills list, verify the skill directory exists and contains a valid `SKILL.md`:
+
+```bash
+for skill in architecture-intelligence architecture-self-healing analysis-retry-engine \
+             git-governance mcp-routing package-manager-governance precommit-diagnostics \
+             rtk-execution-layer subagent-parallelization terminal-safety; do
+  [ -f ".agents/skills/$skill/SKILL.md" ] || echo "MISSING: $skill"
+done
+```
+
+If any skill is missing:
+
+```
+❌ Skill load failed — <skill name> is missing from .agents/skills/.
+   Why it matters: This skill handles <responsibility>. The orchestrator cannot safely execute without it.
+   Run: verify .agents/skills/<skill name>/SKILL.md exists and is non-empty.
+```
+
+STOP the session. Do not proceed to intake or workflow steps until all required skills are loadable.
+
+---
+
 # Session Mode Detection
 
 Note:
@@ -553,6 +627,51 @@ options:
     default: true
   - label: "♻️ Resume interrupted stage"
     value: "resume"
+  - label: "🔍 Dry-run — validate only, no writes"
+    value: "dry_run"
+```
+
+## Dry-Run Mode
+
+If the user selects `dry_run`:
+
+Dry-run mode executes all validation and prerequisite checks but produces **no file writes, no git operations, and no commits**.
+
+What dry-run does:
+- Runs the Skill Health Check
+- Runs Architecture Sanity Check
+- Validates intake fields (stage name, phase, stage file)
+- Checks that `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>` exists and is not PRODUCTION READY / DEPRECATED
+- Validates the working tree is clean
+- Checks that the stage branch does not already exist
+- Checks that all required templates exist under `specs/templates/`
+- Reports what would be created, which agents would be invoked, and which guards would run
+
+What dry-run does NOT do:
+- Write any file to disk
+- Create or checkout any git branch
+- Initialize `.workflow-state.json`
+- Invoke any SpecKit agent or guardian agent
+- Make any commit
+
+At the end of dry-run, display a summary:
+
+```
+🔍 Dry-Run Complete — No changes made
+
+Stage:     <STAGE_NAME>
+Phase:     <PHASE_NAME>
+Branch:    spec/<STAGE_DIR_NAME> (would be created)
+
+Pre-flight checks:
+  ✅ Stage file exists and is not locked
+  ✅ Working tree is clean
+  ✅ Branch does not exist
+  ✅ All required templates present
+  ✅ All skills loadable
+  ⚠️  <any warnings found>
+
+To start the actual workflow, re-invoke with "🆕 Start new stage".
 ```
 
 ## Resume Protocol
@@ -573,8 +692,10 @@ Resumable stages found:
 
 3. Once selected, read `.workflow-state.json` and restore all session variables:
    - `STAGE_NAME`, `PHASE_NAME`, `STAGE_FILE_NAME`, `STAGE_DIR_NAME`
-   - `BASE_BRANCH`, `PKG_MANAGER`
+   - `BASE_BRANCH`
+   - `PKG_MANAGER` — restore from `pkg_manager` field in state. Do NOT re-detect from lockfile. If the field is absent (legacy state file) → re-detect once and write it back to state before continuing.
    - `current_step`, `stage_status`, `drift_passed`, `tasks_total`, `tasks_completed`
+   - `deferred_tasks`, `guardian_verdicts`, `step_timings`
 
 4. Run RTK session initialization (detect and cache `RTK_AVAILABLE`).
 
@@ -587,6 +708,7 @@ Resumable stages found:
 Branch:       spec/<STAGE_DIR_NAME>
 Last step:    <current_step>
 Status:       <stage_status>
+Last updated: <last_updated from .workflow-state.json>
 Resuming at:  <next_logical_step>
 ```
 
@@ -610,7 +732,13 @@ Resuming at:  <next_logical_step>
 - Never overwrite existing reports from completed steps.
 - Never re-initialize `.workflow-state.json` — merge updates only.
 - If `stage_status` is `BACKEND CLOSED` → jump directly to Step 7 (Closure) if not yet complete.
-- If `.workflow-state.json` is corrupt or unreadable → STOP. Display error. Ask user to provide intake manually.
+- If `.workflow-state.json` is corrupt or unreadable:
+  ```
+  ❌ Workflow state file is corrupt or unreadable — resume blocked.
+     Why it matters: State file is required to restore session variables and resume at the correct step.
+     Fix: Provide intake values manually to start from the last known good step, or restore the file from git history.
+  ```
+  → STOP. Ask user to provide intake manually.
 
 ---
 
@@ -620,6 +748,19 @@ Resuming at:  <next_logical_step>
 
 Only shown when session mode = **new**. Skip entirely when resuming.
 
+### Phase File Pre-Fill (C4)
+
+Before presenting the intake form, attempt to pre-fill from the stage file if the user has already provided a file path or if one can be inferred from context:
+
+1. If `STAGE_FILE_NAME` can be determined (e.g. from a file path the user typed, or from the current git branch name) → read `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>` and extract:
+   - Stage name from the first `# ` heading
+   - Phase name from the file path
+   - Any scope notes from the file body
+2. Pre-populate intake fields with extracted values, marked as `(auto-filled — confirm or edit)`.
+3. If no file can be inferred → present the blank form as normal.
+
+### Intake Form
+
 Present the following input widget to the user:
 
 ```widget ask_user
@@ -627,19 +768,41 @@ fields:
   - label: "Stage Name"
     placeholder: "e.g. Tenant Provisioning Service"
     required: true
+    validation:
+      - rule: "non-empty"
+        error: "Stage Name is required"
+      - rule: "no special characters except spaces and hyphens"
+        error: "Stage Name must not contain special characters"
   - label: "Phase Name"
     placeholder: "e.g. PHASE_02_BACKEND"
     required: true
+    validation:
+      - rule: "non-empty"
+        error: "Phase Name is required"
+      - rule: "matches pattern PHASE_NN_*"
+        error: "Phase Name must match format PHASE_NN_NAME (e.g. PHASE_02_BACKEND)"
   - label: "Stage File"
     placeholder: "e.g. STAGE_05_TENANT_PROVISIONING_SERVICE.md"
     required: true
+    validation:
+      - rule: "non-empty"
+        error: "Stage File is required"
+      - rule: "matches pattern STAGE_NN*_.md"
+        error: "Stage File must match format STAGE_NN_NAME.md"
+      - rule: "file exists at specs/phases/<PHASE_NAME>/<STAGE_FILE>"
+        error: "Stage File not found — verify the phase name and file name are correct"
 ```
+
+Inline validation rules:
+- Validate each field immediately on blur (when the user leaves the field), not only on submit.
+- Display error message directly below the failing field in red.
+- Do NOT allow form submission until all fields pass validation.
+- On submission, display a confirmation block before proceeding.
 
 Rules:
 
 - All three fields are required.
-- If any field is missing → highlight the missing field and ask the user to complete it before proceeding.
-- Once all fields are filled → summarize parsed values in a confirmation block before proceeding.
+- Once all fields pass validation → summarize parsed values in a confirmation block before proceeding.
 - Do NOT re-ask for values already confirmed.
 
 After the user submits the form, display a confirmation summary and present a single action button:
@@ -654,7 +817,76 @@ style: primary
 
 ---
 
-## Stage Lifecycle Guard
+## ADR Creation Protocol
+
+Referenced throughout as **"ADR required before proceeding."**
+
+When any step detects that an architectural decision is required (new module, layer boundary change, cross-app dependency, schema design choice with long-term implications), the orchestrator MUST pause and follow this protocol before continuing.
+
+### When ADR is required
+
+- A new `packages/` module is introduced that does not exist in `ARCHITECTURE_MAP.json`
+- A dependency between layers is proposed that violates current `ARCHITECTURE_CONTRACT.json` rules
+- A database schema decision has permanent implications (e.g. multi-tenant isolation strategy change)
+- A new external integration is proposed (external API, third-party service)
+- Any change to `ARCHITECTURE_MAP.json` or `ARCHITECTURE_CONTRACT.json` is required
+
+### ADR creation steps
+
+1. **STOP current workflow step.** Do not write any plan, task, or implementation artifact until the ADR is recorded.
+
+2. Present to the user:
+   ```
+   ⏸ ADR Required
+   
+   An architectural decision must be recorded before this step can continue.
+   Decision needed: <describe the decision>
+   Impact: <which modules, layers, or contracts are affected>
+   ```
+
+3. Collect from the user:
+   - Decision title
+   - Context (why is this decision needed)
+   - Decision (what was decided)
+   - Consequences (what changes as a result)
+
+4. Write ADR to: `docs/architecture/ADR/ADR-<NNNN>-<kebab-title>.md`
+
+   Use template:
+   ```markdown
+   # ADR-<NNNN>: <Title>
+
+   **Status:** Accepted
+   **Date:** <ISO_DATE>
+   **Deciders:** <user name or team>
+
+   ## Context
+   <Why this decision was needed>
+
+   ## Decision
+   <What was decided>
+
+   ## Consequences
+   <What changes, what constraints are introduced>
+
+   ## Related stages
+   - <STAGE_NAME>
+   ```
+
+5. Stage and commit the ADR file:
+   ```bash
+   git add docs/architecture/ADR/ADR-<NNNN>-<kebab-title>.md
+   git commit -m "docs(adr): ADR-<NNNN> <title>"
+   ```
+
+6. Record in `.workflow-state.json`:
+   ```json
+   { "event": "adr_created", "adr": "ADR-<NNNN>", "title": "<title>", "timestamp": "<ISO_TIMESTAMP>" }
+   ```
+
+7. Resume the paused workflow step.
+
+**ADR numbers:** Use the next sequential number from the highest existing ADR in `docs/architecture/ADR/`. If no ADRs exist, start at `ADR-0001`.
 
 Referenced throughout as **"Apply Stage Lifecycle Guard first."**
 
@@ -663,10 +895,134 @@ Referenced throughout as **"Apply Stage Lifecycle Guard first."**
 Before creating, replacing, or updating any `## Stage Status` block:
 
 1. Read current `Status:` from `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`.
-2. If `PRODUCTION READY` or `PRODUCTION HARDENED` → STOP. Do not modify. Propose a new stage.
+2. If `PRODUCTION READY` or `PRODUCTION HARDENED`:
+   ```
+   ❌ Stage is locked — no modifications permitted.
+      Why it matters: PRODUCTION READY and PRODUCTION HARDENED stages are immutable.
+      Fix: Create a new stage to continue work on this feature area.
+   ```
+   → STOP. Do not modify. Propose a new stage.
 3. If `BACKEND CLOSED` → allow only Step 7 closure metadata writes. No structural changes.
-4. If `## Stage Status` block is missing → STOP and request clarification.
-5. Allowed values: `DRAFT` | `IN PROGRESS` | `BACKEND CLOSED` | `PRODUCTION READY` | `PRODUCTION HARDENED` | `DEPRECATED`
+4. If `DEPRECATED`:
+   ```
+   ❌ Stage is deprecated — all writes are forbidden.
+      Why it matters: Deprecated stages are read-only. Modifying them would corrupt governance history.
+      Fix: Reference the superseding stage for any further work.
+   ```
+   → STOP. A deprecated stage is read-only. No writes permitted. See DEPRECATED lifecycle path below.
+5. If `## Stage Status` block is missing:
+   ```
+   ❌ Stage Status block missing — cannot validate lifecycle state.
+      Why it matters: The Stage Status block is required for lifecycle enforcement. Without it the orchestrator cannot determine what operations are permitted.
+      Fix: Add a ## Stage Status block to specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME> with a valid Status: value.
+   ```
+   → STOP and request clarification.
+6. Allowed values: `DRAFT` | `IN PROGRESS` | `BACKEND CLOSED` | `PRODUCTION READY` | `PRODUCTION HARDENED` | `DEPRECATED`
+
+### DEPRECATED Lifecycle Path
+
+A stage is deprecated when its delivered scope is superseded, removed, or replaced by a subsequent stage.
+
+**Who can deprecate:** Only the developer explicitly. The orchestrator never auto-deprecates.
+
+**How to deprecate a stage:**
+
+1. The user must provide a written reason and the superseding stage name (if applicable).
+2. The orchestrator updates `## Stage Status` in the stage file:
+   ```markdown
+   Status: DEPRECATED
+   Deprecated: <ISO_DATE>
+   Reason: <user-provided reason>
+   Superseded by: <STAGE_NAME or "N/A">
+   ```
+3. Update `.workflow-state.json`:
+   ```json
+   {
+     "stage_status": "DEPRECATED",
+     "last_updated": "<ISO_TIMESTAMP>",
+     "history": [..., { "event": "stage_deprecated", "reason": "<reason>", "timestamp": "<ISO_TIMESTAMP>" }]
+   }
+   ```
+4. Commit the deprecation with message: `chore(<stage>): deprecate stage — <reason>`
+5. After deprecation, all workflow operations on this stage are FORBIDDEN. The stage is read-only.
+
+### Risk Level Scoring Rubric
+
+Every `## Stage Status` block requires a `Risk Level`. Compute it using this rubric:
+
+**Score each factor present in the stage:**
+
+| Factor | Points |
+|---|---|
+| Database migration (schema change) | +3 |
+| New table or column added | +2 |
+| Security-sensitive logic (auth, tokens, permissions) | +3 |
+| Worker interaction or async job | +2 |
+| Multi-tenant data isolation logic | +3 |
+| External API integration | +2 |
+| More than 10 tasks | +1 |
+| More than 20 tasks | +2 |
+| New package dependency added | +1 |
+
+**Score → Risk Level:**
+
+| Total score | Risk Level |
+|---|---|
+| 0–3 | LOW |
+| 4–7 | MEDIUM |
+| 8+ | HIGH |
+
+Compute this score at Step 2 (Clarify) when scope is fully known. Update it at Step 5 (Analyze) if the plan revealed additional risk factors.
+
+---
+
+# Scope Amendment Protocol
+
+If the user requests a requirement change, addition, or removal **after any step has been committed**, the orchestrator MUST NOT silently absorb it. Follow this protocol before any further execution:
+
+## Step 1 — Identify Invalidated Steps
+
+Map the amendment to the steps it affects:
+
+| Amendment type | Steps invalidated |
+|---|---|
+| New or changed functional requirement | Specify, Clarify, Plan, Tasks, Analyze |
+| New or changed data model / schema | Plan, Tasks, Analyze |
+| New or changed endpoint / API contract | Plan, Tasks, Analyze |
+| Security or compliance change | Clarify, Plan, Analyze |
+| Descoping an already-planned feature | Plan, Tasks |
+| Implementation-only change (no spec impact) | Tasks, Analyze |
+
+## Step 2 — Present Amendment Impact Widget
+
+```widget choice
+prompt: "Scope amendment detected. The following already-committed steps are invalidated and must be re-run: <list>. How would you like to proceed?"
+options:
+  - label: "✏️ Apply amendment and re-run invalidated steps"
+    value: "apply"
+    style: primary
+  - label: "🛑 Discard amendment — keep current scope"
+    value: "discard"
+```
+
+## Step 3 — Record Amendment
+
+If `apply`:
+
+1. Append to `.workflow-state.json`:
+   ```json
+   {
+     "event": "scope_amendment",
+     "description": "<user-provided description of the change>",
+     "invalidated_steps": ["<step names>"],
+     "timestamp": "<ISO_TIMESTAMP>"
+   }
+   ```
+2. Update `spec.md` with the amended requirement under a `## Amendments` section (append, do not overwrite).
+3. Re-run each invalidated step in sequence from the earliest one affected.
+4. Re-commit each re-run step with a commit message noting the amendment.
+
+**Do NOT carry forward any plan, task, or analysis artifact that was produced before the amendment was recorded. Stale artifacts must be regenerated.**
 
 ---
 
@@ -681,7 +1037,14 @@ Parse `<STAGE_FILE_NAME>` with pattern: `^STAGE_([0-9]+[A-Z]?)_`
 - Extract captured token as `STAGE_TOKEN`.
   - `STAGE_05_TENANT_PROVISIONING_SERVICE.md` → `STAGE_TOKEN = 05`
   - `STAGE_06A_LICENSE_ENFORCEMENT.md` → `STAGE_TOKEN = 06A`
-- If pattern does not match → STOP and request corrected filename.
+- If pattern does not match:
+  ```
+  ❌ Stage file name does not match expected pattern — branch derivation failed.
+     Why it matters: The branch name is derived from the stage file name. An invalid filename produces an invalid branch.
+     Pattern expected: STAGE_NN[A]_DESCRIPTION.md (e.g. STAGE_05_TENANT_PROVISIONING_SERVICE.md)
+     Fix: Correct the Stage File name to match the pattern and resubmit.
+  ```
+  → STOP and request corrected filename.
 - Zero-pad numeric part to 3 digits, preserve trailing letter: `05` → `005` | `06A` → `006A`
 - Convert `<STAGE_NAME>` to kebab-case (lowercase, underscores/spaces → hyphens).
 - Combine: `<PADDED_PREFIX>-<kebab-stage-name>` → e.g. `005-tenant-provisioning-service`, then prefix the git branch with `spec/` resulting in `spec/<STAGE_DIR_NAME>` (example: `spec/005-tenant-provisioning-service`).
@@ -812,6 +1175,7 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
   "stage_file": "specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>",
   "branch": "spec/<STAGE_DIR_NAME>",
   "base_branch": "<BASE_BRANCH>",
+  "pkg_manager": "<PKG_MANAGER>",
   "current_step": "pre_step",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
@@ -820,7 +1184,13 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
   "plan_completed": false,
   "tasks_total": null,
   "tasks_completed": null,
+  "deferred_tasks": [],
+  "guardian_verdicts": {},
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "<ISO_TIMESTAMP>",
   "last_updated": "<ISO_TIMESTAMP>",
+  "step_timings": {},
   "history": [
     {
       "event": "branch_created",
@@ -831,7 +1201,27 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
 }
 ```
 
-`.workflow-state.json` MUST always live at `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`. Never at repo root. Never duplicated. If a conflicting file exists → STOP.
+`.workflow-state.json` MUST always live at `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`. Never at repo root. Never duplicated. If a conflicting file exists:
+```
+❌ Conflicting .workflow-state.json detected — initialization blocked.
+   Why it matters: Multiple state files for the same stage would cause corruption and incorrect resumption.
+   Fix: Remove or archive the conflicting file, then retry.
+   Conflicting path: <path of the conflicting file>
+```
+→ STOP.
+
+### Merge Semantics (A5)
+
+Every step that says "Merge:" means:
+
+1. Read the existing `.workflow-state.json` file into memory.
+2. Apply the listed field changes on top of the existing object (shallow merge of top-level fields).
+3. For the `history` array: read the existing array, append the new event object, write the full updated array back.
+4. For `step_timings`: read existing object, add or update the key for the current step only.
+5. For `guardian_verdicts`: read existing object, add or update only the verdicts returned in the current step.
+6. For `deferred_tasks`: read existing array, append new deferrals only.
+7. Write the entire merged object back to the file.
+8. Never replace the entire file with only the fields listed in a Merge block — unlisted fields MUST be preserved.
 
 ## Pre.7 — Initialize Stage Status Block
 
@@ -894,6 +1284,8 @@ Stage: <STAGE_NAME>
 Phase: <PHASE_NAME>
 ```
 
+Apply Handoff Error Protocol after this handoff returns.
+
 **What speckit.specify does:**
 
 - Calls `create-new-feature.sh` (branch already exists — this will detect it and use `SPECIFY_FEATURE` env var or current branch)
@@ -905,7 +1297,13 @@ The orchestrator reads from these paths after speckit.specify completes. Do NOT 
 
 Constraints: no architecture redesign, database-per-tenant preserved, license middleware mandatory, server-authoritative time only, worker-only grading (if applicable), snapshot integrity preserved (if attempt-related), all writes transactional, idempotency required for critical endpoints, version compatibility enforced.
 
-If ADR is required → STOP and request it before continuing.
+If ADR is required:
+```
+❌ Architectural decision required — workflow paused.
+   Why it matters: This specification introduces an architectural concern that must be recorded before planning begins.
+   Fix: Follow the ADR Creation Protocol to document and commit the decision, then resume from Step 1.
+```
+→ STOP and apply ADR Creation Protocol before continuing.
 
 ## 1.2 — Write Specify Report
 
@@ -949,6 +1347,9 @@ Merge:
 {
   "current_step": "specify",
   "stage_status": "DRAFT",
+  "step_timings": {
+    "specify": { "started_at": "<ISO_TIMESTAMP of 1.1 start>", "completed_at": "<ISO_TIMESTAMP>" }
+  },
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [..., { "event": "specify_complete", "timestamp": "<ISO_TIMESTAMP>" }]
 }
@@ -990,6 +1391,8 @@ Apply the automatic continuation rule before proceeding to Step 2.
 ```
 Stage: <STAGE_NAME>
 ```
+
+Apply Handoff Error Protocol after this handoff returns.
 
 **What speckit.clarify does:**
 
@@ -1047,6 +1450,9 @@ Merge:
   "current_step": "clarify",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
+  "step_timings": {
+    "clarify": { "started_at": "<ISO_TIMESTAMP of 2.1 start>", "completed_at": "<ISO_TIMESTAMP>" }
+  },
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [..., { "event": "clarifications_locked", "timestamp": "<ISO_TIMESTAMP>" }]
 }
@@ -1103,6 +1509,8 @@ This prevents `plan.md` from being generated using stale training-data API knowl
 Stage: <STAGE_NAME>
 ```
 
+Apply Handoff Error Protocol after this handoff returns.
+
 **What speckit.plan does:**
 
 - Calls `setup-plan.sh --json` to copy the plan template to `specs/runtime/<STAGE_DIR_NAME>/plan.md`
@@ -1119,7 +1527,13 @@ Plan must cover: tables/schema changes, migrations, endpoints, middleware layers
 
 Constraints: no cross-tenant logic, no direct DB instantiation, all writes transactional, server-authoritative time only, version compatibility required.
 
-If plan modifies architecture → STOP. ADR required before proceeding.
+If plan modifies architecture:
+```
+❌ Architectural modification detected in plan — workflow paused.
+   Why it matters: Architecture changes outside INFRA stages are forbidden without an ADR. Proceeding without one violates the Zidney Constitution.
+   Fix: Follow the ADR Creation Protocol to document and commit the decision, then resume from Step 3.
+```
+→ STOP. Apply ADR Creation Protocol before proceeding.
 
 ## 3.1A — Guardian Plan Validation
 
@@ -1128,7 +1542,15 @@ Run in parallel:
 /handoff to=zidney-architecture-checker  
 /handoff to=zidney-api-designer
 
-Both MUST return `VERDICT: PASS`. If any returns BLOCKED → STOP. List all violations by severity. Do NOT write PLAN_REPORT or update state. Require remediation and re-validation.
+Apply Handoff Error Protocol after both handoffs return. Both MUST return `VERDICT: PASS`. If any returns BLOCKED:
+```
+❌ Guardian validation failed — plan cannot proceed.
+   Why it matters: The plan contains violations that would cause drift or constitutional failures during implementation.
+   Blocked by: <guardian name>
+   Violations: <list all by severity>
+   Fix: Remediate all listed violations, then re-run 3.1A guardians before writing PLAN_REPORT.
+```
+→ STOP. Do NOT write PLAN_REPORT or update state. Require full remediation and re-validation.
 
 ## 3.2 — Write Plan Report
 
@@ -1173,6 +1595,13 @@ Merge:
   "current_step": "plan",
   "stage_status": "DRAFT",
   "plan_completed": true,
+  "guardian_verdicts": {
+    "architecture_checker": "PASS | BLOCKED",
+    "api_designer": "PASS | BLOCKED"
+  },
+  "step_timings": {
+    "plan": { "started_at": "<ISO_TIMESTAMP of 3.1 start>", "completed_at": "<ISO_TIMESTAMP>" }
+  },
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [..., { "event": "plan_complete", "timestamp": "<ISO_TIMESTAMP>" }]
 }
@@ -1215,6 +1644,8 @@ Apply the automatic continuation rule before proceeding to Step 4.
 Stage: <STAGE_NAME>
 ```
 
+Apply Handoff Error Protocol after this handoff returns.
+
 **What speckit.tasks does:**
 
 - Calls `check-prerequisites.sh --json` to locate `FEATURE_DIR`
@@ -1242,6 +1673,60 @@ After generation, count all `- [ ]` lines and record total as `TASKS_TOTAL`.
 Load `specs/templates/reports/tasks-report-template.md`.  
 Fill from `specs/runtime/<STAGE_DIR_NAME>/tasks.md`.  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/TASKS_REPORT.md`
+
+In addition to the standard template fill, the TASKS_REPORT.md MUST include these enriched sections:
+
+**Risk-Ranked Task View**
+
+After the full task list, append a risk-ranked summary table. Classify each task by risk:
+
+| Risk | Criteria |
+|---|---|
+| 🔴 HIGH | Database migration, schema change, security logic, auth/token/permission code, multi-tenant isolation, worker async job |
+| 🟡 MEDIUM | New endpoint, new service layer, external API call, new package dependency |
+| 🟢 LOW | Config change, logging addition, test-only task, documentation |
+
+Output:
+
+```
+## Risk-Ranked Task Summary
+
+| Task ID | Risk | Description |
+|---------|------|-------------|
+| T003    | 🔴 HIGH   | Add tenant_id column migration to exams table |
+| T007    | 🟡 MEDIUM | Implement POST /api/exams endpoint |
+| T012    | 🟢 LOW    | Add structured logging to ExamService |
+```
+
+**External Dependency Tasks**
+
+List any tasks that involve third-party packages identified during Context7 lookups in 3.1-PRE:
+
+```
+## Tasks with External Dependencies
+
+| Task ID | Package | Version Note |
+|---------|---------|--------------|
+| T009    | drizzle-orm | Uses insert().returning() — verified against v0.30 docs |
+```
+
+If no Context7 lookups were performed or no external deps are involved, write: `None identified.`
+
+**High-Downstream-Impact Tasks**
+
+List tasks that touch modules with HIGH risk classification from `ARCHITECTURE_HEATMAP.md` or `ai-architecture-brain.json`:
+
+```
+## High-Downstream-Impact Tasks
+
+These tasks modify architectural hotspots — extra review attention recommended.
+
+| Task ID | Module | Centrality | Description |
+|---------|--------|------------|-------------|
+| T004    | packages/domain-core | HIGH | Add ExamSession entity |
+```
+
+If no hotspot modules are touched, write: `None identified.`
 
 ## 4.3 — Update Stage Status Block
 
@@ -1282,10 +1767,16 @@ Merge:
   "stage_status": "DRAFT",
   "tasks_total": <TASKS_TOTAL>,
   "tasks_completed": 0,
+  "parallel_task_groups": [],
+  "step_timings": {
+    "tasks": { "started_at": "<ISO_TIMESTAMP of 4.1 start>", "completed_at": "<ISO_TIMESTAMP>" }
+  },
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [..., { "event": "tasks_complete", "tasks_total": <TASKS_TOTAL>, "timestamp": "<ISO_TIMESTAMP>" }]
 }
 ```
+
+`parallel_task_groups` is populated during Step 6 as parallel groups begin executing. Initialize as empty array here.
 
 ## 4.5 — Update README.md
 
@@ -1324,6 +1815,8 @@ Apply the automatic continuation rule before proceeding to Step 5.
 Stage: <STAGE_NAME>
 ```
 
+Apply Handoff Error Protocol after this handoff returns.
+
 **What speckit.analyze does:**
 
 - Calls `check-prerequisites.sh --json --require-tasks --include-tasks` to locate `FEATURE_DIR`
@@ -1345,7 +1838,7 @@ Audit for: isolation violations, license middleware bypass, snapshot integrity b
 /handoff to=zidney-qa-engineer  
 /handoff to=zidney-code-reviewer
 
-Each MUST return `VERDICT: PASS | BLOCKED`. Group findings by severity: 🚨 Critical | ⚠️ High | ⚡ Medium | ℹ️ Low
+Apply Handoff Error Protocol after all four handoffs return. Each MUST return `VERDICT: PASS | BLOCKED`. Group findings by severity: 🚨 Critical | ⚠️ High | ⚡ Medium | ℹ️ Low
 
 ## 5.1B — Composite Verdict Aggregation
 
@@ -1355,7 +1848,33 @@ If structural audit (5.1) = BLOCKED OR any guardian = BLOCKED:
 If all pass:
 → Final Gate = APPROVED | Implementation = AUTHORIZED
 
-If BLOCKED → STOP. List all violations. Do NOT write ANALYZE_REPORT or update state. Require full remediation and clean re-audit.
+If BLOCKED → STOP. Do NOT write ANALYZE_REPORT or update state. Require full remediation and clean re-audit.
+
+Display violations using the following format. On the **first BLOCKED** occurrence, every violation is `❌ NEW`. On **subsequent retry attempts**, diff against the previous attempt's violations stored in `.workflow-state.json` and apply status markers:
+
+```
+❌ Analyze Gate — BLOCKED (Attempt <N>)
+
+Violations:
+
+| Status | Severity | Rule | Location |
+|--------|----------|------|----------|
+| 🆕 New      | 🚨 Critical | tenant_isolation_bypass | apps/api/src/routes/exam.ts:47 |
+| ❌ Remaining | ⚠️ High    | missing_transaction_boundary | apps/api/src/services/ExamService.ts:112 |
+| ✅ Fixed     | ⚡ Medium  | missing_idempotency_key | apps/api/src/routes/attempt.ts:88 |
+
+Remediation Progress (Attempt <N-1> → <N>):
+  ✅ Fixed:     <count>
+  ❌ Remaining: <count>
+  🆕 New:       <count> (introduced during remediation — fix these before retrying)
+```
+
+Status key:
+- `✅ Fixed` — was present in the previous attempt, no longer detected
+- `❌ Remaining` — was present in the previous attempt, still detected
+- `🆕 New` — was NOT present in the previous attempt, introduced during remediation
+
+Remediation is complete only when ALL rows show `✅ Fixed` and there are zero `❌ Remaining` and zero `🆕 New`. Delegate detailed retry state tracking to `.agents/skills/analysis-retry-engine`.
 
 ## 5.2 — Write Analyze Report
 
@@ -1421,6 +1940,15 @@ If APPROVED:
   "stage_status": "IN PROGRESS",
   "drift_passed": true,
   "implementation_allowed": true,
+  "guardian_verdicts": {
+    "security_auditor": "PASS",
+    "performance_optimizer": "PASS",
+    "qa_engineer": "PASS",
+    "code_reviewer": "PASS"
+  },
+  "step_timings": {
+    "analyze": { "started_at": "<ISO_TIMESTAMP of 5.1 start>", "completed_at": "<ISO_TIMESTAMP>" }
+  },
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [..., { "event": "drift_analysis_passed", "timestamp": "<ISO_TIMESTAMP>" }]
 }
@@ -1434,6 +1962,15 @@ If BLOCKED:
   "stage_status": "IN PROGRESS",
   "drift_passed": false,
   "implementation_allowed": false,
+  "guardian_verdicts": {
+    "security_auditor": "PASS | BLOCKED",
+    "performance_optimizer": "PASS | BLOCKED",
+    "qa_engineer": "PASS | BLOCKED",
+    "code_reviewer": "PASS | BLOCKED"
+  },
+  "step_timings": {
+    "analyze": { "started_at": "<ISO_TIMESTAMP of 5.1 start>", "completed_at": "<ISO_TIMESTAMP>" }
+  },
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [..., { "event": "drift_analysis_blocked", "timestamp": "<ISO_TIMESTAMP>" }]
 }
@@ -1476,7 +2013,14 @@ Before generating any code, confirm:
 - No unresolved constitutional violations from Step 5
 - No unresolved ambiguities from any prior step
 
-If any check fails → STOP. Implementation forbidden until resolved.
+If any check fails:
+```
+❌ Implementation gate check failed — code generation is forbidden.
+   Why it matters: Implementing against an unresolved drift or ambiguity produces non-compliant code that will fail the Analyze gate again.
+   Failed check: <drift_passed = false | unresolved violations | unresolved ambiguities>
+   Fix: Resolve all listed issues and re-run Step 5 (Analyze) before attempting implementation.
+```
+→ STOP. Implementation forbidden until resolved.
 
 ## 6.2 — Check SpecKit Checklists Before Implementation
 
@@ -1496,6 +2040,31 @@ options:
 - `recheck` → re-read `checklists/requirements.md` and re-evaluate completeness
 - `proceed` → continue with incomplete checklists, record explicit user override in .workflow-state.json
 
+## 6.2B — GitNexus Context Bootstrap Gate
+
+**Purpose:** Ensure the `gitnexus-context.json` artifact is fresh and valid before implementation begins. A stale or invalid artifact causes incorrect impact analysis and may permit architectural drift to go undetected.
+
+1. Verify `docs/ai/context/gitnexus-context.json` exists and is ≤24h old.
+2. If stale or missing → regenerate:
+   ```bash
+   bun run gitnexus:context
+   ```
+3. Validate the artifact:
+   ```bash
+   bun run gitnexus:validate
+   ```
+4. If validation fails → **STOP. Do NOT begin implementation.**
+   ```
+   ❌ GitNexus context validation failed — implementation blocked.
+      The gitnexus-context.json has invalid or missing dependency data.
+      Why it matters: AI Guard uses this artifact for impact analysis.
+      Run: bun run gitnexus:context && bun run gitnexus:validate to fix.
+   ```
+5. If validation passes → proceed to 6.3.
+
+**Schema authority:** `docs/ai/gitnexus-context.schema.json`
+**Documentation:** `docs/ai/gitnexus.md`
+
 ## 6.3 — Execute Implement
 
 ### 6.3-PRE — Context7 MCP Pre-Implementation Lookup
@@ -1506,7 +2075,14 @@ Steps:
 
 1. Scan `tasks.md` for tasks referencing external packages (identifiable by import paths, library names, or framework APIs in task descriptions).
 2. For each identified third-party dependency, query Context7 MCP for current API docs, correct method signatures, and any breaking changes.
-3. If Context7 returns updated documentation that conflicts with what is written in `plan.md` → STOP. Surface the conflict clearly. Require user decision before proceeding.
+3. If Context7 returns updated documentation that conflicts with what is written in `plan.md`:
+   ```
+   ❌ API documentation conflict detected — implementation paused.
+      Why it matters: Implementing against stale API knowledge will produce broken code.
+      Conflict: <library name> — plan.md uses <stale API>, Context7 reports <current API>
+      Fix: Update plan.md to reflect the current API, re-run 3.1A guardians, then resume implementation.
+   ```
+   → STOP. Surface the conflict clearly. Require user decision before proceeding.
 
 This ensures implementation uses accurate, current API knowledge rather than training-data approximations.
 
@@ -1517,6 +2093,8 @@ Stage: <STAGE_NAME>
 Tasks Total: <TASKS_TOTAL>
 ```
 
+Apply Handoff Error Protocol after this handoff returns.
+
 **What speckit.implement does:**
 
 - Calls `check-prerequisites.sh --json --require-tasks --include-tasks` to locate `FEATURE_DIR`
@@ -1526,6 +2104,44 @@ Tasks Total: <TASKS_TOTAL>
 - Halts on any non-parallel task failure
 
 **Task completion marker:** speckit.implement uses `- [X]` (uppercase X). The orchestrator counts `[X]` lines to derive `TASKS_COMPLETED`.
+
+**Parallel task group tracking (C5):**
+
+Tasks marked `[P]` in `tasks.md` can execute concurrently. The orchestrator MUST track parallel group state to enable precise resumption if speckit.implement is interrupted mid-group.
+
+When a parallel group begins executing, merge to `.workflow-state.json`:
+
+```json
+{
+  "current_parallel_group": {
+    "group_id": "<first task ID in the group, e.g. T012>",
+    "task_ids": ["T012", "T013", "T014"],
+    "completed_task_ids": [],
+    "started_at": "<ISO_TIMESTAMP>"
+  }
+}
+```
+
+After each task in the group completes, append its ID to `completed_task_ids`.
+
+When all tasks in the group complete, merge:
+
+```json
+{
+  "current_parallel_group": null,
+  "parallel_task_groups": [
+    {
+      "group_id": "<group ID>",
+      "task_ids": ["T012", "T013", "T014"],
+      "completed_task_ids": ["T012", "T013", "T014"],
+      "started_at": "<ISO_TIMESTAMP>",
+      "completed_at": "<ISO_TIMESTAMP>"
+    }
+  ]
+}
+```
+
+On resume: if `current_parallel_group` is non-null, resume the group from where it left off — only re-run tasks whose IDs are NOT in `completed_task_ids`.
 
 Rules: modify only stage-scoped files, tenant resolver only, no direct DB instantiation, all writes transactional, idempotency enforced, structured logging, correlation ID, no business logic in frontend, no stack traces to client.
 
@@ -1545,6 +2161,13 @@ Count `- [X]` lines (uppercase X) in `specs/runtime/<STAGE_DIR_NAME>/tasks.md` t
 
 → STOP. Do NOT write report or proceed to closure.
 
+```
+❌ Implementation incomplete — closure is forbidden.
+   Why it matters: All tasks must be completed or formally deferred before the stage can be marked PRODUCTION READY.
+   Completed: <TASKS_COMPLETED> / <TASKS_TOTAL> tasks
+   Fix: Continue implementation or formally defer remaining tasks with written justification.
+```
+
 Display the following summary, then present a choice widget:
 
 ```
@@ -1559,7 +2182,7 @@ Closure is FORBIDDEN until all tasks are complete or formally deferred.
 ```
 
 ```widget choice
-prompt: "How would you like to proceed?"
+prompt: "I have reviewed the remaining tasks listed above. How would you like to proceed?"
 options:
   - label: "▶️ Continue implementation now"
     value: "continue"
@@ -1589,24 +2212,26 @@ Run and record all of the following:
 
 In addition to the above validations, the orchestrator MUST execute and record:
 
-- ESLint (or project linter) → must exit with code 0
-- TypeScript type-check (`tsc --noEmit`) → must exit with code 0
+- Biome check (`biome check .`) → must exit with code 0
+- TypeScript type-check (`bun run typecheck`) → must exit with code 0 (covers both `tsconfig.json` and `tsconfig.test.json`)
 - Dev runtime boot check (`$PKG_MANAGER run dev` — use the package manager detected at Pre.1) → application must start without runtime errors
 
 Rules:
 
-- Any lint ERROR → BLOCK implementation
+- Any Biome lint ERROR → BLOCK implementation
 - Any TypeScript ERROR → BLOCK implementation
 - Any runtime crash on boot → BLOCK implementation
 - WARNINGS are allowed but must be recorded in VALIDATION_REPORT.md
 
-If lint/type/runtime fails:
-→ STOP immediately
-→ List exact failing command output
-→ Do NOT proceed to Implement Report or Closure
-→ Require remediation before continuing
+If any check fails:
 
-If any required validation fails or is skipped without explicit user approval → STOP. List failures. Require remediation.
+```
+❌ <check name> failed — implementation blocked.
+   Why it matters: <lint/type/runtime errors indicate broken code that must not be committed>.
+   Run: <exact command> to reproduce and fix.
+```
+
+Do NOT proceed to Implement Report or Closure until all three gates exit with code 0.
 
 Load `specs/templates/audits/validation-report-template.md`.  
 Fill with actual command output, pass/fail status per check, and failure details if any.  
@@ -1618,8 +2243,15 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md`
 /handoff to=zidney-deployment-engineer  
 /handoff to=zidney-docker-specialist
 
-Each MUST return `VERDICT: PASS | BLOCKED`.  
-If any returns BLOCKED → STOP. List all violations by severity. Require remediation before Pre-Closure Review Gate.
+Apply Handoff Error Protocol after all three handoffs return. Each MUST return `VERDICT: PASS | BLOCKED`. If any returns BLOCKED:
+```
+❌ Pre-closure guardian validation failed — closure is blocked.
+   Why it matters: CI/CD, deployment, and Docker readiness must be confirmed before a stage is marked PRODUCTION READY.
+   Blocked by: <guardian name>
+   Violations: <list all by severity>
+   Fix: Remediate all listed violations, then re-run 6.6 guardians before proceeding to Pre-Closure Review Gate.
+```
+→ STOP. Require remediation before Pre-Closure Review Gate.
 
 ## 6.7 — Write Implement Report
 
@@ -1668,15 +2300,37 @@ Merge:
   "current_step": "implement",
   "stage_status": "BACKEND CLOSED",
   "tasks_completed": <TASKS_COMPLETED>,
+  "deferred_tasks": [
+    {
+      "task_id": "<TASK_ID>",
+      "description": "<task description>",
+      "justification": "<user-provided justification>",
+      "deferred_at": "<ISO_TIMESTAMP>"
+    }
+  ],
+  "guardian_verdicts": {
+    "cicd_automation": "PASS | BLOCKED",
+    "deployment_engineer": "PASS | BLOCKED",
+    "docker_specialist": "PASS | BLOCKED"
+  },
+  "step_timings": {
+    "implement": {
+      "started_at": "<ISO_TIMESTAMP>",
+      "completed_at": "<ISO_TIMESTAMP>"
+    }
+  },
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [..., {
     "event": "stage_backend_closed",
     "tasks_completed": <TASKS_COMPLETED>,
     "tasks_total": <TASKS_TOTAL>,
+    "deferred_count": <number of deferred tasks>,
     "timestamp": "<ISO_TIMESTAMP>"
   }]
 }
 ```
+
+Note: `deferred_tasks` appends to the existing array — do not replace it. If no tasks were deferred, append nothing (preserve existing array).
 
 ## 6.10 — Update README.md
 
@@ -1724,30 +2378,52 @@ And will:
   - Finalize .workflow-state.json
   - Commit all closure artifacts
 
-SpecKit output files (flat in stage root):
-  specs/runtime/<STAGE_DIR_NAME>/spec.md              ← includes Clarifications section from Step 2
-  specs/runtime/<STAGE_DIR_NAME>/plan.md
-  specs/runtime/<STAGE_DIR_NAME>/tasks.md             ← all tasks marked [X]
-  specs/runtime/<STAGE_DIR_NAME>/checklists/requirements.md
-
-Orchestrator reports:
-  specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md
-  specs/runtime/<STAGE_DIR_NAME>/reports/CLARIFY_REPORT.md
-  specs/runtime/<STAGE_DIR_NAME>/reports/PLAN_REPORT.md
-  specs/runtime/<STAGE_DIR_NAME>/reports/TASKS_REPORT.md
-  specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md
-
-Audits:
-  specs/runtime/<STAGE_DIR_NAME>/audits/ANALYZE_REPORT.md
-  specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md
-
 Tasks completed: <TASKS_COMPLETED> / <TASKS_TOTAL>
+```
+
+Present each artifact as a clickable file link so the developer can open and review without manually navigating:
+
+```widget file_links
+label: "SpecKit output files (review before approving)"
+links:
+  - label: "📋 spec.md (includes clarifications)"
+    path: "specs/runtime/<STAGE_DIR_NAME>/spec.md"
+  - label: "📐 plan.md"
+    path: "specs/runtime/<STAGE_DIR_NAME>/plan.md"
+  - label: "✅ tasks.md (all tasks marked [X])"
+    path: "specs/runtime/<STAGE_DIR_NAME>/tasks.md"
+  - label: "☑️ checklists/requirements.md"
+    path: "specs/runtime/<STAGE_DIR_NAME>/checklists/requirements.md"
+```
+
+```widget file_links
+label: "Orchestrator reports (review before approving)"
+links:
+  - label: "📄 SPECIFY_REPORT.md"
+    path: "specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md"
+  - label: "📄 CLARIFY_REPORT.md"
+    path: "specs/runtime/<STAGE_DIR_NAME>/reports/CLARIFY_REPORT.md"
+  - label: "📄 PLAN_REPORT.md"
+    path: "specs/runtime/<STAGE_DIR_NAME>/reports/PLAN_REPORT.md"
+  - label: "📄 TASKS_REPORT.md"
+    path: "specs/runtime/<STAGE_DIR_NAME>/reports/TASKS_REPORT.md"
+  - label: "📄 IMPLEMENT_REPORT.md"
+    path: "specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md"
+```
+
+```widget file_links
+label: "Audit files (review before approving)"
+links:
+  - label: "🔍 ANALYZE_REPORT.md"
+    path: "specs/runtime/<STAGE_DIR_NAME>/audits/ANALYZE_REPORT.md"
+  - label: "🔍 VALIDATION_REPORT.md"
+    path: "specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md"
 ```
 
 Present the following action buttons:
 
 ```widget choice
-prompt: "Please review all reports above. How would you like to proceed?"
+prompt: "I have reviewed the reports above. How would you like to proceed?"
 options:
   - label: "✅ Approve — proceed to closure"
     value: "approve"
@@ -1772,56 +2448,50 @@ Do NOT proceed to Step 7 until explicit approval is received.
 
 ---
 
-## GitNexus Context Bootstrap (Mandatory Pre-Implementation)
-
-**Purpose:** Ensure the `gitnexus-context.json` artifact is fresh and valid before Step 6 (Implement) begins.
-
-Before the orchestrator starts T006 or any implementation task that involves architecture navigation, the following precondition MUST be satisfied:
-
-1. Verify `docs/ai/context/gitnexus-context.json` exists and is ≤24h old.
-2. If stale or missing, regenerate:
-   ```bash
-   bun run gitnexus:context
-   ```
-3. Validate the artifact:
-   ```bash
-   bun run gitnexus:validate
-   ```
-4. If validation fails → STOP. Report the validation errors. Do NOT begin implementation.
-5. If validation passes → proceed to implementation.
-
-**Rationale:** The GitNexus context artifact is the machine-readable architecture snapshot consumed by AI orchestrators and CI gates. A stale or invalid artifact causes incorrect impact analysis and may permit architectural drift to go undetected.
-
-**Schema authority:** `docs/ai/gitnexus-context.schema.json`
-**Documentation:** `docs/ai/gitnexus.md`
-
----
-
 # Local CI Simulation Gate (Mandatory Pre-Closure)
 
-**Gate name:** Run Local CI Simulation (ACT)  
-**Command:** `bun run ci:local`  
-**Required outcome:** Exit code 0 (all workflow jobs pass)  
-**Failure behavior:** Block closure with message: "Local CI failed — see output above"  
-**Bypass:** None. This gate is not configurable or skippable.
+**Gate name:** Run Local CI Simulation (ACT)
+
+Two commands exist — use the correct one for this gate:
+
+| Command | What it runs | Use when |
+|---|---|---|
+| `bun run ci:run-local` | Full 7-step governance orchestrator + `act` simulation | **Stage closure (mandatory)** |
+| `bun run ci:local` | `act` simulation only — no governance steps | Day-to-day fast check only |
+
+**This gate requires `bun run ci:run-local`.** Using `bun run ci:local` alone is insufficient for closure — it skips governance steps (`validate-runtime-scripts`, `arch:guard`, etc.).
+
+**Required outcome:** Exit code 0 (all 7 governance steps + all `act` workflow jobs pass)
+**Bypass:** None. This gate is not configurable or skippable. There is no exceptional case.
 
 AI must:
 
-1. Run `bun run ci:local` from the repository root before marking any stage as PRODUCTION READY.
-2. Confirm all workflow jobs exit with code 0.
-3. Block closure if any job fails — report the failing workflow name and job name in the closure
-   block reason.
-4. This gate is non-bypassable — no flag, config option, or exceptional case permits skipping it.
+1. Run `bun run ci:run-local` from the repository root before marking any stage as PRODUCTION READY.
+2. Confirm exit code = 0.
+3. If any governance step or workflow job fails:
+   ```
+   ❌ Local CI simulation failed — stage closure blocked.
+      Why it matters: All governance steps and CI workflows must pass before a stage is production ready.
+      Failed step: <step name or workflow job name from output>
+      Run: bun run ci:run-local to reproduce. Fix the reported failure and re-run.
+   ```
+4. Do NOT mark stage PRODUCTION READY until this gate passes.
 
 **CI Parity Contract:**
 
-Every file in `.github/workflows/*.yml` must be locally executable via `act`. Any workflow that
-cannot run locally must be adapted, mocked, or have its exclusion explicitly documented before PR
-merge. Violations block stage closure.
+Every file in `.github/workflows/` must be locally executable via `act`. Any workflow that cannot run locally must be adapted, mocked, or have its exclusion explicitly documented before PR merge. Violations block stage closure.
 
-**Governance note (INFRA-023):** This gate was introduced as part of Stage INFRA-023 (Local CI
-Simulation With Act). The `bun run ci:run-local` command is the full 7-step governance orchestrator
-that runs all validation checks AND the `act` simulation as its final step.
+Known local limitations (not blocking):
+
+| Workflow | Local Compatibility | Notes |
+|---|---|---|
+| `ci.yml` | FULL (non-E2E jobs) | E2E Playwright jobs are expected to fail locally — excluded from gate |
+| `architecture-governance.yml` | FULL | `schedule:` trigger not auto-invoked |
+| `ci-type-safety.yml` | FULL | None |
+| `hard-mode-guard.yml` | PARTIAL | Requires `--env GITHUB_REF=refs/heads/<branch>` for branch context |
+| `ai-context-validation.yml` | FULL | None |
+
+**Governance authority:** INFRA-023. See `docs/local-ci.md` for full `act` configuration reference.
 
 ---
 
@@ -1894,6 +2564,7 @@ Modifications require a new migration stage.
   "stage_file": "specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>",
   "branch": "spec/<STAGE_DIR_NAME>",
   "base_branch": "<BASE_BRANCH>",
+  "pkg_manager": "<PKG_MANAGER>",
   "current_step": "stage_production_ready",
   "stage_status": "PRODUCTION READY",
   "clarifications_resolved": true,
@@ -1902,6 +2573,17 @@ Modifications require a new migration stage.
   "plan_completed": true,
   "tasks_total": <TASKS_TOTAL>,
   "tasks_completed": <TASKS_COMPLETED>,
+  "deferred_tasks": [ "<carry forward from 6.9 — do not reset>" ],
+  "session_started_at": "<preserve from initialization>",
+  "step_timings": {
+    "specify":   { "started_at": "<ISO_TIMESTAMP>", "completed_at": "<ISO_TIMESTAMP>" },
+    "clarify":   { "started_at": "<ISO_TIMESTAMP>", "completed_at": "<ISO_TIMESTAMP>" },
+    "plan":      { "started_at": "<ISO_TIMESTAMP>", "completed_at": "<ISO_TIMESTAMP>" },
+    "tasks":     { "started_at": "<ISO_TIMESTAMP>", "completed_at": "<ISO_TIMESTAMP>" },
+    "analyze":   { "started_at": "<ISO_TIMESTAMP>", "completed_at": "<ISO_TIMESTAMP>" },
+    "implement": { "started_at": "<ISO_TIMESTAMP>", "completed_at": "<ISO_TIMESTAMP>" },
+    "closure":   { "started_at": "<ISO_TIMESTAMP of 7.1 start>", "completed_at": "<ISO_TIMESTAMP>" }
+  },
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [
     { "event": "branch_created", "timestamp": "<ISO_TIMESTAMP>" },
@@ -1975,7 +2657,14 @@ Checklist:
 - [ ] `Audit Results:` section documents all guardian audit verdicts (PASS)
 - [ ] `Notes:` section confirms "production ready"
 
-If ANY item is unchecked → STOP. Display the specific items missing. Remediate (update Step 7.3 and re-commit), then re-run 7.8A.
+If ANY item is unchecked:
+```
+❌ Stage Status block is incomplete — governance metadata lock failed.
+   Why it matters: The Stage Status block must be fully populated before the stage can be considered PRODUCTION READY.
+   Missing items: <list each unchecked item>
+   Fix: Update Step 7.3 to populate the missing fields, re-commit, then re-run 7.8A.
+```
+→ STOP. Remediate and re-run 7.8A.
 
 ### 7.8B — Workflow State Consistency Check
 
@@ -2011,7 +2700,13 @@ jq '.history | map(.event)' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
 - `tasks_completed` ≠ `tasks_total` → BLOCKED
 - History contains < 9 events → BLOCKED
 
-If BLOCKED → Display exact mismatch, remediate (update Step 7.4 and re-commit), then re-run 7.8B.
+If BLOCKED:
+```
+❌ Workflow state consistency check failed — governance lock failed.
+   Why it matters: The state file must perfectly reflect stage completion before the stage is sealed.
+   Mismatch detected: <exact field name> = <actual value>, expected <expected value>
+   Fix: Update Step 7.4 to correct the mismatched fields, re-commit, then re-run 7.8B.
+```
 
 ### 7.8C — Git Staging Validation
 
@@ -2052,7 +2747,13 @@ jq '.current_step' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
 
 If both match expected values → Governance gate PASSED. Proceed to Step 7.9.
 
-If any mismatch → Governance gate FAILED. Display exact values. STOP and remediate (update Step 7.3/7.4 and re-commit), then re-run entire 7.8.
+If any mismatch:
+```
+❌ Post-validation state confirmation failed — governance gate failed.
+   Why it matters: Final state must match expected values before the workflow can exit cleanly.
+   Mismatch: <field> = <actual>, expected <expected>
+   Fix: Update Step 7.3 or 7.4 to correct the value, re-commit, then re-run entire 7.8.
+```
 
 ---
 
@@ -2097,9 +2798,41 @@ specs/runtime/<STAGE_DIR_NAME>/
 
 Workflow state: specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json → stage_production_ready
 Stage file:     specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME> → PRODUCTION READY
-
-Next actions:
-  1. git push origin spec/<STAGE_DIR_NAME>
-  2. Open PR using specs/runtime/<STAGE_DIR_NAME>/PR_SUMMARY.md
-  3. Share guides/TESTING_GUIDE.md with QA or reviewing engineer
 ```
+
+Read `step_timings` from `.workflow-state.json` and display the workflow duration summary:
+
+```
+Step Timings:
+  Specify:   <duration>
+  Clarify:   <duration>
+  Plan:      <duration>
+  Tasks:     <duration>
+  Analyze:   <duration>
+  Implement: <duration>
+  Closure:   <duration>
+  ─────────────────────
+  Total:     <sum of all durations>
+```
+
+Then present one-click next actions:
+
+```widget action_buttons
+buttons:
+  - label: "🚀 Push branch"
+    action: "git push origin spec/<STAGE_DIR_NAME>"
+    style: primary
+    description: "Push the stage branch to origin"
+  - label: "📋 Open PR Summary"
+    action: "open_file"
+    path: "specs/runtime/<STAGE_DIR_NAME>/PR_SUMMARY.md"
+    style: secondary
+    description: "Open the completed PR description"
+  - label: "🧪 Open Testing Guide"
+    action: "open_file"
+    path: "specs/runtime/<STAGE_DIR_NAME>/guides/TESTING_GUIDE.md"
+    style: secondary
+    description: "Share with QA or reviewing engineer"
+```
+
+Execute `🚀 Push branch` only after explicit click. Do NOT auto-push.
