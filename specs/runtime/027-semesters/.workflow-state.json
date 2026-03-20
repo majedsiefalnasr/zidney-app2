@@ -1,0 +1,40 @@
+{
+  "stage": "Semesters",
+  "phase": "03_BACKOFFICE_CORE / 02_ACADEMIC_STRUCTURE",
+  "stage_dir": "specs/runtime/027-semesters",
+  "stage_file": "specs/phases/03_BACKOFFICE_CORE/02_ACADEMIC_STRUCTURE/STAGE_27_SEMESTERS.md",
+  "branch": "spec/027-semesters",
+  "base_branch": "develop",
+  "pkg_manager": "bun",
+  "current_step": "specify",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "deferred_tasks": [],
+  "guardian_verdicts": {},
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "2026-03-20T00:00:00.000Z",
+  "last_updated": "2026-03-20T00:05:00.000Z",
+  "step_timings": {
+    "specify": {
+      "started_at": "2026-03-20T00:00:30.000Z",
+      "completed_at": "2026-03-20T00:05:00.000Z"
+    }
+  },
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/027-semesters",
+      "timestamp": "2026-03-20T00:00:00.000Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-03-20T00:05:00.000Z"
+    }
+  ]
+}

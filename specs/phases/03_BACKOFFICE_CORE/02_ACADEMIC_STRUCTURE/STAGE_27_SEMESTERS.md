@@ -9,6 +9,34 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
+Step: specify
+Risk Level: UNKNOWN
+Last Updated: 2026-03-20T00:05:00.000Z
+
+Scope Defined:
+
+- Semester CRUD (create, list, read, update, soft delete)
+- Soft delete with referential guard (students, subjects, exams, content)
+- Unique name per workspace (partial unique index, excludes soft-deleted)
+- Date validation (end_date >= start_date when both provided)
+- Status ENABLED/DISABLED with assignment guard
+- Nullable semester_id FK on students table
+- Nullable semester_id FK on subjects table (FK deferred to STAGE_28)
+- Division-first supremacy rule (FR-09)
+- 5 API endpoints (GET list, POST, GET detail, PATCH, DELETE)
+
+Deferred Scope:
+
+- Subjects FK constraint deferred to STAGE_28_SUBJECTS
+- Exam / content semester filtering (future modules)
+- Frontoffice semester display
+
+Constitutional Compliance:
+
+- Specification drafted — constitutional audit pending
+
+Notes:
+Specification complete. Clarification step pending.
 
 ---
 
