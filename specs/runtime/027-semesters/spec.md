@@ -95,10 +95,9 @@ No exceptions requiring an ADR were detected for this stage.
 - **Tables introduced:**
   - `semesters` — new table in tenant DB
 - **Tables modified:**
-  - `students` — nullable `semester_id` FK column added
-  - `subjects` — nullable `semester_id` FK column added (anticipated for this stage per stage file;
-    STAGE_28_SUBJECTS will define full subject model; the FK is introduced here with `ADD COLUMN IF
-NOT EXISTS` semantics and the subjects table must exist prior to migration run)
+  - `students` — nullable `semester_id FK (ON DELETE RESTRICT)` column added
+  - `subjects` — **not modified in this stage** (clarified); `semester_id` column and FK are added
+    by STAGE_28_SUBJECTS when the `subjects` table is created
 
 **Confirmed:** No shared tenant data. No cross-tenant joins. No global semester singleton. No
 modifications to division, department, group, exam, or content visibility tables.
@@ -383,6 +382,8 @@ semester, verify `semester_id` is persisted on the subject record.
   - `search` query for name substring match (case-insensitive)
   - Pagination via `page` and `limit` parameters
   - Results ordered by `name` ascending by default
+- `limit` values outside the inclusive range 1–100 are rejected with HTTP 422 `VALIDATION_ERROR`.
+  Silent clamping is not applied; the client must send a valid value.
 
 ---
 
@@ -419,24 +420,22 @@ semester, verify `semester_id` is persisted on the subject record.
 
 ### Modified Table: `students` (Tenant DB)
 
-| Column        | Change | Type                     | Nullable | Notes                                                         |
-| ------------- | ------ | ------------------------ | -------- | ------------------------------------------------------------- |
-| `semester_id` | ADD    | UUID (FK → semesters.id) | Yes      | Optional; ON DELETE SET NULL or RESTRICT (per deletion guard) |
+| Column        | Change | Type                     | Nullable | Notes                                                                                     |
+| ------------- | ------ | ------------------------ | -------- | ----------------------------------------------------------------------------------------- |
+| `semester_id` | ADD    | UUID (FK → semesters.id) | Yes      | Optional; ON DELETE RESTRICT — DB-level safety net; hard delete is forbidden by app logic |
 
 ---
 
 ### Modified Table: `subjects` (Tenant DB)
 
-| Column        | Change | Type                     | Nullable | Notes                                                         |
-| ------------- | ------ | ------------------------ | -------- | ------------------------------------------------------------- |
-| `semester_id` | ADD    | UUID (FK → semesters.id) | Yes      | Optional; ON DELETE SET NULL or RESTRICT (per deletion guard) |
-
-> **FK Strategy:** Given that `subjects` may not exist at the time of this migration (it is
-> introduced in STAGE_28_SUBJECTS), the migration must use `ADD COLUMN IF NOT EXISTS` and add the
-> FK constraint only if the `subjects` table exists. Alternatively, the FK constraint for
-> `subjects` can be deferred to STAGE_28_SUBJECTS. Architectural decision: the `semester_id`
-> column on `subjects` is added in this stage; the FK constraint is added within STAGE_28_SUBJECTS
-> after the `subjects` table is created.
+> **Delegation to STAGE_28_SUBJECTS (Clarified):** Because `subjects` does not exist at the time
+> this migration runs, adding `semester_id` here would require conditional DDL (`ADD COLUMN IF
+EXISTS`) against a non-existent table — which is invalid. The `subjects.semester_id` column
+> **and** its FK constraint are therefore the sole responsibility of STAGE_28_SUBJECTS. This
+> migration does not touch the `subjects` table at all. When STAGE_28_SUBJECTS creates the
+> `subjects` table it must include `semester_id UUID REFERENCES semesters(id) ON DELETE RESTRICT`
+> in the CREATE TABLE statement, making the FK constraint immediately present without a separate
+> ALTER TABLE.
 
 ---
 
@@ -444,8 +443,9 @@ semester, verify `semester_id` is persisted on the subject record.
 
 - One forward-only migration file for this stage.
 - Creates `semesters` table.
-- Adds `semester_id` to `students` (with FK constraint).
-- Adds `semester_id` column to `subjects` sans FK (FK added in STAGE_28_SUBJECTS).
+- Adds `semester_id UUID REFERENCES semesters(id) ON DELETE RESTRICT` to `students` (nullable FK).
+- Does **not** modify the `subjects` table; `semester_id` column and FK are entirely the
+  responsibility of STAGE_28_SUBJECTS (clarified — subjects table does not exist at migration time).
 - Increments `schema_version`.
 - Reversible only via snapshot restore — no down migration.
 
@@ -606,13 +606,13 @@ All endpoints require:
 
 ## Transaction Boundaries
 
-| Operation                           | Transaction Required | Notes                                                                                |
-| ----------------------------------- | -------------------- | ------------------------------------------------------------------------------------ |
-| Create semester                     | Yes                  | Unique-name check + insert must be atomic (SELECT FOR UPDATE or deferred constraint) |
-| Update semester                     | Yes                  | Name uniqueness re-check + update must be atomic                                     |
-| Soft-delete semester                | Yes                  | Referential guard queries + soft-delete update must be atomic                        |
-| Student semester assignment update  | Yes                  | ENABLED check + FK update on students table must be atomic                           |
-| Subject semester association update | Yes                  | ENABLED check + FK update on subjects table must be atomic                           |
+| Operation                           | Transaction Required | Notes                                                                                                                                                                                                             |
+| ----------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Create semester                     | Yes                  | Unique-name check + insert must be atomic (SELECT FOR UPDATE or deferred constraint)                                                                                                                              |
+| Update semester                     | Yes                  | Name uniqueness re-check + update must be atomic                                                                                                                                                                  |
+| Soft-delete semester                | Yes                  | Transaction opens with `SELECT ... FOR UPDATE` on the semester row, then referential guard queries, then sets `deleted_at`; second concurrent request waits for lock, reads `deleted_at IS NOT NULL`, returns 404 |
+| Student semester assignment update  | Yes                  | Transaction opens with `SELECT status FROM semesters WHERE id = ? FOR UPDATE`; ENABLED check + FK update must be atomic; prevents TOCTOU with concurrent status change                                            |
+| Subject semester association update | Yes                  | Same `SELECT ... FOR UPDATE` pattern on semester row as student assignment; ENABLED check + FK update atomic                                                                                                      |
 
 **Idempotency:**
 
@@ -770,14 +770,16 @@ This stage is complete when all of the following are verified:
 
 ## Failure Modes & Recovery
 
-| Failure Mode                          | Behavior                                                                 |
-| ------------------------------------- | ------------------------------------------------------------------------ |
-| DB connection failure during create   | Transaction rolled back; 503 returned to client                          |
-| Partial update (network drop)         | Transaction rolled back; client retries PATCH safely (idempotent)        |
-| Concurrent duplicate name insert      | DB unique constraint or SELECT FOR UPDATE ensures only one succeeds; 409 |
-| Delete with concurrent student assign | Transactional guard detects reference; delete fails with 422             |
-| Schema version mismatch               | License middleware intercepts before any semester logic; 409             |
-| Soft-deleted semester queried by ID   | Returns 404 (not 410) — no state disclosure                              |
+| Failure Mode                                 | Behavior                                                                                                                                                                                  |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DB connection failure during create          | Transaction rolled back; 503 returned to client                                                                                                                                           |
+| Partial update (network drop)                | Transaction rolled back; client retries PATCH safely (idempotent)                                                                                                                         |
+| Concurrent duplicate name insert             | DB unique constraint or SELECT FOR UPDATE ensures only one succeeds; 409                                                                                                                  |
+| Delete with concurrent student assign        | Transactional guard detects reference; delete fails with 422                                                                                                                              |
+| Concurrent soft-delete of same semester      | First request acquires `SELECT FOR UPDATE` lock, completes soft-delete; second request waits, reads `deleted_at IS NOT NULL` after lock releases, returns 404 — no double-delete possible |
+| Assignment to concurrently-disabled semester | `SELECT FOR UPDATE` on semester row inside assignment transaction; if disable committed first, ENABLED check fails with 422 `SEMESTER_DISABLED`; no phantom read possible                 |
+| Schema version mismatch                      | License middleware intercepts before any semester logic; 409                                                                                                                              |
+| Soft-deleted semester queried by ID          | Returns 404 (not 410) — no state disclosure                                                                                                                                               |
 
 ---
 
@@ -838,9 +840,10 @@ This stage does NOT:
 
 - `students` table already exists in the tenant DB before this migration runs (introduced in an
   earlier stage).
-- `subjects` table may not exist before this migration (introduced in STAGE_28_SUBJECTS); the
-  `semester_id` column on `subjects` is added in this migration, but the FK constraint is deferred
-  to STAGE_28_SUBJECTS.
+- `subjects` table does not exist before this migration (introduced in STAGE_28_SUBJECTS); neither
+  the `semester_id` column nor the FK constraint is added to `subjects` in this migration.
+  STAGE_28_SUBJECTS is entirely responsible for adding `subjects.semester_id UUID REFERENCES
+semesters(id) ON DELETE RESTRICT` as part of the CREATE TABLE statement for `subjects`.
 - Role-based permission identifiers (`semesters:read`, `semesters:write`, `semesters:delete`) align
   with the permission model established in STAGE_21_ROLE_PERMISSION_SYSTEM.
 - The partial unique index (WHERE `deleted_at IS NULL`) is the preferred approach for name
@@ -852,3 +855,24 @@ This stage does NOT:
 ## Final Constitutional Compliance Statement
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-20
+
+- **Q1: Migration ordering — how to handle `subjects.semester_id` FK when `subjects` table does not yet exist during STAGE_27 migration?**
+  → **A:** STAGE_27 migration does **not** touch the `subjects` table at all. Adding a column to a non-existent table is invalid DDL. Both the `semester_id` column and its FK constraint (`ON DELETE RESTRICT`) are the sole responsibility of STAGE_28_SUBJECTS, which includes `semester_id UUID REFERENCES semesters(id) ON DELETE RESTRICT` directly in its `CREATE TABLE subjects` statement. Conditional DDL (`ADD COLUMN IF NOT EXISTS` against a possible absent table) is explicitly rejected as it introduces migration fragility and violates Zidney's forward-only migration discipline.
+
+- **Q2: Concurrent soft-delete — what happens when two admins delete the same semester simultaneously?**
+  → **A:** The soft-delete transaction must open with `SELECT ... FOR UPDATE` on the target semester row as its **first** DB operation, before any referential guard queries. The first request acquires the row lock, performs the reference checks, sets `deleted_at = NOW()`, and commits. The second concurrent request blocks on the lock, then — after the first commits — reads `deleted_at IS NOT NULL` and returns 404 `SEMESTER_NOT_FOUND`. This guarantees exactly one soft-delete succeeds regardless of request concurrency. The update-WHERE pattern (`UPDATE ... WHERE deleted_at IS NULL`) alone is insufficient because referential checks must also execute inside the same serialized lock scope.
+
+- **Q3: Pagination `limit` out-of-range behavior — should `limit=200` silently clamp to 100 or return a validation error?**
+  → **A:** `limit` values outside the inclusive range 1–100 return HTTP 422 with error code `VALIDATION_ERROR`. Silent clamping is not used. Explicit rejection aligns with Zidney's validation-first request contract and prevents clients from submitting unbounded queries without knowing they were quietly constrained. The existing endpoint spec already states `integer 1–100`; this clarification makes the 422 rejection the canonical behavior.
+
+- **Q4: Race condition — what happens when a student is assigned to a semester that is concurrently being disabled?**
+  → **A:** The student assignment transaction must acquire a row-level lock on the semester using `SELECT status FROM semesters WHERE id = ? FOR UPDATE` **before** writing to `students`. This eliminates the time-of-check / time-of-use (TOCTOU) window: if the disable PATCH committed first, the assignment transaction reads `status = DISABLED` under the lock and returns 422 `SEMESTER_DISABLED`; if the assignment committed first, the disable PATCH proceeds normally without conflict. Relying on PostgreSQL's default `READ COMMITTED` isolation without an explicit row lock is insufficient — a concurrent disable can commit between the status read and the student write within the same READ COMMITTED transaction. The same `SELECT ... FOR UPDATE` pattern applies to subject semester associations.
+
+- **Q5: FK `ON DELETE` clause for `students.semester_id` (and future `subjects.semester_id`) — `RESTRICT` or `SET NULL`?**
+  → **A:** `ON DELETE RESTRICT`. Rationale: (a) The programmatic deletion guard is the primary enforcement layer — it blocks app-level soft-deletes when references exist. (b) `RESTRICT` acts as a DB-level safety net preventing accidental hard deletes (e.g., by maintenance scripts or direct DB access) from silently orphaning student records. (c) `SET NULL` would allow bypassing of the deletion guard at the DB layer, contradicting Zidney's data integrity guarantees. Since hard delete is unconditionally forbidden by the spec, the `RESTRICT` constraint is effectively never triggered by normal application flows, but it enforces the hard-delete prohibition at the database boundary.
