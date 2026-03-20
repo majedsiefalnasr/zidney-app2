@@ -32,6 +32,10 @@ export default defineProject({
         replacement: resolve(__dirname, '../../packages/types/src/index.ts'),
       },
       {
+        find: /^@zidney\/validation\/(.*)$/,
+        replacement: resolve(__dirname, '../../packages/validation/src/$1'),
+      },
+      {
         find: '@zidney/validation',
         replacement: resolve(__dirname, '../../packages/validation/src/index.ts'),
       },
