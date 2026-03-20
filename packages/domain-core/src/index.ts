@@ -35,6 +35,8 @@ export * from './migrations/migrate'
 export * from './monitoring/provisioning-metrics'
 // Provisioning module
 export * from './provisioning/idempotency-handler'
+// Teams module (Stage 026)
+export * as teams from './teams'
 // Tenant resolver module
 export * from './tenant-resolver/version-check'
 // Translation system (Stage 019)

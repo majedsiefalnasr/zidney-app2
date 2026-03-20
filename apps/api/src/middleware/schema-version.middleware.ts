@@ -57,7 +57,7 @@ export const API_SCHEMA_VERSION = '1.2.0'
 /**
  * Minimum compatible schema version for dashboard endpoints
  */
-export const MIN_SCHEMA_VERSION = '1.2.0'
+export const MIN_SCHEMA_VERSION = '1.10.0'
 
 export interface SchemaVersionContext {
   schema_version: string
