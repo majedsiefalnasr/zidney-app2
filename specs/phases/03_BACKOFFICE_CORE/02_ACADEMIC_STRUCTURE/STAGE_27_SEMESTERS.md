@@ -8,17 +8,24 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: HIGH
-Last Updated: 2026-03-20T00:25:00.000Z
+Last Updated: 2026-03-20T00:32:00.000Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all criteria)
+Implementation: AUTHORIZED
 
-- Total: 27 atomic tasks across 9 groups
-- 🔴 HIGH risk: T001 (migration), T007 (create TX), T010 (update TX), T011 (delete TX with FOR UPDATE lock)
-- 🟡 MEDIUM risk: T002, T003, T006, T013, T018–T025, T026, T027
-- 🟢 LOW risk: T004, T005, T008, T009, T012, T014–T017
+Scope Authorized:
+
+- Semester CRUD (create, list, read, update, soft delete)
+- Soft delete with referential guard (students enrolled check)
+- Unique name per workspace (partial functional unique index on LOWER(name))
+- Date validation (end_date >= start_date when both provided, server-side)
+- Status ENABLED/DISABLED
+- Nullable semester_id FK on students table
+- 5 API endpoints under /api/v1/backoffice/workspace
+- 27 atomic tasks across 9 groups (A–I)
 
 Deferred Scope:
 
@@ -29,11 +36,15 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
-- Migration naming, schema_version, TX boundaries, logging all planned
+- All drift criteria passed — implementation authorized
+- All 4 guardian audits: PASS (security, performance, QA, code review)
+- Architecture layer boundaries: PASS
+- Tenant isolation: PASS
+- License middleware: PASS
+- Transaction boundaries: PASS
 
 Notes:
-Atomic task set generated. 27 tasks. Drift analysis gate pending.
+Full drift analysis passed. Implementation gate open. 27 tasks ready for execution.
 
 Scope Defined:
 
