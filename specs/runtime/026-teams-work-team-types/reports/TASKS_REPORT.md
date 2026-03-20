@@ -8,7 +8,7 @@
 
 ## Summary
 
-34 atomic tasks generated across 4 phases: Foundation (5), Domain (11), Routes (16), Tests (2). All tasks name exact file paths and honour the dependency ordering required by the implementation plan. 19 of 34 tasks are parallel-safe. No unrelated files are touched.
+35 atomic tasks generated across 4 phases: Foundation (6), Domain (11), Routes (16), Tests (2). All tasks name exact file paths and honour the dependency ordering required by the implementation plan. 19 of 35 tasks are parallel-safe. No unrelated files are touched.
 
 ---
 
@@ -23,18 +23,18 @@
 
 ## Task Breakdown
 
-| Category                     | Tasks  | IDs       | Notes                                            |
-| ---------------------------- | ------ | --------- | ------------------------------------------------ |
-| Migration / DB Schema        | 5      | T001–T005 | 1 migration + 3 Drizzle schemas + barrel update  |
-| Domain (types+errors)        | 2      | T006–T007 | parallel-safe foundation files                   |
-| Domain (repository)          | 3      | T008–T010 | sequential (same file, 3 function groups)        |
-| Domain (service)             | 3      | T011–T013 | sequential (same file, 3 function groups)        |
-| Domain (barrel + validation) | 3      | T014–T016 | index, domain-core barrel, Zod schemas           |
-| API Route Handlers           | 15     | T017–T031 | helpers + 13 handlers + router index             |
-| Router Mount                 | 1      | T032      | mount teamsRouter in backoffice main router      |
-| Unit Tests                   | 1      | T033      | service unit tests (14 scenarios)                |
-| Integration Tests            | 1      | T034      | API integration tests (CRUD + RBAC + pagination) |
-| **Total**                    | **34** |           |                                                  |
+| Category                     | Tasks  | IDs                    | Notes                                                                       |
+| ---------------------------- | ------ | ---------------------- | --------------------------------------------------------------------------- |
+| Migration / DB Schema        | 6      | T001, T001b, T002–T005 | 1 migration + MIN_SCHEMA_VERSION update + 3 Drizzle schemas + barrel update |
+| Domain (types+errors)        | 2      | T006–T007              | parallel-safe foundation files                                              |
+| Domain (repository)          | 3      | T008–T010              | sequential (same file, 3 function groups)                                   |
+| Domain (service)             | 3      | T011–T013              | sequential (same file, 3 function groups)                                   |
+| Domain (barrel + validation) | 3      | T014–T016              | index, domain-core barrel, Zod schemas                                      |
+| API Route Handlers           | 15     | T017–T031              | helpers + 13 handlers + router index                                        |
+| Router Mount                 | 1      | T032                   | mount teamsRouter in backoffice main router                                 |
+| Unit Tests                   | 1      | T033                   | service unit tests (14 scenarios)                                           |
+| Integration Tests            | 1      | T034                   | API integration tests (CRUD + RBAC + pagination)                            |
+| **Total**                    | **35** |                        |                                                                             |
 
 ---
 

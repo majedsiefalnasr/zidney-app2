@@ -9,6 +9,7 @@
 ## Phase 0 — Foundation
 
 - [ ] T001 [MigrationDB] Create forward-only DDL migration bumping schema_version 1.9.0 → 1.10.0 — `apps/api/src/db/tenant/migrations/20260319_004_teams.ts`
+- [ ] T001b [Config] Update MIN_SCHEMA_VERSION constant from '1.2.0' to '1.10.0' in the schema-version middleware — `apps/api/src/middleware/schema-version.middleware.ts`
 - [ ] T002 [P] [Schema] Create Drizzle ORM schema for `team_types` table — `apps/api/src/db/tenant/schemas/team-types.schema.ts`
 - [ ] T003 [P] [Schema] Create Drizzle ORM schema for `teams` table (imports team-types.schema) — `apps/api/src/db/tenant/schemas/teams.schema.ts`
 - [ ] T004 [P] [Schema] Create Drizzle ORM schema for `staff_teams` join table (imports teams.schema + backoffice-staff-users.schema) — `apps/api/src/db/tenant/schemas/staff-teams.schema.ts`
@@ -17,20 +18,20 @@
 ## Phase 1 — Domain
 
 - [ ] T006 [P] [Domain] Create TypeScript types and interfaces (DbClient, AuditContext, TeamStatus, row interfaces, input/result types) — `packages/domain-core/src/teams/teams.types.ts`
-- [ ] T007 [P] [Domain] Create custom TeamsError class and all error codes (TEAM_NOT_FOUND, TEAM_TYPE_NOT_FOUND, TEAM_STAFF_ASSIGNMENT_NOT_FOUND, TEAM_TYPE_NAME_DUPLICATE, TEAM_NAME_DUPLICATE, TEAM_TYPE_DISABLED, TEAM_TYPE_HAS_TEAMS, TEAM_DISABLED, TEAM_HAS_ASSIGNMENTS, TEAM_REFERENCED_BY_REPORTING, TEAM_MAX_MEMBERS_EXCEEDED, VALIDATION_ERROR) — `packages/domain-core/src/teams/teams.errors.ts`
+- [ ] T007 [P] [Domain] Create custom TeamsError class and all error codes (TEAM_NOT_FOUND, TEAM_TYPE_NOT_FOUND, TEAM_STAFF_ASSIGNMENT_NOT_FOUND, STAFF_NOT_FOUND, TEAM_TYPE_NAME_DUPLICATE, TEAM_NAME_DUPLICATE, TEAM_TYPE_DISABLED, TEAM_TYPE_HAS_TEAMS, TEAM_DISABLED, TEAM_HAS_ASSIGNMENTS, TEAM_REFERENCED_BY_REPORTING, TEAM_MAX_MEMBERS_EXCEEDED, TEAM_LOCK_CONTENTION, VALIDATION_ERROR) — `packages/domain-core/src/teams/teams.errors.ts`
 - [ ] T008 [Domain] Create all repository functions for team types (teamTypeNameExists, findTeamTypeById, findTeamTypes, insertTeamType, updateTeamTypeRow, softDeleteTeamType, countTeamsForType) — `packages/domain-core/src/teams/teams.repository.ts`
 - [ ] T009 [Domain] Add all team repository functions to the same file (teamNameExists, findTeamById, findTeams, insertTeam, updateTeamRow, softDeleteTeam, lockTeamForUpdate) — `packages/domain-core/src/teams/teams.repository.ts`
-- [ ] T010 [Domain] Add all staff-assignment repository functions to the same file (countStaffInTeam, findStaffTeamAssignment, findTeamMembers, upsertStaffTeamAssignment, deleteStaffTeamAssignment, countReportingReferences) — `packages/domain-core/src/teams/teams.repository.ts`
+- [ ] T010 [Domain] Add all staff-assignment repository functions to the same file (countStaffInTeam, findStaffTeamAssignment, findTeamMembers with pagination, upsertStaffTeamAssignment, deleteStaffTeamAssignment, countReportingReferences, checkStaffExistsInWorkspace) — `packages/domain-core/src/teams/teams.repository.ts`
 - [ ] T011 [Domain] Create team type service functions with transaction guards (listTeamTypes, createTeamType, getTeamTypeById, updateTeamType, deleteTeamType) — `packages/domain-core/src/teams/teams.service.ts`
 - [ ] T012 [Domain] Add team service functions with transaction guards (listTeams, createTeam, getTeamById, updateTeam, deleteTeam) — `packages/domain-core/src/teams/teams.service.ts`
-- [ ] T013 [Domain] Add staff assignment service functions with SELECT FOR UPDATE transaction (listTeamMembers, assignStaffToTeam, removeStaffFromTeam) — `packages/domain-core/src/teams/teams.service.ts`
+- [ ] T013 [Domain] Add staff assignment service functions with SELECT FOR UPDATE transaction (listTeamMembers with cursor pagination + ListTeamMembersResult envelope, assignStaffToTeam with staff-existence pre-check, removeStaffFromTeam) — `packages/domain-core/src/teams/teams.service.ts`
 - [ ] T014 [Domain] Create public barrel export for the teams domain package — `packages/domain-core/src/teams/index.ts`
 - [ ] T015 [Domain] Add `export * from './teams'` to the domain-core barrel — `packages/domain-core/src/index.ts`
 - [ ] T016 [P] [Domain] Create Zod validation schemas for all team and team type input shapes — `packages/validation/src/backoffice/teams.schemas.ts`
 
 ## Phase 2 — Routes
 
-- [ ] T017 [Routes] Create shared route utilities and TeamsError-to-HTTP error mapper — `apps/api/src/routes/backoffice/teams/helpers.ts`
+- [ ] T017 [Routes] Create shared route utilities and TeamsError-to-HTTP error mapper including PostgreSQL error code handling: PG 55P03 (lock_not_available) → 422 TEAM_LOCK_CONTENTION, PG 23503 (foreign_key_violation) → 404 STAFF_NOT_FOUND — `apps/api/src/routes/backoffice/teams/helpers.ts`
 - [ ] T018 [P] [Routes] Create handler for GET /team-types (list with status filter and keyset pagination) — `apps/api/src/routes/backoffice/teams/list-team-types.ts`
 - [ ] T019 [P] [Routes] Create handler for POST /team-types (create with 201 response) — `apps/api/src/routes/backoffice/teams/create-team-type.ts`
 - [ ] T020 [P] [Routes] Create handler for GET /team-types/:id (get by ID, 404 on not found) — `apps/api/src/routes/backoffice/teams/get-team-type.ts`
@@ -56,6 +57,6 @@
 
 ## Task Summary
 
-- Total tasks: 34
+- Total tasks: 35
 - Parallel-safe tasks: 19 (T002, T003, T004, T006, T007, T016, T018, T019, T020, T021, T022, T023, T024, T025, T026, T027, T028, T029, T030)
 - Phases: Foundation | Domain | Routes | Tests

@@ -64,11 +64,12 @@ This plan covers the full backend implementation of Teams and Team Types for the
 
 ### 3.2 Modified Files
 
-| Path                                           | Change                                                                                                              |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `apps/api/src/db/tenant/schemas/index.ts`      | Add `export * from './team-types.schema'`, `export * from './teams.schema'`, `export * from './staff-teams.schema'` |
-| `packages/domain-core/src/index.ts`            | Add `export * from './teams'`                                                                                       |
-| `apps/api/src/routes/backoffice/<main router>` | Mount `teamsRouter` under `/backoffice`                                                                             |
+| Path                                                   | Change                                                                                                              |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `apps/api/src/db/tenant/schemas/index.ts`              | Add `export * from './team-types.schema'`, `export * from './teams.schema'`, `export * from './staff-teams.schema'` |
+| `packages/domain-core/src/index.ts`                    | Add `export * from './teams'`                                                                                       |
+| `apps/api/src/routes/backoffice/<main router>`         | Mount `teamsRouter` under `/backoffice`                                                                             |
+| `apps/api/src/middleware/schema-version.middleware.ts` | Update `MIN_SCHEMA_VERSION` constant from `'1.2.0'` to `'1.10.0'`                                                   |
 
 ---
 
@@ -223,6 +224,7 @@ export type TeamsErrorCode =
   | "TEAM_TYPE_NOT_FOUND" // 404
   | "TEAM_NOT_FOUND" // 404
   | "TEAM_STAFF_ASSIGNMENT_NOT_FOUND" // 404
+  | "STAFF_NOT_FOUND" // 404 — staff_id does not exist in this workspace
   | "TEAM_TYPE_NAME_DUPLICATE" // 409
   | "TEAM_NAME_DUPLICATE" // 409
   | "TEAM_TYPE_DISABLED" // 422
@@ -231,6 +233,7 @@ export type TeamsErrorCode =
   | "TEAM_HAS_ASSIGNMENTS" // 422
   | "TEAM_REFERENCED_BY_REPORTING" // 422
   | "TEAM_MAX_MEMBERS_EXCEEDED" // 422
+  | "TEAM_LOCK_CONTENTION" // 422 — concurrent FOR UPDATE NOWAIT failed (PG 55P03)
   | "VALIDATION_ERROR"; // 422
 ```
 
@@ -249,7 +252,9 @@ HTTP status mapping:
 | `TEAM_HAS_ASSIGNMENTS`            | 422    |
 | `TEAM_REFERENCED_BY_REPORTING`    | 422    |
 | `TEAM_MAX_MEMBERS_EXCEEDED`       | 422    |
+| `TEAM_LOCK_CONTENTION`            | 422    |
 | `VALIDATION_ERROR`                | 422    |
+| `STAFF_NOT_FOUND`                 | 404    |
 
 ### 6.2 Repository Functions (`teams.repository.ts`)
 
@@ -278,6 +283,7 @@ findStaffTeamAssignment(db, staffId, teamId): Promise<StaffTeamRow | null>
 findTeamMembers(db, teamId, pagination: { limit: number; cursor?: string }): Promise<{ rows: StaffTeamRow[]; total: number }>
 upsertStaffTeamAssignment(db, staffId, teamId): Promise<void>   // INSERT ... ON CONFLICT DO NOTHING
 deleteStaffTeamAssignment(db, staffId, teamId): Promise<boolean>
+checkStaffExistsInWorkspace(db, staffId): Promise<boolean>   // SELECT EXISTS from backoffice_staff_users
 
 // Reference checks
 countReportingReferences(db, teamId): Promise<number>   // returns 0 until reporting tables exist
@@ -308,10 +314,13 @@ deleteTeam(db, id: string, audit: AuditContext): Promise<void>
 #### Assignment Services
 
 ```typescript
-listTeamMembers(db, teamId: string): Promise<StaffTeamRow[]>
+listTeamMembers(db, teamId: string, input: ListTeamMembersInput): Promise<ListTeamMembersResult>
 assignStaffToTeam(db, teamId: string, staffId: string, audit: AuditContext): Promise<void>
 removeStaffFromTeam(db, teamId: string, staffId: string, audit: AuditContext): Promise<void>
 ```
+
+`ListTeamMembersInput` extends the shared pagination input `{ limit: number; cursor?: string }`.  
+`ListTeamMembersResult` is `{ items: StaffTeamRow[]; total: number; nextCursor: string | null }`.
 
 ---
 
@@ -395,6 +404,11 @@ BEGIN
   1. lockTeamForUpdate(db, teamId)
      → SELECT id, status, max_members FROM teams WHERE id = $1 AND deleted_at IS NULL FOR UPDATE NOWAIT
      → throw TEAM_NOT_FOUND if null
+     → map PG error 55P03 (lock_not_available) → throw TEAM_LOCK_CONTENTION (422)
+  1b. checkStaffExistsInWorkspace(db, staffId)
+     → SELECT EXISTS FROM backoffice_staff_users WHERE id = $1
+     → throw STAFF_NOT_FOUND (404) if false
+     → (prevents raw FK 23503 violation from surfacing as 500)
   2. findStaffTeamAssignment(db, staffId, teamId)
      → if row EXISTS: COMMIT and return success (idempotent short-circuit — FR-016)
   3. if team.status === 'DISABLED': throw TEAM_DISABLED
@@ -555,7 +569,19 @@ Error: `404` `TEAM_NOT_FOUND`
 
 #### PATCH /teams/:id
 
-Body (all fields optional — partial update): same fields as POST
+Body (all fields optional — partial update):
+
+```json
+{
+  "name": "string?",
+  "team_type_id": "UUID | null?",
+  "max_members": "integer | null?",
+  "description": "string | null?",
+  "status": "ENABLED | DISABLED?"
+}
+```
+
+Note: `status` is not accepted in POST (new teams default to `ENABLED`). Only PATCH exposes it per FR-008 (staff admin can enable/disable a team).
 
 Response: `200` `{ "success": true, "data": TeamRow, "error": null }`
 
@@ -685,7 +711,46 @@ All validation failures return `422 VALIDATION_ERROR` with field-level messages.
 
 ## 12 Error Response Contract
 
-All error responses follow the platform contract (no unstructured responses):
+All error responses follow the platform contract (no unstructured responses).
+
+### PostgreSQL-level Error Mapping
+
+The route error mapper in `helpers.ts` must catch raw PostgreSQL errors before the generic 500 fallback:
+
+| PG Error Code | Meaning               | Mapped to              | HTTP |
+| ------------- | --------------------- | ---------------------- | ---- |
+| `55P03`       | lock_not_available    | `TEAM_LOCK_CONTENTION` | 422  |
+| `23503`       | foreign_key_violation | `STAFF_NOT_FOUND`      | 404  |
+
+**Implementation pattern in `teamsErrorResponse`:**
+
+```typescript
+if (err instanceof Error && "code" in err) {
+  if ((err as { code: string }).code === "55P03")
+    return c.json(
+      {
+        success: false,
+        data: null,
+        error: {
+          code: "TEAM_LOCK_CONTENTION",
+          message: "Request could not acquire lock, please retry.",
+        },
+      },
+      422,
+    );
+  if ((err as { code: string }).code === "23503")
+    return c.json(
+      {
+        success: false,
+        data: null,
+        error: { code: "STAFF_NOT_FOUND", message: "Staff member not found in this workspace." },
+      },
+      404,
+    );
+}
+```
+
+Note: `checkStaffExistsInWorkspace` in TX7 prevents the 23503 FK violation in the happy path. This PG-level catch is a defensive fallback for any edge cases that bypass the application check.
 
 ```json
 {
