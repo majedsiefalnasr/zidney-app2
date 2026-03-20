@@ -1,0 +1,111 @@
+{
+  "stage": "Semesters",
+  "phase": "03_BACKOFFICE_CORE / 02_ACADEMIC_STRUCTURE",
+  "stage_dir": "specs/runtime/027-semesters",
+  "stage_file": "specs/phases/03_BACKOFFICE_CORE/02_ACADEMIC_STRUCTURE/STAGE_27_SEMESTERS.md",
+  "branch": "spec/027-semesters",
+  "base_branch": "develop",
+  "pkg_manager": "bun",
+  "current_step": "stage_production_ready",
+  "stage_status": "PRODUCTION READY",
+  "clarifications_resolved": true,
+  "drift_passed": true,
+  "implementation_allowed": true,
+  "plan_completed": true,
+  "tasks_total": 27,
+  "tasks_completed": 27,
+  "deferred_tasks": [
+    {
+      "task_id": "STAGE_28_SUBJECTS_GUARD",
+      "description": "countSubjectsForSemester full implementation and SEMESTER_HAS_SUBJECTS guard activation",
+      "justification": "Subjects table does not exist yet; stub safely returns 0 until STAGE_28 creates the FK",
+      "deferred_at": "2026-03-20T18:00:00.000Z"
+    }
+  ],
+  "guardian_verdicts": {
+    "security_auditor": "PASS",
+    "performance_optimizer": "PASS",
+    "qa_engineer": "PASS",
+    "code_reviewer": "PASS",
+    "cicd_automation": "PASS",
+    "deployment_engineer": "PASS",
+    "docker_specialist": "PASS"
+  },
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "2026-03-20T00:00:00.000Z",
+  "last_updated": "2026-03-20T18:30:00.000Z",
+  "step_timings": {
+    "specify": {
+      "started_at": "2026-03-20T00:00:30.000Z",
+      "completed_at": "2026-03-20T00:05:00.000Z"
+    },
+    "clarify": {
+      "started_at": "2026-03-20T00:05:10.000Z",
+      "completed_at": "2026-03-20T00:08:00.000Z"
+    },
+    "plan": {
+      "started_at": "2026-03-20T00:08:10.000Z",
+      "completed_at": "2026-03-20T00:20:00.000Z"
+    },
+    "tasks": {
+      "started_at": "2026-03-20T00:20:10.000Z",
+      "completed_at": "2026-03-20T00:25:00.000Z"
+    },
+    "analyze": {
+      "started_at": "2026-03-20T00:25:10.000Z",
+      "completed_at": "2026-03-20T00:32:00.000Z"
+    },
+    "implement": {
+      "started_at": "2026-03-20T00:32:10.000Z",
+      "completed_at": "2026-03-20T17:45:00.000Z"
+    },
+    "closure": {
+      "started_at": "2026-03-20T17:45:10.000Z",
+      "completed_at": "2026-03-20T18:30:00.000Z"
+    }
+  },
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/027-semesters",
+      "timestamp": "2026-03-20T00:00:00.000Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-03-20T00:05:00.000Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "timestamp": "2026-03-20T00:08:00.000Z"
+    },
+    {
+      "event": "plan_complete",
+      "timestamp": "2026-03-20T00:20:00.000Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 27,
+      "timestamp": "2026-03-20T00:25:00.000Z"
+    },
+    {
+      "event": "drift_analysis_passed",
+      "timestamp": "2026-03-20T00:32:00.000Z"
+    },
+    {
+      "event": "stage_backend_closed",
+      "tasks_completed": 27,
+      "tasks_total": 27,
+      "deferred_count": 1,
+      "timestamp": "2026-03-20T17:45:00.000Z"
+    },
+    {
+      "event": "pre_closure_review_approved",
+      "timestamp": "2026-03-20T17:45:05.000Z"
+    },
+    {
+      "event": "stage_production_ready",
+      "timestamp": "2026-03-20T18:30:00.000Z"
+    }
+  ]
+}

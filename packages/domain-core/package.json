@@ -23,7 +23,9 @@
     "./departments": "./src/departments/index.ts",
     "./divisions": "./src/divisions/index.ts",
     "./groups": "./src/groups/index.ts",
-    "./hierarchy": "./src/hierarchy/index.ts"
+    "./hierarchy": "./src/hierarchy/index.ts",
+    "./teams": "./src/teams/index.ts",
+    "./semesters": "./src/semesters/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",

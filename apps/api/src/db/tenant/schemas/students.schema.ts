@@ -26,6 +26,7 @@ import { index, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 import { departments } from './departments.schema'
 import { divisions } from './divisions.schema'
 import { groups } from './groups.schema'
+import { semesters } from './semesters.schema'
 
 // ---------------------------------------------------------------------------
 // students
@@ -67,6 +68,15 @@ export const students = pgTable(
      * One student belongs to at most one group at a time.
      */
     group_id: uuid('group_id').references(() => groups.id, { onDelete: 'setNull' }),
+    /**
+     * Semester assignment — added by migration 20260320_005_semesters.ts (STAGE_27).
+     * FK → semesters(id) ON DELETE RESTRICT:
+     *   prevents hard-deleting a semester that still has students assigned.
+     *   The application enforces soft-delete and service-layer student-count guard,
+     *   so this DB constraint is a safety net only.
+     * NULLABLE: no backfill required; existing students start with semester_id = null.
+     */
+    semester_id: uuid('semester_id').references(() => semesters.id, { onDelete: 'restrict' }),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -77,6 +87,8 @@ export const students = pgTable(
     departmentIdIdx: index('idx_students_department_id').on(table.department_id),
     /** List all students in a group + FK traversal path for assignment count. */
     groupIdIdx: index('idx_students_group_id').on(table.group_id),
+    /** Sparse FK traversal index for semester assignment (STAGE_27). */
+    semesterIdIdx: index('idx_students_semester_id').on(table.semester_id),
     /** uniqueIndex on email is handled by DB bootstrap — not declared here. */
     externalIdIdx: index('idx_students_external_id').on(table.external_id),
   })
