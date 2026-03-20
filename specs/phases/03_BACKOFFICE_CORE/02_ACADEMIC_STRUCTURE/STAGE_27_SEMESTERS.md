@@ -9,34 +9,40 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-03-20T00:10:00.000Z
+Last Updated: 2026-03-20T00:20:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Semester CRUD with soft delete and referential guards
-- Unique name per workspace (partial unique index)
-- Date window validation (end_date >= start_date)
-- Status ENABLED/DISABLED with assignment guard
-- Nullable semester_id FK on students (ON DELETE RESTRICT)
-- Division-first supremacy rule enforced
-- 5 CRUD API endpoints
-- SELECT FOR UPDATE locking for concurrent operations
-- STAGE_27 does NOT modify subjects table (fully delegated to STAGE_28)
+- Tenant migration: semesters table + students.semester_id FK + schema_version 1.10.0 → 1.11.0
+- Drizzle schema: semesters.schema.ts + students.schema.ts updated
+- Domain package: packages/domain-core/src/semesters/ (types, errors, repository, service, index)
+- Validation schemas: packages/validation/src/backoffice/semesters.schemas.ts
+- Route handlers: 5 handlers + helpers + index under apps/api/src/routes/backoffice/semesters/
+- Route registration: app.ts updated
+- Package exports: domain-core/package.json adds ./semesters (and fixes missing ./teams)
+- Unit tests + integration tests
+- Total: 17 new files, 3 modified files
 
 Deferred Scope:
 
 - subjects.semester_id column and FK (STAGE_28_SUBJECTS)
+- subjects guard in deleteSemester (STAGE_28)
 - Exam / content semester filtering (future modules)
 - Frontoffice semester display
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian verdicts: architecture-checker PASS, api-designer PASS
+- Migration naming and schema_version conventions confirmed
+- No cross-tenant logic; no global DB singleton; all writes transactional
+- SELECT FOR UPDATE concurrency guards included
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. 17 new files, 3 modified. Pagination: page/limit (offset-based).
+Subjects guard deferred to STAGE_28. Task breakdown in progress.
 
 Scope Defined:
 
