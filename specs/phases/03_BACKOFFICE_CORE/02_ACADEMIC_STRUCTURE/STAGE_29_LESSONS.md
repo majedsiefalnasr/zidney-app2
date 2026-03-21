@@ -9,20 +9,31 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-21T00:00:00.000Z
+Last Updated: 2026-03-21T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Lesson CRUD (list, create, get, update, soft-delete)
+- Tenant DB migration: lessons table with subject_id FK
+- Status lifecycle: ENABLED | DISABLED
+- Permission gate: question_manage OR subject_manage
+- Division scoping via Subject FK (transitive)
+- Hard delete blocked when referenced
+
+Deferred Scope:
+
+- Frontoffice lesson views (not in this stage)
+- MCQ/Traditional question tagging (downstream stages)
+- Auto-selection filter integration (downstream)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
