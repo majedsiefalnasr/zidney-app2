@@ -18,6 +18,9 @@ out/
 .turbo/
 .nyc_output/
 
+# Auto-generated files — excluded from formatting to preserve validator determinism
+docs/scripts/SCRIPT_REGISTRY.md
+
 # Biome-managed file types — do not process with Prettier
 *.ts
 *.tsx

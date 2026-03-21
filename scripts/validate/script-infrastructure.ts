@@ -97,13 +97,36 @@ export function validateRegistryFreshness(
 
   const freshContent = generateRegistry(metas)
 
-  // Normalise: strip the "Last generated" timestamp line before diffing
-  const normalize = (s: string) =>
-    s
+  // Normalize: strip generated metadata and formatter-introduced changes
+  // Handles: timestamp, trailing whitespace, blank lines, markdown table alignment
+  const normalize = (s: string) => {
+    return s
       .split('\n')
-      .filter((l) => !l.startsWith('> Last generated:'))
+      .filter((l) => !l.startsWith('> Last generated:')) // Strip timestamp
+      .map((l) => {
+        // For markdown table rows (contains pipes |)
+        if (l.includes('|')) {
+          // Check if it's a separator row (all dashes and pipes)
+          const isSeparator = /^\|\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?$/.test(l)
+          if (isSeparator) {
+            // Normalize separator: `| --- | --- |` regardless of dash count or padding
+            const cellCount = l.split('|').length - 2 // Count pipes, subtract outer ones
+            return '| ' + Array(cellCount).fill('---').join(' | ') + ' |'
+          }
+          // For data rows: split by pipes, trim each cell, rejoin with consistent spacing
+          return l
+            .split('|')
+            .map((cell) => cell.trim())
+            .join('|')
+            .trimEnd()
+        }
+        // For non-table lines, just trim trailing whitespace
+        return l.trimEnd()
+      })
+      .filter((l) => l.length > 0) // Remove blank lines
       .join('\n')
       .trim()
+  }
 
   if (normalize(existingContent) !== normalize(freshContent)) {
     return [
