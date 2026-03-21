@@ -288,7 +288,7 @@ The stage implements an identical security layer across three applications:
 
 1. Merge PR to `develop`
 2. Deploy to staging (automated CI/CD)
-3. Run integration smoke tests (`bun run run-staging-smoke-tests.sh`)
+3. Run integration smoke tests (`bun run ci:smoke:staging.sh`)
 4. Verify 401 handling in staging environment
 5. Verify 423/426 license responses display properly
 6. Deploy to production (blue/green or canary strategy as per ops procedure)

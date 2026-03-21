@@ -5,7 +5,7 @@
 ## Command
 
 ```sh
-bun run gitnexus:validate
+bun run arch:validate:gitnexus
 ```
 
 ## Purpose
@@ -31,7 +31,7 @@ node:fs, node:path, docs/ai/context/gitnexus-context.json,
 ## Example Usage
 
 ```sh
-bun run gitnexus:validate
+bun run arch:validate:gitnexus
 ```
 
 ## Known Failure Modes

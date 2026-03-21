@@ -51,7 +51,7 @@ Spec verification tasks referenced in parentheses reflect the naming in `spec.md
 - [x] T006 [P] [CHK] Create Workspace Package Validation check module (spec T005) — enumerates all `packages/*/package.json` entries; confirms each package appears as a dependency in at least one `apps/*/package.json` or has an import in `apps/*/src/**`; classifies each as ACTIVE or ORPHANED; returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/workspace-package-check.ts`
 - [x] T007 [P] [CHK] Create Skill Surface Validation check module (spec T006) — enumerates all immediate subdirectories of `.agents/skills/`; checks each against `SKILLS_INDEX.md` and `AGENTS.md` files; flags directories absent from both surfaces; flags stale index entries (in index but no directory on disk); parent container dirs without root `SKILL.md` (`aws-skills/`, `gitnexus/`) are not flagged; returns `TaskResult` — `scripts/dev/hygiene-checks/skill-surface-check.ts`
 - [x] T008 [P] [CHK] Create CI Workflow Hygiene check module (spec T007) — reads all `.github/workflows/*.yml`; extracts and normalises `run:` step commands; builds duplicate-step matrix; flags commands and step labels appearing in more than one workflow; lists consolidation candidates (no changes made); returns `TaskResult` with PASS or FLAG — `scripts/dev/hygiene-checks/ci-workflow-check.ts`
-- [x] T009 [P] [CHK] Create AI Context Integrity check module (spec T008) — spawns `bun run ai-context:validate`; applies SKIP if ENOENT or missing-script exit, WARNING if exit non-zero with artifact-error output, PASS if exit 0; captures stdout/stderr in findings; returns `TaskResult` with PASS, WARNING, or SKIP status — `scripts/dev/hygiene-checks/ai-context-check.ts`
+- [x] T009 [P] [CHK] Create AI Context Integrity check module (spec T008) — spawns `bun run ai:context:validate`; applies SKIP if ENOENT or missing-script exit, WARNING if exit non-zero with artifact-error output, PASS if exit 0; captures stdout/stderr in findings; returns `TaskResult` with PASS, WARNING, or SKIP status — `scripts/dev/hygiene-checks/ai-context-check.ts`
 - [x] T010 [P] [CHK] Create Architecture Guard Verification check module (spec T009) — spawns `bun run arch:guard` and `bun run arch:health` (120 s timeout each); captures stdout, stderr, exit codes; classifies all violations as pre-existing (stage introduces no code changes); status = PASS if both exit 0 with no violations, FLAG (not FAIL) otherwise; records output under "Architecture Guard — Pre-existing Violations Found"; does not block stage — `scripts/dev/hygiene-checks/arch-guard-check.ts`
 
 ---
@@ -82,7 +82,7 @@ Execute sequentially; T015 must precede T017; T017 must complete before T018–T
 
 - [x] T015 [GATE] Add `"hygiene:report": "bun scripts/dev/hygiene-report-generator.ts"` script entry to root `package.json`
 - [x] T016 [GATE] Ensure `docs/reports/` directory exists and create initial `REPOSITORY_HYGIENE_REPORT.md` placeholder file (will be overwritten by T017 with live report content) — `docs/reports/REPOSITORY_HYGIENE_REPORT.md`
-- [x] T017 [GATE] Run full integration smoke — `bun run hygiene:report`; confirms all nine checks execute without throws; produces final `docs/reports/REPOSITORY_HYGIENE_REPORT.md` containing all ten task sections (T001–T010); exits with code 0 — output: `docs/reports/REPOSITORY_HYGIENE_REPORT.md`
+- [x] T017 [GATE] Run full integration smoke — `bun run dev:hygiene:report`; confirms all nine checks execute without throws; produces final `docs/reports/REPOSITORY_HYGIENE_REPORT.md` containing all ten task sections (T001–T010); exits with code 0 — output: `docs/reports/REPOSITORY_HYGIENE_REPORT.md`
 - [x] T018 [GATE] Run `bun run lint` — confirm zero lint violations introduced by new scripts
 - [x] T019 [GATE] Run `bun run typecheck` — confirm zero TypeScript errors in new files
 - [x] T020 [GATE] Run `bun run test` — confirm unit tests T012–T014 pass; no pre-existing tests regressed
@@ -110,7 +110,7 @@ T001 (types.ts)
         └── T014 [P] (workspace-package-check.test.ts)
               └── T015 (package.json script entry)
                     └── T016 (REPOSITORY_HYGIENE_REPORT.md placeholder)
-                          └── T017 (bun run hygiene:report — smoke integration)
+                          └── T017 (bun run dev:hygiene:report — smoke integration)
                                 └── T018 (bun run lint)
                                 └── T019 (bun run typecheck)
                                 └── T020 (bun run test)

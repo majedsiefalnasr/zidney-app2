@@ -62,9 +62,9 @@ a permanent **Script Knowledge Base**.
 
 The repository currently contains references such as:
 
-bun run db:pool-status  
-bun run db:validate-licenses  
-bun run seed-dashboard-test-data
+bun run db:status:pool  
+bun run db:validate:licenses  
+bun run dev:seed:dashboard-test-data
 
 However:
 
@@ -328,7 +328,7 @@ exit 1
 
 Example CI integration:
 
-bun run validate-runtime-scripts
+bun run validate:runtime:scripts
 
 CI must fail when a referenced runtime script does not exist.
 
@@ -422,7 +422,7 @@ Example:
 
 Add command:
 
-bun run generate-script-docs
+bun run dev:generate:script-docs
 
 CI should execute this to ensure:
 
@@ -507,9 +507,9 @@ bun run validate-script-infrastructure
 Example CI pipeline step:
 
 ```
-bun run validate-runtime-scripts
+bun run validate:runtime:scripts
 bun run validate-script-infrastructure
-bun run generate-script-docs
+bun run dev:generate:script-docs
 ```
 
 ---

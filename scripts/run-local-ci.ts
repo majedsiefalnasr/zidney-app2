@@ -5,8 +5,8 @@
  *              sequence including all governance checks and the full act CI simulation.
  *              Step 0 is a Docker fail-fast check; Steps 1–7 are governance checks that
  *              run to completion regardless of individual failures (fail-forward).
- * @mode manual,pre-closure
- * @dependencies node:child_process, node:process
+ * @category dev
+ * @usage bun run ci:run-local
  */
 
 import { spawnSync } from 'node:child_process'

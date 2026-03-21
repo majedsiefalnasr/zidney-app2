@@ -94,7 +94,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 2. **Run artifact generation:**
 
    ```bash
-   bun run ai-context:generate
+   bun run ai:context:generate
    ```
 
 3. **Verify all 7 artifacts exist:**
@@ -282,7 +282,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 2. **Run artifact generation (should be fast — fresh):**
 
    ```bash
-   time bun run ai-context:generate
+   time bun run ai:context:generate
    # Expected: <1 second (no regeneration)
    ```
 
@@ -295,7 +295,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 4. **Run artifact generation again (should regenerate):**
 
    ```bash
-   time bun run ai-context:generate --force
+   time bun run ai:context:generate --force
    # Expected: 5-10 seconds (full regeneration)
    ```
 
@@ -307,7 +307,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 
 6. **Run artifact generation (should be fresh again):**
    ```bash
-   time bun run ai-context:generate
+   time bun run ai:context:generate
    # Expected: <1 second (detected no changes)
    ```
 
@@ -339,7 +339,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 2. **Manual performance test (full generation):**
 
    ```bash
-   time bun run ai-context:generate --force
+   time bun run ai:context:generate --force
    ```
 
    **Expected:** Completes in <5 seconds
@@ -390,7 +390,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 
 5. **Run governance audit:**
    ```bash
-   bun run infra-audit:check -- --scope ai-context
+   bun run arch:audit:check -- --scope ai-context
    ```
    **Expected:** ✅ Architecture score: 100/100
 
@@ -493,7 +493,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 2. **Verify architecture audit still passes:**
 
    ```bash
-   bun run infra-audit
+   bun run arch:audit
    ```
 
    **Expected:** Architecture score >= 85/100 (target: 100/100)
@@ -520,14 +520,14 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 
 ### Issue: Artifacts not generated
 
-**Symptom:** `bun run ai-context:generate` produces no output files
+**Symptom:** `bun run ai:context:generate` produces no output files
 
 **Solutions:**
 
 1. Check permissions: `ls -l docs/ai/context/`
-2. Check for errors: `bun run ai-context:generate --verbose`
+2. Check for errors: `bun run ai:context:generate --verbose`
 3. Verify source files: `ls docs/architecture/adr/ docs/architecture/intelligence/`
-4. Run with force: `bun run ai-context:generate --force`
+4. Run with force: `bun run ai:context:generate --force`
 
 ### Issue: Schema validation fails
 
@@ -537,7 +537,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 
 1. Check artifact syntax: `jq . docs/ai/context/ai-module-map.json`
 2. Compare against schema: `cat docs/ai/context/schemas/ai-context.schema.json`
-3. Regenerate artifacts: `bun run ai-context:generate --force`
+3. Regenerate artifacts: `bun run ai:context:generate --force`
 4. Check TypeScript types: `grep "export interface" packages/types/src/ai-context.ts`
 
 ### Issue: Performance test timeout
@@ -547,7 +547,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 **Solutions:**
 
 1. Check system load: `top` or `htop`
-2. Run with --verbose: `bun run ai-context:generate --verbose`
+2. Run with --verbose: `bun run ai:context:generate --verbose`
 3. Profile generation: `node --prof scripts/ai-context/index.ts`
 4. Check disk space: `df -h docs/ai/context/`
 

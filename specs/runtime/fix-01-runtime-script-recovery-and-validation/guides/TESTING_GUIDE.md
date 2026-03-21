@@ -44,7 +44,7 @@ Key outcomes:
 | Docker running             | `docker ps`                                                        |
 | Environment file present   | Verify `.env.local` exists with DATABASE_URL                       |
 | Repo root has node_modules | `ls node_modules                                                   | head -5` returns packages |
-| PostgreSQL running         | `bun run db:pool-status` should exit 0                             |
+| PostgreSQL running         | `bun run db:status:pool` should exit 0                             |
 | Correct branch checked out | `git branch` shows `fix-01-runtime-script-recovery-and-validation` |
 
 ---
@@ -102,7 +102,7 @@ AGENTS.md                                  — Script Governance section
 bun install
 
 # Verify environment
-bun run db:pool-status
+bun run db:status:pool
 
 # Run all unit tests
 bun test
@@ -120,21 +120,21 @@ bun test --project=validate-scripts
 bun test scripts/validate/__tests__/runtime-scripts.test.ts
 
 # CI validation suite for this stage
-bun run validate-runtime-scripts  # EXIT 0 if all 83 spec refs registered
+bun run validate:runtime:scripts  # EXIT 0 if all 83 spec refs registered
 bun run typecheck                 # EXIT 0 if no TS errors
 bun run lint                      # EXIT 0 if no Biome violations
 
 # Run each new script manually to verify operation
-bun run db:pool-status
-bun run db:validate-licenses
+bun run db:status:pool
+bun run db:validate:licenses
 bun run db:migrate --help
 bun run db:console
 bun run validate:ai-context-fresh
 bun run validate:ai-context-schemas
-bun run maintenance:cache-clean
-bun run seed-dashboard-test-data
-bun run validate-runtime-scripts
-bun run generate-script-docs
+bun run infra:cache:clean
+bun run dev:seed:dashboard-test-data
+bun run validate:runtime:scripts
+bun run dev:generate:script-docs
 ```
 
 ---
@@ -146,7 +146,7 @@ bun run generate-script-docs
 **Expected:** Exit 0, no unregistered references found.
 
 ```bash
-bun run validate-runtime-scripts
+bun run validate:runtime:scripts
 ```
 
 **What to check:** Output should list all 83 spec references as `registered` under their corresponding script keys.
@@ -156,7 +156,7 @@ bun run validate-runtime-scripts
 **Expected:** EXIT 0 with structured log showing connection pool status.
 
 ```bash
-bun run db:pool-status
+bun run db:status:pool
 ```
 
 **What to check:** Confirms PostgreSQL is running and DATABASE_URL is valid.
@@ -166,7 +166,7 @@ bun run db:pool-status
 **Expected:** EXIT 0 with structured log showing license status counts.
 
 ```bash
-bun run db:validate-licenses
+bun run db:validate:licenses
 ```
 
 **What to check:** Queries the master DB and groups licenses by status (active, expired, etc.).
@@ -202,7 +202,7 @@ bun run validate:ai-context-schemas
 **Expected:** EXIT 0 with structured log showing cleanup results.
 
 ```bash
-bun run maintenance:cache-clean
+bun run infra:cache:clean
 ```
 
 **What to check:** Cleans `.turbo/`, `node_modules/.cache/`, and `apps/*/dist/` directories.
@@ -212,7 +212,7 @@ bun run maintenance:cache-clean
 **Expected:** EXIT 0, all 14 script docs regenerated in `docs/scripts/`.
 
 ```bash
-bun run generate-script-docs
+bun run dev:generate:script-docs
 ```
 
 **What to check:** Verifies JSDoc metadata headers are correct in all script files, generates conformance table, updates `docs/scripts/SCRIPT_REGISTRY.md`.
@@ -241,7 +241,7 @@ bun test --project=validate-scripts scripts/validate/__tests__/runtime-scripts.t
 | Scenario                              | Cause                                | Resolution                                                      |
 | ------------------------------------- | ------------------------------------ | --------------------------------------------------------------- |
 | `db:pool-status` exits 1              | PostgreSQL not running               | `docker compose up -d` to start services                        |
-| `validate:ai-context-fresh` exits 1   | AI context missing or stale          | Run `bun run ai-context:refresh`                                |
+| `validate:ai-context-fresh` exits 1   | AI context missing or stale          | Run `bun run ai:context:refresh`                                |
 | `validate:ai-context-schemas` exits 1 | Invalid JSON in ai-context files     | Manually review/fix `docs/ai/context/*.json`                    |
 | `validate-runtime-scripts` exits 1    | Unregistered spec references         | Add missing scripts to `package.json`                           |
 | `generate-script-docs` exits 1        | Invalid JSDoc metadata               | Check `@script`, `@domain`, `@description` tags in script files |
@@ -255,7 +255,7 @@ Use this checklist when reviewing the PR:
 
 - [ ] All 46 tasks completed and marked `[X]` in tasks.md
 - [ ] Unit tests pass: `bun test --project=validate-scripts`
-- [ ] CI gates pass: `bun run validate-runtime-scripts && bun run typecheck && bun run lint`
+- [ ] CI gates pass: `bun run validate:runtime:scripts && bun run typecheck && bun run lint`
 - [ ] All new scripts execute without errors: manual scenario tests 1–7 pass
 - [ ] Documentation complete: `docs/scripts/` has 12 pages + README + REGISTRY
 - [ ] No `console.log` in any new `.ts` files (structured logging via `createLogger` only)

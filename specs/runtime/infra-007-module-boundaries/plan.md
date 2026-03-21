@@ -545,10 +545,10 @@ unchanged.
 
 # AFTER
 - name: module-boundary-validation
-  run: bun run ai-guard
+  run: bun run ai:guard
 ```
 
-**Rationale for `bun run ai-guard`**: FR-010 requires `bun run ai-guard` to work from repo root.
+**Rationale for `bun run ai:guard`**: FR-010 requires `bun run ai:guard` to work from repo root.
 Using the package.json script in CI ensures CI and local developers use exactly the same invocation.
 This is a minor improvement aligned with the spec.
 
@@ -611,7 +611,7 @@ For each Functional Requirement, the validation method and test artifact:
 
 ### FR-001 — Boundary Map File Exists
 
-**Test method**: Run `bun run ai-guard` on a clean branch → verify file exists + is valid JSON.  
+**Test method**: Run `bun run ai:guard` on a clean branch → verify file exists + is valid JSON.  
 **Negative test**: Temporarily rename `module-boundaries.json` → verify ai-guard prints the
 `WARNING: module-boundaries.json not found` message and continues with ARCHITECTURE_MAP.json only
 (exit 0 if no other violations).
@@ -691,13 +691,13 @@ layers entries.
 **Verified by**: Inspect `.github/workflows/ci.yml` and confirm:
 
 - `arch-guard` job has step named `module-boundary-validation`
-- Step runs `bun run ai-guard`
+- Step runs `bun run ai:guard`
 - Job `needs: [lint, typecheck]`
 - `unit-tests` job `needs: [..., arch-guard]`
 
 ### FR-010 — Developer Local Check
 
-**Test**: Run `bun run ai-guard` from repo root → verify exit code 0 on clean monorepo.  
+**Test**: Run `bun run ai:guard` from repo root → verify exit code 0 on clean monorepo.  
 **Also verify**: `package.json` contains `"ai-guard": "bun scripts/ai-guard.ts"`.
 
 ### FR-011 — New Module Registration Workflow
@@ -775,13 +775,13 @@ proceeding.
 
 **Pre-condition**: Step 4 verified (exit 0)  
 **Action**: Add `"ai-guard": "bun scripts/ai-guard.ts"` to scripts  
-**Verification**: `bun run ai-guard` → exit 0
+**Verification**: `bun run ai:guard` → exit 0
 
 ### Step 6 — Update `.github/workflows/ci.yml`
 
 **Pre-condition**: Step 5 complete  
 **Action**: Rename step `"Run AI-Guard architecture check"` → `"module-boundary-validation"`, update
-`run:` to `bun run ai-guard`  
+`run:` to `bun run ai:guard`  
 **Verification**: Inspect YAML manually; check no YAML syntax errors.
 
 ### Step 7 — Update `infra-audit.ts` — Undeclared Module Detection (FR-008)
@@ -836,13 +836,13 @@ missing-field error-path tests.
 
 - `bun run lint` → exit 0
 - `bun run typecheck` → exit 0
-- `bun run ai-guard` → exit 0
+- `bun run ai:guard` → exit 0
 - `bun run arch:audit` → 0 undeclared modules
 - `vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts` → all pass (note: `test:unit`
   enumerates named workspace projects and excludes the root project where this test lives — use
   `vitest run` directly)
 
-> **NFR-004 Performance Budget**: `bun run ai-guard` must complete in under 30 seconds on a full
+> **NFR-004 Performance Budget**: `bun run ai:guard` must complete in under 30 seconds on a full
 > monorepo scan. Validated by T024 (wall-clock measurement). The implementation performs a
 > single-pass file scan with O(n × m) complexity where n = source files and m = import statements
 > per file; no recursive disk traversal or network calls. Expected runtime is well under 30 s for a

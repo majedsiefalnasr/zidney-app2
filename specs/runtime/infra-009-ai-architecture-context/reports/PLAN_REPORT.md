@@ -109,7 +109,7 @@ All 5 clarification questions are addressed in the plan:
 
 | Clarification            | Decision                             | Implementation Impact                                     |
 | ------------------------ | ------------------------------------ | --------------------------------------------------------- |
-| **Q1: Regeneration**     | Local pre-commit + CI validation     | `bun run generate:ai-context` in hooks; CI safety check   |
+| **Q1: Regeneration**     | Local pre-commit + CI validation     | `bun run ai:context:generate` in hooks; CI safety check   |
 | **Q2: Schema Formality** | TypeScript interfaces + JSON schemas | `packages/types/src/ai-context.ts`; auto-generate schemas |
 | **Q3: Versioning**       | semantic versioning in artifacts     | `"schema_version": "1.0.0"` in each artifact              |
 | **Q4: Change Detection** | Intelligent hash-based detection     | Only regenerate if sources changed; include metadata      |

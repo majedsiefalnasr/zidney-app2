@@ -186,7 +186,7 @@ Validate AI context artifacts.
 Run:
 
 ```
-bun run ai-context:validate
+bun run ai:context:validate
 ```
 
 Artifacts checked:

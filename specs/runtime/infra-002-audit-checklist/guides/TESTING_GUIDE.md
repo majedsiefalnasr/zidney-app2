@@ -137,7 +137,7 @@ fatal: pathspec 'infra-audit-report.json' did not match any files
 **Purpose:** Ensure the new script compiles without errors
 
 ```bash
-bun run tsc --noEmit scripts/infra-audit.ts
+bun run typecheck:src --noEmit scripts/infra-audit.ts
 ```
 
 **Expected outcome:** Exit 0 (no TypeScript errors from infra-audit.ts)
@@ -289,7 +289,7 @@ Before merging the PR:
 - [ ] Reviewed SAFE_ROLLOUT_PLAN.md — prerequisites are clear
 - [ ] All 3 reports cross-reference each other (relative markdown links)
 - [ ] No existing source/config/schema/test files were modified
-- [ ] Type check passes: `bun run tsc --noEmit`
+- [ ] Type check passes: `bun run typecheck:src --noEmit`
 - [ ] Lint check passes (or only pre-existing warnings): `bun run lint`
 
 ---

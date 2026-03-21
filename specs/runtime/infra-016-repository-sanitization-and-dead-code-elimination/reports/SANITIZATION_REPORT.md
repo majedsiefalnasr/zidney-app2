@@ -56,7 +56,7 @@
 - No additional validation run was required for the documentation-only close-out work.
 - Baseline or environment issues remain unchanged:
   - `bun run test` depends on local PostgreSQL endpoints on `5432` and `5433`
-  - `bun run type-safety-guard` still fails on the pre-existing `as any` assertion in `packages/ui-system/src/utils/url-sync.ts`
+  - `bun run arch:type-safety-guard` still fails on the pre-existing `as any` assertion in `packages/ui-system/src/utils/url-sync.ts`
 
 ## Quickstart Walkthrough Result
 

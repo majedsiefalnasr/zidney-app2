@@ -48,7 +48,7 @@ export function normalizeValidationGovernance(input: {
       severity: 'high',
       impacted_surface: 'docs/ai/context/ai-architecture-brain.json',
       message: 'Architecture brain validation failed.',
-      remediation: 'Run bun run arch:validate-brain and resolve the reported graph issues.',
+      remediation: 'Run bun run arch:validate:brain and resolve the reported graph issues.',
       source_tools: ['arch:validate-brain'],
     })
   }

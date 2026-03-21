@@ -276,7 +276,7 @@ Responsibilities:
 Add:
 
 ```
-bun run gitnexus:validate
+bun run arch:validate:gitnexus
 ```
 
 CI must fail if:

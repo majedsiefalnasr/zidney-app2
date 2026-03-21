@@ -1,8 +1,10 @@
 /**
  * @script validate:ai-context-fresh
  * @domain validate
+ * @category validation
  * @description Check that the AI context mini artifact exists and is not older than 24 hours
  * @mode manual,ci
+ * @usage bun run validate:ai-context-fresh
  * @dependencies node:fs,node:path,node:crypto
  */
 
@@ -25,7 +27,7 @@ function main(): void {
   if (!existsSync(AI_CONTEXT_MINI)) {
     logger.error('AI context artifact missing', {
       path: AI_CONTEXT_MINI,
-      hint: 'Run: bun run ai-context:generate',
+      hint: 'Run: bun run ai:context:generate',
     })
     process.exit(1)
   }
@@ -49,7 +51,7 @@ function main(): void {
       path: AI_CONTEXT_MINI,
       ageHours: ageHours.toFixed(2),
       maxAgeHours: 24,
-      hint: 'Run: bun run ai-context:refresh',
+      hint: 'Run: bun run ai:context:refresh',
     })
     process.exit(1)
   }

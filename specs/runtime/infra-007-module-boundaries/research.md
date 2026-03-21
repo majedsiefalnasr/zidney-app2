@@ -437,7 +437,7 @@ arch-guard:
 
 **Required change**: Rename step `"Run AI-Guard architecture check"` →
 `"module-boundary-validation"`. Also update `run:` from `bun scripts/ai-guard.ts` to
-`bun run ai-guard` to use the new package.json script.
+`bun run ai:guard` to use the new package.json script.
 
 **Job placement is already correct**: `arch-guard` job runs after `lint` and `typecheck`, and before
 `unit-tests` (which has `needs: [lint, typecheck, arch-guard]`). This satisfies FR-009 with zero

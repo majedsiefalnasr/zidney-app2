@@ -36,7 +36,7 @@ audit script itself executes cleanly with exit code 0 and produces a valid 11-ke
 | ------------------------ | ----------- | -------------------------------- | --------------- | ------------------------------------------ |
 | Audit script execution   | Yes         | `bun run scripts/infra-audit.ts` | ✅ PASS         | Exit 0; 11-key JSON output                 |
 | Bun install              | Yes         | `bun install`                    | ✅ PASS         | No changes required                        |
-| TypeScript type-check    | Yes         | `bun run tsc --noEmit`           | ⚠️ PRE-EXISTING | 2 pre-existing TS errors (not new)         |
+| TypeScript type-check    | Yes         | `bun run typecheck:src --noEmit` | ⚠️ PRE-EXISTING | 2 pre-existing TS errors (not new)         |
 | Lint                     | Yes         | `bun run lint`                   | ⚠️ PRE-EXISTING | 10 pre-existing errors, 2405 warnings      |
 | Unit tests               | Conditional | `bun test`                       | ⚠️ DB-GATED     | Requires Docker Compose test environment   |
 | Integration tests        | Conditional | `bun test`                       | ⚠️ DB-GATED     | Requires docker-compose.test.yml           |
@@ -100,7 +100,7 @@ EXIT: 0
 ### Type Check
 
 ```text
-$ bun run tsc --noEmit
+$ bun run typecheck:src --noEmit
 apps/frontoffice/src/main.ts(17,32): error TS2306:
   File '.../apps/mmc/src/core/guards/index.ts' is not a module.
 apps/mmc/src/main.ts(28,32): error TS2306:
@@ -112,7 +112,7 @@ Total TS errors: 2 (PRE-EXISTING — documented in GAP_REPORT.md §7)
 ```
 
 > **Note:** These 2 errors pre-date this stage. `infra-audit.ts` introduces zero new TypeScript
-> errors (verified via `bun run tsc --noEmit scripts/infra-audit.ts` — no errors).
+> errors (verified via `bun run typecheck:src --noEmit scripts/infra-audit.ts` — no errors).
 
 ### Lint
 

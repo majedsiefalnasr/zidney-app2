@@ -379,7 +379,7 @@ bun test --coverage departments
 ### Pre-Test Setup
 
 - [ ] Database is clean and migrations applied: `bun run db:migrate`
-- [ ] Test data initialized: `bun run seed-dashboard-test-data`
+- [ ] Test data initialized: `bun run dev:seed:dashboard-test-data`
 - [ ] Redis cache cleared (if applicable)
 - [ ] API server running or available
 - [ ] Auth tokens generated for test users

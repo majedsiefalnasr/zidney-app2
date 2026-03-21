@@ -64,7 +64,7 @@ tests/static/05-architecture-guard.test.ts                    (new — 7 tests)
 
 ```bash
 # From repo root
-bun run vitest run tests/unit/ai-guard/ai-guard-validation.test.ts tests/static/05-architecture-guard.test.ts
+bun run test run tests/unit/ai-guard/ai-guard-validation.test.ts tests/static/05-architecture-guard.test.ts
 ```
 
 Expected: `37 passed | 7 passed | 0 failed`
@@ -72,7 +72,7 @@ Expected: `37 passed | 7 passed | 0 failed`
 ### Run unit tests only
 
 ```bash
-bun run vitest run tests/unit/ai-guard/ai-guard-validation.test.ts
+bun run test run tests/unit/ai-guard/ai-guard-validation.test.ts
 ```
 
 Expected: `37 passed | 0 failed` 7 describe blocks should all show green:
@@ -88,7 +88,7 @@ Expected: `37 passed | 0 failed` 7 describe blocks should all show green:
 ### Run static tests only
 
 ```bash
-bun run vitest run tests/static/05-architecture-guard.test.ts
+bun run test run tests/static/05-architecture-guard.test.ts
 ```
 
 Expected: `7 passed | 0 failed` ARCHITECTURE_CONTRACT.json must encode all 4 required boundary
@@ -167,7 +167,7 @@ import.
 **Purpose:** Confirm that importing `ai-guard.ts` in a test does NOT trigger the real `runGuard()`
 file-system scan.
 
-1. Run: `bun run vitest run tests/unit/ai-guard/ai-guard-validation.test.ts --reporter=verbose`
+1. Run: `bun run test run tests/unit/ai-guard/ai-guard-validation.test.ts --reporter=verbose`
 2. Observe: the test suite should complete without any file-system errors or "changed files" output.
 
 Expected: All 37 tests pass. No `[AI-Guard]` or `[INFRA AUDIT]` output is printed during the test
@@ -203,8 +203,8 @@ application logs) when violations are detected. No `console.log` was introduced.
 
 ## Sign-Off Checklist
 
-- [ ] `bun run vitest run tests/unit/ai-guard/ai-guard-validation.test.ts` → 37/37 PASS
-- [ ] `bun run vitest run tests/static/05-architecture-guard.test.ts` → 7/7 PASS
+- [ ] `bun run test run tests/unit/ai-guard/ai-guard-validation.test.ts` → 37/37 PASS
+- [ ] `bun run test run tests/static/05-architecture-guard.test.ts` → 7/7 PASS
 - [ ] `bun run arch:guard` exits 0 with "architecture validation passed"
 - [ ] `bun scripts/infra-audit.ts` reports score 100/100
 - [ ] Husky hook rejects a test commit containing a cross-app import (Scenario 1)

@@ -64,7 +64,7 @@ the subsequent STAGE_INFRA_GOVERNANCE stage.
 | T019      | Verify [INFRA AUDIT] log prefix                          | 1     | ✅                                       |
 | T020–T040 | Manual supplement audit tasks (US1–US8)                  | 2     | ✅                                       |
 | T041      | bun install                                              | 2     | ✅ exit 0                                |
-| T042      | bun run tsc --noEmit                                     | 2     | ✅ (2 pre-existing errors documented)    |
+| T042      | bun run typecheck:src --noEmit                           | 2     | ✅ (2 pre-existing errors documented)    |
 | T043      | bun run lint                                             | 2     | ✅ (10 pre-existing errors documented)   |
 | T044      | bun test --coverage                                      | 2     | ⚠️ DB-GATED (no new failures introduced) |
 | T045      | bun run build                                            | 2     | ✅ (root build n/a; per-app builds pass) |

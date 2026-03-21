@@ -38,14 +38,14 @@ dead-letter queue (DLQ) management.
 
 ```bash
 # From repo root — run all worker unit tests (excludes load tests)
-bun run vitest run --project worker
+bun run test run --project worker
 
 # From this directory
 bun run test
 bun run test:unit
 
 # Load tests (require Redis + PostgreSQL; run separately)
-bun run vitest run --dir tests/load
+bun run test run --dir tests/load
 ```
 
 > Load tests (`tests/load/`, `tests/load-testing.test.ts`) are excluded from the standard unit

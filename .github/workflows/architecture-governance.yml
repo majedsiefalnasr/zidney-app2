@@ -144,3 +144,21 @@ jobs:
           else
             echo "No AI execution log artifacts found." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      # ── Script System Governance ──────────────────────────────────────
+
+      # ── 14. Validate Script Naming Convention ──────────────────────────
+      - name: Validate Script Naming Convention
+        run: bun run validate:script:naming
+
+      # ── 15. Validate Script Usages ─────────────────────────────────────
+      - name: Validate Script Usages (no broken or orphan references)
+        run: bun run validate:script:usage
+
+      # ── 16. Validate Script Infrastructure ────────────────────────────
+      - name: Validate Script Infrastructure (headers + registry freshness)
+        run: bun run validate:script:infrastructure
+
+      # ── 17. Verify Script Registry Generation ─────────────────────────
+      - name: Verify Script Registry Generation
+        run: bun run dev:generate:script-docs

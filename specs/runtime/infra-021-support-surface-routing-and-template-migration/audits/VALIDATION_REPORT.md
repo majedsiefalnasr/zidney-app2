@@ -48,8 +48,8 @@ The repository-wide test suite, lint, typecheck, and type-safety checks now all 
 | Architecture diff              | `bun scripts/architecture-diff.ts`                                                                                                      | ✅               | No violations detected                                                                               |
 | Infra audit                    | `bun scripts/infra-audit.ts`                                                                                                            | ✅               | Audit completed with architecture score `100/100`                                                    |
 | Architecture brain validation  | `bun scripts/validate-architecture-brain.ts`                                                                                            | ✅ with warnings | Warning-only duplicate-edge diagnostics; no blocking failure                                         |
-| Type safety guard              | `bun run type-safety-guard`                                                                                                             | ✅               | False-positive detection fixed in `scripts/type-safety-guard.ts`; approved compat exceptions honored |
-| AI context refresh             | `bun run ai-context:refresh`                                                                                                            | ✅               | Context generation succeeded; generated side effects were not retained in the worktree               |
+| Type safety guard              | `bun run arch:type-safety-guard`                                                                                                        | ✅               | False-positive detection fixed in `scripts/type-safety-guard.ts`; approved compat exceptions honored |
+| AI context refresh             | `bun run ai:context:refresh`                                                                                                            | ✅               | Context generation succeeded; generated side effects were not retained in the worktree               |
 | Workflow validation            | `bun run validate:workflows`                                                                                                            | ✅               | `actionlint` command completed successfully                                                          |
 | Prompt parity                  | SHA-256 comparison of overlapping Speckit prompts                                                                                       | ✅               | All nine overlapping Speckit prompt files matched byte-for-byte                                      |
 | Test environment prerequisites | `bash scripts/verify-test-env.sh`                                                                                                       | ✅               | PostgreSQL on `5433`, PostgreSQL on `5432` via mirrored port mapping, and Redis on `6380` available  |
@@ -106,7 +106,7 @@ bun scripts/ai-guard.ts -> architecture validation passed
 bun scripts/architecture-diff.ts -> no violations detected
 bun scripts/infra-audit.ts -> complete, architecture score 100 / 100
 bun scripts/validate-architecture-brain.ts -> warnings only, no blocking failure
-bun run ai-context:refresh -> SUCCESS
+bun run ai:context:refresh -> SUCCESS
 bun run validate:workflows -> actionlint completed successfully
 bash -n .specify/scripts/bash/create-new-feature.sh .specify/scripts/bash/setup-plan.sh .specify/scripts/bash/update-agent-context.sh -> PASS
 ```
@@ -114,7 +114,7 @@ bash -n .specify/scripts/bash/create-new-feature.sh .specify/scripts/bash/setup-
 ### Type Safety Guard
 
 ```text
-bun run type-safety-guard
+bun run arch:type-safety-guard
 ✅ No type safety violations detected
 ```
 

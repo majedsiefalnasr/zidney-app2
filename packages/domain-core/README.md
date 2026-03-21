@@ -37,7 +37,7 @@ rule enforcement.
 
 ```bash
 # From repo root
-bun run vitest run --project domain-core
+bun run test run --project domain-core
 
 # From this directory
 bun run test

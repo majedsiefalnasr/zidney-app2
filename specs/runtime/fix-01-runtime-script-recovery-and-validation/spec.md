@@ -47,9 +47,9 @@ The repository currently references operational scripts across `specs/runtime/*`
 such as:
 
 ```
-bun run db:pool-status
-bun run db:validate-licenses
-bun run seed-dashboard-test-data
+bun run db:status:pool
+bun run db:validate:licenses
+bun run dev:seed:dashboard-test-data
 ```
 
 The current state of these scripts has four failure modes:
@@ -191,13 +191,13 @@ Create `scripts/generate-script-docs.ts` that:
 ### Scenario 1 — Developer follows a runtime spec
 
 **Given** a developer reads `specs/runtime/006-attempt-engine-foundation/spec.md` and finds a
-`bun run db:pool-status` command  
+`bun run db:status:pool` command  
 **When** they run that command from the repository root  
 **Then** the script executes, exits with code 0, and produces structured log output
 
 ### Scenario 2 — Developer finds script documentation
 
-**Given** a developer needs to understand what `bun run db:validate-licenses` does  
+**Given** a developer needs to understand what `bun run db:validate:licenses` does  
 **When** they open `docs/scripts/db-validate-licenses.md`  
 **Then** they can determine the purpose, usage, dependencies, and failure modes without reading
 source code
@@ -206,7 +206,7 @@ source code
 
 **Given** a developer adds a new `bun run my-new-script` reference to a spec file  
 **When** they push to CI without registering the script in `package.json`  
-**Then** `bun run validate-runtime-scripts` exits with code 1 and lists the missing script
+**Then** `bun run validate:runtime:scripts` exits with code 1 and lists the missing script
 
 ### Scenario 4 — Script deduplication complete
 
@@ -219,7 +219,7 @@ source code
 ### Scenario 5 — No spec-to-script drift after stage completion
 
 **Given** the full T001–T012 workflow has been executed  
-**When** `bun run validate-runtime-scripts` is run  
+**When** `bun run validate:runtime:scripts` is run  
 **Then** it exits with code 0 — every script referenced in runtime specs exists and is
 registered
 
@@ -313,13 +313,13 @@ All criteria are technology-agnostic and user/operator observable:
 4. **Full documentation coverage** — Every recovered script has an individual documentation page
    in `docs/scripts/`.
 
-5. **CI guard operational** — Running `bun run validate-runtime-scripts` exits with code 0 when
+5. **CI guard operational** — Running `bun run validate:runtime:scripts` exits with code 0 when
    all referenced scripts are registered, and exits with code 1 when any are missing.
 
 6. **Governance rule in place** — The script governance rule is recorded in `AGENTS.md` and is
    enforceable.
 
-7. **Automated documentation sync** — Running `bun run generate-script-docs` regenerates the
+7. **Automated documentation sync** — Running `bun run dev:generate:script-docs` regenerates the
    full `docs/scripts/` directory from metadata headers without manual intervention.
 
 8. **No regressions introduced** — All existing tests continue to pass; no runtime behavior is

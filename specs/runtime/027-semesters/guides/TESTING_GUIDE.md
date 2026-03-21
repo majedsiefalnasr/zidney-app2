@@ -84,10 +84,10 @@ bun run db:migrate
 bun run dev:api
 
 # Run only semesters unit tests
-bun run vitest run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts
+bun run test run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts
 
 # Run only semesters integration tests
-bun run vitest run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts
+bun run test run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts
 
 # Run all tests (note: one pre-existing flaky ai-engine timeout may appear — unrelated to semesters)
 bun run test
@@ -105,10 +105,10 @@ bun run typecheck
 bun run lint
 
 # Unit tests only
-bun run vitest run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts
+bun run test run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts
 
 # Integration tests only
-bun run vitest run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts
+bun run test run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts
 ```
 
 Expected outcome: all semesters tests pass, typecheck exits 0, lint exits 0.

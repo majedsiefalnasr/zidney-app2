@@ -1,8 +1,10 @@
 /**
- * @script validate:scan-packages
+ * @script validate:scan:packages
  * @domain validate
- * @description Walk all runtime spec docs and extract unique bun run script references
+ * @category governance
+ * @description Walk all runtime spec docs and extract unique script references
  * @mode manual,ci
+ * @usage bun run validate:scan:packages
  * @dependencies node:fs,node:path,node:crypto
  */
 
@@ -22,8 +24,8 @@ const EXCLUDED_NAMES = new Set([
   'wrapper',
   'lint:staged',
   // False positives from code literals in spec markdown files
-  'references', // plan.md string literal: "bun run references"
-  'json', // TESTING_GUIDE.md code: `bun run json.stringify ...`
+  'references', // plan.md string literal matching false-positive pattern
+  'json', // TESTING_GUIDE.md code false-positive pattern
 ])
 
 const REPO_ROOT = process.cwd()

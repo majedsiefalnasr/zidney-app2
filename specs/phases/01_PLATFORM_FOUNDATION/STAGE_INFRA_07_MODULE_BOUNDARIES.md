@@ -370,7 +370,7 @@ Developers do not manually manage boundaries.
 Instead they run:
 
 ```
-bun run ai-guard
+bun run ai:guard
 ```
 
 The guard will automatically detect:

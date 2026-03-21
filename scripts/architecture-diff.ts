@@ -1,4 +1,10 @@
 /**
+ * @script arch:diff
+ * @domain arch
+ * @category governance
+ * @description Detect architecture violations in the current change set (PR/staged diff) by comparing changed imports against ARCHITECTURE_CONTRACT.json rules.
+ * @usage bun run arch:diff
+ *
  * Zidney Architecture Diff Analyzer
  *
  * Purpose

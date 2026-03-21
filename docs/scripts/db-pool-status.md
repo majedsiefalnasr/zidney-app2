@@ -3,7 +3,7 @@
 ## Command
 
 ```sh
-bun run db:pool-status
+bun run db:status:pool
 ```
 
 ## Purpose
@@ -40,10 +40,10 @@ is unreachable (infra-absent pattern — not a broken script).
 
 ```sh
 # Check pool health
-DATABASE_URL=postgres://user:pass@localhost:5432/master_db bun run db:pool-status
+DATABASE_URL=postgres://user:pass@localhost:5432/master_db bun run db:status:pool
 
 # In CI (DATABASE_URL set via environment)
-bun run db:pool-status
+bun run db:status:pool
 ```
 
 Expected structured log output on success:

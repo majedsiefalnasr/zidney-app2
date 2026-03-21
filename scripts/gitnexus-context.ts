@@ -1,20 +1,19 @@
 /**
- * @script gitnexus:context
- * @domain gitnexus
- * @description Generates a structured GitNexus context JSON artifact from git state and the
- *   ai-architecture-brain.json. Replaces legacy brain-printing output with machine-readable
- *   context consumed by AI orchestrators and CI gates.
- * @mode cli
- * @dependencies node:child_process, node:fs, node:path, docs/ai/context/ai-architecture-brain.json
+ * @script arch:gitnexus:context
+ * @domain arch
+ * @category dev
+ * @description Generates a structured GitNexus context JSON artifact from git state and
+ *   ai-architecture-brain.json for AI orchestrators and CI gates.
+ * @usage bun run arch:gitnexus:context
  *
  * Output: docs/ai/context/gitnexus-context.json (or stdout with --dry-run)
  * Schema:  docs/ai/gitnexus-context.schema.json
  *
  * Usage:
- *   bun run gitnexus:context                   # default: changed files only
- *   bun run gitnexus:context -- --all          # full workspace scan
- *   bun run gitnexus:context -- --dry-run      # print to stdout, no file write
- *   bun run gitnexus:context -- --base-ref HEAD~2  # custom base ref
+ *   bun run arch:gitnexus:context              # default: changed files only
+ *   bun run arch:gitnexus:context -- --all     # full workspace scan
+ *   bun run arch:gitnexus:context -- --dry-run # print to stdout, no file write
+ *   bun run arch:gitnexus:context -- --base-ref HEAD~2  # custom base ref
  */
 
 import { execFileSync } from 'node:child_process'

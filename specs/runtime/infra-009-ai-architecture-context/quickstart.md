@@ -305,17 +305,17 @@ echo "Artifacts are $AGE_DAYS days old"
 
 ```bash
 # Automatic (on every commit)
-# - Pre-commit hook runs: bun run generate:ai-context
+# - Pre-commit hook runs: bun run ai:context:generate
 # - Staged artifacts committed automatically
 
 # Manual regeneration
-bun run generate:ai-context
+bun run ai:context:generate
 
 # Forced regeneration (ignore timestamps)
-bun run generate:ai-context --force
+bun run ai:context:generate --force
 
 # Verbose output (debugging)
-bun run generate:ai-context --verbose
+bun run ai:context:generate --verbose
 ```
 
 **When to regenerate:**
@@ -337,7 +337,7 @@ bun run generate:ai-context --verbose
 Error: docs/ai/context/ not found
 
 # Solution:
-bun run generate:ai-context
+bun run ai:context:generate
 ```
 
 ---
@@ -352,7 +352,7 @@ Error: Schema validation failed
 jq . < docs/ai/context/ai-module-map.json
 
 # If invalid JSON, regenerate:
-bun run generate:ai-context
+bun run ai:context:generate
 ```
 
 ---
@@ -364,7 +364,7 @@ bun run generate:ai-context
 Warning: AI context is 45 days old. Regenerate?
 
 # Solution:
-bun run generate:ai-context
+bun run ai:context:generate
 git add docs/ai/context/
 git commit -m "chore: regenerate AI context"
 ```
@@ -390,13 +390,13 @@ Error: Expected schema_version 1.0.0, got 2.0.0
 # You added a forbidden import, but validation didn't catch it
 
 # Regenerate artifacts (might be stale):
-bun run generate:ai-context
+bun run ai:context:generate
 
 # Check freshness:
 jq '.generated_at' docs/ai/context/ai-architecture-brain.json
 
 # If still failing, check ai-guard manually:
-bun run validate:architecture
+bun run arch:audit
 ```
 
 ---
@@ -519,7 +519,7 @@ ai-dependency-graph.json for impact analysis.
 1. ✅ Read this quickstart
 2. ✅ Review ai-architecture-summary.md
 3. ✅ Explore ai-layer-model.json to understand rules
-4. ✅ Run `bun run generate:ai-context` to populate artifacts
+4. ✅ Run `bun run ai:context:generate` to populate artifacts
 5. ✅ Share artifacts with your AI assistant for better suggestions
 
 ---

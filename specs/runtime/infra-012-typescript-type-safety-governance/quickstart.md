@@ -594,7 +594,7 @@ When you push a PR, GitHub Actions will run:
 3. If it works locally but fails CI:
    - Clear node_modules: `rm -rf node_modules && bun install`
    - Rebuild: `bun run build`
-   - Check if stale cache: `bun run cache-clean`
+   - Check if stale cache: `bun run infra:cache:clean`
 
 ---
 

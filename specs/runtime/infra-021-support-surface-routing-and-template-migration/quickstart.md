@@ -120,8 +120,8 @@ bun scripts/ai-guard.ts
 bun scripts/architecture-diff.ts
 bun scripts/infra-audit.ts
 bun scripts/validate-architecture-brain.ts
-bun run type-safety-guard
-bun run ai-context:refresh
+bun run arch:type-safety-guard
+bun run ai:context:refresh
 bun run validate:workflows
 ```
 

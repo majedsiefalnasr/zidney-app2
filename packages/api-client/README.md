@@ -31,7 +31,7 @@ client that abstracts `fetch` details and makes it easy to mock HTTP in tests.
 
 ```bash
 # From repo root
-bun run vitest run --project api-client
+bun run test run --project api-client
 
 # From this directory
 bun run test

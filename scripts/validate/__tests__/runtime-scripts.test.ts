@@ -22,7 +22,7 @@ describe('extractScriptReferences', () => {
 ## Commands
 
 Run \`bun run db:migrate\` to apply migrations.
-Then run \`bun run db:pool-status\` to verify.
+Then run \`bun run db:status:pool\` to verify.
 Also \`bun run validate:ai-context-fresh\` before deploying.
 `
     const refs = extractScriptReferences(content)
@@ -69,7 +69,7 @@ bun run db:migrate
     const content = `
 bun run db:migrate
 bun run db:migrate
-bun run db:pool-status
+bun run db:status:pool
 `
     const refs = extractScriptReferences(content)
     expect(refs.length).toBe(2)

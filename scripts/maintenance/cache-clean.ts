@@ -1,8 +1,10 @@
 /**
- * @script maintenance:cache-clean
- * @domain maintenance
+ * @script infra:cache:clean
+ * @domain infra
+ * @category maintenance
  * @description Remove build caches and temporary output directories to free disk space
  * @mode manual
+ * @usage bun run infra:cache:clean
  * @dependencies node:fs,node:path,node:crypto
  */
 

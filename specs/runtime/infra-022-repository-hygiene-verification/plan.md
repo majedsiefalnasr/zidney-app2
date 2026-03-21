@@ -297,7 +297,7 @@ export interface TaskResult {
 **Algorithm**:
 
 ```
-1. Attempt: spawn `bun run ai-context:validate` from repo root.
+1. Attempt: spawn `bun run ai:context:validate` from repo root.
 2. Capture: stdout, stderr, exitCode.
 3. Decision tree:
    - If spawn throws ENOENT or the process exits non-zero because the script file is missing:
@@ -324,7 +324,7 @@ export interface TaskResult {
 - `docs/ai/context/ai-module-map.json`
 - `docs/ai/context/ai-layer-model.json` (canonical filename; spec references "ai-layer-map.json" but actual generated file is `ai-layer-model.json`)
 
-**Inputs**: Result of `bun run ai-context:validate` subprocess  
+**Inputs**: Result of `bun run ai:context:validate` subprocess  
 **Outputs**: TaskResult with PASS / WARNING / SKIP status and captured output
 
 ---
@@ -535,7 +535,7 @@ versions are referenced by `package.json`. The subdirectory versions may be supe
 **Status**: PASS | WARNING | SKIP
 
 <If SKIP:>
-**AI Context — Script Unavailable**: `bun run ai-context:validate` could not be executed.
+**AI Context — Script Unavailable**: `bun run ai:context:validate` could not be executed.
 Reason: <captured error>
 Stage completion is not blocked by this result.
 
@@ -651,7 +651,7 @@ The agent context update confirms zero new technology additions for this stage.
 3. Create `scripts/dev/hygiene-report-generator.ts` (orchestrator + T010)
 4. Add `"hygiene:report"` entry to root `package.json` scripts
 5. Create unit test files
-6. Run: `bun run hygiene:report` — executes all checks, writes report
+6. Run: `bun run dev:hygiene:report` — executes all checks, writes report
 7. Commit `docs/reports/REPOSITORY_HYGIENE_REPORT.md` as tracked artifact
 8. Run: `bun .specify/scripts/bash/update-agent-context.sh copilot`
 9. Verify: `git diff --name-only` confirms no writes to `docs/architecture/` governance paths

@@ -15,7 +15,7 @@
 | TypeScript        | `bun run typecheck`                        | 0                          | ✅ PASS                     |
 | Unit Tests        | `bunx vitest run --project hygiene-checks` | 0                          | ✅ PASS                     |
 | Git Scope         | `git diff --name-only HEAD`                | 0                          | ✅ PASS                     |
-| Integration Smoke | `bun run hygiene:report`                   | 0                          | ✅ PASS                     |
+| Integration Smoke | `bun run dev:hygiene:report`               | 0                          | ✅ PASS                     |
 
 **Overall: ALL GATES PASSED**
 
@@ -128,9 +128,9 @@ Auto-generated artifacts (side effects of running `arch:guard` and `arch:health`
 
 ---
 
-## Gate 5 — Integration Smoke Test (`bun run hygiene:report`)
+## Gate 5 — Integration Smoke Test (`bun run dev:hygiene:report`)
 
-**Command:** `bun run hygiene:report`
+**Command:** `bun run dev:hygiene:report`
 **Exit Code:** 0
 **Result:** ✅ PASS
 

@@ -70,5 +70,5 @@
 
 ## Validation Gate
 
-- [x] T016 Verify script key naming compliance — run `bun run validate-runtime-scripts` and confirm zero violations — package.json
+- [x] T016 Verify script key naming compliance — run `bun run validate:runtime:scripts` and confirm zero violations — package.json
 - [x] T017 Verify all 5 test cases pass deterministically with no live git state — tests/gitnexus-context.test.ts

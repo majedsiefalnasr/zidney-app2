@@ -785,7 +785,7 @@ jobs:
       # Step 2: Regenerate artifacts if sources changed
       - name: Regenerate AI context artifacts
         if: steps.changed.outputs.sources_changed == 'true'
-        run: bun run generate:ai-context --verbose
+        run: bun run ai:context:generate --verbose
 
       # Step 3: Validate freshness
       - name: Validate artifact freshness
@@ -801,7 +801,7 @@ jobs:
         run: |
           if ! git diff-index --quiet HEAD -- docs/ai/context/; then
             echo "Artifacts were regenerated but not committed"
-            echo "Run: bun run generate:ai-context"
+            echo "Run: bun run ai:context:generate"
             echo "Then commit the results"
             exit 1
           fi
@@ -827,7 +827,7 @@ jobs:
 # Generate AI context if ADRs or module-boundaries changed
 if git diff-index --cached HEAD -- docs/architecture/adr docs/architecture/module-boundaries.json | grep -q .; then
   echo "Architecture sources changed; regenerating AI context..."
-  bun run generate:ai-context
+  bun run ai:context:generate
   if [ $? -ne 0 ]; then
     echo "Failed to generate AI context artifacts"
     exit 1
@@ -1026,7 +1026,7 @@ async function validateArchitectureViaAIContext() {
 
   // 4. Freshen brain if stale (> 7 days)
   if (isStale(brain.generated_at)) {
-    console.warn("AI context is stale; regenerate with: bun run generate:ai-context");
+    console.warn("AI context is stale; regenerate with: bun run ai:context:generate");
   }
 
   return violations;
@@ -1058,7 +1058,7 @@ infra-audit.ts generates infra-audit-report.json with dependency graph.
 // 1. Trigger ai-context generation
 const { execSync } = require("child_process");
 try {
-  execSync("bun run generate:ai-context --force", { stdio: "inherit" });
+  execSync("bun run ai:context:generate --force", { stdio: "inherit" });
 } catch (error) {
   console.warn("AI context generation failed; continuing audit");
 }
@@ -1956,7 +1956,7 @@ This stage explicitly does **NOT**:
 **If artifacts become corrupted:**
 
 1. Delete docs/ai/context/ directory
-2. Run `bun run generate:ai-context`
+2. Run `bun run ai:context:generate`
 3. Verify artifacts recreated successfully
 4. Commit changes
 

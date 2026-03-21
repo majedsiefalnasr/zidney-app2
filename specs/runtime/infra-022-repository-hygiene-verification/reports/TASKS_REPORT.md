@@ -73,7 +73,7 @@ final report commit (T022).
 
 ## Idempotency Tasks
 
-- T017 (`bun run hygiene:report`) — re-runnable; always overwrites `REPOSITORY_HYGIENE_REPORT.md`
+- T017 (`bun run dev:hygiene:report`) — re-runnable; always overwrites `REPOSITORY_HYGIENE_REPORT.md`
   with fresh output. Idempotent by design.
 - All check modules (T002–T010) — stateless reads; safe to re-execute at any time.
 

@@ -1,8 +1,10 @@
 /**
  * @script db:console
  * @domain db
+ * @category runtime
  * @description Launch an interactive psql session connected to DATABASE_URL
  * @mode manual
+ * @usage bun run db:console
  * @dependencies psql,node:crypto,node:child_process
  *
  * Note: Connects directly to DATABASE_URL — no --workspace= arg required.

@@ -61,7 +61,7 @@ Not applicable — INFRA governance stage. No database writes. No HTTP endpoints
 
 ## Idempotency Tasks
 
-Not applicable — INFRA governance stage. `bun run ai-guard` is a read-only validation script;
+Not applicable — INFRA governance stage. `bun run ai:guard` is a read-only validation script;
 running multiple times produces identical output.
 
 ---

@@ -23,7 +23,7 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [x] T004 Create a deterministic governance command runner with an allowlisted non-shell command surface, explicit per-tool timeout budgets, and structured execution telemetry for `arch:guard:ci`, `bun scripts/infra-audit.ts --quick`, `bun type-safety-guard --json`, `bun run arch:validate-brain`, `gitnexus query`, and `gitnexus impact` in scripts/architecture-health/source-runner.ts
+- [x] T004 Create a deterministic governance command runner with an allowlisted non-shell command surface, explicit per-tool timeout budgets, and structured execution telemetry for `arch:guard:ci`, `bun scripts/infra-audit.ts --quick`, `bun type-safety-guard --json`, `bun run arch:validate:brain`, `gitnexus query`, and `gitnexus impact` in scripts/architecture-health/source-runner.ts
 - [x] T005 [P] Implement the approved weighted threshold policy and PASS/BLOCKED verdict calculation in scripts/architecture-health/score-model.ts
 - [x] T006 [P] Implement finding fingerprinting and cross-tool deduplication in scripts/architecture-health/finding-normalizer.ts
 - [x] T007 [P] Implement baseline-first architecture-intelligence inspection for stale, missing, invalid, and partially regenerated artifacts in scripts/architecture-health/intelligence-snapshot.ts

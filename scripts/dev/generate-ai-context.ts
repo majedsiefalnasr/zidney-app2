@@ -4,9 +4,9 @@
  * Path: scripts/dev/generate-ai-context.ts
  *
  * Usage:
- *   bun run generate-ai-context.ts              # Generate if changed
- *   bun run generate-ai-context.ts --force      # Force generation
- *   bun run generate-ai-context.ts --validate   # Validate after generation
+ *   bun run ai:context:generate              # Generate if changed
+ *   bun run ai:context:generate -- --force  # Force generation
+ *   bun run ai:context:generate -- --validate # Validate after generation
  */
 
 import { join } from 'node:path'

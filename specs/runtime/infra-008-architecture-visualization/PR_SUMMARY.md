@@ -147,8 +147,8 @@ Confirm compliance with Zidney Constitution v1.2.0:
 
 ```bash
 bun test
-bun run vitest run tests/unit/visualize/visualize.test.ts  # 14/14 pass
-bun run vitest run tests/static/06-architecture-visualization.test.ts  # 6/6 pass
+bun run test run tests/unit/visualize/visualize.test.ts  # 14/14 pass
+bun run test run tests/static/06-architecture-visualization.test.ts  # 6/6 pass
 ```
 
 ---

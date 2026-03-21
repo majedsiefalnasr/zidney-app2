@@ -368,7 +368,7 @@ Add a new subsection "GitNexus Context Bootstrap" immediately after the Determin
 
 At every session start, the orchestrator MUST:
 
-1. Execute: `bun run gitnexus:context`
+1. Execute: `bun run arch:gitnexus:context`
 2. Verify output written to: `docs/ai/context/gitnexus-context.json`
 3. Reference this file as the authoritative source for:
    - Which files changed in this session
@@ -388,7 +388,7 @@ Before 6.3-PRE Context7 lookup, add:
 ```markdown
 ### 6.2A — Refresh GitNexus Context
 
-Execute: `bun run gitnexus:context`
+Execute: `bun run arch:gitnexus:context`
 
 Use `docs/ai/context/gitnexus-context.json` to verify:
 
@@ -402,7 +402,7 @@ Add GitNexus validation to the parallel guardian list:
 ```markdown
 #### GitNexus Context Validation (Pre-Closure)
 
-Execute: `bun run gitnexus:validate`
+Execute: `bun run arch:validate:gitnexus`
 
 BLOCK CLOSURE if:
 
@@ -429,7 +429,7 @@ AI agents operating inside Zidney MUST use GitNexus context when:
 3. **Making architecture decisions** — Cross-reference `architectureLayerMap` and
    `riskIndicators` before proposing structural modifications.
 
-Execution mechanism: `bun run gitnexus:context` (scripts/gitnexus-context.ts)
+Execution mechanism: `bun run arch:gitnexus:context` (scripts/gitnexus-context.ts)
 
 The auto-trigger behavior for GitNexus MCP (defined in the GitNexus MCP section above)
 remains in effect. This policy adds the obligation to also execute the local context
@@ -468,9 +468,9 @@ Two new script keys added to root `package.json`:
 
 ### 6.2 — CI Gate Documentation
 
-The CI gate `bun run gitnexus:validate` must be documented. Reference from `docs/ci/` or create `docs/ci/gitnexus-validation.md` noting:
+The CI gate `bun run arch:validate:gitnexus` must be documented. Reference from `docs/ci/` or create `docs/ci/gitnexus-validation.md` noting:
 
-- Gate command: `bun run gitnexus:validate`
+- Gate command: `bun run arch:validate:gitnexus`
 - Failure conditions (non-zero exit, schema violation, script error)
 - Pass condition (empty arrays are valid)
 - Typical CI execution time: < 60 seconds (NFR-003)
@@ -479,7 +479,7 @@ The CI gate `bun run gitnexus:validate` must be documented. Reference from `docs
 
 ### 6.3 — `validate-runtime-scripts` Compliance
 
-After adding new script keys, `bun run validate-runtime-scripts` must pass. The scripts follow `<domain>:<action>` naming:
+After adding new script keys, `bun run validate:runtime:scripts` must pass. The scripts follow `<domain>:<action>` naming:
 
 - `gitnexus:context` ✅
 - `gitnexus:validate` ✅ (follows `<domain>:<action>` format per script governance rules)
@@ -496,7 +496,7 @@ After adding new script keys, `bun run validate-runtime-scripts` must pass. The 
 Required sections (all 5 per AC-011):
 
 1. **What GitNexus is and why Zidney uses it** — Intelligence layer overview, problem solved
-2. **How to run GitNexus locally** — Step-by-step: ensure brain is fresh → `bun run arch:audit` → `bun run gitnexus:context`
+2. **How to run GitNexus locally** — Step-by-step: ensure brain is fresh → `bun run arch:audit` → `bun run arch:gitnexus:context`
 3. **Output structure** — Field-by-field reference with link to `docs/ai/gitnexus-context.schema.json`
 4. **How the orchestrator uses GitNexus context** — Lifecycle: session start → implementation → closure
 5. **Troubleshooting** — Common failures and resolutions (brain not found, git errors, empty output, schema mismatch)

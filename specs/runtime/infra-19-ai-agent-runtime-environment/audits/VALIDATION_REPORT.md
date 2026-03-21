@@ -117,7 +117,7 @@ Duration    239ms
 
 | Source             | Warning                                                                                                        |
 | ------------------ | -------------------------------------------------------------------------------------------------------------- |
-| CI/CD Check 6      | `bun ai-runtime:status` should be `bun run ai-runtime:status` for convention consistency — **fixed**           |
+| CI/CD Check 6      | `bun ai-runtime:status` should be `bun run ai:runtime:status` for convention consistency — **fixed**           |
 | Deployment Check 5 | arch-guard job 5-min timeout may be tight on full cache miss with ai-context:refresh — monitor P99 CI duration |
 
 No errors. No blocking issues.

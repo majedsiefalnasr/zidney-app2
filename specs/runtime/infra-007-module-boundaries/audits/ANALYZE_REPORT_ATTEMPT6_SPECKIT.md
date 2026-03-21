@@ -39,11 +39,11 @@ undeclared-module message string.
 **PASS**
 
 Criterion 1 (undeclared in audit output): "Given packages/notifications exists on disk but not in
-module-boundaries.json, When bun run infra-audit is run, Then the audit reports undeclared module:
+module-boundaries.json, When bun run arch:audit is run, Then the audit reports undeclared module:
 packages/notifications." Present.
 
 Criterion 2 (warning disappears after registration): "Given the developer adds
-packages/notifications to module-boundaries.json with layer: domain, When bun run infra-audit is run
+packages/notifications to module-boundaries.json with layer: domain, When bun run arch:audit is run
 again, Then no undeclared-module warning is produced." Present.
 
 #### S5 - Edge cases cover external npm packages, missing file, zero-dependency modules
@@ -126,7 +126,7 @@ sub-cases for two distinct code paths.
 
 **PASS**
 
-T024 (Phase 8 Final Validation): Measure wall-clock time of bun run ai-guard from repo root and
+T024 (Phase 8 Final Validation): Measure wall-clock time of bun run ai:guard from repo root and
 confirm it completes in under 30 seconds on the full monorepo scan -- NFR-004 (performance budget)
 automated verification. Also plan.md Step 9 provides algorithmic rationale: O(n\*m) complexity, no
 recursive disk traversal or network calls, expected well under 30s.

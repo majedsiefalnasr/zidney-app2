@@ -8,14 +8,14 @@
 
 ## Validation Gate Results
 
-| Check              | Command                                                              | Result  |
-| ------------------ | -------------------------------------------------------------------- | ------- |
-| Unit tests         | `bun run vitest run tests/unit/ai-guard/ai-guard-validation.test.ts` | ✅ PASS |
-| Static tests       | `bun run vitest run tests/static/05-architecture-guard.test.ts`      | ✅ PASS |
-| Lint (Biome)       | `bunx lint-staged` (via Husky gate 1)                                | ✅ PASS |
-| Type check         | `bun scripts/ai-guard.ts` (via Husky gate 2)                         | ✅ PASS |
-| Architecture guard | `bun scripts/ai-guard.ts`                                            | ✅ PASS |
-| Infra audit        | `bun scripts/infra-audit.ts --quick` (via Husky gate 3)              | ✅ PASS |
+| Check              | Command                                                            | Result  |
+| ------------------ | ------------------------------------------------------------------ | ------- |
+| Unit tests         | `bun run test run tests/unit/ai-guard/ai-guard-validation.test.ts` | ✅ PASS |
+| Static tests       | `bun run test run tests/static/05-architecture-guard.test.ts`      | ✅ PASS |
+| Lint (Biome)       | `bunx lint-staged` (via Husky gate 1)                              | ✅ PASS |
+| Type check         | `bun scripts/ai-guard.ts` (via Husky gate 2)                       | ✅ PASS |
+| Architecture guard | `bun scripts/ai-guard.ts`                                          | ✅ PASS |
+| Infra audit        | `bun scripts/infra-audit.ts --quick` (via Husky gate 3)            | ✅ PASS |
 
 ---
 

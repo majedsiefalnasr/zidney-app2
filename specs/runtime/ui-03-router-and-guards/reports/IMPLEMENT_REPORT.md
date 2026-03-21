@@ -154,7 +154,7 @@ pass.
 | T056    | Create `apps/mmc/tests/integration/core/router/router.test.ts`                              | Tests           | ✅     |
 | T057    | Create `apps/backoffice/tests/integration/core/router/router.test.ts`                       | Tests           | ✅     |
 | T058    | Create `apps/frontoffice/tests/integration/core/router/router.test.ts`                      | Tests           | ✅     |
-| T059    | `bun run tsc --noEmit` — 0 TypeScript errors                                                | Validation      | ✅     |
+| T059    | `bun run typecheck:src --noEmit` — 0 TypeScript errors                                      | Validation      | ✅     |
 | T060    | `bun run lint` — 0 new ESLint errors                                                        | Validation      | ✅     |
 | T061    | Grep `guestOnly\|requiredRole\|requiredModule` — 0 results                                  | Validation      | ✅     |
 | T062    | Grep singleton router exports — 0 results                                                   | Validation      | ✅     |

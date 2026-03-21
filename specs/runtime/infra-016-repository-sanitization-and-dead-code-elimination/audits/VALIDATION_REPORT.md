@@ -11,7 +11,7 @@ The first cleanup batch is retained. No validation signal indicates that deletin
 Static validation gates passed. Remaining failures are baseline or environment issues outside the files changed in this batch:
 
 - `bun run test` reports integration failures because PostgreSQL endpoints on `5432` and `5433` are not available in the current environment.
-- `bun run type-safety-guard` reports an existing violation in `packages/ui-system/src/utils/url-sync.ts:224` caused by an `as any` assertion.
+- `bun run arch:type-safety-guard` reports an existing violation in `packages/ui-system/src/utils/url-sync.ts:224` caused by an `as any` assertion.
 
 ## Gate Results
 
@@ -24,8 +24,8 @@ Static validation gates passed. Remaining failures are baseline or environment i
 | `bun scripts/architecture-diff.ts`           | PASS               | Completed before later gate failures.                                                                                                            |
 | `bun scripts/infra-audit.ts`                 | PASS with warnings | Duplicate-edge warnings reported; no blocking failure before later gates.                                                                        |
 | `bun scripts/validate-architecture-brain.ts` | PASS               | Completed before later gate failures.                                                                                                            |
-| `bun run type-safety-guard`                  | FAIL (baseline)    | Existing `type-assertion-any` violation at `packages/ui-system/src/utils/url-sync.ts:224`.                                                       |
-| `bun run ai-context:refresh`                 | PASS (output)      | Generator output reported `Status: SUCCESS`, `Artifacts: 7`, `Violations: 0`; terminal wrapper returned exit code `130` after successful output. |
+| `bun run arch:type-safety-guard`             | FAIL (baseline)    | Existing `type-assertion-any` violation at `packages/ui-system/src/utils/url-sync.ts:224`.                                                       |
+| `bun run ai:context:refresh`                 | PASS (output)      | Generator output reported `Status: SUCCESS`, `Artifacts: 7`, `Violations: 0`; terminal wrapper returned exit code `130` after successful output. |
 | `bun run test`                               | FAIL (environment) | Summary: `3423` passed, `72` failed; failures show `ECONNREFUSED` to local PostgreSQL on ports `5432` and `5433`.                                |
 | `bun run validate:workflows`                 | PASS               | `actionlint` invocation produced no workflow errors.                                                                                             |
 

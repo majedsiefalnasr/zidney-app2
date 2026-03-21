@@ -1,9 +1,9 @@
 /**
- * @script db:validate-licenses
+ * @script db:validate:licenses
  * @domain db
+ * @category governance
  * @description Validate license distribution in master_db — report status counts per license status
- * @mode manual,ci
- * @dependencies pg,node:crypto
+ * @usage bun run db:validate:licenses
  */
 
 import { randomUUID } from 'node:crypto'

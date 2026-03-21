@@ -127,7 +127,7 @@ export function checkArchitectureGuard(): boolean {
  * Returns true if the check recorded an error.
  */
 export function checkArchitectureBrain(): boolean {
-  const result = spawnCheck(['bun', 'arch:validate-brain'])
+  const result = spawnCheck(['bun', 'arch:validate:brain'])
   if (result.exitCode !== 0) {
     const detail = result.errorMessage || 'brain validation failed'
     line('architecture brain', 'error', `${detail} — run: bun scripts/infra-audit.ts`)
@@ -219,7 +219,7 @@ export function checkEnvFile(): boolean {
  * Returns true if the check recorded an error.
  */
 export function checkTypeScript(): boolean {
-  const result = spawnCheck(['bun', 'type-safety-guard'])
+  const result = spawnCheck(['bun', 'arch:type-safety-guard'])
   if (result.exitCode !== 0) {
     const detail = result.errorMessage || 'type violations found'
     line('TypeScript configuration', 'error', `${detail} — run: bun typecheck`)

@@ -3,7 +3,7 @@
 ## Command
 
 ```sh
-bun run maintenance:cache-clean
+bun run infra:cache:clean
 ```
 
 ## Purpose
@@ -46,7 +46,7 @@ via structured log.
 ## Example Usage
 
 ```sh
-bun run maintenance:cache-clean
+bun run infra:cache:clean
 ```
 
 Expected output:

@@ -3,7 +3,7 @@
 ## Command
 
 ```sh
-bun run validate-runtime-scripts
+bun run validate:runtime:scripts
 ```
 
 ## Purpose
@@ -52,7 +52,7 @@ Exits 0 when all references are registered.
 
 ```sh
 # Run guard (exits 0 if all registered, 1 if any missing)
-bun run validate-runtime-scripts
+bun run validate:runtime:scripts
 ```
 
 Expected output on pass:

@@ -210,7 +210,7 @@ Validate AI context artifacts under `docs/ai/context/`.
 Validation command:
 
 ```bash
-bun run ai-context:validate
+bun run ai:context:validate
 ```
 
 Artifacts validated:
@@ -454,7 +454,7 @@ No automated rollback is required. All outputs are additive report artifacts.
 
 1. INFRA-16 (repository sanitization) and INFRA-21 (support surface routing and template migration) are already merged and stable on the base branch before this stage begins.
 2. `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md` exists and is populated with authoritative surface declarations from INFRA-21.
-3. `bun run ai-context:validate`, `bun run arch:guard`, and `bun run arch:health` are available and functioning as of the base branch state.
+3. `bun run ai:context:validate`, `bun run arch:guard`, and `bun run arch:health` are available and functioning as of the base branch state.
 4. Dead script detection begins from `scripts/` only; generated build outputs are excluded.
 5. Cleanup actions (deletion of dead scripts, removal of unused dependencies) are deferred to a human reviewer after consulting the hygiene report. This stage produces the report but does not perform destructive operations autonomously.
 6. The hygiene report is an additive artifact; if a prior version exists, the new version replaces it.
@@ -484,7 +484,7 @@ No automated rollback is required. All outputs are additive report artifacts.
 
 - Q: T004 — Should dependency hygiene check only the root `package.json`, or should it also check all workspace packages under `packages/*` and `apps/*`? → A: Check both top-level root `package.json` AND all workspace package dependencies (`packages/*` and `apps/*`). Each workspace package is checked independently. The report groups findings by workspace root.
 
-- Q: T008 — If `bun run ai-context:validate` exits with a non-zero code because the script itself does not exist, should this be treated as SKIP, WARNING, or FAIL? → A: If the script does not exist (command not found or exit ≠ 0 due to missing script), treat as SKIP and document under "AI Context — Script Unavailable." If the script exists but returns errors about actual invalid artifacts, treat as WARNING. Only structural script execution errors (exit code 1 from actual validation failures) are FAIL. Stage completion is not blocked by a SKIP result.
+- Q: T008 — If `bun run ai:context:validate` exits with a non-zero code because the script itself does not exist, should this be treated as SKIP, WARNING, or FAIL? → A: If the script does not exist (command not found or exit ≠ 0 due to missing script), treat as SKIP and document under "AI Context — Script Unavailable." If the script exists but returns errors about actual invalid artifacts, treat as WARNING. Only structural script execution errors (exit code 1 from actual validation failures) are FAIL. Stage completion is not blocked by a SKIP result.
 
 - Q: T009 — If `arch:guard` reports pre-existing violations that were introduced before this stage, should they block stage completion or be documented only? → A: Pre-existing violations (introduced before this stage, not by any change in this branch) do NOT block stage completion. They are documented in the hygiene report under "Architecture Guard — Pre-existing Violations Found." Only violations introduced by this stage's own changes would block. Since this stage introduces no code changes, any violations found are pre-existing and are documented only.
 

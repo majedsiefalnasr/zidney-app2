@@ -164,15 +164,15 @@ The JSON file has the following top-level keys:
 
 After running the script, the following must be done **manually** to complete the audit:
 
-| Step                    | What to Do                                                                                                                                                 | Where Results Go |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| ESLint rule severity    | Open each `eslint.config.*` and record severity for `no-unused-vars`, `@typescript-eslint/no-explicit-any`, `no-console`, `vue/multi-word-component-names` | Gap Report §3    |
-| CI workflow posture     | Read each `.github/workflows/*.yml` and mark each step (Lint/Type/Unit/Integration/E2E/Coverage Gate) as Present/Absent/Informational                      | Gap Report §4    |
-| `bun install` exit code | Run and record                                                                                                                                             | Gap Report §5    |
-| `bun run tsc --noEmit`  | Run and record total TS error count                                                                                                                        | Gap Report §7    |
-| `bun run lint`          | Run and record error and warning counts                                                                                                                    | Gap Report §7    |
-| `bun test --coverage`   | Run, record Lines%/Fn%/Stmt%/Branch%; record DB-GATED failures                                                                                             | Gap Report §2    |
-| `bun run build`         | Run and record exit code                                                                                                                                   | Gap Report §5    |
+| Step                             | What to Do                                                                                                                                                 | Where Results Go |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| ESLint rule severity             | Open each `eslint.config.*` and record severity for `no-unused-vars`, `@typescript-eslint/no-explicit-any`, `no-console`, `vue/multi-word-component-names` | Gap Report §3    |
+| CI workflow posture              | Read each `.github/workflows/*.yml` and mark each step (Lint/Type/Unit/Integration/E2E/Coverage Gate) as Present/Absent/Informational                      | Gap Report §4    |
+| `bun install` exit code          | Run and record                                                                                                                                             | Gap Report §5    |
+| `bun run typecheck:src --noEmit` | Run and record total TS error count                                                                                                                        | Gap Report §7    |
+| `bun run lint`                   | Run and record error and warning counts                                                                                                                    | Gap Report §7    |
+| `bun test --coverage`            | Run, record Lines%/Fn%/Stmt%/Branch%; record DB-GATED failures                                                                                             | Gap Report §2    |
+| `bun run build`                  | Run and record exit code                                                                                                                                   | Gap Report §5    |
 
 ---
 

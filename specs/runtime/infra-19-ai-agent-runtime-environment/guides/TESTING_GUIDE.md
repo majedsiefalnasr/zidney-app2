@@ -141,7 +141,7 @@ bun typecheck
 
 - If context loader fails, verify `docs/ai/AI_CONTEXT_INDEX.md` exists
 - If skill loader fails, check `.agents/skills/` directory structure
-- If architecture intelligence fails, run `bun run ai-context:refresh` to regenerate the brain
+- If architecture intelligence fails, run `bun run ai:context:refresh` to regenerate the brain
 
 ---
 
@@ -153,7 +153,7 @@ bun typecheck
 2. Navigate to the PR and view the "Checks" tab
 3. Find the `arch-guard` job in the CI workflow
 4. Expand the job and look for "AI Agent Runtime Status Check" step
-5. Observe the step runs `bun run ai-runtime:status` and shows output
+5. Observe the step runs `bun run ai:runtime:status` and shows output
 
 **Expected:**
 
@@ -165,7 +165,7 @@ bun typecheck
 **Troubleshooting:**
 
 - If the step fails in CI, check the CI logs for which check failed
-- Common cause: `docs/ai/context/ai-architecture-brain.json` is stale — run `bun run ai-context:refresh`
+- Common cause: `docs/ai/context/ai-architecture-brain.json` is stale — run `bun run ai:context:refresh`
 
 ---
 
@@ -192,7 +192,7 @@ bun typecheck
 **Troubleshooting:**
 
 - Revert the manual edit after testing: `git checkout docs/ai/context/ai-architecture-brain.json`
-- Or regenerate: `bun run ai-context:refresh`
+- Or regenerate: `bun run ai:context:refresh`
 
 ---
 
@@ -244,7 +244,7 @@ This scenario is primarily validated by unit tests, but you can simulate it manu
 A: Verifies `docs/ai/AI_CONTEXT_INDEX.md` exists and contains required sections. This file is the entry point for AI agent context loading.
 
 **Q: How do I regenerate the architecture brain if it's stale?**  
-A: Run `bun run ai-context:refresh` (or `bun ai-context:refresh`). This re-indexes the repository and updates `docs/ai/context/ai-architecture-brain.json`.
+A: Run `bun run ai:context:refresh` (or `bun ai-context:refresh`). This re-indexes the repository and updates `docs/ai/context/ai-architecture-brain.json`.
 
 **Q: Why does the script use `independent try/catch per sub-check`?**  
 A: Each check (especially Architecture Intelligence) has multiple internal validations. Independent try/catch ensures that if one sub-check fails (e.g., empty brain), the script continues to attempt the other sub-checks and reports all findings.

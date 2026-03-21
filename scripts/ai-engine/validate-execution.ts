@@ -116,7 +116,7 @@ async function main(): Promise<void> {
   })
 
   const typeSafetyGuard = await runGovernanceTool({
-    command: 'type-safety-guard',
+    command: 'arch:type-safety-guard',
     args: ['--json', '--no-exit-error'],
     timeoutMs,
   })

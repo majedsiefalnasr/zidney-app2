@@ -83,13 +83,13 @@ npx vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts
 npx vitest run tests/unit/infra-audit/infra-audit-boundaries.test.ts
 
 # Option 5: Runtime execution of ai-guard (≤0.4s)
-bun run ai-guard
+bun run ai:guard
 
 # Option 6: Full typecheck
-bun run tsc --noEmit
+bun run typecheck:src --noEmit
 
 # Option 7: Lint (should see 0 errors)
-bun run biome check scripts/ai-guard.ts scripts/infra-audit.ts tests/
+bun run lint check scripts/ai-guard.ts scripts/infra-audit.ts tests/
 ```
 
 **Expected outcome:** All commands exit with code 0. All tests pass. No errors.
@@ -105,16 +105,16 @@ These commands mirror the CI pipeline and validate the entire module boundary sy
 bun run test:unit:boundaries
 
 # AI guard runtime execution (pre-commit hook gate)
-bun run ai-guard
+bun run ai:guard
 
 # Type check (catches TypeScript errors)
-bun run tsc --noEmit
+bun run typecheck:src --noEmit
 
 # Lint (catches code style violations)
-bun run biome check .
+bun run lint check .
 
 # Full suite (recommended for pre-deployment verification)
-bun run test:unit:boundaries && bun run ai-guard && bun run tsc --noEmit && bun run biome check .
+bun run test:unit:boundaries && bun run ai:guard && bun run typecheck:src --noEmit && bun run lint check .
 ```
 
 ---
@@ -252,13 +252,13 @@ npx vitest run tests/unit/infra-audit/infra-audit-boundaries.test.ts
 
 ### Scenario 4 — AI Guard Runtime Execution (Performance)
 
-**Purpose:** Verify that `bun run ai-guard` loads module-boundaries.json and validates the current
+**Purpose:** Verify that `bun run ai:guard` loads module-boundaries.json and validates the current
 repository state successfully.
 
 **Run:**
 
 ```bash
-time bun run ai-guard
+time bun run ai:guard
 ```
 
 **Expected output:**
@@ -343,7 +343,7 @@ rm test-violation.ts
 ```bash
 # Look for these steps in .github/workflows/ci.yml
 - name: module-boundary-validation
-  run: bun run ai-guard
+  run: bun run ai:guard
 
 - name: Run module boundary unit tests
   run: bun run test:unit:boundaries
@@ -357,7 +357,7 @@ rm test-violation.ts
 
 **Troubleshooting:**
 
-- If CI step fails but local `bun run ai-guard` passes → check for OS-specific path issues (Windows
+- If CI step fails but local `bun run ai:guard` passes → check for OS-specific path issues (Windows
   vs. Unix paths)
 - If 43 tests don't run in CI → verify `test:unit:boundaries` script is defined in package.json
 - If timeout occurs → increase timeout threshold in workflows; investigate slow tests
@@ -389,7 +389,7 @@ If you create a new module (e.g., `packages/new-module`):
 
 3. **Verify:**
    ```bash
-   bun run ai-guard  # Should show zero undeclared modules
+   bun run ai:guard  # Should show zero undeclared modules
    ```
 
 ### Edge Case 2 — Cross-Layer Import
@@ -419,7 +419,7 @@ If you need to modify the governance rules:
    ```
 3. Run ai-guard to validate against repo:
    ```bash
-   bun run ai-guard
+   bun run ai:guard
    ```
 4. Commit (pre-commit will re-validate)
 
@@ -430,9 +430,9 @@ If you need to modify the governance rules:
 Before approving this PR:
 
 - [ ] All 43 tests pass: `bun run test:unit:boundaries` → 43/43
-- [ ] Type check passes: `bun run tsc --noEmit` → exit 0
-- [ ] Lint passes: `bun run biome check` → exit 0, 0 errors
-- [ ] AI guard executes: `bun run ai-guard` → exit 0, < 0.4s
+- [ ] Type check passes: `bun run typecheck:src --noEmit` → exit 0
+- [ ] Lint passes: `bun run lint check` → exit 0, 0 errors
+- [ ] AI guard executes: `bun run ai:guard` → exit 0, < 0.4s
 - [ ] CI passes on this branch
 - [ ] module-boundaries.json is well-formed (static tests confirm)
 - [ ] All 13 modules declared in layers
@@ -451,7 +451,7 @@ Before approving this PR:
 | `module-boundaries.json not found` | File path error                      | Verify: `ls docs/architecture/module-boundaries.json` |
 | `layer violation detected!`        | Wrong rule in module-boundaries.json | Review allowed_dependencies matrix                    |
 | `43 tests don't run in CI`         | test:unit:boundaries script missing  | Check package.json `scripts` section                  |
-| `ai-guard takes > 30s`             | Large codebase or slow machine       | Profile with `time bun run ai-guard`                  |
+| `ai-guard takes > 30s`             | Large codebase or slow machine       | Profile with `time bun run ai:guard`                  |
 | `Cross-app import not blocked`     | Cross-cutting rule not in list       | Add glob pattern to cross_cutting_rules               |
 | Pre-commit doesn't run             | Husky not installed                  | Run `bun install` and re-configure hooks              |
 

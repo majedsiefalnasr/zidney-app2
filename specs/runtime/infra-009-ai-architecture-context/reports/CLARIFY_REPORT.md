@@ -34,7 +34,7 @@ architectural and implementation decisions.
 
 **Implementation Impact:**
 
-- Add `bun run generate:ai-context` to pre-commit hooks
+- Add `bun run ai:context:generate` to pre-commit hooks
 - Add CI validation job
 - Baseline cost: ~2-5 seconds per commit locally, ~10 seconds in CI
 

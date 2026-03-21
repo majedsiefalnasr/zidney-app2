@@ -1,5 +1,13 @@
 #!/usr/bin/env bun
 
+/**
+ * @script arch:type-safety-guard
+ * @domain arch
+ * @category governance
+ * @description Unified architecture guard — runs type safety checks and validates import boundaries using the architecture contract.
+ * @usage bun run arch:type-safety-guard
+ */
+
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { runUnifiedArchitectureGuard } from './architecture-guard/runner'

@@ -71,14 +71,14 @@ validating all Phase 3 work.
 
 ### Independent Test Criteria
 
-- `bun run db:pool-status` exits 0 (or exits 0 with structured infra-absent warn log)
-- `bun run db:validate-licenses` exits 0 (infra-absent pattern)
+- `bun run db:status:pool` exits 0 (or exits 0 with structured infra-absent warn log)
+- `bun run db:validate:licenses` exits 0 (infra-absent pattern)
 - `bun run db:migrate` exits 0 (infra-absent pattern)
 - `bun run db:console` exits 0 (infra-absent pattern)
 - `bun run validate:ai-context-fresh` exits 0 or 1 with structured log (no unhandled exception)
 - `bun run validate:ai-context-schemas` exits 0 or 1 with structured log
-- `bun run maintenance:cache-clean` exits 0
-- `bun run seed-dashboard-test-data` exits 0 (infra-absent)
+- `bun run infra:cache:clean` exits 0
+- `bun run dev:seed:dashboard-test-data` exits 0 (infra-absent)
 - Root `package.json` contains all 29 new registrations listed in plan.md §T006
 
 ### Tasks
@@ -116,13 +116,13 @@ validating all Phase 3 work.
 
 ## Phase 4 — US3: CI Guard Script
 
-> **US3 Goal:** `bun run validate-runtime-scripts` hard-blocks (exit 1) when any `bun run <script>`
+> **US3 Goal:** `bun run validate:runtime:scripts` hard-blocks (exit 1) when any `bun run <script>`
 > reference in `specs/runtime/**` is absent from root `package.json`; exits 0 when all are
 > registered.
 
 ### Independent Test Criteria
 
-- `bun run validate-runtime-scripts` exits 0 after Phase 3 registration is complete
+- `bun run validate:runtime:scripts` exits 0 after Phase 3 registration is complete
 - Unit test: `extractScriptReferences` correctly extracts script names from markdown content
 - Unit test: excluded names (`my-new-script`, `scripts`, `wrapper`, `lint:staged`) are filtered
 - Unit test: CLI flag forms (`bun run --watch`) do not produce a match
@@ -151,8 +151,8 @@ validating all Phase 3 work.
 - `docs/scripts/README.md` exists with domain-grouped table of contents
 - `docs/scripts/SCRIPT_REGISTRY.md` is present and lists all 79 in-scope scripts
 - Each of the 10 recovered scripts has a `docs/scripts/<script>.md` with all 8 required sections
-- `bun run generate-script-docs` exits 0 and overwrites/regenerates doc files from metadata headers
-- `bun run generate-script-docs` exits 1 if any script violates the `<domain>:<action>` naming convention
+- `bun run dev:generate:script-docs` exits 0 and overwrites/regenerates doc files from metadata headers
+- `bun run dev:generate:script-docs` exits 1 if any script violates the `<domain>:<action>` naming convention
 
 ### Tasks
 
@@ -177,7 +177,7 @@ validating all Phase 3 work.
 
 - [x] T037 [US2] Create `scripts/generate/script-docs.ts` — JSDoc metadata header, `createLogger('generate-script-docs')`, correlationId; walks `scripts/**/*.ts` excluding `__tests__/`; parses `@script`, `@domain`, `@description`, `@mode`, `@dependencies` JSDoc tags; validates each `@script` key against `DOMAIN_ACTION_RE` + legacy allowlist; writes `docs/scripts/<script-key-with-dashes>.md` per recovered script; writes `docs/scripts/SCRIPT_REGISTRY.md`; exits 1 on naming violation — scripts/generate/script-docs.ts
 - [x] T038 [US2] Register `generate-script-docs` in root `package.json` scripts block: `"generate-script-docs": "bun run scripts/generate/script-docs.ts"` — package.json
-- [x] T039 [US2] Execute `bun run generate-script-docs` → verify it exits 0 and overwrites `docs/scripts/` pages matching the hand-authored versions from T027–T036
+- [x] T039 [US2] Execute `bun run dev:generate:script-docs` → verify it exits 0 and overwrites `docs/scripts/` pages matching the hand-authored versions from T027–T036
 
 ---
 
@@ -189,7 +189,7 @@ validating all Phase 3 work.
 - [x] T041 Update `docs/scripts/SCRIPT_REGISTRY.md` to post-fix status — run `bun run scripts/validate/diff-script-registry.ts` and apply final state (MISSING → RECONSTRUCTED, DUPLICATE → CANONICAL, UNREGISTERED → REGISTERED, ALIAS-NEEDED → REGISTERED) — docs/scripts/SCRIPT_REGISTRY.md
 - [x] T042 Execute T007 validation run — invoke each new/recovered script via `bun run <script>` from repo root, record exit code, stdout/stderr structured log output, and classification (PASS / PASS-INFRA-DEPENDENT / FAIL) for: `db:pool-status`, `db:validate-licenses`, `db:migrate`, `db:console`, `validate:ai-context-fresh`, `validate:ai-context-schemas`, `maintenance:cache-clean`, `seed-dashboard-test-data`, `validate-runtime-scripts`, `generate-script-docs` — (execution only, no file)
 - [x] T043 Write `audits/runtime-script-validation.md` — validation report with date, executor, and per-row results table (Script | Exit Code | Output Excerpt | Classification) from T042 execution — specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/runtime-script-validation.md
-- [x] T044 Execute `bun run validate-runtime-scripts` from repo root → confirm exit 0 (zero unregistered spec references); if exit 1, identify missing registrations and add them in root `package.json` before proceeding — package.json (if remediation needed)
+- [x] T044 Execute `bun run validate:runtime:scripts` from repo root → confirm exit 0 (zero unregistered spec references); if exit 1, identify missing registrations and add them in root `package.json` before proceeding — package.json (if remediation needed)
 - [x] T045 Run `bun run typecheck` → confirm zero TypeScript errors across all new script files — (validation only)
 - [x] T046 Run `bun run lint` → confirm zero Biome violations across all new script files — (validation only)
 

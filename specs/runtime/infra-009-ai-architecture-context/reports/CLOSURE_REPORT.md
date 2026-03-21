@@ -351,19 +351,19 @@ tests/
 
 ```bash
 # ADR changes detected
-bun run ai-context:refresh
+bun run ai:context:refresh
 
 # Architecture audit changes
-bun run ai-context:refresh
+bun run ai:context:refresh
 
 # Module boundaries change
-bun run ai-context:refresh
+bun run ai:context:refresh
 ```
 
 **Manual Refresh (if needed):**
 
 ```bash
-bun run ai-context:generate --force
+bun run ai:context:generate --force
 ```
 
 ### Monitoring & Maintenance

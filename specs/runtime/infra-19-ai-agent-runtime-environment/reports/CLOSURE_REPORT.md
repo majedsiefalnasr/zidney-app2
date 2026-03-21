@@ -37,7 +37,7 @@ Zidney Hard Mode Workflow for STAGE_INFRA_19_AI_AGENT_RUNTIME_ENVIRONMENT is **C
 
 - **`package.json` entries** — 3 `ai-runtime:*` scripts added: `ai-runtime:status` (run the diagnostic), `ai-runtime:refresh` (refresh context), `ai-runtime:validate` (validate brain).
 
-- **`.github/workflows/ci.yml` integration** — 2 new consecutive steps in `arch-guard` job: (1) "Generate ai-context on cache miss" (conditional on cache-hit != true), (2) "AI Agent Runtime Status Check" (run `bun run ai-runtime:status`).
+- **`.github/workflows/ci.yml` integration** — 2 new consecutive steps in `arch-guard` job: (1) "Generate ai-context on cache miss" (conditional on cache-hit != true), (2) "AI Agent Runtime Status Check" (run `bun run ai:runtime:status`).
 
 ---
 

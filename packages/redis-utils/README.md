@@ -28,7 +28,7 @@ primitives used across the API and Worker services.
 
 ```bash
 # From repo root
-bun run vitest run --project redis-utils
+bun run test run --project redis-utils
 
 # From this directory
 bun run test

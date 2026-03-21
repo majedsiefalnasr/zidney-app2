@@ -226,13 +226,13 @@ unified pre-merge gate combining lint, type-check, and unit tests is absent.
 
 All commands run at SHA `10d878c3ae506e15ecd470327598ac87de186fb2` on 2026-03-04.
 
-| Command                | Exit Code | Notes                                                                     |
-| ---------------------- | --------- | ------------------------------------------------------------------------- |
-| `bun install`          | 0         | 1122 installs, no changes; no compatibility warnings                      |
-| `bun run tsc --noEmit` | non-zero  | 2 pre-existing TS errors (see §7); no errors in new files                 |
-| `bun run lint`         | non-zero  | 10 errors, 2369 warnings; all pre-existing; none in new files             |
-| `bun test --coverage`  | —         | **DB-GATED** — connection refused to staging API and local DB             |
-| `bun run build`        | non-zero  | `bun workspaces run build` — `workspaces` subcommand not supported by Bun |
+| Command                          | Exit Code | Notes                                                                     |
+| -------------------------------- | --------- | ------------------------------------------------------------------------- |
+| `bun install`                    | 0         | 1122 installs, no changes; no compatibility warnings                      |
+| `bun run typecheck:src --noEmit` | non-zero  | 2 pre-existing TS errors (see §7); no errors in new files                 |
+| `bun run lint`                   | non-zero  | 10 errors, 2369 warnings; all pre-existing; none in new files             |
+| `bun test --coverage`            | —         | **DB-GATED** — connection refused to staging API and local DB             |
+| `bun run build`                  | non-zero  | `bun workspaces run build` — `workspaces` subcommand not supported by Bun |
 
 ### 5.2 Coverage Baseline
 

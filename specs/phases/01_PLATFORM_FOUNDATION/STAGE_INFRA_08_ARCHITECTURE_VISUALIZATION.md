@@ -213,7 +213,7 @@ Visualization generation can run in CI to keep diagrams up to date.
 Recommended pipeline step:
 
 ```
-bun run infra-audit
+bun run arch:audit
 bun run architecture:visualize
 ```
 

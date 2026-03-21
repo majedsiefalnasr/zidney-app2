@@ -46,7 +46,7 @@ isolation test, hono alias in vitest.config.ts, null guard in context handler).
 ### Unit Tests
 
 ```
-bun run vitest run tests/unit/middleware/backoffice-rbac-guard.test.ts tests/unit/middleware/backoffice-module-guard.test.ts tests/unit/middleware/license-enforcement.test.ts tests/unit/db/migrations/tenant-rbac-skeleton.test.ts
+bun run test run tests/unit/middleware/backoffice-rbac-guard.test.ts tests/unit/middleware/backoffice-module-guard.test.ts tests/unit/middleware/license-enforcement.test.ts tests/unit/db/migrations/tenant-rbac-skeleton.test.ts
 
  Test Files  4 passed (4)
       Tests  30 passed (30)

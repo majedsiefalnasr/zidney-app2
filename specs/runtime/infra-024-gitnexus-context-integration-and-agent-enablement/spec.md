@@ -90,7 +90,7 @@ This stage is **architecture tooling only**. No tenant runtime code is modified.
 6. Agent execution policy — GitNexus usage rules for impact analysis and reasoning
 7. Deterministic test harness at `tests/gitnexus-context.test.ts`
 8. Validation script at `scripts/validate-gitnexus.ts`
-9. CI integration: `bun run gitnexus:validate` gate
+9. CI integration: `bun run arch:validate:gitnexus` gate
 10. Closure gate enforcement — orchestrator blocks closure without GitNexus validation
 11. Documentation at `docs/ai/gitnexus.md`
 12. Governance rule update in `AGENTS.md`
@@ -262,7 +262,7 @@ The validation script must be integrated into the CI pipeline as a required gate
 
 -- Root `package.json` includes a script entry `gitnexus:validate` that executes `scripts/validate-gitnexus.ts`
 
-- CI configuration calls `bun run gitnexus:validate`
+- CI configuration calls `bun run arch:validate:gitnexus`
 - CI fails if:
   - GitNexus CLI command fails (non-zero exit code)
   - Schema structure validation fails (invalid types, missing required keys)
@@ -484,7 +484,7 @@ This stage operates **outside** the runtime trust chain (Isolation → License �
 | AC-006 | Orchestrator has "Load GitNexus Context" step at 3 phases                | ✅          |
 | AC-007 | All 5 test cases in `tests/gitnexus-context.test.ts` pass                | ✅          |
 | AC-008 | `scripts/validate-gitnexus.ts` exists with JSDoc header                  | ✅          |
-| AC-009 | `bun run gitnexus:validate` passes in CI                                 | ✅          |
+| AC-009 | `bun run arch:validate:gitnexus` passes in CI                            | ✅          |
 | AC-010 | Closure gate blocks if GitNexus context not validated                    | ✅          |
 | AC-011 | `docs/ai/gitnexus.md` exists with all 5 required sections                | ✅          |
 | AC-012 | `AGENTS.md` governance rule references `scripts/gitnexus-context.ts`     | ✅          |
@@ -555,4 +555,4 @@ This stage is infrastructure tooling only. It introduces no tenant data access, 
 **A4:** Write to a well-known file at `docs/ai/context/gitnexus-context.json`. This is consistent with the existing Zidney pattern (`ai-architecture-brain.json` already resides at `docs/ai/context/`). Sub-agents reference the context by file path. The orchestrator step must document this path explicitly. The file must be regenerated at each orchestrator session start — stale files from prior sessions must not be trusted.
 
 **Q5:** When `changedFiles` is empty (clean git tree, no staged or unstaged changes), should `scripts/validate-gitnexus.ts` exit 0 (pass) or non-zero (fail)?  
-**A5:** Exit 0. Empty arrays are a valid output state — a clean tree legitimately produces `changedFiles: []`. The CI gate (`bun run gitnexus:validate`) must fail only on: (a) non-zero exit code from the GitNexus CLI itself, (b) JSON schema structure violations (invalid types, missing required keys), or (c) script execution errors. An empty-but-structurally-valid output is always a passing condition.
+**A5:** Exit 0. Empty arrays are a valid output state — a clean tree legitimately produces `changedFiles: []`. The CI gate (`bun run arch:validate:gitnexus`) must fail only on: (a) non-zero exit code from the GitNexus CLI itself, (b) JSON schema structure violations (invalid types, missing required keys), or (c) script execution errors. An empty-but-structurally-valid output is always a passing condition.

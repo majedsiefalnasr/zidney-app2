@@ -77,7 +77,7 @@ All 22 tasks completed successfully. No tasks deferred.
 ## Integration Smoke Test Output (T017)
 
 ```
-bun run hygiene:report
+bun run dev:hygiene:report
 [T001] Routing Authority Verification        ✓ PASS
 [T002] Template System Consolidation         ⚑ FLAG
 [T003] Dead Script Detection                 ⚑ FLAG

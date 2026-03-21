@@ -221,7 +221,7 @@ bun run test
 ls -lh docs/ai/context/*.json
 
 # Verify architecture score
-bun run infra-audit
+bun run arch:audit
 
 # Expected: 100/100 ✅
 ```
@@ -248,10 +248,10 @@ Once merged to develop:
 
 ```bash
 # Refresh artifacts (if needed)
-bun run ai-context:refresh
+bun run ai:context:refresh
 
 # Monitor freshness
-bun run ai-context:status
+bun run ai:context:status
 ```
 
 ### Documentation Access

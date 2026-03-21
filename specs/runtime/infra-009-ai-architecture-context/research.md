@@ -98,7 +98,7 @@ should developers regenerate locally before each commit?
 
 **Implementation:**
 
-- `bun run generate:ai-context` added to .husky/pre-commit
+- `bun run ai:context:generate` added to .husky/pre-commit
 - GitHub Actions job validates artifact freshness on every push
 - Pre-commit hook auto-stages generated artifacts
 - CI job fails if artifacts don't match expected state
@@ -478,7 +478,7 @@ After generating infra-audit-report.json, trigger ai-context generation:
 
 ```typescript
 // After infra-audit completes
-execSync("bun run generate:ai-context --force");
+execSync("bun run ai:context:generate --force");
 
 // Validate consistency
 const aiGraph = loadArtifact("docs/ai/context/ai-dependency-graph.json");

@@ -268,13 +268,13 @@ beyond what the script can infer.
 
 These commands must be run manually (read-only) and their output recorded:
 
-| Command                | Records                                       |
-| ---------------------- | --------------------------------------------- |
-| `bun install`          | Exit code; any compatibility warnings         |
-| `bun run tsc --noEmit` | TypeScript error count                        |
-| `bun run lint`         | ESLint error count, warning count             |
-| `bun test --coverage`  | Exit code; raw coverage Lines/Fn/Stmt/Branch% |
-| `bun run build`        | Exit code; any build errors                   |
+| Command                          | Records                                       |
+| -------------------------------- | --------------------------------------------- |
+| `bun install`                    | Exit code; any compatibility warnings         |
+| `bun run typecheck:src --noEmit` | TypeScript error count                        |
+| `bun run lint`                   | ESLint error count, warning count             |
+| `bun test --coverage`            | Exit code; raw coverage Lines/Fn/Stmt/Branch% |
+| `bun run build`                  | Exit code; any build errors                   |
 
 **Rules (from CL1):** Run full test suite; record DB-gated failures as `"DB-GATED"` entries; do not
 filter by test type; record partial coverage.
@@ -428,7 +428,7 @@ All of the following must pass before this stage may be marked complete:
 | Audit script executes                 | `bun run scripts/infra-audit.ts`                        | Exit code 0; `infra-audit-report.json` present                                                               |
 | JSON output keys present              | `cat infra-audit-report.json \| bun -e "..."` or manual | Contains `vitestConfigs`, `eslintConfigs`, `playwrightConfigs`, `totalTestFiles`, `readmeAudit`, `timestamp` |
 | Lint passes                           | `bun run lint`                                          | 0 new errors introduced by `scripts/infra-audit.ts`                                                          |
-| Type check passes                     | `bun run tsc --noEmit`                                  | 0 new TypeScript errors introduced                                                                           |
+| Type check passes                     | `bun run typecheck:src --noEmit`                        | 0 new TypeScript errors introduced                                                                           |
 | Gap Report present and valid          | File check                                              | `reports/GAP_REPORT.md` non-empty, ≥ 1 finding per audit area                                                |
 | Risk Classification present           | File check                                              | `reports/RISK_CLASSIFICATION.md` non-empty, risk level per gap                                               |
 | Safe Rollout Plan present             | File check                                              | `reports/SAFE_ROLLOUT_PLAN.md` non-empty, steps sequenced                                                    |

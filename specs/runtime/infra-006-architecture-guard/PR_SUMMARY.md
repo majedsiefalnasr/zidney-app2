@@ -111,7 +111,7 @@ Confirm compliance with Zidney Constitution v1.2.0:
 Test Command:
 
 ```bash
-bun run vitest run tests/unit/ai-guard/ai-guard-validation.test.ts tests/static/05-architecture-guard.test.ts
+bun run test run tests/unit/ai-guard/ai-guard-validation.test.ts tests/static/05-architecture-guard.test.ts
 ```
 
 ---

@@ -280,7 +280,7 @@ Developers do not interact directly with Architecture Guard.
 Instead they run:
 
 ```
-bun run ai-guard
+bun run ai:guard
 ```
 
 or rely on the CI pipeline.

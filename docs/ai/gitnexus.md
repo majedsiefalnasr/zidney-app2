@@ -8,12 +8,12 @@ context artifacts, and CLI queries.
 
 ## Quick Reference
 
-| Command                     | Purpose                                           |
-| --------------------------- | ------------------------------------------------- |
-| `bun run gitnexus:context`  | Generate `docs/ai/context/gitnexus-context.json`  |
-| `bun run gitnexus:validate` | Validate the artifact against the schema          |
-| `npx gitnexus analyze`      | Re-index the repository (run when index is stale) |
-| `gitnexus status`           | Check CLI health and index freshness              |
+| Command                          | Purpose                                           |
+| -------------------------------- | ------------------------------------------------- |
+| `bun run arch:gitnexus:context`  | Generate `docs/ai/context/gitnexus-context.json`  |
+| `bun run arch:validate:gitnexus` | Validate the artifact against the schema          |
+| `npx gitnexus analyze`           | Re-index the repository (run when index is stale) |
+| `gitnexus status`                | Check CLI health and index freshness              |
 
 ---
 
@@ -46,10 +46,10 @@ machine-readable output of this integration.
 **Script key:** `gitnexus:context`
 
 ```bash
-bun run gitnexus:context                     # changed files only (default)
-bun run gitnexus:context -- --all            # full workspace scan
-bun run gitnexus:context -- --dry-run        # preview JSON without writing
-bun run gitnexus:context -- --base-ref HEAD~3  # custom comparison base
+bun run arch:gitnexus:context                     # changed files only (default)
+bun run arch:gitnexus:context -- --all            # full workspace scan
+bun run arch:gitnexus:context -- --dry-run        # preview JSON without writing
+bun run arch:gitnexus:context -- --base-ref HEAD~3  # custom comparison base
 ```
 
 The generator:
@@ -85,7 +85,7 @@ See `docs/ci/gitnexus-validation.md` for full pipeline documentation.
 
 The artifact is considered **stale** if older than 24 hours.
 
-`bun run gitnexus:validate` will fail with a `freshness` error for stale artifacts.
+`bun run arch:validate:gitnexus` will fail with a `freshness` error for stale artifacts.
 
 Regenerate before:
 
@@ -117,7 +117,7 @@ If modules or layers appear incorrect in the context artifact, regenerate the br
 
 ```bash
 bun run arch:audit   # regenerates ai-architecture-brain.json
-bun run gitnexus:context  # then regenerate context artifact
+bun run arch:gitnexus:context  # then regenerate context artifact
 ```
 
 ---
@@ -130,4 +130,4 @@ bun run gitnexus:context  # then regenerate context artifact
 | `All impactedModules = []`             | No files changed vs base ref          | Use `--all` or commit changes first            |
 | `riskScore` always 0                   | No hotspots in brain                  | Re-run `bun run arch:audit` to update hotspots |
 | `gitnexus CLI health check failed`     | GitNexus not installed or not indexed | `npx gitnexus analyze`                         |
-| Validation `freshness` error           | Artifact >24h old                     | `bun run gitnexus:context`                     |
+| Validation `freshness` error           | Artifact >24h old                     | `bun run arch:gitnexus:context`                |

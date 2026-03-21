@@ -91,16 +91,16 @@ bun run arch:audit && bun run arch:visualize
 
 ```bash
 # Unit tests for visualization functions
-bun run vitest run tests/unit/visualize/visualize.test.ts
+bun run test run tests/unit/visualize/visualize.test.ts
 
 # Static integration tests validating output files
-bun run vitest run tests/static/06-architecture-visualization.test.ts
+bun run test run tests/static/06-architecture-visualization.test.ts
 
 # Full suite
-bun run vitest run tests/unit/visualize/ tests/static/06-*
+bun run test run tests/unit/visualize/ tests/static/06-*
 
 # Coverage
-bun run vitest run --coverage tests/unit/visualize/visualize.test.ts
+bun run test run --coverage tests/unit/visualize/visualize.test.ts
 ```
 
 **Expected outcome**: All 14 unit tests pass (Test 1–14 in visualize.test.ts) + 6 static tests pass

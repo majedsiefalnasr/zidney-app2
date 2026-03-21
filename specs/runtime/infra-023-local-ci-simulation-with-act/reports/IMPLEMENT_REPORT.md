@@ -30,7 +30,7 @@
 | T002 | Verify `.actrc` content (read-only, no modifications)                                  | ✅ PASS |
 | T003 | Add 5 `ci:local*` + `validate:scripts-infra` script keys to `package.json`             | ✅ PASS |
 | T004 | Add `.act.secrets` to `.gitignore` under act section                                   | ✅ PASS |
-| T005 | `bun run validate-runtime-scripts` gate: 5 new scripts resolve correctly               | ✅ PASS |
+| T005 | `bun run validate:runtime:scripts` gate: 5 new scripts resolve correctly               | ✅ PASS |
 | T006 | Audit all 5 GitHub workflows for `act` compatibility; findings documented              | ✅ PASS |
 | T007 | Create `scripts/run-local-ci.ts` (7-step orchestrator) + add `ci:run-local` key        | ✅ PASS |
 | T008 | `bun run type-check` exits 0; `ci:run-local` resolves in validate-runtime-scripts      | ✅ PASS |

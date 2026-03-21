@@ -36,7 +36,7 @@ configuration.
 
 ```bash
 # Unit tests (from repo root)
-bun run vitest run --project mmc
+bun run test run --project mmc
 
 # Unit tests (from this directory)
 bun run test

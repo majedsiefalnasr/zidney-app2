@@ -60,7 +60,7 @@ bun install
 2. **Generate artifacts** (first time)
 
 ```bash
-bun run generate:ai-context
+bun run ai:context:generate
 ```
 
 3. **Verify generation**
@@ -84,25 +84,25 @@ Check that 7 files exist in `docs/ai/context/`:
 #### Standard generation (only if sources changed)
 
 ```bash
-bun run generate:ai-context
+bun run ai:context:generate
 ```
 
 #### Force regeneration
 
 ```bash
-bun run generate:ai-context --force
+bun run ai:context:generate --force
 ```
 
 #### Generate with validation
 
 ```bash
-bun run generate:ai-context --validate
+bun run ai:context:generate --validate
 ```
 
 #### Verbose output
 
 ```bash
-bun run generate:ai-context --verbose
+bun run ai:context:generate --verbose
 ```
 
 ### Consuming Artifacts
@@ -329,7 +329,7 @@ Artifacts are validated on every push:
 # .github/workflows/ai-context-validation.yml
 - name: Validate AI Context
   run: |
-    bun run generate:ai-context --validate
+    bun run ai:context:generate --validate
 ```
 
 ### Pre-Commit Hook
@@ -338,13 +338,13 @@ Artifacts are regenerated before commit:
 
 ```bash
 # Husky hook (.husky/pre-commit)
-bun run generate:ai-context
+bun run ai:context:generate
 ```
 
 ### Development Workflow
 
 1. Make architectural changes
-2. Run `bun run generate:ai-context` to update artifacts
+2. Run `bun run ai:context:generate` to update artifacts
 3. Commit both changes and artifacts
 4. CI validates artifacts on push
 
@@ -412,7 +412,7 @@ cat docs/architecture/module-boundaries.json | jq .
 which bun node
 
 # Try force regeneration with verbose output
-bun run generate:ai-context --force --verbose
+bun run ai:context:generate --force --verbose
 ```
 
 ### Issue: "Validation failed: Schema mismatch"
@@ -423,7 +423,7 @@ bun run generate:ai-context --force --verbose
 
 ```bash
 # Regenerate with validation
-bun run generate:ai-context --force --validate
+bun run ai:context:generate --force --validate
 
 # Check schema version
 cat docs/ai/context/ai-layer-model.json | jq .schema_version
@@ -437,7 +437,7 @@ cat docs/ai/context/ai-layer-model.json | jq .schema_version
 
 1. Verify all 7 artifacts exist in `docs/ai/context/`
 2. Check JSON is valid: `jq . docs/ai/context/*.json`
-3. Regenerate: `bun run generate:ai-context --force`
+3. Regenerate: `bun run ai:context:generate --force`
 4. Verify timestamps are current
 
 ---

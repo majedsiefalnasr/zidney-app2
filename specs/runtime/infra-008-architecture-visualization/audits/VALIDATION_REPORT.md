@@ -50,7 +50,7 @@ bun -e "JSON.parse(require('fs').readFileSync('tests/unit/visualize/fixtures/arc
 
 ### T016 — Unit Tests
 
-**Command**: `bun run vitest run tests/unit/visualize/visualize.test.ts`
+**Command**: `bun run test run tests/unit/visualize/visualize.test.ts`
 
 **Result**: ✅ PASS — 14/14 tests passed.
 
@@ -119,7 +119,7 @@ docs/architecture/visualization/
 
 ### T018 — Static Tests
 
-**Command**: `bun run vitest run tests/static/`
+**Command**: `bun run test run tests/static/`
 
 **Result**: ✅ PASS — 23/23 tests passed (4 test files).
 

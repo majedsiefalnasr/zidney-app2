@@ -20,7 +20,7 @@ Full refresh flows may use:
 
 ```bash
 bun run arch:audit
-bun run ai-context:refresh
+bun run ai:context:refresh
 ```
 
 ## Supported Modes

@@ -39,7 +39,7 @@ Artifacts regenerate automatically before every commit:
 ```bash
 # This happens automatically via Husky
 # File: .husky/pre-commit
-bun run generate:ai-context
+bun run ai:context:generate
 ```
 
 **Behavior:**
@@ -61,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v1
-      - run: bun run generate:ai-context --validate
+      - run: bun run ai:context:generate --validate
 ```
 
 **Behavior:**
@@ -79,31 +79,31 @@ jobs:
 
 ```bash
 # Regenerate if sources changed (smart mode)
-bun run generate:ai-context
+bun run ai:context:generate
 ```
 
 ### Force Regeneration
 
 ```bash
 # Always regenerate, regardless of change status
-bun run generate:ai-context --force
+bun run ai:context:generate --force
 ```
 
 ### Regenerate with Validation
 
 ```bash
 # Generate AND validate immediately after
-bun run generate:ai-context --validate
+bun run ai:context:generate --validate
 ```
 
 ### Verbose Output
 
 ```bash
 # Show detailed progress and logging
-bun run generate:ai-context --verbose
+bun run ai:context:generate --verbose
 
 # Combine options
-bun run generate:ai-context --force --validate --verbose
+bun run ai:context:generate --force --validate --verbose
 ```
 
 ---
@@ -138,7 +138,7 @@ jq .source_metadata docs/ai/context/ai-module-map.json
 
 ```bash
 # Validate all artifacts
-bun run generate:ai-context --validate
+bun run ai:context:generate --validate
 
 # Manual JSON schema validation
 jq -s '.[0] | keys' docs/ai/context/schemas/ai-module-map.schema.json
@@ -174,11 +174,11 @@ cat .ai-context-cache/source-hash.json | jq .
 
 ```bash
 # Force regeneration and reset cache
-bun run generate:ai-context --force
+bun run ai:context:generate --force
 
 # Or manually reset cache
 rm -rf .ai-context-cache/
-bun run generate:ai-context
+bun run ai:context:generate
 ```
 
 ### Issue: "Regeneration fails with 'sources changed' error"
@@ -209,7 +209,7 @@ ls -la packages/
 
 ```bash
 # Run with validation to see errors
-bun run generate:ai-context --validate
+bun run ai:context:generate --validate
 
 # Check specific artifact
 jq . docs/ai/context/ai-module-map.json | head -20
@@ -222,7 +222,7 @@ jq . docs/ai/context/schemas/ai-module-map.schema.json
 
 ```bash
 # Regenerate with strict validation
-bun run generate:ai-context --force --validate
+bun run ai:context:generate --force --validate
 
 # If specific artifact fails, check its content
 # File: scripts/ai-context/artifact-builders/[builder-name].ts
@@ -244,7 +244,7 @@ git status
 
 ```bash
 # Regenerate artifacts
-bun run generate:ai-context
+bun run ai:context:generate
 
 # Stage the new artifacts
 git add docs/ai/context/
@@ -262,7 +262,7 @@ git commit --no-verify -m "message"
 
 ```bash
 # Reproduce CI locally
-bun run generate:ai-context --validate
+bun run ai:context:generate --validate
 
 # Check CI logs for specific errors
 # In GitHub: Actions → [workflow name] → [run] → Logs
@@ -272,7 +272,7 @@ bun run generate:ai-context --validate
 
 ```bash
 # Generate locally and commit
-bun run generate:ai-context --validate
+bun run ai:context:generate --validate
 
 # Push updated artifacts
 git add docs/ai/context/
@@ -316,7 +316,7 @@ done
 # Recommend action
 echo ""
 if [ $AGE_HOURS -gt $THRESHOLD_HOURS ]; then
-  echo "💡 Recommendation: Run 'bun run generate:ai-context --force'"
+  echo "💡 Recommendation: Run 'bun run ai:context:generate --force'"
 fi
 ```
 
@@ -366,7 +366,7 @@ health_checks:
 
 1. Regenerate artifacts
    ```bash
-   bun run generate:ai-context --force --validate
+   bun run ai:context:generate --force --validate
    ```
 ````
 
@@ -409,10 +409,10 @@ health_checks:
 
 ```bash
 # Common operations
-bun run generate:ai-context              # Standard refresh
-bun run generate:ai-context --force      # Force refresh
-bun run generate:ai-context --validate   # Refresh + validate
-bun run generate:ai-context --verbose    # Detailed output
+bun run ai:context:generate              # Standard refresh
+bun run ai:context:generate --force      # Force refresh
+bun run ai:context:generate --validate   # Refresh + validate
+bun run ai:context:generate --verbose    # Detailed output
 
 # Inspecting artifacts
 jq . docs/ai/context/ai-module-map.json
@@ -435,7 +435,7 @@ git diff docs/ai/context/
 For operational issues with artifact freshness:
 
 1. Run diagnostic script: `bash scripts/check-ai-context-freshness.sh`
-2. Attempt manual refresh: `bun run generate:ai-context --force --validate`
-3. Check logs: `bun run generate:ai-context --verbose`
+2. Attempt manual refresh: `bun run ai:context:generate --force --validate`
+3. Check logs: `bun run ai:context:generate --verbose`
 4. Review: `specs/runtime/infra-009-ai-architecture-context/`
 5. Contact: Architecture team / DevOps

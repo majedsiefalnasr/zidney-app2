@@ -12,7 +12,7 @@ This stage plans a repository-governance migration that establishes one routing 
 **Language/Version**: TypeScript 5.x, Bun workspace scripts, Bash shell tooling, Markdown/YAML/JSON governance assets  
 **Primary Dependencies**: Bun, Vitest, Biome, Husky, actionlint/workflow validation, SpecKit shell scripts, architecture guard tooling, infra audit tooling, AI context refresh tooling  
 **Storage**: Repository filesystem artifacts only; no database or tenant schema changes  
-**Testing**: `bun run lint`, `bun run typecheck`, `bun run test`, `bun run arch:guard`, `bun scripts/ai-guard.ts`, `bun scripts/architecture-diff.ts`, `bun scripts/infra-audit.ts`, `bun scripts/validate-architecture-brain.ts`, `bun run type-safety-guard`, `bun run ai-context:refresh`, `bun run validate:workflows`, plus direct validation of `.specify/scripts/bash/create-new-feature.sh`, `.specify/scripts/bash/setup-plan.sh`, and `.specify/scripts/bash/update-agent-context.sh` when touched  
+**Testing**: `bun run lint`, `bun run typecheck`, `bun run test`, `bun run arch:guard`, `bun scripts/ai-guard.ts`, `bun scripts/architecture-diff.ts`, `bun scripts/infra-audit.ts`, `bun scripts/validate-architecture-brain.ts`, `bun run arch:type-safety-guard`, `bun run ai:context:refresh`, `bun run validate:workflows`, plus direct validation of `.specify/scripts/bash/create-new-feature.sh`, `.specify/scripts/bash/setup-plan.sh`, and `.specify/scripts/bash/update-agent-context.sh` when touched  
 **Target Platform**: macOS/Linux developer environments and CI runners  
 **Project Type**: Monorepo infrastructure-governance stage  
 **Performance Goals**: Deterministic evidence collection for all governed support surfaces; zero silent routing divergence across canonical and compatibility roots; no broken contributor entrypoints after the migration batch  
@@ -253,8 +253,8 @@ Validation runs in two cadences:
 - `bun scripts/architecture-diff.ts`
 - `bun scripts/infra-audit.ts`
 - `bun scripts/validate-architecture-brain.ts`
-- `bun run type-safety-guard`
-- `bun run ai-context:refresh`
+- `bun run arch:type-safety-guard`
+- `bun run ai:context:refresh`
 - `bun run validate:workflows`
 
 If routing or template entrypoints change, also verify:

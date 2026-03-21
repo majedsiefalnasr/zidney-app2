@@ -24,16 +24,16 @@ Idempotency and concurrency validations are covered by both code logic and test 
 
 ## Validation Matrix
 
-| Validation Check                       | Required | Command(s)                                                                                            | Result | Notes                                                                                                          |
-| -------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
-| Unit tests (impacted business logic)   | Yes      | `bun run vitest run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts`           | ✅     | 15 tests pass                                                                                                  |
-| Integration tests (impacted API flows) | Yes      | `bun run vitest run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts` | ✅     | 13 tests pass                                                                                                  |
-| Snapshot tests (grading behavior)      | N/A      | —                                                                                                     | N/A    | Stage does not involve exam grading                                                                            |
-| Lint (Biome)                           | Yes      | `bun run lint`                                                                                        | ✅     | No lint errors in semesters files                                                                              |
-| Type check                             | Yes      | `bun run typecheck`                                                                                   | ✅     | Zero TypeScript errors across entire project                                                                   |
-| Migration validation                   | Yes      | Manual inspection                                                                                     | ✅     | Migration uses BEGIN/COMMIT, forward-only, increments schema_version to 1.11.0, no modification of prior files |
-| Idempotency replay validation          | Yes      | Code + test inspection                                                                                | ✅     | Unique constraint on LOWER(name); SELECT FOR UPDATE prevents concurrent double-delete; insert returns row ID   |
-| Concurrency validation                 | Yes      | Code + test inspection                                                                                | ✅     | deleteSemester uses `SELECT ... FOR UPDATE` row lock inside TX; updateSemester locks row inside TX             |
+| Validation Check                       | Required | Command(s)                                                                                          | Result | Notes                                                                                                          |
+| -------------------------------------- | -------- | --------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| Unit tests (impacted business logic)   | Yes      | `bun run test run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts`           | ✅     | 15 tests pass                                                                                                  |
+| Integration tests (impacted API flows) | Yes      | `bun run test run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts` | ✅     | 13 tests pass                                                                                                  |
+| Snapshot tests (grading behavior)      | N/A      | —                                                                                                   | N/A    | Stage does not involve exam grading                                                                            |
+| Lint (Biome)                           | Yes      | `bun run lint`                                                                                      | ✅     | No lint errors in semesters files                                                                              |
+| Type check                             | Yes      | `bun run typecheck`                                                                                 | ✅     | Zero TypeScript errors across entire project                                                                   |
+| Migration validation                   | Yes      | Manual inspection                                                                                   | ✅     | Migration uses BEGIN/COMMIT, forward-only, increments schema_version to 1.11.0, no modification of prior files |
+| Idempotency replay validation          | Yes      | Code + test inspection                                                                              | ✅     | Unique constraint on LOWER(name); SELECT FOR UPDATE prevents concurrent double-delete; insert returns row ID   |
+| Concurrency validation                 | Yes      | Code + test inspection                                                                              | ✅     | deleteSemester uses `SELECT ... FOR UPDATE` row lock inside TX; updateSemester locks row inside TX             |
 
 ---
 
@@ -42,7 +42,7 @@ Idempotency and concurrency validations are covered by both code logic and test 
 ### Unit Tests
 
 ```text
-Command: bun run vitest run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts
+Command: bun run test run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts
 
  ✓ listSemesters > returns items, total, page, and limit
  ✓ listSemesters > returns empty items when no semesters exist
@@ -68,7 +68,7 @@ Command: bun run vitest run packages/domain-core/src/semesters/__tests__/semeste
 ### Integration Tests
 
 ```text
-Command: bun run vitest run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts
+Command: bun run test run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts
 
  ✓ GET /semesters — listSemestersHandler > returns 200 with paginated semesters
  ✓ GET /semesters — listSemestersHandler > returns 422 on invalid query params

@@ -31,8 +31,8 @@ Run the existing governance producers first:
 
 ```bash
 bun run arch:audit
-bun run ai-context:refresh
-bun run arch:validate-brain
+bun run ai:context:refresh
+bun run arch:validate:brain
 ```
 
 Expected behavior:
@@ -168,8 +168,8 @@ Use the standard verification sequence after implementing the stage:
 bun run arch:guard:ci
 bun run arch:audit
 bun type-safety-guard --json
-bun run ai-context:refresh
-bun run arch:validate-brain
+bun run ai:context:refresh
+bun run arch:validate:brain
 bun run lint
 bun run validate:types
 ```

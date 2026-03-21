@@ -26,17 +26,17 @@ these errors are not new and do not affect app builds (all app-level vue-tsc che
 
 ## Validation Matrix
 
-| Validation Check                       | Required | Command(s)                                                                                                           | Result | Notes                                                                                                                              |
-| -------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Unit tests (impacted business logic)   | Yes      | `bun run vitest run tests/unit/mmc/core tests/unit/backoffice/core tests/unit/frontoffice/core`                      | ✅     | 21 files, 220 tests — all pass                                                                                                     |
-| Integration tests (impacted API flows) | Yes      | `bun run vitest run tests/integration/mmc/auth tests/integration/backoffice/auth tests/integration/frontoffice/auth` | ✅     | 6 files, 48 tests — all pass (401-race, session-clear-wiring)                                                                      |
-| Snapshot tests (grading behavior)      | N/A      | —                                                                                                                    | N/A    | No grading logic in this stage                                                                                                     |
-| Lint                                   | Yes      | `bun run lint`                                                                                                       | ✅     | 0 errors, 2303 warnings (all pre-existing)                                                                                         |
-| Type check (app-level)                 | Yes      | `bunx vue-tsc --noEmit` in each app                                                                                  | ✅     | All 3 apps exit code 0                                                                                                             |
-| Type check (root multi-app)            | Yes      | `bun run typecheck`                                                                                                  | ⚠️     | Pre-existing `@/*` path resolution issues in root tsconfig — not introduced by this stage; baselines confirmed by stash comparison |
-| Migration validation                   | N/A      | —                                                                                                                    | N/A    | No schema changes in this stage                                                                                                    |
-| Idempotency replay validation          | Yes      | `tests/integration/*/auth/401-race.test.ts`                                                                          | ✅     | Single-flight 401 guard verified — concurrent retry does not duplicate requests                                                    |
-| Concurrency validation                 | Yes      | `tests/integration/*/auth/401-race.test.ts`                                                                          | ✅     | Race condition guard validated for all 3 apps                                                                                      |
+| Validation Check                       | Required | Command(s)                                                                                                         | Result | Notes                                                                                                                              |
+| -------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Unit tests (impacted business logic)   | Yes      | `bun run test run tests/unit/mmc/core tests/unit/backoffice/core tests/unit/frontoffice/core`                      | ✅     | 21 files, 220 tests — all pass                                                                                                     |
+| Integration tests (impacted API flows) | Yes      | `bun run test run tests/integration/mmc/auth tests/integration/backoffice/auth tests/integration/frontoffice/auth` | ✅     | 6 files, 48 tests — all pass (401-race, session-clear-wiring)                                                                      |
+| Snapshot tests (grading behavior)      | N/A      | —                                                                                                                  | N/A    | No grading logic in this stage                                                                                                     |
+| Lint                                   | Yes      | `bun run lint`                                                                                                     | ✅     | 0 errors, 2303 warnings (all pre-existing)                                                                                         |
+| Type check (app-level)                 | Yes      | `bunx vue-tsc --noEmit` in each app                                                                                | ✅     | All 3 apps exit code 0                                                                                                             |
+| Type check (root multi-app)            | Yes      | `bun run typecheck`                                                                                                | ⚠️     | Pre-existing `@/*` path resolution issues in root tsconfig — not introduced by this stage; baselines confirmed by stash comparison |
+| Migration validation                   | N/A      | —                                                                                                                  | N/A    | No schema changes in this stage                                                                                                    |
+| Idempotency replay validation          | Yes      | `tests/integration/*/auth/401-race.test.ts`                                                                        | ✅     | Single-flight 401 guard verified — concurrent retry does not duplicate requests                                                    |
+| Concurrency validation                 | Yes      | `tests/integration/*/auth/401-race.test.ts`                                                                        | ✅     | Race condition guard validated for all 3 apps                                                                                      |
 
 ---
 
@@ -45,7 +45,7 @@ these errors are not new and do not affect app builds (all app-level vue-tsc che
 ### Unit Tests
 
 ```text
-bun run vitest run \
+bun run test run \
   tests/unit/mmc/core tests/unit/backoffice/core tests/unit/frontoffice/core \
   tests/integration/mmc/auth tests/integration/backoffice/auth tests/integration/frontoffice/auth
 

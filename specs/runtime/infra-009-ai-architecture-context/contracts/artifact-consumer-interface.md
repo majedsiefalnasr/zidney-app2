@@ -66,7 +66,7 @@ async function discoverArtifacts(): Promise<ArtifactManifest> {
 
 ```typescript
 // If docs/ai/context/ missing
-throw new ArtifactNotFoundError("AI context directory not found. Run: bun run generate:ai-context");
+throw new ArtifactNotFoundError("AI context directory not found. Run: bun run ai:context:generate");
 
 // If required artifact missing
 throw new ArtifactNotFoundError(`Missing required artifact: ${artifactName}`);
@@ -139,7 +139,7 @@ async function validateFreshness(artifact: {
       fresh: false,
       warning:
         `Artifacts are ${ageDays.toFixed(1)} days old. ` +
-        `Regenerate with: bun run generate:ai-context`,
+        `Regenerate with: bun run ai:context:generate`,
     };
   }
 
@@ -148,7 +148,7 @@ async function validateFreshness(artifact: {
       fresh: true,
       warning:
         `Artifacts are ${ageDays.toFixed(1)} days old. ` +
-        `Consider regenerating: bun run generate:ai-context`,
+        `Consider regenerating: bun run ai:context:generate`,
     };
   }
 
@@ -362,7 +362,7 @@ class ArtifactError extends Error {
 
 class ArtifactNotFoundError extends ArtifactError {
   code = "ARTIFACT_NOT_FOUND";
-  recoveryAction = "Run: bun run generate:ai-context";
+  recoveryAction = "Run: bun run ai:context:generate";
 }
 
 class ArtifactParseError extends ArtifactError {
@@ -372,12 +372,12 @@ class ArtifactParseError extends ArtifactError {
 
 class ArtifactValidationError extends ArtifactError {
   code = "ARTIFACT_VALIDATION_ERROR";
-  recoveryAction = "Regenerate artifacts: bun run generate:ai-context";
+  recoveryAction = "Regenerate artifacts: bun run ai:context:generate";
 }
 
 class ArtifactStaleError extends ArtifactError {
   code = "ARTIFACT_STALE";
-  recoveryAction = "Regenerate artifacts: bun run generate:ai-context";
+  recoveryAction = "Regenerate artifacts: bun run ai:context:generate";
 }
 
 class SchemaVersionError extends ArtifactError {

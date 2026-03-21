@@ -2,7 +2,58 @@
 
 ## Stage Status
 
-DRAFT
+Status: PRODUCTION READY
+Closure Date: 2026-03-21
+Risk Level: LOW
+Last Updated: 2026-03-21T15:25:00Z
+
+Implementation: COMPLETE
+Tasks: 14 / 14 completed
+
+Scope Closed:
+
+- T001: SCRIPT_MIGRATION_MAP.md created with 33 migration entries
+- T002: SCRIPT_REGISTRY.md placeholder created (regenerated via dev:generate:script-docs)
+- T003: script-naming.ts validator implemented (domain:action[:scope] convention)
+- T004: script-usage.ts validator implemented (bun run reference scan with false-positive filters)
+- T005: script-infrastructure.ts validator implemented (5-field metadata + registry freshness)
+- T006: refactor-scripts.ts engine implemented (Type A–E logic + dry-run mode)
+- T007: script-docs.ts generator updated (enforces 5-field metadata)
+- T008: 5 new governed package.json entries added (validate:script:\*, validate:diff:registry, validate:scan:packages, ai:validate:prompts)
+- T009: @category + @usage metadata added to all tracked scripts (27 registered)
+- T010: 33 renames/removals applied from SCRIPT_MIGRATION_MAP
+- T011: dev:refactor:scripts live run completed and verified
+- T012: CI validation block added to architecture-governance.yml
+- T013: script-system-governance SKILL.md updated with governance rules
+- T014: Full validation gate passed — validate:script:naming, validate:script:usage, validate:script:infrastructure, dev:generate:script-docs ✅
+
+Deferred Scope:
+
+- AST-based replacement (future enhancement beyond regex engine)
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation — N/A (INFRA stage, no multi-tenant changes)
+- ADR-0007 Version compatibility enforcement — ✅ Verified
+- ADR-0008 Semantic versioning alignment — ✅ Verified
+- All validation gates passed — ✅ 4/4 validators PASS
+- All guardian verdicts — ✅ 6/6 PASS
+- Constitutional compliance audit — ✅ COMPLIANT
+
+Notes:
+Production ready. All validation gates passed. Script governance system is live across the monorepo. Use `PR_SUMMARY.md` to create PR. Share `guides/TESTING_GUIDE.md` with QA/reviewers.
+
+- Automated script deprecation tracking
+- Auditing existing invocation command-strings (FR-005 deferred to future INFRA stage)
+
+Constitutional Compliance:
+
+- All drift criteria passed — implementation authorized
+- INFRA stage: no tenant isolation, license, DB, or routing requirements applicable
+- Test coverage specified for all 4 implementation tasks
+
+Notes:
+Drift analysis passed (Attempt 2). Implementation gate open.
 
 ---
 
@@ -217,7 +268,7 @@ Add:
 bun run validate-script-naming
 bun run validate-script-usage
 bun run validate-script-infrastructure
-bun run generate-script-docs
+bun run dev:generate:script-docs
 ```
 
 Fail CI if:

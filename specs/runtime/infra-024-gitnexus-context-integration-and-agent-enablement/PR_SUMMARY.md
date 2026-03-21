@@ -34,7 +34,7 @@
 - **Boundaries touched:** Script layer only (`scripts/`, `docs/`, `tests/`, `package.json`).
   No API routes, no database schema, no tenant isolation, no attempt engine involvement.
 - **Why it is safe:** All changes are pure offline tooling. No runtime code paths were modified.
-  The only new runtime surface is `bun run gitnexus:context` and `bun run gitnexus:validate`
+  The only new runtime surface is `bun run arch:gitnexus:context` and `bun run arch:validate:gitnexus`
   which are developer/CI commands only.
 - **Constitutional guarantees intact:** Database-per-tenant unchanged. License middleware
   unchanged. Attempt engine unchanged. Version enforcement unchanged.
@@ -130,10 +130,10 @@ Test commands:
 
 ```bash
 # INFRA-024 specific tests
-bun run vitest run tests/gitnexus-context.test.ts
+bun run test run tests/gitnexus-context.test.ts
 
 # Full workspace
-bun run vitest run
+bun run test run
 ```
 
 Expected: 15/15 tests pass; 76/76 workspace tests pass.
@@ -249,7 +249,7 @@ Local verification:
 ```bash
 bun scripts/infra-audit.ts
 bun scripts/ai-guard.ts
-bun run vitest run
+bun run test run
 ```
 
 This ensures that Zidney's architecture, governance, and testing guarantees remain intact before
