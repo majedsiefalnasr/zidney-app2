@@ -209,17 +209,19 @@ An automated refactor engine must update all script references across the reposi
 
 ### FR-005: Invocation Standardization
 
-All script invocations defined in `package.json` must resolve to:
+All **new** script invocations added to `package.json` in this stage must resolve to:
 
 ```
 bun scripts/<domain>/<file>.ts
 ```
 
-Invocation patterns that must be eliminated:
+Invocation patterns that must be eliminated for new entries:
 
 - `bun run scripts/...` (use `bun scripts/...`)
 - Direct `ts-node` or `npx tsx` invocations not going through `bun`
 - Inline shell commands that duplicate what a named script does
+
+**Scope note:** FR-005 applies to the 5 new entries introduced in this stage. Auditing and correcting the command-string values of all existing `package.json` entries (e.g., migrating existing `bun run scripts/foo.ts` values to `bun scripts/foo.ts`) is explicitly deferred as tech debt to a future INFRA stage. Success Criterion 1 (naming compliance) does not require retroactive command-value correction.
 
 ---
 

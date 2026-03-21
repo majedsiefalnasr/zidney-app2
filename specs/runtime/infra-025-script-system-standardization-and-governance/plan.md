@@ -203,6 +203,8 @@ Stored verbatim at `docs/scripts/SCRIPT_MIGRATION_MAP.md`.
 | `vitest`                | `test` (lifecycle)                                     |
 | `worker`                | `dev:worker` (already exists)                          |
 
+**Refactor engine behavior for Type E:** These aliases are redundant duplicates of already-existing canonical scripts. Unlike Types A–D, the alias key must be removed from `package.json` rather than renamed. The engine behavior: (1) in all non-`package.json` files, replace `bun run <alias>` with `bun run <canonical-target>` (same `replaceAll` mechanism as A–D, treating the canonical target as the new name); (2) the alias key is deleted from `package.json`. For the migration map, Type E entries use the canonical target as the "New Name" column value. This ensures no dangling references remain after the alias key is removed.
+
 #### Summary
 
 | Type                            | Count  |
@@ -324,6 +326,38 @@ Mode: <dry-run|live>
 
 ## Phase 1: Validation Script Design (FR-008)
 
+### Shared TypeScript Types
+
+To ensure type consistency across all three validation scripts and the refactor engine, define these interfaces in `scripts/validate/types.ts`:
+
+```ts
+// Imported by script-naming.ts, script-usage.ts, script-infrastructure.ts, refactor-scripts.ts
+export interface ScriptEntry {
+  name: string;
+  command: string;
+  packageFile: string;
+  workspaceName: string | null;
+}
+
+export interface ViolationRecord {
+  rule: string;
+  file: string;
+  line?: number;
+  scriptName?: string;
+  message: string;
+  hint?: string;
+}
+
+export interface MigrationEntry {
+  oldName: string;
+  type: "A" | "B" | "C" | "D" | "E";
+  violation: string;
+  newName: string; // For Type E: the canonical target (already-existing script name)
+}
+```
+
+All three validators and the refactor engine import from `scripts/validate/types.ts`. Add `scripts/validate/types.ts` to the new files manifest.
+
 ### `scripts/validate/script-naming.ts`
 
 Package.json entry: `"validate:script:naming": "bun scripts/validate/script-naming.ts"`
@@ -363,7 +397,10 @@ Package.json entry: `"validate:script:usage": "bun scripts/validate/script-usage
 
 ```
 1. Build reference set: all script names from all package.json files
-2. Scan files in scope: /bun run ([\w:.-]+)/g
+2. Scan files in scope using pattern: /bun run (?:--?\S+ )*([\ w:.-]+)/g
+   - The `(?:--?\S+ )*` prefix clause skips zero or more CLI flag tokens (e.g. --bun, --silent)
+   - The captured group must begin with [a-zA-Z]; tokens starting with '-' are skipped
+   - Example: 'bun run --bun validate:script:naming' captures 'validate:script:naming'
 3. For each match: if name not in reference set → broken reference
 4. After FULL scan: emit violations
 5. if violations > 0: process.exit(1)
@@ -644,7 +681,16 @@ No security concerns for this developer tooling stage.
 scripts/validate/__tests__/script-naming.test.ts
 scripts/validate/__tests__/script-usage.test.ts
 scripts/validate/__tests__/script-infrastructure.test.ts
+scripts/dev/__tests__/refactor-scripts.test.ts
 ```
+
+**Refactor engine test cases** (`scripts/dev/__tests__/refactor-scripts.test.ts`):
+
+- `parseMigrationMap()`: valid table returns correct map; malformed entry (missing backtick) skips gracefully
+- `replaceInFile()`: replacement occurs when old name present; returns false when content unchanged
+- `validateNoRemnants()`: detects stale reference and returns violation; clean scan returns empty array
+- `--dry-run` flag: no file writes occur after invocation; process exits 0
+- Idempotency: re-running engine after completed migration produces zero replacements
 
 ### Integration Verification
 

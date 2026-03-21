@@ -2,34 +2,38 @@
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: LOW
-Last Updated: 2026-03-21T12:10:00Z
+Last Updated: 2026-03-21T12:35:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (Attempt 2 — all 5 guardians)
+Implementation: AUTHORIZED
 
-- Total: 14 atomic tasks
-- 2 foundation doc tasks (T001–T002)
-- 3 validation script tasks — parallel group A (T003–T005)
-- 2 tooling implementation tasks (T006–T007)
-- 1 package.json new entries task (T008)
-- 2 broad update tasks — parallel group B (T009–T010)
-- 1 live refactor run task (T011)
-- 2 integration tasks (T012–T013)
-- 1 terminal validation gate (T014)
+Scope Authorized:
+
+- T001–T014 (14 tasks) authorized for implementation
+- script-naming.ts, script-usage.ts, script-infrastructure.ts validation scripts
+- refactor-scripts.ts engine with Type A–E logic
+- 5 new canonical package.json entries
+- 33 package.json renames/removals
+- CI validation integration
+- .agents/skills/script-system-governance update
 
 Deferred Scope:
 
 - AST-based replacement (future enhancement beyond regex engine)
 - Automated script deprecation tracking
+- Auditing existing invocation command-strings (FR-005 deferred to future INFRA stage)
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed — implementation authorized
+- INFRA stage: no tenant isolation, license, DB, or routing requirements applicable
+- Test coverage specified for all 4 implementation tasks
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Drift analysis passed (Attempt 2). Implementation gate open.
 
 ---
 
