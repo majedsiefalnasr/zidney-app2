@@ -3,21 +3,21 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-21T12:05:05Z
+Last Updated: 2026-03-21T12:10:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Script naming convention (`<domain>:<action>[:<scope>]`) — 9 allowed domains
-- 33-entry migration map (`docs/scripts/SCRIPT_MIGRATION_MAP.md`)
-- Refactor engine at `scripts/dev/refactor-scripts.ts` (`dev:refactor:scripts`)
-- 3 validation scripts: `validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure`
-- Registry generator (`dev:generate:script-docs`) with 5-field metadata enforcement
-- Auto-generated registry (`docs/scripts/SCRIPT_REGISTRY.md`) with normalized staleness check
-- 4-step CI block appended to `architecture-governance.yml` (steps 14–17)
-- AI governance skill update (`.agents/skills/script-system-governance/SKILL.md`)
-- Root `package.json` — 33 renames/removals + 5 new governed entries
+- Total: 14 atomic tasks
+- 2 foundation doc tasks (T001–T002)
+- 3 validation script tasks — parallel group A (T003–T005)
+- 2 tooling implementation tasks (T006–T007)
+- 1 package.json new entries task (T008)
+- 2 broad update tasks — parallel group B (T009–T010)
+- 1 live refactor run task (T011)
+- 2 integration tasks (T012–T013)
+- 1 terminal validation gate (T014)
 
 Deferred Scope:
 
@@ -26,11 +26,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Guardian audit PASS: Architecture Checker ✅ | API Designer ✅
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Guardian validation passed after V-1/V-2 remediation. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
