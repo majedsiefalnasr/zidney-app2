@@ -138,6 +138,22 @@ This contract is authoritative.
 | Skill index               | `.agents/skills/SKILLS_INDEX.md`                       |
 | Orchestrator              | `.agents/agents/zidney-orchestrator.agent.md`          |
 
+---
+
+## UI Development
+
+When building or modifying any Vue 3 UI, components, layouts, or design system elements:
+
+- Load and apply the `ckm:ui-styling` skill (`.agents/skills/ui-styling/SKILL.md`)
+- Use `pnpm dlx shadcn-vue@latest add [component]` to add shadcn-vue components
+- Follow Vue SFC patterns (`<script setup lang="ts">` + `<template>`)
+- Use vee-validate + `@vee-validate/zod` + zod for form validation
+- Use `@vueuse/core` `useColorMode()` for dark mode
+- Prefer Reka UI primitives for accessible, unstyled base components
+- Use `class` (not `className`), `for` (not `htmlFor`), `as-child` (not `asChild`)
+
+---
+
 <!-- gitnexus:start -->
 
 # GitNexus MCP

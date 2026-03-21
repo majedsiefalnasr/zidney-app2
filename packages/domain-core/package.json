@@ -25,7 +25,8 @@
     "./groups": "./src/groups/index.ts",
     "./hierarchy": "./src/hierarchy/index.ts",
     "./teams": "./src/teams/index.ts",
-    "./semesters": "./src/semesters/index.ts"
+    "./semesters": "./src/semesters/index.ts",
+    "./subjects": "./src/subjects/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",

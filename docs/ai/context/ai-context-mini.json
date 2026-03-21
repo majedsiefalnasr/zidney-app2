@@ -1,55 +1,54 @@
 {
-  "architectureScore": 100,
-  "modules": [
-    "packages/job-queue",
-    "packages/logger",
-    "packages/types",
-    "packages/config",
-    "packages/redis-utils",
-    "packages/ui-system",
-    "packages/api-client",
-    "packages/domain-core",
-    "packages/validation",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/api",
-    "apps/worker"
-  ],
-  "hotspots": [
+  "schema_version": "1.0.0",
+  "generated_at": "2026-03-21T09:27:24.789Z",
+  "layers": [
     {
-      "module": "packages/logger",
-      "score": 268
+      "name": "infrastructure",
+      "description": "Infrastructure layer",
+      "order": 1
     },
     {
-      "module": "packages/domain-core",
-      "score": 109
+      "name": "domain",
+      "description": "Domain layer",
+      "order": 2
     },
     {
-      "module": "packages/types",
-      "score": 100
+      "name": "runtime",
+      "description": "Runtime layer",
+      "order": 3
     },
     {
-      "module": "packages/validation",
-      "score": 36
-    },
-    {
-      "module": "packages/api-client",
-      "score": 17
+      "name": "ui",
+      "description": "Ui layer",
+      "order": 4
     }
   ],
-  "dependencyRules": {
-    "forbidPackagesImportingApps": true,
-    "forbidAppsImportingOtherApps": true
+  "modules_by_layer": {
+    "runtime": [
+      "apps/mmc",
+      "apps/frontoffice",
+      "apps/backoffice",
+      "apps/api",
+      "apps/worker",
+      "packages/job-queue",
+      "packages/types",
+      "packages/api-client",
+      "packages/validation"
+    ],
+    "infrastructure": [
+      "packages/logger",
+      "packages/config",
+      "packages/redis-utils"
+    ],
+    "ui": [
+      "packages/ui-system"
+    ],
+    "domain": [
+      "packages/domain-core"
+    ]
   },
-  "layerRules": {
-    "forbidUiImportingDomain": {
-      "source": "packages/ui-system",
-      "target": "packages/domain-core"
-    },
-    "forbidApiClientImportingWorker": {
-      "source": "packages/api-client",
-      "target": "apps/worker"
-    }
-  }
+  "rules": {},
+  "critical_violations": [],
+  "full_context_url": "docs/ai/context/",
+  "full_context_size_bytes": 15728640
 }

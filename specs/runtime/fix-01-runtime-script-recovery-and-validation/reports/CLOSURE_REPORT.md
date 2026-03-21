@@ -40,7 +40,7 @@ all spec references are tracked in `package.json`.
 
 ### Phase 2 (Foundational Scan Tooling)
 
-- `scan-package-scripts.ts`: Walks `specs/runtime/*/*.md`, extracts all `bun run X` references
+- `scan-package-scripts.ts`: Walks `specs/runtime/*/*.md`, extracts all `bun run <script>` references
 - `diff-script-registry.ts`: Compares scan results with root `package.json`
 - `detect-broken-scripts.ts`: Validates each registered script resolves to an importable file
 - Scan and diff artifacts written to `audits/`

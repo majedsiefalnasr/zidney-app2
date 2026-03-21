@@ -9,7 +9,43 @@ Status: Critical
 
 ## Stage Status
 
-Status: DRAFT
+Status: BACKEND CLOSED
+Step: implement
+Risk Level: HIGH
+Last Updated: 2025-07-23T00:00:00.000Z
+
+Implementation: COMPLETE
+Tasks: 27 / 27 completed
+
+Scope Closed:
+
+- Tenant DB migration: subjects table, 9 indexes, FK constraints, schema_version 1.11.0→1.12.0
+- Domain package: packages/domain-core/src/subjects/ (types, errors, dependency-registry, repository, service, index)
+- Validation schemas: packages/validation/src/backoffice/subjects.schemas.ts (5 schemas)
+- Route handlers: apps/api/src/routes/backoffice/subjects/ (7 handlers + helpers + index)
+- Route registration: apps/api/src/app.ts
+- Unit tests (19 tests passing) + integration tests (17 tests passing)
+- All 27 tasks completed — 0 deferred
+
+Deferred Scope:
+
+- Subject-count license limits (downstream limits stage)
+- translation_coverage field (P3, STAGE_19 translation infrastructure)
+- Downstream content FK dependencies (registered additively by downstream stages)
+- semesterBelongsToDivision full implementation (forward-compatibility stub — semesters table has no division_id at STAGE_27)
+
+Constitutional Compliance:
+
+- ADR alignment verified
+- Implementation compliant with Zidney Constitution v1.2.0
+- Tenant isolation enforced via getDb(c) in all handlers
+- All write operations transactional (createSubject, updateSubject, deleteSubject)
+- Idempotency via CAS on updated_at (transitionSubjectStatus) + IF NOT EXISTS in migration
+- No cross-tenant access; no stack traces exposed to clients; structured logging throughout
+
+Notes:
+Backend implementation complete. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 

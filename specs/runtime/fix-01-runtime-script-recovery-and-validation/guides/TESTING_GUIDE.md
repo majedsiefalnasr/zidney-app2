@@ -227,7 +227,7 @@ bun test --project=validate-scripts scripts/validate/__tests__/runtime-scripts.t
 
 **What to check:**
 
-- ✓ extractScriptReferences finds standard bun run calls
+- ✓ extractScriptReferences finds standard `bun run <script>` references
 - ✓ extractScriptReferences ignores excluded names
 - ✓ extractScriptReferences ignores CLI flag forms
 - ✓ loadRegisteredScripts returns a Set of keys

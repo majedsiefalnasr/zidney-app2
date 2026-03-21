@@ -122,6 +122,6 @@ None. All 16 tasks completed.
 
 ## Notes
 
-- `validate-runtime-scripts` exits non-zero (9 pre-existing missing script references: `calls`, `X`, `preview`, `start`, `build:watch`, `build:analyze`, `test:ui`, `test:watch`, `seed:test-data`). These are not caused by this stage and are tracked separately. T003 resolved exactly 5 of the original 14, confirming correct scope.
+- `validate-runtime-scripts` exits non-zero (9 pre-existing missing script references: `calls`, `X`, `preview`, `start`, `build:watch`, `build:analyze`, `test:ui`, `test:watch`, `seed-dashboard-test-data`). These are not caused by this stage and are tracked separately. T003 resolved exactly 5 of the original 14, confirming correct scope.
 - `run-local-ci.ts` Step 1 (`validate-runtime-scripts`) FAIL is expected in current codebase state due to pre-existing script references. Does not block stage closure.
 - All `ci:local*` script commands work correctly when `GITHUB_TOKEN` is set in `.secrets`.

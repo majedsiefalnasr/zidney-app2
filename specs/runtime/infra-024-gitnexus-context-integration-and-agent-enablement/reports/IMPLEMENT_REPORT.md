@@ -26,47 +26,47 @@ full documentation was authored.
 
 ## Files Modified
 
-| File Path                                      | Change Type             | Notes                                                                                                                |
-| ---------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `scripts/gitnexus-context.ts`                  | Modified (full replace) | Legacy 70-line console.log printer replaced with 410-line production implementation                                  |
-| `scripts/validate/validate-gitnexus.ts`        | Created                 | 5-step CI validation pipeline, exit 0/1                                                                              |
-| `tests/gitnexus-context.test.ts`               | Created                 | 15-case Vitest unit test suite (5 describe blocks)                                                                   |
-| `docs/ai/gitnexus-context.schema.json`         | Created                 | JSON Schema Draft-07, 9 required fields                                                                              |
-| `tests/fixtures/gitnexus/mock-brain.json`      | Created                 | 3-module architecture brain fixture                                                                                  |
-| `tests/fixtures/gitnexus/mock-git-changed.txt` | Created                 | 3-path git diff fixture                                                                                              |
-| `tests/fixtures/gitnexus/mock-git-log.txt`     | Created                 | 3-commit git log fixture                                                                                             |
-| `docs/ai/gitnexus.md`                          | Created                 | Primary GitNexus usage documentation                                                                                 |
-| `docs/ci/gitnexus-validation.md`               | Created                 | CI gate documentation                                                                                                |
-| `docs/scripts/gitnexus-context.md`             | Created                 | Script reference documentation                                                                                       |
-| `docs/scripts/validate-gitnexus.md`            | Created                 | Validation script documentation                                                                                      |
-| `package.json`                                 | Modified                | Added `gitnexus:context`, `gitnexus:validate`, `validate-gitnexus` script keys; added `gitnexus@1.4.6` devDependency |
-| `bun.lock`                                     | Modified                | Updated by `bun add -D gitnexus@1.4.6`                                                                               |
-| `.agents/agents/zidney-orchestrator.agent.md`  | Modified                | Added GitNexus Context Bootstrap (Mandatory Pre-Implementation) section                                              |
-| `AGENTS.md`                                    | Modified                | Added GitNexus Context Artifact Usage Policy section                                                                 |
+| File Path                                      | Change Type             | Notes                                                                                           |
+| ---------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- |
+| `scripts/gitnexus-context.ts`                  | Modified (full replace) | Legacy 70-line console.log printer replaced with 410-line production implementation             |
+| `scripts/validate/validate-gitnexus.ts`        | Created                 | 5-step CI validation pipeline, exit 0/1                                                         |
+| `tests/gitnexus-context.test.ts`               | Created                 | 15-case Vitest unit test suite (5 describe blocks)                                              |
+| `docs/ai/gitnexus-context.schema.json`         | Created                 | JSON Schema Draft-07, 9 required fields                                                         |
+| `tests/fixtures/gitnexus/mock-brain.json`      | Created                 | 3-module architecture brain fixture                                                             |
+| `tests/fixtures/gitnexus/mock-git-changed.txt` | Created                 | 3-path git diff fixture                                                                         |
+| `tests/fixtures/gitnexus/mock-git-log.txt`     | Created                 | 3-commit git log fixture                                                                        |
+| `docs/ai/gitnexus.md`                          | Created                 | Primary GitNexus usage documentation                                                            |
+| `docs/ci/gitnexus-validation.md`               | Created                 | CI gate documentation                                                                           |
+| `docs/scripts/gitnexus-context.md`             | Created                 | Script reference documentation                                                                  |
+| `docs/scripts/validate-gitnexus.md`            | Created                 | Validation script documentation                                                                 |
+| `package.json`                                 | Modified                | Added `gitnexus:context`, `gitnexus:validate` script keys; added `gitnexus@1.4.6` devDependency |
+| `bun.lock`                                     | Modified                | Updated by `bun add -D gitnexus@1.4.6`                                                          |
+| `.agents/agents/zidney-orchestrator.agent.md`  | Modified                | Added GitNexus Context Bootstrap (Mandatory Pre-Implementation) section                         |
+| `AGENTS.md`                                    | Modified                | Added GitNexus Context Artifact Usage Policy section                                            |
 
 ---
 
 ## Tasks Completion
 
-| Task ID | Description                                                              | Layer          | Status |
-| ------- | ------------------------------------------------------------------------ | -------------- | ------ |
-| T001    | Install `gitnexus@1.4.6` as devDependency                                | Infrastructure | ✅     |
-| T002    | Create `docs/ai/gitnexus-context.schema.json`                            | Infrastructure | ✅     |
-| T003    | Create `tests/fixtures/gitnexus/mock-brain.json`                         | Infrastructure | ✅     |
-| T004    | Create `tests/fixtures/gitnexus/mock-git-changed.txt`                    | Infrastructure | ✅     |
-| T005    | Create `tests/fixtures/gitnexus/mock-git-log.txt`                        | Infrastructure | ✅     |
-| T006    | Full replace `scripts/gitnexus-context.ts`                               | Infrastructure | ✅     |
-| T007    | Create `scripts/validate/validate-gitnexus.ts`                           | Infrastructure | ✅     |
-| T008    | Create `tests/gitnexus-context.test.ts`                                  | Infrastructure | ✅     |
-| T009    | Add GitNexus Bootstrap to `zidney-orchestrator.agent.md`                 | Governance     | ✅     |
-| T010    | Add GitNexus Usage Policy to `AGENTS.md`                                 | Governance     | ✅     |
-| T011    | Add `gitnexus:context`, `gitnexus:validate`, `validate-gitnexus` scripts | Infrastructure | ✅     |
-| T012    | Create `docs/ci/gitnexus-validation.md`                                  | Documentation  | ✅     |
-| T013    | Create `docs/ai/gitnexus.md`                                             | Documentation  | ✅     |
-| T014    | Create `docs/scripts/gitnexus-context.md`                                | Documentation  | ✅     |
-| T015    | Create `docs/scripts/validate-gitnexus.md`                               | Documentation  | ✅     |
-| T016    | `validate-runtime-scripts` — 0 INFRA-024 violations                      | Governance     | ✅     |
-| T017    | 15/15 unit tests passing in `tests/gitnexus-context.test.ts`             | Infrastructure | ✅     |
+| Task ID | Description                                                  | Layer          | Status |
+| ------- | ------------------------------------------------------------ | -------------- | ------ |
+| T001    | Install `gitnexus@1.4.6` as devDependency                    | Infrastructure | ✅     |
+| T002    | Create `docs/ai/gitnexus-context.schema.json`                | Infrastructure | ✅     |
+| T003    | Create `tests/fixtures/gitnexus/mock-brain.json`             | Infrastructure | ✅     |
+| T004    | Create `tests/fixtures/gitnexus/mock-git-changed.txt`        | Infrastructure | ✅     |
+| T005    | Create `tests/fixtures/gitnexus/mock-git-log.txt`            | Infrastructure | ✅     |
+| T006    | Full replace `scripts/gitnexus-context.ts`                   | Infrastructure | ✅     |
+| T007    | Create `scripts/validate/validate-gitnexus.ts`               | Infrastructure | ✅     |
+| T008    | Create `tests/gitnexus-context.test.ts`                      | Infrastructure | ✅     |
+| T009    | Add GitNexus Bootstrap to `zidney-orchestrator.agent.md`     | Governance     | ✅     |
+| T010    | Add GitNexus Usage Policy to `AGENTS.md`                     | Governance     | ✅     |
+| T011    | Add `gitnexus:context`, `gitnexus:validate` scripts          | Infrastructure | ✅     |
+| T012    | Create `docs/ci/gitnexus-validation.md`                      | Documentation  | ✅     |
+| T013    | Create `docs/ai/gitnexus.md`                                 | Documentation  | ✅     |
+| T014    | Create `docs/scripts/gitnexus-context.md`                    | Documentation  | ✅     |
+| T015    | Create `docs/scripts/validate-gitnexus.md`                   | Documentation  | ✅     |
+| T016    | `validate-runtime-scripts` — 0 INFRA-024 violations          | Governance     | ✅     |
+| T017    | 15/15 unit tests passing in `tests/gitnexus-context.test.ts` | Infrastructure | ✅     |
 
 **Completed:** 17 / 17
 

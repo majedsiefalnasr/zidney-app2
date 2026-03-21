@@ -144,7 +144,7 @@ Expected: 15/15 tests pass; 76/76 workspace tests pass.
 
 - [x] No migrations included (N/A — no schema changes)
 - [x] Backward compatibility verified (package.json scripts additive only)
-- [x] Rollback strategy defined (remove `gitnexus:context`, `gitnexus:validate`, `validate-gitnexus` script keys)
+- [x] Rollback strategy defined (remove `gitnexus:context`, `gitnexus:validate` script keys)
 - [x] No untracked schema changes
 
 ---

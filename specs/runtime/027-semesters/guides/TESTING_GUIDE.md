@@ -34,14 +34,14 @@ Key outcomes:
 
 ## Prerequisites
 
-| Requirement                | Validation Command / Check                            |
-| -------------------------- | ----------------------------------------------------- |
-| Bun installed              | `bun --version` (v1+)                                 |
-| Docker running             | `docker ps` — Postgres container up                   |
-| Environment file present   | `.env` exists with `DATABASE_URL` pointing to test DB |
-| Migrations applied         | `bun run db:migrate:tenant` (or equivalent)           |
-| Correct branch checked out | `git branch` shows `spec/027-semesters`               |
-| Dependencies installed     | `bun install` from repo root                          |
+| Requirement                | Validation Command / Check                                           |
+| -------------------------- | -------------------------------------------------------------------- |
+| Bun installed              | `bun --version` (v1+)                                                |
+| Docker running             | `docker ps` — Postgres container up                                  |
+| Environment file present   | `.env` exists with `DATABASE_URL` pointing to test DB                |
+| Migrations applied         | `bun run db:migrate -- --workspace <workspace-slug>` (or equivalent) |
+| Correct branch checked out | `git branch` shows `spec/027-semesters`                              |
+| Dependencies installed     | `bun install` from repo root                                         |
 
 ---
 
