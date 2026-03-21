@@ -1,3 +1,0 @@
----
-agent: Zidney Performance Optimizer
----

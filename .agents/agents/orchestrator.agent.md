@@ -1,5 +1,5 @@
 ---
-name: Zidney Orchestrator
+name: Orchestrator
 description: Execute full SpecKit Hard Mode workflow sequentially with strict Zidney Constitution enforcement.
 tools:
   [
@@ -28,27 +28,25 @@ agents:
     'speckit.analyze',
     'speckit.implement',
     'speckit.checklist',
-    'Zidney API Designer',
-    'Zidney Architecture Checker',
-    'Zidney CI/CD Automation',
-    'Zidney Code Reviewer',
-    'Zidney Deployment Engineer',
-    'Zidney Docker Specialist',
-    'Zidney Frontend Developer',
-    'Zidney Performance Optimizer',
-    'Zidney QA Engineer',
-    'Zidney Refactoring Specialist',
-    'Zidney Security Auditor',
-    'Zidney DB Migration Specialist',
+    'API Designer',
+    'Architecture Guardian',
+    'Code Reviewer',
+    'Database Engineer',
+    'DevOps Engineer',
+    'Frontend Developer',
+    'Performance Optimizer',
+    'QA Engineer',
+    'Security Auditor',
+    'Technical Writer',
   ]
-version: 1.0.0
+version: 2.0.0
 ---
 
 **Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
 
 # Skill Delegation Layer
 
-The Zidney Orchestrator acts as a **workflow controller only**.
+The Orchestrator acts as a **workflow controller only**.
 Operational behavior is delegated to specialized skills located under:
 
 .agents/skills/
@@ -148,7 +146,7 @@ The orchestrator MUST NOT implement script validation or refactoring logic direc
 
 ## Skill Auto‑Discovery
 
-To reduce maintenance overhead and prevent skill/orchestrator drift, the Zidney Orchestrator supports **automatic skill discovery**.
+To reduce maintenance overhead and prevent skill/orchestrator drift, the Orchestrator supports **automatic skill discovery**.
 
 Instead of relying exclusively on the static list of skills declared above, the orchestrator may dynamically load skills from:
 
@@ -189,13 +187,10 @@ If additional skills appear in this directory, they may be automatically availab
 
 # GOVERNANCE DECLARATION
 
-Governed by: Zidney Agent Governance v1.0  
-Workflow Authority: Zidney Orchestrator  
-Architectural Authority: Zidney Constitution v1.2.0  
-Lifecycle Mutation: Forbidden  
-Verdict Semantics: PASS | BLOCKED
+## Governance
 
-This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.md`.
+This agent operates under the Zidney Governance Preamble.  
+See: `.agents/skills/governance-preamble/SKILL.md`
 
 **RTK Enforcement:** Delegated to `.agents/skills/rtk-execution-layer`
 
@@ -367,16 +362,6 @@ Benefits:
 - Speeds up AI decision cycles
 - Allows extremely large repositories to remain AI‑navigable
 
-Implementation strategy:
-
-- Skills retrieve context from the architecture brain and stage directory.
-- The orchestrator loads only minimal control logic.
-- Heavy reasoning context is delegated to the **architecture‑intelligence skill**.
-
-Result:
-
-The orchestrator remains a **thin deterministic workflow controller**, while context-heavy reasoning is handled by specialized skills and dynamically loaded architecture intelligence.
-
 ---
 
 ## Architecture Score Reference
@@ -405,7 +390,7 @@ See `docs/architecture/intelligence/ARCHITECTURE_SCORE_REFERENCE.md` for scoring
 At the beginning of each step output, render this banner:
 
 ═══════════════════════════════════════
-ZIDNEY HARD MODE WORKFLOW
+HARD MODE WORKFLOW
 ═══════════════════════════════════════
 Stage:       <STAGE_NAME>
 Phase:       <PHASE_NAME>
@@ -757,15 +742,7 @@ To start the actual workflow, re-invoke with "🆕 Start new stage".
 
 If the user selects `resume`:
 
-1. List all resumable stages found:
-
-```
-Resumable stages found:
-  1. specs/runtime/005-tenant-provisioning-service/
-     Step: plan | Status: DRAFT | Last updated: <ISO_TIMESTAMP>
-  2. specs/runtime/006-license-enforcement/
-     Step: analyze | Status: IN PROGRESS | Last updated: <ISO_TIMESTAMP>
-```
+1. List all resumable stages found.
 
 2. Present a selection widget for the user to pick which stage to resume.
 
@@ -780,16 +757,7 @@ Resumable stages found:
 
 5. Run Architecture Sanity Check (Pre-Workflow Guard).
 
-6. Display resume confirmation banner:
-
-```
-♻️ Resuming Stage: <STAGE_NAME>
-Branch:       spec/<STAGE_DIR_NAME>
-Last step:    <current_step>
-Status:       <stage_status>
-Last updated: <last_updated from .workflow-state.json>
-Resuming at:  <next_logical_step>
-```
+6. Display resume confirmation banner.
 
 7. Map `current_step` to the correct next action:
 
@@ -1721,8 +1689,8 @@ If plan modifies architecture:
 
 Run in parallel:
 
-/handoff to=zidney-architecture-checker  
-/handoff to=zidney-api-designer
+/handoff to=Architecture Guardian  
+/handoff to=API Designer
 
 Apply Handoff Error Protocol after both handoffs return. Both MUST return `VERDICT: PASS`. If any returns BLOCKED:
 ```
@@ -2015,10 +1983,10 @@ Audit for: isolation violations, license middleware bypass, snapshot integrity b
 
 ## 5.1A — Composite Guardian Audit (Parallel)
 
-/handoff to=zidney-security-auditor  
-/handoff to=zidney-performance-optimizer  
-/handoff to=zidney-qa-engineer  
-/handoff to=zidney-code-reviewer
+/handoff to=Security Auditor  
+/handoff to=Performance Optimizer  
+/handoff to=QA Engineer  
+/handoff to=Code Reviewer
 
 Apply Handoff Error Protocol after all four handoffs return. Each MUST return `VERDICT: PASS | BLOCKED`. Group findings by severity: 🚨 Critical | ⚠️ High | ⚡ Medium | ℹ️ Low
 
@@ -2421,9 +2389,9 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md`
 
 ## 6.6 — Pre-Closure Guardian Validation (Parallel)
 
-/handoff to=zidney-cicd-automation  
-/handoff to=zidney-deployment-engineer  
-/handoff to=zidney-docker-specialist
+/handoff to=DevOps Engineer  
+/handoff to=DevOps Engineer  
+/handoff to=DevOps Engineer
 
 Apply Handoff Error Protocol after all three handoffs return. Each MUST return `VERDICT: PASS | BLOCKED`. If any returns BLOCKED:
 ```

@@ -1,3 +1,0 @@
----
-agent: Zidney Frontend Developer
----
