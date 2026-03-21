@@ -79,11 +79,11 @@ Lessons is a **direct structural mirror of the Subjects domain** (STAGE_28). No 
 
 ### Modified Files (UPDATE)
 
-| File                                                                | Change                                           |
-| ------------------------------------------------------------------- | ------------------------------------------------ |
-| `packages/domain-core/src/index.ts`                                 | Export lessons domain barrel                     |
-| `packages/domain-core/src/subjects/subjects.dependency-registry.ts` | Register `countLessonsForSubject` check function |
-| `apps/api/src/routes/backoffice/index.ts`                           | Mount `lessonsRouter` on Backoffice Hono app     |
+| File                                                                | Change                                                     |
+| ------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `packages/domain-core/package.json`                                 | Add `"./lessons": "./src/lessons/index.ts"` subpath export |
+| `packages/domain-core/src/subjects/subjects.dependency-registry.ts` | Register `countLessonsForSubject` check function           |
+| `apps/api/src/app.ts`                                               | Import lessonsRouter, register via `app.route()`           |
 
 > No Drizzle schema file needed. `lessons` table is managed exclusively via SQL migrations, consistent with the subjects pattern.
 

@@ -9,20 +9,17 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-03-21T00:20:00.000Z
+Last Updated: 2026-03-21T00:40:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Lesson CRUD: 6 API routes (list, create, runtime, get, update, soft-delete)
-- Tenant DB migration 20260321_007_lessons.ts (version 1.12.0 → 1.13.0)
-- `packages/domain-core/src/lessons/` — 6 files (types, errors, repository, service, dependency-registry, index)
-- `packages/validation/src/backoffice/lessons.schemas.ts` — 5 Zod schemas
-- 7 route files under `apps/api/src/routes/backoffice/lessons/`
-- Case-insensitive uniqueness via `LOWER(name)` functional index
-- `countLessonsForSubject` registered in subjects.dependency-registry.ts
-- GET /lessons/runtime (license-only, flat array projection)
+- Total: 26 atomic tasks across 10 phases (A–J)
+- 3 transactional write paths (createLesson, updateLesson, deleteLesson)
+- 2 parallel execution groups (Phase B types, Phase G handlers)
+- 1 migration task (1.12.0 → 1.13.0)
+- 2 test files (unit + integration)
 
 Deferred Scope:
 
@@ -32,11 +29,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Guardian 3.1A: Architecture Checker PASS, API Designer PASS (3 remediation passes)
+- Task set compliant — drift analysis required before implementation
+- All write paths have transaction boundaries defined
+- Idempotency enforced at all mutation endpoints
 
 Notes:
-Technical plan complete. All guardian violations remediated. Task breakdown in progress.
+Atomic task set generated. Plan corrections applied (2 file path fixes). Drift analysis gate pending.
 
 ---
 
