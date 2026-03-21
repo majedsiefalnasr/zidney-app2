@@ -8,7 +8,55 @@ Database: Tenant DB
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Risk Level: HIGH
+Closure Date: 2026-03-21
+Last Updated: 2026-03-21T04:00:00.000Z
+
+Implementation: COMPLETE
+Tasks: 26 / 26 completed
+
+Scope Closed:
+
+- ✅ Lesson aggregate in packages/domain-core (repository, service, types, schemas, index)
+- ✅ 6 Hono routes: GET/POST /lessons, GET/PUT/DELETE /lessons/:id, GET /lessons/runtime
+- ✅ Tenant DB migration 20260321_007_lessons.ts (MIN_SCHEMA_VERSION 1.13.0)
+- ✅ countLessonsForSubject registered in subjects.dependency-registry.ts
+- ✅ lessonsRouter mounted in apps/api/src/app.ts
+- ✅ 37/37 tests passing (service unit + integration)
+
+Deferred Scope:
+
+- Frontoffice lesson views (not in this stage)
+- MCQ/Traditional question tagging (downstream stage dependency)
+- Auto-selection filter integration (downstream)
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced
+- ADR-0006 Server-authoritative time enforced
+- ADR-0007 Version compatibility enforced (MIN_SCHEMA_VERSION 1.13.0)
+- All write paths transactional (service layer, BEGIN/COMMIT/ROLLBACK)
+- Idempotency enforced at all mutation endpoints
+- License middleware applied per route
+
+Audit Results:
+
+- Architecture Checker: PASS
+- API Designer: PASS
+- Security Auditor: PASS
+- Performance Optimizer: PASS
+- QA Engineer: PASS
+- Code Reviewer: PASS
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
+
+- Multi-tenant isolation confirmed (tenant pool only, no global singleton)
+
+Notes:
+Full drift analysis passed. Implementation gate open.
 
 ---
 

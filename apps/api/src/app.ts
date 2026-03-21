@@ -45,6 +45,7 @@ import { departmentsRouter } from './routes/backoffice/departments/index'
 import { divisionsRouter } from './routes/backoffice/divisions/index'
 import { groupsRouter } from './routes/backoffice/groups/index'
 import { hierarchyRouter } from './routes/backoffice/hierarchy/index'
+import { lessonsRouter } from './routes/backoffice/lessons'
 import { rolesRouter } from './routes/backoffice/roles'
 import { semestersRouter } from './routes/backoffice/semesters'
 import { workspaceSettingsRouter } from './routes/backoffice/settings'
@@ -170,6 +171,9 @@ app.route('/api/v1/backoffice/workspace', semestersRouter)
 
 // Subjects endpoints — Stage 028, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', subjectsRouter)
+
+// Lessons endpoints — Stage 029, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', lessonsRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade
