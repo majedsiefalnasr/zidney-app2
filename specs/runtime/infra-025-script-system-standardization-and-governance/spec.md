@@ -285,7 +285,7 @@ The following script validation steps must be added to the CI pipeline.
 | `validate:script:naming`         | All script names follow convention            |
 | `validate:script:usage`          | No broken or orphan references                |
 | `validate:script:infrastructure` | Registry is current; metadata headers present |
-| `generate:script:docs`           | Registry can be regenerated without errors    |
+| `dev:generate:script-docs`       | Registry can be regenerated without errors    |
 
 CI must fail if any check fails. No bypass is permitted.
 

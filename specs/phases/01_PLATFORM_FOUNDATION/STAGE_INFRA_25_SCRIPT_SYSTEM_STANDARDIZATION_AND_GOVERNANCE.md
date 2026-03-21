@@ -3,23 +3,21 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-21T00:00:00Z
+Last Updated: 2026-03-21T12:05:05Z
 
-Scope Defined:
+Scope Planned:
 
-- Script naming convention (`<domain>:<action>[:<scope>]`)
-- Script inventory across root + all workspace package.json files
-- Migration map (`docs/scripts/SCRIPT_MIGRATION_MAP.md`)
-- Automated refactor engine (`scripts/refactor-scripts.ts`) — includes `.sh` scan
-- Invocation standardization (`bun scripts/<domain>/<file>.ts`)
-- Script metadata headers per file
-- Auto-generated script registry (`docs/scripts/SCRIPT_REGISTRY.md`)
-- Validation scripts (naming + usage) — report-all mode
-- CI integration → `architecture-governance.yml`
-- Orchestrator gate
-- AI governance skill (supplements existing docs)
+- Script naming convention (`<domain>:<action>[:<scope>]`) — 9 allowed domains
+- 33-entry migration map (`docs/scripts/SCRIPT_MIGRATION_MAP.md`)
+- Refactor engine at `scripts/dev/refactor-scripts.ts` (`dev:refactor:scripts`)
+- 3 validation scripts: `validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure`
+- Registry generator (`dev:generate:script-docs`) with 5-field metadata enforcement
+- Auto-generated registry (`docs/scripts/SCRIPT_REGISTRY.md`) with normalized staleness check
+- 4-step CI block appended to `architecture-governance.yml` (steps 14–17)
+- AI governance skill update (`.agents/skills/script-system-governance/SKILL.md`)
+- Root `package.json` — 33 renames/removals + 5 new governed entries
 
 Deferred Scope:
 
@@ -28,10 +26,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian audit PASS: Architecture Checker ✅ | API Designer ✅
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Guardian validation passed after V-1/V-2 remediation. Task breakdown in progress.
 
 ---
 
