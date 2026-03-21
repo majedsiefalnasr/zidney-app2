@@ -74,6 +74,7 @@ Loaded skills:
 - security-hardening
 - api-testing-patterns
 - drizzle-orm-patterns
+- script-system-governance
 
 The orchestrator MUST NOT duplicate logic implemented by these skills.
 
@@ -100,6 +101,7 @@ Responsibility mapping:
 | Security hardening rules         | security-hardening         |
 | Multi-tenant test patterns       | api-testing-patterns       |
 | Drizzle ORM usage patterns       | drizzle-orm-patterns       |
+| Script system governance         | script-system-governance   |
 
 Execution model:
 
@@ -117,6 +119,32 @@ The orchestrator retains responsibility only for:
 - Subagent coordination
 
 ---
+
+## Script System Governance
+
+**Delegated to:** `.agents/skills/script-system-governance`
+
+All script validation, naming enforcement, deduplication, registry checks, and refactor operations are handled by the script-system-governance skill.
+
+The orchestrator MUST:
+
+- Invoke this skill before:
+  - Step 6 — Implement
+  - Step 7 — Closure
+
+- Block execution if:
+  - Missing scripts
+  - Invalid script references
+  - Duplicate scripts detected
+
+- Suggest running:
+  ```
+  bun run refactor-scripts
+  ```
+  when inconsistencies or drift are detected
+
+The orchestrator MUST NOT implement script validation or refactoring logic directly.
+```
 
 ## Skill Auto‑Discovery
 
@@ -545,6 +573,36 @@ The user should only see ONE logical next action at a time.
 ---
 
 **Pre-Commit Diagnostics:** Delegated to `.agents/skills/precommit-diagnostics`
+
+### Pre-Commit Script Governance Integration
+
+The precommit-diagnostics skill MUST integrate with `script-system-governance` to enforce early failure detection for script issues.
+
+Required behavior:
+
+- Before any commit or step completion, precommit-diagnostics MUST:
+  - Validate all referenced scripts exist in package.json
+  - Detect missing `bun run <script>` commands
+  - Detect duplicate or conflicting script names
+  - Ensure naming follows `<domain>:<action>[:<scope>]`
+  - Ensure scripts are documented in `docs/scripts/`
+
+- If any violation is detected:
+  - BLOCK the commit or step
+  - Surface error with exact script name and location
+
+- Suggested automatic checks:
+  ```bash
+  bun run validate:runtime-scripts
+  bun run script:usage-scan
+  ```
+
+- If drift is detected, suggest:
+  ```bash
+  bun run refactor-scripts
+  ```
+
+The orchestrator MUST rely on precommit-diagnostics for early detection and MUST NOT duplicate validation logic.
 
 ---
 
@@ -2384,7 +2442,51 @@ Fill from `specs/runtime/<STAGE_DIR_NAME>/tasks.md` (count `- [X]` lines for TAS
 Include a validation summary — full evidence is in `audits/VALIDATION_REPORT.md`, do not duplicate it.  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md`
 
-## 6.8 — Update Stage Status Block
+## 6.8 — Script Refactor Engine (Optional Enhancement)
+
+Purpose:
+Provide a deterministic, automated mechanism to migrate and normalize script names across the repository after introducing the Script Naming Governance stage.
+
+Task Reference:
+- T011 – Script Refactor Engine
+
+Command:
+```bash
+bun run refactor-scripts
+```
+
+Responsibilities:
+- Reads the **script migration map** generated during the Script Governance stage (e.g., `docs/scripts/script-migration-map.json`)
+- Updates all script references across the codebase:
+  - `package.json` files (root + workspaces)
+  - CI workflows (`.github/workflows/*`)
+  - Orchestrator / agents / skills (`.agents/**`)
+  - Documentation (`docs/**`)
+  - Runtime specs (`specs/runtime/**`)
+- Ensures no stale script names remain
+- Produces a diff summary report
+
+Validation:
+- Run all migrated scripts to ensure they execute without errors
+- Run global validation:
+```bash
+bun run validate-runtime-scripts
+```
+
+Failure Handling:
+If any script reference cannot be resolved:
+```
+❌ Script refactor failed — unresolved script reference detected.
+   Why it matters: Inconsistent script names break automation and CI.
+   Fix: Update migration map or manually resolve remaining references.
+```
+→ STOP until resolved
+
+Notes:
+- This step is **non-blocking** and can be executed after implementation or as part of an INFRA stage
+- Recommended to integrate into CI as a validation guard in future stages
+
+## 6.9 — Update Stage Status Block
 
 Apply Stage Lifecycle Guard first.
 
@@ -2415,7 +2517,7 @@ Notes:
 Backend implementation complete. No structural backend modifications allowed.
 ```
 
-## 6.9 — Update .workflow-state.json
+## 6.10 — Update .workflow-state.json
 
 Merge:
 
@@ -2456,11 +2558,11 @@ Merge:
 
 Note: `deferred_tasks` appends to the existing array — do not replace it. If no tasks were deferred, append nothing (preserve existing array).
 
-## 6.10 — Update README.md
+## 6.11 — Update README.md
 
 Mark Implement row as `✅`.
 
-## 6.11 — Commit Implement Step
+## 6.12 — Commit Implement Step
 
 Apply Git Hygiene Enforcement:
 
