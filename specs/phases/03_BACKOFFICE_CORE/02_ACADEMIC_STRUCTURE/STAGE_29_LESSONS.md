@@ -8,21 +8,22 @@ Database: Tenant DB
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: HIGH
-Last Updated: 2026-03-21T01:00:00.000Z
+Last Updated: 2026-03-21T03:30:00.000Z
 
-Drift Analysis: PASSED (all 15 criteria — attempt 2)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 26 / 26 completed
 
-Scope Authorized:
+Scope Closed:
 
-- Lesson aggregate in packages/domain-core (repository, service, types, schemas, index)
-- 6 Hono routes: GET/POST /lessons, GET/PUT/DELETE /lessons/:id, GET /lessons/runtime
-- Tenant DB migration 20260321_007_lessons.ts (MIN_SCHEMA_VERSION 1.13.0)
-- countLessonsForSubject registered in subjects.dependency-registry.ts
-- lessonsRouter mounted in apps/api/src/app.ts
+- ✅ Lesson aggregate in packages/domain-core (repository, service, types, schemas, index)
+- ✅ 6 Hono routes: GET/POST /lessons, GET/PUT/DELETE /lessons/:id, GET /lessons/runtime
+- ✅ Tenant DB migration 20260321_007_lessons.ts (MIN_SCHEMA_VERSION 1.13.0)
+- ✅ countLessonsForSubject registered in subjects.dependency-registry.ts
+- ✅ lessonsRouter mounted in apps/api/src/app.ts
+- ✅ 37/37 tests passing (service unit + integration)
 
 Deferred Scope:
 
@@ -32,12 +33,18 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Drift audit PASSED — all 15 criteria — attempt 2
-- 2 medium violations from attempt 1 remediated before re-audit
+- ADR alignment verified
+- Implementation compliant with Zidney Constitution v1.2.0
 - All write paths transactional (service layer, BEGIN/COMMIT/ROLLBACK)
 - Idempotency enforced at all mutation endpoints
 - Server-authoritative time enforced (no Node.js clock in DB writes)
 - Schema version enforcement confirmed (MIN_SCHEMA_VERSION 1.13.0)
+- Tenant isolation enforced via workspace resolver on all routes
+- License middleware applied per route
+
+Notes:
+Backend implementation complete. No structural backend modifications allowed.
+Modifications require a new migration stage.
 - Multi-tenant isolation confirmed (tenant pool only, no global singleton)
 
 Notes:

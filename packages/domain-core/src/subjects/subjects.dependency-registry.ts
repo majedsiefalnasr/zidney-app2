@@ -22,14 +22,31 @@ import type { DbClient } from './subjects.types'
 export type DependencyCheckFn = (db: DbClient, subjectId: string) => Promise<number>
 
 // ---------------------------------------------------------------------------
+// Downstream Dependency Checks
+// ---------------------------------------------------------------------------
+
+/** STAGE_29: Count lessons that belong to this subject. */
+async function countLessonsForSubject(db: DbClient, subjectId: string): Promise<number> {
+  interface CountRow extends Record<string, unknown> {
+    count: string
+  }
+  const result = await db.query<CountRow>(
+    `SELECT COUNT(*)::text AS count FROM lessons WHERE subject_id = $1::uuid`,
+    [subjectId]
+  )
+  return parseInt(result.rows[0]?.count ?? '0', 10)
+}
+
+// ---------------------------------------------------------------------------
 // Registry
 // ---------------------------------------------------------------------------
 
 /**
  * Registry of dependency check functions.
- * Starts empty at STAGE_28 — downstream stages append entries here.
+ * Populated at STAGE_29 with lessons FK check.
+ * Future stages (questions, assessments, etc.) append their own entries.
  */
-export const subjectDependencyRegistry: DependencyCheckFn[] = []
+export const subjectDependencyRegistry: DependencyCheckFn[] = [countLessonsForSubject]
 
 // ---------------------------------------------------------------------------
 // Aggregator
