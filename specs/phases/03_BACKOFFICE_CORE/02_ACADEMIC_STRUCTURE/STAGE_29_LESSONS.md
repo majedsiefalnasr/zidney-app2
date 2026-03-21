@@ -9,31 +9,33 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-21T00:00:00.000Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-03-21T00:02:00.000Z
 
 Scope Defined:
 
 - Lesson CRUD (list, create, get, update, soft-delete)
-- Tenant DB migration: lessons table with subject_id FK
+- Tenant DB migration: lessons table with subject_id FK (20260321_007_lessons.ts)
 - Status lifecycle: ENABLED | DISABLED
 - Permission gate: question_manage OR subject_manage
 - Division scoping via Subject FK (transitive)
-- Hard delete blocked when referenced
+- Hard delete blocked when referenced by questions/auto-selection/exam configs
+- MIN_SCHEMA_VERSION = 1.13.0
+- PATCH guard ordering contract established
 
 Deferred Scope:
 
 - Frontoffice lesson views (not in this stage)
-- MCQ/Traditional question tagging (downstream stages)
+- MCQ/Traditional question tagging (downstream stage dependency)
 - Auto-selection filter integration (downstream)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Risk Level: HIGH. Ready for technical planning.
 
 ---
 

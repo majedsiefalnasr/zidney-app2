@@ -724,3 +724,98 @@ apps/api/src/db/tenant/migrations/
 
 _(none — all decisions resolved at specification time using available context and project
 conventions)_
+
+---
+
+## Clarifications
+
+### Session 2026-03-21
+
+**Q1: Transaction partial failure — what happens if the service-layer operation fails mid-way during a write?**
+Resolution: All write operations (create, update, soft-delete) are wrapped in an explicit
+`db.transaction(async (tx) => { ... })` call at the service layer. All repository calls within
+that closure share the transactional client. If any step (INSERT, UPDATE, schema-version write)
+throws, the transaction is rolled back atomically and no partial state is persisted. The service
+catches the error, issues the implicit ROLLBACK via the Drizzle transaction wrapper, and
+re-throws a typed `LessonsError` for the handler to serialize. There is no possibility of
+partial success within a single route handler invocation.
+
+**Q2: Idempotency — what happens if `POST /lessons` is called twice with the same `(subject_id, name)`?**
+Resolution: The service performs a pre-insert SELECT to detect the duplicate before issuing the
+INSERT. If a duplicate is found at the check stage, it returns 409 `LESSON_NAME_DUPLICATE`
+immediately without touching the database. If the pre-check passes but the INSERT then raises a
+PostgreSQL unique constraint violation (error code `23505` — possible in a narrow race window),
+the service MUST catch that DB exception and translate it to 409 `LESSON_NAME_DUPLICATE` as a
+second-layer safety net. `POST /lessons` is **not idempotent**; repeat calls with the same
+payload are always rejected after the first successful create.
+
+**Q3: Concurrency — if two simultaneous requests create the same `(subject_id, name)`, which wins?**
+Resolution: The **first committed INSERT wins**. The `UNIQUE (subject_id, name)` constraint at
+the database level is the authoritative guard. The service-level pre-check is an optimistic fast
+path; the DB constraint is the correctness guarantee. The losing request receives a PostgreSQL
+`23505` unique violation, which the service translates to 409 `LESSON_NAME_DUPLICATE`. No retry
+or merge logic is applied; the client must decide whether to resurface the conflict to the user.
+
+**Q4: Schema version enforcement — what is `MIN_SCHEMA_VERSION` for lesson routes?**
+Resolution: `MIN_SCHEMA_VERSION = "1.13.0"` — the version introduced by migration
+`20260321_007_lessons.ts`. Any tenant whose `schema_version` is below `1.13.0` (i.e., the
+lessons table has not been migrated yet) will receive 409 `SCHEMA_VERSION_MISMATCH` before any
+lesson business logic executes. This check applies to ALL lesson routes, including GET.
+
+**Q5: Audit trail — how are `created_by` and `updated_by` populated?**
+Resolution: `buildAuditCtx` (in `helpers.ts`) reads the authenticated user ID from
+`c.get('auth').userId` — the Hono context key set by the session/auth middleware after JWT
+validation. `created_by` is set to this value at INSERT time and is **never updated thereafter**.
+`updated_by` is set to this value on every UPDATE and soft-delete. Both are `NULLABLE` to
+support the `ON DELETE SET NULL` FK semantics when a user account is removed. If the context
+carries no user ID (anonymous context), both default to `null`.
+
+**Q6: Error code registry completeness — are middleware-level error codes in scope for `LESSONS_ERROR_HTTP_STATUS`?**
+Resolution: No. `FORBIDDEN` (403), `LICENSE_LOCKED` (423), `LICENSE_ARCHIVED` (403),
+`LICENSE_NOT_FOUND` (404), and `SCHEMA_VERSION_MISMATCH` (409) are **middleware-owned** error
+codes emitted by shared tenant-resolver, auth, and license middleware — not by the lesson domain.
+`LESSONS_ERROR_HTTP_STATUS` in `lessons.errors.ts` only maps lesson-domain codes
+(`LESSON_NOT_FOUND`, `LESSON_SUBJECT_NOT_FOUND`, `LESSON_NAME_DUPLICATE`, `LESSON_DISABLED`,
+`LESSON_ALREADY_DISABLED`, `LESSON_ALREADY_ENABLED`, `LESSON_HAS_DEPENDENT_CONTENT`,
+`VALIDATION_ERROR`). Per-route error tables that reference `FORBIDDEN` / `LICENSE_*` describe
+the full response surface visible to the client; those codes are surfaced by middleware before
+the handler is invoked.
+
+**Q7: PATCH mixed-field update on a DISABLED lesson — what if `status: ENABLED` and `name` are sent together?**
+Resolution: If a PATCH payload contains **any non-status field** (i.e., `name`, `code`, or
+`description`) and the target lesson is `DISABLED`, the request fails with 422
+`LESSON_DISABLED` regardless of whether a `status: ENABLED` transition is also included in the
+same payload. Clients must issue two sequential requests: (1) PATCH `{ status: "ENABLED" }` to
+re-enable, then (2) PATCH `{ name: "...", ... }` to update other fields. This preserves the
+integrity of BR-04 without introducing ambiguous atomic re-enable-and-edit semantics.
+
+**Q8: Hard-delete prevention — which tables are checked in `lessons.dependency-registry.ts` for this stage?**
+Resolution: In this stage, all downstream tables that would reference `lesson_id`
+(`mcq_questions`, `traditional_questions`, auto-selection configs, exam configs) **do not yet
+exist**. `lessons.dependency-registry.ts` is therefore implemented as a stub that
+unconditionally returns `{ hasContent: false }`. Each downstream stage is responsible for
+registering its own FK check against lessons when it introduces its table. The
+`LESSON_HAS_DEPENDENT_CONTENT` (422) error code is reserved for a future hard-delete surface
+that is explicitly out of scope for this stage; the soft-delete path (`DELETE /lessons/:id`)
+never invokes the dependency registry.
+
+**Q9: Pagination — does the list endpoint run a separate COUNT query?**
+Resolution: Yes. `GET /lessons` executes two queries within the same transactional read context:
+(1) `SELECT ... WHERE <filters> ORDER BY name ASC LIMIT :limit OFFSET :offset` for the page
+of items, and (2) `SELECT COUNT(*) WHERE <filters>` (without LIMIT/OFFSET) for the `total`
+field in the response. Both queries apply the identical filter predicate. This matches the
+Subjects list pattern. Cursor-based pagination is **not** introduced in this stage. The
+`total` field always reflects the filtered count (not the unfiltered table size).
+
+**Q10: PATCH validation check ordering — in what sequence are guards applied?**
+Resolution: The service applies PATCH guards in this strict order:
+
+1. Fetch lesson by ID → if not found, return `404 LESSON_NOT_FOUND`.
+2. If any non-status field is present in the payload AND `lesson.status === 'DISABLED'` →
+   return `422 LESSON_DISABLED`.
+3. If `status` in payload equals the current lesson status (idempotent status flip) → return
+   `422 LESSON_ALREADY_ENABLED` or `422 LESSON_ALREADY_DISABLED`.
+4. If `name` is present → query for existing `(subject_id, name)` excluding current lesson ID
+   → if found, return `409 LESSON_NAME_DUPLICATE`.
+5. Perform the UPDATE within the open transaction; catch DB `23505` as a final
+   `LESSON_NAME_DUPLICATE` safety net.
