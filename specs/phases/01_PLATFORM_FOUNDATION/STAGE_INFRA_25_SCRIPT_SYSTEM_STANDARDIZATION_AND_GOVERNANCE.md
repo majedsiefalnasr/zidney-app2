@@ -3,8 +3,8 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: LOW
 Last Updated: 2026-03-21T00:00:00Z
 
 Scope Defined:
@@ -12,14 +12,14 @@ Scope Defined:
 - Script naming convention (`<domain>:<action>[:<scope>]`)
 - Script inventory across root + all workspace package.json files
 - Migration map (`docs/scripts/SCRIPT_MIGRATION_MAP.md`)
-- Automated refactor engine (`scripts/refactor-scripts.ts`)
+- Automated refactor engine (`scripts/refactor-scripts.ts`) — includes `.sh` scan
 - Invocation standardization (`bun scripts/<domain>/<file>.ts`)
 - Script metadata headers per file
 - Auto-generated script registry (`docs/scripts/SCRIPT_REGISTRY.md`)
-- Validation scripts (naming + usage)
-- CI integration
+- Validation scripts (naming + usage) — report-all mode
+- CI integration → `architecture-governance.yml`
 - Orchestrator gate
-- AI governance skill
+- AI governance skill (supplements existing docs)
 
 Deferred Scope:
 
@@ -28,10 +28,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

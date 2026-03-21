@@ -42,6 +42,18 @@ This stage establishes a **first-class governed script system** for the entire m
 
 ---
 
+## Clarifications
+
+### Session 2026-03-21
+
+- Q: Does the refactor engine (FR-004) include `.sh` files in its scan-and-replace scope, given the engine skeleton in the stage file only matches `md|json|ts|yml|yaml|js`? → A: Yes — `.sh` files are explicitly in scope. Stage T003 and FR-004 both list shell scripts. The skeleton is illustrative; the implementation file-match regex must include `\.sh$` in addition to the other extensions.
+- Q: Should `validate:script:naming` and `validate:script:usage` (FR-008) operate in fail-fast mode or report-all mode? → A: Report-all. Both scripts must collect and emit the complete list of all violations before exiting non-zero, enabling developers to fix every issue in a single pass.
+- Q: Which existing CI workflow file receives the four script validation steps from FR-009 — `ci.yml`, `architecture-governance.yml`, or a new dedicated file? → A: `.github/workflows/architecture-governance.yml`. Script governance is a governance concern matching the purpose of that workflow, which already houses `arch:guard`, `infra-audit.ts`, and `arch:health:ci`. No new workflow file is created.
+- Q: Does the "no duplicate script names across `package.json` files" rule in FR-002 apply to all script names (including universal lifecycle names like `build`, `test`) or only to governed `<domain>:<action>[:<scope>]` names? → A: Governed scripts only. The duplicate-name prohibition applies exclusively to scripts conforming to `<domain>:<action>[:<scope>]`. Standard lifecycle scripts (`build`, `test`, `lint`, `typecheck`, `dev`, `clean`, `check`) that exist across all workspaces are explicitly exempt.
+- Q: Does the new `script-system-governance` AI skill (FR-011) supersede or supplement existing script guidance in `AGENTS.md` and other documentation? → A: Supplements. The skill is additive — it becomes the canonical agent-facing interface for script governance operations. Existing `AGENTS.md` entries, README references, and CI comments are not removed. Agents must load the skill whenever creating, renaming, or validating scripts.
+
+---
+
 ## Constitutional Compliance Declaration
 
 This stage modifies only developer tooling and build-time governance. No runtime behavior, data model, or trust chain component is altered.
@@ -151,7 +163,7 @@ Every script name defined anywhere in the repository must conform to `<domain>:<
 - Only the domains listed in the Domain Map are permitted
 - Separator must be `:` (not `-` between domain segments)
 - Action and scope segments may contain `-` internally (e.g., `db:validate:tenant-schema`)
-- Duplicate script names across different package.json files are forbidden
+- Duplicate script names across different package.json files are forbidden **for scripts conforming to the `<domain>:<action>[:<scope>]` convention only**. Standard lifecycle scripts (`build`, `test`, `lint`, `typecheck`, `dev`, `clean`, `check`) that exist across all workspaces are exempt from the deduplication rule.
 
 A validation script must check and fail if any non-conforming name exists.
 
@@ -182,7 +194,7 @@ An automated refactor engine must update all script references across the reposi
 - All TypeScript scripts (`scripts/**/*.ts`)
 - All Markdown documentation (`docs/**/*.md`, `specs/**/*.md`)
 - All agent files (`.agents/**/*.md`)
-- Shell scripts (`.sh` files)
+- Shell scripts (`.sh` files) — the file-match regex **must** include `\.sh$`; the engine skeleton in the stage file omits this extension and must be updated during implementation
 
 **Behavior:**
 
@@ -258,13 +270,15 @@ Two validation scripts must be created:
 - Detects orphan references (calls to scripts that do not exist)
 - Detects broken references (old names that were renamed but not updated)
 
-Both scripts must exit with a non-zero code on failure.
+Both scripts must operate in **report-all mode**: collect and emit the complete list of all violations before exiting with a non-zero code. Fail-fast (early exit on first violation) is prohibited; every invocation must surface the full violation set to enable single-pass remediation.
 
 ---
 
 ### FR-009: CI Integration
 
-The following script validation steps must be added to the CI pipeline:
+The following script validation steps must be added to the CI pipeline.
+
+**Target workflow file:** `.github/workflows/architecture-governance.yml`. Script governance is a governance concern; these steps are added as a new `# Script System Governance` block inside the existing `architecture-governance` job. No new workflow file is created.
 
 | CI Check                         | What it validates                             |
 | -------------------------------- | --------------------------------------------- |
@@ -298,6 +312,8 @@ A skill file must be created at `.agents/skills/script-system-governance/SKILL.m
 - How to rename an existing script safely
 - How to update all usages after a rename
 - Anti-patterns to avoid (inline commands, missing registry, wrong domain, broken references)
+
+**Relationship to existing documentation:** The skill is **additive (supplements, does not supersede)** existing script guidance in `AGENTS.md`, README references, and CI comments. Those sources remain as human-readable context. The skill becomes the canonical agent-facing interface for script governance operations. Any AI agent creating, renaming, or validating scripts must load this skill.
 
 The skill must be loaded by any AI agent that creates, renames, or validates scripts.
 
