@@ -20,25 +20,25 @@
 
 ### Service Unit Tests (19 tests)
 
-| Suite | Tests | Result |
-|-------|-------|--------|
-| listLessons | 2 | ✅ PASS |
-| getLesson | 2 | ✅ PASS |
-| getActiveLessons | 2 | ✅ PASS |
-| createLesson | 4 | ✅ PASS |
-| updateLesson | 6 | ✅ PASS |
-| deleteLesson | 3 | ✅ PASS |
+| Suite            | Tests | Result  |
+| ---------------- | ----- | ------- |
+| listLessons      | 2     | ✅ PASS |
+| getLesson        | 2     | ✅ PASS |
+| getActiveLessons | 2     | ✅ PASS |
+| createLesson     | 4     | ✅ PASS |
+| updateLesson     | 6     | ✅ PASS |
+| deleteLesson     | 3     | ✅ PASS |
 
 ### Integration Tests (18 tests)
 
-| Suite | Tests | Result |
-|-------|-------|--------|
-| listLessonsHandler | 3 | ✅ PASS |
-| getActiveLessonsHandler | 3 | ✅ PASS |
-| createLessonHandler | 3 | ✅ PASS |
-| getLessonHandler | 3 | ✅ PASS |
-| updateLessonHandler | 3 | ✅ PASS |
-| deleteLessonHandler | 3 | ✅ PASS |
+| Suite                   | Tests | Result  |
+| ----------------------- | ----- | ------- |
+| listLessonsHandler      | 3     | ✅ PASS |
+| getActiveLessonsHandler | 3     | ✅ PASS |
+| createLessonHandler     | 3     | ✅ PASS |
+| getLessonHandler        | 3     | ✅ PASS |
+| updateLessonHandler     | 3     | ✅ PASS |
+| deleteLessonHandler     | 3     | ✅ PASS |
 
 ---
 
