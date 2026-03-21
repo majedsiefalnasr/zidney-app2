@@ -461,7 +461,7 @@ Logger: `createLogger('domain:lessons')`
 
 1. `findLessonById(tx, id)` → null → throw `LESSON_NOT_FOUND`
 2. `lesson.status === 'DISABLED'` → throw `LESSON_ALREADY_DISABLED`
-3. `updateLessonRow(tx, id, { status: 'DISABLED', updated_at: new Date() }, audit.user_id)`
+3. `updateLessonRow(tx, id, { status: 'DISABLED' }, audit.user_id)` — `updated_at = NOW()` set internally by `updateLessonRow` via SQL, never from Node.js clock
 4. Return `{ deleted: true as const }`
 
 ### `lessons.dependency-registry.ts`
@@ -736,8 +736,8 @@ Forward-only (ADR-0008). No automated rollback.
 1. `DROP TABLE IF EXISTS lessons CASCADE`
 2. `UPDATE _schema_versions SET version = '1.12.0', updated_at = NOW() WHERE name = 'schema_version'`
 3. Revert `subjects.dependency-registry.ts` — remove `countLessonsForSubject` registration
-4. Remove `lessonsRouter` from `apps/api/src/routes/backoffice/index.ts`
-5. Remove lessons barrel from `packages/domain-core/src/index.ts`
+4. Remove `lessonsRouter` from `apps/api/src/app.ts`
+5. Remove `"./lessons"` subpath from `packages/domain-core/package.json`
 
 **Feature flags**: None. Route availability governed by `MIN_SCHEMA_VERSION = 1.13.0`.
 
@@ -753,8 +753,8 @@ Forward-only (ADR-0008). No automated rollback.
 
 ### Route registration checklist
 
-- [ ] `apps/api/src/routes/backoffice/index.ts` — mount `lessonsRouter`
-- [ ] `packages/domain-core/src/index.ts` — export lessons domain barrel
+- [ ] `apps/api/src/app.ts` — mount `lessonsRouter` after subjectsRouter
+- [ ] `packages/domain-core/package.json` — add `"./lessons"` subpath export
 - [ ] `packages/validation/src/backoffice/index.ts` — re-export lessons schemas (if barrel exists)
 
 ### Environment gates

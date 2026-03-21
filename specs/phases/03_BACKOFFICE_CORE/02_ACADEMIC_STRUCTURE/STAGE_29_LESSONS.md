@@ -8,18 +8,21 @@ Database: Tenant DB
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: HIGH
-Last Updated: 2026-03-21T00:40:00.000Z
+Last Updated: 2026-03-21T01:00:00.000Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all 15 criteria — attempt 2)
+Implementation: AUTHORIZED
 
-- Total: 26 atomic tasks across 10 phases (A–J)
-- 3 transactional write paths (createLesson, updateLesson, deleteLesson)
-- 2 parallel execution groups (Phase B types, Phase G handlers)
-- 1 migration task (1.12.0 → 1.13.0)
-- 2 test files (unit + integration)
+Scope Authorized:
+
+- Lesson aggregate in packages/domain-core (repository, service, types, schemas, index)
+- 6 Hono routes: GET/POST /lessons, GET/PUT/DELETE /lessons/:id, GET /lessons/runtime
+- Tenant DB migration 20260321_007_lessons.ts (MIN_SCHEMA_VERSION 1.13.0)
+- countLessonsForSubject registered in subjects.dependency-registry.ts
+- lessonsRouter mounted in apps/api/src/app.ts
 
 Deferred Scope:
 
@@ -29,12 +32,16 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
-- All write paths have transaction boundaries defined
+- Drift audit PASSED — all 15 criteria — attempt 2
+- 2 medium violations from attempt 1 remediated before re-audit
+- All write paths transactional (service layer, BEGIN/COMMIT/ROLLBACK)
 - Idempotency enforced at all mutation endpoints
+- Server-authoritative time enforced (no Node.js clock in DB writes)
+- Schema version enforcement confirmed (MIN_SCHEMA_VERSION 1.13.0)
+- Multi-tenant isolation confirmed (tenant pool only, no global singleton)
 
 Notes:
-Atomic task set generated. Plan corrections applied (2 file path fixes). Drift analysis gate pending.
+Full drift analysis passed. Implementation gate open.
 
 ---
 
