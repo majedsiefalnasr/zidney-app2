@@ -11,7 +11,7 @@ All NEEDS CLARIFICATION items from the Technical Context have been resolved belo
 
 ---
 
-### R001 — Does `bun run ai-context:validate` exist?
+### R001 — Does `bun run ai:context:validate` exist?
 
 **Decision**: Script exists.  
 **Rationale**: `package.json` defines `"ai-context:validate": "bun scripts/generate-ai-context.ts --validate"`. The file `scripts/generate-ai-context.ts` exists at the root-level and accepts `--validate` as a CLI flag.  
@@ -81,7 +81,7 @@ T004 scans root + all 14 workspaces independently. T005 checks each `packages/*`
 | `scripts/dev/validate-script-duplication.ts`         | T003 (partial — duplicate detection only) | Used as input to dead script enumeration; T003 extends this with reference corpus scan |
 | `scripts/architecture-guard/architecture-guard.ts`   | T009                                      | Invoke via `bun run arch:guard`                                                        |
 | `scripts/architecture-health/architecture-health.ts` | T009                                      | Invoke via `bun run arch:health`                                                       |
-| `scripts/generate-ai-context.ts --validate`          | T008                                      | Invoke via `bun run ai-context:validate`                                               |
+| `scripts/generate-ai-context.ts --validate`          | T008                                      | Invoke via `bun run ai:context:validate`                                               |
 
 No existing script covers T001, T002, T005, T006, T007, or T010 directly.
 

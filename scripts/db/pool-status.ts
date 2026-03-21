@@ -1,9 +1,9 @@
 /**
- * @script db:pool-status
+ * @script db:status:pool
  * @domain db
+ * @category runtime
  * @description Check PostgreSQL connection pool health and report status
- * @mode manual,ci
- * @dependencies pg,node:crypto
+ * @usage bun run db:status:pool
  */
 
 import { randomUUID } from 'node:crypto'

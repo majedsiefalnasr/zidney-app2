@@ -1,8 +1,10 @@
 /**
  * @script db:migrate
  * @domain db
+ * @category runtime
  * @description Run database migrations via drizzle-kit push — applies pending schema changes to master_db
  * @mode manual,ci
+ * @usage bun run db:migrate
  * @dependencies drizzle-kit,node:crypto,node:child_process
  */
 

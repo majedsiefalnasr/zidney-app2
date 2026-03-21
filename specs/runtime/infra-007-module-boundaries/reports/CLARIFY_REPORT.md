@@ -36,7 +36,7 @@ technical planning.
 | C2  | What structural changes does `ai-guard.ts` require?                       | 3 new additions: `BOUNDARIES_PATH` constant, `loadModuleBoundaries()`, `validateLayerBoundaries()` + cross-cutting rules evaluator. All existing validators remain intact.                    | Scopes implementation work precisely                    |
 | C3  | How are TypeScript path aliases resolved?                                 | Must use `loadTsAliases()` from `infra-audit.ts` — the `@zidney/ui/*` wildcard requires special handling that plain prefix-stripping cannot do correctly.                                     | Prevents silent false negatives on aliased imports      |
 | C4  | Should existing boundary violations be treated as warnings or errors?     | Always blocking errors. No warning mode. Violations must be fixed before `BACKEND CLOSED`.                                                                                                    | Eliminates ambiguity in SC-006/SC-010                   |
-| C5  | Where does the CI step insert? Name of `bun run ai-guard` command?        | CI: `arch-guard` job already exists; step renamed to `module-boundary-validation`. `package.json` needs `"ai-guard": "bun scripts/ai-guard.ts"` added — currently only `"arch:guard"` exists. | Defines exact implementation target for FR-010          |
+| C5  | Where does the CI step insert? Name of `bun run ai:guard` command?        | CI: `arch-guard` job already exists; step renamed to `module-boundary-validation`. `package.json` needs `"ai-guard": "bun scripts/ai-guard.ts"` added — currently only `"arch:guard"` exists. | Defines exact implementation target for FR-010          |
 
 ---
 
@@ -65,7 +65,7 @@ None. All implementation-critical ambiguities resolved.
 | ----------------------------------------- | ------ | -------------------------------------------------------------- |
 | All material ambiguities resolved         | ✅     | 5 resolved, 0 remaining                                        |
 | Transaction strategy confirmed            | ✅ N/A | No database transactions — pure static analysis tooling        |
-| Idempotency strategy confirmed            | ✅     | `bun run ai-guard` is stateless and idempotent by design       |
+| Idempotency strategy confirmed            | ✅     | `bun run ai:guard` is stateless and idempotent by design       |
 | Isolation boundaries confirmed            | ✅ N/A | INFRA stage — no tenant isolation concerns                     |
 | Version and license constraints confirmed | ✅ N/A | Tooling-only stage — no version compatibility concerns         |
 | Import boundary rules at tool level       | ✅     | `loadTsAliases()` reuse confirmed for correct alias resolution |

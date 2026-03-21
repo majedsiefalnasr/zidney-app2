@@ -87,7 +87,7 @@ DATABASE_URL=postgresql://postgres:password@localhost:5432/zidney_master_db
 cd apps/api
 
 # Execute all master_db migrations
-bun run migrate
+bun run db:migrate
 
 # Or execute specific migrations
 bun run db:migrate --migration=009_create_affiliates_tables.ts

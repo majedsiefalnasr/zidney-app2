@@ -139,7 +139,7 @@ The orchestrator MUST:
 
 - Suggest running:
   ```
-  bun run refactor-scripts
+  bun run dev:refactor:scripts
   ```
   when inconsistencies or drift are detected
 
@@ -593,13 +593,13 @@ Required behavior:
 
 - Suggested automatic checks:
   ```bash
-  bun run validate:runtime-scripts
-  bun run script:usage-scan
+  bun run validate:runtime:scripts
+  bun run validate:script:usage
   ```
 
 - If drift is detected, suggest:
   ```bash
-  bun run refactor-scripts
+  bun run dev:refactor:scripts
   ```
 
 The orchestrator MUST rely on precommit-diagnostics for early detection and MUST NOT duplicate validation logic.
@@ -2229,18 +2229,18 @@ options:
 1. Verify `docs/ai/context/gitnexus-context.json` exists and is ≤24h old.
 2. If stale or missing → regenerate:
    ```bash
-   bun run gitnexus:context
+   bun run arch:gitnexus:context
    ```
 3. Validate the artifact:
    ```bash
-   bun run gitnexus:validate
+   bun run arch:validate:gitnexus
    ```
 4. If validation fails → **STOP. Do NOT begin implementation.**
    ```
    ❌ GitNexus context validation failed — implementation blocked.
       The gitnexus-context.json has invalid or missing dependency data.
       Why it matters: AI Guard uses this artifact for impact analysis.
-      Run: bun run gitnexus:context && bun run gitnexus:validate to fix.
+      Run: bun run arch:gitnexus:context && bun run arch:validate:gitnexus to fix.
    ```
 5. If validation passes → proceed to 6.3.
 
@@ -2452,7 +2452,7 @@ Task Reference:
 
 Command:
 ```bash
-bun run refactor-scripts
+bun run dev:refactor:scripts
 ```
 
 Responsibilities:
@@ -2470,7 +2470,7 @@ Validation:
 - Run all migrated scripts to ensure they execute without errors
 - Run global validation:
 ```bash
-bun run validate-runtime-scripts
+bun run validate:runtime:scripts
 ```
 
 Failure Handling:

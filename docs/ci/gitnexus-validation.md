@@ -16,10 +16,10 @@ and semantically valid before it is consumed by AI orchestrators or architecture
 
 ```bash
 # Generate the context artifact first
-bun run gitnexus:context
+bun run arch:gitnexus:context
 
 # Then validate
-bun run gitnexus:validate
+bun run arch:validate:gitnexus
 ```
 
 Exit codes:
@@ -53,18 +53,18 @@ On failure (stderr):
 ```
 [validate-gitnexus] FAILED — 2 error(s) found
   [required-fields] Missing required field: "analysisMode"
-  [freshness] gitnexus-context.json is 36h old (>24h). Run: bun run gitnexus:context
+  [freshness] gitnexus-context.json is 36h old (>24h). Run: bun run arch:gitnexus:context
 ```
 
 ## Remediation
 
-| Error Step             | Fix                                                                                      |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| `file-existence`       | Run `bun run gitnexus:context`                                                           |
-| `json-parse`           | Delete artifact and regenerate: `bun run gitnexus:context`                               |
-| `required-fields`      | Regenerate: `bun run gitnexus:context`                                                   |
-| `semantic-constraints` | Regenerate: `bun run gitnexus:context`; if persists, check `scripts/gitnexus-context.ts` |
-| `freshness`            | Run `bun run gitnexus:context`                                                           |
+| Error Step             | Fix                                                                                           |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| `file-existence`       | Run `bun run arch:gitnexus:context`                                                           |
+| `json-parse`           | Delete artifact and regenerate: `bun run arch:gitnexus:context`                               |
+| `required-fields`      | Regenerate: `bun run arch:gitnexus:context`                                                   |
+| `semantic-constraints` | Regenerate: `bun run arch:gitnexus:context`; if persists, check `scripts/gitnexus-context.ts` |
+| `freshness`            | Run `bun run arch:gitnexus:context`                                                           |
 
 ## Schema Reference
 
@@ -88,5 +88,5 @@ In `.github/workflows/*.yml`, add a step after `arch:context`:
 
 ```yaml
 - name: Validate GitNexus context artifact
-  run: bun run gitnexus:validate
+  run: bun run arch:validate:gitnexus
 ```

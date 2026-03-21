@@ -190,10 +190,10 @@ Two new steps in `.github/workflows/ci.yml` `arch-guard` job (after `module-boun
 ```yaml
 - name: Generate ai-context on cache miss
   if: steps.cache-ai-context.outputs.cache-hit != 'true'
-  run: bun run ai-context:refresh
+  run: bun run ai:context:refresh
 
 - name: AI Agent Runtime Status Check
-  run: bun run ai-runtime:status
+  run: bun run ai:runtime:status
 ```
 
 **Rationale:**
@@ -230,7 +230,7 @@ Two new steps in `.github/workflows/ci.yml` `arch-guard` job (after `module-boun
 
 ## 11. Known Limitations & Dependencies
 
-- **Prerequisite:** Architecture context must be freshly generated or manually maintained. Run `bun run ai-context:refresh` if the script reports Architecture Intelligence warnings.
+- **Prerequisite:** Architecture context must be freshly generated or manually maintained. Run `bun run ai:context:refresh` if the script reports Architecture Intelligence warnings.
 - **Dependency:** Requires Bun v1+. Does NOT work with `node` directly.
 - **Edge Case Regex:** The path validation regex `^(packages|apps)\/[^/]+$` is strict by design — only matches well-formed module paths at the top level.
 

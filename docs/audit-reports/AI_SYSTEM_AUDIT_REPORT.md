@@ -816,8 +816,8 @@ There is no system for:
 │                                                                  │
 │  6.2B GitNexus Context Bootstrap Gate                           │
 │       ├── Verify gitnexus-context.json ≤24h old                │
-│       ├── Regenerate if stale → bun run gitnexus:context        │
-│       └── Validate → bun run gitnexus:validate                  │
+│       ├── Regenerate if stale → bun run arch:gitnexus:context        │
+│       └── Validate → bun run arch:validate:gitnexus                  │
 │                                                                  │
 │  6.3-PRE  Context7 MCP Pre-Implementation Lookup                │
 │           └── Query docs for 3rd-party libs in tasks.md         │

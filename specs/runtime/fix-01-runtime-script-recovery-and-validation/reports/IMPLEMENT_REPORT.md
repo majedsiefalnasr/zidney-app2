@@ -115,12 +115,12 @@ registered in `package.json`, one `validate-scripts` Vitest project was added, a
 | T036    | Write `docs/scripts/generate-script-docs.md`          | Docs                | ✅     |
 | T037    | Create `scripts/generate/script-docs.ts`              | Scripts/Generate    | ✅     |
 | T038    | Register `generate-script-docs` in `package.json`     | Config              | ✅     |
-| T039    | Execute `bun run generate-script-docs` → exit 0       | Validation          | ✅     |
+| T039    | Execute `bun run dev:generate:script-docs` → exit 0   | Validation          | ✅     |
 | T040    | Add `## Script Governance` to `AGENTS.md`             | Docs                | ✅     |
 | T041    | Update `SCRIPT_REGISTRY.md` to post-fix state         | Docs                | ✅     |
 | T042    | Execute validation run of all 10 new scripts          | Validation          | ✅     |
 | T043    | Write `audits/runtime-script-validation.md`           | Docs                | ✅     |
-| T044    | `bun run validate-runtime-scripts` → EXIT 0           | CI Gate             | ✅     |
+| T044    | `bun run validate:runtime:scripts` → EXIT 0           | CI Gate             | ✅     |
 | T045    | `bun run typecheck` → EXIT 0                          | CI Gate             | ✅     |
 | T046    | `bun run lint` → EXIT 0                               | CI Gate             | ✅     |
 
@@ -141,7 +141,7 @@ registered in `package.json`, one `validate-scripts` Vitest project was added, a
 | Issue                                                                                                                                                     | Resolution                                                                              |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | `speckit.implement` sub-agent created all files but did not apply `package.json`, `vitest.workspace.ts`, `AGENTS.md` modifications or mark tasks `[X]`    | Applied all missing changes manually                                                    |
-| `validate-runtime-scripts` reported `cache-clean` unregistered (referenced in `specs/runtime/infra-012-typescript-type-safety-governance/quickstart.md`)  | Added `"cache-clean": "bun run maintenance:cache-clean"` alias to `package.json`        |
+| `validate-runtime-scripts` reported `cache-clean` unregistered (referenced in `specs/runtime/infra-012-typescript-type-safety-governance/quickstart.md`)  | Added `"cache-clean": "bun run infra:cache:clean"` alias to `package.json`              |
 | `bun run lint` exited 1 with 12 Biome format errors in generated JSON files (`docs/reports/infra-audit-report.json`, `docs/architecture/audits/history/`) | Applied `bun run lint:fix` to auto-format all generated JSON artifacts; exit 0 achieved |
 
 ---

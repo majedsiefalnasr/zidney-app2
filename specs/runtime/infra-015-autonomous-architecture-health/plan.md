@@ -31,7 +31,7 @@ Implement a small architecture-health orchestration layer under `scripts/archite
 **Language/Version**: TypeScript (`typescript@latest`), Bun runtime, Bash automation  
 **Primary Dependencies**: Bun CLI, Node `child_process` and `fs` APIs, `scripts/architecture-guard/architecture-guard.ts`, `scripts/infra-audit.ts`, `scripts/type-safety-guard.ts`, `scripts/generate-ai-context.ts`, `scripts/validate-architecture-brain.ts`  
 **Storage**: Filesystem-only governance artifacts in `docs/architecture/health/`, `docs/architecture/intelligence/`, and `docs/ai/context/`; no database writes and no direct DB instantiation  
-**Testing**: `bun run arch:guard:ci`, `bun run arch:audit`, `bun type-safety-guard --json`, `bun run ai-context:refresh`, `bun run arch:validate-brain`, `bun run lint`, `bun run validate:types`, plus focused Vitest coverage for score calculation, finding deduplication, stale-artifact detection, and report serialization  
+**Testing**: `bun run arch:guard:ci`, `bun run arch:audit`, `bun type-safety-guard --json`, `bun run ai:context:refresh`, `bun run arch:validate:brain`, `bun run lint`, `bun run validate:types`, plus focused Vitest coverage for score calculation, finding deduplication, stale-artifact detection, and report serialization  
 **Target Platform**: macOS/Linux developer environments and GitHub Actions Bun CI  
 **Project Type**: Monorepo governance CLI and report generation workflow  
 **Performance Goals**: Deterministic full-repository health assessment with stable output ordering for CI diffing, zero runtime impact on tenant-facing flows, local compliant runs completing within 90 seconds at the 95th percentile, and CI compliant runs completing within 120 seconds at the 95th percentile  
@@ -142,7 +142,7 @@ tests/
 - Add unit tests for score weighting, threshold evaluation, finding deduplication, and report serialization.
 - Add static or integration-style tests for stale or missing AI-context artifacts, undeclared-module drift reporting, immutable CI threshold behavior, nightly artifact publication, non-duplicating history snapshots, and scanner performance budgets.
 - Verify p95 performance using a benchmark harness that executes at least 20 compliant assessment runs in local and CI environments, then computes p95 from emitted duration telemetry.
-- Verify the final pipeline with: `bun run arch:guard:ci`, `bun run arch:audit`, `bun type-safety-guard --json`, `bun run ai-context:refresh`, `bun run arch:validate-brain`, `bun run lint`, and `bun run validate:types`.
+- Verify the final pipeline with: `bun run arch:guard:ci`, `bun run arch:audit`, `bun type-safety-guard --json`, `bun run ai:context:refresh`, `bun run arch:validate:brain`, `bun run lint`, and `bun run validate:types`.
 
 ## Implementation Layers
 

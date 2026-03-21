@@ -218,18 +218,18 @@ CREATE INDEX IF NOT EXISTS idx_tenants_registry_license_id ON tenants_registry(l
 
 ```bash
 # Check migration status
-bun run migrate:status
+bun run db:migrate
 # Output: Listing pending migrations...
 
 # Run all pending migrations
-bun run migrate:up
+bun run db:migrate
 # Output: Applied migration 20260217_004...
 #         Applied migration 20260218_003...
 #         ... (all 6)
 #         Total time: 3.2 seconds
 
 # Verify
-bun run migrate:status
+bun run db:migrate
 # Output: All migrations applied. Schema version: 1.0.0
 ```
 

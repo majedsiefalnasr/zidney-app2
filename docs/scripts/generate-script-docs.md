@@ -3,7 +3,7 @@
 ## Command
 
 ```sh
-bun run generate-script-docs
+bun run dev:generate:script-docs
 ```
 
 ## Purpose
@@ -64,7 +64,7 @@ All `@script` keys must match pattern: `/^[a-z][a-z0-9]+:[a-z][a-z0-9-]+$/`
 
 ```sh
 # Regenerate all script docs
-bun run generate-script-docs
+bun run dev:generate:script-docs
 ```
 
 Expected output:

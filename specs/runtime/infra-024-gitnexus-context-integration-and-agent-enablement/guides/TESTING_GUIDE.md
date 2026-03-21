@@ -23,10 +23,10 @@ having to reason from raw source code.
 
 Key outcomes:
 
-- Running `bun run gitnexus:context` generates `docs/ai/context/gitnexus-context.json` from live
+- Running `bun run arch:gitnexus:context` generates `docs/ai/context/gitnexus-context.json` from live
   git state and the architecture brain.
-- Running `bun run gitnexus:validate` validates the artifact in 5 steps; exits 0 = valid, 1 = invalid.
-- Running `bun run gitnexus:validate` (via `ts-node`/bun) produces a human-readable CI report.
+- Running `bun run arch:validate:gitnexus` validates the artifact in 5 steps; exits 0 = valid, 1 = invalid.
+- Running `bun run arch:validate:gitnexus` (via `ts-node`/bun) produces a human-readable CI report.
 - 15 unit tests covering all 8 exported functions and CLI flag parsing pass in < 2s.
 - The orchestrator includes a bootstrap block to auto-invoke GitNexus context before implementation.
 
@@ -75,10 +75,10 @@ bun install
 cat package.json | grep gitnexus
 
 # Generate the gitnexus-context.json artifact
-bun run gitnexus:context
+bun run arch:gitnexus:context
 
 # Validate the generated artifact
-bun run gitnexus:validate
+bun run arch:validate:gitnexus
 
 # Run with --dry-run (no file write)
 bun run scripts/gitnexus-context.ts --dry-run
@@ -93,10 +93,10 @@ bun run scripts/gitnexus-context.ts --all
 
 ```bash
 # Run only the INFRA-024 unit tests
-bun run vitest run tests/gitnexus-context.test.ts
+bun run test run tests/gitnexus-context.test.ts
 
 # Run full workspace tests
-bun run vitest run
+bun run test run
 
 # Check lint (Biome)
 bunx biome check scripts/gitnexus-context.ts scripts/validate/validate-gitnexus.ts tests/gitnexus-context.test.ts
@@ -121,7 +121,7 @@ Expected outcomes:
 **Purpose:** Verify the CLI generates a valid `gitnexus-context.json` from actual repository state.
 
 1. Ensure you are on the INFRA-024 branch: `git branch --show-current`
-2. Run: `bun run gitnexus:context`
+2. Run: `bun run arch:gitnexus:context`
 3. Check the output file exists: `ls -la docs/ai/context/gitnexus-context.json`
 4. Inspect structure: `cat docs/ai/context/gitnexus-context.json | head -40`
 
@@ -141,8 +141,8 @@ That is expected in environments without the global binary. The artefact is stil
 
 **Purpose:** Confirm the artifact passes all 5 validation steps.
 
-1. Generate artifact first: `bun run gitnexus:context`
-2. Run: `bun run gitnexus:validate`
+1. Generate artifact first: `bun run arch:gitnexus:context`
+2. Run: `bun run arch:validate:gitnexus`
 3. Observe console output from the validation pipeline
 
 **Expected:**
@@ -179,7 +179,7 @@ That is expected in environments without the global binary. The artefact is stil
 
 **Purpose:** Verify that `--all` bypasses change detection and includes the full module set.
 
-1. Run without flag: `bun run gitnexus:context && cat docs/ai/context/gitnexus-context.json | python3 -c "import sys,json; d=json.load(sys.stdin); print('changedModules:', len(d['changedModules']))"`
+1. Run without flag: `bun run arch:gitnexus:context && cat docs/ai/context/gitnexus-context.json | python3 -c "import sys,json; d=json.load(sys.stdin); print('changedModules:', len(d['changedModules']))"`
 2. Run with flag: `bun run scripts/gitnexus-context.ts --all && cat docs/ai/context/gitnexus-context.json | python3 -c "import sys,json; d=json.load(sys.stdin); print('changedModules:', len(d['changedModules']))"`
 
 **Expected:**
@@ -205,14 +205,14 @@ That is expected in environments without the global binary. The artefact is stil
 
 ## Negative Cases
 
-| Scenario                   | Trigger                                                                                | Expected Response                                               |
-| -------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Stale artifact (>24h old)  | Manually set `generatedAt` to yesterday's ISO date, then `bun run gitnexus:validate`   | Step 5 FAIL → exit code 1 with "Artifact is stale" message      |
-| Missing artifact file      | `rm docs/ai/context/gitnexus-context.json && bun run gitnexus:validate`                | Step 1 FAIL → exit code 1 with "File not found" message         |
-| Corrupt JSON               | `echo "not-json" > docs/ai/context/gitnexus-context.json && bun run gitnexus:validate` | Step 2 FAIL → exit code 1 with "Invalid JSON" message           |
-| Missing required field     | Remove `schemaVersion` from JSON manually, then validate                               | Step 3 FAIL → exit code 1 listing missing field                 |
-| Invalid `--output` path    | `bun run scripts/gitnexus-context.ts --output /etc/forbidden.json`                     | Process exits with error: path outside workspace boundary       |
-| Invalid `--base-ref` value | `bun run scripts/gitnexus-context.ts --base-ref "../../malicious"`                     | Process exits with error: ref failed `sanitizeRef()` validation |
+| Scenario                   | Trigger                                                                                     | Expected Response                                               |
+| -------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Stale artifact (>24h old)  | Manually set `generatedAt` to yesterday's ISO date, then `bun run arch:validate:gitnexus`   | Step 5 FAIL → exit code 1 with "Artifact is stale" message      |
+| Missing artifact file      | `rm docs/ai/context/gitnexus-context.json && bun run arch:validate:gitnexus`                | Step 1 FAIL → exit code 1 with "File not found" message         |
+| Corrupt JSON               | `echo "not-json" > docs/ai/context/gitnexus-context.json && bun run arch:validate:gitnexus` | Step 2 FAIL → exit code 1 with "Invalid JSON" message           |
+| Missing required field     | Remove `schemaVersion` from JSON manually, then validate                                    | Step 3 FAIL → exit code 1 listing missing field                 |
+| Invalid `--output` path    | `bun run scripts/gitnexus-context.ts --output /etc/forbidden.json`                          | Process exits with error: path outside workspace boundary       |
+| Invalid `--base-ref` value | `bun run scripts/gitnexus-context.ts --base-ref "../../malicious"`                          | Process exits with error: ref failed `sanitizeRef()` validation |
 
 ---
 
@@ -244,8 +244,8 @@ To verify the CI gate script works as expected in CI:
 
 ```bash
 # Simulate the CI validation step
-bun run gitnexus:context
-bun run gitnexus:validate
+bun run arch:gitnexus:context
+bun run arch:validate:gitnexus
 echo "Exit code: $?"
 ```
 

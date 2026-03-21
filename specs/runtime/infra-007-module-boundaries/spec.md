@@ -34,7 +34,7 @@ constructs. It is a pure infrastructure governance stage.
 - Defining the allowed and forbidden dependency matrix for each layer
 - Defining per-module allowed and forbidden dependency overrides where needed
 - Extending `scripts/ai-guard.ts` to load and validate imports against `module-boundaries.json`
-- Adding a `module-boundary-validation` CI step that runs `bun run ai-guard`
+- Adding a `module-boundary-validation` CI step that runs `bun run ai:guard`
 - Documenting a workflow for registering new modules in the boundary map
 - Aligning the boundary map format with the existing `ARCHITECTURE_MAP.json` so both files
   complement each other
@@ -57,7 +57,7 @@ constructs. It is a pure infrastructure governance stage.
 ### Scenario 1 — Developer Adds a Forbidden Import (Priority: P1)
 
 A developer working on `apps/mmc` accidentally imports a function directly from `apps/api`
-internals. They run `bun run ai-guard` locally before committing.
+internals. They run `bun run ai:guard` locally before committing.
 
 **Why this priority**: Prevents the most critical class of architecture violation — cross-app
 imports that couple independent runtimes.
@@ -68,11 +68,11 @@ verifying `ai-guard` exits non-zero with a descriptive error.
 **Acceptance Scenarios**:
 
 1. **Given** `apps/mmc/src/foo.ts` contains `import { bar } from 'apps/api/src/bar'`, **When**
-   `bun run ai-guard` is run, **Then** the tool exits with code 1 and prints
+   `bun run ai:guard` is run, **Then** the tool exits with code 1 and prints
    `ARCHITECTURE VIOLATION — cross-app import: apps/mmc → apps/api`.
-2. **Given** the same file, **When** a CI pipeline runs `bun run ai-guard`, **Then** the pipeline
+2. **Given** the same file, **When** a CI pipeline runs `bun run ai:guard`, **Then** the pipeline
    stage fails and the error is visible in the CI log.
-3. **Given** the developer removes the forbidden import, **When** `bun run ai-guard` is run again,
+3. **Given** the developer removes the forbidden import, **When** `bun run ai:guard` is run again,
    **Then** the tool exits with code 0.
 
 ---
@@ -85,15 +85,15 @@ A developer extending `packages/ui-system` accidentally imports from `packages/d
 creates hidden complexity and breaks the layering model.
 
 **Independent Test**: Add a domain import in a `packages/ui-system` fixture file. Run
-`bun run ai-guard`. Verify failure.
+`bun run ai:guard`. Verify failure.
 
 **Acceptance Scenarios**:
 
 1. **Given** `packages/ui-system/src/Button.vue` contains
-   `import { someRule } from 'packages/domain-core'`, **When** `bun run ai-guard` is run, **Then**
+   `import { someRule } from 'packages/domain-core'`, **When** `bun run ai:guard` is run, **Then**
    the tool reports a layer violation with the module names, source layer, and target layer.
 2. **Given** a new module is added to `packages/` without being registered in
-   `module-boundaries.json`, **When** `bun run infra-audit` is run, **Then** the audit warns that
+   `module-boundaries.json`, **When** `bun run arch:audit` is run, **Then** the audit warns that
    the module is undeclared.
 
 ---
@@ -106,20 +106,20 @@ map before CI will pass.
 **Why this priority**: Module registration is a governance gate. Without it, new code exists outside
 the enforcement system.
 
-**Independent Test**: Add a new package directory, run `bun run ai-guard`, verify the tool produces
+**Independent Test**: Add a new package directory, run `bun run ai:guard`, verify the tool produces
 an undeclared-module warning. Then add the module to `module-boundaries.json` and verify the warning
 disappears.
 
 **Acceptance Scenarios**:
 
 1. **Given** `packages/notifications` exists on disk but is not in `module-boundaries.json`,
-   **When** `bun run infra-audit` is run, **Then** the audit reports
+   **When** `bun run arch:audit` is run, **Then** the audit reports
    `undeclared module: packages/notifications`.
 2. **Given** the developer adds `packages/notifications` to `module-boundaries.json` with
-   `layer: "domain"`, **When** `bun run infra-audit` is run again, **Then** no undeclared-module
+   `layer: "domain"`, **When** `bun run arch:audit` is run again, **Then** no undeclared-module
    warning is produced.
 3. **Given** the module is registered, **When** `packages/notifications` imports from `apps/api`,
-   **Then** `bun run ai-guard` reports a boundary violation.
+   **Then** `bun run ai:guard` reports a boundary violation.
 
 ---
 
@@ -211,11 +211,11 @@ the boundary map MUST be reported as `undeclared`.
 ### FR-009 — CI Pipeline Integration
 
 A `module-boundary-validation` step MUST run in the CI pipeline after `lint` and before `tests`. The
-step runs `bun run ai-guard`. A non-zero exit code MUST fail the pipeline.
+step runs `bun run ai:guard`. A non-zero exit code MUST fail the pipeline.
 
 ### FR-010 — Developer Local Check
 
-Running `bun run ai-guard` from the repository root MUST perform the full boundary validation. The
+Running `bun run ai:guard` from the repository root MUST perform the full boundary validation. The
 command MUST be defined in the root `package.json` scripts. It MUST return exit code 0 on no
 violations and exit code 1 on any violation.
 
@@ -262,7 +262,7 @@ must continue to work correctly if `module-boundaries.json` does not yet exist (
 
 ### NFR-004 — Performance
 
-The full boundary validation (`bun run ai-guard`) MUST complete in under 30 seconds on the full
+The full boundary validation (`bun run ai:guard`) MUST complete in under 30 seconds on the full
 Zidney monorepo. Developers must not experience meaningful friction in local workflows.
 
 ### NFR-005 — Determinism
@@ -513,16 +513,16 @@ For each changed `.ts`, `.tsx`, or `.vue` file:
 
 | ID     | Criterion                                                                | How Measured                                                                               |
 | ------ | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| SC-001 | All 13 monorepo modules are assigned a layer in `module-boundaries.json` | `bun run infra-audit` reports 0 undeclared modules                                         |
+| SC-001 | All 13 monorepo modules are assigned a layer in `module-boundaries.json` | `bun run arch:audit` reports 0 undeclared modules                                          |
 | SC-002 | `module-boundaries.json` exists and is valid JSON                        | File exists at `docs/architecture/module-boundaries.json`; JSON.parse succeeds             |
-| SC-003 | `bun run ai-guard` detects a cross-app import                            | Test fixture with forbidden import causes exit code 1 with violation message               |
-| SC-004 | `bun run ai-guard` detects a layer violation (UI → domain)               | Test fixture with `packages/ui-system` importing `packages/domain-core` causes exit code 1 |
+| SC-003 | `bun run ai:guard` detects a cross-app import                            | Test fixture with forbidden import causes exit code 1 with violation message               |
+| SC-004 | `bun run ai:guard` detects a layer violation (UI → domain)               | Test fixture with `packages/ui-system` importing `packages/domain-core` causes exit code 1 |
 | SC-005 | CI pipeline blocks a PR containing a forbidden import                    | CI job `module-boundary-validation` fails on a branch with a known violation               |
-| SC-006 | `bun run ai-guard` exits 0 on a clean monorepo                           | Running against the current clean codebase produces exit code 0                            |
-| SC-007 | `bun run ai-guard` completes in under 30 seconds                         | Measured in CI on full monorepo scan                                                       |
-| SC-008 | A new package added without registration is flagged                      | `bun run infra-audit` reports `undeclared module` for the new directory                    |
+| SC-006 | `bun run ai:guard` exits 0 on a clean monorepo                           | Running against the current clean codebase produces exit code 0                            |
+| SC-007 | `bun run ai:guard` completes in under 30 seconds                         | Measured in CI on full monorepo scan                                                       |
+| SC-008 | A new package added without registration is flagged                      | `bun run arch:audit` reports `undeclared module` for the new directory                     |
 | SC-009 | TypeScript alias imports are correctly resolved                          | Importing `@zidney/logger` in an illegal location is caught as a boundary violation        |
-| SC-010 | No violations exist in current codebase after this stage ships           | `bun run ai-guard` exits 0, zero violations                                                |
+| SC-010 | No violations exist in current codebase after this stage ships           | `bun run ai:guard` exits 0, zero violations                                                |
 
 ---
 
@@ -530,7 +530,7 @@ For each changed `.ts`, `.tsx`, or `.vue` file:
 
 | Risk                                                                                                           | Likelihood | Impact | Mitigation                                                                                                                                     |
 | -------------------------------------------------------------------------------------------------------------- | ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Existing codebase has undiscovered boundary violations                                                         | Medium     | High   | Run `bun run ai-guard` against current codebase during implementation to identify and fix violations before stage goes live                    |
+| Existing codebase has undiscovered boundary violations                                                         | Medium     | High   | Run `bun run ai:guard` against current codebase during implementation to identify and fix violations before stage goes live                    |
 | TypeScript alias resolution is incomplete                                                                      | Medium     | Medium | Audit all aliases in `tsconfig.json` and `tsconfig.base.json`; add test fixtures for each alias pattern used in the monorepo                   |
 | packages/types classification change (infrastructure vs domain) breaks existing logic in ARCHITECTURE_MAP.json | Low        | Low    | Both files coexist; `ARCHITECTURE_MAP.json` is not modified by this stage; only `module-boundaries.json` reflects the corrected classification |
 | packages/api-client classification change breaks ai-guard rules                                                | Low        | Low    | ai-guard.ts loads module-boundaries.json first; the corrected layer assignment takes precedence                                                |
@@ -640,17 +640,17 @@ warnings on the first run after this stage ships?**
 
 A: Always blocking errors (exit code 1). No warning mode exists. Confirmed by SC-006 ("bun run
 ai-guard exits 0 on a clean monorepo"), SC-010 ("No violations exist in current codebase after this
-stage ships"), and the Risk Assessment entry: "Run `bun run ai-guard` against current codebase
+stage ships"), and the Risk Assessment entry: "Run `bun run ai:guard` against current codebase
 during implementation to identify and fix violations before stage goes live." The implementation
 workflow for this stage is: (1) implement the new module-boundaries enforcement in `ai-guard.ts`,
-(2) run `bun run ai-guard` against the full monorepo, (3) fix any violations found, (4) verify exit
+(2) run `bun run ai:guard` against the full monorepo, (3) fix any violations found, (4) verify exit
 code 0 before marking the stage BACKEND CLOSED. There is no phased or graceful rollout — the tool
 either passes (exit 0) or fails (exit 1) upon completion of this stage.
 
 ---
 
 **Q: What is the exact insertion point for `module-boundary-validation` in the actual CI pipeline,
-and does the `bun run ai-guard` script command already exist in `package.json`?**
+and does the `bun run ai:guard` script command already exist in `package.json`?**
 
 A: Confirmed by reading `.github/workflows/ci.yml` and root `package.json`. In `ci.yml`, the
 existing `arch-guard` job (Job 3, named "AI-Guard — Architecture Boundaries") already runs
@@ -660,7 +660,7 @@ before tests" requirement. The implementation change is: rename the step inside 
 from `"Run AI-Guard architecture check"` to `"module-boundary-validation"` (or add a new step by
 that name). No new GitHub Actions job is required — the existing job placement is correct. Regarding
 `package.json`: the current scripts include `"arch:guard": "bun scripts/ai-guard.ts"` but there is
-NO `"ai-guard"` script. FR-010 requires that `bun run ai-guard` works from the repository root. The
+NO `"ai-guard"` script. FR-010 requires that `bun run ai:guard` works from the repository root. The
 implementation must add `"ai-guard": "bun scripts/ai-guard.ts"` to the root `package.json`. The
 existing `"arch:guard"` alias is preserved (no breaking changes to existing developer workflows).
 

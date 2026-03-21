@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
  * T113-T115: Performance Benchmarking Tests
  *
  * Tests query performance and API response times against SLA targets
- * Not part of standard test suite - run separately with: bun run bench:licenses
+ * Not part of standard test suite - run separately with: bun run test:performance
  */
 
 describe('T113: Database Query Performance Benchmarks', () => {

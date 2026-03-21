@@ -33,7 +33,7 @@ Backoffice, and Frontoffice SPAs.
 
 ```bash
 # Unit tests (from repo root)
-bun run vitest run --project ui-system
+bun run test run --project ui-system
 
 # From this directory
 bun run test

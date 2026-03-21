@@ -30,7 +30,7 @@ pre-flight validation).
 
 ```bash
 # From repo root
-bun run vitest run --project validation
+bun run test run --project validation
 
 # From this directory
 bun run test

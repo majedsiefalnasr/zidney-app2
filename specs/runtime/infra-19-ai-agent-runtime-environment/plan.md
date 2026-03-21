@@ -407,7 +407,7 @@ The new step is inserted **after** the `module-boundary-validation` step and **b
 
 - name: Generate ai-context on cache miss
   if: steps.cache-ai-context.outputs.cache-hit != 'true'
-  run: bun run ai-context:refresh
+  run: bun run ai:context:refresh
 
 - name: AI Agent Runtime Status Check
   run: bun ai-runtime:status

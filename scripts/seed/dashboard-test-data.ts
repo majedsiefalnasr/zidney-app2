@@ -1,8 +1,10 @@
 /**
- * @script seed-dashboard-test-data
- * @domain seed
+ * @script dev:seed:dashboard-test-data
+ * @domain dev
+ * @category runtime
  * @description Seed realistic MMC dashboard test data into master_db for dashboard testing
  * @mode manual
+ * @usage bun run dev:seed:dashboard-test-data
  * @dependencies pg,packages/config,node:crypto
  *
  * Merge Header: Canonical content absorbed from:
@@ -29,7 +31,7 @@
  *
  * Usage:
  * ```sh
- * bun run seed-dashboard-test-data
+ * bun run dev:seed:dashboard-test-data
  * ```
  *
  * Execution Time: ~5-10 seconds for 1320 records
@@ -138,7 +140,7 @@ async function seedDashboardTestData(): Promise<void> {
     if (existingLicenses.rows[0].count > 0) {
       logger.warn('Test data already exists', {
         count: existingLicenses.rows[0].count,
-        hint: 'To re-seed, run: bun run seed:clean && bun run seed:dashboard',
+        hint: 'To re-seed, run: bun run dev:seed:dashboard-test-data (after clearing test data manually)',
       })
       return
     }

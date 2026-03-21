@@ -1,4 +1,10 @@
 /**
+ * @script arch:audit
+ * @domain arch
+ * @category governance
+ * @description Monorepo governance scanner — audits Vitest, ESLint, Playwright, import boundaries, and outputs infra-audit-report.json.
+ * @usage bun run arch:audit
+ *
  * Zidney Infrastructure Audit
  *
  * Monorepo governance scanner.

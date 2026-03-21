@@ -140,15 +140,15 @@ permission-gated access.
 
 ## Validation Gates Passed
 
-| Gate                         | Command                         | Result                    |
-| ---------------------------- | ------------------------------- | ------------------------- |
-| ESLint                       | `bun run lint`                  | ✅ 0 errors (exit 0)      |
-| TypeScript (root)            | `bun run typecheck`             | ✅ No new errors          |
-| TypeScript (mmc app)         | `tsc --noEmit`                  | ✅ exit 0                 |
-| TypeScript (backoffice app)  | `tsc --noEmit`                  | ✅ exit 0                 |
-| TypeScript (frontoffice app) | `tsc --noEmit`                  | ✅ exit 0                 |
-| Unit + Integration Tests     | `bun run vitest run [31 files]` | ✅ 273/273 PASS           |
-| Code Format                  | `bun run format`                | ✅ All 66 files formatted |
+| Gate                         | Command                       | Result                    |
+| ---------------------------- | ----------------------------- | ------------------------- |
+| ESLint                       | `bun run lint`                | ✅ 0 errors (exit 0)      |
+| TypeScript (root)            | `bun run typecheck`           | ✅ No new errors          |
+| TypeScript (mmc app)         | `tsc --noEmit`                | ✅ exit 0                 |
+| TypeScript (backoffice app)  | `tsc --noEmit`                | ✅ exit 0                 |
+| TypeScript (frontoffice app) | `tsc --noEmit`                | ✅ exit 0                 |
+| Unit + Integration Tests     | `bun run test run [31 files]` | ✅ 273/273 PASS           |
+| Code Format                  | `bun run format`              | ✅ All 66 files formatted |
 
 ---
 

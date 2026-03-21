@@ -160,7 +160,7 @@ bun run db:migrate
 
 ```bash
 # Run all 31 test files (273 tests)
-bun run vitest run tests/unit/{mmc,backoffice,frontoffice}/core tests/integration/{mmc,backoffice,frontoffice}/auth
+bun run test run tests/unit/{mmc,backoffice,frontoffice}/core tests/integration/{mmc,backoffice,frontoffice}/auth
 
 # Expected outcome:
 # ✓ 273 tests pass
@@ -171,26 +171,26 @@ bun run vitest run tests/unit/{mmc,backoffice,frontoffice}/core tests/integratio
 
 ```bash
 # MMC only
-bun run vitest run tests/{unit,integration}/mmc
+bun run test run tests/{unit,integration}/mmc
 
 # Backoffice only
-bun run vitest run tests/{unit,integration}/backoffice
+bun run test run tests/{unit,integration}/backoffice
 
 # Frontoffice only
-bun run vitest run tests/{unit,integration}/frontoffice
+bun run test run tests/{unit,integration}/frontoffice
 ```
 
 ### Run Tests by Category
 
 ```bash
 # Unit tests only
-bun run vitest run tests/unit/{mmc,backoffice,frontoffice}/core
+bun run test run tests/unit/{mmc,backoffice,frontoffice}/core
 
 # Integration tests only
-bun run vitest run tests/integration/{mmc,backoffice,frontoffice}/auth
+bun run test run tests/integration/{mmc,backoffice,frontoffice}/auth
 
 # Security audits only
-bun run vitest run tests/unit/*/core/auth/token-persistence-audit.test.ts tests/unit/*/core/router/guards/route-coverage-audit.test.ts
+bun run test run tests/unit/*/core/auth/token-persistence-audit.test.ts tests/unit/*/core/router/guards/route-coverage-audit.test.ts
 ```
 
 ### Code Quality Checks
@@ -210,7 +210,7 @@ bun run format
 
 ```bash
 # Generate coverage HTML
-bun run vitest run --coverage tests/unit/{mmc,backoffice,frontoffice}/core
+bun run test run --coverage tests/unit/{mmc,backoffice,frontoffice}/core
 
 # View report
 open coverage/index.html
@@ -277,7 +277,7 @@ exactly once, even if multiple concurrent requests receive 401.
 **Test Command (Automated):**
 
 ```bash
-bun run vitest run tests/integration/*/auth/401-race.test.ts
+bun run test run tests/integration/*/auth/401-race.test.ts
 ```
 
 ---
@@ -420,12 +420,12 @@ preserved so they can be sent back after signing in.
 
 These tests are automatically run as part of the PR validation pipeline:
 
-| Step       | Command              | Success Criteria                               |
-| ---------- | -------------------- | ---------------------------------------------- |
-| Unit Tests | `bun run vitest run` | 273/273 pass, exit 0                           |
-| ESLint     | `bun run lint`       | 0 errors from this stage, exit 0               |
-| TypeScript | `bun run typecheck`  | Type check passes, exit 0                      |
-| Coverage   | Optional             | Coverage report generated if threshold defined |
+| Step       | Command             | Success Criteria                               |
+| ---------- | ------------------- | ---------------------------------------------- |
+| Unit Tests | `bun run test run`  | 273/273 pass, exit 0                           |
+| ESLint     | `bun run lint`      | 0 errors from this stage, exit 0               |
+| TypeScript | `bun run typecheck` | Type check passes, exit 0                      |
+| Coverage   | Optional            | Coverage report generated if threshold defined |
 
 ---
 
@@ -447,7 +447,7 @@ alias: {
 
 # Reinstall and try again:
 bun install
-bun run vitest run tests/unit/*/core/auth/token-persistence-audit.test.ts
+bun run test run tests/unit/*/core/auth/token-persistence-audit.test.ts
 ```
 
 ### Storage API Not Available (token-persistence-audit fails)
@@ -464,7 +464,7 @@ bun run vitest run tests/unit/*/core/auth/token-persistence-audit.test.ts
 bun add -D jsdom
 
 # Re-run test:
-bun run vitest run tests/unit/*/core/auth/token-persistence-audit.test.ts
+bun run test run tests/unit/*/core/auth/token-persistence-audit.test.ts
 ```
 
 ### Route Import Fails in route-coverage-audit
@@ -482,7 +482,7 @@ alias: {
 }
 
 # Re-run test:
-bun run vitest run tests/unit/*/core/router/guards/route-coverage-audit.test.ts
+bun run test run tests/unit/*/core/router/guards/route-coverage-audit.test.ts
 ```
 
 ### Lint Errors on v-html References
@@ -511,7 +511,7 @@ bun run lint
 All of the following must be true to consider this stage successfully tested:
 
 - ✅ All 273 tests pass
-  (`bun run vitest run tests/unit/{mmc,backoffice,frontoffice}/core tests/integration/{mmc,backoffice,frontoffice}/auth`)
+  (`bun run test run tests/unit/{mmc,backoffice,frontoffice}/core tests/integration/{mmc,backoffice,frontoffice}/auth`)
 - ✅ ESLint shows 0 new errors (`bun run lint | grep error`)
 - ✅ TypeScript type-check passes (`bun run typecheck`)
 - ✅ Token is NOT persisted to browser storage (manual scenario 1)

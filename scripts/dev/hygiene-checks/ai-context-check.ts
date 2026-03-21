@@ -1,6 +1,6 @@
 /**
  * T009 — AI Context Freshness Check
- * Spawns `bun run ai-context:validate` to verify AI context artifacts are up-to-date.
+ * Spawns `bun run ai:context:validate` to verify AI context artifacts are up-to-date.
  * Decision tree:
  *   - ENOENT or "Cannot find module" / "No such file" in stderr → SKIP
  *   - exit 0 → PASS

@@ -198,7 +198,7 @@ Before approving:
 - [ ] Review `docs/architecture/module-boundaries.json` (2 min — layer definitions)
 - [ ] Review modified `scripts/ai-guard.ts` exports (5 min — new functions)
 - [ ] Run `bun run test:unit:boundaries` locally (2 min — all 43 pass)
-- [ ] Run `bun run ai-guard` locally (< 1 min — 0.4s, exit 0)
+- [ ] Run `bun run ai:guard` locally (< 1 min — 0.4s, exit 0)
 - [ ] Verify CI pipeline passes on this branch
 - [ ] Read [TESTING_GUIDE.md](guides/TESTING_GUIDE.md) (optional — for testing strategies)
 

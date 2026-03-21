@@ -290,11 +290,11 @@ bun run arch:audit
 # Expected: ✅ Score 100/100, 0 layer violations, 0 drift
 
 echo "=== Running validate-brain ==="
-bun run arch:validate-brain
+bun run arch:validate:brain
 # Expected: ✅ Valid or "PASSED WITH WARNINGS"
 
 echo "=== Running type-safety-guard ==="
-bun run type-safety-guard --json 2>&1 | jq .violations[0:2]
+bun run arch:type-safety-guard --json 2>&1 | jq .violations[0:2]
 # Expected: Minimal external violations (not from stage code)
 ```
 

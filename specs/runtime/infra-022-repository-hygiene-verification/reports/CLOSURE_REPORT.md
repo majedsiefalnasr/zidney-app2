@@ -101,7 +101,7 @@ INFRA-022 Repository Hygiene Verification is **complete and production ready**. 
 | TypeScript        | `bun run typecheck`                        | ✅ 0 errors                             |
 | Unit Tests        | `bunx vitest run --project hygiene-checks` | ✅ 11/11 pass                           |
 | Git Scope         | `git diff --name-only HEAD`                | ✅ Only expected files modified         |
-| Integration Smoke | `bun run hygiene:report`                   | ✅ All checks execute, report generated |
+| Integration Smoke | `bun run dev:hygiene:report`               | ✅ All checks execute, report generated |
 
 Evidence: [VALIDATION_REPORT.md](audits/VALIDATION_REPORT.md)
 
@@ -170,7 +170,7 @@ These findings were **surfaced by the tooling — not introduced**. The hygiene 
 
 ```bash
 # Run full hygiene verification
-bun run hygiene:report
+bun run dev:hygiene:report
 
 # Run unit tests
 bunx vitest run --project hygiene-checks
@@ -185,7 +185,7 @@ cat docs/reports/REPOSITORY_HYGIENE_REPORT.md
 
 1. **Review the Hygiene Report:** [docs/reports/REPOSITORY_HYGIENE_REPORT.md](../../../docs/reports/REPOSITORY_HYGIENE_REPORT.md)
 2. **Plan Remediation:** Create future stages (e.g., INFRA-23, INFRA-24) for each finding
-3. **Integrate into CI:** Consider running `bun run hygiene:report` in PR validation pipeline
+3. **Integrate into CI:** Consider running `bun run dev:hygiene:report` in PR validation pipeline
 4. **Monitor:** Use the report as a baseline; track improvements over time
 
 ---

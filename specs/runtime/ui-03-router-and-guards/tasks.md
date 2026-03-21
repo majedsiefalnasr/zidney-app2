@@ -10,7 +10,7 @@
 **MVP Scope**: US8 (RouteMeta foundation) → US1+US2 (AuthGuard) → US3 (WorkspaceGuard) → US4
 (RoleGuard) → US5+US6 (Fallback views) → Migrations → Tests → Validation.
 
-Each phase is an independently committable increment. Run `bun run tsc --noEmit` after each phase.
+Each phase is an independently committable increment. Run `bun run typecheck:src --noEmit` after each phase.
 
 ---
 
@@ -31,7 +31,7 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 > `public`/`roles[]`/`requiresWorkspace` in all three apps. This phase is the prerequisite for all
 > guard and router tasks.
 >
-> **Independent Test Criteria**: `bun run tsc --noEmit` passes with zero errors in all three apps
+> **Independent Test Criteria**: `bun run typecheck:src --noEmit` passes with zero errors in all three apps
 > after this phase.
 
 - [x] T003 [P] [US8] Rewrite `apps/mmc/src/core/router/types.ts` — replace `guestOnly` with
@@ -373,7 +373,7 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 
 > All phases complete. Run full validation suite.
 
-- [x] T059 Run `bun run tsc --noEmit` in workspace root — zero TypeScript errors expected; all
+- [x] T059 Run `bun run typecheck:src --noEmit` in workspace root — zero TypeScript errors expected; all
       RouteMeta augmentations valid under strict mode; all router factories return typed Router
       instances
 - [x] T060 Run `bun run lint` in workspace root — zero ESLint errors expected; no `console.log`, no

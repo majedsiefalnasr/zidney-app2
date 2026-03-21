@@ -82,8 +82,8 @@ The full governance suite must run after `consumer_rewiring` and `compatibility_
 - `bun scripts/architecture-diff.ts`
 - `bun scripts/infra-audit.ts`
 - `bun scripts/validate-architecture-brain.ts`
-- `bun run type-safety-guard`
-- `bun run ai-context:refresh`
+- `bun run arch:type-safety-guard`
+- `bun run ai:context:refresh`
 - `bun run validate:workflows`
 
 ## Rollback Rules

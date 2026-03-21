@@ -80,7 +80,7 @@ jq -f schema ai-module-map.json < ai-module-map.schema.json
 Schemas are regenerated during artifact generation:
 
 ```bash
-bun run generate:ai-context
+bun run ai:context:generate
 
 # This also updates all schema files
 ```

@@ -110,10 +110,10 @@ Test Commands:
 
 ```bash
 # Unit tests
-bun run vitest run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts
+bun run test run packages/domain-core/src/semesters/__tests__/semesters.service.test.ts
 
 # Integration tests
-bun run vitest run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts
+bun run test run apps/api/src/routes/backoffice/semesters/__tests__/semesters.integration.test.ts
 ```
 
 ---

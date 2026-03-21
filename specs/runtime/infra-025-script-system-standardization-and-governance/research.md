@@ -146,7 +146,7 @@ The root `package.json` defines **113 script entries** as of the research scan.
 
 - **Current command:** `bun scripts/generate-ai-context.ts`
 - **Issue:** Domain `ai-context` uses hyphen — should be `ai:context`
-- **Duplicate entry:** `generate:ai-context` points to same command (`bun run ai-context:generate`)
+- **Duplicate entry:** `generate:ai-context` points to same command (`bun run ai:context:generate`)
 - **New name:** `ai:context:generate`; `generate:ai-context` alias removed
 
 #### `ai-context:refresh` / `ai-context:validate` / `ai-context:status`
@@ -242,17 +242,17 @@ The root `package.json` defines **113 script entries** as of the research scan.
 
 Confirmed by inspecting command values in `package.json`:
 
-| Alias                   | Command                           | Canonical                          |
-| ----------------------- | --------------------------------- | ---------------------------------- |
-| `infra-audit`           | `bun run arch:audit`              | `arch:audit`                       |
-| `migrate`               | `bun run db:migrate`              | `db:migrate`                       |
-| `validate:architecture` | `bun run arch:audit`              | `arch:audit`                       |
-| `type-coverage`         | `bun run validate:types`          | `validate:types`                   |
-| `cache-clean`           | `bun run maintenance:cache-clean` | `infra:cache:clean` (after rename) |
-| `biome`                 | `biome check .`                   | `lint`                             |
-| `tsc`                   | `bun run typecheck:src`           | `typecheck:src`                    |
-| `vitest`                | `vitest run`                      | `test`                             |
-| `worker`                | `bun run dev:worker`              | `dev:worker`                       |
+| Alias                   | Command                     | Canonical                          |
+| ----------------------- | --------------------------- | ---------------------------------- |
+| `infra-audit`           | `bun run arch:audit`        | `arch:audit`                       |
+| `migrate`               | `bun run db:migrate`        | `db:migrate`                       |
+| `validate:architecture` | `bun run arch:audit`        | `arch:audit`                       |
+| `type-coverage`         | `bun run validate:types`    | `validate:types`                   |
+| `cache-clean`           | `bun run infra:cache:clean` | `infra:cache:clean` (after rename) |
+| `biome`                 | `biome check .`             | `lint`                             |
+| `tsc`                   | `bun run typecheck:src`     | `typecheck:src`                    |
+| `vitest`                | `vitest run`                | `test`                             |
+| `worker`                | `bun run dev:worker`        | `dev:worker`                       |
 
 ---
 
@@ -350,7 +350,7 @@ The `.agents/skills/script-system-governance/SKILL.md` itself contains `bun run`
 
 The refactor engine uses plain string `replaceAll` — not regex. This means:
 
-- Re-running after completion: `replaceAll("bun run db:pool-status", "bun run db:status:pool")` on a file that already contains `bun run db:status:pool` produces zero replacements ✓
+- Re-running after completion: `replaceAll("bun run db:status:pool", "bun run db:status:pool")` on a file that already contains `bun run db:status:pool` produces zero replacements ✓
 - No risk of double-replacement: old names never appear in replacement values ✓
 - Safe to chain multiple runs: each is a no-op once migration is complete ✓
 
@@ -362,7 +362,7 @@ The refactor engine uses plain string `replaceAll` — not regex. This means:
 
 ```json
 "ai-context:generate": "bun scripts/generate-ai-context.ts",
-"generate:ai-context": "bun run ai-context:generate"
+"generate:ai-context": "bun run ai:context:generate"
 ```
 
 `generate:ai-context` is an indirect alias calling `ai-context:generate`. After renaming `ai-context:generate` → `ai:context:generate`, the `generate:ai-context` entry becomes a call to a non-existent script. Both entries must be resolved:

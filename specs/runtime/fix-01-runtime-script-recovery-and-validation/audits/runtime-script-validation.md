@@ -52,8 +52,8 @@ All 83 runtime spec references are registered in `package.json`.
 
 ## Previous False Positives Resolved
 
-| Script name   | Source                                                      | Resolution                                                     |
-| ------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
-| `references`  | `plan.md` string literal: `"bun run references"`            | Added to `EXCLUDED_NAMES`                                      |
-| `json`        | `TESTING_GUIDE.md` code: `` `bun run json.stringify ...` `` | Added to `EXCLUDED_NAMES`                                      |
-| `cache-clean` | Real reference in `quickstart.md`                           | Added alias `"cache-clean": "bun run maintenance:cache-clean"` |
+| Script name   | Source                                                      | Resolution                                               |
+| ------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| `references`  | `plan.md` string literal: `"bun run references"`            | Added to `EXCLUDED_NAMES`                                |
+| `json`        | `TESTING_GUIDE.md` code: `` `bun run json.stringify ...` `` | Added to `EXCLUDED_NAMES`                                |
+| `cache-clean` | Real reference in `quickstart.md`                           | Added alias `"cache-clean": "bun run infra:cache:clean"` |

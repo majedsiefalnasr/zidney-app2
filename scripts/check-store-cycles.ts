@@ -1,6 +1,12 @@
 #!/usr/bin/env bun
 import { resolve } from 'node:path'
 /**
+ * @script arch:check:store-cycles
+ * @domain arch
+ * @category governance
+ * @description Runs madge on each app's src/core/state/ to assert zero circular dependencies. Exits with non-zero code on any detected cycle.
+ * @usage bun run arch:check:store-cycles
+ *
  * scripts/check-store-cycles.ts
  *
  * Runs madge on each app's src/core/state/ directory and asserts zero circular

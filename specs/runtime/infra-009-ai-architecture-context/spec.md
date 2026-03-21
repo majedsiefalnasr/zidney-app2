@@ -959,7 +959,7 @@ merge.
 
 **Implementation Implication:**
 
-- Add `bun run generate:ai-context` to pre-commit hooks (developers run locally)
+- Add `bun run ai:context:generate` to pre-commit hooks (developers run locally)
 - CI job validates that artifacts match current source state (safety net)
 - Prevents stale artifacts from being committed to main
 

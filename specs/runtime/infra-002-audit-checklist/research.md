@@ -161,7 +161,7 @@ The following data points cannot be determined by static filesystem inspection a
 
 - Exact test file counts per app and package
 - Coverage percentages (Lines%, Functions%, Statements%, Branches%)
-- TypeScript error count (`bun run tsc --noEmit`)
+- TypeScript error count (`bun run typecheck:src --noEmit`)
 - ESLint error and warning counts (`bun run lint`)
 - Skipped/flaky test markers count per app
 - Bun command exit codes

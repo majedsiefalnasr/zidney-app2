@@ -76,7 +76,7 @@ The hygiene verification system surfaced **7 pre-existing findings** across diff
 bun run lint                                   # ✅ Clean for new files
 bun run typecheck                              # ✅ 0 errors
 bunx vitest run --project hygiene-checks      # ✅ 11/11 tests pass
-bun run hygiene:report                         # ✅ All checks execute, report generated
+bun run dev:hygiene:report                         # ✅ All checks execute, report generated
 ```
 
 ### Quality Metrics
@@ -122,7 +122,7 @@ bun run hygiene:report                         # ✅ All checks execute, report 
 ### Run hygiene report in your environment
 
 ```bash
-bun run hygiene:report
+bun run dev:hygiene:report
 ```
 
 Expected output:
@@ -156,7 +156,7 @@ Expected: **11 / 11 tests pass**
 
 1. **Review Findings:** Evaluate pre-existing findings in `docs/reports/REPOSITORY_HYGIENE_REPORT.md`
 2. **Plan Remediation:** Create follow-up stages (INFRA-23, INFRA-24, etc.) for each FLAG category
-3. **CI Integration:** Consider adding `bun run hygiene:report` to PR validation pipeline
+3. **CI Integration:** Consider adding `bun run dev:hygiene:report` to PR validation pipeline
 4. **Monitor:** Use hygiene report as baseline; track improvements over time
 
 ---

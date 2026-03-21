@@ -43,7 +43,7 @@ All checklist items passed. No `[NEEDS CLARIFICATION]` markers remain.
 - FR07: Workspace packages not imported by any app flagged for review
 - FR08: `.agents/skills/` surface validation — orphaned skills detected
 - FR09: `.github/workflows/` CI hygiene — duplicate and redundant pipelines surfaced
-- FR10: AI context integrity check via `bun run ai-context:validate`
+- FR10: AI context integrity check via `bun run ai:context:validate`
 - FR11: Architecture guard full pipeline execution (`bun run arch:guard`, `bun run arch:health`)
 - FR12: Final `docs/reports/REPOSITORY_HYGIENE_REPORT.md` generated with all findings
 
@@ -74,6 +74,6 @@ None — specification was unambiguous and fully captured from the stage file.
 
 | Risk                                                                  | Severity | Mitigation                                             |
 | --------------------------------------------------------------------- | -------- | ------------------------------------------------------ |
-| `bun run ai-context:validate` script may not exist or may fail        | Medium   | Verify script exists; skip gracefully if unavailable   |
+| `bun run ai:context:validate` script may not exist or may fail        | Medium   | Verify script exists; skip gracefully if unavailable   |
 | `arch:guard` and `arch:health` may surface pre-existing violations    | Medium   | Document findings; do not block on pre-existing issues |
 | Destructive cleanup targets (dead scripts, deps) require human review | High     | Report-only; no automated deletion in this stage       |

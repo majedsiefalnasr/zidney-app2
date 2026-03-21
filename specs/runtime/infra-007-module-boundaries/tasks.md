@@ -115,7 +115,7 @@ implementation
 - [x] T015 ⚠️ Depends on T014 — run only after T014 is complete. In `.github/workflows/ci.yml`,
       rename the step named `Run AI-Guard architecture check` (line ~82) to
       `name: module-boundary-validation` and update `run: bun scripts/ai-guard.ts` to
-      `run: bun run ai-guard` — no change to the job graph, `needs:` dependencies, or job name
+      `run: bun run ai:guard` — no change to the job graph, `needs:` dependencies, or job name
       (plan.md §File 4)
 
 ---
@@ -203,7 +203,7 @@ implementation
       introduced, no Biome violations in modified files)
 - [x] T020 Run `bun run typecheck` from repo root and confirm exit code 0 — all new types in
       `scripts/ai-guard.ts` are correctly typed and no `tsconfig.json` violations
-- [x] T021 Run `bun run ai-guard` from repo root and confirm exit code 0 — FR-010 + SC-010: the new
+- [x] T021 Run `bun run ai:guard` from repo root and confirm exit code 0 — FR-010 + SC-010: the new
       `ai-guard` package.json script works and no existing code violates the boundary map
 - [x] T022 Run `vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts` directly to confirm the
       new unit test file passes (the `test:unit` script enumerates named vitest projects which
@@ -213,7 +213,7 @@ implementation
       confirm the FR-008 behavioral test passes
 - [x] T023 Run `bun run test:static` and confirm all static tests pass including
       `tests/static/module-boundaries.test.ts`
-- [x] T024 Measure wall-clock time of `bun run ai-guard` from repo root and confirm it completes in
+- [x] T024 Measure wall-clock time of `bun run ai:guard` from repo root and confirm it completes in
       under 30 seconds on the full monorepo scan — NFR-004 (performance budget) automated
       verification
 

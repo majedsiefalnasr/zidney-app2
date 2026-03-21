@@ -3,7 +3,7 @@
 ## Command
 
 ```sh
-bun run db:validate-licenses
+bun run db:validate:licenses
 ```
 
 ## Purpose
@@ -20,7 +20,7 @@ without requiring a full application stack.
 
 ## When to Run
 
-- After running `bun run seed-dashboard-test-data` to verify seeding worked
+- After running `bun run dev:seed:dashboard-test-data` to verify seeding worked
 - During QA validation to confirm license counts match expected values
 - In staging environment health checks before release
 
@@ -39,7 +39,7 @@ summary log on query success. Exits 0 with error log if query fails (infra-absen
 ## Example Usage
 
 ```sh
-DATABASE_URL=postgres://user:pass@localhost:5432/master_db bun run db:validate-licenses
+DATABASE_URL=postgres://user:pass@localhost:5432/master_db bun run db:validate:licenses
 ```
 
 Expected output:

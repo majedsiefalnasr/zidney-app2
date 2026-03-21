@@ -16,19 +16,19 @@ recent commits, and per-module risk indicators.
 
 ```bash
 # Default: changed files since HEAD~1
-bun run gitnexus:context
+bun run arch:gitnexus:context
 
 # Full workspace scan
-bun run gitnexus:context -- --all
+bun run arch:gitnexus:context -- --all
 
 # Preview without writing to disk
-bun run gitnexus:context -- --dry-run
+bun run arch:gitnexus:context -- --dry-run
 
 # Custom base comparison ref
-bun run gitnexus:context -- --base-ref HEAD~3
+bun run arch:gitnexus:context -- --base-ref HEAD~3
 
 # Custom output path
-bun run gitnexus:context -- --output docs/ai/context/custom.json
+bun run arch:gitnexus:context -- --output docs/ai/context/custom.json
 ```
 
 ## CLI Arguments

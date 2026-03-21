@@ -14,7 +14,7 @@ any downstream consumer (AI agent, architecture reporter, drift detector) proces
 ## Usage
 
 ```bash
-bun run gitnexus:validate
+bun run arch:validate:gitnexus
 ```
 
 Exits with code `0` on success, `1` on any failure.
@@ -45,20 +45,20 @@ On failure (stderr):
 ```
 [validate-gitnexus] FAILED — 2 error(s) found
   [required-fields] Missing required field: "analysisMode"
-  [freshness] gitnexus-context.json is 36h old (>24h). Run: bun run gitnexus:context
+  [freshness] gitnexus-context.json is 36h old (>24h). Run: bun run arch:gitnexus:context
 
 [validate-gitnexus] 3/5 checks passed
 ```
 
 ## Remediation
 
-| Error step             | Remediation                                                                                          |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| `file-existence`       | Run `bun run gitnexus:context`                                                                       |
-| `json-parse`           | Delete artifact and run `bun run gitnexus:context`                                                   |
-| `required-fields`      | Run `bun run gitnexus:context` to regenerate                                                         |
-| `semantic-constraints` | Run `bun run gitnexus:context`; if persists, check schema alignment in `scripts/gitnexus-context.ts` |
-| `freshness`            | Run `bun run gitnexus:context`                                                                       |
+| Error step             | Remediation                                                                                               |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| `file-existence`       | Run `bun run arch:gitnexus:context`                                                                       |
+| `json-parse`           | Delete artifact and run `bun run arch:gitnexus:context`                                                   |
+| `required-fields`      | Run `bun run arch:gitnexus:context` to regenerate                                                         |
+| `semantic-constraints` | Run `bun run arch:gitnexus:context`; if persists, check schema alignment in `scripts/gitnexus-context.ts` |
+| `freshness`            | Run `bun run arch:gitnexus:context`                                                                       |
 
 ## Schema Reference
 

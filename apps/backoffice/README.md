@@ -37,7 +37,7 @@ white-label configuration.
 
 ```bash
 # Unit tests (from repo root)
-bun run vitest run --project backoffice
+bun run test run --project backoffice
 
 # Unit tests (from this directory)
 bun run test

@@ -406,7 +406,7 @@ async function main(): Promise<void> {
   });
 
   if (!existsSync(CONTEXT_FILE)) {
-    logger.error("AI context artifact missing — run bun run ai-context:generate", {
+    logger.error("AI context artifact missing — run bun run ai:context:generate", {
       correlationId,
       service: "validate:ai-context-fresh",
       file: CONTEXT_FILE,
@@ -597,13 +597,13 @@ The following entries must be added to the `scripts` block of root `package.json
 #### Alias Registrations (no new implementation files)
 
 ```json
-"ai-context:status": "bun run ai-context:validate",
+"ai-context:status": "bun run ai:context:validate",
 "biome": "biome check .",
 "build:api": "bun --cwd apps/api build",
 "build:packages": "bun run --workspaces build --filter='./packages/*'",
 "ci:test": "vitest run --reporter=verbose",
 "dev": "bun run dev:all",
-"generate:ai-context": "bun run ai-context:generate",
+"generate:ai-context": "bun run ai:context:generate",
 "infra-audit": "bun run arch:audit",
 "infra-audit:check": "bun run arch:audit --check",
 "migrate": "bun run db:migrate",
@@ -724,7 +724,7 @@ manual | ci | manual,ci
 
 ## Example Usage
 
-bun run db:pool-status
+bun run db:status:pool
 
 ## Known Failure Modes
 
@@ -1038,13 +1038,13 @@ After T006 completion, every newly registered script maps to one of three catego
 
 | Key                     | Value                                                |
 | ----------------------- | ---------------------------------------------------- |
-| `ai-context:status`     | `bun run ai-context:validate`                        |
+| `ai-context:status`     | `bun run ai:context:validate`                        |
 | `biome`                 | `biome check .`                                      |
 | `build:api`             | `bun --cwd apps/api build`                           |
 | `build:packages`        | `bun run --workspaces build --filter='./packages/*'` |
 | `ci:test`               | `vitest run --reporter=verbose`                      |
 | `dev`                   | `bun run dev:all`                                    |
-| `generate:ai-context`   | `bun run ai-context:generate`                        |
+| `generate:ai-context`   | `bun run ai:context:generate`                        |
 | `infra-audit`           | `bun run arch:audit`                                 |
 | `infra-audit:check`     | `bun run arch:audit --check`                         |
 | `migrate`               | `bun run db:migrate`                                 |

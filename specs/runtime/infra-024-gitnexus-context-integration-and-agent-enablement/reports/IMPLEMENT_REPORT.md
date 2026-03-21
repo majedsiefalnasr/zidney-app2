@@ -86,10 +86,10 @@ full documentation was authored.
 
 | Check                  | Command                                                                                                             | Result                                          |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Unit tests             | `bun run vitest run tests/gitnexus-context.test.ts`                                                                 | ✅ 15/15 PASS                                   |
+| Unit tests             | `bun run test run tests/gitnexus-context.test.ts`                                                                   | ✅ 15/15 PASS                                   |
 | Lint (INFRA-024 files) | `bunx biome check scripts/gitnexus-context.ts scripts/validate/validate-gitnexus.ts tests/gitnexus-context.test.ts` | ✅ 0 errors                                     |
 | Type-check             | `bun run type-check`                                                                                                | ✅ Exit 0                                       |
-| Script governance      | `bun run validate-runtime-scripts`                                                                                  | ✅ 0 new violations (9 pre-existing, unrelated) |
+| Script governance      | `bun run validate:runtime:scripts`                                                                                  | ✅ 0 new violations (9 pre-existing, unrelated) |
 
 Full validation evidence: `audits/VALIDATION_REPORT.md`
 

@@ -163,7 +163,7 @@
       "name": "cache-clean",
       "status": "VALID",
       "occurrences": 1,
-      "packageJsonValue": "bun run maintenance:cache-clean"
+      "packageJsonValue": "bun run infra:cache:clean"
     },
     {
       "name": "check:store-cycles",

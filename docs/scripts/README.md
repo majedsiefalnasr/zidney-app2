@@ -16,7 +16,7 @@ Each script document covers: purpose, when to run, dependencies, example usage, 
    - `@mode manual|ci` — when the script runs
    - `@dependencies <comma-separated>` — runtime dependencies
 
-2. Run `bun run generate-script-docs` to regenerate all documentation pages.
+2. Run `bun run dev:generate:script-docs` to regenerate all documentation pages.
 
 3. Verify the generated `docs/scripts/<script-name>.md` file and update if needed.
 

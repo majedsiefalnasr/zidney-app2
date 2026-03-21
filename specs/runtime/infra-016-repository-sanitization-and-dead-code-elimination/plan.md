@@ -12,7 +12,7 @@ This stage plans a repository-wide sanitization pass that removes dead assets, c
 **Language/Version**: TypeScript 5.x, Bun workspace scripts, Bash shell tooling, Markdown/YAML/JSON governance assets  
 **Primary Dependencies**: Bun, Vitest, Biome, Husky, Prettier, actionlint, architecture guard tooling, infra audit tooling, AI context generation scripts  
 **Storage**: Repository filesystem artifacts only; no database or tenant schema changes  
-**Testing**: `bun run lint`, `bun run typecheck`, `bun run test`, `bun run arch:guard`, `bun scripts/ai-guard.ts`, `bun scripts/architecture-diff.ts`, `bun scripts/infra-audit.ts`, `bun scripts/validate-architecture-brain.ts`, `bun run type-safety-guard`, `bun run ai-context:refresh`, workflow linting where relevant  
+**Testing**: `bun run lint`, `bun run typecheck`, `bun run test`, `bun run arch:guard`, `bun scripts/ai-guard.ts`, `bun scripts/architecture-diff.ts`, `bun scripts/infra-audit.ts`, `bun scripts/validate-architecture-brain.ts`, `bun run arch:type-safety-guard`, `bun run ai:context:refresh`, workflow linting where relevant  
 **Target Platform**: macOS/Linux developer environments and CI runners  
 **Project Type**: Monorepo infrastructure-governance stage  
 **Performance Goals**: Produce a repeatable full-repository classification pass without requiring runtime service startup; prioritize deterministic evidence over scan speed  
@@ -187,8 +187,8 @@ The minimum acceptance gate set after any cleanup is:
 - `bun scripts/architecture-diff.ts`
 - `bun scripts/infra-audit.ts`
 - `bun scripts/validate-architecture-brain.ts`
-- `bun run type-safety-guard`
-- `bun run ai-context:refresh`
+- `bun run arch:type-safety-guard`
+- `bun run ai:context:refresh`
 
 Where the cleanup touches workflow wiring, also run `bun run validate:workflows`. Where hook wiring changes, confirm `.github/workflows/` and `.husky/` remain present, referenced scripts still exist, and `package.json` plus `lint-staged.config.mjs` still resolve the expected hook commands. Regardless of workflow changes, confirm that protected governance authority files remain present and unmodified, including `AGENTS.md`, `docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md`, `docs/AGENT_GOVERNANCE.md`, `docs/PROJECT_CONTEXT_PRIMER.md`, `specs/STAGE_LIFECYCLE_POLICY.md`, `specs/phases/MASTER_EXECUTION_ROADMAP.md`, `.github/workflows/architecture-governance.yml`, `.husky/pre-commit`, and `.husky/pre-push`; the sole approved authority-file mutation in this stage is the explicit remediation of `.github/workflows/hard-mode-guard.yml` to enforce that wider authority set.
 

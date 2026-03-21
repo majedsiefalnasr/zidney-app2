@@ -647,7 +647,7 @@ jobs:
         timeout-minutes: 1
 
       - name: Step 4 - Type Coverage (Optional, Warning Only)
-        run: bun run type-coverage --at-least 85
+        run: bun run validate:types --at-least 85
         continue-on-error: true
 
       - name: Report Results

@@ -3,7 +3,7 @@
 ## Command
 
 ```sh
-bun run seed-dashboard-test-data
+bun run dev:seed:dashboard-test-data
 ```
 
 ## Purpose
@@ -42,7 +42,7 @@ Production-safe: aborts immediately if `NODE_ENV=production`.
 
 ```sh
 # Seed with test database URL
-DATABASE_URL=postgres://user:pass@localhost:5432/master_db bun run seed-dashboard-test-data
+DATABASE_URL=postgres://user:pass@localhost:5432/master_db bun run dev:seed:dashboard-test-data
 ```
 
 Expected output:

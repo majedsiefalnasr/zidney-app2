@@ -88,7 +88,7 @@ All 17 tasks in tasks.md have been implemented and marked `[X]`. The primary del
 
 | Guardian                   | Verdict | Notes                                                                          |
 | -------------------------- | ------- | ------------------------------------------------------------------------------ |
-| Zidney CI/CD Automation    | PASS    | WARN resolved: `bun ai-runtime:status` → `bun run ai-runtime:status` in ci.yml |
+| Zidney CI/CD Automation    | PASS    | WARN resolved: `bun ai-runtime:status` → `bun run ai:runtime:status` in ci.yml |
 | Zidney Deployment Engineer | PASS    | 5/5 checks pass — no rollback risk for additive-only tooling change            |
 
 ---

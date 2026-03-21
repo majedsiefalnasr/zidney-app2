@@ -1,8 +1,10 @@
 /**
- * @script validate:diff-registry
+ * @script validate:diff:registry
  * @domain validate
+ * @category governance
  * @description Compare scanned runtime spec script references against root package.json, produce diff report
  * @mode manual,ci
+ * @usage bun run validate:diff:registry
  * @dependencies node:fs,node:path,node:crypto
  */
 

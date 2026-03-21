@@ -203,7 +203,7 @@ has a clear, approved roadmap to follow.
 
 ### FR-US7: Technical Debt Snapshot
 
-- FR-US7-1: The audit must run `bun run tsc --noEmit` (read-only) and record the total TypeScript
+- FR-US7-1: The audit must run `bun run typecheck:src --noEmit` (read-only) and record the total TypeScript
   error count.
 - FR-US7-2: The audit must run `bun run lint` (read-only) and record total ESLint error count and
   warning count.
@@ -252,7 +252,7 @@ has a clear, approved roadmap to follow.
 
 - NFR-P1: The `scripts/infra-audit.ts` script must complete a full monorepo scan in under 30 seconds
   on a machine with ≥8 GB RAM.
-- NFR-P2: All read-only audit commands (`bun test --coverage`, `bun run tsc --noEmit`,
+- NFR-P2: All read-only audit commands (`bun test --coverage`, `bun run typecheck:src --noEmit`,
   `bun run lint`) must be run sequentially, not in parallel, to avoid masking resource contention
   issues.
 
@@ -339,7 +339,7 @@ has a clear, approved roadmap to follow.
 
 ### AC-US7: Technical Debt Snapshot
 
-- AC-US7-1: TypeScript error count from `bun run tsc --noEmit` is recorded and dated.
+- AC-US7-1: TypeScript error count from `bun run typecheck:src --noEmit` is recorded and dated.
 - AC-US7-2: ESLint error count and warning count from `bun run lint` are recorded and dated.
 - AC-US7-3: Skipped test count per app is recorded.
 

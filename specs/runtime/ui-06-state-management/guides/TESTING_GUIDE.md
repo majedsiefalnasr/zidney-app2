@@ -48,7 +48,7 @@ cd apps/mmc && bunx vitest run tests/integration/pinia-bootstrap.test.ts
 
 # Store cycle detection
 bun /path/to/scripts/check-store-cycles.ts
-# Or from repo root: bun run check:store-cycles
+# Or from repo root: bun run arch:check:store-cycles
 ```
 
 ### Expected Results

@@ -21,7 +21,7 @@ const REQUIRED_ARTIFACTS: RequiredArtifact[] = [
   {
     artifact_name: 'ai-architecture-brain.json',
     path: 'docs/ai/context/ai-architecture-brain.json',
-    validator: 'bun run arch:validate-brain',
+    validator: 'bun run arch:validate:brain',
   },
 ]
 

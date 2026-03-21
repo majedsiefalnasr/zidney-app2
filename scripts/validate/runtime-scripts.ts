@@ -1,10 +1,10 @@
 /**
- * @script validate-runtime-scripts
+ * @script validate:runtime:scripts
  * @domain validate
+ * @category governance
  * @description CI guard: hard-blocks (exit 1) when any bun run <script> reference in
  *   specs/runtime/** is absent from root package.json. Exits 0 when all are registered.
- * @mode ci,manual
- * @dependencies node:fs,node:path,node:crypto
+ * @usage bun run validate:runtime:scripts
  */
 
 import { randomUUID } from 'node:crypto'
@@ -24,8 +24,8 @@ export const EXCLUDED_NAMES = new Set<string>([
   'wrapper',
   'lint:staged',
   // False positives from code literals in spec markdown files
-  'references', // plan.md string literal: "bun run references"
-  'json', // TESTING_GUIDE.md code: `bun run json.stringify ...`
+  'references', // plan.md string literal matching false-positive pattern
+  'json', // TESTING_GUIDE.md code false-positive pattern
 ])
 
 const REPO_ROOT = process.cwd()

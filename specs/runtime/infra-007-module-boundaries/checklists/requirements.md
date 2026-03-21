@@ -97,7 +97,7 @@ STAGE_INFRA_07_MODULE_BOUNDARIES
 - [x] Updated CI pipeline stage order documented
 - [x] `module-boundary-validation` step described
 - [x] Failure behavior documented (PR blocked on violation)
-- [x] Developer local check (`bun run ai-guard`) documented (FR-010)
+- [x] Developer local check (`bun run ai:guard`) documented (FR-010)
 - [x] Package.json script requirement documented
 
 ---

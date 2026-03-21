@@ -1,9 +1,9 @@
 /**
- * @script validate:detect-broken
+ * @script validate:scripts-infra
  * @domain validate
+ * @category governance
  * @description Detect missing or broken TypeScript script files referenced in root package.json
- * @mode manual,ci
- * @dependencies node:fs,node:path,node:crypto,node:child_process
+ * @usage bun run validate:scripts-infra
  */
 
 import { spawnSync } from 'node:child_process'

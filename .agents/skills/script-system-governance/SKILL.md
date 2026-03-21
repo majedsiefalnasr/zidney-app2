@@ -9,17 +9,19 @@ description: Enforces repository-wide script consistency, validation, naming sta
 
 This skill ensures that all scripts across Zidney are:
 
-- Consistent in naming
-- Properly registered and discoverable
+- Consistent in naming (domain-first colon-separated)
+- Properly registered in `package.json` and discoverable via the script registry
+- Annotated with 5-field metadata headers
 - Fully traceable to their origin (spec/runtime)
 - Safe to refactor without breaking the system
 - Validated before execution (locally + CI)
 
 This prevents:
-- Missing scripts (`bun run xxx` fails)
+- Missing scripts (`xxx` command not found)
 - Duplicate or conflicting scripts
 - Broken CI or orchestrator pipelines
 - Drift between specs and runtime
+- Stale or undocumented script registry
 
 ---
 
@@ -28,8 +30,8 @@ This prevents:
 ### 1. Single Source of Truth
 All scripts MUST:
 - Exist in `package.json`
-- Be implemented in `/scripts/`
-- Be documented in `docs/scripts/`
+- Be implemented in `scripts/`
+- Be documented in `docs/scripts/SCRIPT_REGISTRY.md` (auto-generated)
 
 ---
 
@@ -40,54 +42,85 @@ Format:
 <domain>:<action>[:<scope>]
 ```
 
-Examples:
-- `db:pool-status`
-- `db:validate-licenses`
-- `validate:ai-context-fresh`
-- `arch:validate-brain`
-- `test:e2e:mmc`
+**9 Canonical Domains:**
 
-Rules:
-- Use `:` not `-`
-- Domain-first grouping
+| Domain     | Purpose                                    | Examples                              |
+|------------|---------------------------------------------|---------------------------------------|
+| `db`       | Database operations                         | `db:migrate`, `db:status:pool`        |
+| `arch`     | Architecture / governance checks            | `arch:audit`, `arch:diff`             |
+| `validate` | Validation guards                           | `validate:tsconfig`, `validate:runtime:scripts` |
+| `ai`       | AI context and execution tools              | `ai:guard`, `ai:context:generate`     |
+| `ci`       | CI / pipeline scripts                       | `ci:run-local`, `ci:smoke:staging`    |
+| `repo`     | Repo doctor / onboarding tools              | `repo:doctor`, `repo:status`          |
+| `dev`      | Developer tooling                           | `dev:hygiene:report`, `dev:refactor:scripts` |
+| `infra`    | Infrastructure / Docker / cache             | `infra:cache:clean`                   |
+| `test`     | Test-type aliases                            | `test:e2e:mmc`, `test:integration`   |
+
+**Rules:**
+- Use `:` as separator — NEVER `-` except within a segment-word (`scripts-infra` is valid inside a segment)
+- Domain comes first
+- Maximum 3 segments: `domain:action:scope`
 - No duplicates across domains
+- Lifecycle hooks (`prepare`, `build`, `test`, etc.) are exempt from convention
 
 ---
 
-### 3. Script Location Policy
+### 3. Required Metadata Header (5 Fields)
 
-| Script Type        | Location                        |
-|------------------|--------------------------------|
-| Database          | `scripts/db/`                  |
-| Validation        | `scripts/validate/`            |
-| Architecture      | `scripts/governance/`          |
-| Testing           | `scripts/test/` (if needed)    |
-| Infra / CI        | `scripts/ci/`                  |
+Every script file that has a `@script` tag MUST include all 5 required fields:
 
----
-
-### 4. Allowed Engines
-
-- Primary: `bun`
-- Fallback: `node` (only if required)
-- NEVER mix engines for same domain
-
----
-
-### 5. Script Registry (Required)
-
-Each script must have an entry in:
-
-```
-docs/scripts/<script-name>.md
+```typescript
+/**
+ * @script domain:action:scope
+ * @domain domain
+ * @category governance | dev | runtime | analysis
+ * @description One-sentence description of what the script does.
+ * @usage bun run <domain>:<action>:<scope>
+ */
 ```
 
-Must include:
-- Purpose
-- Usage
-- Source (which spec/runtime)
-- When to use
-- Called by (CI / dev / orchestrator)
+Example:
+```typescript
+/**
+ * @script validate:script:naming
+ * @domain validate
+ * @category governance
+ * @description Validates all package.json script names against the 9-domain naming convention.
+ * @usage bun run validate:script:naming
+ */
+```
+
+**Deprecated fields** (replace with `@category` / `@usage`):
+- `@mode` — remove
+- `@dependencies` — remove
+
+---
+
+### 4. Script Location Policy
+
+| Script Type           | Location                        |
+|-----------------------|---------------------------------|
+| Database              | `scripts/db/`                   |
+| Validation            | `scripts/validate/`             |
+| Architecture          | `scripts/architecture/`         |
+| Architecture guard    | `scripts/architecture-guard/`   |
+| AI / context          | `scripts/ai-engine/` or root    |
+| CI / local pipeline   | `scripts/ci/`                   |
+| Developer tooling     | `scripts/dev/`                  |
+| Generation / docs     | `scripts/generate/`             |
+| Infrastructure        | `scripts/maintenance/`          |
+
+---
+
+### 5. Registry Auto-Generation
+
+The script registry is auto-generated by:
+```bash
+bun run dev:generate:script-docs
+```
+Output: `docs/scripts/SCRIPT_REGISTRY.md`
+
+Do NOT edit this file manually — it is always overwritten.
 
 ---
 
@@ -97,145 +130,130 @@ Must include:
 
 ### Workflow 1: Add New Script
 
-1. Identify origin spec:
-```
-specs/runtime/<spec-name>
-```
+1. Create implementation file:
+   ```
+   scripts/<domain>/<script-name>.ts
+   ```
 
-2. Implement:
-```
-scripts/<domain>/<script>.ts
-```
+2. Add 5-field metadata header at top of file
 
-3. Register in `package.json`:
-```
-"<domain>:<action>": "bun run scripts/<domain>/<script>.ts"
-```
+3. Register in root `package.json`:
+   ```json
+   "domain:action:scope": "bun scripts/<domain>/<script-name>.ts"
+   ```
 
-4. Document in:
-```
-docs/scripts/<script>.md
-```
+4. Regenerate registry:
+   ```bash
+   bun run dev:generate:script-docs
+   ```
 
-5. Validate:
-```
-bun run validate:runtime-scripts
-```
+5. Validate naming and infrastructure:
+   ```bash
+   bun run validate:script:naming
+   bun run validate:script:infrastructure
+   ```
 
 ---
 
-### Workflow 2: Rename Script (Critical)
+### Workflow 2: Rename Existing Script
 
-1. Update:
-- `package.json`
-- Script file if needed
+1. Add the old-name → new-name entry to `docs/scripts/SCRIPT_MIGRATION_MAP.md`:
+   ```markdown
+   | old-name | Type C | naming-violation | new:name |
+   ```
 
-2. Run refactor scan:
-```
-bun run script:usage-scan
-```
+2. Apply the rename in `package.json` (key + any internal command references)
 
-3. Update ALL references:
-- specs/
-- scripts/
-- docs/
-- CI workflows
-- orchestrator agents
+3. Update the script file's `@script` metadata tag
 
-4. Validate:
-```
-bun run validate:runtime-scripts
-```
+4. Run the refactor engine to propagate references:
+   ```bash
+   bun run dev:refactor:scripts
+   ```
 
-🚫 NEVER rename without updating references
+5. Verify zero unresolved references in `reports/SCRIPT_REFACTOR_REPORT.md`
+
+6. Validate full system:
+   ```bash
+   bun run validate:script:naming
+   bun run validate:script:usage
+   bun run validate:script:infrastructure
+   bun run dev:generate:script-docs
+   ```
+
+🚫 NEVER rename without running the refactor engine — dangling references break CI and orchestrators
 
 ---
 
-### Workflow 3: Detect Missing Scripts
+### Workflow 3: Detect Naming Violations
 
-Run:
-```
-bun run validate:runtime-scripts
+```bash
+bun run validate:script:naming
 ```
 
 Checks:
-- All `bun run xxx` exist
-- All scripts resolve correctly
-- No orphan commands in specs
+- All scripts in `package.json` match `domain:action[:scope]` pattern
+- Domain is one of the 9 canonical domains
+- No lifecycle hooks incorrectly flagged
 
 ---
 
-### Workflow 4: Detect Duplicates
+### Workflow 4: Detect Broken References
 
-Run:
-```
-bun run script:dedupe
+```bash
+bun run validate:script:usage
 ```
 
-Ensures:
-- No duplicate names
-- No overlapping functionality
+Checks:
+- All `bun run <script>` references in `.ts`, `.yml`, `.md`, `.sh` files
+- References point to scripts that exist in `package.json`
+- No orphan commands
 
 ---
 
-## Orchestrator Integration
+### Workflow 5: Detect Missing Metadata
 
-The Zidney orchestrator MUST:
-
-Before execution:
-1. Validate script exists
-2. Validate script passes registry check
-3. Block execution if missing
-
-Example guard:
+```bash
+bun run validate:script:infrastructure
 ```
-if (!scriptExists(command)) fail("SCRIPT_NOT_FOUND")
-```
+
+Checks:
+- All `.ts` files with `@script` tag have all 5 required fields
+- Registry in `docs/scripts/SCRIPT_REGISTRY.md` is fresh
 
 ---
 
-## CI Enforcement (Recommended)
+## CI Enforcement
 
-Add job:
+The following steps are in `.github/workflows/architecture-governance.yml` (steps 14–17):
 
+```yaml
+- name: Validate Script Naming Convention
+  run: bun run validate:script:naming
+
+- name: Validate Script Usages (no broken or orphan references)
+  run: bun run validate:script:usage
+
+- name: Validate Script Infrastructure (headers + registry freshness)
+  run: bun run validate:script:infrastructure
+
+- name: Verify Script Registry Generation
+  run: bun run dev:generate:script-docs
 ```
-bun run validate:runtime-scripts
-bun run script:usage-scan
-```
-
-Fail if:
-- Missing script
-- Broken reference
-- Duplicate script
-
-Optional:
-- Run via `act` locally before push
 
 ---
 
 ## Anti-Patterns (Forbidden)
 
-❌ `bun run something` not in package.json  
-❌ Duplicate scripts across domains  
-❌ Scripts without docs  
-❌ Scripts without spec origin  
-❌ Renaming without full propagation  
-❌ Mixing `:` and `-` naming  
-
----
-
-## Advanced (Optional but Recommended)
-
-### Script Refactor Engine
-
-```
-bun run refactor-scripts
-```
-
-Auto:
-- Update references
-- Apply naming rules
-- Generate migration map
+| Anti-Pattern                                | Why It's Forbidden                              |
+|---------------------------------------------|-------------------------------------------------|
+| `<script-name>` not in `package.json`       | Breaks CI, orchestrators, and refactor tracking |
+| Script key uses hyphens as separator (`-`)  | Illegal naming format — use `:` separator       |
+| Domain not in the 9 canonical domains       | Prevents categorization and discoverability     |
+| Missing `@script` / `@domain` / `@category` / `@description` / `@usage` | Registry and CI validators will fail |
+| Renaming without running refactor engine    | Leaves dangling references in specs/CI/docs     |
+| Duplicate script names across domains       | Silent incorrect invocation                     |
+| Editing `SCRIPT_REGISTRY.md` manually       | Overwritten on next `dev:generate:script-docs`  |
 
 ---
 
@@ -243,25 +261,26 @@ Auto:
 
 System is valid when:
 
-- All scripts resolve
-- No duplicates exist
-- All scripts documented
-- All spec commands executable
-- CI + orchestrator enforce rules
+- `bun run validate:script:naming` exits 0
+- `bun run validate:script:usage` exits 0
+- `bun run validate:script:infrastructure` exits 0
+- `bun run dev:generate:script-docs` exits 0
+- `reports/SCRIPT_REFACTOR_REPORT.md` shows `✅ Unresolved references: 0`
+- `docs/scripts/SCRIPT_REGISTRY.md` is up-to-date
 
 ---
 
-## Summary
+## Key File Locations
 
-This skill transforms scripts from:
-→ scattered commands
+| File | Purpose |
+|------|---------|
+| `docs/scripts/SCRIPT_REGISTRY.md` | Auto-generated registry (do not edit) |
+| `docs/scripts/SCRIPT_MIGRATION_MAP.md` | Manual migration tracking across renames |
+| `scripts/validate/script-naming.ts` | Naming validator (`validate:script:naming`) |
+| `scripts/validate/script-usage.ts` | Usage validator (`validate:script:usage`) |
+| `scripts/validate/script-infrastructure.ts` | Metadata + registry validator (`validate:script:infrastructure`) |
+| `scripts/generate/script-docs.ts` | Registry generator (`dev:generate:script-docs`) |
+| `scripts/dev/refactor-scripts.ts` | Refactor engine (`dev:refactor:scripts`) |
+| `reports/SCRIPT_REFACTOR_REPORT.md` | Output of last refactor run |
 
-Into:
-→ governed system layer
-
-It guarantees:
-- Stability
-- Discoverability
-- Refactor safety
-- CI integrity
-- AI agent correctness
+---

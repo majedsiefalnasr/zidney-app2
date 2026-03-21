@@ -1,10 +1,12 @@
 /**
- * @script gitnexus:validate
- * @domain gitnexus
+ * @script arch:validate:gitnexus
+ * @domain arch
+ * @category governance
  * @description Validates the gitnexus-context.json artifact against the JSON Schema and
  *   performs structural integrity checks. Exits with code 0 if valid, 1 if invalid.
  *   Designed to run as a CI gate before any AI agent consumes the context artifact.
  * @mode cli
+ * @usage bun run arch:validate:gitnexus
  * @dependencies node:fs, node:path, docs/ai/context/gitnexus-context.json,
  *   docs/ai/gitnexus-context.schema.json
  */
@@ -48,7 +50,7 @@ function checkFilesExist(): ValidationError[] {
   if (!existsSync(CONTEXT_PATH)) {
     errors.push({
       step: 'file-existence',
-      message: `gitnexus-context.json not found at: ${CONTEXT_PATH}. Run: bun run gitnexus:context`,
+      message: `gitnexus-context.json not found at: ${CONTEXT_PATH}. Run: bun run arch:gitnexus:context`,
     })
   }
   if (!existsSync(SCHEMA_PATH)) {
@@ -230,7 +232,7 @@ function checkFreshness(context: Record<string, unknown>): ValidationError[] {
     const ageHours = Math.round(ageMs / (1000 * 60 * 60))
     errors.push({
       step: 'freshness',
-      message: `gitnexus-context.json is ${ageHours}h old (>24h). Run: bun run gitnexus:context`,
+      message: `gitnexus-context.json is ${ageHours}h old (>24h). Run: bun run arch:gitnexus:context`,
     })
   }
 

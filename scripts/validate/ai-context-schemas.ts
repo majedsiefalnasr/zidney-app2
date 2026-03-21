@@ -1,8 +1,10 @@
 /**
  * @script validate:ai-context-schemas
  * @domain validate
+ * @category validation
  * @description Validate that all required AI context JSON artifacts exist and are valid JSON
  * @mode manual,ci
+ * @usage bun run validate:ai-context-schemas
  * @dependencies node:fs,node:path,node:crypto
  */
 
@@ -59,7 +61,7 @@ function main(): void {
       errors,
       total: REQUIRED_ARTIFACTS.length,
       failed: errors.length,
-      hint: 'Run: bun run ai-context:generate to regenerate all artifacts',
+      hint: 'Run: bun run ai:context:generate to regenerate all artifacts',
     })
     process.exit(1)
   }

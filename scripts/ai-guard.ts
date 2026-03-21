@@ -1,4 +1,10 @@
 /**
+ * @script ai:guard
+ * @domain ai
+ * @category governance
+ * @description Enforces architecture rules (import boundaries, contract compliance) before AI-generated commits and in CI.
+ * @usage bun run ai:guard
+ *
  * Zidney AI Guard
  *
  * Purpose:

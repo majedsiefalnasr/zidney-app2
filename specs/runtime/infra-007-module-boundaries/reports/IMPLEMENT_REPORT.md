@@ -69,11 +69,11 @@ and a dedicated `test:unit:boundaries` CI step covering 43 new tests.
 | T018    | Create `tests/unit/ai-guard/ai-guard-boundaries.test.ts` (28 tests, scenarios a–n)                                                    | Test           | ✅     |
 | T019    | Run `bun run lint` — exit 0                                                                                                           | Validation     | ✅     |
 | T020    | Run `bun run typecheck` — exit 0                                                                                                      | Validation     | ✅     |
-| T021    | Run `bun run ai-guard` — exit 0                                                                                                       | Validation     | ✅     |
+| T021    | Run `bun run ai:guard` — exit 0                                                                                                       | Validation     | ✅     |
 | T022    | Run `vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts` — 28/28 pass                                                         | Validation     | ✅     |
 | T022b   | Run `vitest run tests/unit/infra-audit/infra-audit-boundaries.test.ts` — 8/8 pass                                                     | Validation     | ✅     |
 | T023    | Run `bun run test:static` — includes 7/7 static tests pass                                                                            | Validation     | ✅     |
-| T024    | Wall-clock time of `bun run ai-guard` < 30s — confirmed 0.4s                                                                          | Validation     | ✅     |
+| T024    | Wall-clock time of `bun run ai:guard` < 30s — confirmed 0.4s                                                                          | Validation     | ✅     |
 
 **Completed:** 26 / 26
 
@@ -107,7 +107,7 @@ and a dedicated `test:unit:boundaries` CI step covering 43 new tests.
 | ------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------ |
 | Tenant resolver context used for tenant DB access | ✅ N/A | No tenant DB touched — governance tooling only                                             |
 | All write operations are transactional            | ✅ N/A | No write operations; guard is read-only                                                    |
-| Idempotency is enforced where required            | ✅     | `bun run ai-guard` is fully idempotent (read-only scan)                                    |
+| Idempotency is enforced where required            | ✅     | `bun run ai:guard` is fully idempotent (read-only scan)                                    |
 | Structured logging is present                     | ✅     | `console.warn` for missing boundaries, `console.error` for fatal errors (no `console.log`) |
 | `console.log` is absent                           | ✅     | Only `console.warn` and `console.log` for info messages (per plan.md §2c)                  |
 | No stack traces exposed to clients                | ✅ N/A | CLI tool, not an HTTP endpoint                                                             |

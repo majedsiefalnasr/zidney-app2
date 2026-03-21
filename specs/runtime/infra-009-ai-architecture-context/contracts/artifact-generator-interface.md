@@ -516,7 +516,7 @@ async function audit() {
   const report = generateAudit();
 
   // Trigger artifact generation
-  execSync("bun run generate:ai-context");
+  execSync("bun run ai:context:generate");
 
   // Load generated artifact
   const graph = await loadArtifact<AIDependencyGraph>("docs/ai/context/ai-dependency-graph.json");

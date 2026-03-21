@@ -79,7 +79,7 @@ bunx vitest run --project hygiene-checks
 ### Test 2: Run Full Integration Smoke
 
 ```bash
-bun run hygiene:report
+bun run dev:hygiene:report
 ```
 
 **Expected:** ✅ All 9 checks execute; report written to `docs/reports/REPOSITORY_HYGIENE_REPORT.md`
@@ -141,7 +141,7 @@ cat docs/reports/REPOSITORY_HYGIENE_REPORT.md
 
 1. Open `docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md`
 2. Verify it has at least one `Authoritative Root:` entry for agents, prompts, templates
-3. Run `bun run hygiene:report`
+3. Run `bun run dev:hygiene:report`
 
 **Expected:** Check T001 reports PASS
 
@@ -163,9 +163,9 @@ cat docs/reports/REPOSITORY_HYGIENE_REPORT.md
 
 **Manual Step:**
 
-1. Run `bun run ai-context:validate` directly
+1. Run `bun run ai:context:validate` directly
 2. Verify it exits 0
-3. Re-run `bun run hygiene:report`
+3. Re-run `bun run dev:hygiene:report`
 
 **Expected:** Check T008 reports PASS
 
@@ -177,7 +177,7 @@ cat docs/reports/REPOSITORY_HYGIENE_REPORT.md
 
 1. Run `bun run arch:guard` directly
 2. Run `bun run arch:health` directly
-3. Run `bun run hygiene:report`
+3. Run `bun run dev:hygiene:report`
 
 **Expected:** Check T009 reports PASS (or FLAG if pre-existing violations)
 
@@ -238,7 +238,7 @@ When reading `docs/reports/REPOSITORY_HYGIENE_REPORT.md`:
 
 **Check:**
 
-- Run individual checks: `bun run arch:guard`, `bun run ai-context:validate`
+- Run individual checks: `bun run arch:guard`, `bun run ai:context:validate`
 - Review orchestrator output for which check failed
 - Note: Orchestrator exits 0 regardless of findings — check counts errors differently
 
@@ -280,7 +280,7 @@ bun run typecheck
 2. **Merge to develop:** Once approved, merge to `develop`
 3. **Monitor Report:** Track the hygiene report over time; use as baseline for improvements
 4. **Plan Remediation:** Create follow-up stages (e.g., INFRA-23, INFRA-24) for each FLAG category
-5. **CI Integration:** Consider adding `bun run hygiene:report` to PR validation
+5. **CI Integration:** Consider adding `bun run dev:hygiene:report` to PR validation
 
 ---
 

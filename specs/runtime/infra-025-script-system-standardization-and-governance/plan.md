@@ -413,7 +413,7 @@ Package.json entry: `"validate:script:usage": "bun scripts/validate/script-usage
 
   BROKEN REFERENCE
   File: .github/workflows/architecture-governance.yml:87
-  Script: bun run db:pool-status
+  Script: bun run db:status:pool
   ↳ Not found in any package.json. Perhaps: db:status:pool
 ```
 

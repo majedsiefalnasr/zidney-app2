@@ -128,7 +128,7 @@
         "exists": true,
         "status": "CURRENT",
         "last_modified_at": "2026-03-12T22:54:00.434Z",
-        "validator": "bun run arch:validate-brain"
+        "validator": "bun run arch:validate:brain"
       }
     ],
     "validation_status": "CURRENT",

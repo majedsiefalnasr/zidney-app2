@@ -28,7 +28,7 @@ configuration through a typed, validated schema rather than raw `process.env` ac
 
 ```bash
 # From repo root
-bun run vitest run --project config
+bun run test run --project config
 
 # From this directory
 bun run test

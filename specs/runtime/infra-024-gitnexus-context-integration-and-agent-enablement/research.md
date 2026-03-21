@@ -118,7 +118,7 @@ The `reason` field is constructed from the dependency count and hotspot status.
 
 ## RES-006 — CI Failure Conditions
 
-**Decision:** `bun run gitnexus:validate` fails (non-zero exit) ONLY on:
+**Decision:** `bun run arch:validate:gitnexus` fails (non-zero exit) ONLY on:
 
 1. Non-zero exit code from any CLI command invoked by the script.
 2. JSON schema structure violation (invalid types, missing required keys).

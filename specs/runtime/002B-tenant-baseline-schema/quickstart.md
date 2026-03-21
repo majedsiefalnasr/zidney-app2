@@ -411,7 +411,7 @@ curl -X POST http://localhost:3000/mmm/workspaces/550e8400-e29b-41d4-a716-446655
 redis-cli LLEN schema-migrations-queue
 
 # If > 100, worker might be overloaded
-# Scale: bun run worker --workers=4 (in production)
+# Scale: bun run dev:worker --workers=4 (in production)
 
 # For testing, check worker logs for actual errors
 ```

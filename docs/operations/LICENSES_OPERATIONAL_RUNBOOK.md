@@ -65,7 +65,7 @@
 3. **Run Database Migrations**
 
    ```bash
-   bun run migrate:up --stage production
+   bun run db:migrate --stage production
    ```
 
    Migrations run atomically:
@@ -129,7 +129,7 @@
 
 ```bash
 # If schema mismatch, check migrations
-bun run migrate:status
+bun run db:migrate
 # If corrupted, restore from backup
 psql zidney_master < backup.sql
 ```
@@ -258,7 +258,7 @@ DELETE FROM licenses WHERE id NOT IN (
 redis-cli LINDEX bull:provisioning:dlq 0 | jq '.failedReason'
 
 # If database issue, fix and retry
-bun run provisioning:retry-dlq
+# bun run <provisioning-retry-dlq>  # contact infra team
 
 # If persistent, escalate and preserve DLQ for audit
 redis-cli BGSAVE  # Backup Redis state
@@ -289,7 +289,7 @@ redis-cli BGSAVE  # Backup Redis state
 3. **Rollback Database**
 
    ```bash
-   bun run migrate:down --stage production --to-version <PREVIOUS>
+   # Migrations are forward-only — restore from SQL backup instead (see above)
    ```
 
 4. **Redeploy Previous API + Worker**
@@ -420,7 +420,7 @@ SELECT 'Avg Provision Time (sec)', ROUND(AVG(EXTRACT(EPOCH FROM (updated_at - cr
 docker run --name test-restore postgres:15
 pg_restore -d zidney_master backup.sql
 # Run consistency checks
-bun run db:verify-integrity
+# Verify integrity manually via: psql -c "SELECT COUNT(*) FROM licenses"
 # Document results
 docker stop test-restore && docker rm test-restore
 ```

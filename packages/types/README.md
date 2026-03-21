@@ -28,7 +28,7 @@ No runtime dependencies — pure TypeScript type definitions only.
 
 ```bash
 # Type-check only (types package has no runtime test logic)
-bun run vitest run --project types
+bun run test run --project types
 
 # From repo root typecheck
 bun run typecheck

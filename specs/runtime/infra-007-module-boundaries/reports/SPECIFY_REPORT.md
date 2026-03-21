@@ -38,7 +38,7 @@ specified. No `[NEEDS CLARIFICATION]` markers remain.
 | 2   | `packages/api-client` → `ui` layer                                        | api-client is a frontend HTTP adapter; it belongs in `ui`, not `infrastructure`. Corrects current mis-classification.     |
 | 3   | `module-boundaries.json` complements `ARCHITECTURE_MAP.json`              | Both files coexist; `ai-guard.ts` merges them with `module-boundaries.json` taking precedence for layer/dependency rules. |
 | 4   | UI modules may NOT import `domain` packages                               | Prevents domain logic from leaking into the presentation layer; UI communicates only through API client.                  |
-| 5   | Developer-facing command is `bun run ai-guard`                            | Single discoverable entry point; internally reads both `module-boundaries.json` and `ARCHITECTURE_MAP.json`.              |
+| 5   | Developer-facing command is `bun run ai:guard`                            | Single discoverable entry point; internally reads both `module-boundaries.json` and `ARCHITECTURE_MAP.json`.              |
 | 6   | Undeclared modules emit warnings (not errors) in local mode, errors in CI | Balances developer velocity with CI strictness.                                                                           |
 
 ---
@@ -58,12 +58,12 @@ specified. No `[NEEDS CLARIFICATION]` markers remain.
   `ui` module
 - **FR-008** — `ai-guard.ts` warns (local) / errors (CI) for modules present in the repo but absent
   from `module-boundaries.json`
-- **FR-009** — CI pipeline includes a `module-boundary-validation` step running `bun run ai-guard`
-- **FR-010** — `bun run ai-guard` exits 0 if no violations found, non-zero otherwise
+- **FR-009** — CI pipeline includes a `module-boundary-validation` step running `bun run ai:guard`
+- **FR-010** — `bun run ai:guard` exits 0 if no violations found, non-zero otherwise
 - **FR-011** — Violation output includes: module name, source layer, target layer, violation type,
   file path
 - **FR-012** — New module onboarding workflow documented: assign layer → add to
-  `module-boundaries.json` → verify with `bun run ai-guard`
+  `module-boundaries.json` → verify with `bun run ai:guard`
 
 ---
 
@@ -81,7 +81,7 @@ None. All ambiguities were resolved from the stage file, existing tooling source
 | No cross-tenant access introduced       | ✅     | Pure INFRA stage — no tenant logic            |
 | License middleware requirement captured | ✅ N/A | Not applicable to governance tooling          |
 | Snapshot integrity requirement captured | ✅ N/A | Not applicable to governance tooling          |
-| Idempotency strategy defined            | ✅ N/A | `bun run ai-guard` is idempotent by nature    |
+| Idempotency strategy defined            | ✅ N/A | `bun run ai:guard` is idempotent by nature    |
 | Transaction boundaries identified       | ✅ N/A | No database interaction                       |
 | Server-authoritative time enforced      | ✅ N/A | No runtime timing concerns                    |
 | Import boundary rules enforced          | ✅     | This stage IS the import boundary enforcement |

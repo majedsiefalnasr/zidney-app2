@@ -39,7 +39,7 @@ and orchestration of domain packages.
 
 ```bash
 # From repo root — run all API tests (unit + integration)
-bun run vitest run --project api
+bun run test run --project api
 
 # From this directory
 bun run test

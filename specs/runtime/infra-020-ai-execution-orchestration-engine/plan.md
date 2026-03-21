@@ -697,7 +697,7 @@ Options:
 
 ```
 bun arch:guard      → bun run arch:guard (maps to scripts/architecture-guard/architecture-guard.ts)
-bun type-safety-guard → bun run type-safety-guard (maps to scripts/type-safety-guard.ts)
+bun type-safety-guard → bun run arch:type-safety-guard (maps to scripts/type-safety-guard.ts)
 bun arch:health     → bun run arch:health:ci (maps to scripts/architecture-health/architecture-health.ts --ci)
 ```
 

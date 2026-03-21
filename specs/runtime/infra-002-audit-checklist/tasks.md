@@ -78,7 +78,7 @@
       from T003
 - [x] T018 [P] [US9] Lint `scripts/infra-audit.ts` via `bun run lint` — verify 0 new ESLint errors
       introduced by the script
-- [x] T019 [P] [US9] Type-check via `bun run tsc --noEmit` — verify 0 new TypeScript errors
+- [x] T019 [P] [US9] Type-check via `bun run typecheck:src --noEmit` — verify 0 new TypeScript errors
       introduced by `scripts/infra-audit.ts`
 
 ---
@@ -166,7 +166,7 @@
 
 - [x] T041 [US5] Run `bun install` — record exit code and any Bun compatibility warnings; note any
       Node.js-only tooling warnings
-- [x] T042 [US7] Run `bun run tsc --noEmit` — record total TypeScript error count with git SHA and
+- [x] T042 [US7] Run `bun run typecheck:src --noEmit` — record total TypeScript error count with git SHA and
       ISO 8601 timestamp
 - [x] T043 [US7] Run `bun run lint` — record total ESLint error count and warning count with git SHA
       and ISO 8601 timestamp

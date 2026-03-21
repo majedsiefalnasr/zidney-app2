@@ -29,7 +29,7 @@ logger that enforces required fields and prevents `console.log` usage across the
 
 ```bash
 # From repo root
-bun run vitest run --project logger
+bun run test run --project logger
 
 # From this directory
 bun run test

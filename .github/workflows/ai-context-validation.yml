@@ -50,7 +50,7 @@ jobs:
       - name: Test ai-context:generate command
         run: |
           echo "🧪 Testing ai-context:generate command..."
-          if ! bun run ai-context:generate; then
+          if ! bun run ai:context:generate; then
             echo "❌ ai-context:generate command failed"
             exit 1
           fi
@@ -60,7 +60,7 @@ jobs:
       - name: Test ai-context:refresh command
         run: |
           echo "🧪 Testing ai-context:refresh command..."
-          if ! bun run ai-context:refresh; then
+          if ! bun run ai:context:refresh; then
             echo "❌ ai-context:refresh command failed"
             exit 1
           fi
@@ -70,7 +70,7 @@ jobs:
       - name: Test ai-context:validate command
         run: |
           echo "🧪 Testing ai-context:validate command..."
-          if ! bun run ai-context:validate; then
+          if ! bun run ai:context:validate; then
             echo "❌ ai-context:validate command failed"
             exit 1
           fi
@@ -80,7 +80,7 @@ jobs:
       - name: Test ai-context:generate alias
         run: |
           echo "🧪 Testing ai-context:generate alias..."
-          if ! bun run ai-context:generate; then
+          if ! bun run ai:context:generate; then
             echo "❌ ai-context:generate alias failed"
             exit 1
           fi

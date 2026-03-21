@@ -109,8 +109,8 @@ bun scripts/ai-guard.ts
 bun scripts/architecture-diff.ts
 bun scripts/infra-audit.ts
 bun scripts/validate-architecture-brain.ts
-bun run type-safety-guard
-bun run ai-context:refresh
+bun run arch:type-safety-guard
+bun run ai:context:refresh
 ```
 
 If workflow or hook wiring changes, also validate those paths explicitly. In all cases, verify that `AGENTS.md`, `docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md`, `docs/AGENT_GOVERNANCE.md`, `docs/PROJECT_CONTEXT_PRIMER.md`, `specs/STAGE_LIFECYCLE_POLICY.md`, `specs/phases/MASTER_EXECUTION_ROADMAP.md`, `.github/workflows/architecture-governance.yml`, `.husky/pre-commit`, and `.husky/pre-push` remain present and unmodified. The only approved authority-file mutation in this stage is the explicit governance-remediation change to `.github/workflows/hard-mode-guard.yml`.

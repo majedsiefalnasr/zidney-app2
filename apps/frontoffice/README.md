@@ -36,7 +36,7 @@ timing are server-authoritative.
 
 ```bash
 # Unit tests (from repo root)
-bun run vitest run --project frontoffice
+bun run test run --project frontoffice
 
 # Unit tests (from this directory)
 bun run test
