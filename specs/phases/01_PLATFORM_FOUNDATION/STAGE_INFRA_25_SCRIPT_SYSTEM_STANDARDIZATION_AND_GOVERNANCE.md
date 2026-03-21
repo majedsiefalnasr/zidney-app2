@@ -3,20 +3,35 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-21T00:00:00Z
+Last Updated: 2026-03-21T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Script naming convention (`<domain>:<action>[:<scope>]`)
+- Script inventory across root + all workspace package.json files
+- Migration map (`docs/scripts/SCRIPT_MIGRATION_MAP.md`)
+- Automated refactor engine (`scripts/refactor-scripts.ts`)
+- Invocation standardization (`bun scripts/<domain>/<file>.ts`)
+- Script metadata headers per file
+- Auto-generated script registry (`docs/scripts/SCRIPT_REGISTRY.md`)
+- Validation scripts (naming + usage)
+- CI integration
+- Orchestrator gate
+- AI governance skill
+
+Deferred Scope:
+
+- AST-based replacement (future enhancement beyond regex engine)
+- Automated script deprecation tracking
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
