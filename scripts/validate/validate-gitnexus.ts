@@ -1,5 +1,5 @@
 /**
- * @script validate-gitnexus
+ * @script gitnexus:validate
  * @domain gitnexus
  * @description Validates the gitnexus-context.json artifact against the JSON Schema and
  *   performs structural integrity checks. Exits with code 0 if valid, 1 if invalid.

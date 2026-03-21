@@ -8,17 +8,21 @@
  */
 
 import { describe, expect, it, vi } from 'vitest'
+
+import type {
+  AuditContext,
+  CreateSubjectInput,
+  TransitionSubjectInput,
+  UpdateSubjectInput,
+} from '../index'
+
 import {
-  type AuditContext,
-  type CreateSubjectInput,
   createSubject,
   deleteSubject,
   getSubjectById,
   listSubjects,
   SubjectsError,
-  type TransitionSubjectInput,
   transitionSubjectStatus,
-  type UpdateSubjectInput,
   updateSubject,
 } from '../index'
 

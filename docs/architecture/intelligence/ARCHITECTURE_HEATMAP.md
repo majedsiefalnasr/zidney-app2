@@ -1,15 +1,15 @@
 # Zidney Architecture Risk Heatmap
 
-Generated: 2026-03-19T11:48:58.514Z
+Generated: 2026-03-21T09:27:24.714Z
 
 ## Module Risk Classification
 
 | Module               | Risk   |
 | -------------------- | ------ |
 | packages/logger      | HIGH   |
-| packages/types       | MEDIUM |
 | packages/domain-core | MEDIUM |
 | packages/job-queue   | LOW    |
+| packages/types       | LOW    |
 | packages/config      | LOW    |
 | packages/redis-utils | LOW    |
 | packages/ui-system   | LOW    |

@@ -1,5 +1,5 @@
 /**
- * @script gitnexus-context
+ * @script gitnexus:context
  * @domain gitnexus
  * @description Generates a structured GitNexus context JSON artifact from git state and the
  *   ai-architecture-brain.json. Replaces legacy brain-printing output with machine-readable

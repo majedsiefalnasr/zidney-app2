@@ -19,7 +19,7 @@ Key deliverables:
 - `scripts/validate/validate-gitnexus.ts` — 5-step validation pipeline for CI gating
 - `docs/ai/gitnexus-context.schema.json` — JSON Schema Draft-07 for the artifact
 - `tests/gitnexus-context.test.ts` — 15/15 tests passing
-- `package.json` scripts: `gitnexus:context`, `gitnexus:validate`, `validate-gitnexus`
+- `package.json` scripts: `gitnexus:context`, `gitnexus:validate`
 - Documentation + CI docs + orchestrator integration
 
 ---
@@ -80,7 +80,7 @@ None — all 17/17 tasks delivered.
 | All writes transactional                       | ✅ N/A | Writes only `gitnexus-context.json`; atomic via temp-write pattern     |
 | Idempotency enforced where required            | ✅     | `gitnexus:context` is idempotent — reruns overwrite cleanly            |
 | Structured logging present                     | ✅     | `console.error` for errors; `process.stdout.write` for JSON output     |
-| Script governance (package.json key naming)    | ✅     | Keys: `gitnexus:context`, `gitnexus:validate`, `validate-gitnexus`     |
+| Script governance (package.json key naming)    | ✅     | Keys: `gitnexus:context`, `gitnexus:validate`                          |
 | JSDoc metadata header in scripts               | ✅     | `@script`, `@domain`, `@description`, `@mode`, `@dependencies` present |
 | import.meta.main CLI entry guard               | ✅     | `if (import.meta.main) { main() }` — no auto-execution on import       |
 | Security: no command injection                 | ✅     | `execFileSync` with array args; `sanitizeRef()` regex allowlist        |

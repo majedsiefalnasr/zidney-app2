@@ -1,4 +1,7 @@
+---
 name: typescript-governance
+description: TypeScript governance rules for the Zidney monorepo
+---
 
 # TypeScript Governance Skill
 

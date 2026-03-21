@@ -39,13 +39,13 @@ Expected: 56 tests pass (28 unit + 28 integration).
 
 ---
 
-## Database Setup
+# Database Setup
 
 Ensure you have run the teams migration against a tenant database:
 
 ```bash
 # Run tenant migrations (includes 20260319_004_teams.ts)
-bun run db:migrate:tenant -- --workspace <workspace-slug>
+bun run db:migrate -- --workspace <workspace-slug>
 ```
 
 Verify tables exist:

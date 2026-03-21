@@ -243,7 +243,7 @@ A validation script must exist at `scripts/validate-gitnexus.ts` that verifies G
 
 - File exists at `scripts/validate-gitnexus.ts`
 - Script includes a JSDoc metadata header with `@script`, `@domain`, `@description`, `@mode`, and `@dependencies` fields
-- Script is registered in root `package.json` as `validate-gitnexus`
+- Script is registered in root `package.json` as `gitnexus:validate`
 - Script is documented in `docs/scripts/validate-gitnexus.md`
 - Script performs:
   1. GitNexus context generation
@@ -260,7 +260,8 @@ The validation script must be integrated into the CI pipeline as a required gate
 
 **Acceptance criteria:**
 
-- Root `package.json` includes a script entry `validate-gitnexus` that executes `scripts/validate-gitnexus.ts`
+-- Root `package.json` includes a script entry `gitnexus:validate` that executes `scripts/validate-gitnexus.ts`
+
 - CI configuration calls `bun run gitnexus:validate`
 - CI fails if:
   - GitNexus CLI command fails (non-zero exit code)

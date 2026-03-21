@@ -239,8 +239,8 @@ All 6 migrations are:
 
 ```bash
 # In production:
-npm run db:migrate:master -- --version=20260222
-npm run db:migrate:tenant -- --version=20260222
+bun run db:migrate -- --version=20260222  # master migration
+bun run db:migrate -- --version=20260222  # tenant migration (use --workspace <slug> as needed)
 ```
 
 **Rollback Plan:** Snapshot restore only (per Migration Policy)

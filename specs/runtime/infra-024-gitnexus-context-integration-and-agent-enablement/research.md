@@ -174,10 +174,10 @@ These must be preserved. Two **new** script keys are added:
 
 ```json
 "gitnexus:context": "bun scripts/gitnexus-context.ts",
-"validate-gitnexus": "bun scripts/validate-gitnexus.ts"
+"gitnexus:validate": "bun scripts/validate/validate-gitnexus.ts"
 ```
 
-The spec requires `gitnexus:context` (FR-002) and `validate-gitnexus` (FR-008) as the canonical names. The existing `arch:context` and `arch:refresh` aliases remain and benefit from the script replacement.
+The spec requires `gitnexus:context` (FR-002) and `gitnexus:validate` (FR-008) as the canonical script names. The existing `arch:context` and `arch:refresh` aliases remain and benefit from the script replacement.
 
 ---
 

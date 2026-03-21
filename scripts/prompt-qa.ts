@@ -1,13 +1,13 @@
 /**
- * @script prompt-qa
+ * @script ai:prompt-qa
  * @domain ai
  * @description Validates AI agent and prompt file structural integrity
  * @mode validation
  * @dependencies fs, path, yaml (built-in Bun)
  */
 
-import { existsSync, readdirSync, readFileSync } from 'fs'
-import { join } from 'path'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 const ROOT = join(import.meta.dir, '..')
 const AGENTS_DIR = join(ROOT, '.agents', 'agents')
@@ -144,7 +144,7 @@ function checkSkillSizes() {
         const content = readFileSync(fullPath, 'utf-8')
         const lines = content.split('\n').length
         if (lines > 500) {
-          const relPath = fullPath.replace(ROOT + '/', '')
+          const relPath = fullPath.replace(`${ROOT}/`, '')
           addViolation(relPath, 'skill-size-exceeded', `SKILL.md has ${lines} lines (max 500)`)
         }
       }
@@ -177,7 +177,7 @@ function checkOrphanedSkillDirs() {
       if (hasSubDirs) {
         walkForOrphans(fullPath, depth + 1)
       } else if (!hasSkillFile) {
-        const relPath = fullPath.replace(ROOT + '/', '')
+        const relPath = fullPath.replace(`${ROOT}/`, '')
         addViolation(relPath, 'orphaned-skill-dir', 'Skill directory has no SKILL.md')
       }
     }

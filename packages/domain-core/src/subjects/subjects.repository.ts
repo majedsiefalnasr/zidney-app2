@@ -397,4 +397,4 @@ export async function semesterBelongsToDivision(
   return Promise.resolve(true)
 }
 
-export type { SubjectRow, RowCountRow }
+export type { RowCountRow, SubjectRow }

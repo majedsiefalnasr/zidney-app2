@@ -26,7 +26,7 @@ Key outcomes:
 - Running `bun run gitnexus:context` generates `docs/ai/context/gitnexus-context.json` from live
   git state and the architecture brain.
 - Running `bun run gitnexus:validate` validates the artifact in 5 steps; exits 0 = valid, 1 = invalid.
-- Running `bun run validate-gitnexus` (via `ts-node`/bun) produces a human-readable CI report.
+- Running `bun run gitnexus:validate` (via `ts-node`/bun) produces a human-readable CI report.
 - 15 unit tests covering all 8 exported functions and CLI flag parsing pass in < 2s.
 - The orchestrator includes a bootstrap block to auto-invoke GitNexus context before implementation.
 

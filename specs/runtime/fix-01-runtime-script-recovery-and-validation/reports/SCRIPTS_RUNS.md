@@ -100,45 +100,45 @@ bun run cache-clean
 
 ### /apps/frontoffice/package.json
 
-bun run dev
-bun run build
-bun run preview
+bun --cwd apps/frontoffice run dev
+bun --cwd apps/frontoffice run build
+bun --cwd apps/frontoffice run preview
 
 ### /apps/backoffice/package.json
 
-bun run dev
-bun run build
-bun run preview
+bun --cwd apps/backoffice run dev
+bun --cwd apps/backoffice run build
+bun --cwd apps/backoffice run preview
 
 ### /apps/mmc/package.json
 
-bun run dev
-bun run build
-bun run preview
+bun --cwd apps/mmc run dev
+bun --cwd apps/mmc run build
+bun --cwd apps/mmc run preview
 
 ### /apps/api/package.json
 
-bun run dev
-bun run build
-bun run start
+bun --cwd apps/api run dev
+bun --cwd apps/api run build
+bun --cwd apps/api run start
 
 ### /apps/worker/package.json
 
-bun run dev
-bun run build
-bun run start
+bun --cwd apps/worker run dev
+bun --cwd apps/worker run build
+bun --cwd apps/worker run start
 
 ### /packages/ui-system/package.json
 
-bun run build
-bun run build:watch
-bun run build:analyze
-bun run test
-bun run test:ui
-bun run test:coverage
-bun run lint
-bun run type-check
-bun run preview
+bun --cwd packages/ui-system run build
+bun --cwd packages/ui-system run build:watch
+bun --cwd packages/ui-system run build:analyze
+bun --cwd packages/ui-system run test
+bun --cwd packages/ui-system run test:ui
+bun --cwd packages/ui-system run test:coverage
+bun --cwd packages/ui-system run lint
+bun --cwd packages/ui-system run type-check
+bun --cwd packages/ui-system run preview
 
 ### /packages/domain-core/package.json
 
@@ -147,10 +147,10 @@ bun run test
 
 ### /packages/api-client/package.json
 
-bun run build
-bun run test
-bun run test:watch
-bun run typecheck
+bun --cwd packages/api-client run build
+bun --cwd packages/api-client run test
+bun --cwd packages/api-client run test:watch
+bun --cwd packages/api-client run typecheck
 
 ### /packages/validation/package.json
 
