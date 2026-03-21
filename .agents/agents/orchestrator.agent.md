@@ -1351,12 +1351,12 @@ If any artifact is stale or missing:
 
 ## Pre.10 — Session Memory Cleanup
 
-Check `.agents/session-memory.md` for stale data from previous workflow sessions:
+Check `.agents/session/session-memory.md` for stale data from previous workflow sessions:
 
-1. Read `.agents/session-memory.md`.
+1. Read `.agents/session/session-memory.md`.
 2. If it contains data from a **different stage** (different `STAGE_NAME` or older than 7 days):
-   - Archive the old content to `.agents/session-memory-archive-<ISO_DATE>.md`.
-   - Reset `.agents/session-memory.md` to:
+   - Archive the old content to `.agents/session/archive/session-memory-archive-<ISO_DATE>.md`.
+   - Reset `.agents/session/session-memory.md` to:
 
 ```markdown
 # Session Memory
