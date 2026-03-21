@@ -9,20 +9,20 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-03-21T00:02:00.000Z
+Last Updated: 2026-03-21T00:20:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Lesson CRUD (list, create, get, update, soft-delete)
-- Tenant DB migration: lessons table with subject_id FK (20260321_007_lessons.ts)
-- Status lifecycle: ENABLED | DISABLED
-- Permission gate: question_manage OR subject_manage
-- Division scoping via Subject FK (transitive)
-- Hard delete blocked when referenced by questions/auto-selection/exam configs
-- MIN_SCHEMA_VERSION = 1.13.0
-- PATCH guard ordering contract established
+- Lesson CRUD: 6 API routes (list, create, runtime, get, update, soft-delete)
+- Tenant DB migration 20260321_007_lessons.ts (version 1.12.0 → 1.13.0)
+- `packages/domain-core/src/lessons/` — 6 files (types, errors, repository, service, dependency-registry, index)
+- `packages/validation/src/backoffice/lessons.schemas.ts` — 5 Zod schemas
+- 7 route files under `apps/api/src/routes/backoffice/lessons/`
+- Case-insensitive uniqueness via `LOWER(name)` functional index
+- `countLessonsForSubject` registered in subjects.dependency-registry.ts
+- GET /lessons/runtime (license-only, flat array projection)
 
 Deferred Scope:
 
@@ -32,10 +32,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian 3.1A: Architecture Checker PASS, API Designer PASS (3 remediation passes)
 
 Notes:
-All specification ambiguities resolved. Risk Level: HIGH. Ready for technical planning.
+Technical plan complete. All guardian violations remediated. Task breakdown in progress.
 
 ---
 

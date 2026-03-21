@@ -215,19 +215,23 @@ permission,
 CONSTRAINT lessons_status_check CHECK (status IN ('ENABLED', 'DISABLED'))
 ```
 
-**Unique constraint:**
+**Unique constraint (case-insensitive functional index):**
 
 ```sql
-CONSTRAINT lessons_subject_name_key UNIQUE (subject_id, name)
+CREATE UNIQUE INDEX unique_lessons_subject_name ON lessons (subject_id, LOWER(name));
 ```
+
+> A functional index on `LOWER(name)` is used instead of a plain `UNIQUE` constraint to enforce
+> case-insensitive uniqueness at the database level. This ensures "Algebra" and "algebra" cannot
+> coexist in the same subject even under concurrent inserts.
 
 ### Indexes
 
-| Index Name                 | Columns              | Type   | Purpose                      |
-| -------------------------- | -------------------- | ------ | ---------------------------- |
-| `idx_lessons_subject_id`   | `subject_id`         | B-tree | Subject-scoped queries       |
-| `idx_lessons_status`       | `status`             | B-tree | Status-filtered list queries |
-| `lessons_subject_name_key` | `(subject_id, name)` | Unique | Uniqueness enforcement       |
+| Index Name                    | Columns                     | Type                | Purpose                                 |
+| ----------------------------- | --------------------------- | ------------------- | --------------------------------------- |
+| `idx_lessons_subject_id`      | `subject_id`                | B-tree              | Subject-scoped queries                  |
+| `idx_lessons_status`          | `status`                    | B-tree              | Status-filtered list queries            |
+| `unique_lessons_subject_name` | `(subject_id, LOWER(name))` | Unique (functional) | Case-insensitive uniqueness enforcement |
 
 ### Migration File
 
@@ -263,13 +267,18 @@ Route file: `apps/api/src/routes/backoffice/lessons/index.ts`
 
 ### Route Table
 
-| Method   | Path           | Handler function      | Description                               |
-| -------- | -------------- | --------------------- | ----------------------------------------- |
-| `GET`    | `/lessons`     | `listLessonsHandler`  | Paginated list with optional filters      |
-| `POST`   | `/lessons`     | `createLessonHandler` | Create a new lesson                       |
-| `GET`    | `/lessons/:id` | `getLessonHandler`    | Get single lesson by ID                   |
-| `PATCH`  | `/lessons/:id` | `updateLessonHandler` | Update name, code, description, or status |
-| `DELETE` | `/lessons/:id` | `deleteLessonHandler` | Soft-delete (set status = DISABLED)       |
+| Method   | Path               | Handler function          | Description                                                 |
+| -------- | ------------------ | ------------------------- | ----------------------------------------------------------- |
+| `GET`    | `/lessons`         | `listLessonsHandler`      | Paginated list with optional filters                        |
+| `POST`   | `/lessons`         | `createLessonHandler`     | Create a new lesson                                         |
+| `GET`    | `/lessons/runtime` | `getActiveLessonsHandler` | Public (license-only) list of ENABLED lessons for a subject |
+| `GET`    | `/lessons/:id`     | `getLessonHandler`        | Get single lesson by ID                                     |
+| `PATCH`  | `/lessons/:id`     | `updateLessonHandler`     | Update name, code, description, or status                   |
+| `DELETE` | `/lessons/:id`     | `deleteLessonHandler`     | Soft-delete (set status = DISABLED)                         |
+
+> **Routing order:** `/lessons/runtime` (static) MUST be declared before `/lessons/:id`
+> (parameterised) in the Hono router to prevent the parameter route from capturing the literal
+> string `"runtime"` as an `:id` value.
 
 ---
 
@@ -350,6 +359,48 @@ Route file: `apps/api/src/routes/backoffice/lessons/index.ts`
 
 ---
 
+### GET /lessons/runtime
+
+Returns a restricted projection of **ENABLED** lessons for a given subject. Intended for use by
+Frontoffice or MMC runtimes that need to enumerate available lessons without requiring a
+authenticated Backoffice session.
+
+**Authentication:** None required. License check is enforced.
+
+**Query Parameters:**
+
+| Parameter    | Type   | Required | Description                       |
+| ------------ | ------ | -------- | --------------------------------- |
+| `subject_id` | `UUID` | Yes      | Parent subject ID (tenant-scoped) |
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "data": [{ "id": "uuid", "name": "string", "code": "string | null" }],
+  "error": null
+}
+```
+
+> Response is a flat array (not paginated). Only `id`, `name`, and `code` are returned.
+> Disabled lessons are excluded. Results are ordered by `name ASC`.
+
+**Error Responses:**
+
+| HTTP | Error Code                 | Condition                                |
+| ---- | -------------------------- | ---------------------------------------- |
+| 422  | `VALIDATION_ERROR`         | `subject_id` missing or not a valid UUID |
+| 404  | `LESSON_SUBJECT_NOT_FOUND` | `subject_id` does not exist in tenant DB |
+| 423  | `LICENSE_LOCKED`           | Workspace license is `SOFT_LOCKED`       |
+
+**Implementation file:** `apps/api/src/routes/backoffice/lessons/get-active-lessons.ts`
+
+**Access Control:** License middleware only (no auth). Tenant resolver is required — all DB
+access is scoped to the resolved tenant's pool.
+
+---
+
 ### GET /lessons/:id
 
 **Path Parameters:** `id` (UUID)
@@ -366,9 +417,10 @@ Route file: `apps/api/src/routes/backoffice/lessons/index.ts`
 
 **Error Responses:**
 
-| HTTP | Error Code         | Condition                          |
-| ---- | ------------------ | ---------------------------------- |
-| 404  | `LESSON_NOT_FOUND` | Lesson does not exist in tenant DB |
+| HTTP | Error Code         | Condition                                      |
+| ---- | ------------------ | ---------------------------------------------- |
+| 422  | `VALIDATION_ERROR` | `id` path parameter is not a valid UUID format |
+| 404  | `LESSON_NOT_FOUND` | Lesson does not exist in tenant DB             |
 
 ---
 
@@ -427,11 +479,12 @@ Performs a **soft delete** by setting `status = DISABLED`. No SQL `DELETE` is is
 
 **Error Responses:**
 
-| HTTP | Error Code                | Condition                   |
-| ---- | ------------------------- | --------------------------- |
-| 404  | `LESSON_NOT_FOUND`        | Lesson not found            |
-| 422  | `LESSON_ALREADY_DISABLED` | Lesson is already DISABLED  |
-| 403  | `FORBIDDEN`               | Missing required permission |
+| HTTP | Error Code                | Condition                                      |
+| ---- | ------------------------- | ---------------------------------------------- |
+| 422  | `VALIDATION_ERROR`        | `id` path parameter is not a valid UUID format |
+| 404  | `LESSON_NOT_FOUND`        | Lesson not found                               |
+| 422  | `LESSON_ALREADY_DISABLED` | Lesson is already DISABLED                     |
+| 403  | `FORBIDDEN`               | Missing required permission                    |
 
 ---
 
@@ -446,8 +499,9 @@ schema entirely).
 ### BR-02: Name Uniqueness is Subject-Scoped
 
 Lesson names must be unique within a given subject. Two lessons in different subjects may share
-the same name. Uniqueness is enforced via the `UNIQUE (subject_id, name)` constraint at the
-database level and validated at the service layer before insert/update.
+the same name. Uniqueness is enforced at the database level via the functional unique index
+`unique_lessons_subject_name ON lessons (subject_id, LOWER(name))`, which ensures
+case-insensitive uniqueness. The service layer also performs a pre-check before insert/update.
 
 ### BR-03: Soft Delete Only
 
@@ -597,7 +651,7 @@ All API responses follow the Zidney error contract:
 | `LESSON_DISABLED`              | 422  | Lesson is DISABLED; field edits blocked                                  |
 | `LESSON_ALREADY_DISABLED`      | 422  | Status update to DISABLED on already-DISABLED lesson                     |
 | `LESSON_ALREADY_ENABLED`       | 422  | Status update to ENABLED on already-ENABLED lesson                       |
-| `LESSON_HAS_DEPENDENT_CONTENT` | 422  | Hard delete blocked (surface this if a hard-delete path is ever exposed) |
+| `LESSON_HAS_DEPENDENT_CONTENT` | 409  | Hard delete blocked (surface this if a hard-delete path is ever exposed) |
 | `VALIDATION_ERROR`             | 422  | Validation failure (field-level messages included)                       |
 
 ### Error Logging
@@ -621,7 +675,7 @@ The following indexes must be created in the tenant migration:
 
 1. `idx_lessons_subject_id` on `(subject_id)` — all subject-scoped lesson queries
 2. `idx_lessons_status` on `(status)` — status-filtered list queries
-3. `UNIQUE (subject_id, name)` — uniqueness enforcement at DB level
+3. `unique_lessons_subject_name ON (subject_id, LOWER(name))` — case-insensitive uniqueness enforcement at DB level (functional index)
 
 ### Query Requirements
 
@@ -689,6 +743,7 @@ apps/api/src/routes/backoffice/lessons/
   index.ts                       — Router factory
   list-lessons.ts                — GET /lessons
   create-lesson.ts               — POST /lessons
+  get-active-lessons.ts          — GET /lessons/runtime (license-only, no auth)
   get-lesson.ts                  — GET /lessons/:id
   update-lesson.ts               — PATCH /lessons/:id
   delete-lesson.ts               — DELETE /lessons/:id
@@ -732,13 +787,15 @@ conventions)_
 ### Session 2026-03-21
 
 **Q1: Transaction partial failure — what happens if the service-layer operation fails mid-way during a write?**
-Resolution: All write operations (create, update, soft-delete) are wrapped in an explicit
-`db.transaction(async (tx) => { ... })` call at the service layer. All repository calls within
-that closure share the transactional client. If any step (INSERT, UPDATE, schema-version write)
-throws, the transaction is rolled back atomically and no partial state is persisted. The service
-catches the error, issues the implicit ROLLBACK via the Drizzle transaction wrapper, and
-re-throws a typed `LessonsError` for the handler to serialize. There is no possibility of
-partial success within a single route handler invocation.
+Resolution: All write operations (create, update, soft-delete) call `db.query('BEGIN')` before
+the first repository call, then `db.query('COMMIT')` on success. If any step (INSERT, UPDATE,
+schema-version write) throws, the catch block executes `db.query('ROLLBACK')` atomically — no
+partial state is persisted. This matches the Subjects domain pattern
+(`packages/domain-core/src/subjects/subjects.service.ts`). The `DbClient` interface used by the
+domain layer has no `transaction()` method; raw SQL transaction guards are used throughout.
+The service catches the error, issues the explicit `ROLLBACK`, and re-throws a typed
+`LessonsError` for the handler to serialize. Read-only operations (`getLesson`,
+`getActiveLessons`, `listLessons`) do not open transactions.
 
 **Q2: Idempotency — what happens if `POST /lessons` is called twice with the same `(subject_id, name)`?**
 Resolution: The service performs a pre-insert SELECT to detect the duplicate before issuing the
@@ -795,7 +852,7 @@ Resolution: In this stage, all downstream tables that would reference `lesson_id
 exist**. `lessons.dependency-registry.ts` is therefore implemented as a stub that
 unconditionally returns `{ hasContent: false }`. Each downstream stage is responsible for
 registering its own FK check against lessons when it introduces its table. The
-`LESSON_HAS_DEPENDENT_CONTENT` (422) error code is reserved for a future hard-delete surface
+`LESSON_HAS_DEPENDENT_CONTENT` (409) error code is reserved for a future hard-delete surface
 that is explicitly out of scope for this stage; the soft-delete path (`DELETE /lessons/:id`)
 never invokes the dependency registry.
 
