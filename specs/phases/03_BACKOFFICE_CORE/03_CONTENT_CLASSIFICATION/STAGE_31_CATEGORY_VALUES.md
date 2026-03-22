@@ -9,18 +9,21 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-03-22T00:01:00.000Z
+Last Updated: 2026-03-22T14:30:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Category Values CRUD (list, create, read, update, soft-delete)
-- Status workflow: COMPLETED → UNDER_REVIEW → APPROVED → ENABLED / DISABLED
-- Translation-driven display via shared translations table
-- Optional scope filters: category_value_subjects, category_value_divisions
-- Full tenant isolation — all tables in tenant DB only
-- License middleware mandatory on all routes
+- Category Values CRUD (list, create, read, update, soft-delete) — 5 API endpoints
+- Status workflow: COMPLETED → UNDER_REVIEW → APPROVED → ENABLED ↔ DISABLED
+- Translation-driven display via shared translations table (field_name + translated_value)
+- Optional scope filters: category_value_subjects, category_value_divisions (linking tables)
+- Full tenant isolation — all 3 tables in tenant DB only
+- License middleware + writeGuard (requireAnyPermission) mandatory on mutation routes
+- schema_version 1.15.0 gate enforced on all routes
+- Soft-delete idempotency: repeat DELETE → 200 { deleted: true }
+- include_deleted=true gated on classification_manage permission
 
 Deferred Scope:
 
@@ -30,10 +33,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Architecture Guardian: PASS (attempt 4)
+- API Designer: PASS (attempt 4)
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 

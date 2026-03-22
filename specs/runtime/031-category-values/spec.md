@@ -335,13 +335,13 @@ Category that still has active (non-soft-deleted) values.
 Category Values do **not** have `name` or `description` columns. All display text is stored in the
 shared `translations` table with the following shape:
 
-| Column          | Value / Constraint                          |
-| --------------- | ------------------------------------------- |
-| `entity_type`   | `"CATEGORY_VALUE"` (constant)               |
-| `entity_id`     | `category_values.id` (UUID)                 |
-| `language_code` | e.g., `"ar"`, `"en"` (workspace-configured) |
-| `field_name`    | `"name"` or `"description"`                 |
-| `value`         | The translated text                         |
+| Column             | Value / Constraint                          |
+| ------------------ | ------------------------------------------- |
+| `entity_type`      | `"CATEGORY_VALUE"` (constant)               |
+| `entity_id`        | `category_values.id` (UUID)                 |
+| `language_code`    | e.g., `"ar"`, `"en"` (workspace-configured) |
+| `field_name`       | `"name"` or `"description"`                 |
+| `translated_value` | The translated text                         |
 
 **Fallback rule:** When a display-language `name` is not found, fall back to the workspace default
 language. If no translation exists at all, return an empty string (never null error).
