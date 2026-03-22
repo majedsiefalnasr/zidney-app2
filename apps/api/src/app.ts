@@ -41,6 +41,7 @@ import { tenantResolver } from './middleware/tenant-resolver'
 import { registerStage06Routes } from './routes/attempts/index-stage06'
 import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
 import { categoriesRouter } from './routes/backoffice/categories'
+import { categoryValuesRouter } from './routes/backoffice/category-values'
 import { backofficeContextRouter } from './routes/backoffice/context'
 import { departmentsRouter } from './routes/backoffice/departments/index'
 import { divisionsRouter } from './routes/backoffice/divisions/index'
@@ -178,6 +179,9 @@ app.route('/api/v1/backoffice/workspace', lessonsRouter)
 
 // Categories endpoints — Stage 030, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', categoriesRouter)
+
+// Category Values endpoints — Stage 031, permission guard applied per write routes
+app.route('/api/v1/backoffice/workspace', categoryValuesRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade
