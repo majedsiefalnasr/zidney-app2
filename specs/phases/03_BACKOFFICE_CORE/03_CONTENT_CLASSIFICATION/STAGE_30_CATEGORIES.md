@@ -9,20 +9,30 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-22T00:00:00.000Z
+Last Updated: 2026-03-22T00:01:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Category CRUD API (list, create, read, update, soft-delete)
+- Category tree view endpoint
+- Parent-child hierarchy (max depth 3, circular ref detection)
+- Subject scoping via category_subjects join table
+- Division scoping via category_divisions join table
+- RBAC: question_manage OR classification_manage
+- Three tenant DB tables: categories, category_subjects, category_divisions
+
+Deferred Scope:
+
+- Category Values (STAGE_31)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
