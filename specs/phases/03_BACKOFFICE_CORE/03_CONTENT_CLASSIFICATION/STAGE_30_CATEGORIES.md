@@ -9,18 +9,19 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-22T00:01:00.000Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-03-22T00:02:00.000Z
 
 Scope Defined:
 
 - Category CRUD API (list, create, read, update, soft-delete)
 - Category tree view endpoint
-- Parent-child hierarchy (max depth 3, circular ref detection)
+- Parent-child hierarchy (max depth 3, circular ref detection, SELECT FOR UPDATE locking)
 - Subject scoping via category_subjects join table
 - Division scoping via category_divisions join table
-- RBAC: question_manage OR classification_manage
+- Soft-delete blocked when ENABLED children exist (422 CATEGORY_HAS_ENABLED_CHILDREN)
+- RBAC: requirePermission middleware on write routes
 - Three tenant DB tables: categories, category_subjects, category_divisions
 
 Deferred Scope:
@@ -29,10 +30,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

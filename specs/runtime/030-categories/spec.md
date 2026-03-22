@@ -231,6 +231,9 @@ This specification is validated against **Zidney Constitution v1.2.0**.
    attempted via internal tooling, **Then** FK constraints prevent deletion at the database level.
 4. **Given** a staff member without the required permissions, **Then** the API returns 403
    Forbidden.
+5. **Given** an ENABLED category with at least one direct ENABLED child, **When** a delete
+   request is sent, **Then** the API returns 422 `CATEGORY_HAS_ENABLED_CHILDREN`. The operator
+   must explicitly disable all direct ENABLED children before the parent can be disabled.
 
 ---
 
@@ -592,21 +595,22 @@ An absent `division_ids` key leaves division scope unchanged.
 
 **Error Responses:**
 
-| HTTP | Error Code                    | Condition                                            |
-| ---- | ----------------------------- | ---------------------------------------------------- |
-| 404  | `CATEGORY_NOT_FOUND`          | Category not found                                   |
-| 409  | `CATEGORY_NAME_DUPLICATE`     | New `name` already taken in tenant                   |
-| 409  | `CATEGORY_CODE_DUPLICATE`     | New `code` already taken in tenant                   |
-| 404  | `CATEGORY_PARENT_NOT_FOUND`   | New `parent_id` does not exist in tenant DB          |
-| 422  | `CATEGORY_CIRCULAR_REFERENCE` | New `parent_id` is a descendant of this category     |
-| 422  | `CATEGORY_MAX_DEPTH_EXCEEDED` | Re-parenting would push descendants beyond depth 3   |
-| 422  | `CATEGORY_DISABLED`           | Category is DISABLED; non-status field edits blocked |
-| 422  | `CATEGORY_ALREADY_ENABLED`    | Status → ENABLED on already-ENABLED category         |
-| 422  | `CATEGORY_ALREADY_DISABLED`   | Status → DISABLED on already-DISABLED category       |
-| 404  | `CATEGORY_SUBJECT_NOT_FOUND`  | Any `subject_id` in new scope not found              |
-| 404  | `CATEGORY_DIVISION_NOT_FOUND` | Any `division_id` in new scope not found             |
-| 422  | `VALIDATION_ERROR`            | Invalid field values or empty body                   |
-| 403  | `FORBIDDEN`                   | Missing required permission                          |
+| HTTP | Error Code                      | Condition                                                       |
+| ---- | ------------------------------- | --------------------------------------------------------------- |
+| 404  | `CATEGORY_NOT_FOUND`            | Category not found                                              |
+| 409  | `CATEGORY_NAME_DUPLICATE`       | New `name` already taken in tenant                              |
+| 409  | `CATEGORY_CODE_DUPLICATE`       | New `code` already taken in tenant                              |
+| 404  | `CATEGORY_PARENT_NOT_FOUND`     | New `parent_id` does not exist in tenant DB                     |
+| 422  | `CATEGORY_CIRCULAR_REFERENCE`   | New `parent_id` is a descendant of this category                |
+| 422  | `CATEGORY_MAX_DEPTH_EXCEEDED`   | Re-parenting would push descendants beyond depth 3              |
+| 422  | `CATEGORY_DISABLED`             | Category is DISABLED; non-status field edits blocked            |
+| 422  | `CATEGORY_ALREADY_ENABLED`      | Status → ENABLED on already-ENABLED category                    |
+| 422  | `CATEGORY_ALREADY_DISABLED`     | Status → DISABLED on already-DISABLED category                  |
+| 422  | `CATEGORY_HAS_ENABLED_CHILDREN` | Status → DISABLED blocked; category has direct ENABLED children |
+| 404  | `CATEGORY_SUBJECT_NOT_FOUND`    | Any `subject_id` in new scope not found                         |
+| 404  | `CATEGORY_DIVISION_NOT_FOUND`   | Any `division_id` in new scope not found                        |
+| 422  | `VALIDATION_ERROR`              | Invalid field values or empty body                              |
+| 403  | `FORBIDDEN`                     | Missing required permission                                     |
 
 ---
 
@@ -626,12 +630,13 @@ Performs a **soft delete** by setting `status = DISABLED`. No SQL `DELETE` is is
 
 **Error Responses:**
 
-| HTTP | Error Code                  | Condition                                      |
-| ---- | --------------------------- | ---------------------------------------------- |
-| 422  | `VALIDATION_ERROR`          | `id` path parameter is not a valid UUID format |
-| 404  | `CATEGORY_NOT_FOUND`        | Category not found                             |
-| 422  | `CATEGORY_ALREADY_DISABLED` | Category is already DISABLED                   |
-| 403  | `FORBIDDEN`                 | Missing required permission                    |
+| HTTP | Error Code                      | Condition                                                              |
+| ---- | ------------------------------- | ---------------------------------------------------------------------- |
+| 422  | `VALIDATION_ERROR`              | `id` path parameter is not a valid UUID format                         |
+| 404  | `CATEGORY_NOT_FOUND`            | Category not found                                                     |
+| 422  | `CATEGORY_ALREADY_DISABLED`     | Category is already DISABLED                                           |
+| 422  | `CATEGORY_HAS_ENABLED_CHILDREN` | Category has at least one direct ENABLED child; disable children first |
+| 403  | `FORBIDDEN`                     | Missing required permission                                            |
 
 ---
 
@@ -738,6 +743,34 @@ DISABLED ───────────────────────�
 
 Initial status on creation: `ENABLED`.
 
+### BR-14: Hierarchy-Mutating Transactions Use SELECT FOR UPDATE
+
+Any service operation that reads a category's parent chain in order to validate or mutate the
+hierarchy must acquire a row-level lock (`SELECT ... FOR UPDATE`) on the relevant category row at
+transaction open time, before any ancestry traversal or depth/circular-reference check is
+performed. This prevents concurrent requests from racing on stale parent-depth data.
+
+| Operation        | Row locked              | Condition                               |
+| ---------------- | ----------------------- | --------------------------------------- |
+| `createCategory` | The parent category row | Only when `parent_id` is non-null       |
+| `updateCategory` | The target category row | Only when `parent_id` is in the payload |
+| `deleteCategory` | The target category row | Always (prevents concurrent re-enable)  |
+
+Read-only operations (`listCategories`, `getCategory`, `getCategoriesTree`) do not acquire
+row-level locks.
+
+### BR-15: Soft-Delete Requires All Direct ENABLED Children to Be Disabled First
+
+A category cannot be disabled (via `DELETE /categories/:id` or `PATCH` with `status: DISABLED`)
+if any of its **direct** children have `status = ENABLED`. The API returns 422
+`CATEGORY_HAS_ENABLED_CHILDREN`. The operator must explicitly disable each direct ENABLED child
+before the parent can be disabled. This check is scoped to direct children only — grandchildren
+at deeper levels are not examined during this guard.
+
+For `PATCH`, this guard is inserted between the already-disabled check (step 3 in Q8 guard
+ordering) and the circular-reference check (step 4): if `status` in the payload is `DISABLED`,
+the service verifies no direct ENABLED children exist before proceeding.
+
 ---
 
 ## Access Control
@@ -753,6 +786,20 @@ All write endpoints (`POST`, `PATCH`, `DELETE`) require the acting user to hold 
 
 Read endpoints (`GET /categories`, `GET /categories/tree`, `GET /categories/:id`) require any
 authenticated Backoffice user with workspace access (standard session + license validation).
+
+### Permission Check Implementation
+
+Permission enforcement uses **middleware**, not in-handler logic:
+
+- `requirePermission('question_manage', 'classification_manage')` is registered as a route-level
+  middleware on each write route (`POST`, `PATCH`, `DELETE`) in the router factory
+  (`apps/api/src/routes/backoffice/categories/index.ts`).
+- The middleware is applied after the tenant resolver and license middleware in the standard
+  tenant/license/permission chain — consistent with the existing Backoffice route pattern.
+- Read routes (`GET`) do not carry `requirePermission`; they require only authenticated session
+  and valid license.
+- If the acting user holds neither `question_manage` nor `classification_manage`, the middleware
+  short-circuits with 403 `FORBIDDEN` before the handler executes.
 
 ### Tenant Isolation
 
@@ -847,21 +894,22 @@ All API responses follow the Zidney error contract:
 
 ### Error Code Registry
 
-| Error Code                       | HTTP | Description                                                         |
-| -------------------------------- | ---- | ------------------------------------------------------------------- |
-| `CATEGORY_NOT_FOUND`             | 404  | Category ID does not exist in tenant DB                             |
-| `CATEGORY_NAME_DUPLICATE`        | 409  | `name` (case-insensitive) already taken in tenant                   |
-| `CATEGORY_CODE_DUPLICATE`        | 409  | `code` (case-insensitive, non-null) already taken in tenant         |
-| `CATEGORY_PARENT_NOT_FOUND`      | 404  | `parent_id` does not exist in tenant DB                             |
-| `CATEGORY_MAX_DEPTH_EXCEEDED`    | 422  | Adding or moving the category would exceed max hierarchy depth of 3 |
-| `CATEGORY_CIRCULAR_REFERENCE`    | 422  | New `parent_id` forms a circular ancestor chain                     |
-| `CATEGORY_DISABLED`              | 422  | Category is DISABLED; non-status field edits blocked                |
-| `CATEGORY_ALREADY_DISABLED`      | 422  | Status update to DISABLED on already-DISABLED category              |
-| `CATEGORY_ALREADY_ENABLED`       | 422  | Status update to ENABLED on already-ENABLED category                |
-| `CATEGORY_HAS_DEPENDENT_CONTENT` | 409  | Hard delete blocked by FK constraint (reserved for future surface)  |
-| `CATEGORY_SUBJECT_NOT_FOUND`     | 404  | Subject ID in scope list not found in tenant DB                     |
-| `CATEGORY_DIVISION_NOT_FOUND`    | 404  | Division ID in scope list not found in tenant DB                    |
-| `VALIDATION_ERROR`               | 422  | Validation failure (field-level messages included in response)      |
+| Error Code                       | HTTP | Description                                                                                        |
+| -------------------------------- | ---- | -------------------------------------------------------------------------------------------------- |
+| `CATEGORY_NOT_FOUND`             | 404  | Category ID does not exist in tenant DB                                                            |
+| `CATEGORY_NAME_DUPLICATE`        | 409  | `name` (case-insensitive) already taken in tenant                                                  |
+| `CATEGORY_CODE_DUPLICATE`        | 409  | `code` (case-insensitive, non-null) already taken in tenant                                        |
+| `CATEGORY_PARENT_NOT_FOUND`      | 404  | `parent_id` does not exist in tenant DB                                                            |
+| `CATEGORY_MAX_DEPTH_EXCEEDED`    | 422  | Adding or moving the category would exceed max hierarchy depth of 3                                |
+| `CATEGORY_CIRCULAR_REFERENCE`    | 422  | New `parent_id` forms a circular ancestor chain                                                    |
+| `CATEGORY_DISABLED`              | 422  | Category is DISABLED; non-status field edits blocked                                               |
+| `CATEGORY_ALREADY_DISABLED`      | 422  | Status update to DISABLED on already-DISABLED category                                             |
+| `CATEGORY_ALREADY_ENABLED`       | 422  | Status update to ENABLED on already-ENABLED category                                               |
+| `CATEGORY_HAS_ENABLED_CHILDREN`  | 422  | Category has direct ENABLED children; operator must disable them first before disabling the parent |
+| `CATEGORY_HAS_DEPENDENT_CONTENT` | 409  | Hard delete blocked by FK constraint (reserved for future surface)                                 |
+| `CATEGORY_SUBJECT_NOT_FOUND`     | 404  | Subject ID in scope list not found in tenant DB                                                    |
+| `CATEGORY_DIVISION_NOT_FOUND`    | 404  | Division ID in scope list not found in tenant DB                                                   |
+| `VALIDATION_ERROR`               | 422  | Validation failure (field-level messages included in response)                                     |
 
 ### Error Logging
 
@@ -878,14 +926,14 @@ Stack traces must **never** be returned in API responses.
 
 ## Transaction Boundaries
 
-| Operation           | Transaction Required | Notes                                                                             |
-| ------------------- | -------------------- | --------------------------------------------------------------------------------- |
-| `createCategory`    | Yes                  | INSERT into `categories` + INSERT into `category_subjects` + `category_divisions` |
-| `updateCategory`    | Yes                  | UPDATE `categories` + DELETE/INSERT scope rows in one transaction                 |
-| `deleteCategory`    | Yes                  | UPDATE `categories.status` to `DISABLED`                                          |
-| `listCategories`    | No                   | Read-only                                                                         |
-| `getCategory`       | No                   | Read-only                                                                         |
-| `getCategoriesTree` | No                   | Read-only                                                                         |
+| Operation           | Transaction Required | Notes                                                                                                       |
+| ------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `createCategory`    | Yes                  | SELECT FOR UPDATE on parent row (if `parent_id` non-null); INSERT into `categories` + scope tables          |
+| `updateCategory`    | Yes                  | SELECT FOR UPDATE on target row (if `parent_id` in payload); UPDATE `categories` + DELETE/INSERT scope rows |
+| `deleteCategory`    | Yes                  | SELECT FOR UPDATE on target row; UPDATE `categories.status` to `DISABLED`                                   |
+| `listCategories`    | No                   | Read-only                                                                                                   |
+| `getCategory`       | No                   | Read-only                                                                                                   |
+| `getCategoriesTree` | No                   | Read-only                                                                                                   |
 
 Failure in any step triggers explicit `ROLLBACK` — no partial state is persisted.
 
@@ -1005,8 +1053,9 @@ Location: `packages/domain-core/src/categories/__tests__/`
 - `createCategory` — success (root), success (child), name duplicate, code duplicate, parent not
   found, max depth exceeded (parent at depth 3), subject not found, division not found
 - `updateCategory` — success, name duplicate, code duplicate, disabled guard, circular reference
-  (direct), circular reference (indirect), max depth exceeded on re-parent, scope replacement
-- `deleteCategory` (soft) — success path, already-disabled guard
+  (direct), circular reference (indirect), max depth exceeded on re-parent, scope replacement,
+  PATCH status → DISABLED blocked when direct ENABLED children exist (`CATEGORY_HAS_ENABLED_CHILDREN`)
+- `deleteCategory` (soft) — success path, already-disabled guard, blocked when direct ENABLED children exist (`CATEGORY_HAS_ENABLED_CHILDREN`)
 - Status lifecycle transitions (`ENABLED → DISABLED → ENABLED`)
 - Depth computation: depths 1, 2, 3, and failed attempt at depth 4
 - Circular reference detection: direct cycle (A→A), two-hop cycle (A→B→A), three-hop cycle
@@ -1144,3 +1193,9 @@ Resolution: In this stage, all downstream tables that would reference `category_
 `{ hasContent: false }`. Each downstream stage is responsible for registering its own FK check
 against categories when it introduces its table. `CATEGORY_HAS_DEPENDENT_CONTENT` (409) is
 reserved for a future hard-delete surface that is explicitly out of scope.
+
+### Session 2026-03-22 — speckit.clarify
+
+- Q: Concurrent `parent_id` locking — how should hierarchy-mutating transactions guard against race conditions on the target category row? → A: SELECT FOR UPDATE on the target category row (or parent row for `createCategory`) when opening any hierarchy-mutating transaction.
+- Q: When soft-deleting a category (DELETE or PATCH status → DISABLED) that has direct ENABLED children, should the operation be blocked or cascade-disable? → A: Block with 422 `CATEGORY_HAS_ENABLED_CHILDREN`. Operator must explicitly disable all direct ENABLED children first before the parent can be disabled.
+- Q: How should the RBAC permission check be applied — inline handler logic, route-level middleware, or a service-layer guard? → A: Middleware: `requirePermission('question_manage', 'classification_manage')` registered on each write route (POST, PATCH, DELETE) in the router factory, consistent with the tenant/license middleware pattern. Read routes require only authenticated session and valid license.
