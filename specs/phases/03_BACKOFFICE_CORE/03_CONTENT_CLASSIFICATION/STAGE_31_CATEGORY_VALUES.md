@@ -9,21 +9,23 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-03-22T14:30:00.000Z
+Last Updated: 2026-03-22T14:40:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Category Values CRUD (list, create, read, update, soft-delete) — 5 API endpoints
-- Status workflow: COMPLETED → UNDER_REVIEW → APPROVED → ENABLED ↔ DISABLED
-- Translation-driven display via shared translations table (field_name + translated_value)
-- Optional scope filters: category_value_subjects, category_value_divisions (linking tables)
-- Full tenant isolation — all 3 tables in tenant DB only
-- License middleware + writeGuard (requireAnyPermission) mandatory on mutation routes
-- schema_version 1.15.0 gate enforced on all routes
-- Soft-delete idempotency: repeat DELETE → 200 { deleted: true }
-- include_deleted=true gated on classification_manage permission
+- Total: 25 atomic tasks across 9 phases
+- Phase 0: DB migration (1 task)
+- Phase 1: Drizzle ORM schema (4 tasks)
+- Phase 2: Error catalog + types (2 tasks)
+- Phase 3: Repository layer (1 task — 22 functions)
+- Phase 4: Service layer + dependency registry (4 tasks)
+- Phase 5: Zod validation schemas (1 task)
+- Phase 6: Handler layer (6 tasks)
+- Phase 7: Router + registration (2 tasks)
+- Phase 8: Unit tests (2 tasks)
+- Phase 9: Integration tests (1 task)
 
 Deferred Scope:
 
@@ -33,12 +35,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 - Architecture Guardian: PASS (attempt 4)
 - API Designer: PASS (attempt 4)
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
