@@ -9,9 +9,9 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-22T00:00:10.000Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-03-22T00:01:00.000Z
 
 Scope Defined:
 
@@ -30,10 +30,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

@@ -783,7 +783,7 @@ All newly created Category Values start in `COMPLETED` status. The workflow engi
 through the defined transitions. There is no mechanism to create a value directly in `ENABLED`
 status.
 
-### BR-04: Only `ENABLED` Values Are Usable in Classification
+### BR-04: Only `ENABLED` Values With an `ENABLED` Parent Category Are Usable in Classification
 
 Only values in `ENABLED` status may be:
 
@@ -791,8 +791,14 @@ Only values in `ENABLED` status may be:
 - Assigned to new Traditional Question classifications
 - Referenced in Exam configuration auto-selection filters
 
-Values in any other status (`COMPLETED`, `UNDER_REVIEW`, `APPROVED`, `DISABLED`) must be rejected
-at the point of assignment with 422 `CATEGORY_VALUE_NOT_ENABLED`.
+Additionally, the value's parent Category must also be `ENABLED` at the time of assignment.
+A value whose parent Category is `DISABLED` cannot be assigned to new content even if the value
+itself is `ENABLED`. This check is performed at the service layer when validating a classification
+assignment request.
+
+Values in any other status (`COMPLETED`, `UNDER_REVIEW`, `APPROVED`, `DISABLED`), or whose parent
+Category is `DISABLED`, must be rejected at the point of assignment with 422
+`CATEGORY_VALUE_NOT_ENABLED`.
 
 ### BR-05: Referential Integrity Blocks Hard Deletion
 
@@ -862,11 +868,16 @@ All standard list and lookup operations filter on `deleted_at IS NULL` unless th
 explicitly passes `include_deleted=true` with admin-level permission. This filter is applied at
 the repository layer, not the service layer, to ensure it cannot be accidentally omitted.
 
-### BR-15: `SELECT FOR UPDATE` on Status Transitions
+### BR-15: `SELECT FOR UPDATE` on Status Transitions and Soft-Delete
 
 Any service operation that reads and then transitions status must acquire a row-level lock
 (`SELECT ... FOR UPDATE`) on the `category_values` row before checking the current status and
 applying the transition. This prevents concurrent status transitions from racing on stale state.
+
+The soft-delete operation must also acquire `SELECT ... FOR UPDATE` on the target row before
+executing the reference count check and setting `deleted_at`. Without this lock, two concurrent
+DELETE requests could both pass the reference check before either commits, bypassing the
+idempotency guard and the intent of the 404 return for already-deleted values.
 
 ---
 
@@ -919,12 +930,12 @@ the DB FK constraint applies.
 
 ## Transaction Boundaries
 
-| Operation                  | Transactional? | What is included in the transaction                                     |
-| -------------------------- | -------------- | ----------------------------------------------------------------------- |
-| Create Category Value      | Yes            | INSERT into `category_values`, INSERT translations, INSERT scope rows   |
-| Update Category Value      | Yes            | UPDATE `category_values`, UPSERT translations, DELETE+INSERT scope rows |
-| Status Transition          | Yes            | SELECT FOR UPDATE + UPDATE `category_values.status`                     |
-| Soft-Delete Category Value | Yes            | Reference count check + UPDATE `category_values.deleted_at`             |
+| Operation                  | Transactional? | What is included in the transaction                                             |
+| -------------------------- | -------------- | ------------------------------------------------------------------------------- |
+| Create Category Value      | Yes            | INSERT into `category_values`, INSERT translations, INSERT scope rows           |
+| Update Category Value      | Yes            | UPDATE `category_values`, UPSERT translations, DELETE+INSERT scope rows         |
+| Status Transition          | Yes            | SELECT FOR UPDATE + UPDATE `category_values.status`                             |
+| Soft-Delete Category Value | Yes            | SELECT FOR UPDATE + Reference count check + UPDATE `category_values.deleted_at` |
 
 All transactions are managed at the **service layer**. Repository functions accept an optional
 transaction handle and do not open their own transactions.
@@ -1093,3 +1104,46 @@ This feature does **NOT**:
 ## Final Constitutional Compliance Statement
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-22
+
+**Q: Should `SELECT FOR UPDATE` be applied to the soft-delete operation to prevent a concurrent-deletion race on the reference count check?**
+**A:** Yes. The soft-delete transaction must acquire `SELECT ... FOR UPDATE` on the `category_values` row before running the reference count check and writing `deleted_at`. Without this lock, two concurrent DELETE requests can both pass the reference check before either commits, defeating the 404 idempotency guard. This is consistent with BR-15's locking philosophy and has been applied: the Transaction Boundaries table now records `SELECT FOR UPDATE` for soft-delete, and BR-15 has been extended to cover this case.
+
+**Q: Are status transition permissions role-differentiated across transition stages (e.g., only a reviewer can approve UNDER_REVIEW → APPROVED), or is a single permission tier applied uniformly?**
+**A:** A flat single-tier permission (`question_manage OR classification_manage`) governs ALL status transitions uniformly for this stage. No per-transition role differentiation is required. The workflow is editorial, not a strict multi-role approval gate. Role-scoped transition gating is out of scope for Stage 31 and may be introduced in a future governance stage if needed.
+
+**Q: Can a parent Category be DISABLED while it has active (non-soft-deleted) Category Values, and what is the usability impact on those ENABLED values?**
+**A:** Yes — the Category disable guard (Stage 30, US-06 scenario 5) only blocks disabling a Category with ENABLED direct child _categories_; it does not block based on the presence of Category Values. However, BR-04 has been extended: a Category Value is usable for new content assignment **only if** both the value is `ENABLED` AND its parent Category is also `ENABLED`. Existing references to a value whose parent is subsequently `DISABLED` are preserved for historical integrity. The usability block applies only to _new_ assignments.
+
+**Q: Does the general PATCH endpoint (code, translations, scope fields) require a concurrency guard beyond the `SELECT FOR UPDATE` already specified for status transitions?**
+**A:** No additional locking (`version` column or ETag) is required. For non-status PATCH fields (code, translations, scope), last-write-wins semantics are acceptable — backoffice editorial concurrency is low and the `updated_at` audit column provides accountability. The `SELECT FOR UPDATE` requirement in BR-15 applies to status-transition operations only; it does not apply to general field updates in this stage.
+
+**Q: Is the per-category `code` uniqueness intentional and does it permit the same `code` value across different categories in the same tenant?**
+**A:** Yes, intentional. Category Value `code` identifies one option _within_ a classification dimension (e.g., `"EASY"` within Difficulty), whereas Category `code` identifies the dimension axis itself (tenant-scoped). Reusing `"EASY"` across multiple categories (e.g., Difficulty → Easy, Cognitive Level → Easy) is a valid and expected use case. The partial unique index `(category_id, LOWER(code)) WHERE deleted_at IS NULL` is the correct and complete constraint. No cross-category code uniqueness is required.
+
+---
+
+## Risk Assessment
+
+| Risk Factor                        | Score  |
+| ---------------------------------- | ------ |
+| Database migration (schema change) | +3     |
+| New tables added (3 tables)        | +2     |
+| Security-sensitive logic           | +3     |
+| Multi-tenant data isolation logic  | +3     |
+| More than 10 tasks                 | +1     |
+| Worker interaction / async job     | 0      |
+| External API integration           | 0      |
+| New package dependency             | 0      |
+| **Total**                          | **12** |
+
+**Risk Level: HIGH (12 / threshold 8+)**
+
+Primary drivers: new tenant-scoped schema (3 tables + migration), multi-tenant isolation across
+all layers, permission gating on all write paths, `SELECT FOR UPDATE` concurrency requirements,
+and the reference-check guard on soft-delete against cross-stage downstream tables.
