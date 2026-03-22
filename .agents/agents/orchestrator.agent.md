@@ -136,13 +136,16 @@ The orchestrator MUST:
   - Duplicate scripts detected
 
 - Suggest running:
+
   ```
   bun run dev:refactor:scripts
   ```
+
   when inconsistencies or drift are detected
 
 The orchestrator MUST NOT implement script validation or refactoring logic directly.
-```
+
+---
 
 ## Skill Auto‑Discovery
 
@@ -494,11 +497,13 @@ Workflow state lives at: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json` �
 **NEVER write orchestrator reports into SpecKit file locations or vice versa.**
 
 If any artifact is outside its designated location:
+
 ```
 ❌ Artifact location violation — <file> found at <actual path>, expected at <correct path>.
    Why it matters: Misplaced artifacts break SpecKit agent path resolution and report generation.
    Fix: Move the file to its correct location before proceeding.
 ```
+
 → STOP and correct before proceeding.
 
 ---
@@ -577,12 +582,14 @@ Required behavior:
   - Surface error with exact script name and location
 
 - Suggested automatic checks:
+
   ```bash
   bun run validate:runtime:scripts
   bun run validate:script:usage
   ```
 
 - If drift is detected, suggest:
+
   ```bash
   bun run dev:refactor:scripts
   ```
@@ -605,13 +612,13 @@ Referenced throughout as **"Apply Handoff Error Protocol."**
 
 Every `/handoff` call is subject to failure. After every handoff the orchestrator MUST evaluate the response before proceeding:
 
-| Failure mode | Detection | Response |
-|---|---|---|
-| Agent returned no output | Empty or null response | STOP — display error below, present retry/abort |
-| Agent returned an error message | Response begins with ERROR or exception text | STOP — display full error, present retry/abort |
-| Agent timed out | No response within expected window | STOP — display timeout error, present retry/abort |
-| Agent returned partial output | Required sections missing from response | STOP — list missing sections, present retry/abort |
-| Agent returned BLOCKED verdict | Response contains `VERDICT: BLOCKED` | Follow the BLOCKED protocol for that step (do not treat as a handoff failure) |
+| Failure mode                    | Detection                                    | Response                                                                      |
+| ------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
+| Agent returned no output        | Empty or null response                       | STOP — display error below, present retry/abort                               |
+| Agent returned an error message | Response begins with ERROR or exception text | STOP — display full error, present retry/abort                                |
+| Agent timed out                 | No response within expected window           | STOP — display timeout error, present retry/abort                             |
+| Agent returned partial output   | Required sections missing from response      | STOP — list missing sections, present retry/abort                             |
+| Agent returned BLOCKED verdict  | Response contains `VERDICT: BLOCKED`         | Follow the BLOCKED protocol for that step (do not treat as a handoff failure) |
 
 **On any handoff failure, display:**
 
@@ -702,6 +709,7 @@ If the user selects `dry_run`:
 Dry-run mode executes all validation and prerequisite checks but produces **no file writes, no git operations, and no commits**.
 
 What dry-run does:
+
 - Runs the Skill Health Check
 - Runs Architecture Sanity Check
 - Validates intake fields (stage name, phase, stage file)
@@ -712,6 +720,7 @@ What dry-run does:
 - Reports what would be created, which agents would be invoked, and which guards would run
 
 What dry-run does NOT do:
+
 - Write any file to disk
 - Create or checkout any git branch
 - Initialize `.workflow-state.json`
@@ -780,11 +789,13 @@ If the user selects `resume`:
 - Never re-initialize `.workflow-state.json` — merge updates only.
 - If `stage_status` is `BACKEND CLOSED` → jump directly to Step 7 (Closure) if not yet complete.
 - If `.workflow-state.json` is corrupt or unreadable:
+
   ```
   ❌ Workflow state file is corrupt or unreadable — resume blocked.
      Why it matters: State file is required to restore session variables and resume at the correct step.
      Fix: Provide intake values manually to start from the last known good step, or restore the file from git history.
   ```
+
   → STOP. Ask user to provide intake manually.
 
 ---
@@ -841,6 +852,7 @@ fields:
 ```
 
 Inline validation rules:
+
 - Validate each field immediately on blur (when the user leaves the field), not only on submit.
 - Display error message directly below the failing field in red.
 - Do NOT allow form submission until all fields pass validation.
@@ -883,9 +895,10 @@ When any step detects that an architectural decision is required (new module, la
 1. **STOP current workflow step.** Do not write any plan, task, or implementation artifact until the ADR is recorded.
 
 2. Present to the user:
+
    ```
    ⏸ ADR Required
-   
+
    An architectural decision must be recorded before this step can continue.
    Decision needed: <describe the decision>
    Impact: <which modules, layers, or contracts are affected>
@@ -900,6 +913,7 @@ When any step detects that an architectural decision is required (new module, la
 4. Write ADR to: `docs/architecture/ADR/ADR-<NNNN>-<kebab-title>.md`
 
    Use template:
+
    ```markdown
    # ADR-<NNNN>: <Title>
 
@@ -908,27 +922,38 @@ When any step detects that an architectural decision is required (new module, la
    **Deciders:** <user name or team>
 
    ## Context
+
    <Why this decision was needed>
 
    ## Decision
+
    <What was decided>
 
    ## Consequences
+
    <What changes, what constraints are introduced>
 
    ## Related stages
+
    - <STAGE_NAME>
    ```
 
 5. Stage and commit the ADR file:
+
    ```bash
    git add docs/architecture/ADR/ADR-<NNNN>-<kebab-title>.md
    git commit -m "docs(adr): ADR-<NNNN> <title>"
    ```
 
 6. Record in `.workflow-state.json`:
+
    ```json
-   { "event": "adr_created", "adr": "ADR-<NNNN>", "title": "<title>", "timestamp": "<ISO_TIMESTAMP>" }
+   {
+     "event": "adr_created",
+     "adr": "ADR-<NNNN>",
+     "title": "<title>",
+     "timestamp": "<ISO_TIMESTAMP>"
+   }
    ```
 
 7. Resume the paused workflow step.
@@ -999,25 +1024,25 @@ Every `## Stage Status` block requires a `Risk Level`. Compute it using this rub
 
 **Score each factor present in the stage:**
 
-| Factor | Points |
-|---|---|
-| Database migration (schema change) | +3 |
-| New table or column added | +2 |
-| Security-sensitive logic (auth, tokens, permissions) | +3 |
-| Worker interaction or async job | +2 |
-| Multi-tenant data isolation logic | +3 |
-| External API integration | +2 |
-| More than 10 tasks | +1 |
-| More than 20 tasks | +2 |
-| New package dependency added | +1 |
+| Factor                                               | Points |
+| ---------------------------------------------------- | ------ |
+| Database migration (schema change)                   | +3     |
+| New table or column added                            | +2     |
+| Security-sensitive logic (auth, tokens, permissions) | +3     |
+| Worker interaction or async job                      | +2     |
+| Multi-tenant data isolation logic                    | +3     |
+| External API integration                             | +2     |
+| More than 10 tasks                                   | +1     |
+| More than 20 tasks                                   | +2     |
+| New package dependency added                         | +1     |
 
 **Score → Risk Level:**
 
 | Total score | Risk Level |
-|---|---|
-| 0–3 | LOW |
-| 4–7 | MEDIUM |
-| 8+ | HIGH |
+| ----------- | ---------- |
+| 0–3         | LOW        |
+| 4–7         | MEDIUM     |
+| 8+          | HIGH       |
 
 Compute this score at Step 2 (Clarify) when scope is fully known. Update it at Step 5 (Analyze) if the plan revealed additional risk factors.
 
@@ -1031,14 +1056,14 @@ If the user requests a requirement change, addition, or removal **after any step
 
 Map the amendment to the steps it affects:
 
-| Amendment type | Steps invalidated |
-|---|---|
-| New or changed functional requirement | Specify, Clarify, Plan, Tasks, Analyze |
-| New or changed data model / schema | Plan, Tasks, Analyze |
-| New or changed endpoint / API contract | Plan, Tasks, Analyze |
-| Security or compliance change | Clarify, Plan, Analyze |
-| Descoping an already-planned feature | Plan, Tasks |
-| Implementation-only change (no spec impact) | Tasks, Analyze |
+| Amendment type                              | Steps invalidated                      |
+| ------------------------------------------- | -------------------------------------- |
+| New or changed functional requirement       | Specify, Clarify, Plan, Tasks, Analyze |
+| New or changed data model / schema          | Plan, Tasks, Analyze                   |
+| New or changed endpoint / API contract      | Plan, Tasks, Analyze                   |
+| Security or compliance change               | Clarify, Plan, Analyze                 |
+| Descoping an already-planned feature        | Plan, Tasks                            |
+| Implementation-only change (no spec impact) | Tasks, Analyze                         |
 
 ## Step 2 — Present Amendment Impact Widget
 
@@ -1249,12 +1274,14 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
 ```
 
 `.workflow-state.json` MUST always live at `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`. Never at repo root. Never duplicated. If a conflicting file exists:
+
 ```
 ❌ Conflicting .workflow-state.json detected — initialization blocked.
    Why it matters: Multiple state files for the same stage would cause corruption and incorrect resumption.
    Fix: Remove or archive the conflicting file, then retry.
    Conflicting path: <path of the conflicting file>
 ```
+
 → STOP.
 
 ### Merge Semantics (A5)
@@ -1420,11 +1447,13 @@ The orchestrator reads from these paths after speckit.specify completes. Do NOT 
 Constraints: no architecture redesign, database-per-tenant preserved, license middleware mandatory, server-authoritative time only, worker-only grading (if applicable), snapshot integrity preserved (if attempt-related), all writes transactional, idempotency required for critical endpoints, version compatibility enforced.
 
 If ADR is required:
+
 ```
 ❌ Architectural decision required — workflow paused.
    Why it matters: This specification introduces an architectural concern that must be recorded before planning begins.
    Fix: Follow the ADR Creation Protocol to document and commit the decision, then resume from Step 1.
 ```
+
 → STOP and apply ADR Creation Protocol before continuing.
 
 ## 1.2 — Write Specify Report
@@ -1550,6 +1579,7 @@ Apply Handoff Error Protocol after this handoff returns.
 The orchestrator uses these checklists during Step 5 (Analyze) and Step 6 (Implement) for verification.
 
 If `speckit.checklist` is unavailable, the orchestrator must manually create minimal checklists covering:
+
 - [ ] Tenant isolation verified
 - [ ] License middleware applied
 - [ ] Rate limiting configured
@@ -1678,11 +1708,13 @@ Plan must cover: tables/schema changes, migrations, endpoints, middleware layers
 Constraints: no cross-tenant logic, no direct DB instantiation, all writes transactional, server-authoritative time only, version compatibility required.
 
 If plan modifies architecture:
+
 ```
 ❌ Architectural modification detected in plan — workflow paused.
    Why it matters: Architecture changes outside INFRA stages are forbidden without an ADR. Proceeding without one violates the Zidney Constitution.
    Fix: Follow the ADR Creation Protocol to document and commit the decision, then resume from Step 3.
 ```
+
 → STOP. Apply ADR Creation Protocol before proceeding.
 
 ## 3.1A — Guardian Plan Validation
@@ -1693,6 +1725,7 @@ Run in parallel:
 /handoff to=API Designer
 
 Apply Handoff Error Protocol after both handoffs return. Both MUST return `VERDICT: PASS`. If any returns BLOCKED:
+
 ```
 ❌ Guardian validation failed — plan cannot proceed.
    Why it matters: The plan contains violations that would cause drift or constitutional failures during implementation.
@@ -1700,6 +1733,7 @@ Apply Handoff Error Protocol after both handoffs return. Both MUST return `VERDI
    Violations: <list all by severity>
    Fix: Remediate all listed violations, then re-run 3.1A guardians before writing PLAN_REPORT.
 ```
+
 → STOP. Do NOT write PLAN_REPORT or update state. Require full remediation and re-validation.
 
 ## 3.2 — Write Plan Report
@@ -1830,11 +1864,11 @@ In addition to the standard template fill, the TASKS_REPORT.md MUST include thes
 
 After the full task list, append a risk-ranked summary table. Classify each task by risk:
 
-| Risk | Criteria |
-|---|---|
-| 🔴 HIGH | Database migration, schema change, security logic, auth/token/permission code, multi-tenant isolation, worker async job |
-| 🟡 MEDIUM | New endpoint, new service layer, external API call, new package dependency |
-| 🟢 LOW | Config change, logging addition, test-only task, documentation |
+| Risk      | Criteria                                                                                                                |
+| --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 🔴 HIGH   | Database migration, schema change, security logic, auth/token/permission code, multi-tenant isolation, worker async job |
+| 🟡 MEDIUM | New endpoint, new service layer, external API call, new package dependency                                              |
+| 🟢 LOW    | Config change, logging addition, test-only task, documentation                                                          |
 
 Output:
 
@@ -2020,6 +2054,7 @@ Remediation Progress (Attempt <N-1> → <N>):
 ```
 
 Status key:
+
 - `✅ Fixed` — was present in the previous attempt, no longer detected
 - `❌ Remaining` — was present in the previous attempt, still detected
 - `🆕 New` — was NOT present in the previous attempt, introduced during remediation
@@ -2164,12 +2199,14 @@ Before generating any code, confirm:
 - No unresolved ambiguities from any prior step
 
 If any check fails:
+
 ```
 ❌ Implementation gate check failed — code generation is forbidden.
    Why it matters: Implementing against an unresolved drift or ambiguity produces non-compliant code that will fail the Analyze gate again.
    Failed check: <drift_passed = false | unresolved violations | unresolved ambiguities>
    Fix: Resolve all listed issues and re-run Step 5 (Analyze) before attempting implementation.
 ```
+
 → STOP. Implementation forbidden until resolved.
 
 ## 6.2 — Check SpecKit Checklists Before Implementation
@@ -2394,6 +2431,7 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md`
 /handoff to=DevOps Engineer
 
 Apply Handoff Error Protocol after all three handoffs return. Each MUST return `VERDICT: PASS | BLOCKED`. If any returns BLOCKED:
+
 ```
 ❌ Pre-closure guardian validation failed — closure is blocked.
    Why it matters: CI/CD, deployment, and Docker readiness must be confirmed before a stage is marked PRODUCTION READY.
@@ -2401,6 +2439,7 @@ Apply Handoff Error Protocol after all three handoffs return. Each MUST return `
    Violations: <list all by severity>
    Fix: Remediate all listed violations, then re-run 6.6 guardians before proceeding to Pre-Closure Review Gate.
 ```
+
 → STOP. Require remediation before Pre-Closure Review Gate.
 
 ## 6.7 — Write Implement Report
@@ -2416,14 +2455,17 @@ Purpose:
 Provide a deterministic, automated mechanism to migrate and normalize script names across the repository after introducing the Script Naming Governance stage.
 
 Task Reference:
+
 - T011 – Script Refactor Engine
 
 Command:
+
 ```bash
 bun run dev:refactor:scripts
 ```
 
 Responsibilities:
+
 - Reads the **script migration map** generated during the Script Governance stage (e.g., `docs/scripts/script-migration-map.json`)
 - Updates all script references across the codebase:
   - `package.json` files (root + workspaces)
@@ -2435,22 +2477,27 @@ Responsibilities:
 - Produces a diff summary report
 
 Validation:
+
 - Run all migrated scripts to ensure they execute without errors
 - Run global validation:
+
 ```bash
 bun run validate:runtime:scripts
 ```
 
 Failure Handling:
 If any script reference cannot be resolved:
+
 ```
 ❌ Script refactor failed — unresolved script reference detected.
    Why it matters: Inconsistent script names break automation and CI.
    Fix: Update migration map or manually resolve remaining references.
 ```
+
 → STOP until resolved
 
 Notes:
+
 - This step is **non-blocking** and can be executed after implementation or as part of an INFRA stage
 - Recommended to integrate into CI as a validation guard in future stages
 
@@ -2648,10 +2695,10 @@ Do NOT proceed to Step 7 until explicit approval is received.
 
 Two commands exist — use the correct one for this gate:
 
-| Command | What it runs | Use when |
-|---|---|---|
+| Command                | What it runs                                           | Use when                      |
+| ---------------------- | ------------------------------------------------------ | ----------------------------- |
 | `bun run ci:run-local` | Full 7-step governance orchestrator + `act` simulation | **Stage closure (mandatory)** |
-| `bun run ci:local` | `act` simulation only — no governance steps | Day-to-day fast check only |
+| `bun run ci:local`     | `act` simulation only — no governance steps            | Day-to-day fast check only    |
 
 **This gate requires `bun run ci:run-local`.** Using `bun run ci:local` alone is insufficient for closure — it skips governance steps (`validate-runtime-scripts`, `arch:guard`, etc.).
 
@@ -2677,13 +2724,13 @@ Every file in `.github/workflows/` must be locally executable via `act`. Any wor
 
 Known local limitations (not blocking):
 
-| Workflow | Local Compatibility | Notes |
-|---|---|---|
-| `ci.yml` | FULL (non-E2E jobs) | E2E Playwright jobs are expected to fail locally — excluded from gate |
-| `architecture-governance.yml` | FULL | `schedule:` trigger not auto-invoked |
-| `ci-type-safety.yml` | FULL | None |
-| `hard-mode-guard.yml` | PARTIAL | Requires `--env GITHUB_REF=refs/heads/<branch>` for branch context |
-| `ai-context-validation.yml` | FULL | None |
+| Workflow                      | Local Compatibility | Notes                                                                 |
+| ----------------------------- | ------------------- | --------------------------------------------------------------------- |
+| `ci.yml`                      | FULL (non-E2E jobs) | E2E Playwright jobs are expected to fail locally — excluded from gate |
+| `architecture-governance.yml` | FULL                | `schedule:` trigger not auto-invoked                                  |
+| `ci-type-safety.yml`          | FULL                | None                                                                  |
+| `hard-mode-guard.yml`         | PARTIAL             | Requires `--env GITHUB_REF=refs/heads/<branch>` for branch context    |
+| `ai-context-validation.yml`   | FULL                | None                                                                  |
 
 **Governance authority:** INFRA-023. See `docs/local-ci.md` for full `act` configuration reference.
 
@@ -2852,12 +2899,14 @@ Checklist:
 - [ ] `Notes:` section confirms "production ready"
 
 If ANY item is unchecked:
+
 ```
 ❌ Stage Status block is incomplete — governance metadata lock failed.
    Why it matters: The Stage Status block must be fully populated before the stage can be considered PRODUCTION READY.
    Missing items: <list each unchecked item>
    Fix: Update Step 7.3 to populate the missing fields, re-commit, then re-run 7.8A.
 ```
+
 → STOP. Remediate and re-run 7.8A.
 
 ### 7.8B — Workflow State Consistency Check
@@ -2895,6 +2944,7 @@ jq '.history | map(.event)' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
 - History contains < 9 events → BLOCKED
 
 If BLOCKED:
+
 ```
 ❌ Workflow state consistency check failed — governance lock failed.
    Why it matters: The state file must perfectly reflect stage completion before the stage is sealed.
@@ -2942,6 +2992,7 @@ jq '.current_step' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
 If both match expected values → Governance gate PASSED. Proceed to Step 7.9.
 
 If any mismatch:
+
 ```
 ❌ Post-validation state confirmation failed — governance gate failed.
    Why it matters: Final state must match expected values before the workflow can exit cleanly.
@@ -3051,6 +3102,7 @@ Rollback is triggered when:
 ### R.1 — Identify Rollback Target
 
 Read `.workflow-state.json` to determine:
+
 - `current_step` — the step that failed
 - `history` — find the last successful commit event
 
@@ -3131,6 +3183,7 @@ Reverted: <count> commits"
 After rollback, the orchestrator re-enters the workflow at `<TARGET_STEP>`. All subsequent steps must be re-executed from that point.
 
 Re-entry is allowed at:
+
 - **Step 3 (Plan)** — if implementation approach needs redesign
 - **Step 5 (Analyze)** — if analysis needs to be re-run with corrected constraints
 - **Step 6 (Implement)** — if only implementation code needs correction
