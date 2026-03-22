@@ -111,7 +111,7 @@ export function validateRegistryFreshness(
           if (isSeparator) {
             // Normalize separator: `| --- | --- |` regardless of dash count or padding
             const cellCount = l.split('|').length - 2 // Count pipes, subtract outer ones
-            return '| ' + Array(cellCount).fill('---').join(' | ') + ' |'
+            return `| ${Array(cellCount).fill('---').join(' | ')} |`
           }
           // For data rows: split by pipes, trim each cell, rejoin with consistent spacing
           return l
