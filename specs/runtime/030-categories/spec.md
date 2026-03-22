@@ -64,18 +64,19 @@ Skill_); category values define the selectable options on that axis.
 
 This specification is validated against **Zidney Constitution v1.2.0**.
 
-| Rule                                   | Compliance                                                                                       |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| No cross-tenant access                 | ✓ All three category tables reside exclusively within the tenant DB                              |
-| No middleware bypass                   | ✓ Tenant resolver → license middleware mandatory before any category route                       |
-| No grading outside worker              | ✓ Feature does not touch attempt or grading logic                                                |
-| No direct DB instantiation             | ✓ All DB access via tenant resolver context; no global singleton                                 |
-| No weakening of snapshot integrity     | ✓ Category/value FKs in downstream content are immutable after attempt capture                   |
-| No weakening of transaction boundaries | ✓ All writes (create, update, soft-delete, scope mutations) are wrapped in explicit transactions |
-| No weakening of version enforcement    | ✓ Schema version incremented; migration is forward-only                                          |
-| Server-authoritative time only         | ✓ `created_at`/`updated_at` set by server; no client-supplied timestamps accepted                |
-| No console.log allowed                 | ✓ All logging via structured logger with required fields                                         |
-| Division boundary preserved            | ✓ Division scoping is opt-in via `category_divisions`; no cross-division data leakage            |
+| Rule                                   | Compliance                                                                                                      |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| No cross-tenant access                 | ✓ All three category tables reside exclusively within the tenant DB                                             |
+| No middleware bypass                   | ✓ Tenant resolver → license middleware mandatory before any category route                                      |
+| No grading outside worker              | ✓ Feature does not touch attempt or grading logic                                                               |
+| No direct DB instantiation             | ✓ All DB access via tenant resolver context; no global singleton                                                |
+| No weakening of snapshot integrity     | ✓ Category/value FKs in downstream content are immutable after attempt capture                                  |
+| No weakening of transaction boundaries | ✓ All writes (create, update, soft-delete, scope mutations) are wrapped in explicit transactions                |
+| No weakening of version enforcement    | ✓ Schema version incremented; migration is forward-only                                                         |
+| Server-authoritative time only         | ✓ `created_at`/`updated_at` set by server; no client-supplied timestamps accepted                               |
+| No console.log allowed                 | ✓ All logging via structured logger with required fields                                                        |
+| Division boundary preserved            | ✓ Division scoping is opt-in via `category_divisions`; no cross-division data leakage                           |
+| Rate limiting enforced                 | ✓ Platform rate-limiting middleware applied; write routes ≤ 30 req/min, read routes ≤ 120 req/min per workspace |
 
 ---
 
@@ -965,6 +966,15 @@ logger.debug("Create category", {
 ```
 
 Mutating operations must log at `info` level on success and `warn` level on domain errors.
+
+### Rate Limiting
+
+All category routes are covered by the platform-level rate-limiting middleware (via `packages/redis-utils` + rate-limit middleware applied at the backoffice app level):
+
+- Write endpoints (`POST /`, `PATCH /:id`, `DELETE /:id`): ≤ 30 requests/min per workspace
+- Read endpoints (`GET /`, `GET /tree`, `GET /:id`): ≤ 120 requests/min per workspace
+
+Exceeding the limit returns `429 Too Many Requests` with `{ success: false, data: null, error: { code: "RATE_LIMIT_EXCEEDED", message: "..." } }`.
 
 ### Idempotency
 

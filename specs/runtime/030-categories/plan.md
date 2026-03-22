@@ -650,7 +650,8 @@ authentication middleware      → validates session token
     │
     ▼
 RBAC resolver middleware       → resolves user permissions from DB
-    │
+    │                            (platform-level rate limit middleware applied by outer
+    │                             backoffice app: 30 req/min writes, 120 req/min reads)
     ▼
 [write routes only]
 requireAnyPermission(          → checks question_manage OR classification_manage
