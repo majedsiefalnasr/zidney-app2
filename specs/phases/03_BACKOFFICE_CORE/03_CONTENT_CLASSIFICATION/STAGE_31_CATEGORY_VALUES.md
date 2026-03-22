@@ -9,20 +9,31 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-22T00:00:00.000Z
+Last Updated: 2026-03-22T00:00:10.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Category Values CRUD (list, create, read, update, soft-delete)
+- Status workflow: COMPLETED → UNDER_REVIEW → APPROVED → ENABLED / DISABLED
+- Translation-driven display via shared translations table
+- Optional scope filters: category_value_subjects, category_value_divisions
+- Full tenant isolation — all tables in tenant DB only
+- License middleware mandatory on all routes
+
+Deferred Scope:
+
+- Frontoffice display of category values (not in this stage)
+- Scoring/grading logic (explicit non-goal)
+- Division logic embedded in values (explicit non-goal)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
