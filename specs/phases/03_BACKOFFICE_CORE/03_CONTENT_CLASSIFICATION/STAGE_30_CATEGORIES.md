@@ -9,20 +9,18 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-03-22T00:02:00.000Z
+Last Updated: 2026-03-22T00:03:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Category CRUD API (list, create, read, update, soft-delete)
-- Category tree view endpoint
-- Parent-child hierarchy (max depth 3, circular ref detection, SELECT FOR UPDATE locking)
-- Subject scoping via category_subjects join table
-- Division scoping via category_divisions join table
-- Soft-delete blocked when ENABLED children exist (422 CATEGORY_HAS_ENABLED_CHILDREN)
-- RBAC: requirePermission middleware on write routes
-- Three tenant DB tables: categories, category_subjects, category_divisions
+- Migration 008 (tenant DB, schema 1.13.0 → 1.14.0): categories, category_subjects, category_divisions
+- Drizzle ORM schemas for all 3 tables
+- Domain package: packages/domain-core/src/categories/ (7 files)
+- Validation: packages/validation/src/backoffice/categories.schemas.ts
+- API routes: 6 endpoints (GET list, POST create, GET tree, GET single, PATCH update, DELETE soft-delete)
+- Unit tests: 31 cases | Integration tests: 22 cases
 
 Deferred Scope:
 
@@ -30,10 +28,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
