@@ -173,21 +173,21 @@ Full Drizzle column definitions and constraints are specified in `data-model.md`
 
 Key types:
 
-| Type                       | Description                                                                   |
-| -------------------------- | ----------------------------------------------------------------------------- |
-| `CategoryValueStatus`      | `'COMPLETED' \| 'UNDER_REVIEW' \| 'APPROVED' \| 'ENABLED' \| 'DISABLED'`      |
-| `DbClient`                 | Minimal pg.Pool / pg.PoolClient duck-type interface                           |
-| `AuditContext`             | `{ user_id, correlation_id, workspace_slug, workspace_id }`                   |
-| `TranslationInput`         | `{ language_code, name, description? }`                                       |
-| `TranslationRow`           | Translation as stored in the DB                                               |
-| `CategoryValueRow`         | Flat DB row from `category_values`                                            |
-| `ScopedCategoryValueRow`   | Extends `CategoryValueRow` with `subject_ids`, `division_ids`, `translations` |
-| `FullCategoryValueRow`     | Extends `ScopedCategoryValueRow` with `category` summary                      |
-| `ListCategoryValuesInput`  | Query params (category_id, status, search, page, limit, language_code)        |
-| `ListCategoryValuesResult` | `{ items: ScopedCategoryValueRow[], total, page, limit }`                     |
-| `CreateCategoryValueInput` | `{ category_id, code, translations, subject_ids?, division_ids? }`            |
-| `UpdateCategoryValueInput` | All fields optional except constraints; at least one required                 |
-| `WorkspaceLanguageConfig`  | `{ default_language, supported_languages: string[] }`                         |
+| Type                       | Description                                                                               |
+| -------------------------- | ----------------------------------------------------------------------------------------- |
+| `CategoryValueStatus`      | `'COMPLETED' \| 'UNDER_REVIEW' \| 'APPROVED' \| 'ENABLED' \| 'DISABLED'`                  |
+| `DbClient`                 | Minimal pg.Pool / pg.PoolClient duck-type interface                                       |
+| `AuditContext`             | `{ user_id, correlation_id, workspace_slug, workspace_id, caller_permissions: string[] }` |
+| `TranslationInput`         | `{ language_code, name, description? }`                                                   |
+| `TranslationRow`           | Translation as stored in the DB                                                           |
+| `CategoryValueRow`         | Flat DB row from `category_values`                                                        |
+| `ScopedCategoryValueRow`   | Extends `CategoryValueRow` with `subject_ids`, `division_ids`, `translations`             |
+| `FullCategoryValueRow`     | Extends `ScopedCategoryValueRow` with `category` summary                                  |
+| `ListCategoryValuesInput`  | Query params (category_id, status, search, page, limit, language_code)                    |
+| `ListCategoryValuesResult` | `{ items: ScopedCategoryValueRow[], total, page, limit }`                                 |
+| `CreateCategoryValueInput` | `{ category_id, code, translations, subject_ids?, division_ids? }`                        |
+| `UpdateCategoryValueInput` | All fields optional except constraints; at least one required                             |
+| `WorkspaceLanguageConfig`  | `{ default_language, supported_languages: string[] }`                                     |
 
 Full type definitions in `data-model.md`.
 
@@ -217,30 +217,29 @@ Error code union `CategoryValueErrorCode` and class `CategoryValueError extends 
 
 Pure SQL functions — no transactions opened here.
 
-| Function                                               | Purpose                                                                               |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| `findCategoryValueById(db, id)`                        | SELECT single row WHERE id = $1 AND deleted_at IS NULL                                |
-| `findCategoryValueForUpdate(db, id)`                   | SELECT .. FOR UPDATE NOWAIT (lock before writes)                                      |
-| `findCategoryById(db, id)`                             | Check parent category exists + get status and scope                                   |
-| `countCategoryValues(db, opts)`                        | COUNT with filters; search via translations JOIN                                      |
-| `findCategoryValues(db, opts)`                         | SELECT rows with pagination, translation JOIN, scope via batch                        |
-| `findScopeForValues(db, valueIds)`                     | Bulk SELECT from scope tables WHERE id = ANY($1::uuid[])                              |
-| `findTranslationsForValues(db, valueIds)`              | SELECT from translations WHERE entity_type = 'CATEGORY_VALUE' AND entity_id = ANY($1) |
-| `insertCategoryValue(db, input, audit)`                | INSERT INTO category_values RETURNING \*                                              |
-| `updateCategoryValueRow(db, id, patch, audit)`         | UPDATE SET .. always updated_at = NOW() RETURNING \*                                  |
-| `softDeleteCategoryValue(db, id, audit)`               | UPDATE SET deleted_at = NOW(), updated_by = $audit.user_id                            |
-| `deleteValueSubjectScope(db, valueId)`                 | DELETE FROM category_value_subjects WHERE category_value_id = $1                      |
-| `insertValueSubjectScope(db, valueId, ids)`            | INSERT batch into category_value_subjects                                             |
-| `deleteValueDivisionScope(db, valueId)`                | DELETE FROM category_value_divisions WHERE category_value_id = $1                     |
-| `insertValueDivisionScope(db, valueId, ids)`           | INSERT batch into category_value_divisions                                            |
-| `categoryValueCodeExists(db, catId, code, excludeId?)` | Check LOWER(code) uniqueness within category                                          |
-| `subjectsExistBatch(db, subjectIds)`                   | SELECT id FROM subjects WHERE id = ANY($1)                                            |
-| `divisionsExistBatch(db, divisionIds)`                 | SELECT id FROM divisions WHERE id = ANY($1)                                           |
-| `findCategorySubjectScope(db, categoryId)`             | Return parent category's subject_ids as a Set                                         |
-| `findCategoryDivisionScope(db, categoryId)`            | Return parent category's division_ids as a Set                                        |
-| `upsertTranslations(db, entityId, translations)`       | INSERT ... ON CONFLICT translations_composite_unique DO UPDATE                        |
-| `findWorkspaceLanguageConfig(db)`                      | SELECT supported_languages + default_language from workspace_settings                 |
-| `checkValueDependencies(db, valueId)`                  | Calls all registered dependency functions; returns total ref count                    |
+| Function                                               | Purpose                                                                                                                                                                                                                                         |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `findCategoryValueById(db, id)`                        | SELECT single row WHERE id = $1 AND deleted_at IS NULL                                                                                                                                                                                          |
+| `findCategoryValueForUpdate(db, id)`                   | SELECT .. FOR UPDATE NOWAIT (lock before writes)                                                                                                                                                                                                |
+| `findCategoryById(db, id)`                             | Check parent category exists + get status and scope                                                                                                                                                                                             |
+| `countCategoryValues(db, opts)`                        | COUNT with filters; search via translations JOIN                                                                                                                                                                                                |
+| `findCategoryValues(db, opts)`                         | SELECT rows with pagination, translation JOIN, scope via batch                                                                                                                                                                                  |
+| `findScopeForValues(db, valueIds)`                     | Bulk SELECT from scope tables WHERE id = ANY($1::uuid[])                                                                                                                                                                                        |
+| `findTranslationsForValues(db, valueIds)`              | SELECT from translations WHERE entity_type = 'CATEGORY_VALUE' AND entity_id = ANY($1); returns raw DB rows; pivot into `TranslationRow[]` performed by private `mapTranslationRows()` helper within this file (not exported from module barrel) |
+| `insertCategoryValue(db, input, audit)`                | INSERT INTO category_values RETURNING \*                                                                                                                                                                                                        |
+| `updateCategoryValueRow(db, id, patch, audit)`         | UPDATE SET .. always updated_at = NOW() RETURNING \*                                                                                                                                                                                            |
+| `softDeleteCategoryValue(db, id, audit)`               | UPDATE SET deleted_at = NOW(), updated_by = $audit.user_id                                                                                                                                                                                      |
+| `deleteValueSubjectScope(db, valueId)`                 | DELETE FROM category_value_subjects WHERE category_value_id = $1                                                                                                                                                                                |
+| `insertValueSubjectScope(db, valueId, ids)`            | INSERT batch into category_value_subjects                                                                                                                                                                                                       |
+| `deleteValueDivisionScope(db, valueId)`                | DELETE FROM category_value_divisions WHERE category_value_id = $1                                                                                                                                                                               |
+| `insertValueDivisionScope(db, valueId, ids)`           | INSERT batch into category_value_divisions                                                                                                                                                                                                      |
+| `categoryValueCodeExists(db, catId, code, excludeId?)` | Check LOWER(code) uniqueness within category                                                                                                                                                                                                    |
+| `subjectsExistBatch(db, subjectIds)`                   | SELECT id FROM subjects WHERE id = ANY($1)                                                                                                                                                                                                      |
+| `divisionsExistBatch(db, divisionIds)`                 | SELECT id FROM divisions WHERE id = ANY($1)                                                                                                                                                                                                     |
+| `findCategorySubjectScope(db, categoryId)`             | Return parent category's subject_ids as a Set                                                                                                                                                                                                   |
+| `findCategoryDivisionScope(db, categoryId)`            | Return parent category's division_ids as a Set                                                                                                                                                                                                  |
+| `upsertTranslations(db, entityId, translations)`       | INSERT ... ON CONFLICT translations_composite_unique DO UPDATE                                                                                                                                                                                  |
+| `findWorkspaceLanguageConfig(db)`                      | SELECT supported_languages + default_language from workspace_settings                                                                                                                                                                           |
 
 **Search implementation (parameterised, injection-safe):**
 
@@ -285,13 +284,14 @@ Read operations are transaction-free. All write operations manage their own tran
 #### `createCategoryValue(db, input, audit)` — transactional
 
 ```
-TX: BEGIN
-  1. findCategoryById(db, category_id)
-     → null:                       CATEGORY_NOT_FOUND
-     → status != 'ENABLED':        CATEGORY_DISABLED
-  2. findWorkspaceLanguageConfig(db)
+PRE-TX (validation read — no lock held):
+  1. findWorkspaceLanguageConfig(db)
      → unknown language_code:      UNSUPPORTED_LANGUAGE
      → default_language name absent: CATEGORY_VALUE_NAME_REQUIRED
+TX: BEGIN
+  2. findCategoryById(db, category_id)
+     → null:                       CATEGORY_NOT_FOUND
+     → status != 'ENABLED':        CATEGORY_DISABLED
   3. categoryValueCodeExists(db, category_id, code)
      → true:                       CATEGORY_VALUE_CODE_DUPLICATE
   4. [if subject_ids non-empty]
@@ -314,6 +314,9 @@ ROLLBACK on error
 #### `updateCategoryValue(db, id, input, audit)` — transactional
 
 ```
+PRE-TX (validation read — no lock held):
+  0. [if input.translations present] findWorkspaceLanguageConfig(db)
+     → UNSUPPORTED_LANGUAGE
 TX: BEGIN (FOR UPDATE NOWAIT on the value row)
   1. findCategoryValueForUpdate(db, id)
      → null or deleted_at IS NOT NULL: CATEGORY_VALUE_NOT_FOUND
@@ -323,25 +326,23 @@ TX: BEGIN (FOR UPDATE NOWAIT on the value row)
      → validateStatusTransition(current, new): INVALID_STATUS_TRANSITION
   4. [if input.code present] categoryValueCodeExists(db, category_id, input.code, excludeId=id)
      → CATEGORY_VALUE_CODE_DUPLICATE
-  5. [if input.translations present] findWorkspaceLanguageConfig
-     → UNSUPPORTED_LANGUAGE
-  6. [if input.subject_ids present and non-empty]
+  5. [if input.subject_ids present and non-empty]
      a. subjectsExistBatch         → CATEGORY_VALUE_SUBJECT_NOT_FOUND
      b. findCategorySubjectScope   → CATEGORY_VALUE_SCOPE_EXCEEDS_PARENT
-  7. [if input.division_ids present and non-empty]
+  6. [if input.division_ids present and non-empty]
      a. divisionsExistBatch        → CATEGORY_VALUE_DIVISION_NOT_FOUND
      b. findCategoryDivisionScope  → CATEGORY_VALUE_SCOPE_EXCEEDS_PARENT
-  8. updateCategoryValueRow(db, id, patch, audit) → CategoryValueRow
-  9. [if input.translations present] upsertTranslations(db, id, translations)
- 10. [if input.subject_ids present]
+  7. updateCategoryValueRow(db, id, patch, audit) → CategoryValueRow
+  8. [if input.translations present] upsertTranslations(db, id, translations)
+  9. [if input.subject_ids present]
        deleteValueSubjectScope(db, id)
        [if non-empty] insertValueSubjectScope(db, id, input.subject_ids)
- 11. [if input.division_ids present]
+ 10. [if input.division_ids present]
        deleteValueDivisionScope(db, id)
        [if non-empty] insertValueDivisionScope(db, id, input.division_ids)
 COMMIT
- 12. [parallel] fetch updated scope + translations
- 13. Return ScopedCategoryValueRow
+ 11. [parallel] fetch updated scope + translations
+ 12. Return ScopedCategoryValueRow
 ROLLBACK on error
   → PG 55P03 → CATEGORY_VALUE_LOCK_CONFLICT
   → PG 23505 → CATEGORY_VALUE_CODE_DUPLICATE

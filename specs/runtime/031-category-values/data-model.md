@@ -408,6 +408,7 @@ export interface AuditContext {
   correlation_id: string;
   workspace_slug: string;
   workspace_id: string;
+  caller_permissions: string[];
 }
 
 export interface TranslationInput {
@@ -491,19 +492,20 @@ export interface WorkspaceLanguageConfig {
 
 ## Error Code Catalog (`category-values.errors.ts`)
 
-| Error Code                            | HTTP | Condition                                              |
-| ------------------------------------- | ---- | ------------------------------------------------------ |
-| `CATEGORY_VALUE_NOT_FOUND`            | 404  | Value not found or soft-deleted                        |
-| `CATEGORY_VALUE_SUBJECT_NOT_FOUND`    | 404  | A subject_id in scope not found                        |
-| `CATEGORY_VALUE_DIVISION_NOT_FOUND`   | 404  | A division_id in scope not found                       |
-| `CATEGORY_NOT_FOUND`                  | 404  | Parent category not found                              |
-| `CATEGORY_VALUE_CODE_DUPLICATE`       | 409  | code (case-insensitive) already taken in this category |
-| `CATEGORY_VALUE_IN_USE`               | 422  | Value referenced by questions/exams                    |
-| `CATEGORY_VALUE_CATEGORY_IMMUTABLE`   | 422  | Attempt to change category_id                          |
-| `CATEGORY_VALUE_NAME_REQUIRED`        | 422  | No name translation for default language               |
-| `CATEGORY_VALUE_SCOPE_EXCEEDS_PARENT` | 422  | Scope IDs not a subset of parent category scope        |
-| `CATEGORY_DISABLED`                   | 422  | Parent category is disabled                            |
-| `INVALID_STATUS_TRANSITION`           | 422  | Invalid status transition                              |
-| `UNSUPPORTED_LANGUAGE`                | 422  | language_code not in workspace config                  |
-| `CATEGORY_VALUE_LOCK_CONFLICT`        | 409  | Row locked by concurrent request (55P03)               |
-| `VALIDATION_ERROR`                    | 422  | Request validation failed                              |
+| Error Code                            | HTTP | Condition                                                                             |
+| ------------------------------------- | ---- | ------------------------------------------------------------------------------------- |
+| `FORBIDDEN`                           | 403  | Caller lacks required permission (e.g. `classification_manage` for `include_deleted`) |
+| `CATEGORY_VALUE_NOT_FOUND`            | 404  | Value not found or soft-deleted                                                       |
+| `CATEGORY_VALUE_SUBJECT_NOT_FOUND`    | 404  | A subject_id in scope not found                                                       |
+| `CATEGORY_VALUE_DIVISION_NOT_FOUND`   | 404  | A division_id in scope not found                                                      |
+| `CATEGORY_NOT_FOUND`                  | 404  | Parent category not found                                                             |
+| `CATEGORY_VALUE_CODE_DUPLICATE`       | 409  | code (case-insensitive) already taken in this category                                |
+| `CATEGORY_VALUE_IN_USE`               | 422  | Value referenced by questions/exams                                                   |
+| `CATEGORY_VALUE_CATEGORY_IMMUTABLE`   | 422  | Attempt to change category_id                                                         |
+| `CATEGORY_VALUE_NAME_REQUIRED`        | 422  | No name translation for default language                                              |
+| `CATEGORY_VALUE_SCOPE_EXCEEDS_PARENT` | 422  | Scope IDs not a subset of parent category scope                                       |
+| `CATEGORY_DISABLED`                   | 422  | Parent category is disabled                                                           |
+| `INVALID_STATUS_TRANSITION`           | 422  | Invalid status transition                                                             |
+| `UNSUPPORTED_LANGUAGE`                | 422  | language_code not in workspace config                                                 |
+| `CATEGORY_VALUE_LOCK_CONFLICT`        | 409  | Row locked by concurrent request (55P03)                                              |
+| `VALIDATION_ERROR`                    | 422  | Request validation failed                                                             |

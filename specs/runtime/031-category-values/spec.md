@@ -264,7 +264,7 @@ This specification is validated against **Zidney Constitution v1.2.0**.
 2. **Given** a Category Value referenced by one or more `mcq_questions`, `traditional_questions`,
    or `exams`, **Then** the API returns 422 `CATEGORY_VALUE_IN_USE` and deletion is blocked.
 3. **Given** a value already soft-deleted, **When** a delete request is sent, **Then** the API
-   returns 404 `CATEGORY_VALUE_NOT_FOUND`.
+   returns 200 `{ deleted: true }` (idempotent — already-deleted is treated as success).
 4. **Given** a staff member without the required permissions, **Then** the API returns 403
    Forbidden.
 
@@ -756,7 +756,7 @@ issued.
 | HTTP | Error Code                 | Condition                                 |
 | ---- | -------------------------- | ----------------------------------------- |
 | 422  | `VALIDATION_ERROR`         | `id` is not a valid UUID format           |
-| 404  | `CATEGORY_VALUE_NOT_FOUND` | Value not found or already soft-deleted   |
+| 404  | `CATEGORY_VALUE_NOT_FOUND` | Value not found (never existed)           |
 | 422  | `CATEGORY_VALUE_IN_USE`    | Value is referenced by questions or exams |
 | 403  | `FORBIDDEN`                | Missing required permission               |
 
@@ -877,7 +877,8 @@ applying the transition. This prevents concurrent status transitions from racing
 The soft-delete operation must also acquire `SELECT ... FOR UPDATE` on the target row before
 executing the reference count check and setting `deleted_at`. Without this lock, two concurrent
 DELETE requests could both pass the reference check before either commits, bypassing the
-idempotency guard and the intent of the 404 return for already-deleted values.
+idempotency guard; note that an already-deleted value returns 200 `{ deleted: true }` (idempotent
+pattern) rather than an error.
 
 ---
 
@@ -916,7 +917,7 @@ idempotency guard and the intent of the 404 return for already-deleted values.
 | Value is referenced by `mcq_questions`                   | Soft-delete blocked → 422 `CATEGORY_VALUE_IN_USE` |
 | Value is referenced by `traditional_questions`           | Soft-delete blocked → 422 `CATEGORY_VALUE_IN_USE` |
 | Value is referenced by `exams`                           | Soft-delete blocked → 422 `CATEGORY_VALUE_IN_USE` |
-| Value already soft-deleted                               | Returns 404 `CATEGORY_VALUE_NOT_FOUND`            |
+| Value already soft-deleted                               | Returns 200 `{ deleted: true }` (idempotent)      |
 | Hard SQL DELETE attempted via migration/tooling          | FK `ON DELETE RESTRICT` blocks at database level  |
 | Category hard delete attempted while active values exist | FK `ON DELETE RESTRICT` blocks at database level  |
 
@@ -944,13 +945,13 @@ transaction handle and do not open their own transactions.
 
 ## Idempotency Strategy
 
-| Operation          | Idempotency Mechanism                                                                                                  |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| Create             | Unique index on `(category_id, LOWER(code)) WHERE deleted_at IS NULL` prevents duplicates; returns 409 on conflict     |
-| Status Transition  | Re-submitting the same transition for the current status returns 422 `INVALID_STATUS_TRANSITION`, not a silent success |
-| Soft-Delete        | Attempting to soft-delete an already-deleted value returns 404 rather than silently succeeding a second time           |
-| Scope Replacement  | Replacing with the same scope is idempotent (delete + re-insert within transaction)                                    |
-| Translation Upsert | Upsert by `(entity_id, language_code, field_name)` is inherently idempotent                                            |
+| Operation          | Idempotency Mechanism                                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Create             | Unique index on `(category_id, LOWER(code)) WHERE deleted_at IS NULL` prevents duplicates; returns 409 on conflict          |
+| Status Transition  | Re-submitting the same transition for the current status returns 422 `INVALID_STATUS_TRANSITION`, not a silent success      |
+| Soft-Delete        | Attempting to soft-delete an already-deleted value returns 200 `{ deleted: true }` (idempotent — no error, no side effects) |
+| Scope Replacement  | Replacing with the same scope is idempotent (delete + re-insert within transaction)                                         |
+| Translation Upsert | Upsert by `(entity_id, language_code, field_name)` is inherently idempotent                                                 |
 
 ---
 
