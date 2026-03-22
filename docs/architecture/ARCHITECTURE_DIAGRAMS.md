@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-03-21T09:27:24.710Z
-Git SHA: 3c89b65851cd0cd8dbafe7dc374afe77425b8dda
+Generated: 2026-03-22T13:40:14.217Z
+Git SHA: bd9a0f85cc3e552682025b5dcfa676a0a3405f78
 
 ---
 
@@ -65,6 +65,8 @@ graph LR
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_types
+  packages_domain_core --> packages_logger
+  packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -556,8 +558,51 @@ graph LR
   apps_api --> packages_validation
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
   apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_domain_core
@@ -738,6 +783,8 @@ graph TD
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
+  packages_domain_core --> packages_logger
+  packages_domain_core --> packages_logger
   packages_domain_core --> packages_types
   packages_domain_core --> packages_types
   packages_domain_core --> packages_validation
@@ -1219,8 +1266,51 @@ graph TD
   apps_api --> packages_validation
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_validation
   apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_domain_core

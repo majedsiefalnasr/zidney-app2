@@ -8,7 +8,45 @@ Database: Tenant DB
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: HIGH
+Closure Date: 2026-03-22T10:00:00.000Z
+
+Implementation: COMPLETE
+Tasks: 35 / 35 completed
+
+Scope Delivered:
+
+- ✅ Migration 008 (tenant DB, schema 1.13.0 → 1.14.0): categories, category_subjects, category_divisions tables with FK constraints, B-tree indexes, CONCURRENT unique indexes
+- ✅ Permission seeds: classification:manage + question:manage for ADMIN role
+- ✅ Drizzle ORM schemas for all 3 tables (barrel-exported from schemas/index.ts)
+- ✅ Domain package packages/domain-core/src/categories/ (7 files): types, errors (14 codes), repository (18 fns), tree assembler (O(N)), dependency registry stub, service (6 fns with transactions + depth/circular guards)
+- ✅ Validation: 5 Zod schemas in packages/validation/src/backoffice/categories.schemas.ts
+- ✅ API routes: 6 handlers (list, create, tree, get, update, soft-delete) + router factory registered in app.ts
+- ✅ Tests: 26 unit + 28 integration = 54 total, all passing
+- ✅ Architecture: ai-guard PASS, infra-audit PASS (score 100/100)
+- ✅ Quality: lint clean, typecheck clean
+
+Deferred Scope:
+
+- Category Values (STAGE_31) — explicitly deferred; categories provide the classification axis, category values provide the option list
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced — all queries use tenant pool from Hono context
+- ADR-0006 Server-authoritative time enforced — all timestamps via NOW() in SQL
+- ADR-0007 Version compatibility enforced — MIN_SCHEMA_VERSION = '1.14.0' in router middleware
+- ADR-0008 Semantic versioning enforced — schema bumped 1.13.0 → 1.14.0 in migration
+- No middleware bypass — tenant resolver, license, schema version applied to all routes
+- All writes transactional — createCategory, updateCategory, deleteCategory use BEGIN/COMMIT/ROLLBACK
+- Idempotency enforced — permission seeds use ON CONFLICT DO NOTHING; indexes use IF NOT EXISTS
+- Structured logging — logger.error on unhandled exceptions; correlation IDs via AuditContext
+- Import boundaries enforced — packages/domain-core has no apps/ imports
+
+Notes:
+Stage is production ready. All 35 tasks complete. No structural backend modifications allowed.
+Modifications to categories domain require a new stage.
 
 ---
 
