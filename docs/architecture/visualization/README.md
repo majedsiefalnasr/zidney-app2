@@ -3,8 +3,8 @@
 > **Auto-generated** — do not edit manually.
 > Re-run `bun run arch:visualize` to refresh after running `bun run arch:audit`.
 
-Generated: 2026-03-17T10:57:07.277Z
-Git SHA: 4790c3e26cfb95f64435a29b2787d6eb0df95521
+Generated: 2026-03-23T11:58:30.794Z
+Git SHA: 658694f73a41690bd6f00a051ca67035dbcfa05d
 
 ---
 
