@@ -7,20 +7,31 @@ Phase: 03_BACKOFFICE_CORE Domain: 03_CONTENT_CLASSIFICATION Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
+Last Updated: 2026-03-23T00:05:00.000Z
 Initiated: 2026-03-23T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- MCQ Basket CRUD (LINKED / UNLINKED types)
+- Basket-Question linking/unlinking with indexes
+- Status workflow engine integration (DRAFT → ENABLED)
+- Deletion guard (blocked if referenced in exam config / auto-selection)
+- Auto-selection engine basket filter compatibility
+- 22 functional requirements captured
+
+Deferred Scope:
+
+- Auto-selection engine implementation (depends on exam config)
+- Exam config basket reference schema (separate stage)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
