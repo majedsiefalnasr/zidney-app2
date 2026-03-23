@@ -3,20 +3,33 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-23T10:00:00Z
+Last Updated: 2026-03-23T10:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Trivy CLI-based security scanning across 5 scan modes
+- Pre-commit fast-fail integration (deps-only, ≤30s)
+- CI GitHub Actions full scan step (HIGH/CRITICAL fail)
+- Orchestrator Step 5 capture + Step 6.5 blocking gate
+- 5 scripts in scripts/security/ registered in root package.json
+- 5 docs files in docs/scripts/security-\*.md
+- .trivyignore at repo root
+
+Deferred Scope:
+
+- SBOM generation (future stage)
+- License compliance enforcement (future stage)
+- Dependency allow/deny policies (future stage)
+- Runtime security monitoring, WAF, DAST, pen testing
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 

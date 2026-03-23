@@ -6,7 +6,7 @@
   "branch": "spec/infra-026-trivy-security-scanning-and-enforcement",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
@@ -19,13 +19,19 @@
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-03-23T10:00:00Z",
-  "last_updated": "2026-03-23T10:00:00Z",
-  "step_timings": {},
+  "last_updated": "2026-03-23T10:05:00Z",
+  "step_timings": {
+    "specify": { "started_at": "2026-03-23T10:00:30Z", "completed_at": "2026-03-23T10:05:00Z" }
+  },
   "history": [
     {
       "event": "branch_created",
       "branch": "spec/infra-026-trivy-security-scanning-and-enforcement",
       "timestamp": "2026-03-23T10:00:00Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-03-23T10:05:00Z"
     }
   ]
 }
