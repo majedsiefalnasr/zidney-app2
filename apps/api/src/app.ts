@@ -40,6 +40,7 @@ import { tenantResolver } from './middleware/tenant-resolver'
 // Route registration (Phase C, Phase D)
 import { registerStage06Routes } from './routes/attempts/index-stage06'
 import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
+import { basketsRouter } from './routes/backoffice/baskets'
 import { categoriesRouter } from './routes/backoffice/categories'
 import { categoryValuesRouter } from './routes/backoffice/category-values'
 import { backofficeContextRouter } from './routes/backoffice/context'
@@ -186,6 +187,9 @@ app.route('/api/v1/backoffice/workspace', categoryValuesRouter)
 
 // Tags endpoints — Stage 032, permission guard applied per write routes
 app.route('/api/v1/backoffice/workspace', tagsRouter)
+
+// MCQ Baskets endpoints — Stage 033, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', basketsRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade

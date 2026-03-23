@@ -24,8 +24,10 @@
  * Ordered lifecycle states for all workflow-enabled content entities.
  * Sequence position determines transition legality (FR-001).
  * Initial state for newly created entities is COMPLETED (FR-002, A-003).
+ * DRAFT is the initial state for MCQ Baskets (STAGE_33_MCQ_BASKETS).
  */
 export enum WorkflowState {
+  DRAFT = 'DRAFT',
   COMPLETED = 'COMPLETED',
   UNDER_REVIEW = 'UNDER_REVIEW',
   APPROVED = 'APPROVED',
@@ -34,9 +36,10 @@ export enum WorkflowState {
 
 /**
  * Ordered array — index position is the canonical sequence number.
- * COMPLETED=0, UNDER_REVIEW=1, APPROVED=2, ENABLED=3
+ * DRAFT=0, COMPLETED=1, UNDER_REVIEW=2, APPROVED=3, ENABLED=4
  */
 export const WORKFLOW_STATE_ORDER: WorkflowState[] = [
+  WorkflowState.DRAFT,
   WorkflowState.COMPLETED,
   WorkflowState.UNDER_REVIEW,
   WorkflowState.APPROVED,
@@ -71,6 +74,12 @@ export interface WorkflowTransitionDefinition {
  */
 export const WORKFLOW_TRANSITIONS: WorkflowTransitionDefinition[] = [
   // Forward transitions
+  {
+    from: WorkflowState.DRAFT,
+    to: WorkflowState.COMPLETED,
+    forward: true,
+    actionKey: 'complete',
+  },
   {
     from: WorkflowState.COMPLETED,
     to: WorkflowState.UNDER_REVIEW,
@@ -124,4 +133,5 @@ export const WORKFLOW_ENTITY_TYPES = new Set<string>([
   'topic',
   'library_file',
   'template',
+  'mcq_basket',
 ])
