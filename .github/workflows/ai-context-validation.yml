@@ -22,7 +22,7 @@ on:
       - "package.json"
 
 env:
-  BUN_VERSION: "1.3.9"
+  BUN_VERSION: "1.3.11"
 
 jobs:
   ai-context-validation:
