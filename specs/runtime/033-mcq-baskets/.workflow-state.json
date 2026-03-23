@@ -6,9 +6,9 @@
   "branch": "spec/033-mcq-baskets",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -19,11 +19,15 @@
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-03-23T00:00:00.000Z",
-  "last_updated": "2026-03-23T00:05:00.000Z",
+  "last_updated": "2026-03-23T00:15:00.000Z",
   "step_timings": {
     "specify": {
       "started_at": "2026-03-23T00:00:30.000Z",
       "completed_at": "2026-03-23T00:05:00.000Z"
+    },
+    "clarify": {
+      "started_at": "2026-03-23T00:05:30.000Z",
+      "completed_at": "2026-03-23T00:15:00.000Z"
     }
   },
   "history": [
@@ -35,6 +39,10 @@
     {
       "event": "specify_complete",
       "timestamp": "2026-03-23T00:05:00.000Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "timestamp": "2026-03-23T00:15:00.000Z"
     }
   ]
 }

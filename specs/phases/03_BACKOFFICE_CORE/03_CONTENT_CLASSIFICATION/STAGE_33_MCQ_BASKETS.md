@@ -7,31 +7,33 @@ Phase: 03_BACKOFFICE_CORE Domain: 03_CONTENT_CLASSIFICATION Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-23T00:05:00.000Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-03-23T00:15:00.000Z
 Initiated: 2026-03-23T00:00:00.000Z
 
 Scope Defined:
 
 - MCQ Basket CRUD (LINKED / UNLINKED types)
-- Basket-Question linking/unlinking with indexes
-- Status workflow engine integration (DRAFT → ENABLED)
-- Deletion guard (blocked if referenced in exam config / auto-selection)
+- Basket-Question linking/unlinking with unique constraint
+- Status workflow engine: DRAFT → COMPLETED → UNDER_REVIEW → APPROVED → ENABLED (forward-only)
+- Per-role RBAC for workflow transitions (C2)
+- Deletion guard: ALL exam config statuses block deletion (C4)
+- Link endpoint: 409 on duplicate (C3)
+- max_questions null = unlimited (C5)
 - Auto-selection engine basket filter compatibility
-- 22 functional requirements captured
 
 Deferred Scope:
 
-- Auto-selection engine implementation (depends on exam config)
+- Auto-selection engine implementation (depends on exam config stage)
 - Exam config basket reference schema (separate stage)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

@@ -122,19 +122,19 @@ No exceptions requiring a new ADR were detected for this stage.
 
 ### Table: `mcq_baskets`
 
-| Column          | Type         | Constraints                                                      |
-| --------------- | ------------ | ---------------------------------------------------------------- |
-| `id`            | UUID         | Primary key                                                      |
-| `name`          | VARCHAR(255) | NOT NULL                                                         |
-| `code`          | VARCHAR(100) | NOT NULL, UNIQUE per workspace                                   |
-| `type`          | VARCHAR(20)  | NOT NULL, CHECK IN (`LINKED`, `UNLINKED`)                        |
-| `max_questions` | INTEGER      | Nullable — when set, enforced during link and enable transitions |
-| `description`   | TEXT         | Nullable                                                         |
-| `status`        | VARCHAR(30)  | NOT NULL, managed by workflow engine                             |
-| `created_at`    | TIMESTAMPTZ  | NOT NULL, server-set                                             |
-| `updated_at`    | TIMESTAMPTZ  | NOT NULL, server-set                                             |
-| `created_by`    | UUID         | Nullable, FK → `users.id`                                        |
-| `updated_by`    | UUID         | Nullable, FK → `users.id`                                        |
+| Column          | Type         | Constraints                                                                                                                                     |
+| --------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`            | UUID         | Primary key                                                                                                                                     |
+| `name`          | VARCHAR(255) | NOT NULL                                                                                                                                        |
+| `code`          | VARCHAR(100) | NOT NULL, UNIQUE per workspace                                                                                                                  |
+| `type`          | VARCHAR(20)  | NOT NULL, CHECK IN (`LINKED`, `UNLINKED`)                                                                                                       |
+| `max_questions` | INTEGER      | Nullable — when `null`, no question-count cap is enforced (unlimited); when set (positive integer), enforced during link and enable transitions |
+| `description`   | TEXT         | Nullable                                                                                                                                        |
+| `status`        | VARCHAR(30)  | NOT NULL, managed by workflow engine                                                                                                            |
+| `created_at`    | TIMESTAMPTZ  | NOT NULL, server-set                                                                                                                            |
+| `updated_at`    | TIMESTAMPTZ  | NOT NULL, server-set                                                                                                                            |
+| `created_by`    | UUID         | Nullable, FK → `users.id`                                                                                                                       |
+| `updated_by`    | UUID         | Nullable, FK → `users.id`                                                                                                                       |
 
 **Indexes:**
 
@@ -354,8 +354,12 @@ Delete a basket permanently.
 
 **Preconditions (deletion guard):**
 
-1. Basket MUST NOT be referenced in any MCQ exam configuration.
-2. Basket MUST NOT be referenced in any auto-selection rule.
+1. Basket MUST NOT be referenced in any MCQ exam configuration — **regardless of that configuration's
+   lifecycle status** (including DRAFT configurations). Any record in the exam configuration table
+   that references the basket ID blocks deletion.
+2. Basket MUST NOT be referenced in any auto-selection rule — **regardless of that rule's status**
+   (including DRAFT rules). Any record in the auto-selection rule table that references the basket
+   ID blocks deletion.
 3. If either precondition fails, the deletion MUST be rejected. The basket may be disabled via
    workflow transition instead.
 
@@ -385,7 +389,12 @@ no direct status mutation is allowed through the CRUD update endpoint.
 
 Trigger a workflow state transition on a basket.
 
-**Permission required:** Mapped to transition type per workflow engine permission configuration.
+**Permission required:** Transition-specific, mapped per the workflow engine configuration:
+
+- `DRAFT → COMPLETED`: `question_manage` OR `content_manage`
+- `COMPLETED → UNDER_REVIEW`: `question_manage` OR `content_manage`
+- `UNDER_REVIEW → APPROVED`: `content_review` OR `question_manage`
+- `APPROVED → ENABLED`: `content_review` OR `question_manage`
 
 **Request body:**
 
@@ -422,13 +431,13 @@ Trigger a workflow state transition on a basket.
 
 **Error cases:**
 
-| Status | Error Code                     | Condition                                                    |
-| ------ | ------------------------------ | ------------------------------------------------------------ |
-| 404    | `BASKET_NOT_FOUND`             | Basket does not exist                                        |
-| 400    | `INVALID_STATE_TRANSITION`     | Requested transition is not a valid forward or backward step |
-| 422    | `BASKET_EMPTY_CANNOT_ENABLE`   | Attempting ENABLED transition on a basket with 0 questions   |
-| 422    | `BASKET_EXCEEDS_MAX_QUESTIONS` | Basket question count exceeds `max_questions` at ENABLE time |
-| 403    | `FORBIDDEN`                    | Insufficient permission for this transition                  |
+| Status | Error Code                     | Condition                                                                                              |
+| ------ | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| 404    | `BASKET_NOT_FOUND`             | Basket does not exist                                                                                  |
+| 400    | `INVALID_STATE_TRANSITION`     | Requested transition is not a valid forward step; backward transitions are not permitted in this stage |
+| 422    | `BASKET_EMPTY_CANNOT_ENABLE`   | Attempting ENABLED transition on a basket with 0 questions                                             |
+| 422    | `BASKET_EXCEEDS_MAX_QUESTIONS` | Basket question count exceeds `max_questions` at ENABLE time                                           |
+| 403    | `FORBIDDEN`                    | Insufficient permission for this transition                                                            |
 
 ---
 
@@ -733,7 +742,9 @@ it. Verify the API rejects the deletion with the correct error code.
   Direct status mutation via the CRUD update endpoint is forbidden.
 - **FR-005**: System MUST enforce the workflow transition chain:
   `DRAFT → COMPLETED → UNDER_REVIEW → APPROVED → ENABLED`.
-  Out-of-order transitions MUST be rejected with `400 INVALID_STATE_TRANSITION`.
+  Out-of-order or backward transitions MUST be rejected with `400 INVALID_STATE_TRANSITION`.
+  Backward transitions (e.g. `ENABLED → APPROVED`) are out of scope for this stage and are
+  treated as invalid regardless of the requested direction.
 - **FR-006**: System MUST prevent transitioning a basket to `ENABLED` when `questionCount = 0`,
   returning `422 BASKET_EMPTY_CANNOT_ENABLE`.
 - **FR-007**: System MUST prevent transitioning a basket to `ENABLED` when `max_questions` is
@@ -744,7 +755,8 @@ it. Verify the API rejects the deletion with the correct error code.
 - **FR-010**: System MUST allow authorized staff to update basket metadata (`name`, `code`,
   `maxQuestions`, `description`). `type` and `status` are NOT updatable via this endpoint.
 - **FR-011**: System MUST allow authorized staff to delete a basket only if it has no references in
-  exam configuration tables or auto-selection rules.
+  exam configuration tables or auto-selection rule tables, **regardless of those records' lifecycle
+  status** (DRAFT, ACTIVE, ARCHIVED, or any other status counts as a blocking reference).
 - **FR-012**: Deletion of a basket MUST atomically remove all associated `mcq_basket_questions`
   rows via cascade.
 - **FR-013**: System MUST allow authorized staff to link an MCQ question to a basket.
@@ -845,3 +857,41 @@ The following are explicitly excluded from this stage and must not be implemente
 - Backward workflow transitions (disabling a basket is out of scope for this stage).
 - Basket reordering or priority ranking of questions within a basket.
 - Cross-tenant basket templates or global basket libraries.
+
+---
+
+## Clarifications
+
+### Session 2026-03-23
+
+- Q: Can a basket transition backwards (e.g. ENABLED → APPROVED → UNDER_REVIEW)? → A: No. All
+  backward transitions return `400 INVALID_STATE_TRANSITION`. The shared workflow engine enforces
+  forward-only progression in this stage. Backward transitions (including `ENABLED → APPROVED`) are
+  explicitly out of scope and are treated as invalid regardless of the requested direction.
+
+- Q: Which RBAC roles can perform workflow transitions vs. basic CRUD? → A: Basic CRUD
+  (`create`, `update`, `delete`, `link`, `unlink`) requires `question_manage` OR `content_manage`.
+  Workflow transitions are role-mapped per step: `DRAFT → COMPLETED` and
+  `COMPLETED → UNDER_REVIEW` require `question_manage` OR `content_manage`; `UNDER_REVIEW →
+APPROVED` and `APPROVED → ENABLED` require `content_review` OR `question_manage`. These mappings
+  are registered in the shared workflow engine permission configuration.
+
+- Q: Exact behavior when the link endpoint receives a duplicate (basket_id, question_id) — 200
+  idempotent or 409 conflict? → A: `409 Conflict` with error code `BASKET_QUESTION_DUPLICATE`. The
+  link operation is NOT idempotent-200. Duplicates are always rejected with a conflict error,
+  enforced at both the application layer (pre-check) and the database constraint layer
+  (`UNIQUE(basket_id, question_id)`). This is consistent with the Constitutional Compliance
+  Declaration in this spec.
+
+- Q: What constitutes a "reference" that blocks deletion — only active/enabled exam configs, or
+  all? → A: ALL references regardless of the exam configuration's or auto-selection rule's own
+  lifecycle status block deletion. Even a DRAFT exam configuration or a DRAFT auto-selection rule
+  that contains a reference to the basket prevents its deletion. This prevents orphaned
+  configuration state on any subsequent publish of that configuration.
+
+- Q: If max_questions is null, is there no cap, or is there a system-level default cap? → A:
+  `null` means no cap — unlimited questions may be linked to the basket. No system-level default cap
+  exists in this stage. The platform write rate limit (≤ 30 req/min per workspace) is the only
+  operational throttle. When `max_questions` is set to a positive integer, that value is enforced
+  strictly at both link time (`BASKET_MAX_QUESTIONS_REACHED`) and ENABLED transition time
+  (`BASKET_EXCEEDS_MAX_QUESTIONS`).
