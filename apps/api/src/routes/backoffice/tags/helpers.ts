@@ -77,7 +77,7 @@ export function tagsErrorResponse(c: Context, err: unknown): Response {
         message: err.message || TAG_ERROR_MESSAGES[err.code] || 'Unknown error',
       },
     }
-    return c.json(response, httpStatus)
+    return c.json(response, httpStatus as 400 | 403 | 404 | 409 | 422 | 500 | 503)
   }
 
   if (

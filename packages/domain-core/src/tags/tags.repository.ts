@@ -28,7 +28,7 @@ import type {
 // Internal Row Mapper Types
 // ---------------------------------------------------------------------------
 
-interface TagDbRow {
+interface TagDbRow extends Record<string, unknown> {
   id: string
   name: string
   normalized_name: string
@@ -39,7 +39,7 @@ interface TagDbRow {
   updated_by: string | null
 }
 
-interface TagRelationDbRow {
+interface TagRelationDbRow extends Record<string, unknown> {
   id: string
   tag_id: string
   entity_type: string
@@ -47,7 +47,7 @@ interface TagRelationDbRow {
   created_at: Date
 }
 
-interface CountRow {
+interface CountRow extends Record<string, unknown> {
   count: string
 }
 

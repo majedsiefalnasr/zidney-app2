@@ -26,6 +26,7 @@ export interface AuditContext {
   correlation_id: string
   workspace_slug: string
   workspace_id: string
+  caller_permissions?: string[]
 }
 
 // ---------------------------------------------------------------------------
@@ -120,9 +121,12 @@ export interface ListTagEntitiesResult {
 }
 
 export interface DeleteTagResult {
-  deleted: true
+  success: true
+  id: string
+  relations_removed: number
 }
 
 export interface DeleteTagRelationResult {
-  deleted: true
+  success: true
+  id: string
 }
