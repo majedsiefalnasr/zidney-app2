@@ -122,19 +122,21 @@ No exceptions requiring a new ADR were detected for this stage.
 
 ### Table: `mcq_baskets`
 
-| Column          | Type         | Constraints                                                                                                                                     |
-| --------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`            | UUID         | Primary key                                                                                                                                     |
-| `name`          | VARCHAR(255) | NOT NULL                                                                                                                                        |
-| `code`          | VARCHAR(100) | NOT NULL, UNIQUE per workspace                                                                                                                  |
-| `type`          | VARCHAR(20)  | NOT NULL, CHECK IN (`LINKED`, `UNLINKED`)                                                                                                       |
-| `max_questions` | INTEGER      | Nullable — when `null`, no question-count cap is enforced (unlimited); when set (positive integer), enforced during link and enable transitions |
-| `description`   | TEXT         | Nullable                                                                                                                                        |
-| `status`        | VARCHAR(30)  | NOT NULL, managed by workflow engine                                                                                                            |
-| `created_at`    | TIMESTAMPTZ  | NOT NULL, server-set                                                                                                                            |
-| `updated_at`    | TIMESTAMPTZ  | NOT NULL, server-set                                                                                                                            |
-| `created_by`    | UUID         | Nullable, FK → `users.id`                                                                                                                       |
-| `updated_by`    | UUID         | Nullable, FK → `users.id`                                                                                                                       |
+| Column              | Type         | Constraints                                                                                                                                     |
+| ------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                | UUID         | Primary key                                                                                                                                     |
+| `name`              | VARCHAR(255) | NOT NULL                                                                                                                                        |
+| `code`              | VARCHAR(100) | NOT NULL, UNIQUE per workspace                                                                                                                  |
+| `type`              | VARCHAR(20)  | NOT NULL, CHECK IN (`LINKED`, `UNLINKED`)                                                                                                       |
+| `max_questions`     | INTEGER      | Nullable — when `null`, no question-count cap is enforced (unlimited); when set (positive integer), enforced during link and enable transitions |
+| `description`       | TEXT         | Nullable                                                                                                                                        |
+| `status`            | VARCHAR(30)  | NOT NULL, managed by workflow engine                                                                                                            |
+| `created_at`        | TIMESTAMPTZ  | NOT NULL, server-set                                                                                                                            |
+| `updated_at`        | TIMESTAMPTZ  | NOT NULL, server-set                                                                                                                            |
+| `created_by`        | UUID         | Nullable, FK → `users.id`                                                                                                                       |
+| `updated_by`        | UUID         | Nullable, FK → `users.id`                                                                                                                       |
+| `status_updated_at` | TIMESTAMPTZ  | Nullable — set by workflow engine on every status transition                                                                                    |
+| `status_updated_by` | UUID         | Nullable, FK → `users.id` — set by workflow engine on every status transition                                                                   |
 
 **Indexes:**
 
@@ -298,7 +300,7 @@ List baskets with optional filtering and pagination.
 
 ---
 
-#### `GET /workspace/:slug/mcq-baskets/:id`
+#### `GET /workspace/:slug/mcq-baskets/:basketId`
 
 Retrieve a single basket by ID.
 
@@ -314,7 +316,7 @@ Retrieve a single basket by ID.
 
 ---
 
-#### `PATCH /workspace/:slug/mcq-baskets/:id`
+#### `PATCH /workspace/:slug/mcq-baskets/:basketId`
 
 Update basket metadata (`name`, `code`, `maxQuestions`, `description`).
 
@@ -346,7 +348,7 @@ Update basket metadata (`name`, `code`, `maxQuestions`, `description`).
 
 ---
 
-#### `DELETE /workspace/:slug/mcq-baskets/:id`
+#### `DELETE /workspace/:slug/mcq-baskets/:basketId`
 
 Delete a basket permanently.
 
@@ -374,8 +376,8 @@ Delete a basket permanently.
 | Status | Error Code                            | Condition                                      |
 | ------ | ------------------------------------- | ---------------------------------------------- |
 | 404    | `BASKET_NOT_FOUND`                    | Basket does not exist                          |
-| 422    | `BASKET_REFERENCED_IN_EXAM_CONFIG`    | Basket is referenced in an exam configuration  |
-| 422    | `BASKET_REFERENCED_IN_AUTO_SELECTION` | Basket is referenced in an auto-selection rule |
+| 409    | `BASKET_REFERENCED_IN_EXAM_CONFIG`    | Basket is referenced in an exam configuration  |
+| 409    | `BASKET_REFERENCED_IN_AUTO_SELECTION` | Basket is referenced in an auto-selection rule |
 | 403    | `FORBIDDEN`                           | Insufficient permission                        |
 
 ---
@@ -385,7 +387,7 @@ Delete a basket permanently.
 Basket workflow state is managed exclusively via the **shared status workflow engine** —
 no direct status mutation is allowed through the CRUD update endpoint.
 
-#### `POST /workspace/:slug/mcq-baskets/:id/workflow/transition`
+#### `POST /workspace/:slug/mcq-baskets/:basketId/workflow/transition`
 
 Trigger a workflow state transition on a basket.
 
@@ -443,7 +445,7 @@ Trigger a workflow state transition on a basket.
 
 ### Basket-Question Linking
 
-#### `POST /workspace/:slug/mcq-baskets/:id/questions`
+#### `POST /workspace/:slug/mcq-baskets/:basketId/questions`
 
 Add a question to a basket.
 
@@ -478,17 +480,17 @@ Add a question to a basket.
 
 **Error cases:**
 
-| Status | Error Code                     | Condition                               |
-| ------ | ------------------------------ | --------------------------------------- |
-| 404    | `BASKET_NOT_FOUND`             | Basket does not exist                   |
-| 404    | `QUESTION_NOT_FOUND`           | Question does not exist in tenant       |
-| 409    | `BASKET_QUESTION_DUPLICATE`    | Question already linked to this basket  |
-| 422    | `BASKET_MAX_QUESTIONS_REACHED` | Adding would exceed `max_questions` cap |
-| 403    | `FORBIDDEN`                    | Insufficient permission                 |
+| Status | Error Code                       | Condition                               |
+| ------ | -------------------------------- | --------------------------------------- |
+| 404    | `BASKET_NOT_FOUND`               | Basket does not exist                   |
+| 404    | `QUESTION_NOT_FOUND`             | Question does not exist in tenant       |
+| 409    | `BASKET_QUESTION_ALREADY_LINKED` | Question already linked to this basket  |
+| 422    | `BASKET_MAX_QUESTIONS_REACHED`   | Adding would exceed `max_questions` cap |
+| 403    | `FORBIDDEN`                      | Insufficient permission                 |
 
 ---
 
-#### `DELETE /workspace/:slug/mcq-baskets/:id/questions/:questionId`
+#### `DELETE /workspace/:slug/mcq-baskets/:basketId/questions/:questionId`
 
 Remove a question from a basket.
 
@@ -510,7 +512,7 @@ Remove a question from a basket.
 
 ---
 
-#### `GET /workspace/:slug/mcq-baskets/:id/questions`
+#### `GET /workspace/:slug/mcq-baskets/:basketId/questions`
 
 List all questions linked to a basket.
 
@@ -640,7 +642,7 @@ shell with no exam utility.
 1. **Given** an existing basket and an existing question, **When** a link request is sent, **Then**
    `mcq_basket_questions` row is inserted and `questionCount` on the basket increases by 1.
 2. **Given** the same `(basketId, questionId)` pair, **When** a second link request is sent,
-   **Then** the API returns `409 Conflict` with `BASKET_QUESTION_DUPLICATE`.
+   **Then** the API returns `409 Conflict` with `BASKET_QUESTION_ALREADY_LINKED`.
 3. **Given** a non-existent `questionId`, **When** a link request is sent, **Then** the API returns
    `404 Not Found` with `QUESTION_NOT_FOUND`.
 4. **Given** `maxQuestions = 5` and the basket already has 5 questions linked, **When** a link

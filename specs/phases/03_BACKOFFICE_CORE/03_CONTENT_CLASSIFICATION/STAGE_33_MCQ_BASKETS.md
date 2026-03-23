@@ -7,21 +7,22 @@ Phase: 03_BACKOFFICE_CORE Domain: 03_CONTENT_CLASSIFICATION Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-03-23T00:15:00.000Z
+Last Updated: 2026-03-23T00:30:00.000Z
 Initiated: 2026-03-23T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
 - MCQ Basket CRUD (LINKED / UNLINKED types)
-- Basket-Question linking/unlinking with unique constraint
-- Status workflow engine: DRAFT → COMPLETED → UNDER_REVIEW → APPROVED → ENABLED (forward-only)
-- Per-role RBAC for workflow transitions (C2)
-- Deletion guard: ALL exam config statuses block deletion (C4)
-- Link endpoint: 409 on duplicate (C3)
-- max_questions null = unlimited (C5)
-- Auto-selection engine basket filter compatibility
+- New migration `20260323_011_mcq_baskets.ts` (schema 1.16.0 → 1.17.0): tables `mcq_baskets` + `mcq_basket_questions`
+- Workflow engine extension: add `DRAFT` state, `DRAFT→COMPLETED` edge, register `mcq_basket` entity
+- Domain package `packages/domain-core/src/baskets/` (service, repository, types, errors)
+- Validation schemas `packages/validation/src/backoffice/baskets.schemas.ts`
+- 10 route handlers + 1 router under `apps/api/src/routes/backoffice/baskets/`
+- questionCount computed at read time (no stored counter)
+- Deletion guard: graceful `information_schema` check (AD-004)
+- Permission bridging for workflow transitions (AD-002)
 
 Deferred Scope:
 
@@ -30,10 +31,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Architecture Guardian: PASS (corrections applied)
+- API Designer: PASS (all 3 blocking violations remediated)
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
