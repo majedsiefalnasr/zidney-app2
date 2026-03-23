@@ -9,21 +9,23 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-03-23T00:15:00Z
+Last Updated: 2026-03-23T00:30:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Flat tagging system (tags + tag_relations tables)
-- Tag CRUD with normalized_name uniqueness (10 endpoints)
-- Tag assignment to MCQ_QUESTION, TRADITIONAL_QUESTION, LIBRARY_FILE
-- Tag-based AND-logic filtering with pagination
-- Lifecycle enforcement: ENABLED/DISABLED states
-- All precondition checks inside write transactions
+- 2 new tenant DB tables: `tags`, `tag_relations` (migration 20260323_010_tags.ts)
+- Schema version bump: 1.15.0 → 1.16.0
+- Drizzle schemas: `tags.schema.ts`, `tag-relations.schema.ts`
+- Domain package: `packages/domain-core/src/tags/` (errors, types, repo, service, tests)
+- Validation: `packages/validation/src/backoffice/tags.schemas.ts`
+- 9 Hono route handlers + router index in `apps/api/src/routes/backoffice/tags/`
+- Integration tests: `tests/tags.integration.test.ts`
 
 Deferred Scope:
 
+- Tag filtering on entity list endpoints (MCQ, traditional, library) — entity endpoints don't exist yet
 - OR-logic multi-tag filtering
 - Tag auto-suggestions
 - Hierarchical tags (explicitly excluded)
@@ -31,7 +33,7 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
 All specification ambiguities resolved. Ready for technical planning.
