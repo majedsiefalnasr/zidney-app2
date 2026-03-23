@@ -7,22 +7,19 @@ Phase: 03_BACKOFFICE_CORE Domain: 03_CONTENT_CLASSIFICATION Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-03-23T00:30:00.000Z
+Last Updated: 2026-03-23T01:00:00.000Z
 Initiated: 2026-03-23T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- MCQ Basket CRUD (LINKED / UNLINKED types)
-- New migration `20260323_011_mcq_baskets.ts` (schema 1.16.0 → 1.17.0): tables `mcq_baskets` + `mcq_basket_questions`
-- Workflow engine extension: add `DRAFT` state, `DRAFT→COMPLETED` edge, register `mcq_basket` entity
-- Domain package `packages/domain-core/src/baskets/` (service, repository, types, errors)
-- Validation schemas `packages/validation/src/backoffice/baskets.schemas.ts`
-- 10 route handlers + 1 router under `apps/api/src/routes/backoffice/baskets/`
-- questionCount computed at read time (no stored counter)
-- Deletion guard: graceful `information_schema` check (AD-004)
-- Permission bridging for workflow transitions (AD-002)
+- Total: 35 atomic tasks
+- Infrastructure: 7 (workflow engine, migration, Drizzle schemas, boot registry)
+- Domain: 6 (types, errors, repository, service, dependency registry, barrel)
+- Validation: 2 (Zod schemas + export)
+- API Routes: 12 (helpers, 9 handlers, router assembly, app.ts mount)
+- Testing: 8 (2 unit + 5 integration + 1 isolation)
 
 Deferred Scope:
 
@@ -31,12 +28,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Guardian: PASS (corrections applied)
-- API Designer: PASS (all 3 blocking violations remediated)
+- Task set compliant — drift analysis required before implementation
+- Architecture Guardian: PASS | API Designer: PASS (plan step)
+- All write paths transactional | Idempotency enforced | Layer boundaries respected
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
