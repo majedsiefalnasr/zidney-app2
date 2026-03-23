@@ -735,3 +735,24 @@ The following items are explicitly NOT part of this stage:
   order; custom ranking is not required.
 - **Subject, Lesson, Category, Category Value, Division** — these are separate structured
   classification systems; tags must never replace them.
+
+---
+
+## Clarifications
+
+### Session 2026-03-23
+
+**Q: Do the four precondition checks for tag assignment (tag existence, enabled status, entity existence, duplicate check) execute inside the write transaction or outside it?**
+**A:** All four checks execute INSIDE the write transaction. The confirmed Zidney platform pattern — used in `packages/domain-core/src/lessons/lessons.service.ts` and `packages/domain-core/src/subjects/subjects.service.ts` — is: `BEGIN → precondition reads → INSERT → COMMIT`, with `ROLLBACK` on any failure. This eliminates TOCTOU race conditions between the existence checks and the insert. The same BEGIN-scoped pattern applies to tag creation (normalized_name uniqueness check + INSERT) and to tag assignment (all four preconditions + INSERT into `tag_relations`). FR-017 ("all writes execute within a transaction") is satisfied only when preconditions are checked inside the same transaction scope.
+
+**Q: When two concurrent tag creation requests both pass the application-level normalized_name check and the DB unique constraint fires on one of them (PostgreSQL error code `23505`), what response should be returned?**
+**A:** The implementation MUST catch the `23505` unique constraint violation and translate it to `409 TAG_DUPLICATE` — identical to the response produced by the app-level pre-insert check. This is the established platform pattern: `lessons.service.ts` explicitly catches `err.code === '23505'` and throws `LESSON_NAME_DUPLICATE`. No separate error code for concurrent collisions is needed; `TAG_DUPLICATE` covers all duplicate cases regardless of detection layer. This also applies to PATCH name updates that race with a concurrent creation.
+
+**Q: Does `GET /workspace/:slug/tags` without a `status` query parameter return all tags (ENABLED and DISABLED) or only ENABLED tags by default?**
+**A:** The default list returns ALL tags regardless of status. User Story 2 Scenario 1 states "all tags are returned" when the endpoint is called without filters. The `status` parameter is an optional filter, not a mandatory gate. The `idx_tags_status` index exists to accelerate filtered queries, not to enforce a default-hidden state. DISABLED tags carry no access risk — they are purely a catalog curation concern — so hiding them by default would degrade the backoffice management experience. Callers who need only active tags must supply `?status=ENABLED` explicitly.
+
+**Q: Is `entityType` validate at the application layer, the DB CHECK constraint layer, or both — and which is authoritative?**
+**A:** Application layer is PRIMARY and authoritative (FR-007 mandates the structured `TAG_RELATION_INVALID_ENTITY_TYPE` error code). The DB `CHECK IN ('MCQ_QUESTION', 'TRADITIONAL_QUESTION', 'LIBRARY_FILE')` on `entity_type` (VARCHAR(40)) is a safety backstop only. The implementation MUST perform app-layer validation before the INSERT to guarantee the correct `422 TAG_RELATION_INVALID_ENTITY_TYPE` response. If a DB CHECK violation (PostgreSQL error code `23514`) fires due to an implementation gap, it MUST be caught and translated to the same `422 TAG_RELATION_INVALID_ENTITY_TYPE` response. Using VARCHAR(40) + CHECK (rather than a PostgreSQL ENUM) is intentional: adding a new entity type in a future stage requires only a migration to widen the CHECK constraint and an app-layer update, with no ENUM-type recast.
+
+**Q: What are the default and maximum values for `per_page` on the tag list endpoint and the `GET /workspace/:slug/tags/:id/entities` endpoint?**
+**A:** Default `per_page = 20`, maximum `per_page = 100`. This is the confirmed platform-wide standard, declared in `packages/validation/src/backoffice/hierarchy.schemas.ts` (`DEFAULT_PER_PAGE = 20`, `MAX_PER_PAGE = 100`) and enforced identically in `packages/domain-core/src/rbac/rbac.service.ts` (`Math.min(100, Math.max(1, input.pageSize ?? 20))`). The tag list validation schema MUST apply these same bounds via Zod: `z.coerce.number().int().min(1).max(100).default(20)`. The `perPage: 20` shown in the spec's example response is normative, not illustrative.

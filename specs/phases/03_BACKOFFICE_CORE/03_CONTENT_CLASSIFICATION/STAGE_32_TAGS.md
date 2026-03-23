@@ -9,18 +9,18 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-23T00:05:00Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-03-23T00:15:00Z
 
 Scope Defined:
 
-- Flat tagging system for content classification (tags + tag_relations tables)
-- Tag CRUD API (10 endpoints)
+- Flat tagging system (tags + tag_relations tables)
+- Tag CRUD with normalized_name uniqueness (10 endpoints)
 - Tag assignment to MCQ_QUESTION, TRADITIONAL_QUESTION, LIBRARY_FILE
-- Tag-based entity filtering (AND logic, paginated)
-- normalized_name uniqueness enforcement at DB level
-- Lifecycle management: ENABLED/DISABLED states
+- Tag-based AND-logic filtering with pagination
+- Lifecycle enforcement: ENABLED/DISABLED states
+- All precondition checks inside write transactions
 
 Deferred Scope:
 
@@ -31,10 +31,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
