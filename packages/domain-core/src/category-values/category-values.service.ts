@@ -311,7 +311,7 @@ export async function updateCategoryValue(
       }
     }
     // Name must remain present if translations are being replaced
-    const hasNameTranslation = input.translations!.some(
+    const hasNameTranslation = input.translations?.some(
       (t) => t.field_name === 'name' && t.translated_value.trim().length > 0
     )
     if (!hasNameTranslation) {

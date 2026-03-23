@@ -79,7 +79,7 @@ All API responses: `{ success: boolean, data: object | null, error: { code, mess
 AI must assume this validation pipeline runs locally and in CI:
 
 ```
-bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run type-check && bun run test
+bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run typecheck && bun run test
 ```
 
 If a change would break the audit, AI must refuse to generate it.
@@ -99,7 +99,7 @@ See: `specs/STAGE_LIFECYCLE_POLICY.md`
 
 ### Testing
 
-No feature is complete without: unit tests + integration tests (if API) + migration validated + lint + type-check passes.
+No feature is complete without: unit tests + integration tests (if API) + migration validated + lint + typecheck passes.
 
 ### Escalation
 

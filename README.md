@@ -364,7 +364,7 @@ bun run lint
 Run TypeScript checks:
 
 ```
-bun run type-check
+bun run typecheck
 ```
 
 Run tests:
@@ -453,7 +453,7 @@ git checkout -b feature/<feature-name>
 
 ```
 bun run lint
-bun run type-check
+bun run typecheck
 bun run test
 bun scripts/infra-audit.ts
 ```
@@ -502,7 +502,7 @@ Always run the full validation pipeline locally:
 
 ```
 bun run lint
-bun run type-check
+bun run typecheck
 bun run test
 bun scripts/infra-audit.ts --ci
 ```

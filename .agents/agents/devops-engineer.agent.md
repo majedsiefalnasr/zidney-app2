@@ -183,7 +183,7 @@ jobs:
       - name: Lint
         run: bun run lint
       - name: Type Check
-        run: bun run type-check
+        run: bun run typecheck
       - name: Unit Tests
         run: bun run test
       - name: Tenant Isolation Tests
