@@ -1,6 +1,7 @@
 import { logger } from '@zidney/logger'
 import { sql } from 'drizzle-orm'
 import { up as applyRbacRolePermissionsComplete } from '../db/tenant/migrations/20260302_001_rbac_role_permissions_complete'
+import { up as applyMcqBaskets } from '../db/tenant/migrations/20260323_011_mcq_baskets'
 
 /**
  * T009: Tenant DB Migration Registration - Boot Sequence
@@ -36,6 +37,19 @@ const TENANT_MIGRATIONS_1_1_0 = [
  * - UPDATE schema_version 1.3.0 → 1.4.0
  */
 const TENANT_MIGRATIONS_1_4_0_NAME = '20260302_001_rbac_role_permissions_complete'
+
+/**
+ * STAGE_33: Tenant migrations required for 1.17.0 schema (MCQ Baskets)
+ * Applied for tenants currently at schema_version < 1.17.0.
+ *
+ * Migration: 20260323_011_mcq_baskets
+ * - CREATE mcq_baskets
+ * - CREATE mcq_basket_questions
+ * - FK constraints + B-tree indexes
+ * - CONCURRENT unique indexes (code, basket_id+question_id)
+ * - UPDATE schema_version 1.16.0 → 1.17.0
+ */
+const TENANT_MIGRATIONS_1_17_0_NAME = '20260323_011_mcq_baskets'
 
 /**
  * Apply tenant DB migrations during app boot
@@ -134,6 +148,58 @@ export async function registerAndApplyTenantMigrations(
       )
     } catch (error) {
       logger.error(`[${correlationId}][${workspaceSlug}] STAGE_21 migration 1.4.0 failed:`, {
+        error,
+      })
+      failedTenants.push(workspaceSlug)
+    }
+  }
+
+  // ─── STAGE_33: Apply 1.16.0 → 1.17.0 migrations ───────────────────────────
+  // For any tenant currently at schema_version < 1.17.0, apply the MCQ Baskets
+  // migration to bring them to 1.17.0.
+  for (const [workspaceSlug, db] of tenantConnections.entries()) {
+    try {
+      // Query schema_version from the canonical _schema_versions table
+      const versionResult = await db.execute(
+        sql`SELECT version FROM _schema_versions WHERE name = 'schema_version' LIMIT 1`
+      )
+
+      const currentVersion = (versionResult?.[0]?.version as string) || '0.0.0'
+
+      // Skip if already at or beyond 1.17.0
+      if (currentVersion >= '1.17.0') {
+        continue
+      }
+
+      // Check idempotency: skip if already recorded
+      const alreadyApplied = await db.execute(
+        sql`SELECT 1 FROM migration_history WHERE name = ${TENANT_MIGRATIONS_1_17_0_NAME} LIMIT 1`
+      )
+      if (alreadyApplied?.[0]) {
+        continue
+      }
+
+      // Get a raw PoolClient to run the migration's transactional DDL
+      const pool = (db as Record<string, unknown>).$client
+      const client = await pool.connect()
+      try {
+        await applyMcqBaskets(client)
+      } finally {
+        client.release()
+      }
+
+      // Record the migration name for idempotency
+      await db.execute(
+        sql`INSERT INTO migration_history (name, version, applied_at, correlation_id)
+            VALUES (${TENANT_MIGRATIONS_1_17_0_NAME}, '1.17.0', NOW(), ${correlationId})
+            ON CONFLICT (name) DO NOTHING`
+      )
+
+      logger.info(
+        `[${correlationId}][${workspaceSlug}] Applied migration: ${TENANT_MIGRATIONS_1_17_0_NAME} (schema 1.16.0 → 1.17.0)`
+      )
+    } catch (error) {
+      logger.error(`[${correlationId}][${workspaceSlug}] STAGE_33 migration 1.17.0 failed:`, {
         error,
       })
       failedTenants.push(workspaceSlug)

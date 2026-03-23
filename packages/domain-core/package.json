@@ -30,7 +30,8 @@
     "./lessons": "./src/lessons/index.ts",
     "./categories": "./src/categories/index.ts",
     "./category-values": "./src/category-values/index.ts",
-    "./tags": "./src/tags/index.ts"
+    "./tags": "./src/tags/index.ts",
+    "./baskets": "./src/baskets/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",
