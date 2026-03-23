@@ -282,7 +282,7 @@ bun run validate:ai-context-fresh --help 2>&1 | head -5
    bun run db:console --version 2>&1 | grep -i version
 
    # Test dev scripts
-   bun run dev:lint 2>&1 | head -3
+   bun run lint 2>&1 | head -3
 
    # Test validate scripts
    bun run validate:script:naming 2>&1 | tail -1

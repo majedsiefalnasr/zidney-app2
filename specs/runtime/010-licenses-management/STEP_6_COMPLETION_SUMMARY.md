@@ -135,7 +135,7 @@ Action:
 ```bash
 Commands:
 1. bun run lint --fix
-2. bun run type-check
+2. bun run typecheck
 3. bun test tests/unit/license* tests/integration/
 4. git status (should be clean)
 ```
@@ -155,7 +155,7 @@ Commands:
   - Full state lifecycle
   - Soft-lock expiration with lazy evaluation
   - Concurrent duplicate prevention
-- [ ] **Type-Checking:** `bun run type-check` passes with 0 errors
+- [ ] **Type-Checking:** `bun run typecheck` passes with 0 errors
 - [ ] **Linting:** `bun run lint --fix` with 0 errors
 - [ ] **API Validation:** All 10 endpoints respond correctly
   - POST /licenses (201)

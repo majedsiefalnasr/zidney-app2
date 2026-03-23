@@ -730,7 +730,7 @@ The following are explicitly out of scope for Stage 031:
 9. **Write integration tests** (live test DB)
 10. **Run full validation suite:**
     ```bash
-    bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run type-check && bun run test
+    bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run typecheck && bun run test
     ```
 
 ---

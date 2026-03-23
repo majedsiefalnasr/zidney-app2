@@ -714,7 +714,7 @@ provisioning not fully integrated.
 
 1. ✅ Complete type-checking fixes
    - Resolve `any` type annotations in license service layer
-   - Command: `bun run type-check` → fix reported errors
+   - Command: `bun run typecheck` → fix reported errors
 
 2. ✅ Implement critical unit tests (14 tests)
    - RBAC boundary enforcement (6 tests)
@@ -884,7 +884,7 @@ TOTAL ESTIMATED TIME: 3 hours
 
 ### Mitigation Actions (Priority)
 
-1. ✅ Type-checking: Run `bun run type-check` → fix all errors
+1. ✅ Type-checking: Run `bun run typecheck` → fix all errors
 2. ✅ Testing: Implement all P1 test bodies → run full suite
 3. ✅ Worker: Add timeout/DLQ guards → test failure paths
 4. ✅ UI Security: Add RBAC auth checks → verify role enforcement

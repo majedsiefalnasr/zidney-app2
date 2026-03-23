@@ -36,7 +36,7 @@
 5. **Run baseline checks**
 
    ```bash
-   bun run type-check
+   bun run typecheck
    bun run lint
    bun run test
    ```

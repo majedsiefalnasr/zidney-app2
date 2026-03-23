@@ -33,7 +33,7 @@
 | T005 | `bun run validate:runtime:scripts` gate: 5 new scripts resolve correctly               | ✅ PASS |
 | T006 | Audit all 5 GitHub workflows for `act` compatibility; findings documented              | ✅ PASS |
 | T007 | Create `scripts/run-local-ci.ts` (7-step orchestrator) + add `ci:run-local` key        | ✅ PASS |
-| T008 | `bun run type-check` exits 0; `ci:run-local` resolves in validate-runtime-scripts      | ✅ PASS |
+| T008 | `bun run typecheck` exits 0; `ci:run-local` resolves in validate-runtime-scripts       | ✅ PASS |
 | T009 | `bun run ci:local:list` lists all 5 workflows without containers                       | ✅ PASS |
 | T010 | CI parity contract policy documented (part of T013 file creation)                      | ✅ PASS |
 | T011 | Closure gate specification defined                                                     | ✅ PASS |
@@ -101,14 +101,14 @@
 
 ## Validation Summary
 
-| Check                             | Result                                                                 |
-| --------------------------------- | ---------------------------------------------------------------------- |
-| Lint (`bun run lint`)             | ✅ PASS (0 errors, 1 pre-existing warning in translation.context.ts)   |
-| TypeScript (`bun run type-check`) | ✅ PASS (exit 0)                                                       |
-| validate-runtime-scripts          | ✅ PASS (5 new script keys resolve; 9 pre-existing failures unchanged) |
-| Migration required?               | No — governance tooling only                                           |
-| API tests required?               | No — no API changes                                                    |
-| Unit tests required?              | No — orchestrator has no testable business logic                       |
+| Check                            | Result                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------- |
+| Lint (`bun run lint`)            | ✅ PASS (0 errors, 1 pre-existing warning in translation.context.ts)   |
+| TypeScript (`bun run typecheck`) | ✅ PASS (exit 0)                                                       |
+| validate-runtime-scripts         | ✅ PASS (5 new script keys resolve; 9 pre-existing failures unchanged) |
+| Migration required?              | No — governance tooling only                                           |
+| API tests required?              | No — no API changes                                                    |
+| Unit tests required?             | No — orchestrator has no testable business logic                       |
 
 Full validation evidence: [audits/VALIDATION_REPORT.md](../audits/VALIDATION_REPORT.md)
 

@@ -24,7 +24,7 @@ bun run test
 ### Run Type-Check
 
 ```bash
-bun run type-check
+bun run typecheck
 ```
 
 ### Run Linting

@@ -79,7 +79,7 @@ Full testing guide: `specs/runtime/029-lessons/guides/TESTING_GUIDE.md`
 Run automated tests:
 
 ```bash
-bun run vitest run \
+bun run test \
   packages/domain-core/src/lessons/__tests__/lessons.service.test.ts \
   apps/api/src/routes/backoffice/lessons/__tests__/lessons.integration.test.ts
 ```

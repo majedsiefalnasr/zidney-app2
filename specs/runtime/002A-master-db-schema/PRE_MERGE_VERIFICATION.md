@@ -16,7 +16,7 @@
 
 ## 1️⃣ Type Safety Check
 
-**Command**: `bun run type-check` (tsc --noEmit)
+**Command**: `bun run typecheck` (tsc --noEmit)
 
 ### Audit Results
 

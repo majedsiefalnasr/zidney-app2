@@ -32,8 +32,8 @@ All local validation checks green. Step 6.6 guardian batch (CI/CD Automation, De
 | Integration tests (impacted API flows)             | Yes         | `rtk vitest run packages/domain-core/src/hierarchy/__tests__/hierarchy.service.test.ts tests/backoffice/hierarchy/hierarchy.integration.test.ts` | ✅           | Current repo pattern uses placeholder integration assertions for this stage area                  |
 | Snapshot tests (grading behavior, if applicable)   | Conditional | N/A                                                                                                                                              | N/A          | Hierarchy feature does not touch grading or attempt snapshots                                     |
 | Lint                                               | Yes         | `rtk bun run lint`                                                                                                                               | ✅\*         | Only remaining issue is a pre-existing warning outside Stage 25                                   |
-| Type check                                         | Yes         | `rtk bun run type-check`                                                                                                                         | ✅           | Source and test type-check both passed                                                            |
-| Migration validation (if schema changed)           | Conditional | `rtk bun run type-check`                                                                                                                         | ❌ / PARTIAL | Migration file compiles, but no migration was executed against a live test tenant DB in this turn |
+| Type check                                         | Yes         | `rtk bun run typecheck`                                                                                                                          | ✅           | Source and test type-check both passed                                                            |
+| Migration validation (if schema changed)           | Conditional | `rtk bun run typecheck`                                                                                                                          | ❌ / PARTIAL | Migration file compiles, but no migration was executed against a live test tenant DB in this turn |
 | Idempotency replay validation (critical endpoints) | Yes         | N/A                                                                                                                                              | N/A          | No dedicated idempotent replay endpoint introduced by this stage                                  |
 | Concurrency validation (critical flows)            | Yes         | `packages/domain-core/src/hierarchy/__tests__/hierarchy.service.test.ts`                                                                         | ⚠ Partial    | Service tests cover cycle-guard behavior, but no explicit concurrent runtime harness was executed |
 
@@ -73,7 +73,7 @@ Warning only; outside Stage 25 implementation scope.
 ### Type Check
 
 ```text
-rtk bun run type-check
+rtk bun run typecheck
 $ bun run typecheck
 $ bun typecheck:src && bun typecheck:tests
 $ tsc --noEmit

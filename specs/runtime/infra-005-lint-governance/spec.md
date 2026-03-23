@@ -24,7 +24,7 @@ The work covers:
 - Establishing explicit import order governance enforced by Biome's import organizer
 - Activating and verifying lint-staged pre-commit hooks to run Biome and AI-Guard before every
   commit
-- Verifying and enforcing the CI quality-gate sequence: `bun run lint` → `bun run type-check` →
+- Verifying and enforcing the CI quality-gate sequence: `bun run lint` → `bun run typecheck` →
   `bun scripts/ai-guard.ts`
 - Documenting the multi-layer governance model for developers and AI agents
 - Defining module ownership rules and critical module protection policy
@@ -175,7 +175,7 @@ immediately visible at the point of authorship.
 **Acceptance Criteria:**
 
 - CI runs `bun run lint` and fails if any Biome violation is found.
-- CI runs `bun run type-check` and fails if any TypeScript error is found.
+- CI runs `bun run typecheck` and fails if any TypeScript error is found.
 - CI runs `bun scripts/ai-guard.ts` and fails if any architecture boundary violation is found.
 - All three gates are **blocking** — a failing gate prevents merge.
 - Each gate reports failures with sufficient detail to diagnose without local reproduction.
@@ -342,7 +342,7 @@ The CI pipeline must run all three quality gates as blocking steps for every pul
 | Step | Command                   | Failure Behavior                     |
 | ---- | ------------------------- | ------------------------------------ |
 | 1    | `bun run lint`            | Fail CI run; print Biome violations  |
-| 2    | `bun run type-check`      | Fail CI run; print TypeScript errors |
+| 2    | `bun run typecheck`       | Fail CI run; print TypeScript errors |
 | 3    | `bun scripts/ai-guard.ts` | Fail CI run; print arch violations   |
 
 All three steps must pass before any merge is allowed. No gate may be skipped or marked as
@@ -414,7 +414,7 @@ protections documented. `ARCHITECTURE_MAP.json` reflects their criticality via t
 The `.husky/pre-push` hook currently runs informational checks only. This stage validates that the
 hook does not block push by default, but documents the recommended developer workflow:
 
-- Before pushing, run `bun run lint && bun run type-check` locally.
+- Before pushing, run `bun run lint && bun run typecheck` locally.
 - CI enforces the full gate; the pre-push hook is advisory only.
 
 If the pre-push hook already has lint/type-check gates enabled, this requirement is a no-op.
@@ -436,7 +436,7 @@ strategy is:
    b. AI-Guard → checks staged files against architecture boundaries
 3. CI checks:
    a. bun run lint (full codebase)
-   b. bun run type-check
+   b. bun run typecheck
    c. bun scripts/ai-guard.ts (full staged set in CI context)
 4. Merge gated on all CI checks passing.
 5. Post-merge: bun run arch:audit runs on schedule to detect any drift
@@ -618,7 +618,7 @@ itself rather than business logic.
 
 - **TC-05:** Introduce a Biome lint violation (e.g., `noDebugger`) in a test branch. Verify
   `bun run lint` exits non-zero and CI fails at the lint gate.
-- **TC-06:** Introduce a TypeScript type error in a test branch. Verify `bun run type-check` exits
+- **TC-06:** Introduce a TypeScript type error in a test branch. Verify `bun run typecheck` exits
   non-zero and CI fails at the type-check gate.
 - **TC-07:** Introduce an architecture boundary violation in a test branch. Verify
   `bun scripts/ai-guard.ts` exits non-zero and CI fails at the AI-Guard gate.
@@ -696,7 +696,7 @@ gate would ensure the brain is always fresh, but adds CI runtime cost.
 command is reserved for developer maintenance and pre-refactor workflows.
 
 **Impact on spec:** FR-06 updated to advisory role only. CI gate sequence remains: `bun run lint` →
-`bun run type-check` → `bun scripts/ai-guard.ts`.
+`bun run typecheck` → `bun scripts/ai-guard.ts`.
 
 ---
 

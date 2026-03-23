@@ -367,7 +367,7 @@ Husky is installed (`.husky/pre-commit` exists). The pre-commit hook runs:
 
 ```
 bun run lint
-bun run type-check
+bun run typecheck
 ```
 
 However, `type-check` is not a defined script in root `package.json` — the correct script is
@@ -376,7 +376,7 @@ However, `type-check` is not a defined script in root `package.json` — the cor
 block all commits.
 
 **GAP-D1:** 2 pre-existing TypeScript compilation errors.  
-**GAP-D2:** Pre-commit hook references `bun run type-check` (script not found; correct name is
+**GAP-D2:** Pre-commit hook references `bun run typecheck` (script not found; correct name is
 `typecheck`).  
 **GAP-D3:** `husky` is not listed in root `package.json` devDependencies — hook may not initialize
 on clean installs.  
@@ -401,7 +401,7 @@ currently blocks all commits.
 | Coverage Threshold   | NEEDS WORK | No coverage threshold defined in any CI workflow; codecov upload is informational only — failures do not block merges.                                     |
 | E2E Isolation        | NEEDS WORK | No Playwright config found in any app; E2E testing is completely absent from the monorepo.                                                                 |
 | ESLint Enforcement   | NEEDS WORK | 10 pre-existing errors; `no-console` and `no-explicit-any` at `warn` (not `error`); `apps/api`, `apps/worker`, all packages lack dedicated ESLint configs. |
-| Husky Hooks          | NEEDS WORK | Pre-commit hook references `bun run type-check` (script not found; correct name is `typecheck`); `husky` not in root devDependencies.                      |
+| Husky Hooks          | NEEDS WORK | Pre-commit hook references `bun run typecheck` (script not found; correct name is `typecheck`); `husky` not in root devDependencies.                       |
 | CI Matrix            | NEEDS WORK | `test-stage-001.yml` lacks lint and type-check; no workflow enforces a coverage threshold gate; E2E absent from all workflows.                             |
 
 **NEEDS WORK count: 6**

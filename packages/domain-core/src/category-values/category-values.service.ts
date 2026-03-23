@@ -223,14 +223,15 @@ export async function createCategoryValue(
 
     // --- Subject validation ---
     if ((input.subject_ids ?? []).length > 0) {
-      const invalidSubjects = await subjectsExistBatch(db, input.subject_ids!)
+      const subjectIds = input.subject_ids ?? []
+      const invalidSubjects = await subjectsExistBatch(db, subjectIds)
       if (invalidSubjects.length > 0) {
         throw new CategoryValueError('CATEGORY_VALUE_SUBJECT_NOT_FOUND')
       }
       // Parent scope containment
       const parentSubjectScope = await findCategorySubjectScope(db, input.category_id)
       validateScopeContainment(
-        input.subject_ids!,
+        subjectIds,
         parentSubjectScope,
         'CATEGORY_VALUE_SCOPE_EXCEEDS_PARENT'
       )
@@ -238,14 +239,15 @@ export async function createCategoryValue(
 
     // --- Division validation ---
     if ((input.division_ids ?? []).length > 0) {
-      const invalidDivisions = await divisionsExistBatch(db, input.division_ids!)
+      const divisionIds = input.division_ids ?? []
+      const invalidDivisions = await divisionsExistBatch(db, divisionIds)
       if (invalidDivisions.length > 0) {
         throw new CategoryValueError('CATEGORY_VALUE_DIVISION_NOT_FOUND')
       }
       // Parent scope containment
       const parentDivisionScope = await findCategoryDivisionScope(db, input.category_id)
       validateScopeContainment(
-        input.division_ids!,
+        divisionIds,
         parentDivisionScope,
         'CATEGORY_VALUE_SCOPE_EXCEEDS_PARENT'
       )
@@ -260,15 +262,15 @@ export async function createCategoryValue(
 
     // --- Upsert translations ---
     if ((input.translations ?? []).length > 0) {
-      await upsertTranslations(db, created.id, input.translations!)
+      await upsertTranslations(db, created.id, input.translations ?? [])
     }
 
     // --- Insert scope ---
     if ((input.subject_ids ?? []).length > 0) {
-      await insertValueSubjectScope(db, created.id, input.subject_ids!)
+      await insertValueSubjectScope(db, created.id, input.subject_ids ?? [])
     }
     if ((input.division_ids ?? []).length > 0) {
-      await insertValueDivisionScope(db, created.id, input.division_ids!)
+      await insertValueDivisionScope(db, created.id, input.division_ids ?? [])
     }
 
     await db.query('COMMIT')
@@ -305,7 +307,7 @@ export async function updateCategoryValue(
   if ((input.translations ?? []).length > 0) {
     const langConfig = await findWorkspaceLanguageConfig(db)
     if (!langConfig) throw new CategoryValueError('UNSUPPORTED_LANGUAGE')
-    for (const t of input.translations!) {
+    for (const t of input.translations ?? []) {
       if (!langConfig.supported_languages.includes(t.language_code)) {
         throw new CategoryValueError('UNSUPPORTED_LANGUAGE')
       }
@@ -384,7 +386,7 @@ export async function updateCategoryValue(
 
     // --- Upsert translations (if provided) ---
     if ((input.translations ?? []).length > 0) {
-      await upsertTranslations(db, id, input.translations!)
+      await upsertTranslations(db, id, input.translations ?? [])
     }
 
     // --- Replace subject scope atomically (delete-then-insert) ---

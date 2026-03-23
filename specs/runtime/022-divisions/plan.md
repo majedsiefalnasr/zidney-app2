@@ -1596,7 +1596,7 @@ Execute phases in sequence. Do not begin Phase 3 before Phase 2 compiles cleanly
    delete-division, post-disable, staff-divisions)
 7. Write divisions/index.ts + mount in app.ts
 8. Run integration tests against test DB
-9. Run: bun run lint && bun run type-check && bun run test
+9. Run: bun run lint && bun run typecheck && bun run test
 10. Run: bun scripts/infra-audit.ts (verify no architecture boundary violations)
 ```
 
@@ -1607,7 +1607,7 @@ Execute phases in sequence. Do not begin Phase 3 before Phase 2 compiles cleanly
 Before marking stage complete:
 
 - [ ] Migration runs idempotently (run twice — no errors on second run)
-- [ ] `bun run type-check` — zero errors
+- [ ] `bun run typecheck` — zero errors
 - [ ] `bun run lint` — zero violations
 - [ ] Unit tests: all pass
 - [ ] Integration tests: all pass including rollback and isolation tests

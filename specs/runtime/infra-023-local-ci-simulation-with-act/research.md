@@ -262,7 +262,7 @@ Pre-implementation verification of all scripts that `run-local-ci.ts` will invok
 
 **Note on `type:check` vs `type-check`:** The user-facing documentation uses `type:check` but
 the actual registered key in `package.json` is `type-check` (hyphen). `run-local-ci.ts` must call
-`bun run type-check` (the registered key). The plan documents this mapping explicitly.
+`bun run typecheck` (the registered key). The plan documents this mapping explicitly.
 
 **Note on `validate:scripts-infra`:** This key is referenced in the spec (FR-06 as
 `validate-script-infrastructure`) and the user request as `validate:scripts-infra`. The closest

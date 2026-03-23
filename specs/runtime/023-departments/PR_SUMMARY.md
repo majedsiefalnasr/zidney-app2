@@ -400,7 +400,7 @@ const statusMap: Record<DepartmentsErrorCode, number> = {
 ### Pre-Deploy Checklist
 
 - [ ] All tests passing: `bun test departments`
-- [ ] Type checking: `bun run type-check` (exit 0)
+- [ ] Type checking: `bun run typecheck` (exit 0)
 - [ ] Linting: `bun run lint` (exit 0)
 - [ ] Code review approved
 - [ ] Database backup created

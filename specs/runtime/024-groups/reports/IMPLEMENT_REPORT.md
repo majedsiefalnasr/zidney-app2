@@ -13,7 +13,7 @@ All 29 tasks completed across 5 phases in 4 governance commits.
 
 **Tasks Completed:** 29 / 29
 **Deferred Tasks:** None
-**Type Errors:** 0 (verified via `bun run type-check`)
+**Type Errors:** 0 (verified via `bun run typecheck`)
 **Biome Lint Errors:** 0 (verified via pre-commit hook)
 
 ---

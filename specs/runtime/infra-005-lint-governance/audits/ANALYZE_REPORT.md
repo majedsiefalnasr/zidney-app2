@@ -131,7 +131,7 @@ These items do not block implementation but should be addressed during execution
 | REM-02 | FR-07: spec lists 3 critical packages; plan and T021 validate 5 — rationale is sound but spec should be updated                                                | MEDIUM   | T021 — validate 5 packages; spec update can follow            |
 | REM-03 | 4-layer governance model naming: spec says "Tests" as Layer 4; plan §7.5 says "TypeScript" — LINT_GOVERNANCE.md should follow spec's authoritative layer model | MEDIUM   | T010 — use spec's 4-layer model in the governance doc         |
 | REM-04 | T008 dependency chain vs. diamond pattern (both correct; harmless inconsistency)                                                                               | LOW      | Implementation — follow diamond pattern as specified in tasks |
-| REM-05 | Spec FR-05 references `bun run type-check` (hyphen); correct script is `bun run typecheck` (no hyphen)                                                         | LOW      | T014 — use `bun run typecheck` (no hyphen) as planned         |
+| REM-05 | Spec FR-05 references `bun run typecheck` (hyphen); correct script is `bun run typecheck` (no hyphen)                                                          | LOW      | T014 — use `bun run typecheck` (no hyphen) as planned         |
 
 ---
 

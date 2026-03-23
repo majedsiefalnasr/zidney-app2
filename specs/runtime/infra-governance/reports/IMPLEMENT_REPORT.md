@@ -89,7 +89,7 @@ export default {
 - Removed `#!/usr/bin/env sh` → replaced with `#!/bin/sh`
 - Removed `. "$(dirname -- "$0")/_/husky.sh"` (v8 shell source)
 - Removed `bun run lint` (full repo lint, replaced by staged-only lint-staged)
-- Removed `bun run type-check` (script did not exist)
+- Removed `bun run typecheck` (script did not exist)
 - Added `bunx lint-staged` (staged ESLint fix + Prettier — only staged files)
 - Retains `bun scripts/ai-guard.ts` (architecture guard)
 - Retains `bun scripts/infra-audit.ts --quick` (governance gate)

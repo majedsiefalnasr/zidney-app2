@@ -53,7 +53,7 @@ No schema migrations, no API routes, no new DDD modules — purely additive deve
 | T012 | Create `tests/integration/ai-runtime/runtime-status.integration.test.ts` (real fs)          |  ✓ [P]   |
 | T013 | Run `bun ai-runtime:status` — verify exit 0 + HEALTHY output                                |  ✓ [P]   |
 | T014 | Run `bun run lint` — verify zero violations                                                 |  ✓ [P]   |
-| T015 | Run `bun run type-check` — verify TypeScript strict compliance                              |  ✓ [P]   |
+| T015 | Run `bun run typecheck` — verify TypeScript strict compliance                               |  ✓ [P]   |
 | T016 | Run `bun test tests/unit/ai-runtime/` — verify all unit tests pass                          |  ✓ [P]   |
 | T017 | Run `bun test tests/integration/ai-runtime/` — verify all integration tests pass            |  ✓ [P]   |
 

@@ -407,7 +407,7 @@ Using `bun run lint` (the script alias) is preferred over direct Biome invocatio
 
 ### 4.6 `typecheck` vs `type-check` Naming
 
-The spec and planning brief reference `bun run type-check`. The actual package.json script is
+The spec and planning brief reference `bun run typecheck`. The actual package.json script is
 `bun run typecheck` (no hyphen). The CI `typecheck` job already correctly uses
 `bun run typecheck:src` and `bun run typecheck:tests`.
 

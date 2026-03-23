@@ -26,7 +26,7 @@ This guide provides step-by-step instructions for testing the Incremental Archit
 cd /path/to/zidney-app2
 git checkout spec/infra-011-incremental-architecture-guard
 bun install
-bun run type-check  # Verify TypeScript compiles
+bun run typecheck  # Verify TypeScript compiles
 bun run test:unit -- tests/unit/ai-guard tests/unit/infra-audit  # Run new tests
 ```
 
@@ -281,7 +281,7 @@ bun run test:unit -- tests/unit/infra-audit/generate-graph.test.ts
 ### Run TypeScript Type Check
 
 ```bash
-bun run type-check
+bun run typecheck
 ```
 
 **Expected:** Zero errors.
@@ -350,7 +350,7 @@ bun run type-check
 
 When reviewing PRs that touch `scripts/ai-guard.ts` or `scripts/infra-audit.ts`:
 
-- [ ] TypeScript compiles (`bun run type-check`)
+- [ ] TypeScript compiles (`bun run typecheck`)
 - [ ] All tests pass (`bun run test:unit -- tests/unit/ai-guard tests/unit/infra-audit`)
 - [ ] No broken imports (modules import only from `packages/types` and Node built-ins)
 - [ ] Discriminated union logic in `loadDependencyGraph()` is exhaustive (all 4 reason cases handled)

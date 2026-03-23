@@ -157,8 +157,8 @@ All endpoints:
 Run with:
 
 ```bash
-bun run vitest run packages/domain-core/src/categories/__tests__/categories.service.test.ts
-bun run vitest run apps/api/src/routes/backoffice/categories/__tests__/categories.integration.test.ts
+bun run test packages/domain-core/src/categories/__tests__/categories.service.test.ts
+bun run test apps/api/src/routes/backoffice/categories/__tests__/categories.integration.test.ts
 ```
 
 ---
@@ -225,8 +225,8 @@ Local verification:
 ```bash
 bun scripts/infra-audit.ts
 bun scripts/ai-guard.ts
-bun run vitest run packages/domain-core/src/categories/__tests__/categories.service.test.ts
-bun run vitest run apps/api/src/routes/backoffice/categories/__tests__/categories.integration.test.ts
+bun run test packages/domain-core/src/categories/__tests__/categories.service.test.ts
+bun run test apps/api/src/routes/backoffice/categories/__tests__/categories.integration.test.ts
 ```
 
 ---

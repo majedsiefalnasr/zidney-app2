@@ -32,13 +32,13 @@ Key outcomes:
 
 ## Prerequisites
 
-| Requirement                | Validation Command / Check                                    |
-| -------------------------- | ------------------------------------------------------------- |
-| Bun installed              | `bun --version` (v1+)                                         |
-| Docker running             | `docker ps` — PostgreSQL container must be up                 |
-| Environment file present   | `.env` or `.env.test` exists at repo root                     |
-| Correct branch checked out | `git branch` shows `spec/030-categories`                      |
-| Migrations applied         | `bun run db:migrate:tenant` (or migration runs in test setup) |
+| Requirement                | Validation Command / Check                             |
+| -------------------------- | ------------------------------------------------------ |
+| Bun installed              | `bun --version` (v1+)                                  |
+| Docker running             | `docker ps` — PostgreSQL container must be up          |
+| Environment file present   | `.env` or `.env.test` exists at repo root              |
+| Correct branch checked out | `git branch` shows `spec/030-categories`               |
+| Migrations applied         | `bun run db:migrate` (or migration runs in test setup) |
 
 ---
 
@@ -83,7 +83,7 @@ bun install
 bun run dev:api
 
 # Apply tenant migration (if not auto-applied)
-bun run db:migrate:tenant
+bun run db:migrate
 ```
 
 ---
@@ -92,13 +92,13 @@ bun run db:migrate:tenant
 
 ```bash
 # Unit tests (26 cases — service layer)
-bun run vitest run packages/domain-core/src/categories/__tests__/categories.service.test.ts
+bun run test packages/domain-core/src/categories/__tests__/categories.service.test.ts
 
 # Integration tests (28 cases — HTTP API layer)
-bun run vitest run apps/api/src/routes/backoffice/categories/__tests__/categories.integration.test.ts
+bun run test apps/api/src/routes/backoffice/categories/__tests__/categories.integration.test.ts
 
 # Both together
-bun run vitest run \
+bun run test \
   packages/domain-core/src/categories/__tests__/categories.service.test.ts \
   apps/api/src/routes/backoffice/categories/__tests__/categories.integration.test.ts
 

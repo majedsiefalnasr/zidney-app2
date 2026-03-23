@@ -415,7 +415,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 2. **Run TypeScript check:**
 
    ```bash
-   bun run type-check
+   bun run typecheck
    ```
 
    **Expected:** All types valid

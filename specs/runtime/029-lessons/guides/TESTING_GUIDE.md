@@ -264,7 +264,7 @@ SELECT id, status FROM lessons WHERE id = '<lessonId>';
 Run without a database:
 
 ```bash
-bun run vitest run \
+bun run test \
   packages/domain-core/src/lessons/__tests__/lessons.service.test.ts \
   apps/api/src/routes/backoffice/lessons/__tests__/lessons.integration.test.ts
 ```

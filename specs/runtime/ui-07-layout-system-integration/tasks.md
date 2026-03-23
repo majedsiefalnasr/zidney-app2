@@ -494,7 +494,7 @@ AppLayout entirely (AppSidebar and AppHeader absent from DOM).
       Pinia-driven state changes (e.g. `setMobile(true)` → `sidebarCollapsed=true` → AppSidebar
       binding update) immediately reflect in the sidebar DOM without requiring a user click to
       re-sync; verify fix with T037–T039 composable resize tests
-- [x] T056 Run `bun run lint` and `bun run type-check` across `apps/mmc`, `apps/backoffice`,
+- [x] T056 Run `bun run lint` and `bun run typecheck` across `apps/mmc`, `apps/backoffice`,
       `apps/frontoffice`, and `packages/ui-system` — all must exit with zero errors; collect full
       output and record pass/fail per app in `audits/VALIDATION_REPORT.md`; ESLint errors BLOCK
       merge; TypeScript errors BLOCK merge; warnings are allowed but must be documented

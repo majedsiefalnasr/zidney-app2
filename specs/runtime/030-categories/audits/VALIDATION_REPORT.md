@@ -56,7 +56,7 @@ Result: Application started without uncaught exceptions during startup and bound
 Command:
 
 ```bash
-bun run vitest run packages/domain-core/src/categories/__tests__/categories.service.test.ts
+bun run test packages/domain-core/src/categories/__tests__/categories.service.test.ts
 ```
 
 Result: 26 tests run — all pass. No flaky or skipped tests recorded for these files.
@@ -66,7 +66,7 @@ Result: 26 tests run — all pass. No flaky or skipped tests recorded for these 
 Command:
 
 ```bash
-bun run vitest run apps/api/src/routes/backoffice/categories/__tests__/categories.integration.test.ts
+bun run test apps/api/src/routes/backoffice/categories/__tests__/categories.integration.test.ts
 ```
 
 Result: 28 tests run — all pass. Integration suite validated tenant isolation, RBAC checks, migration-awareness, and endpoint error codes.

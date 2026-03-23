@@ -160,7 +160,7 @@ prevent uncaught promise rejections on network failure.
 | F3  | Coverage Gap (NFR) | No explicit dark mode validation task                                             | LOW      | ACCEPTED — token-only styling enforced by FR-012/ESLint; deferred validation          |
 | F4  | Underspecification | `handleLogout()` had no try/catch                                                 | MEDIUM   | ✅ REMEDIATED — T017–T019 updated to require try/catch wrapping                       |
 | F5  | Sequencing Risk    | T055 (SidebarLayout fix) numbered after T051 but must precede T020–T022           | MEDIUM   | ✅ REMEDIATED — T020–T022 annotated with `[requires T055]` prerequisite marker        |
-| F6  | Coverage Gap (NFR) | No CI lint/typecheck task in tasks.md                                             | LOW      | ✅ REMEDIATED — T056 added: `bun run lint` + `bun run type-check` across all 4 scopes |
+| F6  | Coverage Gap (NFR) | No CI lint/typecheck task in tasks.md                                             | LOW      | ✅ REMEDIATED — T056 added: `bun run lint` + `bun run typecheck` across all 4 scopes  |
 | F7  | Coverage Gap (NFR) | No ESLint rule preventing feature views from importing layout components directly | LOW      | DEFERRED — follow-up governance stage; accepted for this stage                        |
 
 ---

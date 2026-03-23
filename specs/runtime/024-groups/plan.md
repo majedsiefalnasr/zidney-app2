@@ -969,7 +969,7 @@ Cover all 11 endpoints, all error codes, concurrency scenario (see §8.2).
 
 ```bash
 bun run lint
-bun run type-check
+bun run typecheck
 bun run test --filter packages/domain-core
 bun run test --filter apps/api
 ```
