@@ -1,0 +1,31 @@
+{
+  "stage": "Trivy Security Scanning And Enforcement",
+  "phase": "01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-026-trivy-security-scanning-and-enforcement",
+  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_26_TRIVY_SECURITY_SCANNING_AND_ENFORCEMENT.md",
+  "branch": "spec/infra-026-trivy-security-scanning-and-enforcement",
+  "base_branch": "develop",
+  "pkg_manager": "bun",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "deferred_tasks": [],
+  "guardian_verdicts": {},
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "2026-03-23T10:00:00Z",
+  "last_updated": "2026-03-23T10:00:00Z",
+  "step_timings": {},
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/infra-026-trivy-security-scanning-and-enforcement",
+      "timestamp": "2026-03-23T10:00:00Z"
+    }
+  ]
+}
