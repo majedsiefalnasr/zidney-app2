@@ -112,7 +112,7 @@ bun run ci:run-local
 1. Run type-check:
 
    ```bash
-   bun run type-check
+   bun run typecheck
    ```
 
 2. Verify output shows:

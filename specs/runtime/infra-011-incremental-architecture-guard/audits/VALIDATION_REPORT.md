@@ -97,7 +97,7 @@ All mandatory validation gates passed during Step 6 — Implement. The increment
 
 ### Compilation Results
 
-**Command:** `bun run type-check` (tsconfig.base.json strict: true)
+**Command:** `bun run typecheck` (tsconfig.base.json strict: true)
 
 ```
 ✅ Type-check passed

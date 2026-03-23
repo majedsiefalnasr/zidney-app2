@@ -175,10 +175,10 @@ describe('findScopeForValues', () => {
     const SUBJECT_1 = 'aaaa0000-0000-0000-0000-000000000001'
     const SUBJECT_2 = 'aaaa0000-0000-0000-0000-000000000002'
 
-    let callIndex = 0
+    let _callIndex = 0
     const db = {
       query: vi.fn(async (sql: string) => {
-        callIndex++
+        _callIndex++
         if (sql.includes('category_value_subjects')) {
           return {
             rows: [

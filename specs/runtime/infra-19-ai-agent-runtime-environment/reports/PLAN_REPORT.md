@@ -123,7 +123,7 @@ Fully idempotent by nature — the script only reads file system state and produ
 4. T004 — Add CI step to `.github/workflows/ci.yml`
 5. T005 — Write unit tests in `tests/unit/ai-runtime/`
 6. T006 — Write integration tests in `tests/integration/ai-runtime/`
-7. T007 — Validate: `bun ai-runtime:status`, `bun run lint`, `bun run type-check`
+7. T007 — Validate: `bun ai-runtime:status`, `bun run lint`, `bun run typecheck`
 
 ---
 

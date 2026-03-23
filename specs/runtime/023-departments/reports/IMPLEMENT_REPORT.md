@@ -406,7 +406,7 @@ Step 6 Implement execution completed successfully. All 30 atomic tasks were exec
 ⚠️ Pre-deployment checklist:
 
 - [ ] Run full test suite: `vitest`
-- [ ] Run type-check: `bun run type-check`
+- [ ] Run type-check: `bun run typecheck`
 - [ ] Run lint: `bun run lint`
 - [ ] Verify migration applies cleanly: `bun scripts/db/migrate.ts`
 - [ ] Verify route handler exports available for testing

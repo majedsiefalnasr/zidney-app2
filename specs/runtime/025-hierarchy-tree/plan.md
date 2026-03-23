@@ -614,7 +614,7 @@ Step 10 → hierarchy/index.ts (router) + mount in backoffice router
 Step 11 → Unit tests (24 cases)
 Step 12 → Integration tests
 
-CI gate after each step: bun run type-check && bun run lint
+CI gate after each step: bun run typecheck && bun run lint
 Full gate after step 12: bun scripts/infra-audit.ts && bun run test
 ```
 

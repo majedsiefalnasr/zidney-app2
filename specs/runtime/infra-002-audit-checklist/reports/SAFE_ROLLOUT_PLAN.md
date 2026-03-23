@@ -59,7 +59,7 @@ _Target: all items non-breaking and additive-only. No CI breakage expected._
 | 1.1  | GAP-V3 | Add `coverage` block to each per-app vitest config (matching root format: `text`, `json`, `html`) | `bun run test:coverage` from each app dir produces coverage report        |
 | 1.2  | GAP-L2 | Add `vue/multi-word-component-names: warn` to root `eslint.config.mjs`                            | `bun run lint` passes; new rule emits warnings only                       |
 | 1.3  | GAP-D3 | Add `"husky": "^9.0"` to root `package.json` devDependencies; run `bun install`                   | `bun install` installs husky; `.husky/pre-commit` is active after install |
-| 1.4  | GAP-D2 | Fix `.husky/pre-commit`: change `bun run type-check` to `bun run typecheck`                       | `bun run typecheck` resolves to the correct target                        |
+| 1.4  | GAP-D2 | Fix `.husky/pre-commit`: change `bun run typecheck` to `bun run typecheck`                        | `bun run typecheck` resolves to the correct target                        |
 
 **Phase 1 Exit Criteria:**
 

@@ -29,7 +29,8 @@
     "./subjects": "./src/subjects/index.ts",
     "./lessons": "./src/lessons/index.ts",
     "./categories": "./src/categories/index.ts",
-    "./category-values": "./src/category-values/index.ts"
+    "./category-values": "./src/category-values/index.ts",
+    "./tags": "./src/tags/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",

@@ -20,7 +20,7 @@ operational. The remaining gaps are:
 3. The pre-commit hook has a stale comment referencing ESLint/Prettier rather than Biome.
 4. The CI `ci.yml` lint job runs both `bun biome check .` and `bun biome format .` redundantly
    (format checking is already included in `check`).
-5. The canonical CI command referenced in the spec as `bun run type-check` does not match the actual
+5. The canonical CI command referenced in the spec as `bun run typecheck` does not match the actual
    script name `bun run typecheck`.
 
 No new packages or scripts are required. All installation prerequisites (`@biomejs/biome`, `husky`,
@@ -296,7 +296,7 @@ pipeline itself. No changes required or relevant to this stage.
 | `arch:refresh`    | `bun scripts/infra-audit.ts && bun scripts/gitnexus-context.ts` | ✅ Exists |
 | `arch:fix`        | `bun scripts/infra-audit.ts --fix-map`                          | ✅ Exists |
 
-**Important naming discrepancy:** The spec and planning brief reference `bun run type-check`
+**Important naming discrepancy:** The spec and planning brief reference `bun run typecheck`
 (hyphenated). The actual script name is `bun run typecheck` (no hyphen). All spec documentation must
 reference `bun run typecheck` as the canonical command.
 
@@ -327,17 +327,17 @@ required by FR-07.
 
 ## 10. Gap Analysis Summary
 
-| Area                     | Gap Description                                                            | Severity | Required Change       |
-| ------------------------ | -------------------------------------------------------------------------- | -------- | --------------------- |
-| `biome.json`             | `noUnreachable` is `warn` but should be `error`                            | High     | Change 1 rule         |
-| `.husky/pre-commit`      | Stale comment references ESLint/Prettier instead of Biome                  | Low      | Update comment        |
-| `ci.yml`                 | AI-Guard gate missing — not present as a CI job                            | High     | Add arch-guard job    |
-| `ci.yml`                 | Lint job runs `bun biome format .` redundantly after `bun biome check .`   | Low      | Remove redundant step |
-| Spec documentation       | References `bun run type-check` (hyphen) but script is `bun run typecheck` | Low      | Spec accuracy note    |
-| `lint-staged.config.mjs` | None — matches FR-04 exactly                                               | —        | No change             |
-| `scripts/ai-guard.ts`    | None — fully implemented and active                                        | —        | No change             |
-| `package.json` scripts   | None — all required scripts exist                                          | —        | No change             |
-| `ARCHITECTURE_MAP.json`  | None — criticality field already present                                   | —        | No change             |
+| Area                     | Gap Description                                                           | Severity | Required Change       |
+| ------------------------ | ------------------------------------------------------------------------- | -------- | --------------------- |
+| `biome.json`             | `noUnreachable` is `warn` but should be `error`                           | High     | Change 1 rule         |
+| `.husky/pre-commit`      | Stale comment references ESLint/Prettier instead of Biome                 | Low      | Update comment        |
+| `ci.yml`                 | AI-Guard gate missing — not present as a CI job                           | High     | Add arch-guard job    |
+| `ci.yml`                 | Lint job runs `bun biome format .` redundantly after `bun biome check .`  | Low      | Remove redundant step |
+| Spec documentation       | References `bun run typecheck` (hyphen) but script is `bun run typecheck` | Low      | Spec accuracy note    |
+| `lint-staged.config.mjs` | None — matches FR-04 exactly                                              | —        | No change             |
+| `scripts/ai-guard.ts`    | None — fully implemented and active                                       | —        | No change             |
+| `package.json` scripts   | None — all required scripts exist                                         | —        | No change             |
+| `ARCHITECTURE_MAP.json`  | None — criticality field already present                                  | —        | No change             |
 
 ---
 

@@ -194,7 +194,7 @@ Reverse-dependency BFS efficiently maps a small set of changed modules to all af
 
 ## Reviewers' Checklist
 
-- [ ] TypeScript compiles (bun run type-check)
+- [ ] TypeScript compiles (bun run typecheck)
 - [ ] All tests pass (bun run test:unit)
 - [ ] Pre-commit hook runs in <200ms for a typical change
 - [ ] Pre-push gate still enforces full scan

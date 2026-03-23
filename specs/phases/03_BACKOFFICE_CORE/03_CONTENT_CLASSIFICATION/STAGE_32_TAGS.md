@@ -8,7 +8,45 @@ Database: Tenant DB
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Risk Level: HIGH
+Closure Date: 2026-03-23
+Last Updated: 2026-03-23T12:00:00Z
+
+Implementation: COMPLETE
+Tasks: 37 / 37 completed
+
+Scope Closed:
+
+- Flat tagging system: tags + tag_relations tenant tables
+- Full CRUD on tags (create, read list, read one, update, delete with guard)
+- Tag relation lifecycle (create, delete, list by entity, list by tag)
+- Two-phase migration: schema 1.15.0 → 1.16.0
+- RBAC: question_manage / content_manage permission enforcement
+- Entity existence validation with 42P01 forward-compatibility handling
+- 127 tests: 25 service + 41 repository + 28 migration + 34 integration
+
+Deferred Scope:
+
+- Tag filtering on entity list endpoints (MCQ/traditional/library) — entity endpoints don't exist yet
+- OR-logic multi-tag filtering
+- Tag auto-suggestions
+- Hierarchical tags (explicitly excluded)
+- Frontend display layer
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation: ENFORCED
+- Transaction boundaries: PASS — all 5 writes wrapped in BEGIN/COMMIT/ROLLBACK
+- Server-authoritative time: PASS — defaultNow() only, no client timestamps
+- Idempotency: PASS — app-level check + DB UNIQUE backstop for both tables
+- Version enforcement: PASS — schema 1.15.0 → 1.16.0 migration bump
+- No business logic in routes: PASS — thin handlers, all logic in service
+- Structured logging: PASS — @zidney/logger with correlation_id on all writes
+
+Notes:
+Backend implementation complete. No structural backend modifications allowed.
+Commit: 2a555b65
 
 ---
 

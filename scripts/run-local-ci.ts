@@ -56,11 +56,11 @@ function checkDocker(): { running: boolean; message: string } {
 }
 
 const STEPS: Array<{ name: string; scriptKey: string }> = [
-  { name: 'validate-runtime-scripts', scriptKey: 'validate-runtime-scripts' },
+  { name: 'validate:runtime:scripts', scriptKey: 'validate:runtime:scripts' },
   { name: 'validate:scripts-infra', scriptKey: 'validate:scripts-infra' },
-  { name: 'generate-script-docs', scriptKey: 'generate-script-docs' },
+  { name: 'dev:generate:script-docs', scriptKey: 'dev:generate:script-docs' },
   { name: 'arch:guard', scriptKey: 'arch:guard' },
-  { name: 'type-safety-guard', scriptKey: 'type-safety-guard' },
+  { name: 'arch:type-safety-guard', scriptKey: 'arch:type-safety-guard' },
   { name: 'lint', scriptKey: 'lint' },
   { name: 'ci:local', scriptKey: 'ci:local' },
 ]

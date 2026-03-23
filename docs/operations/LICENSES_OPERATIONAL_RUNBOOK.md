@@ -35,7 +35,7 @@
 ### Pre-Deployment (Staging)
 
 - [ ] All tests passing (unit + integration)
-- [ ] Type check clean: `bun run type-check`
+- [ ] Type check clean: `bun run typecheck`
 - [ ] Lint clean: `bun run lint`
 - [ ] Database migrations validated
 - [ ] Worker health check passing

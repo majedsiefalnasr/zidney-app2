@@ -46,7 +46,7 @@ were identified and documented with safe defaults.
 - FR-02: Import order convention — 5-group canonical import ordering enforced by Biome
 - FR-03: AI-Guard pre-commit activation — runs architectural boundary validation before every commit
 - FR-04: lint-staged verification — `biome check --write` applied to staged files
-- FR-05: CI gate enforcement — `bun run lint` + `bun run type-check` + `bun scripts/ai-guard.ts` are
+- FR-05: CI gate enforcement — `bun run lint` + `bun run typecheck` + `bun scripts/ai-guard.ts` are
   all blocking
 - FR-06: Architecture intelligence freshness (advisory) — `arch:audit` as maintenance command, not
   CI gate

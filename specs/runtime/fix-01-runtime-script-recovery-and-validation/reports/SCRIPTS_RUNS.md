@@ -91,7 +91,7 @@ bun run arch:audit:check
 bun run db:migrate
 bun run test:ci
 bun run typecheck:src
-bun run type-check
+bun run typecheck
 bun run validate:types
 bun run arch:audit
 bun run test

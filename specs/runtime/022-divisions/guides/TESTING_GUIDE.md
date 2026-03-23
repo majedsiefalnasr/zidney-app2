@@ -527,7 +527,7 @@ Run before signing off:
 - [ ] All 265 divisions tests pass
 - [ ] No new failing tests in other modules
 - [ ] `bun run lint` passes
-- [ ] `bun run type-check` passes
+- [ ] `bun run typecheck` passes
 - [ ] Migration applied without errors
 - [ ] API starts without errors
 - [ ] Workspace with divisions_enabled=true works

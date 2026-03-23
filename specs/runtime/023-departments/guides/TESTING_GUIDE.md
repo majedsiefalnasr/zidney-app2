@@ -598,7 +598,7 @@ Before deploying to production, run:
 bun test departments
 
 # Type check
-bun run type-check
+bun run typecheck
 
 # Linting
 bun run lint

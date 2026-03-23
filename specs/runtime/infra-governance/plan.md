@@ -198,14 +198,14 @@ bun scripts/infra-audit.ts --quick
 
 # Standard quality gates
 bun run lint
-bun run type-check
+bun run typecheck
 ```
 
 **Issues with current content:**
 
 - Sources `.husky/_/husky.sh` which does not exist → hooks cannot run
 - `bun run lint` runs full repo lint (not staged-only)
-- `bun run type-check` does not exist — correct script is `bun run typecheck`
+- `bun run typecheck` does not exist — correct script is `bun run typecheck`
 - Does not call `lint-staged`
 
 **Target content (Husky v9 format):**

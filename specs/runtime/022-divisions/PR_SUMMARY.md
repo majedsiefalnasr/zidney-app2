@@ -204,7 +204,7 @@ bun scripts/infra-audit.ts
 ## 12. Code Quality & Standards
 
 - [x] Lint passes: `bun run lint` exits 0
-- [x] Type checking passes: `bun run type-check` exits 0
+- [x] Type checking passes: `bun run typecheck` exits 0
 - [x] No console.log in production code
 - [x] Structured logging only
 - [x] Error handling follows contract pattern

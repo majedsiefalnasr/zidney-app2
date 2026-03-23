@@ -50,11 +50,11 @@ Tests structured as documented placeholders (matching departments pattern).
 
 ### TypeScript Type Check
 
-**Command:** `bun run type-check`
+**Command:** `bun run typecheck`
 **Result:** ✅ PASS — 0 errors
 
 ```
-$ bun run type-check 2>&1 | grep "error TS" | wc -l
+$ bun run typecheck 2>&1 | grep "error TS" | wc -l
 0
 ```
 

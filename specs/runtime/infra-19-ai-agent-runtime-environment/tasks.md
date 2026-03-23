@@ -107,7 +107,7 @@ Tasks follow a strict sequential order with explicit parallel opportunities mark
 
 - [x] T014 [P] Run `bun run lint` — zero violations in new files
 
-- [x] T015 [P] Run `bun run type-check` — zero TypeScript errors in new files
+- [x] T015 [P] Run `bun run typecheck` — zero TypeScript errors in new files
 
 - [x] T016 [P] Run `bun test tests/unit/ai-runtime/` — all 29 unit tests pass
 
@@ -170,7 +170,7 @@ T001
 # All can run in parallel:
 bun ai-runtime:status                          # T013
 bun run lint                                   # T014
-bun run type-check                             # T015
+bun run typecheck                             # T015
 bun test tests/unit/ai-runtime/                # T016
 bun test tests/integration/ai-runtime/         # T017
 ```
@@ -183,13 +183,13 @@ Each group can be verified independently:
 
 | Group           | Command                                  | Pass Condition                                      |
 | --------------- | ---------------------------------------- | --------------------------------------------------- |
-| Script scaffold | `bun run type-check`                     | No TypeScript errors in `scripts/ai-runtime/`       |
+| Script scaffold | `bun run typecheck`                      | No TypeScript errors in `scripts/ai-runtime/`       |
 | Status command  | `bun ai-runtime:status`                  | Exit code 0, all 5 layers report [✔] or [⚠]         |
 | Package scripts | `bun ai-runtime:status`                  | Script resolves without `command not found`         |
 | CI step         | Inspect `.github/workflows/ci.yml` diff  | New step present after `module-boundary-validation` |
 | Unit tests      | `bun test tests/unit/ai-runtime/`        | All tests pass, 0 failures                          |
 | Integration     | `bun test tests/integration/ai-runtime/` | All tests pass, 0 errors (warnings permitted)       |
-| Full validation | `bun run lint && bun run type-check`     | Zero lint errors, zero type errors                  |
+| Full validation | `bun run lint && bun run typecheck`      | Zero lint errors, zero type errors                  |
 
 ---
 

@@ -64,7 +64,7 @@ function makeValueRow(overrides: Partial<Record<string, unknown>> = {}) {
   }
 }
 
-function makeScopedRow(overrides: Partial<Record<string, unknown>> = {}) {
+function _makeScopedRow(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     ...makeValueRow(overrides),
     subject_ids: [] as string[],

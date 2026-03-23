@@ -55,7 +55,7 @@ git status --porcelain  # Should show clean working tree
 **Validation:**
 
 ```bash
-bun run type-check tests/audit-helpers.ts
+bun run typecheck tests/audit-helpers.ts
 # Should pass with no type errors
 ```
 
@@ -354,7 +354,7 @@ bun run type-check tests/audit-helpers.ts
 2. Check for any unresolved imports:
 
    ```bash
-   bun run type-check
+   bun run typecheck
    # Should pass with no type errors
    ```
 

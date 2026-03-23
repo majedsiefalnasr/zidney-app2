@@ -469,7 +469,7 @@ verifying the toolchain itself.
 | Prettier removed — no residual config | File search + `package.json` dependency audit          |
 | CI gate order verified                | CI pipeline step inspection                            |
 | Existing unit tests still pass        | `bun run test` — no regressions from code reformatting |
-| Existing type checks still pass       | `bun run type-check` — no regressions                  |
+| Existing type checks still pass       | `bun run typecheck` — no regressions                   |
 
 ### Regression Safety
 

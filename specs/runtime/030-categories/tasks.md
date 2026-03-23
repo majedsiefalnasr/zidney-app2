@@ -39,7 +39,7 @@
 
 **Goal**: Drizzle ORM table definitions for `categories`, `category_subjects`, `category_divisions` with B-tree index declarations and inferred TypeScript types. Functional/partial unique indexes and FK constraints are migration-owned per established convention.
 
-**Independent test criteria**: `bun run type-check` passes with new schema imported; Drizzle toolkit sees all three tables; exported inferred types resolve correctly.
+**Independent test criteria**: `bun run typecheck` passes with new schema imported; Drizzle toolkit sees all three tables; exported inferred types resolve correctly.
 
 - [x] T005 [P] Create Drizzle schema defining `categories` table (10 columns: `id`, `name`, `code`, `description`, `parent_id`, `status`, `created_at`, `updated_at`, `created_by`, `updated_by`; B-tree indexes for `parent_id` and `status`), `categorySubjects` table (3 columns; B-tree indexes for `category_id` and `subject_id`), and `categoryDivisions` table (3 columns; B-tree indexes for `category_id` and `division_id`); export inferred types `Category`, `NewCategory`, `CategorySubject`, `NewCategorySubject`, `CategoryDivision`, `NewCategoryDivision` — `apps/api/src/db/tenant/schemas/categories.schema.ts`
 - [x] T006 Add `export * from "./categories.schema"` to tenant schemas barrel — `apps/api/src/db/tenant/schemas/index.ts`
@@ -145,7 +145,7 @@
 ## Final Phase — Polish & Cross-Cutting Concerns
 
 - [x] T033 [P] Run architecture and infra validation: `bun scripts/ai-guard.ts && bun scripts/infra-audit.ts` — resolve all import boundary violations and module registration gaps before merge — `scripts/`
-- [x] T034 [P] Run quality gates: `bun run lint && bun run type-check` — resolve all lint errors and TypeScript errors introduced by new files — monorepo root
+- [x] T034 [P] Run quality gates: `bun run lint && bun run typecheck` — resolve all lint errors and TypeScript errors introduced by new files — monorepo root
 - [x] T035 Manually verify in `20260322_008_categories.ts` that `CREATE UNIQUE INDEX CONCURRENTLY` calls appear **after** the `COMMIT` call and that no concurrent index creation exists inside the `BEGIN` block — `apps/api/src/db/tenant/migrations/20260322_008_categories.ts`
 
 ---

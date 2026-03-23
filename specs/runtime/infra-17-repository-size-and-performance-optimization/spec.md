@@ -1232,13 +1232,13 @@ After Removal: -Z MB (estimated)
    ```bash
    # Only prune if no hidden imports exist
    bun pm prune
-   bun run type-check  # Verify no type errors
+   bun run typecheck  # Verify no type errors
    ```
 
 5. **Validate build (mandatory before merge):**
    ```bash
    bun run build
-   bun run type-check
+   bun run typecheck
    bun run test:ci  # Full integration test run
    ```
 
