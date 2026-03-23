@@ -3,7 +3,7 @@
 **Feature Branch**: `spec/infra-026-trivy-security-scanning-and-enforcement`
 **Stage File**: `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_26_TRIVY_SECURITY_SCANNING_AND_ENFORCEMENT.md`
 **Created**: 2026-03-23
-**Status**: Draft
+**Status**: IN PROGRESS
 **Phase**: 01_PLATFORM_FOUNDATION
 **Stage ID**: INFRA-026
 
@@ -27,7 +27,7 @@ An infrastructure engineer or developer runs a pre-commit action after modifying
 
 **Why this priority**: Catching vulnerabilities at commit time prevents them from ever reaching CI or production. It is the fastest and cheapest enforcement layer.
 
-**Independent Test**: Can be fully tested by running `bun run security:scan:deps` against a fixture directory containing a known-vulnerable `package.json`, then verifying exit code 1 and diagnostic output.
+**Independent Test**: Can be fully tested by running `bun run infra:security:deps` against a fixture directory containing a known-vulnerable `package.json`, then verifying exit code 1 and diagnostic output.
 
 **Acceptance Scenarios**:
 
@@ -81,11 +81,11 @@ A infrastructure or security engineer can run any of the five defined scan scrip
 
 **Acceptance Scenarios**:
 
-1. **Given** a developer runs `bun run security:scan`, **When** it executes, **Then** a full filesystem scan covering dependencies, secrets, and configuration is performed and the report is printed to stdout.
-2. **Given** a developer runs `bun run security:scan:deps`, **When** it executes, **Then** only dependency vulnerabilities are scanned and reported.
-3. **Given** a developer runs `bun run security:scan:secrets`, **When** it executes, **Then** only secret patterns are scanned and reported, covering all files in the repository.
-4. **Given** a developer runs `bun run security:scan:config`, **When** it executes, **Then** only IaC misconfigurations (`docker-compose.yml`, `Dockerfile`, `terraform/`) are scanned and reported.
-5. **Given** a developer runs `bun run security:scan:ci`, **When** it executes, **Then** the scan mirrors CI behavior exactly: exits with code 1 if HIGH or CRITICAL findings are present, 0 otherwise.
+1. **Given** a developer runs `bun run infra:security`, **When** it executes, **Then** a full scan over tracked working-tree content covering dependencies, secrets, and configuration is performed and the report is printed to stdout.
+2. **Given** a developer runs `bun run infra:security:deps`, **When** it executes, **Then** only dependency vulnerabilities are scanned and reported.
+3. **Given** a developer runs `bun run infra:security:secrets`, **When** it executes, **Then** only secret patterns are scanned and reported, covering tracked repository files or only staged files when `--staged` is passed.
+4. **Given** a developer runs `bun run infra:security:config`, **When** it executes, **Then** only IaC misconfigurations in tracked repository files (`docker-compose.yml`, `Dockerfile`, `terraform/`) are scanned and reported.
+5. **Given** a developer runs `bun run infra:security:ci`, **When** it executes, **Then** the scan mirrors CI behavior exactly: exits with code 1 if HIGH or CRITICAL vulnerabilities are present, if HIGH or CRITICAL infrastructure misconfigurations are present, or if any secret finding is present, and exits with code 0 otherwise.
 
 ---
 
@@ -107,7 +107,7 @@ An infrastructure engineer consulting the repository documentation can find a de
 ### Edge Cases
 
 - What happens when Trivy is not installed in the CI environment? The CI step must include a Trivy installation step or use a pre-installed runner image before scanning.
-- What happens when `security:scan:ci` is run locally by a developer against a clean codebase? It must exit 0 and produce no alarming output.
+- What happens when `infra:security:ci` is run locally by a developer against a clean codebase? It must exit 0 and produce no alarming output.
 - How does the system handle binary files or large files that may slow secret scanning? Trivy's default skip patterns must be validated to not cause scan timeout in CI.
 - What happens when a vulnerability is a known false positive? The stage should document that `.trivyignore` is the suppression mechanism, but the process of approving suppressions is out of scope for this stage.
 - What happens when the pre-commit hook and CI both run simultaneously (e.g., during a fast push)? Both are independent and idempotent — no coordination required.
@@ -120,13 +120,13 @@ An infrastructure engineer consulting the repository documentation can find a de
 
 **Script Delivery**
 
-- **FR-001**: The monorepo MUST provide a `security:scan` script that performs a full filesystem scan covering dependency vulnerabilities, secret patterns, and IaC misconfigurations.
-- **FR-002**: The monorepo MUST provide a `security:scan:deps` script that scans only for dependency vulnerabilities.
-- **FR-003**: The monorepo MUST provide a `security:scan:secrets` script that scans only for committed secrets and sensitive data patterns.
-- **FR-004**: The monorepo MUST provide a `security:scan:config` script that scans only for IaC misconfigurations.
-- **FR-005**: The monorepo MUST provide a `security:scan:ci` script that mirrors CI enforcement exactly — exits with code 1 when HIGH or CRITICAL findings are present, 0 otherwise.
+- **FR-001**: The monorepo MUST provide an `infra:security` script that performs a full tracked-content scan covering dependency vulnerabilities, secret patterns, and IaC misconfigurations.
+- **FR-002**: The monorepo MUST provide an `infra:security:deps` script that scans only for dependency vulnerabilities.
+- **FR-003**: The monorepo MUST provide an `infra:security:secrets` script that scans only for committed secrets and sensitive data patterns in tracked content, plus staged-only content when `--staged` is supplied.
+- **FR-004**: The monorepo MUST provide an `infra:security:config` script that scans only for IaC misconfigurations.
+- **FR-005**: The monorepo MUST provide an `infra:security:ci` script that mirrors CI enforcement exactly and exits with code 1 when HIGH or CRITICAL vulnerabilities are present, or when any secret finding is present.
 - **FR-006**: All script source files MUST reside under `scripts/security/`.
-- **FR-007**: All scripts MUST be registered in the root `package.json` using the naming convention `security:<action>[:scope]`.
+- **FR-007**: All scripts MUST be registered in the root `package.json` using the naming convention `infra:security[:scope]`.
 
 **Severity Policy**
 
@@ -139,28 +139,28 @@ An infrastructure engineer consulting the repository documentation can find a de
 
 **Pre-Commit Integration**
 
-- **FR-010**: The pre-commit hook system MUST invoke `security:scan:deps` on staged changes (or full repo scan if staged scope is unavailable).
+- **FR-010**: The pre-commit hook system MUST invoke `infra:security:deps` on every commit and MUST invoke `infra:security:secrets` on staged files only.
 - **FR-011**: The pre-commit hook MUST block commit if HIGH or CRITICAL vulnerabilities are detected.
 - **FR-012**: The pre-commit hook MUST block commit if any secrets are detected.
 - **FR-013**: Pre-commit security extensions MUST integrate via the existing precommit-diagnostics infrastructure without replacing or disabling existing hooks.
 
 **CI Integration**
 
-- **FR-014**: The GitHub Actions CI workflow MUST include a dedicated `Trivy Security Scan` step.
-- **FR-015**: The CI security scan step MUST run `security:scan:ci` and fail the workflow on HIGH or CRITICAL findings.
-- **FR-016**: The CI security scan step MUST run after dependency installation and before build or test steps.
+- **FR-014**: The GitHub Actions CI workflow MUST include a dedicated `Trivy Security Scan` job.
+- **FR-015**: The CI security scan job MUST run `infra:security:ci` and fail the workflow on HIGH or CRITICAL vulnerabilities, HIGH or CRITICAL infrastructure misconfigurations, or any secret findings.
+- **FR-016**: The CI security scan job MUST run after dependency installation and before build or test jobs, with downstream build/test jobs depending on the security result.
 - **FR-017**: The CI workflow MUST report scan findings as step annotations or log output visible in the PR checks interface.
 
 **Orchestrator Integration**
 
 - **FR-018**: The orchestrator analysis step (Step 5) MUST execute Trivy and capture structured output.
-- **FR-019**: The orchestrator validation gate (Step 6.5) MUST read Trivy output and block execution if CRITICAL vulnerabilities or secrets are detected.
-- **FR-020**: The orchestrator gate MUST NOT duplicate vulnerability classification logic — it MUST consume the output of the scan scripts rather than re-running Trivy independently.
+- **FR-019**: The orchestrator validation gate (Step 6.5) MUST read Trivy output and block execution if CRITICAL vulnerabilities, CRITICAL infrastructure misconfigurations, or secrets are detected.
+- **FR-020**: The orchestrator gate MUST NOT duplicate vulnerability classification logic — it MUST consume the JSON output of `infra:security:ci` rather than re-running Trivy independently.
 
 **Configuration**
 
 - **FR-021**: A `.trivyignore` file MUST be present at the repository root to serve as the approved suppression registry.
-- **FR-022**: Trivy configuration (scan targets, scanner types, severity filters) MUST be centralized and consistent across all scripts.
+- **FR-022**: Trivy configuration (scan targets, scanner types, severity filters, report path, exclusions) MUST be centralized and consistent across all scripts via a shared helper/module under `scripts/security/`.
 
 **Documentation**
 
@@ -169,20 +169,20 @@ An infrastructure engineer consulting the repository documentation can find a de
 
 ### Non-Functional Requirements
 
-- **NFR-001**: The `security:scan:ci` script MUST complete within 3 minutes on a standard CI runner for the current monorepo size.
+- **NFR-001**: The `infra:security:ci` script MUST complete within 3 minutes on a standard CI runner for the current monorepo size.
 - **NFR-002**: The pre-commit security scan MUST complete within 30 seconds to avoid unacceptable developer friction.
 - **NFR-003**: All scan scripts MUST be idempotent — repeated invocations with identical inputs MUST produce identical outputs and exit codes.
 - **NFR-004**: All scripts MUST be executable in isolation without requiring any external service connectivity beyond the Trivy binary.
-- **NFR-005**: Script naming MUST conform strictly to `security:<action>[:scope]` per script-system-governance rules.
+- **NFR-005**: Script naming MUST conform strictly to `infra:security[:scope]` per script-system-governance rules.
 - **NFR-006**: Trivy invocation approach (system-installed binary vs. container-based) MUST be explicitly documented and consistent across all environments (local dev, CI).
 
 ### Security Considerations
 
-- **SC-001**: Trivy itself MUST be pinned to a specific version to prevent supply-chain attacks via tooling upgrades introducing regressions.
-- **SC-002**: `.trivyignore` entries MUST be reviewed and approved through a documented process (process defined externally, file presence enforced here).
-- **SC-003**: The secret scanner MUST cover the full repository including configuration files, environment templates, and Terraform files.
-- **SC-004**: CI scan logs MUST NOT echo the content of detected secrets — only the file path, line number, and secret type.
-- **SC-005**: Trivy scan results MUST NOT be suppressed globally — suppressions must be explicit per-CVE entries in `.trivyignore`.
+- **SEC-001**: Trivy itself MUST be pinned to a specific version to prevent supply-chain attacks via tooling upgrades introducing regressions.
+- **SEC-002**: `.trivyignore` entries MUST be reviewed and approved through a documented process (process defined externally, file presence enforced here).
+- **SEC-003**: The secret scanner MUST cover tracked repository content including configuration files, environment templates, and Terraform files.
+- **SEC-004**: CI scan logs MUST NOT echo the content of detected secrets — only the file path, line number, and secret type.
+- **SEC-005**: Trivy scan results MUST NOT be suppressed globally — suppressions must be explicit per-CVE entries in `.trivyignore`.
 
 ---
 
@@ -190,23 +190,23 @@ An infrastructure engineer consulting the repository documentation can find a de
 
 ### Hard Constraints
 
-- Scripts MUST follow `security:<action>[:scope]` naming — violating this breaks script-system-governance compliance.
+- Scripts MUST follow `infra:security[:scope]` naming — violating this breaks script-system-governance compliance.
 - Scripts MUST live under `scripts/security/` — no security scripts in other directories.
 - No business logic changes, database migrations, or tenant-related code changes are in scope.
 - Pre-commit integration MUST NOT disable or replace existing hooks.
-- CI step placement MUST be after dependency install and before build/test.
+- CI job placement MUST be after dependency install and before build/test, with downstream jobs waiting on security.
 
 ### Dependencies
 
-| Dependency                                  | Type                 | Notes                                                           |
-| ------------------------------------------- | -------------------- | --------------------------------------------------------------- |
-| Trivy binary                                | External tool        | Must be available in CI runner and documented for local install |
-| GitHub Actions CI workflow                  | Integration target   | Existing workflow must be extended, not replaced                |
-| precommit-diagnostics skill                 | Internal skill       | Pre-commit extension must conform to its patterns               |
-| script-system-governance skill              | Internal skill       | All scripts must pass governance validation                     |
-| Orchestrator (zidney-orchestrator.agent.md) | Integration target   | Steps 5 and 6.5 must be extended                                |
-| Root `package.json`                         | Configuration target | All scripts must be registered here                             |
-| `.trivyignore`                              | Configuration file   | Must exist at repo root before CI runs                          |
+| Dependency                                          | Type                 | Notes                                                           |
+| --------------------------------------------------- | -------------------- | --------------------------------------------------------------- |
+| Trivy binary                                        | External tool        | Must be available in CI runner and documented for local install |
+| GitHub Actions CI workflow                          | Integration target   | Existing workflow must be extended, not replaced                |
+| precommit-diagnostics skill                         | Internal skill       | Pre-commit extension must conform to its patterns               |
+| script-system-governance skill                      | Internal skill       | All scripts must pass governance validation                     |
+| Orchestrator (.agents/agents/orchestrator.agent.md) | Integration target   | Steps 5 and 6.5 must be extended                                |
+| Root `package.json`                                 | Configuration target | All scripts must be registered here                             |
+| `.trivyignore`                                      | Configuration file   | Must exist at repo root before CI runs                          |
 
 ### Assumptions
 
@@ -214,6 +214,7 @@ An infrastructure engineer consulting the repository documentation can find a de
 - The existing pre-commit hook infrastructure supports extension without full replacement.
 - No existing Trivy configuration or `.trivyignore` file exists in the repository (this stage creates them).
 - Trivy will be invoked as a CLI tool (not via container) for consistency between local and CI environments.
+- Repo-wide scans operate on tracked working-tree content so local untracked files do not create false CI-equivalence failures.
 - The `bun run` prefix is the standard script invocation method across the monorepo.
 
 ---
@@ -237,29 +238,30 @@ An infrastructure engineer consulting the repository documentation can find a de
 
 ### Measurable Outcomes
 
-- **SC-001**: All five security scripts (`security:scan`, `security:scan:deps`, `security:scan:secrets`, `security:scan:config`, `security:scan:ci`) are present in root `package.json` and executable without errors on a clean repository.
+- **SC-001**: All five security scripts (`infra:security`, `infra:security:deps`, `infra:security:secrets`, `infra:security:config`, `infra:security:ci`) are present in root `package.json` and executable without errors on a clean repository.
 - **SC-002**: The CI pipeline fails within 3 minutes when a HIGH-severity dependency is introduced, with the failing package and CVE identified in the step log.
 - **SC-003**: The pre-commit hook blocks a commit containing a HIGH-severity dependency within 30 seconds of `git commit` invocation.
 - **SC-004**: A committed secret in a test branch causes the CI security scan step to fail and report the secret type and file path without echoing the secret value.
 - **SC-005**: All five `docs/scripts/security-*.md` documentation files exist and contain the required sections (purpose, usage, trigger, severity policy).
 - **SC-006**: The orchestrator validation gate halts execution when given a Trivy report containing CRITICAL findings, producing a block diagnostic message.
-- **SC-007**: `bun run security:scan:ci` run locally on the current main branch exits with code 0 (baseline clean state confirmed).
-- **SC-008**: All scripts pass script-system-governance validation (`bun run scripts/governance/validate-scripts.ts` or equivalent) without violations.
-- **SC-009**: Running the full governance validation pipeline (`bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run typecheck`) passes with no new violations introduced by this stage.
+- **SC-007**: `bun run infra:security:ci` run locally on the current main branch exits with code 0 (baseline clean state confirmed).
+- **SC-008**: All scripts pass script-system-governance validation (`bun run validate:script:naming && bun run validate:script:usage && bun run validate:script:infrastructure && bun run dev:generate:script-docs`) without violations.
+- **SC-009**: Running the full governance validation pipeline (`bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run typecheck && bun run test`) passes with no new violations introduced by this stage.
+- **SC-010**: The pre-commit secret scan blocks a staged fixture secret without echoing the secret value, and the orchestrator gate fails closed on corrupt or unreadable Trivy JSON.
 
 ---
 
 ## Risk Assessment
 
-| Risk                                                           | Likelihood | Impact | Mitigation                                                                            |
-| -------------------------------------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------- |
-| Trivy not available in CI runner                               | Medium     | High   | Add explicit Trivy install step to CI workflow; document version pinning              |
-| Pre-commit scan causes excessive developer friction (>30s)     | Medium     | Medium | Scope pre-commit scan to deps-only; full scan reserved for CI                         |
-| False positives in secret scanner block valid commits          | Low        | High   | Establish `.trivyignore` process; document suppression path in docs                   |
-| Script naming drift from governance convention                 | Low        | Medium | Script validation enforced via `ai-guard.ts` on every CI run                          |
-| Orchestrator integration breaks existing Step 5 behavior       | Low        | High   | Orchestrator changes must be isolated to Step 5 output capture and Step 6.5 gate only |
-| Trivy version changes break scan behavior between environments | Medium     | Medium | Pin Trivy version in CI workflow and document required local version                  |
-| Security scan timeout in CI on large repo                      | Low        | Medium | Validate scan time against current repo size; add `--timeout` flag if needed          |
+| Risk                                                           | Likelihood | Impact | Mitigation                                                                             |
+| -------------------------------------------------------------- | ---------- | ------ | -------------------------------------------------------------------------------------- |
+| Trivy not available in CI runner                               | Medium     | High   | Add explicit Trivy install step to CI workflow; document version pinning               |
+| Pre-commit scan causes excessive developer friction (>30s)     | Medium     | Medium | Keep dependency scan unconditional and secret scan staged-only; validate total runtime |
+| False positives in secret scanner block valid commits          | Low        | High   | Establish `.trivyignore` process; document suppression path in docs                    |
+| Script naming drift from governance convention                 | Low        | Medium | Script validation enforced via script validators and registry generation               |
+| Orchestrator integration breaks existing Step 5 behavior       | Low        | High   | Orchestrator changes must be isolated to Step 5 output capture and Step 6.5 gate only  |
+| Trivy version changes break scan behavior between environments | Medium     | Medium | Pin Trivy version in CI workflow and document required local version                   |
+| Security scan timeout in CI on large repo                      | Low        | Medium | Validate scan time against current repo size; add `--timeout` flag if needed           |
 
 ---
 
@@ -267,30 +269,30 @@ An infrastructure engineer consulting the repository documentation can find a de
 
 ### Session 2026-03-23
 
-**Q: How should Trivy be installed in the CI environment — via a pre-built action (e.g. `aquasecurity/trivy-action`), via a manual `curl` install step in the workflow YAML, or via a container-based runner image with Trivy pre-installed?**
-**A:** Manual `curl` install step in workflow YAML with a pinned version tag, then call `bun run security:scan:ci`. This avoids abstraction over scripts and keeps the CI step aligned with local dev invocation.
-**Impact:** FR-014, FR-015, FR-016, NFR-006, SC-001 (CI step now uses a known install pattern); also resolves the "Trivy not available in CI runner" risk row in Risk Assessment.
+**Q: How should Trivy be installed in the CI environment — via a pre-built action (e.g. `aquasecurity/trivy-action`), via a manual install step in the workflow YAML, or via a container-based runner image with Trivy pre-installed?**
+**A:** Use a manual workflow step that downloads the version-pinned Trivy release asset and verifies its published checksum before installation, then call `bun run infra:security:ci`. This keeps the CI step aligned with local dev invocation without trusting a mutable installer script from an upstream branch.
+**Impact:** FR-014, FR-015, FR-016, NFR-006, SEC-001, SC-001; also resolves the "Trivy not available in CI runner" risk row in Risk Assessment.
 
 ---
 
-**Q: Which specific Trivy version should be pinned — latest stable at time of implementation, a hardcoded version frozen for this stage, or a floating minor-version range?**
-**A:** Pin to the latest stable release at time of stage implementation. The CI install step will reference a specific version string (e.g. `v0.59.1` or the latest at implementation time). Local installation documented in docs as "install matching version". The `.trivyignore` file plus version in CI YAML serve as the configuration lock.
-**Impact:** SC-001 (version pinning requirement), NFR-006 (consistent invocation across environments), Risk Assessment row "Trivy version changes break scan behavior between environments".
+**Q: Which specific Trivy version should be pinned for this stage — a hardcoded stage-local version or a floating range?**
+**A:** Pin to `v0.59.1` for this stage. The CI install step, local install docs, and validation tasks all use this exact version so behavior stays deterministic across environments.
+**Impact:** SEC-001, SC-001, NFR-006, Risk Assessment row "Trivy version changes break scan behavior between environments".
 
 ---
 
-**Q: Should the pre-commit hook run `security:scan:deps` only on staged changes that touch `package.json` / lock files, or unconditionally on every commit?**
-**A:** Run `security:scan:deps` on EVERY commit (not just on package.json changes). Rationale: the 30-second budget is for dependency scanning only (not full scan), and running it unconditionally avoids false confidence when devs add indirect dependencies via transitive imports without touching lock files. Trivy dependency scan on a Bun monorepo completes well within 30s.
-**Impact:** FR-010 (pre-commit invocation scope); NFR-002 (30-second pre-commit budget confirmed as achievable for deps-only scan); User Story 1 acceptance scenarios 1–4 (unconditional trigger now explicit).
+**Q: Should the pre-commit hook run only dependency scanning, or also secret scanning?**
+**A:** Run `infra:security:deps` on EVERY commit and run `infra:security:secrets` against staged files only. Dependency scanning remains unconditional; secret scanning stays bounded to staged content so the pre-commit budget remains enforceable while still satisfying the local secret-block requirement.
+**Impact:** FR-010, FR-011, FR-012, NFR-002, SC-003, SC-010.
 
 ---
 
-**Q: Should the CI Trivy scan step be added to the existing `ci.yml` workflow as a new step/job, or should a dedicated separate workflow file be created (e.g. `security.yml`)?**
-**A:** Add the Trivy step to the EXISTING `ci.yml` workflow, after the dependency install step and before build/test jobs. Do NOT create a separate workflow. If ci.yml has a dedicated security job or a check placeholder, add Trivy there; otherwise insert as a new job step in the main jobs flow.
-**Impact:** FR-014, FR-016 (CI placement now unambiguous — no new workflow file); Constraints "CI step placement MUST be after dependency install and before build/test" (confirmed single-file approach).
+**Q: Should the CI Trivy scan be a parallel check or a prerequisite gate?**
+**A:** Add a dedicated `security` job to the EXISTING `ci.yml` workflow and make downstream build/test jobs depend on it. Do NOT create a separate workflow file.
+**Impact:** FR-014, FR-015, FR-016, SC-002, NFR-001.
 
 ---
 
 **Q: What output format should the orchestrator's Step 5 Trivy invocation produce — JSON file written to disk (e.g. `tmp/trivy-report.json`), stdout piped directly, or SARIF format?**
-**A:** The scan script writes a JSON output file to `tmp/trivy-report.json` (using `trivy fs --format json --output tmp/trivy-report.json`). The orchestrator Step 5 reads this file and Step 6.5 parses it to check for CRITICAL findings. The JSON file is gitignored. This decouples scan execution from orchestrator logic per FR-020.
-**Impact:** FR-018, FR-019, FR-020 (orchestrator integration pattern now defined — file-based JSON handoff, not stdout piping); NFR-003 (idempotency preserved — file overwritten on each run); Success Criteria SC-006 (orchestrator gate implementation path clarified).
+**A:** The scan script writes a sanitized JSON summary file to `tmp/trivy-report.json`. Raw Trivy output may be parsed transiently, but only the sanitized summary is retained and uploaded. The orchestrator Step 5 reads this file and Step 6.5 parses it to check for CRITICAL findings or secret findings. The JSON file is gitignored. This decouples scan execution from orchestrator logic per FR-020 while preserving SEC-004 redaction guarantees.
+**Impact:** FR-018, FR-019, FR-020, SEC-004, NFR-003, SC-006, SC-010.

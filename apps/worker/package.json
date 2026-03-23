@@ -9,7 +9,7 @@
     "start": "bun run dist/index.js"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.995.0",
+    "@aws-sdk/client-s3": "3.1015.0",
     "@zidney/domain-core": "workspace:*",
     "@zidney/logger": "workspace:*",
     "@zidney/types": "workspace:*",

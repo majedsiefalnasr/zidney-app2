@@ -2,19 +2,24 @@
 
 ## Stage Status
 
-Status: DRAFT
-Step: plan
+Status: IN PROGRESS
+Step: implement
 Risk Level: MEDIUM
-Last Updated: 2026-03-23T10:20:00Z
+Last Updated: 2026-03-23T22:23:30Z
 
-Scope Planned:
+Drift Analysis: PASSED (all criteria)
+Implementation: IN PROGRESS
+Tasks: 32 / 34 completed
 
-- 5 TypeScript scripts under scripts/security/ (scan, scan-deps, scan-secrets, scan-config, scan-ci)
-- CI security job added to ci.yml Group 1 (manual curl Trivy install, pinned TRIVY_VERSION)
-- Pre-commit Trivy block appended to .husky/pre-commit (graceful degradation)
-- .trivyignore at repo root; tmp/ gitignored
-- 5 docs files under docs/scripts/security-\*.md
-- Orchestrator Step 5 + Step 6.5 prose extended in zidney-orchestrator.agent.md
+Scope Authorized:
+
+- `infra:security[:scope]` script surface and shared Trivy helper under `scripts/security/`
+- Repo-wide scans constrained to tracked working-tree content; staged secret enforcement constrained to git index state
+- Checksum-verified, pinned `v0.59.1` Trivy acquisition path for CI
+- Pre-commit dependency and staged-secret enforcement with bounded runtime
+- CI `security` job with downstream gating and sanitized artifact retention
+- Orchestrator Step 5/6.5 sanitized JSON contract with fail-closed parsing semantics
+- Documentation, automated tests, governance validation, and timing verification tasks
 
 Deferred Scope:
 
@@ -25,10 +30,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Drift gate passed and implementation remains within INFRA/tooling scope
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Implementation is in progress. Remaining work is limited to CI timing proof and full-suite validation in a provisioned environment.
 
 ---
 
@@ -50,7 +55,7 @@ This stage transforms Zidney from **governance-complete → security-hardened pl
 ### In Scope
 
 - Trivy installation and configuration
-- Repository filesystem scanning (dependencies + secrets)
+- Repository tracked-content scanning (dependencies + secrets)
 - CI integration (GitHub Actions)
 - Pre-commit diagnostics integration
 - Orchestrator security gate integration
@@ -80,18 +85,18 @@ This stage transforms Zidney from **governance-complete → security-hardened pl
 ### Naming Convention
 
 ```
-security:<action>[:scope]
+infra:security[:scope]
 ```
 
 ### Required Scripts
 
-| Script                  | Purpose                              |
-| ----------------------- | ------------------------------------ |
-| `security:scan`         | Full filesystem scan                 |
-| `security:scan:deps`    | Dependency vulnerabilities           |
-| `security:scan:secrets` | Secret detection                     |
-| `security:scan:config`  | IaC misconfiguration                 |
-| `security:scan:ci`      | CI-safe scan (fail on HIGH/CRITICAL) |
+| Script                   | Purpose                                                                 |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `infra:security`         | Full filesystem scan                                                    |
+| `infra:security:deps`    | Dependency vulnerabilities with MEDIUM warnings and HIGH/CRITICAL block |
+| `infra:security:secrets` | Secret detection with staged-file mode                                  |
+| `infra:security:config`  | IaC misconfiguration                                                    |
+| `infra:security:ci`      | Sanitized CI/orchestrator scan summary with blocking exit semantics     |
 
 ---
 
@@ -109,7 +114,7 @@ scripts/security/
 // scripts/security/scan.ts
 import { $ } from "bun";
 
-await $`trivy fs --scanners vuln,secret,config --severity HIGH,CRITICAL .`;
+await $`trivy fs --scanners vuln,secret,misconfig --severity MEDIUM,HIGH,CRITICAL --format json .`;
 ```
 
 ---
@@ -119,11 +124,11 @@ await $`trivy fs --scanners vuln,secret,config --severity HIGH,CRITICAL .`;
 ```json
 {
   "scripts": {
-    "security:scan": "bun run scripts/security/scan.ts",
-    "security:scan:deps": "trivy fs --scanners vuln .",
-    "security:scan:secrets": "trivy fs --scanners secret .",
-    "security:scan:config": "trivy config .",
-    "security:scan:ci": "trivy fs --exit-code 1 --severity HIGH,CRITICAL ."
+    "infra:security": "bun scripts/security/scan.ts",
+    "infra:security:deps": "bun scripts/security/scan-deps.ts",
+    "infra:security:secrets": "bun scripts/security/scan-secrets.ts",
+    "infra:security:config": "bun scripts/security/scan-config.ts",
+    "infra:security:ci": "bun scripts/security/scan-ci.ts"
   }
 }
 ```
@@ -135,7 +140,8 @@ await $`trivy fs --scanners vuln,secret,config --severity HIGH,CRITICAL .`;
 Extend precommit-diagnostics:
 
 ```bash
-bun run security:scan:deps
+bun run infra:security:deps
+bun run infra:security:secrets --staged
 ```
 
 ### Fail Conditions
@@ -151,7 +157,7 @@ bun run security:scan:deps
 
 ```yaml
 - name: Trivy Security Scan
-  run: bun run security:scan:ci
+  run: bun run infra:security:ci
 ```
 
 ### Blocking Rules
@@ -159,6 +165,7 @@ bun run security:scan:deps
 Fail CI if:
 
 - HIGH or CRITICAL vulnerabilities exist
+- HIGH or CRITICAL infrastructure misconfigurations exist
 - Secrets detected
 
 ---
@@ -169,15 +176,17 @@ Fail CI if:
 
 Security Auditor MUST:
 
-- Consume Trivy output
-- Classify risks
+- Execute `infra:security:ci` and consume the sanitized `tmp/trivy-report.json` output
+- Capture the sanitized report for Step 6.5 gate evaluation without duplicating classification logic
 
 ### Step 6.5 — Validation Gate
 
 BLOCK execution if:
 
 - CRITICAL vulnerabilities detected
+- CRITICAL infrastructure misconfigurations detected
 - Secrets detected
+- Report file is missing, unreadable, malformed, or missing required fields
 
 ---
 
@@ -186,7 +195,11 @@ BLOCK execution if:
 Each script MUST be documented:
 
 ```
-docs/scripts/security-<script>.md
+docs/scripts/security-scan.md
+docs/scripts/security-scan-deps.md
+docs/scripts/security-scan-secrets.md
+docs/scripts/security-scan-config.md
+docs/scripts/security-scan-ci.md
 ```
 
 Must include:
@@ -195,6 +208,8 @@ Must include:
 - Usage
 - Trigger (CI / dev / orchestrator)
 - Severity policy
+- Output
+- Prerequisites
 
 ---
 
@@ -207,6 +222,8 @@ Must include:
 | HIGH     | CI fail    |
 | CRITICAL | Hard block |
 
+Secrets: always block in pre-commit, CI, and orchestrator flows.
+
 ---
 
 ## Validation
@@ -214,18 +231,37 @@ Must include:
 ### Required Checks
 
 ```bash
-bun run security:scan
-bun run security:scan:ci
+bun run infra:security
+bun run infra:security:deps
+bun run infra:security:secrets
+bun run infra:security:config
+bun run infra:security:ci
+bun run validate:script:naming
+bun run validate:script:usage
+bun run validate:script:infrastructure
+bun run dev:generate:script-docs
+bun scripts/ai-guard.ts
+bun scripts/infra-audit.ts
+bun run lint
+bun run typecheck
+bun run test
 ```
+
+Required evidence:
+
+- Verify full, deps, secrets, config, and CI scan modes are independently executable.
+- Verify pre-commit dependency plus staged-secret path stays within 30 seconds.
+- Verify the CI security job stays within 3 minutes on a standard GitHub Actions runner.
 
 ---
 
 ## Success Criteria
 
-- No missing security scripts
-- CI blocks vulnerable builds
-- Precommit detects issues early
-- Orchestrator enforces security gate
+- No missing security scripts or governance-validator failures
+- CI blocks vulnerable builds and reports package/CVE or secret metadata correctly
+- Pre-commit blocks vulnerable dependencies and staged secrets within budget
+- Orchestrator enforces sanitized fail-closed security gate semantics
+- Full governance pipeline, including tests, passes after implementation
 - Scripts follow governance rules
 
 ---
