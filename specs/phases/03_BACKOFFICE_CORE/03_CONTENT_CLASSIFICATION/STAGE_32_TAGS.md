@@ -8,21 +8,22 @@ Database: Tenant DB
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: HIGH
-Last Updated: 2026-03-23T00:45:00Z
+Last Updated: 2026-03-23T01:00:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (9/9 criteria)
+Implementation: AUTHORIZED
 
-- Total: 37 atomic tasks across 9 phases
-- Phase 0: DB migration + Drizzle schemas (T001–T003)
-- Phase 1: Domain package — errors/types/repo/service/tests (T004–T010)
-- Phase 2: Zod validation schemas (T011)
-- Phase 3: Hono route handlers + router index (T012–T022)
-- Phase 4: API wiring in app.ts (T023)
-- Phase 5–6: Unit + integration tests (T024–T033)
-- Phase 7–9: Migration validation, lint, typecheck, final test run (T034–T037)
+Scope Authorized:
+
+- Flat tagging system: tags + tag_relations tenant tables
+- Full CRUD on tags (create, read list, read one, update, delete with guard)
+- Tag relation lifecycle (create, delete, list by entity, list by tag)
+- Two-phase migration: schema 1.15.0 → 1.16.0
+- RBAC: question_manage / content_manage permission enforcement
+- Entity existence validation with 42P01 forward-compatibility handling
 
 Deferred Scope:
 
@@ -34,10 +35,18 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- Tenant isolation: PASS — tenant DB only, no cross-tenant joins
+- License middleware: PASS — BackofficeEnv platform-level middleware
+- Transaction boundaries: PASS — all 5 writes wrapped in BEGIN/COMMIT/ROLLBACK
+- Server-authoritative time: PASS — defaultNow() only, no client timestamps
+- Idempotency: PASS — app-level check + DB UNIQUE backstop for both tables
+- Version enforcement: PASS — schema 1.15.0 → 1.16.0 migration bump
+- No business logic in routes: PASS — thin handlers, all logic in service
+- No direct DB instantiation: PASS — c.get('db') pattern throughout
+- Structured logging: PASS — @zidney/logger with correlation_id on all writes
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Full drift analysis passed. All 4 guardians returned PASS. Implementation gate open.
 
 ---
 
