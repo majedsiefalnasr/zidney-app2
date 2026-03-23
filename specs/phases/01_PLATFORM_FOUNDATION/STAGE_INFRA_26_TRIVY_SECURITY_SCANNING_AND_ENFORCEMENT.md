@@ -3,16 +3,16 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-23T10:05:00Z
+Step: clarify
+Risk Level: MEDIUM
+Last Updated: 2026-03-23T10:12:00Z
 
 Scope Defined:
 
-- Trivy CLI-based security scanning across 5 scan modes
-- Pre-commit fast-fail integration (deps-only, ≤30s)
-- CI GitHub Actions full scan step (HIGH/CRITICAL fail)
-- Orchestrator Step 5 capture + Step 6.5 blocking gate
+- Trivy CLI-based security scanning across 5 scan modes (manual curl install, pinned version)
+- Pre-commit fast-fail integration (deps-only unconditional, ≤30s)
+- CI GitHub Actions: new `security` job in ci.yml Group 1 (HIGH/CRITICAL fail)
+- Orchestrator Step 5 writes tmp/trivy-report.json; Step 6.5 parses for CRITICAL
 - 5 scripts in scripts/security/ registered in root package.json
 - 5 docs files in docs/scripts/security-\*.md
 - .trivyignore at repo root
@@ -26,10 +26,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

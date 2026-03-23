@@ -260,3 +260,37 @@ An infrastructure engineer consulting the repository documentation can find a de
 | Orchestrator integration breaks existing Step 5 behavior       | Low        | High   | Orchestrator changes must be isolated to Step 5 output capture and Step 6.5 gate only |
 | Trivy version changes break scan behavior between environments | Medium     | Medium | Pin Trivy version in CI workflow and document required local version                  |
 | Security scan timeout in CI on large repo                      | Low        | Medium | Validate scan time against current repo size; add `--timeout` flag if needed          |
+
+---
+
+## Clarifications
+
+### Session 2026-03-23
+
+**Q: How should Trivy be installed in the CI environment — via a pre-built action (e.g. `aquasecurity/trivy-action`), via a manual `curl` install step in the workflow YAML, or via a container-based runner image with Trivy pre-installed?**
+**A:** Manual `curl` install step in workflow YAML with a pinned version tag, then call `bun run security:scan:ci`. This avoids abstraction over scripts and keeps the CI step aligned with local dev invocation.
+**Impact:** FR-014, FR-015, FR-016, NFR-006, SC-001 (CI step now uses a known install pattern); also resolves the "Trivy not available in CI runner" risk row in Risk Assessment.
+
+---
+
+**Q: Which specific Trivy version should be pinned — latest stable at time of implementation, a hardcoded version frozen for this stage, or a floating minor-version range?**
+**A:** Pin to the latest stable release at time of stage implementation. The CI install step will reference a specific version string (e.g. `v0.59.1` or the latest at implementation time). Local installation documented in docs as "install matching version". The `.trivyignore` file plus version in CI YAML serve as the configuration lock.
+**Impact:** SC-001 (version pinning requirement), NFR-006 (consistent invocation across environments), Risk Assessment row "Trivy version changes break scan behavior between environments".
+
+---
+
+**Q: Should the pre-commit hook run `security:scan:deps` only on staged changes that touch `package.json` / lock files, or unconditionally on every commit?**
+**A:** Run `security:scan:deps` on EVERY commit (not just on package.json changes). Rationale: the 30-second budget is for dependency scanning only (not full scan), and running it unconditionally avoids false confidence when devs add indirect dependencies via transitive imports without touching lock files. Trivy dependency scan on a Bun monorepo completes well within 30s.
+**Impact:** FR-010 (pre-commit invocation scope); NFR-002 (30-second pre-commit budget confirmed as achievable for deps-only scan); User Story 1 acceptance scenarios 1–4 (unconditional trigger now explicit).
+
+---
+
+**Q: Should the CI Trivy scan step be added to the existing `ci.yml` workflow as a new step/job, or should a dedicated separate workflow file be created (e.g. `security.yml`)?**
+**A:** Add the Trivy step to the EXISTING `ci.yml` workflow, after the dependency install step and before build/test jobs. Do NOT create a separate workflow. If ci.yml has a dedicated security job or a check placeholder, add Trivy there; otherwise insert as a new job step in the main jobs flow.
+**Impact:** FR-014, FR-016 (CI placement now unambiguous — no new workflow file); Constraints "CI step placement MUST be after dependency install and before build/test" (confirmed single-file approach).
+
+---
+
+**Q: What output format should the orchestrator's Step 5 Trivy invocation produce — JSON file written to disk (e.g. `tmp/trivy-report.json`), stdout piped directly, or SARIF format?**
+**A:** The scan script writes a JSON output file to `tmp/trivy-report.json` (using `trivy fs --format json --output tmp/trivy-report.json`). The orchestrator Step 5 reads this file and Step 6.5 parses it to check for CRITICAL findings. The JSON file is gitignored. This decouples scan execution from orchestrator logic per FR-020.
+**Impact:** FR-018, FR-019, FR-020 (orchestrator integration pattern now defined — file-based JSON handoff, not stdout piping); NFR-003 (idempotency preserved — file overwritten on each run); Success Criteria SC-006 (orchestrator gate implementation path clarified).
