@@ -3,19 +3,18 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-03-23T10:12:00Z
+Last Updated: 2026-03-23T10:20:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Trivy CLI-based security scanning across 5 scan modes (manual curl install, pinned version)
-- Pre-commit fast-fail integration (deps-only unconditional, ≤30s)
-- CI GitHub Actions: new `security` job in ci.yml Group 1 (HIGH/CRITICAL fail)
-- Orchestrator Step 5 writes tmp/trivy-report.json; Step 6.5 parses for CRITICAL
-- 5 scripts in scripts/security/ registered in root package.json
-- 5 docs files in docs/scripts/security-\*.md
-- .trivyignore at repo root
+- 5 TypeScript scripts under scripts/security/ (scan, scan-deps, scan-secrets, scan-config, scan-ci)
+- CI security job added to ci.yml Group 1 (manual curl Trivy install, pinned TRIVY_VERSION)
+- Pre-commit Trivy block appended to .husky/pre-commit (graceful degradation)
+- .trivyignore at repo root; tmp/ gitignored
+- 5 docs files under docs/scripts/security-\*.md
+- Orchestrator Step 5 + Step 6.5 prose extended in zidney-orchestrator.agent.md
 
 Deferred Scope:
 
@@ -26,10 +25,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
