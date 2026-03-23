@@ -9,20 +9,32 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-23T00:00:00Z
+Last Updated: 2026-03-23T00:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Flat tagging system for content classification (tags + tag_relations tables)
+- Tag CRUD API (10 endpoints)
+- Tag assignment to MCQ_QUESTION, TRADITIONAL_QUESTION, LIBRARY_FILE
+- Tag-based entity filtering (AND logic, paginated)
+- normalized_name uniqueness enforcement at DB level
+- Lifecycle management: ENABLED/DISABLED states
+
+Deferred Scope:
+
+- OR-logic multi-tag filtering
+- Tag auto-suggestions
+- Hierarchical tags (explicitly excluded)
+- Frontend display layer
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
