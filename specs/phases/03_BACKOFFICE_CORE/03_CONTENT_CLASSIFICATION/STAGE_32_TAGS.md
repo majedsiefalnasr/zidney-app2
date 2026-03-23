@@ -9,23 +9,24 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-03-23T00:30:00Z
+Last Updated: 2026-03-23T00:45:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- 2 new tenant DB tables: `tags`, `tag_relations` (migration 20260323_010_tags.ts)
-- Schema version bump: 1.15.0 → 1.16.0
-- Drizzle schemas: `tags.schema.ts`, `tag-relations.schema.ts`
-- Domain package: `packages/domain-core/src/tags/` (errors, types, repo, service, tests)
-- Validation: `packages/validation/src/backoffice/tags.schemas.ts`
-- 9 Hono route handlers + router index in `apps/api/src/routes/backoffice/tags/`
-- Integration tests: `tests/tags.integration.test.ts`
+- Total: 37 atomic tasks across 9 phases
+- Phase 0: DB migration + Drizzle schemas (T001–T003)
+- Phase 1: Domain package — errors/types/repo/service/tests (T004–T010)
+- Phase 2: Zod validation schemas (T011)
+- Phase 3: Hono route handlers + router index (T012–T022)
+- Phase 4: API wiring in app.ts (T023)
+- Phase 5–6: Unit + integration tests (T024–T033)
+- Phase 7–9: Migration validation, lint, typecheck, final test run (T034–T037)
 
 Deferred Scope:
 
-- Tag filtering on entity list endpoints (MCQ, traditional, library) — entity endpoints don't exist yet
+- Tag filtering on entity list endpoints (MCQ/traditional/library) — entity endpoints don't exist yet
 - OR-logic multi-tag filtering
 - Tag auto-suggestions
 - Hierarchical tags (explicitly excluded)
@@ -33,7 +34,7 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
 All specification ambiguities resolved. Ready for technical planning.
