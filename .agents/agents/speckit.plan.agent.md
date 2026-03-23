@@ -1,7 +1,6 @@
 ---
 description: Execute the implementation planning workflow using the plan template to generate design artifacts.
-tools: [execute, read, edit, search, agent, todo]
-handoffs:
+handoffs: 
   - label: Create Tasks
     agent: speckit.tasks
     prompt: Break the plan into tasks
@@ -9,10 +8,7 @@ handoffs:
   - label: Create Checklist
     agent: speckit.checklist
     prompt: Create a checklist for the following domain...
-version: 1.0.0
 ---
-
-**Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
 
 ## User Input
 
@@ -21,6 +17,40 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## Pre-Execution Checks
+
+**Check for extension hooks (before planning)**:
+- Check if `.specify/extensions.yml` exists in the project root.
+- If it exists, read it and look for entries under the `hooks.before_plan` key
+- If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
+- Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
+- For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
+  - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
+  - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
+- For each executable hook, output the following based on its `optional` flag:
+  - **Optional hook** (`optional: true`):
+    ```
+    ## Extension Hooks
+
+    **Optional Pre-Hook**: {extension}
+    Command: `/{command}`
+    Description: {description}
+
+    Prompt: {prompt}
+    To execute: `/{command}`
+    ```
+  - **Mandatory hook** (`optional: false`):
+    ```
+    ## Extension Hooks
+
+    **Automatic Pre-Hook**: {extension}
+    Executing: `/{command}`
+    EXECUTE_COMMAND: {command}
+
+    Wait for the result of the hook command before proceeding to the Outline.
+    ```
+- If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
 ## Outline
 
@@ -38,6 +68,35 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Re-evaluate Constitution Check post-design
 
 4. **Stop and report**: Command ends after Phase 2 planning. Report branch, IMPL_PLAN path, and generated artifacts.
+
+5. **Check for extension hooks**: After reporting, check if `.specify/extensions.yml` exists in the project root.
+   - If it exists, read it and look for entries under the `hooks.after_plan` key
+   - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
+   - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
+   - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
+     - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
+     - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
+   - For each executable hook, output the following based on its `optional` flag:
+     - **Optional hook** (`optional: true`):
+       ```
+       ## Extension Hooks
+
+       **Optional Hook**: {extension}
+       Command: `/{command}`
+       Description: {description}
+
+       Prompt: {prompt}
+       To execute: `/{command}`
+       ```
+     - **Mandatory hook** (`optional: false`):
+       ```
+       ## Extension Hooks
+
+       **Automatic Hook**: {extension}
+       Executing: `/{command}`
+       EXECUTE_COMMAND: {command}
+       ```
+   - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
 ## Phases
 
@@ -80,13 +139,13 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Skip if project is purely internal (build scripts, one-off tools, etc.)
 
 3. **Agent context update**:
-   - Run `.specify/scripts/bash/update-agent-context.sh copilot`
+   - Run `.specify/scripts/bash/update-agent-context.sh opencode`
    - These scripts detect which AI agent is in use
    - Update the appropriate agent-specific context file
    - Add only new technology from current plan
    - Preserve manual additions between markers
 
-**Output**: data-model.md, /contracts/\*, quickstart.md, agent-specific file
+**Output**: data-model.md, /contracts/*, quickstart.md, agent-specific file
 
 ## Key rules
 
