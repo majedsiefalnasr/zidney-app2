@@ -44,7 +44,7 @@ Key outcomes:
 scripts/policy-engine/types.ts       (15 LOC) — Interfaces
 scripts/policy-engine/registry.ts    (10 LOC) — Rule registry
 scripts/policy-engine/runner.ts      (30 LOC) — CLI executor
-package.json                         (1 line added) — policy:check script
+package.json                         (1 line added) — validate:policy script
 ```
 
 No migrations. No API endpoints. No UI changes.
@@ -58,7 +58,7 @@ No migrations. No API endpoints. No UI changes.
 cd /Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2
 
 # Run the policy check in default mode
-bun run policy:check
+bun run validate:policy
 
 # Expected output:
 # [PASS] dummy
@@ -96,7 +96,7 @@ bun test
 **Purpose:** Verify the policy engine runs all registered rules in full mode and reports results correctly.
 
 1. Ensure you are on branch `spec/fix-02-policy-engine-bootstrap-minimal`
-2. Run: `bun run policy:check`
+2. Run: `bun run validate:policy`
 3. Observe the output contains exactly one line: `[PASS] dummy`
 4. Confirm the final line is: `Policy check passed`
 5. Verify exit code is 0: `echo $?` should output `0`
@@ -111,7 +111,7 @@ Troubleshooting: If exit code is 1, check for any error-severity rules in regist
 
 **Purpose:** Verify the `--changed` flag is parsed and mode context is set correctly.
 
-1. Run: `bun run policy:check --changed`
+1. Run: `bun run validate:policy --changed`
 2. Observe the output contains exactly one line: `[PASS] dummy`
 3. Confirm the final line is: `Policy check passed`
 4. Verify exit code is 0
@@ -132,7 +132,7 @@ Manual test (requires code edit):
    ```ts
    export const rules: PolicyRule[] = [];
    ```
-2. Run: `bun run policy:check`
+2. Run: `bun run validate:policy`
 3. Observe output: `Policy check passed — no rules registered`
 4. Verify exit code is 0
 
@@ -165,7 +165,7 @@ Manual test (requires code edit):
    };
    ```
 2. Edit line 10: `export const rules: PolicyRule[] = [testRule];`
-3. Run: `bun run policy:check`
+3. Run: `bun run validate:policy`
 4. Observe output includes: `[FAIL] failing-test: test failure`
 5. Observe final line: `Policy check failed`
 6. Verify exit code is 1: `echo $?` should output `1`
@@ -195,24 +195,24 @@ bun run typecheck
 - [ ] All 3 TypeScript files exist: types.ts, registry.ts, runner.ts
 - [ ] Total LOC ≤ 200 (actual: 55)
 - [ ] Both manual scenarios 1 & 2 pass (default + --changed)
-- [ ] `bun run policy:check` exits 0 in default state
+- [ ] `bun run validate:policy` exits 0 in default state
 - [ ] Empty registry exits 0 with informational message
 - [ ] Error-severity rule exits 1 (manual test scenario 4)
 - [ ] Biome lint passes: `bun biome check scripts/policy-engine/` exits 0
 - [ ] TypeScript typecheck passes: `bun run typecheck` exits 0
-- [ ] package.json contains `"policy:check"` script entry
+- [ ] package.json contains `"validate:policy"` script entry
 
 ---
 
 ## Troubleshooting
 
-| Issue                            | Potential Cause                  | Resolution                                                       |
-| -------------------------------- | -------------------------------- | ---------------------------------------------------------------- |
-| `bun run policy:check` not found | Script not added to package.json | Check root package.json for `policy:check` entry                 |
-| Exit code 1 on default run       | Error-severity rule in registry  | Ensure dummy rule has `success: true`                            |
-| `--changed` flag ignored         | runner.ts not parsing argv       | Verify line 4 of runner.ts: `process.argv.includes("--changed")` |
-| Type errors in typecheck         | Import statements incorrect      | Verify `import type { ... } from "./types"` syntax               |
-| Biome lint errors                | Formatting/import order issues   | Run `bun biome check --write scripts/policy-engine/`             |
+| Issue                               | Potential Cause                  | Resolution                                                       |
+| ----------------------------------- | -------------------------------- | ---------------------------------------------------------------- |
+| `bun run validate:policy` not found | Script not added to package.json | Check root package.json for `validate:policy` entry              |
+| Exit code 1 on default run          | Error-severity rule in registry  | Ensure dummy rule has `success: true`                            |
+| `--changed` flag ignored            | runner.ts not parsing argv       | Verify line 4 of runner.ts: `process.argv.includes("--changed")` |
+| Type errors in typecheck            | Import statements incorrect      | Verify `import type { ... } from "./types"` syntax               |
+| Biome lint errors                   | Formatting/import order issues   | Run `bun biome check --write scripts/policy-engine/`             |
 
 ---
 

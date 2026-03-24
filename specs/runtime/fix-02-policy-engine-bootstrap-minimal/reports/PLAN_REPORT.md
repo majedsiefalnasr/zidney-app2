@@ -29,15 +29,15 @@ is authorized.
 
 ## Architecture Layers Touched
 
-| Layer       | Planned Changes                                       |
-| ----------- | ----------------------------------------------------- |
-| API         | None                                                  |
-| Worker      | None                                                  |
-| Frontend    | None                                                  |
-| DB Master   | None                                                  |
-| DB Tenant   | None                                                  |
-| Scripts/CLI | `scripts/policy-engine/` directory created (3 files)  |
-| Root Config | `package.json` — additive `policy:check` script entry |
+| Layer       | Planned Changes                                          |
+| ----------- | -------------------------------------------------------- |
+| API         | None                                                     |
+| Worker      | None                                                     |
+| Frontend    | None                                                     |
+| DB Master   | None                                                     |
+| DB Tenant   | None                                                     |
+| Scripts/CLI | `scripts/policy-engine/` directory created (3 files)     |
+| Root Config | `package.json` — additive `validate:policy` script entry |
 
 ---
 

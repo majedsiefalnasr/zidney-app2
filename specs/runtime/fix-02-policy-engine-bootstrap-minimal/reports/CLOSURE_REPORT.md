@@ -32,7 +32,7 @@ Stage FIX 02 is complete and ready for production. All 9 tasks were successfully
 - `scripts/policy-engine/types.ts` — TypeScript interfaces: PolicyContext, PolicyResult, PolicyRule (15 LOC)
 - `scripts/policy-engine/registry.ts` — Rule registry with dummy rule and exported rules array (10 LOC)
 - `scripts/policy-engine/runner.ts` — CLI entry point with argv parsing, sequential rule execution, per-rule output, exit 0/1 (30 LOC)
-- `package.json` additive entry — `"policy:check": "bun run scripts/policy-engine/runner.ts"`
+- `package.json` additive entry — `"validate:policy": "bun run scripts/policy-engine/runner.ts"`
 - Total LOC: 55 / 200 limit ✅
 
 ---
@@ -41,8 +41,8 @@ Stage FIX 02 is complete and ready for production. All 9 tasks were successfully
 
 All 4 test scenarios verified during implementation (T006–T009):
 
-1. **Default mode:** `bun run policy:check` → `[PASS] dummy`, `Policy check passed`, exit 0 ✅
-2. **Changed flag:** `bun run policy:check --changed` → `[PASS] dummy`, exit 0 ✅
+1. **Default mode:** `bun run validate:policy` → `[PASS] dummy`, `Policy check passed`, exit 0 ✅
+2. **Changed flag:** `bun run validate:policy --changed` → `[PASS] dummy`, exit 0 ✅
 3. **Empty registry:** Registry with no rules → `Policy check passed — no rules registered`, exit 0 ✅
 4. **Error-severity rule:** Error-severity result → `[FAIL] <ruleId>`, `Policy check failed`, exit 1 ✅
 

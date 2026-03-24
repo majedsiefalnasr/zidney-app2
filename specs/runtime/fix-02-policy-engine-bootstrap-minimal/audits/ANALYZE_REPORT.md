@@ -12,7 +12,7 @@ Full structural drift audit and composite guardian audit passed. 9/9 drift crite
 All 4 guardians returned PASS. No violations detected. Implementation is authorized.
 
 This stage creates 3 utility TypeScript files in `scripts/policy-engine/` and adds one additive
-`policy:check` script entry to the root `package.json`. No HTTP routes, no DB access, no worker
+`validate:policy` script entry to the root `package.json`. No HTTP routes, no DB access, no worker
 jobs, no tenant logic, no external dependencies. All import boundaries, LOC constraints, and
 scope freeze requirements are confirmed clean.
 
@@ -52,7 +52,7 @@ None.
 | Templates          | Canonical parity for rewired consumers                        | N/A    | No template changes                                       |
 | Prompts            | Prompt surfaces synchronized                                  | N/A    | No prompt changes                                         |
 | Guidance           | Stale legacy references removed                               | N/A    | No guidance file changes                                  |
-| Entrypoints        | Shell/loader paths resolve one authority model                | N/A    | `policy:check` is a new additive entry                    |
+| Entrypoints        | Shell/loader paths resolve one authority model                | N/A    | `validate:policy` is a new additive entry                 |
 | Validation Cadence | Per-batch smoke evidence recorded                             | N/A    | No routing-affecting batch                                |
 | Stage Authority    | Stage-file requirements reflected in artifacts                | ✅     | All spec requirements mapped to tasks                     |
 | Support Surfaces   | In-scope support surfaces have dispositions                   | N/A    | No support surfaces in scope                              |

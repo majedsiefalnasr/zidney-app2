@@ -79,7 +79,7 @@ Confirm compliance with Zidney Constitution v1.2.0:
 scripts/policy-engine/types.ts       +15 LOC (interfaces)
 scripts/policy-engine/registry.ts    +10 LOC (rule registry)
 scripts/policy-engine/runner.ts      +30 LOC (CLI executor)
-package.json                         +1 line (policy:check script)
+package.json                         +1 line (validate:policy script)
 
 Total added: 55 LOC (limit: 200)
 ```
@@ -93,7 +93,7 @@ Total added: 55 LOC (limit: 200)
 ### Default Mode
 
 ```bash
-$ bun run policy:check
+$ bun run validate:policy
 [PASS] dummy
 Policy check passed
 Exit: 0
@@ -102,7 +102,7 @@ Exit: 0
 ### Changed Mode
 
 ```bash
-$ bun run policy:check --changed
+$ bun run validate:policy --changed
 [PASS] dummy
 Policy check passed
 Exit: 0
@@ -111,7 +111,7 @@ Exit: 0
 ### Empty Registry
 
 ```bash
-$ bun run policy:check  # (if registry is empty)
+$ bun run validate:policy  # (if registry is empty)
 Policy check passed — no rules registered
 Exit: 0
 ```
@@ -119,7 +119,7 @@ Exit: 0
 ### Error-Severity Rule
 
 ```bash
-$ bun run policy:check  # (if error-severity rule present)
+$ bun run validate:policy  # (if error-severity rule present)
 [PASS] dummy
 [FAIL] failing-test: test failure
 Policy check failed

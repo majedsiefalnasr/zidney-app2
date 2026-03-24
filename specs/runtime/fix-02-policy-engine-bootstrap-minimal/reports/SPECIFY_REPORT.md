@@ -8,7 +8,7 @@
 
 ## Summary
 
-Specification drafted for a minimal, self-contained Policy Engine bootstrap. The stage introduces three TypeScript files under `scripts/policy-engine/` (`types.ts`, `registry.ts`, `runner.ts`) and a `policy:check` script in the root `package.json`. The engine loads rules from a registry, executes them sequentially, and exits with code `0` (pass or warnings only) or `1` (any error-severity failure). Implementation is deliberately constrained to < 200 LOC with zero new external dependencies.
+Specification drafted for a minimal, self-contained Policy Engine bootstrap. The stage introduces three TypeScript files under `scripts/policy-engine/` (`types.ts`, `registry.ts`, `runner.ts`) and a `validate:policy` script in the root `package.json`. The engine loads rules from a registry, executes them sequentially, and exits with code `0` (pass or warnings only) or `1` (any error-severity failure). Implementation is deliberately constrained to < 200 LOC with zero new external dependencies.
 
 ---
 
@@ -24,7 +24,7 @@ Specification drafted for a minimal, self-contained Policy Engine bootstrap. The
 
 | #   | Decision                                         | Rationale                                                                                                  |
 | --- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| 1   | Dummy rule included in initial registry          | Ensures `policy:check` exits cleanly (code 0) on first run without crashing on empty registry              |
+| 1   | Dummy rule included in initial registry          | Ensures `validate:policy` exits cleanly (code 0) on first run without crashing on empty registry           |
 | 2   | Warning-only failures are non-fatal              | Stage spec explicitly states exit 0 for warnings; this separates informational feedback from hard failures |
 | 3   | Sequential (not parallel) execution              | Stage spec mandates sequential execution; keeps implementation simple and deterministic                    |
 | 4   | scripts/ directory (not a new workspace package) | Stays out of the monorepo package graph; no cross-app boundary violations                                  |
@@ -34,7 +34,7 @@ Specification drafted for a minimal, self-contained Policy Engine bootstrap. The
 
 ## Functional Requirements Captured
 
-1. `policy:check` script in root `package.json` invoking `bun run scripts/policy-engine/runner.ts`
+1. `validate:policy` script in root `package.json` invoking `bun run scripts/policy-engine/runner.ts`
 2. `types.ts` exports `PolicyContext`, `PolicyResult`, `PolicyRule` with exact interface shapes
 3. `registry.ts` exports `rules: PolicyRule[]` with at least one dummy rule
 4. `runner.ts` parses `--changed` / `--full` CLI modes
@@ -70,7 +70,7 @@ None — stage file provided sufficient detail for all interface and behavioral 
 
 ## Open Risks
 
-- `policy:check` script name must not conflict with any existing scripts in root `package.json`. To be verified during clarify/plan.
+- `validate:policy` script name must not conflict with any existing scripts in root `package.json`. To be verified during clarify/plan.
 
 ---
 

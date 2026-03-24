@@ -8,7 +8,7 @@
 
 ## Summary
 
-All mandatory validation checks passed for the policy engine bootstrap. The implementation consists of 3 TypeScript files (55 LOC total) under `scripts/policy-engine/` and one additive script entry in root `package.json`. No database migrations, no API endpoints, no UI changes. All behavioral scenarios verified via `bun run policy:check`.
+All mandatory validation checks passed for the policy engine bootstrap. The implementation consists of 3 TypeScript files (55 LOC total) under `scripts/policy-engine/` and one additive script entry in root `package.json`. No database migrations, no API endpoints, no UI changes. All behavioral scenarios verified via `bun run validate:policy`.
 
 ---
 
@@ -17,7 +17,7 @@ All mandatory validation checks passed for the policy engine bootstrap. The impl
 - `specs/runtime/fix-02-policy-engine-bootstrap-minimal/tasks.md`
 - `specs/runtime/fix-02-policy-engine-bootstrap-minimal/plan.md`
 - `scripts/policy-engine/types.ts`, `registry.ts`, `runner.ts`
-- Root `package.json` (policy:check additive entry)
+- Root `package.json` (validate:policy additive entry)
 
 ---
 
@@ -25,7 +25,7 @@ All mandatory validation checks passed for the policy engine bootstrap. The impl
 
 | Validation Check                                   | Required | Command(s)                               | Result  | Notes                                     |
 | -------------------------------------------------- | -------- | ---------------------------------------- | ------- | ----------------------------------------- |
-| Unit tests (impacted business logic)               | Yes      | `bun run policy:check`                   | ✅ PASS | CLI exit 0 on default run; 4 scenarios OK |
+| Unit tests (impacted business logic)               | Yes      | `bun run validate:policy`                | ✅ PASS | CLI exit 0 on default run; 4 scenarios OK |
 | Integration tests (impacted API flows)             | N/A      | —                                        | N/A     | No API surface introduced                 |
 | Snapshot tests (grading behavior, if applicable)   | N/A      | —                                        | N/A     | No grading logic; CLI only                |
 | Lint (Biome)                                       | Yes      | `bun biome check scripts/policy-engine/` | ✅ PASS | 0 errors after auto-fix; 3 files clean    |
@@ -43,12 +43,12 @@ All mandatory validation checks passed for the policy engine bootstrap. The impl
 ### Behavioral Verification (T006–T009)
 
 ```text
-$ bun run policy:check
+$ bun run validate:policy
 [PASS] dummy
 Policy check passed
 Exit: 0 ✅
 
-$ bun run policy:check --changed
+$ bun run validate:policy --changed
 [PASS] dummy
 Policy check passed
 Exit: 0 ✅

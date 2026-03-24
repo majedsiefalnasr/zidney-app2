@@ -30,8 +30,8 @@ All validations in this stage MUST be implemented as **Policy Engine rules**. No
 ### Policy Entry Command
 
 ```
-bun run policy:check --changed   # pre-commit / pre-push
-bun run policy:check --full      # CI / orchestrator closure
+bun run validate:policy --changed   # pre-commit / pre-push
+bun run validate:policy --full      # CI / orchestrator closure
 ```
 
 ### GitNexus Optimization (INFRA-28 Alignment)
@@ -353,7 +353,7 @@ Replace:
 With:
 
 ```
-bun run policy:check --full
+bun run validate:policy --full
 ```
 
 ---
@@ -361,7 +361,7 @@ bun run policy:check --full
 ### Pre-Push Contract
 
 ```
-bun run policy:check --changed
+bun run validate:policy --changed
 ```
 
 ---

@@ -20,13 +20,13 @@ Five targeted clarification questions were answered and appended to `spec.md`. A
 
 ## Clarifications Resolved
 
-| #   | Question                                                                  | Resolution                                                                        | Impact                                                            |
-| --- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Q1  | Does `policy:check` conflict with any existing root package.json scripts? | No conflict — no `policy`-prefixed scripts exist                                  | Safe to add the script                                            |
-| Q2  | Will scripts/policy-engine/\*.ts be covered by root tsconfig.json?        | No — bun native TS transpilation used; no separate tsconfig needed                | Implementation uses `bun run` directly, no extra tsconfig         |
-| Q3  | Should runner.ts print individual rule results or only final summary?     | Both — per-rule `[PASS]`/`[FAIL]` lines then final summary                        | runner.ts must log each rule result before printing final message |
-| Q4  | What happens when rules array is empty?                                   | Pass silently — exit 0, print "Policy check passed — no rules registered"         | runner.ts must handle empty registry gracefully                   |
-| Q5  | Should the dummy rule be removed in future stages?                        | Yes — temporary bootstrap placeholder, replaced (not accumulated) in STAGE_FIX_03 | registry.ts comment must note "replace in STAGE_FIX_03"           |
+| #   | Question                                                                     | Resolution                                                                        | Impact                                                            |
+| --- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Q1  | Does `validate:policy` conflict with any existing root package.json scripts? | No conflict — no `policy`-prefixed scripts exist                                  | Safe to add the script                                            |
+| Q2  | Will scripts/policy-engine/\*.ts be covered by root tsconfig.json?           | No — bun native TS transpilation used; no separate tsconfig needed                | Implementation uses `bun run` directly, no extra tsconfig         |
+| Q3  | Should runner.ts print individual rule results or only final summary?        | Both — per-rule `[PASS]`/`[FAIL]` lines then final summary                        | runner.ts must log each rule result before printing final message |
+| Q4  | What happens when rules array is empty?                                      | Pass silently — exit 0, print "Policy check passed — no rules registered"         | runner.ts must handle empty registry gracefully                   |
+| Q5  | Should the dummy rule be removed in future stages?                           | Yes — temporary bootstrap placeholder, replaced (not accumulated) in STAGE_FIX_03 | registry.ts comment must note "replace in STAGE_FIX_03"           |
 
 ---
 

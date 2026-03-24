@@ -8,7 +8,7 @@
 
 ## Functional Requirements
 
-- [ ] `policy:check` script defined in root `package.json` invoking `bun run scripts/policy-engine/runner.ts`
+- [ ] `validate:policy` script defined in root `package.json` invoking `bun run scripts/policy-engine/runner.ts`
 - [ ] `types.ts` exports `PolicyContext` interface with `mode: "full" | "changed"`
 - [ ] `types.ts` exports `PolicyResult` interface with `ruleId`, `success`, `severity`, and optional `message`
 - [ ] `types.ts` exports `PolicyRule` interface with `id` and `run(context): Promise<PolicyResult>`
@@ -48,11 +48,11 @@
 
 ## Testing
 
-- [ ] Manual: `bun run policy:check` exits `0` and prints `"Policy check passed"`
-- [ ] Manual: `bun run policy:check --changed` exits `0` and prints `"Policy check passed"`
+- [ ] Manual: `bun run validate:policy` exits `0` and prints `"Policy check passed"`
+- [ ] Manual: `bun run validate:policy --changed` exits `0` and prints `"Policy check passed"`
 - [ ] Manual: temporarily registering a rule that returns `{ success: false, severity: "error" }` causes exit `1` and prints `"Policy check failed"`
 - [ ] Manual: registering a rule that returns `{ success: false, severity: "warning" }` still exits `0`
-- [ ] Manual: emptying the `rules` array and running `policy:check` exits `0` without crashing
+- [ ] Manual: emptying the `rules` array and running `validate:policy` exits `0` without crashing
 
 ---
 

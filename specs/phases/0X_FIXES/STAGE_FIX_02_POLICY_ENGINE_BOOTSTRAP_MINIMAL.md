@@ -20,13 +20,13 @@ Scope Delivered:
 - scripts/policy-engine/types.ts — CREATED (15 LOC)
 - scripts/policy-engine/registry.ts — CREATED (10 LOC)
 - scripts/policy-engine/runner.ts — CREATED (30 LOC)
-- package.json (root) — MODIFIED (policy:check script added)
+- package.json (root) — MODIFIED (validate:policy script added)
 - Total LOC: 55 / 200 limit
 
 Verified:
 
-- bun run policy:check → [PASS] dummy / Policy check passed / exit 0 ✅
-- bun run policy:check --changed → [PASS] dummy / exit 0 ✅
+- bun run validate:policy → [PASS] dummy / Policy check passed / exit 0 ✅
+- bun run validate:policy --changed → [PASS] dummy / exit 0 ✅
 - Empty registry → Policy check passed — no rules registered / exit 0 ✅
 - Error-severity rule → [FAIL] / Policy check failed / exit 1 ✅
 - Biome lint: PASS | TypeScript typecheck: PASS | All workflows: PASS
@@ -70,7 +70,7 @@ STAGE_FIX_03_BUILD_TEST_AND_REPOSITORY_CLEANLINESS_ENFORCEMENT
 
 ### MUST Implement
 
-1. `policy:check` command
+1. `validate:policy` command
 2. Minimal rule interface
 3. Rule registry
 4. Basic runner
@@ -190,14 +190,14 @@ run(mode);
 Add:
 
 ```json
-"policy:check": "bun run scripts/policy-engine/runner.ts"
+"validate:policy": "bun run scripts/policy-engine/runner.ts"
 ```
 
 Usage:
 
 ```
-bun run policy:check --full
-bun run policy:check --changed
+bun run validate:policy --full
+bun run validate:policy --changed
 ```
 
 ---
@@ -213,7 +213,7 @@ bun run policy:check --changed
 
 ## Success Criteria
 
-- `policy:check` executes without crashing
+- `validate:policy` executes without crashing
 - Supports `--full` and `--changed`
 - Can execute at least one dummy rule
 - Proper exit codes:

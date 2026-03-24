@@ -20,7 +20,7 @@ Zidney's governance pipeline currently lacks a mechanism to run rule-based check
 
 ### In Scope
 
-- `policy:check` script entry in the root `package.json`
+- `validate:policy` script entry in the root `package.json`
 - `scripts/policy-engine/types.ts` — `PolicyContext`, `PolicyResult`, and `PolicyRule` TypeScript interfaces
 - `scripts/policy-engine/registry.ts` — exported `rules: PolicyRule[]` array (initially empty or containing one dummy rule)
 - `scripts/policy-engine/runner.ts` — sequential rule executor that reads CLI args, runs all registered rules, and exits with the correct code
@@ -44,7 +44,7 @@ Zidney's governance pipeline currently lacks a mechanism to run rule-based check
 
 ## Functional Requirements
 
-1. The root `package.json` must define a `policy:check` script that invokes `bun run scripts/policy-engine/runner.ts`.
+1. The root `package.json` must define a `validate:policy` script that invokes `bun run scripts/policy-engine/runner.ts`.
 2. `scripts/policy-engine/types.ts` must export the `PolicyContext`, `PolicyResult`, and `PolicyRule` interfaces with the exact shape defined in the Technical Design section.
 3. `scripts/policy-engine/registry.ts` must export a `rules` array typed as `PolicyRule[]`.
 4. `scripts/policy-engine/registry.ts` must contain at least one dummy rule so initial execution has a rule to process.
@@ -139,24 +139,24 @@ Key behaviors:
 Add to the root `package.json` `scripts` section:
 
 ```json
-"policy:check": "bun run scripts/policy-engine/runner.ts"
+"validate:policy": "bun run scripts/policy-engine/runner.ts"
 ```
 
 Usage:
 
 ```sh
 # Full mode (default)
-bun run policy:check
-bun run policy:check --full
+bun run validate:policy
+bun run validate:policy --full
 
 # Changed-files mode
-bun run policy:check --changed
+bun run validate:policy --changed
 ```
 
 ## Success Criteria
 
-1. `bun run policy:check` executes without crashing and exits with code `0`.
-2. `bun run policy:check --changed` executes without crashing and exits with code `0`.
+1. `bun run validate:policy` executes without crashing and exits with code `0`.
+2. `bun run validate:policy --changed` executes without crashing and exits with code `0`.
 3. Console output includes `"Policy check passed"` on successful runs.
 4. A rule that returns `{ success: false, severity: "error" }` causes exit code `1` and prints `"Policy check failed"`.
 5. A rule that returns `{ success: false, severity: "warning" }` allows exit code `0`.
@@ -181,7 +181,7 @@ bun run policy:check --changed
 
 ### Blocked by this stage (must complete first)
 
-- `STAGE_FIX_03_BUILD_TEST_AND_REPOSITORY_CLEANLINESS_ENFORCEMENT` — requires `policy:check` to be runnable before it can register cleanliness rules.
+- `STAGE_FIX_03_BUILD_TEST_AND_REPOSITORY_CLEANLINESS_ENFORCEMENT` — requires `validate:policy` to be runnable before it can register cleanliness rules.
 
 ---
 
@@ -189,8 +189,8 @@ bun run policy:check --changed
 
 ### Session 2026-03-24
 
-**Q1: Does `policy:check` conflict with any existing root package.json scripts?**
-A: No conflict. The root `package.json` contains no existing `policy`-prefixed scripts. The name `policy:check` follows the Zidney `<domain>:<action>` convention and is safe to add.
+**Q1: Does `validate:policy` conflict with any existing root package.json scripts?**
+A: No conflict. The root `package.json` contains no existing `policy`-prefixed scripts. The name `validate:policy` follows the Zidney `<domain>:<action>` convention and is safe to add.
 
 **Q2: Will scripts/policy-engine/\*.ts be covered by the root tsconfig.json for type checking?**
 A: No — the root `tsconfig.json` `include` paths cover only `apps/{mmc,backoffice,frontoffice}/src/**/*` and `packages/*/src/**/*`; `scripts/` is excluded. However, `bun run` transpiles TypeScript natively without requiring tsconfig inclusion. Strict type correctness for scripts/ is enforced at runtime by bun's type-aware transpilation. No separate `scripts/tsconfig.json` is needed for this stage; if formal `tsc` coverage of scripts/ becomes required, that is deferred to a future stage.

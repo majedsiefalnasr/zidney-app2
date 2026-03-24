@@ -113,7 +113,7 @@
     "validate:scan:packages": "bun scripts/validate/scan-package-scripts.ts",
     "dev:refactor:scripts": "bun scripts/dev/refactor-scripts.ts",
     "ci:run-local": "bun scripts/run-local-ci.ts",
-    "policy:check": "bun run scripts/policy-engine/runner.ts"
+    "validate:policy": "bun run scripts/policy-engine/runner.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",

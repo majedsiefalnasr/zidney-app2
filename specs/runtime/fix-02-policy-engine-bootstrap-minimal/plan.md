@@ -14,7 +14,7 @@ fix-02-policy-engine-bootstrap-minimal
 
 This stage bootstraps a minimal, self-contained Policy Engine under `scripts/policy-engine/`. It provides the typed interfaces, rule registry, and sequential runner that subsequent fix stages (starting with `STAGE_FIX_03`) will depend on to register and enforce governance rules programmatically.
 
-The implementation is intentionally minimal: no scoring, no categories, no external dependencies, no CI wiring. The sole goal is to have a stable, runnable `bun run policy:check` that:
+The implementation is intentionally minimal: no scoring, no categories, no external dependencies, no CI wiring. The sole goal is to have a stable, runnable `bun run validate:policy` that:
 
 - Loads a typed list of rules from a registry
 - Executes them sequentially
@@ -25,12 +25,12 @@ The implementation is intentionally minimal: no scoring, no categories, no exter
 
 ## 2. Files Changed
 
-| File                                | Action     | Notes                                       |
-| ----------------------------------- | ---------- | ------------------------------------------- |
-| `scripts/policy-engine/types.ts`    | **CREATE** | Shared TypeScript interfaces                |
-| `scripts/policy-engine/registry.ts` | **CREATE** | Rule registry with one dummy rule           |
-| `scripts/policy-engine/runner.ts`   | **CREATE** | CLI entry point and sequential executor     |
-| `package.json` (root)               | **MODIFY** | Add `"policy:check"` script — additive only |
+| File                                | Action     | Notes                                          |
+| ----------------------------------- | ---------- | ---------------------------------------------- |
+| `scripts/policy-engine/types.ts`    | **CREATE** | Shared TypeScript interfaces                   |
+| `scripts/policy-engine/registry.ts` | **CREATE** | Rule registry with one dummy rule              |
+| `scripts/policy-engine/runner.ts`   | **CREATE** | CLI entry point and sequential executor        |
+| `package.json` (root)               | **MODIFY** | Add `"validate:policy"` script — additive only |
 
 No other files are created or modified.
 
@@ -142,7 +142,7 @@ Behavioral rules:
 In the `scripts` section, add one entry (additive, no existing scripts removed or modified):
 
 ```json
-"policy:check": "bun run scripts/policy-engine/runner.ts"
+"validate:policy": "bun run scripts/policy-engine/runner.ts"
 ```
 
 The surrounding `scripts` block is otherwise unchanged.
@@ -171,10 +171,10 @@ Manual verification steps after implementation:
 
 | Test                     | Command                                                                                          | Expected                                                               |
 | ------------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| Default run              | `bun run policy:check`                                                                           | Exit 0; prints `[PASS] dummy` then `Policy check passed`               |
-| Changed mode             | `bun run policy:check --changed`                                                                 | Exit 0; same output                                                    |
-| Full mode explicit       | `bun run policy:check --full`                                                                    | Exit 0; same output (treated as default)                               |
-| Empty registry           | Remove `dummyRule` from `registry.ts`, run `bun run policy:check`                                | Exit 0; prints `Policy check passed — no rules registered`             |
+| Default run              | `bun run validate:policy`                                                                        | Exit 0; prints `[PASS] dummy` then `Policy check passed`               |
+| Changed mode             | `bun run validate:policy --changed`                                                              | Exit 0; same output                                                    |
+| Full mode explicit       | `bun run validate:policy --full`                                                                 | Exit 0; same output (treated as default)                               |
+| Empty registry           | Remove `dummyRule` from `registry.ts`, run `bun run validate:policy`                             | Exit 0; prints `Policy check passed — no rules registered`             |
 | Error-severity failure   | Add rule returning `{ ruleId: "test", success: false, severity: "error", message: "boom" }`, run | Exit 1; prints `[FAIL] test: boom` and `Policy check failed` to stderr |
 | Warning-severity failure | Add rule returning `{ ruleId: "test", success: false, severity: "warning" }`, run                | Exit 0; prints `[FAIL] test` and `Policy check passed`                 |
 | LOC budget               | `wc -l scripts/policy-engine/*.ts`                                                               | Total ≤ 200 lines                                                      |
