@@ -6,8 +6,8 @@
   "branch": "spec/fix-02-policy-engine-bootstrap-minimal",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "implement",
-  "stage_status": "BACKEND CLOSED",
+  "current_step": "stage_production_ready",
+  "stage_status": "PRODUCTION READY",
   "clarifications_resolved": true,
   "drift_passed": true,
   "implementation_allowed": true,
@@ -26,7 +26,7 @@
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-03-24T00:00:00Z",
-  "last_updated": "2026-03-24T13:23:13Z",
+  "last_updated": "2026-03-24T13:24:00Z",
   "step_timings": {
     "specify": { "started_at": "2026-03-24T00:00:30Z", "completed_at": "2026-03-24T00:01:00Z" },
     "clarify": { "started_at": "2026-03-24T00:01:10Z", "completed_at": "2026-03-24T00:02:00Z" },
@@ -68,6 +68,14 @@
       "tasks_total": 9,
       "deferred_count": 0,
       "timestamp": "2026-03-24T13:23:13Z"
+    },
+    {
+      "event": "pre_closure_review_approved",
+      "timestamp": "2026-03-24T13:23:30Z"
+    },
+    {
+      "event": "stage_production_ready",
+      "timestamp": "2026-03-24T13:24:00Z"
     }
   ]
 }
