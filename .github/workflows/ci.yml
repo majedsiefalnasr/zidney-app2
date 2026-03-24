@@ -301,7 +301,7 @@ jobs:
           echo "✓ All skip markers are annotated."
 
       - name: Run unit tests (all projects)
-        run: bun run test:unit -- --debug
+        run: bun run test:unit
 
       - name: Run module boundary unit tests
         run: bun run test:unit:boundaries
