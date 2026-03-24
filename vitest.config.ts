@@ -15,6 +15,12 @@ import { defineConfig } from 'vitest/config'
  * Stage: STAGE_INFRA_03_ALIGNMENT — T001
  */
 export default defineConfig({
+  // Suppress Vite CJS deprecation warning (may cause hangs in CI):
+  // The Node API is deprecated but still functional. Set VITE_CJS_IGNORE_WARNING
+  // to suppress the warning that can interfere with test runner stability.
+  define: {
+    'process.env.VITE_CJS_IGNORE_WARNING': JSON.stringify('true'),
+  },
   test: {
     // Workspace config: orchestrates all app and package projects
     workspace: './vitest.workspace.ts',

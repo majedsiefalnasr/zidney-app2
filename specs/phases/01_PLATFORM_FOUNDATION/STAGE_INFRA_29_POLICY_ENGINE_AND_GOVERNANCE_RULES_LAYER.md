@@ -205,7 +205,7 @@ Uses:
 ### CI (INFRA-27)
 
 ```
-bun run policy:check --full
+bun run validate:policy --full
 ```
 
 Fail on errors.
