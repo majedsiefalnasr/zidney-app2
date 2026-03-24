@@ -31,13 +31,14 @@ run_sql() {
   fi
 }
 
-# Drop and recreate master database
-echo "  • Dropping existing master database..."
-PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -tc "SELECT 1 FROM pg_database WHERE datname = '$MASTER_DB_NAME'" | grep -q 1 && \
-  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -c "DROP DATABASE IF EXISTS $MASTER_DB_NAME" || true
+# Drop and recreate master database (idempotent)
+echo "  • Dropping existing master database (if any)..."
+run_sql -tc "SELECT 1 FROM pg_database WHERE datname = '$MASTER_DB_NAME'" | grep -q 1 && \
+  run_sql -c "DROP DATABASE IF EXISTS \"$MASTER_DB_NAME\"" || true
 
-echo "  • Creating master database..."
-run_sql -tc "CREATE DATABASE $MASTER_DB_NAME"
+echo "  • Creating master database (if missing)..."
+run_sql -tc "SELECT 1 FROM pg_database WHERE datname = '$MASTER_DB_NAME'" | grep -q 1 || \
+  run_sql -c "CREATE DATABASE \"$MASTER_DB_NAME\""
 
 # Create master schema tables
 echo "  • Applying master schema..."

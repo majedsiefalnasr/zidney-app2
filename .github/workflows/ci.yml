@@ -346,6 +346,17 @@ jobs:
       REDIS_PASSWORD: ""
       NODE_ENV: test
       JWT_SECRET: ci-test-secret-not-for-production
+      # Explicit DB envs consumed by `scripts/init-test-db.sh` and integration tests.
+      # NOTE: These are the admin/test credentials used by the postgres service
+      # that the job brings up via the `services.postgres` configuration. The
+      # `init-test-db.sh` script expects `DB_HOST/DB_PORT/DB_USER/DB_PASSWORD`
+      # and `MASTER_DB_NAME` to be present; exporting them here makes the
+      # script deterministic and improves CI reproducibility.
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_USER: zidney_test
+      DB_PASSWORD: zidney_test
+      MASTER_DB_NAME: zidney_master_test
 
     steps:
       - name: Checkout
@@ -388,8 +399,73 @@ jobs:
       - name: Initialize test database
         run: bash scripts/init-test-db.sh
 
+      - name: Verify DB initialization
+        run: |
+          set -euo pipefail
+          echo "Verifying master database '$MASTER_DB_NAME' and 'workspaces' table..."
+          PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$MASTER_DB_NAME" -c "SELECT 1 FROM workspaces LIMIT 1;" || {
+            echo "ERROR: verification query failed — workspaces table may be missing" >&2
+            PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$MASTER_DB_NAME" -c "\dt;" || true
+            exit 1
+          }
+
       - name: Run integration tests
         run: bun run test:integration -- --debug
+
+      - name: Dump Postgres logs (on failure)
+        # This step collects diagnostics when the integration-tests job fails.
+        # It saves docker container listings, postgres container logs and
+        # a few psql diagnostics into `tmp/ci-postgres-logs/`, then uploads
+        # them as an artifact in the following step. The step is guarded by
+        # `if: failure()` so it runs only on job failure and helps debugging
+        # flaky or startup-related DB issues in CI.
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT_DIR=tmp/ci-postgres-logs
+          mkdir -p "$OUT_DIR"
+          echo "=== CI DIAGNOSTICS: Postgres logs (attempt) ==="
+
+          echo "Listing docker containers:" | tee "$OUT_DIR/docker-containers.txt"
+          docker ps -a --format 'ID={{.ID}} Name={{.Names}} Image={{.Image}} Status={{.Status}}' | tee -a "$OUT_DIR/docker-containers.txt" || true
+
+          echo "Trying to find Postgres container by name or image..." | tee -a "$OUT_DIR/docker-containers.txt"
+          if docker ps -a --format '{{.Names}}' | grep -q '^postgres$'; then
+            echo "Found container 'postgres' — dumping logs to $OUT_DIR/docker-logs.txt"
+            docker logs postgres 2>&1 | tee "$OUT_DIR/docker-logs.txt" || true
+          else
+            CONTAINER_ID=$(docker ps -a --filter "ancestor=postgres:15-alpine" --format '{{.ID}}' | head -n1 || true)
+            if [ -n "$CONTAINER_ID" ]; then
+              echo "Found container ID $CONTAINER_ID — dumping logs to $OUT_DIR/docker-logs.txt"
+              docker logs "$CONTAINER_ID" 2>&1 | tee "$OUT_DIR/docker-logs.txt" || true
+            else
+              echo "No Postgres container found by name or image." | tee "$OUT_DIR/docker-logs.txt"
+              echo "Dumping last 100 lines of docker.service journal to $OUT_DIR/journalctl-docker.txt" || true
+              journalctl -u docker --no-pager -n 100 2>&1 | tee "$OUT_DIR/journalctl-docker.txt" || true
+            fi
+          fi
+
+          echo "Attempting psql connectivity checks; outputs saved to $OUT_DIR/psql-diagnostics.txt"
+          export PGPASSWORD="${DB_PASSWORD:-}"
+          {
+            echo "-- psql\l"
+            psql -h "${DB_HOST:-localhost}" -p "${DB_PORT:-5432}" -U "${DB_USER:-zidney_test}" -d "${MASTER_DB_NAME:-zidney_master_test}" -c "\l" 2>&1 || true
+            echo "-- \dt (tables)"
+            psql -h "${DB_HOST:-localhost}" -p "${DB_PORT:-5432}" -U "${DB_USER:-zidney_test}" -d "${MASTER_DB_NAME:-zidney_master_test}" -c "\dt" 2>&1 || true
+          } | tee "$OUT_DIR/psql-diagnostics.txt"
+
+          echo "Saved diagnostics files to $OUT_DIR. Printing tail of docker logs for quick visibility:"
+          tail -n 200 "$OUT_DIR/docker-logs.txt" || true
+          echo "=== End Postgres diagnostics ==="
+
+      - name: Upload Postgres diagnostics (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postgres-diagnostics
+          path: tmp/ci-postgres-logs/
+          retention-days: 7
 
   # ── Job 6. Coverage Validation (OPTIMIZED: Parallel queue) ──────────────
   coverage-validation:
