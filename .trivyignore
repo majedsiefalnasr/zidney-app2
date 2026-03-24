@@ -1,0 +1,4 @@
+# Approved suppressions only. Each entry must be reviewed and justified externally.
+# Format examples:
+# CVE-2024-0000
+# AVD-DS-0001

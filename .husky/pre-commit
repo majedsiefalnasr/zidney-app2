@@ -79,4 +79,25 @@ if [ -n "$BRAIN_FILES" ]; then
 fi
 
 
+# ── Trivy security enforcement ─────────────────────────────────────────────
+if ! command -v trivy >/dev/null 2>&1; then
+  echo "❌ Trivy is required for pre-commit security enforcement."
+  echo "   Install Trivy v0.59.1 before committing."
+  echo "   Run: brew install trivy"
+  exit 1
+fi
+
+echo "Running Trivy dependency scan…"
+bun run infra:security:deps || {
+  echo "❌ Trivy dependency scan failed — commit blocked."
+  exit 1
+}
+
+echo "Running Trivy staged secret scan…"
+bun run infra:security:secrets --staged || {
+  echo "❌ Trivy secret scan failed — commit blocked."
+  exit 1
+}
+
+
 echo "✔ Pre-commit checks passed"

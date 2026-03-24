@@ -80,6 +80,11 @@
     "db:status:pool": "bun run scripts/db/pool-status.ts",
     "db:validate:licenses": "bun run scripts/db/validate-licenses.ts",
     "infra:cache:clean": "bun run scripts/maintenance/cache-clean.ts",
+    "infra:security": "bun scripts/security/scan.ts",
+    "infra:security:deps": "bun scripts/security/scan-deps.ts",
+    "infra:security:secrets": "bun scripts/security/scan-secrets.ts",
+    "infra:security:config": "bun scripts/security/scan-config.ts",
+    "infra:security:ci": "bun scripts/security/scan-ci.ts",
     "dev:generate:script-docs": "bun scripts/generate/script-docs.ts",
     "dev:seed:dashboard-test-data": "bun run scripts/seed/dashboard-test-data.ts",
     "validate:runtime:scripts": "bun run scripts/validate/runtime-scripts.ts",
@@ -114,10 +119,11 @@
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.3.2",
     "@types/pg": "^8.16.0",
+    "@vitejs/plugin-vue": "^5.0.0",
     "@vitest/coverage-v8": "^1.0.0",
     "concurrently": "^8.2.0",
     "gitnexus": "^1.4.6",
-    "hono": "4.12.3",
+    "hono": "4.12.9",
     "husky": "^9.0.0",
     "ioredis": "^5.3.0",
     "jsdom": "^28.1.0",
@@ -133,10 +139,14 @@
     "wait-on": "^9.0.4",
     "yaml-lint": "^1.7.0"
   },
+  "overrides": {
+    "hono": "4.12.9"
+  },
   "engines": {
     "bun": ">=1.3.9"
   },
   "dependencies": {
     "@types/bun": "1.3.11"
-  }
+  },
+  "packageManager": "pnpm@10.12.2+sha512.a32540185b964ee30bb4e979e405adc6af59226b438ee4cc19f9e8773667a66d302f5bfee60a39d3cac69e35e4b96e708a71dd002b7e9359c4112a1722ac323f"
 }

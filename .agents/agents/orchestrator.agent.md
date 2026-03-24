@@ -2403,6 +2403,11 @@ In addition to the above validations, the orchestrator MUST execute and record:
 - TypeScript type-check (`bun run typecheck`) → must exit with code 0 (covers both `tsconfig.json` and `tsconfig.test.json`)
 - Dev runtime boot check (`$PKG_MANAGER run dev` — use the package manager detected at Pre.1) → application must start without runtime errors
 
+For stages that generate a sanitized Trivy report at `tmp/trivy-report.json`, the orchestrator MUST
+consume that retained report instead of re-running Trivy during validation. The gate fails closed if
+the JSON file is missing, malformed, or unreadable. It MUST block on CRITICAL vulnerabilities,
+CRITICAL misconfigurations, or any secret finding, while recording HIGH findings as warnings only.
+
 Rules:
 
 - Any Biome lint ERROR → BLOCK implementation
