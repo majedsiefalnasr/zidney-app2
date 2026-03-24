@@ -7,17 +7,17 @@ Infrastructure Fix Stage
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-24T00:02:00Z
+Last Updated: 2026-03-24T00:03:00Z
 
-Scope Defined:
+Scope Planned:
 
-- policy:check script in root package.json
-- scripts/policy-engine/types.ts, registry.ts, runner.ts
-- Sequential rule execution, exit codes 0/1
-- Per-rule console output + final summary
-- Empty registry handled gracefully
+- scripts/policy-engine/types.ts — CREATE (PolicyContext, PolicyResult, PolicyRule interfaces)
+- scripts/policy-engine/registry.ts — CREATE (dummy rule, exported rules array)
+- scripts/policy-engine/runner.ts — CREATE (CLI executor, per-rule output, exit codes)
+- package.json (root) — MODIFY (add policy:check script entry)
+- Total implementation: ≤ 200 LOC across 3 files
 
 Deferred Scope:
 
@@ -26,10 +26,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Architecture Guardian: PASS | API Designer: PASS
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. All guardians passed. Task breakdown in progress.
 
 ---
 
