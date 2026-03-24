@@ -1,0 +1,31 @@
+{
+  "stage": "STAGE FIX 03 — Build Test and Repository Cleanliness Enforcement",
+  "phase": "0X_FIXES",
+  "stage_dir": "specs/runtime/fix-03-build-test-and-repository-cleanliness-enforcement",
+  "stage_file": "specs/phases/0X_FIXES/STAGE_FIX_03_BUILD_TEST_AND_REPOSITORY_CLEANLINESS_ENFORCEMENT.md",
+  "branch": "spec/fix-03-build-test-and-repository-cleanliness-enforcement",
+  "base_branch": "develop",
+  "pkg_manager": "pnpm",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "deferred_tasks": [],
+  "guardian_verdicts": {},
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "2026-03-24T00:00:00Z",
+  "last_updated": "2026-03-24T00:00:00Z",
+  "step_timings": {},
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/fix-03-build-test-and-repository-cleanliness-enforcement",
+      "timestamp": "2026-03-24T00:00:00Z"
+    }
+  ]
+}
