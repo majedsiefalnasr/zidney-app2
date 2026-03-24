@@ -3,29 +3,29 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-03-24T00:02:00Z
+Last Updated: 2026-03-24T00:03:00Z
 
-Scope Defined:
+Scope Planned:
 
 - Policy Engine enforcement layer for build, test, and repository cleanliness
-- 9 rules registered with INFRA-29: ENVIRONMENT_READY, BUILD_PASS, TEST_PASS, TEST_ISOLATION, FLAKY_TEST_DETECTION, COVERAGE_THRESHOLD, REPO_CLEAN, NO_ARTIFACT_DRIFT, AUTO_FIX_ATTEMPT
-- Single entry point: `bun run validate:policy --changed` (pre-commit/pre-push) / `--full` (CI/closure)
-- Hard fail if Policy Engine unavailable (no soft fallback)
-- Zidney error contract: `{ success, data, error: { code, message } }`
-- Tests run serially per module (--pool=forks --isolate)
+- 9 rules in `scripts/policy-engine/rules/fix-03/`; types.ts + runner.ts + registry.ts updated atomically
+- `PolicyContext.autoFixedPaths` resolves AUTO_FIX_ATTEMPT → REPO_CLEAN sequencing conflict
+- 4 supporting scripts in `scripts/validate/`; 15 test files; 23-file manifest total
+- CI: `policy-gate` job replaces `build-verification`; Husky pre-push updated
+- Exit codes: 0=pass, 1=violation, 2=infra failure
 
 Deferred Scope:
 
-- Worker grading integration: out of scope (infra-only stage)
+- RULE_FIX_03_FLAKY_TEST_DETECTION: deferred (requires separate history-tracking infrastructure)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Guardian verdicts: Architecture Guardian PASS, API Designer PASS. Task breakdown in progress.
 
 ---
 
