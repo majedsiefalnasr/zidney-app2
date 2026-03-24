@@ -7,20 +7,28 @@ Infrastructure Fix Stage
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-24T00:00:00Z
+Last Updated: 2026-03-24T00:01:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- policy:check script in root package.json
+- scripts/policy-engine/types.ts — PolicyContext, PolicyResult, PolicyRule interfaces
+- scripts/policy-engine/registry.ts — rule registry with dummy rule
+- scripts/policy-engine/runner.ts — sequential executor with CLI mode support
+- Exit code 0 (pass/warnings) / 1 (error failures)
+
+Deferred Scope:
+
+- Scoring, rule categories, GitNexus integration, CI integration, caching, parallel execution (all explicitly out of scope)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
