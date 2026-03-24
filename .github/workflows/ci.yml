@@ -410,7 +410,7 @@ jobs:
           }
 
       - name: Run integration tests
-        run: bun run test:integration -- --debug
+        run: bun run test:integration
 
       - name: Dump Postgres logs (on failure)
         # This step collects diagnostics when the integration-tests job fails.
