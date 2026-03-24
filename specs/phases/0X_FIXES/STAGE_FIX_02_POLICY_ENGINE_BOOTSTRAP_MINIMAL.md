@@ -7,17 +7,17 @@ Infrastructure Fix Stage
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-24T00:03:00Z
+Last Updated: 2026-03-24T00:04:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- scripts/policy-engine/types.ts — CREATE (PolicyContext, PolicyResult, PolicyRule interfaces)
-- scripts/policy-engine/registry.ts — CREATE (dummy rule, exported rules array)
-- scripts/policy-engine/runner.ts — CREATE (CLI executor, per-rule output, exit codes)
-- package.json (root) — MODIFY (add policy:check script entry)
-- Total implementation: ≤ 200 LOC across 3 files
+- Total: 9 atomic tasks
+- Setup: 1 (directory)
+- Implementation: 3 (types.ts, registry.ts, runner.ts)
+- Configuration: 1 (package.json policy:check)
+- Testing/Verification: 4
 
 Deferred Scope:
 
@@ -26,11 +26,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Guardian: PASS | API Designer: PASS
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. All guardians passed. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
