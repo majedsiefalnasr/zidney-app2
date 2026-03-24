@@ -12,6 +12,7 @@
         "@playwright/test": "^1.58.2",
         "@types/node": "^25.3.2",
         "@types/pg": "^8.16.0",
+        "@vitejs/plugin-vue": "^5.0.0",
         "@vitest/coverage-v8": "^1.0.0",
         "concurrently": "^8.2.0",
         "gitnexus": "^1.4.6",
