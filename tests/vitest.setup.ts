@@ -121,7 +121,7 @@ afterAll(async () => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pgMod = await import('../apps/api/src/infrastructure/postgres')
-    if (pgMod && pgMod.db && typeof pgMod.db.end === 'function') {
+    if (typeof pgMod?.db?.end === 'function') {
       await pgMod.db.end()
     }
   } catch (_e) {
