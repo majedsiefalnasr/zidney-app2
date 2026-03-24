@@ -3,20 +3,27 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-24T00:00:00Z
+Last Updated: 2026-03-24T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Policy Engine enforcement layer for build, test, and repository cleanliness
+- 9 rules mapped: ENVIRONMENT_READY, BUILD_PASS, TEST_PASS, TEST_ISOLATION, FLAKY_TEST_DETECTION, COVERAGE_THRESHOLD, REPO_CLEAN, NO_ARTIFACT_DRIFT, AUTO_FIX_ATTEMPT
+- INFRA-29 Policy Engine integration required
+- GitNexus (INFRA-28) context used for --changed mode scoping
+
+Deferred Scope:
+
+- Worker grading integration: out of scope (infra-only stage)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
