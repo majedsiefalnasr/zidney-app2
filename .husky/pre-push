@@ -68,31 +68,17 @@ bun scripts/governance/validate-architecture-brain.ts || {
 }
 
 
-# ── Unit Tests (informational) ──────────────────────────────────────────────
-# Tests are non-blocking here — CI enforces them on PR.
-# If tests fail locally, the push proceeds with a visible warning.
-echo "Running unit test suite..."
-if bun run test:unit 2>&1 | tail -20; then
-  echo "✅ Unit tests passing — push will proceed."
-else
-  echo "⚠️  Unit tests failed locally."
-  echo "   Push will still proceed, but CI will block the PR until tests pass."
-  echo "   Run: bun run test:unit to debug."
-fi
 
+# ── Policy Enforcement Gate (FIX-03) ────────────────────────────────────────
+# Replaces separate unit-test and typecheck steps.
+# Uses --changed mode so only affected rules trigger (fast local feedback).
+echo "Running policy enforcement gate (--changed mode)..."
+bun run validate:policy -- --changed || {
+  echo "❌ Policy gate failed — push blocked."
+  echo "   Run: bun run validate:policy -- --changed to debug."
+  exit 1
+}
 
-# ── TypeScript Full Project Validation ──────────────────────────────────────
-TS_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(ts|tsx)$' || true)
-
-if [ -n "$TS_FILES" ]; then
-  echo "Running full TypeScript project validation..."
-  # Using typecheck script from package.json (covers src + tests tsconfigs)
-  bun run typecheck || {
-    echo "❌ TypeScript validation failed — push blocked."
-    echo "   Run: bun typecheck to see all errors."
-    exit 1
-  }
-fi
 
 
 # ── GitHub Actions Workflow Validation ──────────────────────────────────────

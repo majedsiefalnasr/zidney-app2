@@ -663,15 +663,12 @@ jobs:
           retention-days: 7
 
   # ─────────────────────────────────────────────────────────────────
-  # GROUP 4: BUILD VERIFICATION (Optimized: Early completion, reports at end)
+  # GROUP 4: POLICY GATE (Replaces build-verification — runs policy engine)
   # ─────────────────────────────────────────────────────────────────
-  # OPTIMIZATION NOTE: build-verification now depends only on lint+typecheck+arch-guard
-  # This allows build to complete early (~6-8 min) while tests run in parallel.
-  # Build success depends on source quality (no runtime test regressions affect build).
 
-  # ── Job 7. Build Verification (OPTIMIZED: Early, minimal deps) ──────────
-  build-verification:
-    name: Build Verification
+  # ── Job 7. Policy Gate ──────────────────────────────────────────
+  policy-gate:
+    name: Policy Gate (FIX-03)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs:
@@ -679,9 +676,34 @@ jobs:
       - typecheck
       - arch-guard
       - security
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: zidney_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -700,8 +722,13 @@ jobs:
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
-      - name: Build all workspaces
-        run: bun run build
+      - name: Run policy gate (--full)
+        run: bun run validate:policy -- --full
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
 
   # ─────────────────────────────────────────────────────────────────
   # FINAL STATUS JOB (Reports completion after all groups)
@@ -721,7 +748,7 @@ jobs:
       - e2e-mmc
       - e2e-backoffice
       - e2e-frontoffice
-      - build-verification
+      - policy-gate
     if: success()
     steps:
       - name: CI Pipeline Successfully Completed

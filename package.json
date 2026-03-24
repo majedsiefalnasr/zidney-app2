@@ -113,7 +113,11 @@
     "validate:scan:packages": "bun scripts/validate/scan-package-scripts.ts",
     "dev:refactor:scripts": "bun scripts/dev/refactor-scripts.ts",
     "ci:run-local": "bun scripts/run-local-ci.ts",
-    "validate:policy": "bun run scripts/policy-engine/runner.ts"
+    "validate:policy": "bun run scripts/policy-engine/runner.ts",
+    "validate:runtime-env": "bun run scripts/validate/validate-runtime-env.ts",
+    "repo:assert-clean": "bun run scripts/validate/repo-assert-clean.ts",
+    "repo:detect-artifacts": "bun run scripts/validate/repo-detect-artifacts.ts",
+    "repo:hash-build": "bun run scripts/validate/repo-hash-build.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
@@ -148,6 +152,5 @@
   },
   "dependencies": {
     "@types/bun": "1.3.11"
-  },
-  "packageManager": "pnpm@10.12.2+sha512.a32540185b964ee30bb4e979e405adc6af59226b438ee4cc19f9e8773667a66d302f5bfee60a39d3cac69e35e4b96e708a71dd002b7e9359c4112a1722ac323f"
+  }
 }
