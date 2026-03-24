@@ -88,7 +88,7 @@ describe('T030 — WORKFLOW_ENTITY_TYPES: unknown type rejected pre-DB', () => {
 // -------------------------------------------------------------------------
 // T031 — US6: WORKFLOW_ENTITY_TYPES contains exactly 7 Phase 3 types
 // -------------------------------------------------------------------------
-describe('T031 — WORKFLOW_ENTITY_TYPES: exactly 7 Phase 3 entity types', () => {
+describe('T031 — WORKFLOW_ENTITY_TYPES: exactly 8 Phase 3 entity types', () => {
   const EXPECTED_ENTITY_TYPES = [
     'subject',
     'mcq_question',
@@ -97,10 +97,11 @@ describe('T031 — WORKFLOW_ENTITY_TYPES: exactly 7 Phase 3 entity types', () =>
     'topic',
     'library_file',
     'template',
+    'mcq_basket',
   ] as const
 
-  it('has exactly 7 members', () => {
-    expect(WORKFLOW_ENTITY_TYPES.size).toBe(7)
+  it('has exactly 8 members', () => {
+    expect(WORKFLOW_ENTITY_TYPES.size).toBe(8)
   })
 
   it.each(EXPECTED_ENTITY_TYPES)('contains entity type "%s"', (entityType) => {
@@ -118,40 +119,45 @@ describe('T031 — WORKFLOW_ENTITY_TYPES: exactly 7 Phase 3 entity types', () =>
 // T032 — US6: WORKFLOW_STATE_ORDER length/order and WORKFLOW_TRANSITIONS count
 // -------------------------------------------------------------------------
 describe('T032 — WORKFLOW_STATE_ORDER and WORKFLOW_TRANSITIONS', () => {
-  it('WORKFLOW_STATE_ORDER has exactly 4 members', () => {
-    expect(WORKFLOW_STATE_ORDER).toHaveLength(4)
+  it('WORKFLOW_STATE_ORDER has exactly 5 members', () => {
+    expect(WORKFLOW_STATE_ORDER).toHaveLength(5)
   })
 
   it('WORKFLOW_STATE_ORDER is in correct sequence', () => {
-    expect(WORKFLOW_STATE_ORDER[0]).toBe(WorkflowState.COMPLETED)
-    expect(WORKFLOW_STATE_ORDER[1]).toBe(WorkflowState.UNDER_REVIEW)
-    expect(WORKFLOW_STATE_ORDER[2]).toBe(WorkflowState.APPROVED)
-    expect(WORKFLOW_STATE_ORDER[3]).toBe(WorkflowState.ENABLED)
+    expect(WORKFLOW_STATE_ORDER[0]).toBe(WorkflowState.DRAFT)
+    expect(WORKFLOW_STATE_ORDER[1]).toBe(WorkflowState.COMPLETED)
+    expect(WORKFLOW_STATE_ORDER[2]).toBe(WorkflowState.UNDER_REVIEW)
+    expect(WORKFLOW_STATE_ORDER[3]).toBe(WorkflowState.APPROVED)
+    expect(WORKFLOW_STATE_ORDER[4]).toBe(WorkflowState.ENABLED)
   })
 
-  it('COMPLETED is at index 0', () => {
-    expect(WORKFLOW_STATE_ORDER.indexOf(WorkflowState.COMPLETED)).toBe(0)
+  it('DRAFT is at index 0', () => {
+    expect(WORKFLOW_STATE_ORDER.indexOf(WorkflowState.DRAFT)).toBe(0)
   })
 
-  it('UNDER_REVIEW is at index 1', () => {
-    expect(WORKFLOW_STATE_ORDER.indexOf(WorkflowState.UNDER_REVIEW)).toBe(1)
+  it('COMPLETED is at index 1', () => {
+    expect(WORKFLOW_STATE_ORDER.indexOf(WorkflowState.COMPLETED)).toBe(1)
   })
 
-  it('APPROVED is at index 2', () => {
-    expect(WORKFLOW_STATE_ORDER.indexOf(WorkflowState.APPROVED)).toBe(2)
+  it('UNDER_REVIEW is at index 2', () => {
+    expect(WORKFLOW_STATE_ORDER.indexOf(WorkflowState.UNDER_REVIEW)).toBe(2)
   })
 
-  it('ENABLED is at index 3', () => {
-    expect(WORKFLOW_STATE_ORDER.indexOf(WorkflowState.ENABLED)).toBe(3)
+  it('APPROVED is at index 3', () => {
+    expect(WORKFLOW_STATE_ORDER.indexOf(WorkflowState.APPROVED)).toBe(3)
   })
 
-  it('WORKFLOW_TRANSITIONS has exactly 5 entries', () => {
-    expect(WORKFLOW_TRANSITIONS).toHaveLength(5)
+  it('ENABLED is at index 4', () => {
+    expect(WORKFLOW_STATE_ORDER.indexOf(WorkflowState.ENABLED)).toBe(4)
   })
 
-  it('has exactly 3 forward transitions', () => {
+  it('WORKFLOW_TRANSITIONS has exactly 6 entries', () => {
+    expect(WORKFLOW_TRANSITIONS).toHaveLength(6)
+  })
+
+  it('has exactly 4 forward transitions', () => {
     const forwardTransitions = WORKFLOW_TRANSITIONS.filter((t) => t.forward)
-    expect(forwardTransitions).toHaveLength(3)
+    expect(forwardTransitions).toHaveLength(4)
   })
 
   it('has exactly 2 backward transitions', () => {
