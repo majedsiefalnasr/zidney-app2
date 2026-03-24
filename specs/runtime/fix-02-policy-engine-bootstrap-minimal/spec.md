@@ -182,3 +182,24 @@ bun run policy:check --changed
 ### Blocked by this stage (must complete first)
 
 - `STAGE_FIX_03_BUILD_TEST_AND_REPOSITORY_CLEANLINESS_ENFORCEMENT` — requires `policy:check` to be runnable before it can register cleanliness rules.
+
+---
+
+## Clarifications
+
+### Session 2026-03-24
+
+**Q1: Does `policy:check` conflict with any existing root package.json scripts?**
+A: No conflict. The root `package.json` contains no existing `policy`-prefixed scripts. The name `policy:check` follows the Zidney `<domain>:<action>` convention and is safe to add.
+
+**Q2: Will scripts/policy-engine/\*.ts be covered by the root tsconfig.json for type checking?**
+A: No — the root `tsconfig.json` `include` paths cover only `apps/{mmc,backoffice,frontoffice}/src/**/*` and `packages/*/src/**/*`; `scripts/` is excluded. However, `bun run` transpiles TypeScript natively without requiring tsconfig inclusion. Strict type correctness for scripts/ is enforced at runtime by bun's type-aware transpilation. No separate `scripts/tsconfig.json` is needed for this stage; if formal `tsc` coverage of scripts/ becomes required, that is deferred to a future stage.
+
+**Q3: Should runner.ts also print individual rule results (pass/fail per rule) to console, or only the final summary?**
+A: Yes — runner.ts must print each individual rule result to stdout (e.g., `[PASS] dummy` or `[FAIL] <ruleId>: <message>`) before printing the final summary line. This provides per-rule observability and aids debugging without adding structured log dependencies.
+
+**Q4: What should happen when the rules array is empty — pass silently or log a warning?**
+A: Pass silently with exit code `0` and print `"Policy check passed — no rules registered"` to stdout. No warning is emitted; an empty registry is a valid bootstrap state.
+
+**Q5: Should the dummy rule be removed in future stages or remain as a no-op baseline?**
+A: The dummy rule is a temporary bootstrap placeholder. It must be replaced (not retained alongside) by real rules when `STAGE_FIX_03` registers its first production rule. The dummy rule must not exist in any stage after `STAGE_FIX_03` is complete.
