@@ -3,29 +3,30 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-03-24T00:03:00Z
+Last Updated: 2026-03-24T00:04:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Policy Engine enforcement layer for build, test, and repository cleanliness
-- 9 rules in `scripts/policy-engine/rules/fix-03/`; types.ts + runner.ts + registry.ts updated atomically
-- `PolicyContext.autoFixedPaths` resolves AUTO_FIX_ATTEMPT → REPO_CLEAN sequencing conflict
-- 4 supporting scripts in `scripts/validate/`; 15 test files; 23-file manifest total
-- CI: `policy-gate` job replaces `build-verification`; Husky pre-push updated
-- Exit codes: 0=pass, 1=violation, 2=infra failure
+- Total: 34 atomic tasks
+- Phase 1: Core engine type migration (T001–T003, atomic)
+- Phase 2: Supporting scripts (T004–T007, parallel)
+- Phase 3: package.json entries (T008)
+- Phase 4: Rule implementations (T009–T017, parallel)
+- Phase 5: Unit tests (T018–T032, parallel)
+- Phase 6: CI + Husky infrastructure (T033–T034)
 
 Deferred Scope:
 
-- RULE_FIX_03_FLAKY_TEST_DETECTION: deferred (requires separate history-tracking infrastructure)
+- RULE_FIX_03_FLAKY_TEST_DETECTION: formally deferred (DeferralReport emitted at runtime)
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Guardian verdicts: Architecture Guardian PASS, API Designer PASS. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
