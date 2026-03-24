@@ -3,16 +3,18 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-24T00:00:00Z
+Step: clarify
+Risk Level: MEDIUM
+Last Updated: 2026-03-24T00:02:00Z
 
 Scope Defined:
 
 - Policy Engine enforcement layer for build, test, and repository cleanliness
-- 9 rules mapped: ENVIRONMENT_READY, BUILD_PASS, TEST_PASS, TEST_ISOLATION, FLAKY_TEST_DETECTION, COVERAGE_THRESHOLD, REPO_CLEAN, NO_ARTIFACT_DRIFT, AUTO_FIX_ATTEMPT
-- INFRA-29 Policy Engine integration required
-- GitNexus (INFRA-28) context used for --changed mode scoping
+- 9 rules registered with INFRA-29: ENVIRONMENT_READY, BUILD_PASS, TEST_PASS, TEST_ISOLATION, FLAKY_TEST_DETECTION, COVERAGE_THRESHOLD, REPO_CLEAN, NO_ARTIFACT_DRIFT, AUTO_FIX_ATTEMPT
+- Single entry point: `bun run validate:policy --changed` (pre-commit/pre-push) / `--full` (CI/closure)
+- Hard fail if Policy Engine unavailable (no soft fallback)
+- Zidney error contract: `{ success, data, error: { code, message } }`
+- Tests run serially per module (--pool=forks --isolate)
 
 Deferred Scope:
 
@@ -20,10 +22,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

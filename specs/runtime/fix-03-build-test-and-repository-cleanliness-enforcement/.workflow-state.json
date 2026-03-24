@@ -6,9 +6,9 @@
   "branch": "spec/fix-03-build-test-and-repository-cleanliness-enforcement",
   "base_branch": "develop",
   "pkg_manager": "pnpm",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -19,9 +19,10 @@
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-03-24T00:00:00Z",
-  "last_updated": "2026-03-24T00:01:00Z",
+  "last_updated": "2026-03-24T00:02:00Z",
   "step_timings": {
-    "specify": { "started_at": "2026-03-24T00:00:30Z", "completed_at": "2026-03-24T00:01:00Z" }
+    "specify": { "started_at": "2026-03-24T00:00:30Z", "completed_at": "2026-03-24T00:01:00Z" },
+    "clarify": { "started_at": "2026-03-24T00:01:00Z", "completed_at": "2026-03-24T00:02:00Z" }
   },
   "history": [
     {
@@ -32,6 +33,10 @@
     {
       "event": "specify_complete",
       "timestamp": "2026-03-24T00:01:00Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "timestamp": "2026-03-24T00:02:00Z"
     }
   ]
 }

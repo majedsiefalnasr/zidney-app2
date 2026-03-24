@@ -140,7 +140,7 @@ runs; `RULE_FIX_03_TEST_ISOLATION` must detect the dirty state on the second run
 
 ### User Story 5 — Orchestrator blocks stage closure until all errors are resolved (Priority: P3)
 
-Before the orchestrator marks any stage closed, it runs `policy:check --full`. If any
+Before the orchestrator marks any stage closed, it runs `validate:policy --full`. If any
 `error`-severity rule fails, closure is blocked. If only warnings remain and deferred issues are
 documented, closure is allowed.
 
@@ -172,6 +172,10 @@ blocking issues.
 - What happens when coverage falls below threshold on a module that has no changes?
   → `RULE_FIX_03_COVERAGE_THRESHOLD` emits a `warning`, not an error, and deferred
   documentation is generated.
+- What happens when the policy engine module (INFRA-29) is unavailable at import time?
+  → Hard fail. The process exits non-zero immediately with: "Policy engine unavailable — cannot
+  validate". No soft fallback to direct `bun run build` or `bun run test` is permitted; doing so
+  would defeat the enforcement guarantee.
 
 ---
 
@@ -214,7 +218,7 @@ blocking issues.
 
 - **FR-009**: Husky pre-push hook MUST invoke `bun run validate:policy --changed`.
 
-- **FR-010**: The orchestrator closure step MUST invoke `policy:check --full` and block if any
+- **FR-010**: The orchestrator closure step MUST invoke `validate:policy --full` and block if any
   `error`-severity rule fails.
 
 - **FR-011**: Artifact allowlist enforcement MUST permit only `docs/ai/context/*`,
@@ -228,9 +232,11 @@ blocking issues.
   before any `error`-severity rule is evaluated; if auto-fix resolves all issues, subsequent
   rules run against the corrected state.
 
-- **FR-014**: Any rule failure MUST produce a structured output that includes: rule ID, domain,
-  severity, human-readable message, and (where applicable) the list of violating paths or test
-  names.
+- **FR-014**: Any rule failure MUST produce a structured output conforming to the Zidney error
+  contract `{ success: boolean, data: object | null, error: { code, message } | null }`, logged
+  as structured JSON to stdout. The output MUST include: rule ID, domain, severity, human-readable
+  message, and (where applicable) the list of violating paths or test names. Exit code MUST be
+  non-zero on any `error`-severity violation; exit 0 on warnings-only or clean pass.
 
 - **FR-015**: Deferred failures MUST be classified with a structured report identifying the rule,
   reason for deferral, and a suggested follow-up stage or task.
@@ -251,6 +257,13 @@ blocking issues.
   identical repository state.
 - **NFC-007**: Version compatibility between Bun runtime, Node engines, and installed package
   versions MUST be verified as part of `RULE_FIX_03_ENVIRONMENT_READY`.
+- **NFC-008**: The policy engine is an infrastructure enforcement tool, not a data-access layer.
+  Security (authN/authZ) is validated at the pre-commit/pre-push boundary by Husky hooks invoking
+  `validate:policy`; no additional authentication or authorization layer is required within the
+  policy engine itself.
+- **NFC-009**: Test suites MUST run serially per module via Vitest `--pool=forks --isolate`.
+  Parallel CI jobs MUST use separate DB schemas (enforced by the tenant isolation model). No
+  additional locking primitives are required within this stage.
 
 ### Key Entities
 
@@ -259,7 +272,8 @@ blocking issues.
 - **PolicyContext**: Runtime context passed to every rule — includes changed-file list (GitNexus
   output), environment flags, workspace root, and mode (`changed` | `full`).
 - **PolicyResult**: Structured output from a rule — `passed: boolean`, `severity`, `messages[]`,
-  `violatingPaths[]`, optional `deferralReport`.
+  `violatingPaths[]`, optional `deferralReport`. The serialized form MUST conform to the Zidney
+  error contract `{ success: boolean, data: object | null, error: { code, message } | null }`.
 - **ArtifactSnapshot**: A point-in-time record of tracked and untracked files used by drift
   detection rules.
 - **DeferralReport**: A structured document that classifies an unfixable failure, records the
@@ -309,3 +323,15 @@ blocking issues.
   existing tests pass under the standard `bun run test` invocation.
 - Snapshot integrity for attempt grading is preserved because this stage does not modify any
   attempt, question, or grading domain packages.
+
+---
+
+## Clarifications
+
+### Session 2026-03-24
+
+- Q: Should the script naming be `policy:check` or `validate:policy`? → A: Standardize everything to `validate:policy`. The `policy:check` reference is removed entirely. Script naming governance requires `<domain>:<action>[:<scope>]` pattern; `validate:policy` is the canonical form.
+- Q: Does the policy engine require its own authentication or authorization layer? → A: No. The policy engine is an infra tool, not a data-access layer. Security is validated at the pre-commit/pre-push boundary by Husky hooks calling the policy engine. No additional auth layer is needed within the policy engine itself.
+- Q: How is concurrency and locking handled for test isolation in parallel CI jobs? → A: Tests run serially per module via Vitest `--pool=forks --isolate`. Multiple parallel CI jobs MUST use separate DB schemas (already enforced by the tenant isolation model). No additional locking primitives are needed in this stage.
+- Q: What error contract format should policy engine output conform to? → A: Follow the standard Zidney error contract: `{ success: boolean, data: object | null, error: { code, message } | null }`. Policy failures are logged as structured JSON to stdout. Exit code non-zero on any `error`-severity violation; exit 0 on warnings-only or clean pass.
+- Q: What is the integration fallback when the Policy Engine (INFRA-29) is unavailable? → A: Hard fail. If `bun run validate:policy` resolves but the policy engine module throws at import time, the process exits non-zero with: "Policy engine unavailable — cannot validate". No soft fallback to direct `bun run build` / `bun run test` is permitted; that would defeat the enforcement guarantee.
