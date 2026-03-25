@@ -13,22 +13,23 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-03-25T00:15:00Z
+Last Updated: 2026-03-25T01:30:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Policy engine runtime (`scripts/policy-engine/`)
-- Rule system (PolicyRule, PolicyContext, PolicyResult types)
-- Rule registry (central authority for all governance rules)
-- GitNexus context integration with graceful degradation (stale = >24h, GITNEXUS_MAX_AGE_HOURS)
-- Adapter layer: architecture-guard, type-safety-guard, script-governance, Trivy
-- CLI: `bun run policy:check --full / --changed`
-- Two-tier timeout: 2,000ms (--changed), 30,000ms (--full)
-- CI + orchestrator integration
-- Script system unification (T010–T016)
-- Husky optimization (<2s pre-commit)
+- Policy engine runtime (`scripts/policy-engine/`) — engine.ts, registry.ts, types.ts, cli.ts
+- Context loader (`context/loader.ts`) with ContextLoadResult return type
+- Rule system: 8 rule files across ARCH, TYPES, SCRIPTS, AI, SECURITY domains
+- Adapter layer: architecture-guard, type-safety, script-governance, Trivy adapters
+- Two reporters: console.ts, json.ts
+- CLI: argument parsing, rule imports, exit code logic
+- AbortController injected via `context.abortSignal` — shared cancellation channel
+- Pre-loaded context fields: `existingScriptPaths`, `documentedScriptNames` (rule purity)
+- Two-tier timeout: 2,000ms (--changed / Husky), 30,000ms (--full / CI)
+- CI workflow (`policy-check.yml`) + Husky hook update
+- ~22 implementation tasks (T001–T022)
 
 Deferred Scope:
 
@@ -39,11 +40,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
-- NFR-016 naming convention enforced (ENGINE-001 ruleId fix applied)
+- Technical plan compliant — task generation authorized
+- Architecture Guardian: PASS (after V1/V2/V3 remediation)
+- API Designer: PASS (after H1/H2/L1 remediation)
 
 Notes:
-All 5 clarifications resolved. NFR-021 added (two-tier timeout). Risk Level: MEDIUM. Ready for technical planning.
+Technical plan complete. Both guardians passed. Task breakdown in progress.
 
 ---
 
