@@ -1,1 +1,72 @@
-{"schemaVersion":"1.0.0","generatedAt":"2026-03-22T19:20:02.106Z","analysisMode":"changed-only","changedFiles":["specs/phases/03_BACKOFFICE_CORE/03_CONTENT_CLASSIFICATION/STAGE_31_CATEGORY_VALUES.md","specs/runtime/031-category-values/.workflow-state.json","specs/runtime/031-category-values/README.md","specs/runtime/031-category-values/audits/ANALYZE_REPORT.md","specs/runtime/031-category-values/data-model.md","specs/runtime/031-category-values/plan.md","specs/runtime/031-category-values/spec.md","specs/runtime/031-category-values/tasks.md"],"impactedModules":[],"dependencyGraph":{},"architectureLayerMap":{},"recentCommits":[{"hash":"03e1dfe972f1a27a3366862984100271e5217e68","message":"spec(031-category-values): analyze step — PASS (attempt 2, 9 violations remediated)","author":"Majed Sief Alnasr","date":"2026-03-22T21:19:16+02:00"},{"hash":"a5cc3b0959e7c1f89642ed7e1322f2acc805679b","message":"spec(031-category-values): complete tasks step","author":"Majed Sief Alnasr","date":"2026-03-22T20:14:33+02:00"},{"hash":"9d286164633cb772e09449e92973af82ba2e13a3","message":"chore(031-category-values): complete plan step","author":"Majed Sief Alnasr","date":"2026-03-22T20:04:17+02:00"},{"hash":"21e013d46de7a0109a573a13a2dd46a80e389ffa","message":"feat: enhance feature templates and scripts for improved functionality","author":"Majed Sief Alnasr","date":"2026-03-22T19:33:12+02:00"},{"hash":"b5a80efbd00a277705962c0427b7ae9195971a01","message":"spec(031-category-values): step 2 — clarify category values","author":"Majed Sief Alnasr","date":"2026-03-22T18:57:58+02:00"},{"hash":"ee05f447b086227e85a1a8cce58335aae8b5f6f8","message":"spec(031-category-values): step 1 — specify category values","author":"Majed Sief Alnasr","date":"2026-03-22T16:46:14+02:00"},{"hash":"c49e5f16cedd90252fae8d12b96899ba5a5ef106","message":"chore(031-category-values): initialize stage branch and directory","author":"Majed Sief Alnasr","date":"2026-03-22T16:39:23+02:00"},{"hash":"7d39e7072d2894011caca1881acafc47655d8916","message":"docs(reports): add analyze-report-template.md for Analyze (drift) audits","author":"Majed Sief Alnasr","date":"2026-03-22T16:38:48+02:00"},{"hash":"9eec4e1544c662dba40958a987accdae46747514","message":"Merge pull request #69 from majedsiefalnasr/spec/030-categories","author":"Majed Sief Alnasr","date":"2026-03-22T16:28:46+02:00"},{"hash":"c4d593f3ff14837f67b7c381f8d688df59251eb7","message":"chore(settings): update cSpell words list for improved spell checking","author":"Majed Sief Alnasr","date":"2026-03-22T16:25:57+02:00"}],"riskIndicators":[]}
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-03-25T16:08:38.199Z",
+  "analysisMode": "changed-only",
+  "changedFiles": [],
+  "impactedModules": [],
+  "dependencyGraph": {},
+  "architectureLayerMap": {},
+  "recentCommits": [
+    {
+      "hash": "dfc9aaf0c0dddf59856e05ba33779b028303ebdc",
+      "message": "docs(infra-028): closure — production ready",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T18:00:02+02:00"
+    },
+    {
+      "hash": "062a4336cb181907b55106704c48fd09f80dd89c",
+      "message": "feat(infra-028): implement gitnexus context-aware governance scripts",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T17:41:47+02:00"
+    },
+    {
+      "hash": "4d49c618b7706b7f77093f189592380a4ef0e0f4",
+      "message": "chore(infra-028-gitnexus-context-aware-governance): complete analyze step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T17:12:45+02:00"
+    },
+    {
+      "hash": "033a5a96356443018d2daedad2b7543cc43d0d68",
+      "message": "chore(infra-028-gitnexus-context-aware-governance): complete tasks step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T17:11:59+02:00"
+    },
+    {
+      "hash": "85456bd305965bd04192c79f1782a6323c062d58",
+      "message": "chore(infra-028-gitnexus-context-aware-governance): complete plan step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T16:43:04+02:00"
+    },
+    {
+      "hash": "d8928842493b3b09f6d425fda1c00dd78e6370f1",
+      "message": "chore(infra-028-gitnexus-context-aware-governance): complete clarify step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T15:42:12+02:00"
+    },
+    {
+      "hash": "8ce8c0ccc6f0971913717632c0e9a67ac95f67ca",
+      "message": "spec(infra-028-gitnexus-context-aware-governance): Step 1 — Specify",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T15:18:07+02:00"
+    },
+    {
+      "hash": "dcb074772ee4b5f5472850875bdc75b39ab7fbe0",
+      "message": "chore(arch): update architecture intelligence context artifacts",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T15:09:00+02:00"
+    },
+    {
+      "hash": "e23ed724dc7d10175609a49829ea3897e26a1668",
+      "message": "chore(infra-028-gitnexus-context-aware-governance): initialize stage branch and directory",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T15:03:42+02:00"
+    },
+    {
+      "hash": "9039cf3eba7e33e97cd036f1f2e8ade282046f29",
+      "message": "Merge pull request #76 from majedsiefalnasr/spec/infra-027-unified-governance-gate-system",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-25T14:37:48+02:00"
+    }
+  ],
+  "riskIndicators": []
+}

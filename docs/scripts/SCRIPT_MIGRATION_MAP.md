@@ -37,10 +37,14 @@
 | `seed-dashboard-test-data` | C    | no domain, uses `-`           | `dev:seed:dashboard-test-data` |
 | `run-staging-smoke-tests`  | C    | no domain, uses `-`           | `ci:smoke:staging`             |
 
-## Type D — Non-allowed domain (8 entries)
+## Type D — Non-allowed domain (12 entries)
 
 | Old Name                  | Type | Violation                                                        | New Name                  |
 | ------------------------- | ---- | ---------------------------------------------------------------- | ------------------------- |
+| `context:build`           | D    | `context` not in domain map                                      | `arch:context:build`      |
+| `context:changed`         | D    | `context` not in domain map                                      | `arch:context:changed`    |
+| `context:impact`          | D    | `context` not in domain map                                      | `arch:context:impact`     |
+| `context:validate`        | D    | `context` not in domain map                                      | `arch:context:validate`   |
 | `gitnexus:context`        | D    | `gitnexus` not in domain map                                     | `arch:gitnexus:context`   |
 | `gitnexus:validate`       | D    | `gitnexus` not in domain map                                     | `arch:validate:gitnexus`  |
 | `hygiene:report`          | D    | `hygiene` not in domain map                                      | `dev:hygiene:report`      |
@@ -73,9 +77,9 @@
 | Type A — Wrong action structure | 3      |
 | Type B — Hyphen in domain       | 7      |
 | Type C — No domain prefix       | 6      |
-| Type D — Non-allowed domain     | 8      |
+| Type D — Non-allowed domain     | 12     |
 | Type E — Aliases to remove      | 9      |
-| **Total**                       | **33** |
+| **Total**                       | **37** |
 
 ---
 

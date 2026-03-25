@@ -87,7 +87,7 @@ bun run dev:api
 
 ```bash
 # All 4 test suites for this stage
-bun vitest run \
+bun run test \
   packages/domain-core/src/category-values/__tests__/category-values.service.test.ts \
   packages/domain-core/src/category-values/__tests__/category-values.repository.test.ts \
   apps/api/src/routes/backoffice/category-values/__tests__/category-values.integration.test.ts \

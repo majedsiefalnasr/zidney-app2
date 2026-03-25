@@ -14,8 +14,8 @@
 | Lint                 | `bun lint` (biome check)                                   | ✅ PASS | 0         |
 | TypeScript src       | `bun typecheck:src` (tsc --noEmit)                         | ✅ PASS | 0         |
 | TypeScript tests     | `bun typecheck:tests` (tsc --noEmit -p tsconfig.test.json) | ✅ PASS | 0         |
-| Unit tests           | `bun vitest run tests/unit/ai-runtime/`                    | ✅ PASS | 0         |
-| Integration tests    | `bun vitest run tests/integration/ai-runtime/`             | ✅ PASS | 0         |
+| Unit tests           | `bun run test tests/unit/ai-runtime/`                      | ✅ PASS | 0         |
+| Integration tests    | `bun run test tests/integration/ai-runtime/`               | ✅ PASS | 0         |
 
 **All 6 validation checks passed with exit code 0.**
 

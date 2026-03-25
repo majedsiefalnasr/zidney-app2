@@ -94,13 +94,13 @@ bun ai-runtime:status
 
 ```bash
 # Run all unit tests
-bun vitest run tests/unit/ai-runtime/
+bun run test tests/unit/ai-runtime/
 
 # Expected: 29/29 pass
 # Exit code: 0
 
 # Run all integration tests
-bun vitest run tests/integration/ai-runtime/
+bun run test tests/integration/ai-runtime/
 
 # Expected: 6/6 pass
 # Exit code: 0

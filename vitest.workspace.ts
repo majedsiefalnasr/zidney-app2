@@ -210,4 +210,15 @@ export default defineWorkspace([
       include: ['scripts/validate/__tests__/**/*.test.ts'],
     },
   }),
+
+  // Context scripts (arch:context:build / arch:context:validate / etc.)
+  defineProject({
+    plugins: [tsconfigPaths()],
+    test: {
+      name: 'context-scripts',
+      globals: true,
+      environment: 'node',
+      include: ['scripts/context/__tests__/**/*.test.ts'],
+    },
+  }),
 ])

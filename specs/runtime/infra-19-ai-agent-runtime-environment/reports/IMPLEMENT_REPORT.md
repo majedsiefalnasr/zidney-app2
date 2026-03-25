@@ -74,13 +74,13 @@ All 17 tasks in tasks.md have been implemented and marked `[X]`. The primary del
 
 > Full evidence in `audits/VALIDATION_REPORT.md`
 
-| Check             | Command                                        | Result                   |
-| ----------------- | ---------------------------------------------- | ------------------------ |
-| Runtime status    | `bun ai-runtime:status`                        | ✅ EXIT:0, HEALTHY       |
-| Lint              | `bun lint` (1749 files)                        | ✅ EXIT:0, no violations |
-| TypeScript        | `bun typecheck`                                | ✅ EXIT:0, no errors     |
-| Unit tests        | `bun vitest run tests/unit/ai-runtime/`        | ✅ EXIT:0, 29/29 pass    |
-| Integration tests | `bun vitest run tests/integration/ai-runtime/` | ✅ EXIT:0, 6/6 pass      |
+| Check             | Command                                      | Result                   |
+| ----------------- | -------------------------------------------- | ------------------------ |
+| Runtime status    | `bun ai-runtime:status`                      | ✅ EXIT:0, HEALTHY       |
+| Lint              | `bun lint` (1749 files)                      | ✅ EXIT:0, no violations |
+| TypeScript        | `bun typecheck`                              | ✅ EXIT:0, no errors     |
+| Unit tests        | `bun run test tests/unit/ai-runtime/`        | ✅ EXIT:0, 29/29 pass    |
+| Integration tests | `bun run test tests/integration/ai-runtime/` | ✅ EXIT:0, 6/6 pass      |
 
 ---
 

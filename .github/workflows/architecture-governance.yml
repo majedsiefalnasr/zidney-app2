@@ -37,7 +37,11 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      # ── 4. Verify AI Bootstrap Exists ──────────────────────────────────
+      # ── 4. Build and Validate GitNexus Context ─────────────────────────
+      - name: Build and Validate GitNexus Context
+        run: bun run arch:context:build && bun run arch:context:validate
+
+      # ── 5. Verify AI Bootstrap Exists ──────────────────────────────────
       - name: Verify AI Bootstrap Exists
         run: |
           if [ ! -f docs/ai/AI_BOOTSTRAP.md ]; then
@@ -45,23 +49,23 @@ jobs:
             exit 1
           fi
 
-      # ── 5. Run Zidney AI Guard ─────────────────────────────────────────
+      # ── 6. Run Zidney AI Guard ─────────────────────────────────────────
       - name: Run Zidney AI Guard
         run: bun scripts/ai-guard.ts
 
-      # ── 6. Run Infrastructure Audit ────────────────────────────────────
+      # ── 7. Run Infrastructure Audit ────────────────────────────────────
       - name: Run Infrastructure Audit (full repo architecture audit)
         run: bun scripts/infra-audit.ts --ci
 
-      # ── 7. Run Architecture Diff ───────────────────────────────────────
+      # ── 8. Run Architecture Diff ───────────────────────────────────────
       - name: Run Architecture Diff (PR-specific architecture drift check)
         run: bun scripts/architecture-diff.ts
 
-      # ── 8. Run Architecture Health ─────────────────────────────────────
+      # ── 9. Run Architecture Health ─────────────────────────────────────
       - name: Run Architecture Health
         run: bun run arch:health:ci
 
-      # ── 9. Upload Architecture Health Artifacts ───────────────────────
+      # ── 10. Upload Architecture Health Artifacts ───────────────────────
       - name: Upload Architecture Health Artifacts
         if: always()
         uses: actions/upload-artifact@v4

@@ -81,8 +81,8 @@ This PR introduces the **AI Runtime Environment Diagnostic Tool** (`scripts/ai-r
 
 **Testing & Validation Evidence:**
 
-- Unit tests: 29/29 PASS (bun vitest run tests/unit/ai-runtime/)
-- Integration tests: 6/6 PASS (bun vitest run tests/integration/ai-runtime/)
+- Unit tests: 29/29 PASS (bun run test tests/unit/ai-runtime/)
+- Integration tests: 6/6 PASS (bun run test tests/integration/ai-runtime/)
 - Lint: PASS (0 violations across 1749 files)
 - TypeScript: PASS (0 errors)
 - Runtime status: HEALTHY (all 5 checks pass)

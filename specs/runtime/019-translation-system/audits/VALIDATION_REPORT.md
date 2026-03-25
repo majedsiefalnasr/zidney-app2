@@ -29,8 +29,8 @@ to this stage.
 
 | Validation Check                                 | Required | Command(s)                                                           | Result     | Notes                                                           |
 | ------------------------------------------------ | -------- | -------------------------------------------------------------------- | ---------- | --------------------------------------------------------------- |
-| Unit tests (impacted business logic)             | Yes      | `bun vitest run tests/unit/translation/`                             | ✅ PASS    | 72/72 tests passing across 4 files                              |
-| Integration tests (impacted API flows)           | Yes      | `bun vitest run tests/integration/translation/`                      | ✅ CREATED | 4 integration test files created; require DB environment to run |
+| Unit tests (impacted business logic)             | Yes      | `bun run test tests/unit/translation/`                               | ✅ PASS    | 72/72 tests passing across 4 files                              |
+| Integration tests (impacted API flows)           | Yes      | `bun run test tests/integration/translation/`                        | ✅ CREATED | 4 integration test files created; require DB environment to run |
 | Snapshot tests (grading behavior, if applicable) | N/A      | —                                                                    | N/A        | Not an attempt grading feature                                  |
 | Lint (translation scope)                         | Yes      | `bunx eslint packages/domain-core/src/translation/ apps/api/src/...` | ✅ PASS    | 0 errors, 98 warnings (acceptable)                              |
 | Type check (translation scope)                   | Yes      | `bunx tsc --noEmit -p apps/api/tsconfig.app.json`                    | ✅ PASS    | 0 translation-related type errors                               |
@@ -45,7 +45,7 @@ to this stage.
 ### Unit Tests
 
 ```text
-bun vitest run tests/unit/translation/
+bun run test tests/unit/translation/
 
  ✓ tests/unit/translation/translatable-fields.test.ts  (25 tests)
  ✓ tests/unit/translation/coverage-service.test.ts  (19 tests)
@@ -67,7 +67,7 @@ bun vitest run tests/unit/translation/
   tests/integration/translation/workspace-settings-language-removal.test.ts
 
 Note: Integration tests require a running test database environment.
-Run with: bun vitest run tests/integration/translation/
+Run with: bun run test tests/integration/translation/
 ```
 
 ### Snapshot Tests

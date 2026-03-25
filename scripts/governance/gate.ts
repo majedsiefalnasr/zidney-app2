@@ -19,6 +19,8 @@ interface GuardResult {
 }
 
 const GUARDS: Array<{ name: string; script: string }> = [
+  { name: 'Context Build', script: 'arch:context:build' },
+  { name: 'Context Validate', script: 'arch:context:validate' },
   { name: 'Architecture Guard', script: 'arch:guard' },
   { name: 'Type Safety', script: 'validate:types' },
   { name: 'Runtime Scripts', script: 'validate:runtime:scripts' },
