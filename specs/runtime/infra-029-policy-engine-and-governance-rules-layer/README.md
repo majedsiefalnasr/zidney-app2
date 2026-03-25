@@ -17,7 +17,7 @@
 | Analyze   | ✅     | (read-only — no output)     | audits/ANALYZE_REPORT.md    |
 | Implement | ✅     | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
 | Validate  | ✅     | (read-only — no output)     | audits/VALIDATION_REPORT.md |
-| Closure   | ⬜     | —                           | reports/CLOSURE_REPORT.md   |
+| Closure   | ✅     | (complete — all artifacts)  | reports/CLOSURE_REPORT.md   |
 
 ## Stage Artifacts
 
