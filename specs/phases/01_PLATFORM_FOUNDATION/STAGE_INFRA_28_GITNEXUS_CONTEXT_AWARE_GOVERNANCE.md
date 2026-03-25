@@ -3,20 +3,30 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-25T00:00:00Z
+Last Updated: 2026-03-25T00:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Context-aware governance via `context:*` command surface
+- 4 canonical scripts: `context:build`, `context:changed`, `context:impact`, `context:validate`
+- `governance:gate` extended with context bootstrap (build + validate first)
+- Pre-commit integration with `context:changed`
+- CI integration with `context:validate`
+- Orchestrator Step 5 & 6 integration
+
+Deferred Scope:
+
+- Full AI decision engine
+- External context providers
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
