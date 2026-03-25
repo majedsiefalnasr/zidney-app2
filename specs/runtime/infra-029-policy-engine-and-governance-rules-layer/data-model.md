@@ -179,7 +179,7 @@ export interface DependencyGraphModule {
  * with ruleId 'ENGINE-002' (git unavailable) or 'ENGINE-003' (GitNexus issues).
  */
 export interface ContextWarning {
-  code: "GIT_UNAVAILABLE" | "GITNEXUS_STALE" | "GITNEXUS_MISSING";
+  code: "GIT_UNAVAILABLE" | "GITNEXUS_STALE" | "GITNEXUS_MISSING" | "GITNEXUS_MALFORMED";
   message: string;
 }
 
@@ -270,7 +270,7 @@ Rule IDs follow the `<DOMAIN>-<NNN>` format (NFR-016). Reserved ranges:
 
 **ENGINE-001**: Emitted when engine invocation exceeds mode timeout (NFR-021).
 **ENGINE-002**: Emitted when git is unavailable and `--changed` mode falls back to `--full` (from `ContextWarning.code = 'GIT_UNAVAILABLE'`).
-**ENGINE-003**: Emitted when the GitNexus context file is stale or missing (from `ContextWarning.code = 'GITNEXUS_STALE'` or `'GITNEXUS_MISSING'`).
+**ENGINE-003**: Emitted when the GitNexus context file is stale, missing, or malformed JSON (from `ContextWarning.code = 'GITNEXUS_STALE'`, `'GITNEXUS_MISSING'`, or `'GITNEXUS_MALFORMED'`).
 
 ---
 

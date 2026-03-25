@@ -251,8 +251,9 @@ export async function loadContext(
 
 2. **`dependencyGraph`**: Read the GitNexus context file at `docs/ai/context/gitnexus-context.json`.
    - Check `analyzedAt` field — if older than `GITNEXUS_MAX_AGE_HOURS` env var (default: 24h) → treat as stale.
-   - Stale or missing file → `dependencyGraph = null` + emit a `warning`-severity synthetic result.
-   - Parse into `DependencyGraph` type.
+   - Stale or missing file → `dependencyGraph = null` + emit a `warning`-severity synthetic result (`GITNEXUS_STALE` / `GITNEXUS_MISSING`).
+   - **Malformed JSON (parse error)**: wrap `Bun.file(path).json()` in a try/catch. On failure → `dependencyGraph = null` + emit `{ code: 'GITNEXUS_MALFORMED', message: 'gitnexus-context.json is not valid JSON — ignoring dependency graph' }`. This matches the Trivy adapter pattern and prevents NFR-012 crash.
+   - Parse into `DependencyGraph` type (only when present and parse succeeds).
 
 3. **`scripts`**: Read root `package.json` and extract the `scripts` field. On parse failure → `scripts = {}`.
 

@@ -12,22 +12,27 @@
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: MEDIUM
-Last Updated: 2026-03-25T01:45:00Z
+Last Updated: 2026-03-25T02:15:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all 12 criteria)
+Implementation: AUTHORIZED
 
-- Total: 54 atomic tasks across 5 phases (A–E)
-- Phase A: 5 foundational tasks (types, registry, engine, loader)
-- Phase B: 4 adapter tasks (all parallel)
-- Phase C: 8 rule tasks (all parallel)
-- Phase D: 4 CLI & reporter tasks
-- Phase E: 33 test, infra, and gate validation tasks
+Scope Authorized:
+
+- Policy Engine + context loader (types.ts, engine.ts, loader.ts)
+- 4 adapters (ArchGuard, TypeSafety, Scripts, Trivy) — all parallel
+- 8 policy rules across 3 domains (ARCH-001, SCRIPTS-001–004, TYPES-001–002, AI-001)
+- CLI entry point (`policy:check --changed | --full`), console reporter, JSON reporter
+- Full test suite (54 tasks; 17 unit + 4 integration + 6 gate test files + Husky + CI + 4 gate runs)
 
 Deferred Scope:
 
+- FR-032: Invocation-layer declaration validation (documented in spec.md § Deferred Scope; SCRIPTS-005)
+- FR-033: Artifact classification enforcement (SCRIPTS-006)
+- FR-034: .gitignore consistency checker (SCRIPTS-007)
 - Removing/deprecating legacy tools (adapter-first; removal is future stage)
 - Web UI / dashboard for policy results
 - External policy systems (OPA, etc.)
@@ -35,11 +40,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
-- No migrations, no database writes, no HTTP routes
+- All drift criteria passed — implementation authorized
+- MEDIUM pre-implementation gap (GITNEXUS_MALFORMED) fixed before authorization
+- HIGH gap (FR-032/033/034) formally deferred with documentation
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed. Implementation gate open.
 
 ---
 

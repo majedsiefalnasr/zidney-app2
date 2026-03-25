@@ -400,3 +400,17 @@ All four gates MUST pass before this stage is considered closed:
 **Q: What threshold defines a GitNexus index as "stale" for the purpose of FR-016 degraded-context fallback?**
 **A: Index is stale when its last-analyzed timestamp is older than `GITNEXUS_MAX_AGE_HOURS` env var (default: 24 hours). A missing index file is always treated as unavailable regardless of age threshold.**
 **Impact: FR-016 (stale threshold and env var specified inline).**
+
+---
+
+## Deferred Scope
+
+The following functional requirements were identified during drift analysis (Step 5 — INFRA-29 analyze gate) as having no corresponding rules, adapters, or tasks in the current implementation plan. They are **formally deferred** to a follow-on stage. No implementation for these requirements is expected within INFRA-29.
+
+| Requirement | Description                                                                                                                                                                                        | Deferral Reason                                                                                                                                                                       |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-032**  | Every script MUST declare its invocation layer (CI, dev, orchestrator) in its documentation entry. The policy engine MUST enforce this classification.                                             | No user story acceptance criteria maps to this requirement. SCRIPTS-004 validates doc presence only, not invocation-layer content. Deferred to INFRA-29A or scripts governance stage. |
+| **FR-033**  | Generated artifacts MUST be classified as either: commit-required or ignored. The policy engine MUST enforce this classification.                                                                  | No rule (SCRIPTS-005 equivalent) defined in plan.md. Out of scope for current US1–US6 delivery.                                                                                       |
+| **FR-034**  | The `.gitignore` file MUST be the authoritative source for ignored generated artifacts, and the policy engine MUST validate consistency between `.gitignore` and the artifact classification list. | Depends on FR-033 classification scheme. No logic defined in plan.md or tasks.md. Deferred together with FR-033.                                                                      |
+
+These requirements will be tracked as SCRIPTS-005 (invocation layer validator), SCRIPTS-006 (artifact classifier), and SCRIPTS-007 (.gitignore consistency checker) in the follow-on stage spec.
