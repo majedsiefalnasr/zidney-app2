@@ -52,7 +52,10 @@ if (isChanged) {
     const headSha = execSync('git rev-parse HEAD', { encoding: 'utf-8' }).trim()
     const headTs =
       Number(execSync(`git log -1 --format=%ct ${headSha}`, { encoding: 'utf-8' }).trim()) * 1000
-    if (stat.mtimeMs < headTs) {
+    // Allow up to 5 minutes time delta between file mtime and commit timestamp
+    // (normal delay between file write and commit record)
+    const TIME_BUFFER_MS = 5 * 60 * 1000
+    if (stat.mtimeMs < headTs - TIME_BUFFER_MS) {
       process.stderr.write(
         `${JSON.stringify({
           success: false,
