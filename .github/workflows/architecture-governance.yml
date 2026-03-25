@@ -162,3 +162,7 @@ jobs:
       # ── 17. Verify Script Registry Generation ─────────────────────────
       - name: Verify Script Registry Generation
         run: bun run dev:generate:script-docs
+
+      # ── 18. Unified Governance Gate ─────────────────────────────────────
+      - name: Unified Governance Gate
+        run: bun run governance:gate:ci

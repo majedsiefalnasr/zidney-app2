@@ -33,6 +33,7 @@ const ALLOWED_DOMAINS = new Set([
   'dev',
   'infra',
   'test',
+  'governance',
 ])
 
 export interface ScriptMeta {

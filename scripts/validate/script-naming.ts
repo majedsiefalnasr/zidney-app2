@@ -34,6 +34,7 @@ export const ALLOWED_DOMAINS = new Set([
   'dev',
   'infra',
   'test',
+  'governance',
 ])
 
 /** Names exempt from validation (lifecycle scripts defined by package managers / tools) */

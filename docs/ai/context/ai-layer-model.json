@@ -1,80 +1,30 @@
 {
+  "schema_version": "1.0.0",
+  "generated_at": "2026-03-25T12:02:32.392Z",
+  "source_metadata": {
+    "module_boundaries_hash": "6493a7d6"
+  },
   "layers": [
-    "domain",
-    "infrastructure",
-    "runtime",
-    "ui"
-  ],
-  "modules": [
     {
-      "module": "packages/types",
-      "layer": "domain",
-      "criticality": "core"
+      "name": "infrastructure",
+      "description": "Infrastructure layer",
+      "order": 1
     },
     {
-      "module": "packages/logger",
-      "layer": "infrastructure",
-      "criticality": "infrastructure"
+      "name": "domain",
+      "description": "Domain layer",
+      "order": 2
     },
     {
-      "module": "packages/config",
-      "layer": "infrastructure",
-      "criticality": "infrastructure"
+      "name": "runtime",
+      "description": "Runtime layer",
+      "order": 3
     },
     {
-      "module": "packages/redis-utils",
-      "layer": "infrastructure",
-      "criticality": "infrastructure"
-    },
-    {
-      "module": "packages/ui-system",
-      "layer": "ui",
-      "criticality": "ui"
-    },
-    {
-      "module": "packages/api-client",
-      "layer": "infrastructure",
-      "criticality": "infrastructure"
-    },
-    {
-      "module": "packages/domain-core",
-      "layer": "domain",
-      "criticality": "core"
-    },
-    {
-      "module": "packages/validation",
-      "layer": "domain",
-      "criticality": "core"
-    },
-    {
-      "module": "packages/job-queue",
-      "layer": "infrastructure",
-      "criticality": "infrastructure"
-    },
-    {
-      "module": "apps/mmc",
-      "layer": "ui",
-      "criticality": "ui"
-    },
-    {
-      "module": "apps/frontoffice",
-      "layer": "ui",
-      "criticality": "ui"
-    },
-    {
-      "module": "apps/backoffice",
-      "layer": "ui",
-      "criticality": "ui"
-    },
-    {
-      "module": "apps/api",
-      "layer": "runtime",
-      "criticality": "runtime"
-    },
-    {
-      "module": "apps/worker",
-      "layer": "runtime",
-      "criticality": "runtime"
+      "name": "ui",
+      "description": "Ui layer",
+      "order": 4
     }
-  ]
+  ],
+  "rules": {}
 }
