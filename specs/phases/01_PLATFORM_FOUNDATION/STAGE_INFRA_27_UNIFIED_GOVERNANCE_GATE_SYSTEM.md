@@ -3,32 +3,31 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-25T00:10:00Z
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-03-25T00:20:00Z
 
 Scope Defined:
 
-- Unified governance gate (`governance:gate`) composing 6 existing guards
+- Unified governance gate (`governance:gate`) composing 6 guards with corrected canonical script names
 - CI mode variant (`governance:gate:ci`)
-- Changed-files scoped variant (`governance:gate:changed`)
-- Report generation command (`governance:report`)
-- Pre-commit, CI, and orchestrator integration
-- Implementation files under `scripts/governance/`
-- Report output at `docs/governance/governance-report.md`
+- Changed-files scoped variant (`governance:gate:changed`) using confirmed `arch:guard:changed`
+- Report generation command (`governance:report`) with `.gitignore` protection added to scope
+- Pre-commit, CI (`architecture-governance.yml` after step 11), and orchestrator integration
+- Implementation files under `scripts/governance/` (3 new files; existing files untouched)
 
 Deferred Scope:
 
 - Runtime monitoring (explicitly out of scope)
 - External security tooling beyond Trivy (out of scope)
-- Rewriting/replacing existing guards (out of scope)
+- Updating 9-domain naming policy in skill (out of scope)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

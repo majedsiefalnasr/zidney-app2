@@ -73,10 +73,10 @@ A `governance:gate` script MUST be registered in root `package.json`. When invok
 
 1. `bun run arch:guard`
 2. `bun run validate:types`
-3. `bun run validate:runtime-scripts`
-4. `bun run script:usage-scan`
-5. `bun run security:scan:ci`
-6. `bun run ai-context:validate`
+3. `bun run validate:runtime:scripts` _(canonical name — formerly listed as `validate:runtime-scripts`)_
+4. `bun run validate:script:usage` _(canonical name — formerly listed as `script:usage-scan`)_
+5. `bun run infra:security:ci` _(canonical name — formerly listed as `security:scan:ci`)_
+6. `bun run ai-context:validate` _(alias must be created: chains `validate:ai-context-fresh && validate:ai-context-schemas`)_
 
 If any guard exits with a non-zero code, `governance:gate` MUST exit with code `1`. If all guards exit with code `0`, `governance:gate` MUST exit with code `0`. Warnings emitted by any guard MUST be forwarded to stdout but MUST NOT change the exit code.
 
@@ -187,13 +187,13 @@ No other exit codes are permitted. The gate MUST NOT swallow non-zero exit codes
 
 ## Dependencies
 
-| Stage    | What It Provides                                                           |
-| -------- | -------------------------------------------------------------------------- |
-| INFRA-16 | `arch:guard` — architecture boundary enforcement                           |
-| INFRA-21 | `validate:types` — type-safety-guard                                       |
-| INFRA-22 | `ai-context:validate` — AI context validation                              |
-| INFRA-25 | `validate:runtime-scripts`, `script:usage-scan` — script system governance |
-| INFRA-26 | `security:scan:ci` — Trivy security scanning                               |
+| Stage    | What It Provides                                                                                 |
+| -------- | ------------------------------------------------------------------------------------------------ |
+| INFRA-16 | `arch:guard` — architecture boundary enforcement                                                 |
+| INFRA-21 | `validate:types` — type-safety-guard                                                             |
+| INFRA-22 | `ai-context:validate` — AI context validation                                                    |
+| INFRA-25 | `validate:runtime:scripts`, `validate:script:usage` — script system governance (canonical names) |
+| INFRA-26 | `infra:security:ci` — Trivy security scanning (canonical name)                                   |
 
 All five upstream guards MUST be implemented and passing before `governance:gate` implementation begins. The gate MUST NOT be treated as a workaround for broken upstream guards.
 
@@ -223,4 +223,67 @@ All five upstream guards MUST be implemented and passing before `governance:gate
 | `governance:gate:changed` exceeds 10-second target due to `arch:guard:changed` performance          | Medium     | Medium | Profile `arch:guard:changed` independently; if it exceeds budget, the scoped gate may be narrowed to only `validate:runtime-scripts` for the pre-commit context with a documented rationale. |
 | `governance` domain name conflicts with future expansion of the 9-domain naming policy              | Low        | Low    | Document `governance` as a tracked exception in the spec and in the script metadata. A separate task to update `script-system-governance/SKILL.md` is out of scope.                          |
 | Pre-commit hook slowdowns frustrate developer workflow                                              | Low        | Medium | `governance:gate:changed` is scoped to changed files only and skips full scans. Monitor p95 pre-commit time; adjust scope if needed.                                                         |
-| Report file (`docs/governance/governance-report.md`) committed accidentally to main with stale data | Low        | Low    | Add `docs/governance/governance-report.md` to `.gitignore` OR document that it is a generated artefact and should only be committed deliberately.                                            |
+| Report file (`docs/governance/governance-report.md`) committed accidentally to main with stale data | Low        | Low    | **Required:** Add `docs/governance/governance-report.md` to `.gitignore` as a mandatory deliverable of this stage. Confirmed NOT currently in `.gitignore` (see Clarifications Q3).          |
+
+---
+
+## Clarifications
+
+### Session 2026-03-25
+
+**Q1: Do all upstream guard scripts referenced in FR-001 exist in root `package.json` under those exact names?**
+
+A: **No — four of the six names in FR-001 do not exist under the names stated.** Codebase evidence from root `package.json`:
+
+| FR-001 Name (spec)         | Actual Canonical Name in package.json                                                    | Status                                                       |
+| -------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `arch:guard`               | `arch:guard` → `bun scripts/architecture-guard/architecture-guard.ts`                    | ✅ Exists                                                    |
+| `validate:types`           | `validate:types` → `bun typecheck && bun arch:type-safety-guard --json`                  | ✅ Exists                                                    |
+| `validate:runtime-scripts` | Actual name: `validate:runtime:scripts` → `bun run scripts/validate/runtime-scripts.ts`  | ❌ Name mismatch                                             |
+| `script:usage-scan`        | Actual name: `validate:script:usage` → `bun scripts/validate/script-usage.ts`            | ❌ Name mismatch                                             |
+| `security:scan:ci`         | Actual name: `infra:security:ci` → `bun scripts/security/scan-ci.ts`                     | ❌ Name mismatch                                             |
+| `ai-context:validate`      | No single script; split into `validate:ai-context-fresh` + `validate:ai-context-schemas` | ❌ Missing alias; must be created or split reference updated |
+
+**Resolution:** FR-001 MUST be updated before implementation. The gate script at `scripts/governance/gate.ts` MUST reference the canonical names: `validate:runtime:scripts`, `validate:script:usage`, `infra:security:ci`. For `ai-context:validate`, a new alias MUST be created in `package.json` that chains `validate:ai-context-fresh && validate:ai-context-schemas`, OR the gate.ts implementation must call them as two sequential steps documented as one logical guard. The governance `package.json` scripts (`governance:gate`, `governance:gate:ci`, `governance:gate:changed`, `governance:report`) do not yet exist and must all be created.
+
+---
+
+**Q2: Does `arch:guard:changed` exist in `package.json`?**
+
+A: **Yes — it exists.** `arch:guard:changed` → `bun scripts/architecture-guard/architecture-guard.ts --changed`. FR-003's dependency on `arch:guard:changed` is satisfied. No fallback to `arch:guard` is required. The performance risk noted in the spec Risks table remains valid (profile independently), but no naming substitution is needed.
+
+---
+
+**Q3: Is `docs/governance/governance-report.md` protected from accidental commits by `.gitignore`?**
+
+A: **No.** The `.gitignore` file contains entries for `docs/ai/context/architecture-impact-report.json`, `docs/architecture/health/ai-execution-logs/*.json`, and `docs/architecture/health/ai-plans/*.md`, but has **no entry** for `docs/governance/` or `docs/governance/governance-report.md`. The Risk row in this spec ("Report file committed accidentally") is therefore **unmitigated at this time**. **Resolution:** The implementation MUST add `docs/governance/governance-report.md` to `.gitignore` as part of this stage. This is a required deliverable, not optional.
+
+---
+
+**Q4: Does `.github/workflows/architecture-governance.yml` already have a `Unified Governance Gate` step?**
+
+A: **No.** The workflow (10 numbered steps currently) contains no step named "Unified Governance Gate" and no invocation of `governance:gate:ci`. Steps 5–8 run individual guards (`ai-guard.ts`, `infra-audit.ts`, `architecture-diff.ts`, `arch:health:ci`) plus an AI execution validation step. FR-008 has **not** been partially satisfied. The new step must be inserted **after step 11** (`Run AI Execution Validation`) — or after the last existing individual guard step — as specified in FR-008.
+
+---
+
+**Q5: Does `scripts/governance/` already exist with partial implementation?**
+
+A: **Yes — partially.** The directory exists with:
+
+- `scripts/governance/core/governance-validator.ts` — a governance validator utility
+- `scripts/governance/type-safety-guard.ts` — type-safety guard script
+- `scripts/governance/validate-architecture-brain.ts` — architecture brain validator (also referenced by the pre-commit hook)
+
+The three files mandated by FR-005 (`gate.ts`, `gate-ci.ts`, `report.ts`) do **not** exist yet. The existing files are support utilities; none implements the gate orchestration layer. **Resolution:** Implementation must create the three missing files without disturbing the existing `validate-architecture-brain.ts` (already wired into pre-commit). The `core/governance-validator.ts` utility MAY be imported by `gate.ts` if applicable; review its exports before writing new orchestration logic.
+
+---
+
+**Audit Note — Transaction Boundaries, Idempotency, Error Contract, Isolation (N/A Confirmation)**
+
+As declared in Technical Constraints, this is a pure tooling stage. Confirmed N/A:
+
+- **Transaction boundaries:** No database or transactional operations. N/A.
+- **Idempotency:** Satisfied by design — running `governance:gate` multiple times on unchanged state produces the same exit code (deterministic sub-process delegation). No state is mutated.
+- **Version enforcement logic:** Not applicable — no package versioning logic introduced.
+- **Error contract:** The `{ success, data, error }` API contract applies to HTTP routes only. Exit codes `0`/`1` per FR-011 serve as the equivalent contract for CLI tooling. No HTTP surface introduced.
+- **Isolation boundaries:** No tenant resolution, no workspace routes, no license middleware. N/A.
