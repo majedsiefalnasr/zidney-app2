@@ -3,22 +3,15 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-25T00:20:00Z
+Last Updated: 2026-03-25T00:25:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- `scripts/context/build.ts` — wraps `assembleContext()`, atomic write, --dry-run/--all/--force
-- `scripts/context/changed.ts` — git diff --cached, 5-min freshness cache, writes context-changed.json
-- `scripts/context/impact.ts` — filters riskIndicators from context artifact
-- `scripts/context/validate.ts` — validates gitnexus-context.json (no external schema lib)
-- `scripts/context/validate.test.ts` — 8 unit tests
-- `package.json` — 4 new `context:*` scripts; `governance:gate:changed` updated
-- `scripts/governance/gate.ts` — 2 guards prepended (context:build, context:validate)
-- `.husky/pre-commit` — context:changed + context:validate inserted
-- `.github/workflows/architecture-governance.yml` — build+validate CI step inserted
-- `docs/scripts/context-*.md` — 4 registry entries
+- Total: 13 atomic tasks
+- 9 sequential tasks (T001–T009) in dependency order
+- 4 parallel tasks (T010–T013) for docs registry
 
 Deferred Scope:
 
@@ -27,10 +20,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Risk Level = LOW. No migrations. No new dependencies. Task breakdown pending.
+Atomic task set generated. 13 tasks. Drift analysis gate pending.
 
 ---
 

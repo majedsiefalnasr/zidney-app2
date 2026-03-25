@@ -22,15 +22,15 @@ Plan must not introduce architecture outside defined Stage scope.
 
 ## Architectural Scope Confirmation
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| No cross-tenant data access | ✅ CONFIRMED | Scripts operate at workspace level only |
-| No middleware bypass | ✅ N/A | No HTTP layer touched |
-| No direct DB instantiation | ✅ N/A | No database — pure filesystem + git |
-| No grading logic outside Worker | ✅ N/A | No attempt/grading concern |
-| No weakening of snapshot integrity | ✅ N/A | Not applicable |
-| No weakening of version enforcement | ✅ N/A | Not applicable |
-| No layer boundary violation | ✅ CONFIRMED | `scripts/context/` is a pure scripting layer — no `apps/*` imports |
+| Check                               | Status       | Notes                                                              |
+| ----------------------------------- | ------------ | ------------------------------------------------------------------ |
+| No cross-tenant data access         | ✅ CONFIRMED | Scripts operate at workspace level only                            |
+| No middleware bypass                | ✅ N/A       | No HTTP layer touched                                              |
+| No direct DB instantiation          | ✅ N/A       | No database — pure filesystem + git                                |
+| No grading logic outside Worker     | ✅ N/A       | No attempt/grading concern                                         |
+| No weakening of snapshot integrity  | ✅ N/A       | Not applicable                                                     |
+| No weakening of version enforcement | ✅ N/A       | Not applicable                                                     |
+| No layer boundary violation         | ✅ CONFIRMED | `scripts/context/` is a pure scripting layer — no `apps/*` imports |
 
 **No ADR required.** This is a pure tooling stage (scripts + CI config + git hooks).
 
@@ -138,20 +138,20 @@ All work is confined to:
 All state written by scripts is filesystem-only. Atomic write pattern used throughout:
 
 ```typescript
-writeFileSync(tmpPath, JSON.stringify(artifact, null, 2), 'utf8')
-renameSync(tmpPath, outputPath)  // atomic on POSIX -- no partial artifact
+writeFileSync(tmpPath, JSON.stringify(artifact, null, 2), "utf8");
+renameSync(tmpPath, outputPath); // atomic on POSIX -- no partial artifact
 ```
 
 ---
 
 ## Idempotency Plan
 
-| Script | Idempotency Mechanism |
-|--------|----------------------|
-| `context:build` | `--force` bypasses freshness; default re-generates if >24h old. Atomic write prevents partial state. |
-| `context:changed` | Freshness check: return cached if `context-changed.json` < 5 min old (exit 0). |
-| `context:impact` | Deterministic from inputs — re-run safe. |
-| `context:validate` | Pure read — no writes. Inherently idempotent. |
+| Script             | Idempotency Mechanism                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------- |
+| `context:build`    | `--force` bypasses freshness; default re-generates if >24h old. Atomic write prevents partial state. |
+| `context:changed`  | Freshness check: return cached if `context-changed.json` < 5 min old (exit 0).                       |
+| `context:impact`   | Deterministic from inputs — re-run safe.                                                             |
+| `context:validate` | Pure read — no writes. Inherently idempotent.                                                        |
 
 No endpoint idempotency applies (no HTTP layer).
 
@@ -162,6 +162,7 @@ No endpoint idempotency applies (no HTTP layer).
 **Not applicable to HTTP requests.**
 
 Exception: `context:validate` enforces `schemaVersion` consistency:
+
 - Reads `schema.version` from `docs/ai/gitnexus-context.schema.json`
 - Compares against `artifact.schemaVersion`
 - On mismatch: `[context:validate] FAIL: schemaVersion mismatch — artifact='<x>', expected='<y>'` → exit 1
@@ -203,31 +204,31 @@ Error format (named diagnostics — no stack traces):
 
 ## Failure Modes
 
-| Failure Mode | Script | Behavior |
-|---|---|---|
-| `gitnexus-context.json` not found | `context:validate`, `context:impact` | Named diagnostic + exit 1 |
-| Artifact stale (>24h) | `context:validate` | `FAIL: artifact is stale (<N>h old) — run context:build to refresh` + exit 1 |
-| Schema version mismatch | `context:validate` | `FAIL: schemaVersion mismatch` + exit 1 |
-| Required field missing | `context:validate` | `FAIL: missing required field 'x'` + exit 1 |
-| `assembleContext()` throws | `context:build` | `FAIL: assembleContext failed — <message>` + exit 1 |
-| git command unavailable | `context:changed` | `FAIL: git is unavailable — <error>` + exit 1 |
-| Atomic write fails | `context:build`, `context:changed` | `FAIL: atomic write failed — <error>` + exit 1 |
-| Clean tree (0 staged files) | `context:changed` | Write `changedFiles: []`, exit 0 (not an error) |
-| Missing schema file | `context:validate` | `FAIL: schema file not found` + exit 1 |
+| Failure Mode                      | Script                               | Behavior                                                                     |
+| --------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
+| `gitnexus-context.json` not found | `context:validate`, `context:impact` | Named diagnostic + exit 1                                                    |
+| Artifact stale (>24h)             | `context:validate`                   | `FAIL: artifact is stale (<N>h old) — run context:build to refresh` + exit 1 |
+| Schema version mismatch           | `context:validate`                   | `FAIL: schemaVersion mismatch` + exit 1                                      |
+| Required field missing            | `context:validate`                   | `FAIL: missing required field 'x'` + exit 1                                  |
+| `assembleContext()` throws        | `context:build`                      | `FAIL: assembleContext failed — <message>` + exit 1                          |
+| git command unavailable           | `context:changed`                    | `FAIL: git is unavailable — <error>` + exit 1                                |
+| Atomic write fails                | `context:build`, `context:changed`   | `FAIL: atomic write failed — <error>` + exit 1                               |
+| Clean tree (0 staged files)       | `context:changed`                    | Write `changedFiles: []`, exit 0 (not an error)                              |
+| Missing schema file               | `context:validate`                   | `FAIL: schema file not found` + exit 1                                       |
 
 ---
 
 ## Security Review
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| RBAC enforcement server-side | N/A | Scripts run in CI/CLI — no RBAC |
-| No role checks in frontend | N/A | No frontend |
-| No secrets exposed | CONFIRMED | No env vars, tokens, or credentials in scripts |
-| JWT workspace scope enforced | N/A | No HTTP |
-| No sensitive data in logs | CONFIRMED | Logs contain only file paths + artifact metadata |
-| No shell injection | CONFIRMED | `execFileSync` with arg arrays — no string interpolation |
-| No arbitrary file read | CONFIRMED | Scripts read only declared fixed paths |
+| Check                        | Status    | Notes                                                    |
+| ---------------------------- | --------- | -------------------------------------------------------- |
+| RBAC enforcement server-side | N/A       | Scripts run in CI/CLI — no RBAC                          |
+| No role checks in frontend   | N/A       | No frontend                                              |
+| No secrets exposed           | CONFIRMED | No env vars, tokens, or credentials in scripts           |
+| JWT workspace scope enforced | N/A       | No HTTP                                                  |
+| No sensitive data in logs    | CONFIRMED | Logs contain only file paths + artifact metadata         |
+| No shell injection           | CONFIRMED | `execFileSync` with arg arrays — no string interpolation |
+| No arbitrary file read       | CONFIRMED | Scripts read only declared fixed paths                   |
 
 `context:changed` uses `execFileSync('git', ['diff', '--cached', ...], { encoding: 'utf8' })` — NOT `exec()`. No shell injection vector.
 
@@ -253,6 +254,7 @@ File header:
 CLI args: `--dry-run`, `--all`, `--force`
 
 Logic:
+
 1. Parse CLI args from `process.argv`
 2. Build `AssembleOptions` from flags
 3. Call `assembleContext(options)` → `GitNexusContext`
@@ -263,6 +265,7 @@ Logic:
 Output path: `docs/ai/context/gitnexus-context.json`
 
 Imports:
+
 - `node:fs`: `existsSync`, `renameSync`, `writeFileSync`
 - `node:path`: `resolve`
 - `../gitnexus-context.ts`: `assembleContext` (value), `AssembleOptions` (type-only)
@@ -285,14 +288,16 @@ File header:
 ```
 
 Output schema:
+
 ```typescript
 interface ContextChangedArtifact {
-  generatedAt: string     // ISO 8601
-  changedFiles: string[]  // stable-sorted relative paths
+  generatedAt: string; // ISO 8601
+  changedFiles: string[]; // stable-sorted relative paths
 }
 ```
 
 Logic:
+
 1. Read existing artifact if present; if `generatedAt` < 5 min ago → log cache hit, exit 0
 2. `execFileSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACM'], { encoding: 'utf8' })`
 3. Split output by newline, trim, filter empty, sort
@@ -320,10 +325,11 @@ File header:
 ```
 
 Output schema:
+
 ```typescript
 interface ContextImpactArtifact {
-  generatedAt: string
-  riskIndicators: RiskIndicator[]
+  generatedAt: string;
+  riskIndicators: RiskIndicator[];
 }
 ```
 
@@ -331,6 +337,7 @@ interface ContextImpactArtifact {
 Default: one module path per sorted line.
 
 Logic:
+
 1. Read `gitnexus-context.json` → `GitNexusContext` (exit 1 if missing — named diagnostic)
 2. Read `context-changed.json` → fallback to `gitnexus-context.changedFiles` if missing
 3. Filter `riskIndicators` whose `affectedBy` set intersects `changedFiles`
@@ -357,6 +364,7 @@ File header:
 ```
 
 Logic (ordered — stops at first failure):
+
 1. Check artifact exists (`docs/ai/context/gitnexus-context.json`) → exit 1 if missing
 2. Parse JSON → exit 1 if invalid
 3. Read schema (`docs/ai/gitnexus-context.schema.json`) → extract `schema.required` and `schema.version`
@@ -411,11 +419,11 @@ bun run governance:gate   # expect all pass
 
 ## Script Registry
 
-| Script | Docs file |
-|--------|-----------|
-| `context:build` | `docs/scripts/context-build.md` |
-| `context:changed` | `docs/scripts/context-changed.md` |
-| `context:impact` | `docs/scripts/context-impact.md` |
+| Script             | Docs file                          |
+| ------------------ | ---------------------------------- |
+| `context:build`    | `docs/scripts/context-build.md`    |
+| `context:changed`  | `docs/scripts/context-changed.md`  |
+| `context:impact`   | `docs/scripts/context-impact.md`   |
 | `context:validate` | `docs/scripts/context-validate.md` |
 
 ---
@@ -437,23 +445,24 @@ bun run governance:gate   # expect all pass
 
 ## Files Created / Modified Summary
 
-| File | Action | Notes |
-|------|--------|-------|
-| `scripts/context/build.ts` | CREATE | Wraps `assembleContext()`, atomic write, --dry-run |
-| `scripts/context/changed.ts` | CREATE | git diff --cached -> context-changed.json, 5min cache |
-| `scripts/context/impact.ts` | CREATE | Filters riskIndicators -> context-impact.json |
-| `scripts/context/validate.ts` | CREATE | Schema + required field + freshness validation |
-| `scripts/context/validate.test.ts` | CREATE | 8 unit tests covering all exit paths |
-| `docs/scripts/context-build.md` | CREATE | Script registry entry |
-| `docs/scripts/context-changed.md` | CREATE | Script registry entry |
-| `docs/scripts/context-impact.md` | CREATE | Script registry entry |
-| `docs/scripts/context-validate.md` | CREATE | Script registry entry |
-| `package.json` | MODIFY | Add 4 `context:*` scripts; update `governance:gate:changed` |
-| `scripts/governance/gate.ts` | MODIFY | Prepend 2 new guards to GUARDS array |
-| `.husky/pre-commit` | MODIFY | Insert context:changed + context:validate before arch guard |
-| `.github/workflows/architecture-governance.yml` | MODIFY | Insert build+validate step after install |
+| File                                            | Action | Notes                                                       |
+| ----------------------------------------------- | ------ | ----------------------------------------------------------- |
+| `scripts/context/build.ts`                      | CREATE | Wraps `assembleContext()`, atomic write, --dry-run          |
+| `scripts/context/changed.ts`                    | CREATE | git diff --cached -> context-changed.json, 5min cache       |
+| `scripts/context/impact.ts`                     | CREATE | Filters riskIndicators -> context-impact.json               |
+| `scripts/context/validate.ts`                   | CREATE | Schema + required field + freshness validation              |
+| `scripts/context/validate.test.ts`              | CREATE | 8 unit tests covering all exit paths                        |
+| `docs/scripts/context-build.md`                 | CREATE | Script registry entry                                       |
+| `docs/scripts/context-changed.md`               | CREATE | Script registry entry                                       |
+| `docs/scripts/context-impact.md`                | CREATE | Script registry entry                                       |
+| `docs/scripts/context-validate.md`              | CREATE | Script registry entry                                       |
+| `package.json`                                  | MODIFY | Add 4 `context:*` scripts; update `governance:gate:changed` |
+| `scripts/governance/gate.ts`                    | MODIFY | Prepend 2 new guards to GUARDS array                        |
+| `.husky/pre-commit`                             | MODIFY | Insert context:changed + context:validate before arch guard |
+| `.github/workflows/architecture-governance.yml` | MODIFY | Insert build+validate step after install                    |
 
 **Files NOT modified:**
+
 - `scripts/gitnexus-context.ts` — left unchanged; existing `arch:gitnexus:context` also unchanged
 - `docs/ai/gitnexus-context.schema.json` — read-only source of truth
 
@@ -462,6 +471,7 @@ bun run governance:gate   # expect all pass
 ## Rollback Strategy
 
 All changes are purely additive:
+
 - Delete `scripts/context/` directory → existing behavior fully restored
 - Revert `governance:gate:changed` in `package.json` to `bun run arch:guard:changed`
 - Remove 2 prepended entries from `gate.ts` GUARDS array

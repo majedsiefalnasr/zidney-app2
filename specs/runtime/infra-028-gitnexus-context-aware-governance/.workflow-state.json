@@ -6,24 +6,25 @@
   "branch": "spec/infra-028-gitnexus-context-aware-governance",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "plan",
+  "current_step": "tasks",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": true,
-  "tasks_total": null,
-  "tasks_completed": null,
+  "tasks_total": 13,
+  "tasks_completed": 0,
   "deferred_tasks": [],
   "guardian_verdicts": {},
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-03-25T00:00:00Z",
-  "last_updated": "2026-03-25T00:20:00Z",
+  "last_updated": "2026-03-25T00:25:00Z",
   "step_timings": {
     "specify": { "started_at": "2026-03-25T00:01:00Z", "completed_at": "2026-03-25T00:05:00Z" },
     "clarify": { "started_at": "2026-03-25T00:06:00Z", "completed_at": "2026-03-25T00:10:00Z" },
-    "plan": { "started_at": "2026-03-25T00:11:00Z", "completed_at": "2026-03-25T00:20:00Z" }
+    "plan": { "started_at": "2026-03-25T00:11:00Z", "completed_at": "2026-03-25T00:20:00Z" },
+    "tasks": { "started_at": "2026-03-25T00:21:00Z", "completed_at": "2026-03-25T00:25:00Z" }
   },
   "history": [
     {
@@ -42,6 +43,11 @@
     {
       "event": "plan_complete",
       "timestamp": "2026-03-25T00:20:00Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 13,
+      "timestamp": "2026-03-25T00:25:00Z"
     }
   ]
 }

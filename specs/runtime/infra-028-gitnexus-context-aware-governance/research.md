@@ -12,59 +12,59 @@ File: `scripts/gitnexus-context.ts`
 
 ```typescript
 export interface RecentCommit {
-  hash: string
-  message: string
-  author: string
-  date: string
+  hash: string;
+  message: string;
+  author: string;
+  date: string;
 }
 
 export interface RiskIndicator {
-  module: string
-  riskScore: number
-  reason: string
-  affectedBy: string[]
+  module: string;
+  riskScore: number;
+  reason: string;
+  affectedBy: string[];
 }
 
 export interface GitNexusContext {
-  schemaVersion: string            // "1.0.0"
-  generatedAt: string              // ISO 8601
-  analysisMode: 'changed-only' | 'full'
-  changedFiles: string[]
-  impactedModules: string[]
-  dependencyGraph: Record<string, string[]>
-  architectureLayerMap: Record<string, string>
-  recentCommits: RecentCommit[]
-  riskIndicators: RiskIndicator[]
+  schemaVersion: string; // "1.0.0"
+  generatedAt: string; // ISO 8601
+  analysisMode: "changed-only" | "full";
+  changedFiles: string[];
+  impactedModules: string[];
+  dependencyGraph: Record<string, string[]>;
+  architectureLayerMap: Record<string, string>;
+  recentCommits: RecentCommit[];
+  riskIndicators: RiskIndicator[];
 }
 
 export interface AssembleOptions {
-  changedFilesOnly: boolean
-  dryRun: boolean
-  output: string
-  all: boolean
-  baseRef: string
+  changedFilesOnly: boolean;
+  dryRun: boolean;
+  output: string;
+  all: boolean;
+  baseRef: string;
 }
 ```
 
 ### Exported Functions
 
 ```typescript
-export function assembleContext(options: AssembleOptions): GitNexusContext
-export function detectChangedFiles(options: { baseRef: string; all: boolean }): string[]
-export function mapFilesToModules(files: string[], brainModules: string[]): string[]
-export function buildDependencyGraph(modules, brain, full): Record<string, string[]>
-export function buildArchitectureLayerMap(modules, brain, full): Record<string, string>
-export function extractGitHistory(): RecentCommit[]
-export function computeRiskIndicators(modules, brain, changedFiles): RiskIndicator[]
-export function checkGitNexusHealth(): { healthy: boolean; status: string }
+export function assembleContext(options: AssembleOptions): GitNexusContext;
+export function detectChangedFiles(options: { baseRef: string; all: boolean }): string[];
+export function mapFilesToModules(files: string[], brainModules: string[]): string[];
+export function buildDependencyGraph(modules, brain, full): Record<string, string[]>;
+export function buildArchitectureLayerMap(modules, brain, full): Record<string, string>;
+export function extractGitHistory(): RecentCommit[];
+export function computeRiskIndicators(modules, brain, changedFiles): RiskIndicator[];
+export function checkGitNexusHealth(): { healthy: boolean; status: string };
 ```
 
 ### Internal Constants (NOT exported)
 
 ```typescript
-const BRAIN_PATH = resolve(process.cwd(), 'docs/ai/context/ai-architecture-brain.json')
-const DEFAULT_OUTPUT = resolve(process.cwd(), 'docs/ai/context/gitnexus-context.json')
-const SCHEMA_VERSION = '1.0.0'   // ← const, NOT export const — context:validate MUST read from schema file
+const BRAIN_PATH = resolve(process.cwd(), "docs/ai/context/ai-architecture-brain.json");
+const DEFAULT_OUTPUT = resolve(process.cwd(), "docs/ai/context/gitnexus-context.json");
+const SCHEMA_VERSION = "1.0.0"; // ← const, NOT export const — context:validate MUST read from schema file
 ```
 
 ---
@@ -75,6 +75,7 @@ Top-level `version` field: `"1.0.0"` — this is what `context:validate` compare
 `artifact.schemaVersion`.
 
 Required fields (from `required` array):
+
 ```json
 [
   "schemaVersion",
@@ -97,13 +98,13 @@ File: `scripts/governance/gate.ts`
 
 ```typescript
 const GUARDS = [
-  { name: 'Architecture Guard',  script: 'arch:guard' },
-  { name: 'Type Safety',         script: 'validate:types' },
-  { name: 'Runtime Scripts',     script: 'validate:runtime:scripts' },
-  { name: 'Script Usage',        script: 'validate:script:usage' },
-  { name: 'Security CI',         script: 'infra:security:ci' },
-  { name: 'AI Context Validate', script: 'ai:context:validate' },
-]
+  { name: "Architecture Guard", script: "arch:guard" },
+  { name: "Type Safety", script: "validate:types" },
+  { name: "Runtime Scripts", script: "validate:runtime:scripts" },
+  { name: "Script Usage", script: "validate:script:usage" },
+  { name: "Security CI", script: "infra:security:ci" },
+  { name: "AI Context Validate", script: "ai:context:validate" },
+];
 ```
 
 **Plan:** Prepend `context:build` and `context:validate` as GUARDS[0] and GUARDS[1] before
@@ -114,11 +115,13 @@ the existing chain.
 ## 4. Current `governance:gate:changed`
 
 `package.json` line 95:
+
 ```json
 "governance:gate:changed": "bun run arch:guard:changed"
 ```
 
 **Plan:** Change to:
+
 ```json
 "governance:gate:changed": "bun run context:changed && bun run arch:guard:changed"
 ```
@@ -138,6 +141,7 @@ the existing chain.
 9. `arch:guard:changed` (unified governance gate, changed scope)
 
 **Plan:** Insert between step 4 (TS validation) and step 5 (arch guard):
+
 ```sh
 echo "Running GitNexus context resolution…"
 bun run context:changed
@@ -162,6 +166,7 @@ bun run context:validate
 12. Upload AI Execution Validation Artifact
 
 **Plan:** Insert new step after step 3 (Install dependencies) and before step 4 (AI Bootstrap):
+
 ```yaml
 - name: Build and Validate GitNexus Context
   run: bun run context:build && bun run context:validate
@@ -182,6 +187,7 @@ Cache result at `docs/ai/context/context-changed.json` with `generatedAt` timest
 
 `gitnexus-context.ts` uses `writeFileSync` directly (no atomic write currently).
 `context:build` adds the atomic write improvement:
+
 1. Write to `<output>.tmp`
 2. Rename `<output>.tmp` → `<output>` (atomic on POSIX)
 
