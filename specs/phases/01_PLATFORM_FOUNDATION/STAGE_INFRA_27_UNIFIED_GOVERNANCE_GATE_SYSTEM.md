@@ -3,9 +3,35 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-25T01:00:00Z
+Last Updated: 2026-03-25T01:30:00Z
+
+Tasks Generated:
+
+- Total: 16 atomic tasks across 7 parallelization groups
+- 3 new script files: gate.ts, gate-ci.ts, report.ts
+- 5 new package.json scripts
+- pre-commit, CI workflow, .gitignore, docs updates
+- 1 unit test file, 4 final validation tasks
+
+Deferred Scope:
+
+- Runtime monitoring (explicitly out of scope)
+- External security tooling beyond Trivy (out of scope)
+
+Constitutional Compliance:
+
+- Task set compliant — drift analysis required before implementation
+- Architecture Guardian: PASS
+- API Designer: PASS
+
+Notes:
+Atomic task set generated. 16 tasks in 7 dependency-ordered groups. Drift analysis gate pending.
+
+---
+
+## Scope Reference
 
 Scope Planned:
 
