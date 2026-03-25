@@ -13,23 +13,18 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-03-25T01:30:00Z
+Last Updated: 2026-03-25T01:45:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Policy engine runtime (`scripts/policy-engine/`) — engine.ts, registry.ts, types.ts, cli.ts
-- Context loader (`context/loader.ts`) with ContextLoadResult return type
-- Rule system: 8 rule files across ARCH, TYPES, SCRIPTS, AI, SECURITY domains
-- Adapter layer: architecture-guard, type-safety, script-governance, Trivy adapters
-- Two reporters: console.ts, json.ts
-- CLI: argument parsing, rule imports, exit code logic
-- AbortController injected via `context.abortSignal` — shared cancellation channel
-- Pre-loaded context fields: `existingScriptPaths`, `documentedScriptNames` (rule purity)
-- Two-tier timeout: 2,000ms (--changed / Husky), 30,000ms (--full / CI)
-- CI workflow (`policy-check.yml`) + Husky hook update
-- ~22 implementation tasks (T001–T022)
+- Total: 54 atomic tasks across 5 phases (A–E)
+- Phase A: 5 foundational tasks (types, registry, engine, loader)
+- Phase B: 4 adapter tasks (all parallel)
+- Phase C: 8 rule tasks (all parallel)
+- Phase D: 4 CLI & reporter tasks
+- Phase E: 33 test, infra, and gate validation tasks
 
 Deferred Scope:
 
@@ -40,12 +35,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Guardian: PASS (after V1/V2/V3 remediation)
-- API Designer: PASS (after H1/H2/L1 remediation)
+- Task set compliant — drift analysis required before implementation
+- No migrations, no database writes, no HTTP routes
 
 Notes:
-Technical plan complete. Both guardians passed. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
