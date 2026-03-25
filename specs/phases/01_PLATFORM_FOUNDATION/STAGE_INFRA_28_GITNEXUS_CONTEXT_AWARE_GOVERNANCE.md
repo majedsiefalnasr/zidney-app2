@@ -1,8 +1,22 @@
 # STAGE_INFRA_28_GITNEXUS_CONTEXT_AWARE_GOVERNANCE
 
-## Status
+## Stage Status
 
-DRAFT
+Status: DRAFT
+Step: pre_step
+Risk Level: UNKNOWN
+Initiated: 2026-03-25T00:00:00Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
 
 ---
 
