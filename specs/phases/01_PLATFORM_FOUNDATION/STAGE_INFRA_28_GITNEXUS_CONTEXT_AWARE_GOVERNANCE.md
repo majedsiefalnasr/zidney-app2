@@ -3,18 +3,22 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-25T00:10:00Z
+Last Updated: 2026-03-25T00:20:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Context-aware governance via `context:*` command surface
-- 4 canonical scripts: `context:build`, `context:changed`, `context:impact`, `context:validate`
-- `governance:gate` extended with context bootstrap (build + validate first)
-- Pre-commit integration with `context:changed`
-- CI integration with `context:validate`
-- Orchestrator Step 5 & 6 integration
+- `scripts/context/build.ts` — wraps `assembleContext()`, atomic write, --dry-run/--all/--force
+- `scripts/context/changed.ts` — git diff --cached, 5-min freshness cache, writes context-changed.json
+- `scripts/context/impact.ts` — filters riskIndicators from context artifact
+- `scripts/context/validate.ts` — validates gitnexus-context.json (no external schema lib)
+- `scripts/context/validate.test.ts` — 8 unit tests
+- `package.json` — 4 new `context:*` scripts; `governance:gate:changed` updated
+- `scripts/governance/gate.ts` — 2 guards prepended (context:build, context:validate)
+- `.husky/pre-commit` — context:changed + context:validate inserted
+- `.github/workflows/architecture-governance.yml` — build+validate CI step inserted
+- `docs/scripts/context-*.md` — 4 registry entries
 
 Deferred Scope:
 
@@ -23,10 +27,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. 5 decisions encoded. Risk Level = LOW (score 1). Ready for technical planning.
+Technical plan complete. Risk Level = LOW. No migrations. No new dependencies. Task breakdown pending.
 
 ---
 
