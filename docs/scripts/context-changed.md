@@ -1,4 +1,4 @@
-# context:changed
+# arch:context:changed
 
 **Script:** `context:changed`  
 **File:** `scripts/context/changed.ts`  
@@ -17,7 +17,7 @@ A clean staging area (no changed files) is a valid outcome — the artifact is w
 ## Usage
 
 ```bash
-bun run context:changed
+bun run arch:context:changed
 ```
 
 No flags are supported. The script always reads the current staging area.
@@ -55,7 +55,7 @@ line and does not invoke `git`.
 This script is integrated into:
 
 - **`.husky/pre-commit`** — runs on every commit (before architecture guard)
-- **`package.json` `governance:gate:changed`** — `bun run context:changed && bun run arch:guard:changed`
+- **`package.json` `governance:gate:changed`** — `bun run arch:context:changed && bun run arch:guard:changed`
 
 ## Related Scripts
 

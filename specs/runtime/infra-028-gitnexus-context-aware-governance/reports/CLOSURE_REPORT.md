@@ -62,7 +62,7 @@ All 13 tasks completed. No deferrals. Stage is production-ready.
 ## Constitutional Compliance
 
 - ADR-0001 Database-per-tenant isolation: **Not affected**
-- Script naming follows `<domain>:<action>` convention: **context:build, context:changed, context:impact, context:validate** ✅
+- Script naming follows `<domain>:<action>` convention: **context:build, arch:context:changed, arch:context:impact, arch:context:validate** ✅
 - No new app-to-app imports introduced ✅
 - No UI layer changes ✅
 

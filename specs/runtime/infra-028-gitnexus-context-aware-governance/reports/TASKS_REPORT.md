@@ -33,21 +33,21 @@
 
 ## Full Task List
 
-| ID   | Parallel | File                                            | Description                                     |
-| ---- | -------- | ----------------------------------------------- | ----------------------------------------------- |
-| T001 | —        | `scripts/context/validate.ts`                   | Artifact validation script — 6 checks           |
-| T002 | —        | `scripts/context/build.ts`                      | Context build script wrapping assembleContext() |
-| T003 | —        | `scripts/context/changed.ts`                    | Staged-file resolver with 5-min cache           |
-| T004 | —        | `scripts/context/impact.ts`                     | Risk indicator filter script                    |
-| T005 | —        | `scripts/context/validate.test.ts`              | 8 unit tests for validate.ts                    |
-| T006 | —        | `package.json`                                  | Add 4 context:\* scripts + update gate:changed  |
-| T007 | —        | `scripts/governance/gate.ts`                    | Prepend 2 guards                                |
-| T008 | —        | `.husky/pre-commit`                             | Insert context:changed + context:validate       |
-| T009 | —        | `.github/workflows/architecture-governance.yml` | Insert build+validate CI step                   |
-| T010 | ✅       | `docs/scripts/context-build.md`                 | Registry entry                                  |
-| T011 | ✅       | `docs/scripts/context-changed.md`               | Registry entry                                  |
-| T012 | ✅       | `docs/scripts/context-impact.md`                | Registry entry                                  |
-| T013 | ✅       | `docs/scripts/context-validate.md`              | Registry entry                                  |
+| ID   | Parallel | File                                            | Description                                         |
+| ---- | -------- | ----------------------------------------------- | --------------------------------------------------- |
+| T001 | —        | `scripts/context/validate.ts`                   | Artifact validation script — 6 checks               |
+| T002 | —        | `scripts/context/build.ts`                      | Context build script wrapping assembleContext()     |
+| T003 | —        | `scripts/context/changed.ts`                    | Staged-file resolver with 5-min cache               |
+| T004 | —        | `scripts/context/impact.ts`                     | Risk indicator filter script                        |
+| T005 | —        | `scripts/context/validate.test.ts`              | 8 unit tests for validate.ts                        |
+| T006 | —        | `package.json`                                  | Add 4 context:\* scripts + update gate:changed      |
+| T007 | —        | `scripts/governance/gate.ts`                    | Prepend 2 guards                                    |
+| T008 | —        | `.husky/pre-commit`                             | Insert arch:context:changed + arch:context:validate |
+| T009 | —        | `.github/workflows/architecture-governance.yml` | Insert build+validate CI step                       |
+| T010 | ✅       | `docs/scripts/context-build.md`                 | Registry entry                                      |
+| T011 | ✅       | `docs/scripts/context-changed.md`               | Registry entry                                      |
+| T012 | ✅       | `docs/scripts/context-impact.md`                | Registry entry                                      |
+| T013 | ✅       | `docs/scripts/context-validate.md`              | Registry entry                                      |
 
 ---
 

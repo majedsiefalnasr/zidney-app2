@@ -15,7 +15,7 @@
  *     (default)  one `indicator.module` per line, sorted alphabetically
  *     --json     full riskIndicators array as JSON on stdout
  *
- * @usage bun run context:impact [-- --json]
+ * @usage bun run arch:context:impact [-- --json]
  */
 
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
@@ -63,7 +63,7 @@ function writeArtifact(indicators: RiskIndicator[]): void {
 
 function main(): void {
   if (!existsSync(ARTIFACT_PATH)) {
-    fail(`artifact not found — run 'bun run context:build' first (expected: ${ARTIFACT_PATH})`)
+    fail(`artifact not found — run 'bun run arch:context:build' first (expected: ${ARTIFACT_PATH})`)
   }
 
   const context = readJson<GitNexusContext>(ARTIFACT_PATH)

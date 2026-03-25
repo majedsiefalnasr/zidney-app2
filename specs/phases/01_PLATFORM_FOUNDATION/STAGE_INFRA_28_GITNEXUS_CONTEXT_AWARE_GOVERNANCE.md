@@ -149,8 +149,8 @@ await $`bun run gitnexus-context`;
 
 ```text
 governance:gate
-├── context:build
-├── context:validate
+├── arch:context:build
+├── arch:context:validate
 ├── arch:guard (scoped)
 ├── validate:runtime-scripts (scoped)
 ├── security:scan:ci (scoped)
@@ -196,7 +196,7 @@ The orchestrator MUST:
 ### Test Command
 
 ```bash
-bun run context:validate
+bun run arch:context:validate
 ```
 
 ---
@@ -206,8 +206,8 @@ bun run context:validate
 Extend precommit-diagnostics:
 
 ```bash
-bun run context:changed
-bun run context:validate
+bun run arch:context:changed
+bun run arch:context:validate
 ```
 
 ---
@@ -218,10 +218,10 @@ bun run context:validate
 
 ```yaml
 - name: Build Context
-  run: bun run context:build
+  run: bun run arch:context:build
 
 - name: Validate Context
-  run: bun run context:validate
+  run: bun run arch:context:validate
 ```
 
 ---

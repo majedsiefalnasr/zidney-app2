@@ -78,7 +78,7 @@ bun run validate:yaml
 bun run validate:workflows
 
 # Run lint-staged unit tests only
-bun vitest run tests/unit/lint-staged/lint-staged-config.test.ts
+bun run test tests/unit/lint-staged/lint-staged-config.test.ts
 
 # Run full unit test suite
 bun run test
@@ -90,7 +90,7 @@ bun run test
 
 ```bash
 # Unit tests for lint-staged config wiring and config drift
-bun vitest run tests/unit/lint-staged/lint-staged-config.test.ts
+bun run test tests/unit/lint-staged/lint-staged-config.test.ts
 ```
 
 Expected outcome: **21 tests pass, 0 fail**.
@@ -247,7 +247,7 @@ Troubleshooting: If not installed, the pre-push hook will emit a warning and ski
 ## Sign-Off Checklist
 
 - [ ] `bun run format:check:md` exits 0 — all `.md` files pass Prettier check
-- [ ] `bun vitest run tests/unit/lint-staged/lint-staged-config.test.ts` — 21 pass, 0 fail
+- [ ] `bun run test tests/unit/lint-staged/lint-staged-config.test.ts` — 21 pass, 0 fail
 - [ ] Pre-commit hook triggers on `.md` changes (Prettier applied)
 - [ ] Pre-commit hook triggers on `.ts`/`.js` changes (Biome applied, not Prettier)
 - [ ] `.prettierignore` excludes `*.ts`, `*.tsx`, `*.js`, `*.vue`, and AI tooling dirs

@@ -22,7 +22,7 @@
 
 ## Unit Tests
 
-**Command:** `bun vitest run tests/unit/lint-staged/lint-staged-config.test.ts`
+**Command:** `bun run test tests/unit/lint-staged/lint-staged-config.test.ts`
 
 **Result:** 21 passed, 0 failed (237 ms)
 

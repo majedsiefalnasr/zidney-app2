@@ -15,14 +15,14 @@ Lint exits with code 0. TypeScript check exits with code 0. No teams-related typ
 
 ## Validation Checks
 
-| Check                    | Command                                                                                   | Exit Code | Result                                       |
-| ------------------------ | ----------------------------------------------------------------------------------------- | --------- | -------------------------------------------- |
-| Unit tests               | `bun vitest run packages/domain-core/src/teams/__tests__/teams.service.test.ts`           | 0         | ✅ 28/28 pass                                |
-| Integration tests        | `bun vitest run apps/api/src/routes/backoffice/teams/__tests__/teams.integration.test.ts` | 0         | ✅ 28/28 pass                                |
-| Lint (Biome)             | `bun run lint`                                                                            | 0         | ✅ 1934 files checked, no errors             |
-| TypeScript — API         | `bun tsc --noEmit -p apps/api/tsconfig.json`                                              | 0         | ✅ No teams-related type errors              |
-| TypeScript — domain-core | `bun tsc --noEmit -p packages/domain-core/tsconfig.json`                                  | 0         | ✅ No teams-related type errors              |
-| Pre-commit hooks         | `git commit`                                                                              | 0         | ✅ Biome, tsc incremental, AI Guard all pass |
+| Check                    | Command                                                                                 | Exit Code | Result                                       |
+| ------------------------ | --------------------------------------------------------------------------------------- | --------- | -------------------------------------------- |
+| Unit tests               | `bun run test packages/domain-core/src/teams/__tests__/teams.service.test.ts`           | 0         | ✅ 28/28 pass                                |
+| Integration tests        | `bun run test apps/api/src/routes/backoffice/teams/__tests__/teams.integration.test.ts` | 0         | ✅ 28/28 pass                                |
+| Lint (Biome)             | `bun run lint`                                                                          | 0         | ✅ 1934 files checked, no errors             |
+| TypeScript — API         | `bun tsc --noEmit -p apps/api/tsconfig.json`                                            | 0         | ✅ No teams-related type errors              |
+| TypeScript — domain-core | `bun tsc --noEmit -p packages/domain-core/tsconfig.json`                                | 0         | ✅ No teams-related type errors              |
+| Pre-commit hooks         | `git commit`                                                                            | 0         | ✅ Biome, tsc incremental, AI Guard all pass |
 
 ---
 

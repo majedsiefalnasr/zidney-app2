@@ -118,7 +118,7 @@
 Test Command:
 
 ```bash
-bun vitest run tests/unit/translation/
+bun run test tests/unit/translation/
 ```
 
 Expected: 72/72 tests pass.

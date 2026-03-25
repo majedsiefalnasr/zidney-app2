@@ -118,7 +118,7 @@ Stage Directory: `specs/runtime/infra-010-hybrid-lint-format-pipeline/`
 Test Command:
 
 ```bash
-bun vitest run tests/unit/lint-staged/lint-staged-config.test.ts
+bun run test tests/unit/lint-staged/lint-staged-config.test.ts
 # Expected: 21 passed, 0 failed
 ```
 
@@ -250,7 +250,7 @@ Local verification:
 ```bash
 bun scripts/infra-audit.ts
 bun scripts/ai-guard.ts
-bun vitest run tests/unit/lint-staged/lint-staged-config.test.ts
+bun run test tests/unit/lint-staged/lint-staged-config.test.ts
 bun run format:check:md
 ```
 

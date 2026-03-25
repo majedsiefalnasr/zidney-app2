@@ -48,7 +48,7 @@ layer. All 16 FRs, 7 NFRs, and 18 ACs captured with zero clarification markers.
 - FR-007: Script metadata headers + `context` domain registration in script-system-governance
 - FR-008: `governance:gate` extended to run `context:build` → `context:validate` first
 - FR-009: `governance:gate:changed` updated to prepend `context:changed`
-- FR-010: `.husky/pre-commit` extended with `bun run context:changed`
+- FR-010: `.husky/pre-commit` extended with `bun run arch:context:changed`
 - FR-011: `.github/workflows/architecture-governance.yml` extended with `context:validate` step
 - FR-012: Orchestrator Step 5 and Step 6 invoke `context:build` and `context:validate`
 - FR-013: Deterministic output — same git state produces identical artifacts

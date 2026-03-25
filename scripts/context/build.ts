@@ -8,7 +8,7 @@
  *   Supports --dry-run (print to stdout only), --all (full workspace), --force (skip
  *   freshness check and always regenerate).
  *
- * @usage bun run context:build [-- --dry-run] [-- --all] [-- --force]
+ * @usage bun run arch:context:build [-- --dry-run] [-- --all] [-- --force]
  */
 
 import { existsSync, renameSync, writeFileSync } from 'node:fs'

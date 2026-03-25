@@ -109,7 +109,7 @@ Stage Directory: specs/runtime/026-teams-work-team-types/
 Test Command:
 
 ```bash
-bun vitest run \
+bun run test \
   packages/domain-core/src/teams/__tests__/teams.service.test.ts \
   apps/api/src/routes/backoffice/teams/__tests__/teams.integration.test.ts
 ```

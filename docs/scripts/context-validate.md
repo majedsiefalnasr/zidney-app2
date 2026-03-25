@@ -1,4 +1,4 @@
-# context:validate
+# arch:context:validate
 
 **Script:** `context:validate`  
 **File:** `scripts/context/validate.ts`  
@@ -16,19 +16,19 @@ pre-commit, the governance gate, and CI to block stale or malformed context arti
 
 ## Validation Checks (in order)
 
-| #   | Check                        | Failure message                                    |
-| --- | ---------------------------- | -------------------------------------------------- |
-| 1   | Artifact file exists         | `artifact not found — run 'bun run context:build'` |
-| 2   | Valid JSON                   | `invalid JSON in artifact — <parse error>`         |
-| 3   | Schema file exists           | `schema not found at <path>`                       |
-| 4   | All required fields present  | `missing required field: <fieldName>`              |
-| 5   | schemaVersion matches schema | `schemaVersion mismatch — artifact:<x> schema:<y>` |
-| 6   | Artifact age ≤ 24 hours      | `stale artifact — age: <N>h (max: 24h)`            |
+| #   | Check                        | Failure message                                         |
+| --- | ---------------------------- | ------------------------------------------------------- |
+| 1   | Artifact file exists         | `artifact not found — run 'bun run arch:context:build'` |
+| 2   | Valid JSON                   | `invalid JSON in artifact — <parse error>`              |
+| 3   | Schema file exists           | `schema not found at <path>`                            |
+| 4   | All required fields present  | `missing required field: <fieldName>`                   |
+| 5   | schemaVersion matches schema | `schemaVersion mismatch — artifact:<x> schema:<y>`      |
+| 6   | Artifact age ≤ 24 hours      | `stale artifact — age: <N>h (max: 24h)`                 |
 
 ## Usage
 
 ```bash
-bun run context:validate
+bun run arch:context:validate
 ```
 
 No flags are supported. The script always validates the canonical artifact path.
@@ -60,21 +60,21 @@ This script is integrated into:
 If validation fails with `stale artifact`:
 
 ```bash
-bun run context:build --force
-bun run context:validate
+bun run arch:context:build --force
+bun run arch:context:validate
 ```
 
 If validation fails with `missing required field` or `schemaVersion mismatch`:
 
 ```bash
-bun run context:build --force
-bun run context:validate
+bun run arch:context:build --force
+bun run arch:context:validate
 ```
 
 If validation fails with `artifact not found`:
 
 ```bash
-bun run context:build
+bun run arch:context:build
 ```
 
 ## Related Scripts

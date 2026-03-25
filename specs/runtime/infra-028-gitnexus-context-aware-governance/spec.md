@@ -83,7 +83,7 @@ As a developer committing code, I want the pre-commit hook to resolve which file
 
 **Why this priority**: Every commit touches this path. Eliminating false positives is the highest-value outcome of this stage.
 
-**Independent Test**: Run `bun run context:changed` after staging one file. Verify the output lists only that file (and its dependents). Then trigger the pre-commit hook and confirm the governance check completes in under 10 seconds.
+**Independent Test**: Run `bun run arch:context:changed` after staging one file. Verify the output lists only that file (and its dependents). Then trigger the pre-commit hook and confirm the governance check completes in under 10 seconds.
 
 **Acceptance Scenarios:**
 
@@ -99,7 +99,7 @@ As a CI pipeline, I want `context:validate` to run before any guard in the gover
 
 **Why this priority**: A corrupt context artifact causes silent false-negatives in guards — undetected architecture violations.
 
-**Independent Test**: Run `bun run context:build` then manually corrupt `docs/ai/context/gitnexus-context.json`. Run `bun run context:validate`. Confirm it exits with code `1` and describes the schema violation.
+**Independent Test**: Run `bun run arch:context:build` then manually corrupt `docs/ai/context/gitnexus-context.json`. Run `bun run arch:context:validate`. Confirm it exits with code `1` and describes the schema violation.
 
 **Acceptance Scenarios:**
 
@@ -115,7 +115,7 @@ As an infrastructure engineer, I want `context:impact` to output a list of modul
 
 **Why this priority**: Impact analysis prevents undetected breakage in downstream modules; important but not blocking for daily commits.
 
-**Independent Test**: Modify `packages/types/src/index.ts` (highly imported). Run `bun run context:impact`. Verify the output includes all packages that import from `@zidney/types`.
+**Independent Test**: Modify `packages/types/src/index.ts` (highly imported). Run `bun run arch:context:impact`. Verify the output includes all packages that import from `@zidney/types`.
 
 **Acceptance Scenarios:**
 
@@ -259,8 +259,8 @@ The `context` domain must be treated as a new canonical domain. The script-syste
 `scripts/governance/gate.ts` MUST be updated to prepend two new steps before the existing guards:
 
 ```
-Step 0: context:build      — Generate fresh context artifact
-Step 1: context:validate   — Validate context artifact integrity
+Step 0: arch:context:build      — Generate fresh context artifact
+Step 1: arch:context:validate   — Validate context artifact integrity
 Step 2: arch:guard         (existing)
 Step 3: validate:types     (existing)
 Step 4: validate:runtime:scripts (existing)
@@ -278,7 +278,7 @@ If `context:build` or `context:validate` fail, the gate MUST exit immediately wi
 `governance:gate:changed` (defined in INFRA-27 as `arch:guard:changed && validate:runtime:scripts`) MUST be updated to prepend `context:changed` as an additional first step:
 
 ```
-Step 0: context:changed    — Resolve changed file scope
+Step 0: arch:context:changed    — Resolve changed file scope
 Step 1: arch:guard:changed (existing, reads context output)
 Step 2: validate:runtime:scripts (existing)
 ```
@@ -289,7 +289,7 @@ The changed-files variant retains fail-fast semantics (short-circuit on first fa
 
 ### FR-010 — Pre-Commit Integration
 
-`.husky/pre-commit` MUST be extended to run `bun run context:changed` before the `governance:gate:changed` invocation. The output of `context:changed` (a list of staged files) needs no explicit wiring — `governance:gate:changed` and `arch:guard:changed` read the shared context artifact file.
+`.husky/pre-commit` MUST be extended to run `bun run arch:context:changed` before the `governance:gate:changed` invocation. The output of `context:changed` (a list of staged files) needs no explicit wiring — `governance:gate:changed` and `arch:guard:changed` read the shared context artifact file.
 
 ---
 
@@ -299,10 +299,10 @@ The changed-files variant retains fail-fast semantics (short-circuit on first fa
 
 ```yaml
 - name: Build Context
-  run: bun run context:build
+  run: bun run arch:context:build
 
 - name: Validate Context
-  run: bun run context:validate
+  run: bun run arch:context:validate
 ```
 
 These two steps replace any ad-hoc `arch:gitnexus:context` call that may already exist in the workflow. If no such call exists today, the steps are net-new additions.
@@ -313,7 +313,7 @@ These two steps replace any ad-hoc `arch:gitnexus:context` call that may already
 
 The orchestrator agent definition (`docs/AGENT_GOVERNANCE.md` or relevant orchestrator file) MUST be updated such that:
 
-- **Step 5 (Analyze)**: runs `bun run context:build` to generate a fresh artifact before skill invocation.
+- **Step 5 (Analyze)**: runs `bun run arch:context:build` to generate a fresh artifact before skill invocation.
 - **Step 6 (Implement — Pre-Execution)**: `governance:gate:changed` implicitly uses the step-5 artifact via `context:changed`.
 - **Step 7 (Closure — Final Gate)**: `governance:gate` implicitly validates the artifact via `context:validate`.
 
@@ -420,15 +420,15 @@ Any CLI arguments passed to `context:*` scripts MUST be validated against an all
 | AC-01 | `scripts/context/` directory exists with all four `.ts` files                                         | `ls scripts/context/`                                  |
 | AC-02 | All four `context:*` scripts are registered in root `package.json`                                    | `grep context: package.json`                           |
 | AC-03 | All four scripts include 5-field metadata headers                                                     | `bun run validate:runtime:scripts` passes              |
-| AC-04 | `bun run context:build` exits `0` and writes `docs/ai/context/gitnexus-context.json`                  | Manual run + file check                                |
-| AC-05 | `bun run context:changed` exits `0` and outputs file list                                             | Manual run on a dirty tree                             |
-| AC-06 | `bun run context:impact` exits `0` and lists affected modules                                         | Manual run after a shared-package change               |
-| AC-07 | `bun run context:validate` exits `0` after a fresh `context:build`                                    | Sequence test                                          |
-| AC-08 | `bun run context:validate` exits `1` on stale artifact (> 24h old)                                    | Timestamp mutation test                                |
+| AC-04 | `bun run arch:context:build` exits `0` and writes `docs/ai/context/gitnexus-context.json`             | Manual run + file check                                |
+| AC-05 | `bun run arch:context:changed` exits `0` and outputs file list                                        | Manual run on a dirty tree                             |
+| AC-06 | `bun run arch:context:impact` exits `0` and lists affected modules                                    | Manual run after a shared-package change               |
+| AC-07 | `bun run arch:context:validate` exits `0` after a fresh `context:build`                               | Sequence test                                          |
+| AC-08 | `bun run arch:context:validate` exits `1` on stale artifact (> 24h old)                               | Timestamp mutation test                                |
 | AC-09 | `governance:gate` runs `context:build` + `context:validate` as first two steps                        | Inspect `scripts/governance/gate.ts`                   |
 | AC-10 | `governance:gate` fails fast on `context:validate` failure (does not run subsequent guards)           | Unit test in `scripts/governance/`                     |
 | AC-11 | `governance:gate:changed` runs `context:changed` as step 0                                            | Inspect `package.json` or `gate.ts`                    |
-| AC-12 | `.husky/pre-commit` includes `bun run context:changed`                                                | `cat .husky/pre-commit`                                |
+| AC-12 | `.husky/pre-commit` includes `bun run arch:context:changed`                                           | `cat .husky/pre-commit`                                |
 | AC-13 | `.github/workflows/architecture-governance.yml` includes `context:build` and `context:validate` steps | YAML inspection                                        |
 | AC-14 | Orchestrator agent spec updated with `context:build` at Step 5                                        | Inspect orchestrator definition file                   |
 | AC-15 | `arch:gitnexus:context` still works after the stage is complete                                       | `bun run arch:gitnexus:context -- --dry-run` exits `0` |

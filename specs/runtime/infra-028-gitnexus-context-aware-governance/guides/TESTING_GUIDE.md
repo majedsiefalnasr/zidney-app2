@@ -31,7 +31,7 @@ bun install
 ## 1 — Run Unit Tests
 
 ```bash
-bun run vitest run scripts/context/__tests__/validate.test.ts
+bun run bun run test scripts/context/__tests__/validate.test.ts scripts/context/__tests__/validate.test.ts
 ```
 
 **Expected output:**
@@ -63,10 +63,10 @@ The real artifact must be fresh. If it's stale, build first:
 
 ```bash
 # Build a fresh artifact
-bun run context:build
+bun run arch:context:build
 
 # Validate it
-bun run context:validate
+bun run arch:context:validate
 ```
 
 **Expected output (success):**
@@ -78,7 +78,7 @@ bun run context:validate
 **Expected output (stale artifact):**
 
 ```
-[context:validate] FAIL: stale artifact — age: 30.5h (max: 24h) — run 'bun run context:build --force'
+[context:validate] FAIL: stale artifact — age: 30.5h (max: 24h) — run 'bun run arch:context:build --force'
 ```
 
 ---
@@ -87,13 +87,13 @@ bun run context:validate
 
 ```bash
 # Dry run (prints what would be written, no file change)
-bun run context:build -- --dry-run
+bun run arch:context:build -- --dry-run
 
 # Force rebuild (ignores freshness)
-bun run context:build -- --force
+bun run arch:context:build -- --force
 
 # Changed-files-only scan
-bun run context:build
+bun run arch:context:build
 ```
 
 **Expected output:**
@@ -119,7 +119,7 @@ Stage some files first:
 git add scripts/context/validate.ts
 
 # Run changed context script
-bun run context:changed
+bun run arch:context:changed
 ```
 
 **Expected output:**
@@ -150,7 +150,7 @@ Expected JSON shape:
 After running `context:changed` (step 4):
 
 ```bash
-bun run context:impact
+bun run arch:context:impact
 ```
 
 **Expected output:** Lists impacted risk modules whose `affectedBy` intersects the changed files.
@@ -158,7 +158,7 @@ bun run context:impact
 With `--json` flag prints raw JSON array to stdout:
 
 ```bash
-bun run context:impact -- --json
+bun run arch:context:impact -- --json
 ```
 
 ---
@@ -177,8 +177,8 @@ git add scripts/context/validate.ts
 **Expected behavior:**
 
 1. TypeScript incremental check runs
-2. `bun run context:changed` runs → outputs resolved changed files
-3. `bun run context:validate` runs → outputs OK or FAIL
+2. `bun run arch:context:changed` runs → outputs resolved changed files
+3. `bun run arch:context:validate` runs → outputs OK or FAIL
 4. Architecture guard runs
 5. Hook completes (exit 0 if artifact is fresh)
 
@@ -223,7 +223,7 @@ grep -A3 'Build and Validate GitNexus Context' .github/workflows/architecture-go
 
 ```
 - name: Build and Validate GitNexus Context
-  run: bun run context:build && bun run context:validate
+  run: bun run arch:context:build && bun run arch:context:validate
 ```
 
 ---

@@ -64,7 +64,7 @@ export function checkGitNexusHealth(): { healthy: boolean; status: string };
 ```typescript
 const BRAIN_PATH = resolve(process.cwd(), "docs/ai/context/ai-architecture-brain.json");
 const DEFAULT_OUTPUT = resolve(process.cwd(), "docs/ai/context/gitnexus-context.json");
-const SCHEMA_VERSION = "1.0.0"; // ← const, NOT export const — context:validate MUST read from schema file
+const SCHEMA_VERSION = "1.0.0"; // ← const, NOT export const — arch:context:validate MUST read from schema file
 ```
 
 ---
@@ -123,7 +123,7 @@ the existing chain.
 **Plan:** Change to:
 
 ```json
-"governance:gate:changed": "bun run context:changed && bun run arch:guard:changed"
+"governance:gate:changed": "bun run arch:context:changed && bun run arch:guard:changed"
 ```
 
 ---
@@ -144,8 +144,8 @@ the existing chain.
 
 ```sh
 echo "Running GitNexus context resolution…"
-bun run context:changed
-bun run context:validate
+bun run arch:context:changed
+bun run arch:context:validate
 ```
 
 ---
@@ -169,7 +169,7 @@ bun run context:validate
 
 ```yaml
 - name: Build and Validate GitNexus Context
-  run: bun run context:build && bun run context:validate
+  run: bun run arch:context:build && bun run arch:context:validate
 ```
 
 ---

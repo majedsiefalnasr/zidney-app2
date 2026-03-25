@@ -115,7 +115,7 @@ See [`specs/runtime/infra-020-ai-execution-orchestration-engine/guides/TESTING_G
 Quick start:
 
 ```bash
-bun vitest run --project ai-engine   # 64/64 should pass
+bun run test --project ai-engine   # 64/64 should pass
 bun scripts/infra-audit.ts           # refresh brain
 bun run ai:validate                  # exits 0 if governance passes
 ```

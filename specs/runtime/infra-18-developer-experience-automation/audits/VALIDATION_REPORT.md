@@ -25,16 +25,16 @@ idempotency/concurrency validation).
 
 ## Validation Matrix
 
-| Validation Check                                   | Required | Command                                         | Result | Notes                                |
-| -------------------------------------------------- | -------- | ----------------------------------------------- | ------ | ------------------------------------ |
-| Unit tests (impacted business logic)               | Yes      | `bun vitest run tests/unit/dev-scripts/`        | ✅     | 81/81 passed                         |
-| Integration tests (impacted flows)                 | Yes      | `bun vitest run tests/integration/dev-scripts/` | ✅     | Smoke test file created (runs in CI) |
-| Snapshot tests (grading behavior)                  | N/A      | —                                               | N/A    | No grading logic modified            |
-| Lint                                               | Yes      | `bun lint`                                      | ✅     | 0 errors, 0 warnings                 |
-| Type check                                         | Yes      | `bun typecheck:src`                             | ✅     | 0 errors                             |
-| Migration validation (schema changed)              | N/A      | —                                               | N/A    | No database schema changes           |
-| Idempotency replay validation (critical endpoints) | N/A      | —                                               | N/A    | No API endpoints modified            |
-| Concurrency validation (critical flows)            | N/A      | —                                               | N/A    | No concurrent request handling       |
+| Validation Check                                   | Required | Command                                       | Result | Notes                                |
+| -------------------------------------------------- | -------- | --------------------------------------------- | ------ | ------------------------------------ |
+| Unit tests (impacted business logic)               | Yes      | `bun run test tests/unit/dev-scripts/`        | ✅     | 81/81 passed                         |
+| Integration tests (impacted flows)                 | Yes      | `bun run test tests/integration/dev-scripts/` | ✅     | Smoke test file created (runs in CI) |
+| Snapshot tests (grading behavior)                  | N/A      | —                                             | N/A    | No grading logic modified            |
+| Lint                                               | Yes      | `bun lint`                                    | ✅     | 0 errors, 0 warnings                 |
+| Type check                                         | Yes      | `bun typecheck:src`                           | ✅     | 0 errors                             |
+| Migration validation (schema changed)              | N/A      | —                                             | N/A    | No database schema changes           |
+| Idempotency replay validation (critical endpoints) | N/A      | —                                             | N/A    | No API endpoints modified            |
+| Concurrency validation (critical flows)            | N/A      | —                                             | N/A    | No concurrent request handling       |
 
 ---
 
@@ -43,7 +43,7 @@ idempotency/concurrency validation).
 ### Unit Tests
 
 ```
-bun vitest run tests/unit/dev-scripts/ --reporter=verbose
+bun run test tests/unit/dev-scripts/ --reporter=verbose
 
  Test Files  4 passed (4)
       Tests  81 passed (81)

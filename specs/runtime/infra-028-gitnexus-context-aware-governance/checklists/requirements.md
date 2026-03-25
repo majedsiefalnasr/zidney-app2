@@ -40,7 +40,7 @@
 - [ ] CHK018 - Is the 5-minute freshness threshold used in FR-003 (cache hit window) consistent with and differentiated from the 24-hour threshold in FR-005 (staleness gate)? [Consistency, Spec §FR-003, §FR-005]
 - [ ] CHK019 - Is the requirement that `context:validate` is a superset of `arch:validate:gitnexus` (adds freshness) and must NOT replace or alias it sufficiently explicit? [Clarity, Spec §FR-005]
 - [ ] CHK020 - Is the POSIX atomic rename behavior (write to `.tmp` then rename) specified with enough precision to cover the cross-device failure edge case documented in the Risk table? [Clarity, Spec §FR-014, §Risk Assessment]
-- [ ] CHK021 - Does the spec define whether `.husky/pre-commit` also requires `bun run context:validate` — FR-010 only names `context:changed`, yet full-gate integrity implies validate should also run pre-commit? [Clarity, Gap, Spec §FR-010]
+- [ ] CHK021 - Does the spec define whether `.husky/pre-commit` also requires `bun run arch:context:validate` — FR-010 only names `context:changed`, yet full-gate integrity implies validate should also run pre-commit? [Clarity, Gap, Spec §FR-010]
 
 ---
 
@@ -109,7 +109,7 @@
 
 ## Infrastructure Integration (FR-010, FR-011, FR-012)
 
-- [ ] CHK050 - Is `.husky/pre-commit` specified to include `bun run context:changed` before `governance:gate:changed`, with the note that the shared artifact wires the two steps implicitly? [Completeness, Spec §FR-010, §AC-12]
+- [ ] CHK050 - Is `.husky/pre-commit` specified to include `bun run arch:context:changed` before `governance:gate:changed`, with the note that the shared artifact wires the two steps implicitly? [Completeness, Spec §FR-010, §AC-12]
 - [ ] CHK051 - Are the two new CI steps (`Build Context` + `Validate Context`) specified as positioned **before** the Unified Governance Gate step in `architecture-governance.yml`? [Completeness, Spec §FR-011, §AC-13]
 - [ ] CHK052 - Is it specified whether any existing `arch:gitnexus:context` call in the CI workflow should be removed or coexist with the new `context:build` step? [Clarity, Spec §FR-011]
 - [ ] CHK053 - Is the orchestrator agent definition update specified: `context:build` at Step 5 with diagnostic surface, and `governance:gate:changed` / `governance:gate` implicitly consuming the artifact at Steps 6 and 7? [Completeness, Spec §FR-012, §AC-14]

@@ -12,7 +12,7 @@
 ### Unit Tests
 
 ```
-bun run vitest run scripts/context/__tests__/validate.test.ts
+bun run test scripts/context/__tests__/validate.test.ts
 
  ✓ |context-scripts| scripts/context/__tests__/validate.test.ts  (16 tests) 51ms
 
@@ -45,7 +45,7 @@ bun tsc --noEmit --skipLibCheck
 
 ### Lint / Biome
 
-Not run independently (covered by pre-commit hook via `bun run lint:check`).
+Not run independently (covered by pre-commit hook via `bun run lint`).
 
 ### Migration Validation
 

@@ -1,4 +1,4 @@
-# context:build
+# arch:context:build
 
 **Script:** `context:build`  
 **File:** `scripts/context/build.ts`  
@@ -17,16 +17,16 @@ Skips regeneration when the artifact is ≤24 hours old unless `--force` is supp
 
 ```bash
 # Standard rebuild (skips if artifact is fresh)
-bun run context:build
+bun run arch:context:build
 
 # Force rebuild regardless of artifact age
-bun run context:build -- --force
+bun run arch:context:build -- --force
 
 # All-workspace analysis (not just changed files)
-bun run context:build -- --all
+bun run arch:context:build -- --all
 
 # Dry-run: print context JSON to stdout without writing
-bun run context:build -- --dry-run
+bun run arch:context:build -- --dry-run
 ```
 
 ## Options

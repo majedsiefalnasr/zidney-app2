@@ -14,7 +14,7 @@
  *   5. schemaVersion matches schema.version
  *   6. generatedAt is < maxAgeHours old (default: 24h)
  *
- * @usage bun run context:validate
+ * @usage bun run arch:context:validate
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -43,7 +43,7 @@ export function validateArtifact(options: ValidateOptions = {}): string {
 
   // 1. Artifact file exists
   if (!existsSync(artifactPath)) {
-    throw new Error(`artifact not found — run 'bun run context:build' first: ${artifactPath}`)
+    throw new Error(`artifact not found — run 'bun run arch:context:build' first: ${artifactPath}`)
   }
 
   // 2. Valid JSON
@@ -99,7 +99,7 @@ export function validateArtifact(options: ValidateOptions = {}): string {
   if (ageHours >= maxAgeHours) {
     const ageDisplay = ageHours.toFixed(1)
     throw new Error(
-      `stale artifact — age: ${ageDisplay}h (max: ${maxAgeHours}h) — run 'bun run context:build --force'`
+      `stale artifact — age: ${ageDisplay}h (max: ${maxAgeHours}h) — run 'bun run arch:context:build --force'`
     )
   }
 

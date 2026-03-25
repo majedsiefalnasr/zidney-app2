@@ -71,13 +71,13 @@ None. All 17 tasks completed. No deferrals.
 
 ## Validation Gate Evidence
 
-| Check             | Command                                        | Result                    | Exit Code |
-| ----------------- | ---------------------------------------------- | ------------------------- | --------- |
-| Runtime status    | `bun ai-runtime:status`                        | HEALTHY (5/5 checks pass) | 0         |
-| Lint              | `bun lint` (1749 files)                        | No violations             | 0         |
-| TypeScript        | `bun typecheck`                                | Zero errors               | 0         |
-| Unit tests        | `bun vitest run tests/unit/ai-runtime/`        | 29/29 pass                | 0         |
-| Integration tests | `bun vitest run tests/integration/ai-runtime/` | 6/6 pass                  | 0         |
+| Check             | Command                                      | Result                    | Exit Code |
+| ----------------- | -------------------------------------------- | ------------------------- | --------- |
+| Runtime status    | `bun ai-runtime:status`                      | HEALTHY (5/5 checks pass) | 0         |
+| Lint              | `bun lint` (1749 files)                      | No violations             | 0         |
+| TypeScript        | `bun typecheck`                              | Zero errors               | 0         |
+| Unit tests        | `bun run test tests/unit/ai-runtime/`        | 29/29 pass                | 0         |
+| Integration tests | `bun run test tests/integration/ai-runtime/` | 6/6 pass                  | 0         |
 
 ---
 

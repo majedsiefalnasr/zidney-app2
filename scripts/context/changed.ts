@@ -9,7 +9,7 @@
  *   area (no changed files) is a valid state — the artifact is written with an empty
  *   changedFiles array rather than exiting non-zero.
  *
- * @usage bun run context:changed
+ * @usage bun run arch:context:changed
  */
 
 import { execFileSync } from 'node:child_process'

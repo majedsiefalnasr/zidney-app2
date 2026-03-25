@@ -54,7 +54,7 @@ These scripts close both gaps while remaining safe and idempotent.
 
 ```bash
 # All automated tests (81 unit + integration)
-bun vitest run tests/unit/dev-scripts/ tests/integration/dev-scripts/
+bun run test tests/unit/dev-scripts/ tests/integration/dev-scripts/
 
 # Individual scripts
 bun repo:doctor     # health check

@@ -22,7 +22,7 @@ Before running any tests, ensure:
 Run the full `ai-engine` test suite:
 
 ```bash
-bun vitest run --project ai-engine
+bun run test --project ai-engine
 ```
 
 Expected result: **64 tests pass, 0 fail**
@@ -30,7 +30,7 @@ Expected result: **64 tests pass, 0 fail**
 Run a single test file:
 
 ```bash
-bun vitest run scripts/ai-engine/__tests__/run-task.test.ts
+bun run test scripts/ai-engine/__tests__/run-task.test.ts
 ```
 
 Test files and what they cover:
@@ -56,7 +56,7 @@ The integration test spawns a real `bun ai:validate` subprocess. It requires the
 toolchain (`arch:guard`, `type-safety-guard`, `arch:health`) to be available.
 
 ```bash
-bun vitest run tests/integration/ai-engine/validate-execution.integration.test.ts
+bun run test tests/integration/ai-engine/validate-execution.integration.test.ts
 ```
 
 > **Note**: This test is designed for CI where the governance toolchain is available. It may

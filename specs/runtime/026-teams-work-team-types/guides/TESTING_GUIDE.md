@@ -24,13 +24,13 @@ All routes require:
 
 ```bash
 # Unit tests only (domain service)
-bun vitest run packages/domain-core/src/teams/__tests__/teams.service.test.ts
+bun run test packages/domain-core/src/teams/__tests__/teams.service.test.ts
 
 # Integration tests only (API route handlers)
-bun vitest run apps/api/src/routes/backoffice/teams/__tests__/teams.integration.test.ts
+bun run test apps/api/src/routes/backoffice/teams/__tests__/teams.integration.test.ts
 
 # Both together
-bun vitest run \
+bun run test \
   packages/domain-core/src/teams/__tests__/teams.service.test.ts \
   apps/api/src/routes/backoffice/teams/__tests__/teams.integration.test.ts
 ```

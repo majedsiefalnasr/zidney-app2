@@ -1,4 +1,4 @@
-# context:impact
+# arch:context:impact
 
 **Script:** `context:impact`  
 **File:** `scripts/context/impact.ts`  
@@ -21,10 +21,10 @@ printed in two formats: plain module names (one per line, default) or full JSON.
 
 ```bash
 # Default — one affected module name per line (sorted alphabetically)
-bun run context:impact
+bun run arch:context:impact
 
 # JSON — full riskIndicators array on stdout
-bun run context:impact -- --json
+bun run arch:context:impact -- --json
 ```
 
 ## Options
@@ -64,7 +64,7 @@ bun run context:impact -- --json
 
 ## Prerequisites
 
-- `docs/ai/context/gitnexus-context.json` must exist (run `bun run context:build` first)
+- `docs/ai/context/gitnexus-context.json` must exist (run `bun run arch:context:build` first)
 - `docs/ai/context/context-changed.json` is optional — falls back to embedded `changedFiles`
 
 ## Related Scripts

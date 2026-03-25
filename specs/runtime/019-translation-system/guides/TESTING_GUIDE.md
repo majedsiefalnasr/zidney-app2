@@ -96,10 +96,10 @@ bun run dev:worker
 
 ```bash
 # Unit tests (all translation unit tests — no DB required)
-bun vitest run tests/unit/translation/
+bun run test tests/unit/translation/
 
 # Integration tests (requires running DB + Redis)
-bun vitest run tests/integration/translation/
+bun run test tests/integration/translation/
 
 # Full unit suite
 bun test:unit
@@ -317,7 +317,7 @@ bun run db:console --workspace <workspace_slug>
 
 ## Sign-Off Checklist
 
-- [ ] All 72 unit tests pass (`bun vitest run tests/unit/translation/`)
+- [ ] All 72 unit tests pass (`bun run test tests/unit/translation/`)
 - [ ] Integration test scenarios pass (DB environment)
 - [ ] Manual scenarios 1–5 pass
 - [ ] Negative cases return correct error contract

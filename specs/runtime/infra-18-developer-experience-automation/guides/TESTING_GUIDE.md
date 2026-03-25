@@ -29,7 +29,7 @@ git status         # should be on spec/infra-18-developer-experience-automation
 ### Unit Tests (81 tests)
 
 ```bash
-bun vitest run tests/unit/dev-scripts/ --reporter=verbose
+bun run test tests/unit/dev-scripts/ --reporter=verbose
 ```
 
 Expected output:
@@ -47,7 +47,7 @@ Tests      81 passed (81)
 ### Integration Test (CLI Smoke Test)
 
 ```bash
-bun vitest run tests/integration/dev-scripts/ --reporter=verbose
+bun run test tests/integration/dev-scripts/ --reporter=verbose
 ```
 
 Expected output: smoke tests for `repo:doctor` printing valid output with 7+ check
