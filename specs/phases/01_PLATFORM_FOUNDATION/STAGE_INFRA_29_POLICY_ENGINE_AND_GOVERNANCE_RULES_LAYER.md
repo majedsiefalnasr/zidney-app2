@@ -13,20 +13,35 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-25T00:00:00Z
+Last Updated: 2026-03-25T00:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Policy engine runtime (`scripts/policy-engine/`)
+- Rule system (PolicyRule, PolicyContext, PolicyResult types)
+- Rule registry (central authority for all governance rules)
+- GitNexus context integration with graceful degradation
+- Adapter layer: architecture-guard, type-safety-guard, script-governance, Trivy
+- CLI: `bun run policy:check --full / --changed`
+- CI + orchestrator integration
+- Script system unification (T010–T016)
+- Husky optimization (<2s pre-commit)
+
+Deferred Scope:
+
+- Removing/deprecating legacy tools (adapter-first; removal is future stage)
+- Web UI / dashboard for policy results
+- External policy systems (OPA, etc.)
+- Automatic violation remediation
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. 43 FRs, 20 NFRs, 6 user stories, 8 success criteria. No clarifications required. Clarification step pending.
 
 ---
 
