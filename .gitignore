@@ -83,3 +83,6 @@ plans/
 # AI engine runtime logs (generated output files — not for version control)
 docs/architecture/health/ai-execution-logs/*.json
 docs/architecture/health/ai-plans/*.md
+
+# Governance report (generated artifact — not for version control)
+docs/governance/governance-report.md

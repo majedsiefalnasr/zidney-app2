@@ -1,8 +1,88 @@
 # STAGE_INFRA_27_UNIFIED_GOVERNANCE_GATE_SYSTEM
 
-## Status
+## Stage Status
 
-DRAFT
+Status: PRODUCTION READY
+Step: closure
+Risk Level: LOW
+Closure Date: 2026-03-25
+
+Tasks: 16 / 16 completed
+
+Scope Delivered: ✅
+
+- scripts/governance/gate.ts — 6-guard sequential report-all runner
+- scripts/governance/gate-ci.ts — CI variant with GHA ::group::/::error:: annotations
+- scripts/governance/report.ts — 3-guard informational report generator (always exits 0)
+- scripts/governance/**tests**/gate.test.ts — 9 unit tests (9/9 pass)
+- package.json: 5 new scripts (governance:gate, governance:gate:ci, governance:gate:changed, governance:report, ai-context:validate)
+- .husky/pre-commit: governance:gate:changed block after Trivy secret scan
+- .github/workflows/architecture-governance.yml: step 18 (Unified Governance Gate)
+- .gitignore: docs/governance/governance-report.md excluded
+- .agents/agents/orchestrator.agent.md: §6.1B + §7.0 documented
+- scripts/generate/script-docs.ts + scripts/validate/script-naming.ts: 'governance' added to ALLOWED_DOMAINS
+- docs/scripts/SCRIPT_REGISTRY.md: regenerated (36 scripts)
+
+Deferred Scope:
+
+- Runtime monitoring (explicitly out of scope)
+- External security tooling beyond Trivy (out of scope)
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced (N/A — no DB access)
+- ADR-0002 Snapshot immutability enforced (N/A — no attempt/snapshot changes)
+- ADR-0006 Server-authoritative time enforced (N/A — no time-sensitive logic)
+- ADR-0007 Version compatibility enforced (N/A — no version-gated logic)
+- ADR-0008 Semantic versioning aligned — scripts follow domain:action[:scope] naming
+- Architecture Guardian (Plan): PASS
+- API Designer (Plan): PASS
+- Structural Drift Audit: PASS
+- Security Auditor: PASS
+- Performance Optimizer: PASS
+- QA Engineer: PASS
+- Code Reviewer: PASS
+- All 9 unit tests: PASS (56.63s)
+- lint (biome): PASS
+- typecheck: PASS
+- validate:script:infrastructure: PASS
+- validate:script:usage: PASS
+- governance:gate (6 guards): ALL PASS
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new stage.
+
+---
+
+## Scope Reference
+
+Scope Planned:
+
+- Unified governance gate (`governance:gate`) composing 6 guards in report-all mode with canonical script names
+- CI mode variant (`governance:gate:ci`) with GitHub Actions annotation support
+- Changed-files scoped variant (`governance:gate:changed`) using fail-fast `&&` semantics (intentional)
+- Report generation command (`governance:report`) — always exits 0, audit tool only
+- `ai-context:validate` alias created in INFRA-27 (chaining `validate:ai-context-fresh && validate:ai-context-schemas`)
+- Pre-commit integration after Trivy secret scan
+- CI integration as step 18 after step 17 (`Verify Script Registry Generation`) in `architecture-governance.yml`
+- Orchestrator Step 6 / Step 7 gates documented
+- `governance` registered as 10th canonical domain in `script-system-governance/SKILL.md`
+- `docs/governance/governance-report.md` added to `.gitignore`
+
+Deferred Scope:
+
+- Runtime monitoring (explicitly out of scope)
+- External security tooling beyond Trivy (out of scope)
+
+Constitutional Compliance:
+
+- Technical plan compliant — task generation authorized
+- Architecture Guardian: PASS
+- API Designer: PASS
+
+Notes:
+Technical plan complete. Guardian validation passed (2 remediation rounds). Task breakdown in progress.
 
 ---
 

@@ -652,6 +652,7 @@ Performed once at session start (new or resume), before any workflow step execut
 For each skill in the loaded skills list, verify the skill directory exists and contains a valid `SKILL.md`:
 
 ```bash
+# Use fd if available for faster discovery, fall back to shell test
 for skill in architecture-intelligence architecture-self-healing analysis-retry-engine \
              git-governance mcp-routing package-manager-governance precommit-diagnostics \
              rtk-execution-layer subagent-parallelization terminal-safety; do
@@ -671,10 +672,299 @@ STOP the session. Do not proceed to intake or workflow steps until all required 
 
 ---
 
+# Terminal Tool Capability Layer
+
+> **Why this exists:** The `ai-terminal` and `rtk-execution-layer` skills may fail to load in some environments. This section bakes tool detection and RTK execution policy directly into the orchestrator so every command that depends on a specific tool checks for it first and uses the best available fallback — regardless of whether the skills loaded.
+>
+> RTK (Rust Token Killer) is the **default file inspection tool** in this repository. It must always be preferred over `cat`, `head`, or raw `rg` output when inspecting large files for AI reasoning.
+
+---
+
+## RTK Installation Reference
+
+If RTK is not installed, the orchestrator MUST display installation instructions before proceeding with any large-file inspection:
+
+```bash
+# Homebrew (recommended — macOS/Linux)
+brew install rtk
+
+# Quick install (Linux/macOS)
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+
+# Cargo (Rust toolchain required)
+cargo install --git https://github.com/rtk-ai/rtk
+
+# Verify
+rtk --version
+rtk gain
+```
+
+---
+
+## Command Preference Hierarchy
+
+The orchestrator MUST follow this preference order for every terminal operation. These are not suggestions — they are execution policy.
+
+| Operation | Preferred | Fallback |
+|---|---|---|
+| Large file inspection | `rtk summarize` | `head -100 <file>` with warning |
+| Search | `rg` | `grep -r` |
+| File discovery | `fd` | `find` |
+| JSON inspection | `jq` | `python3 -c` / `node -e` |
+| Token measurement | `rtk gain` | N/A — informational only |
+| Output trimming | `rtk trim` | N/A — skip if unavailable |
+| Code transformation | `ast-grep` (`sg`) | `sed` |
+| Formatting | `biome` | `prettier` |
+
+**Never use `cat` on files in `apps/`, `packages/`, or `docs/ai/context/` without checking line count first.** These files are large and will flood the context window.
+
+---
+
+## Tool Detection Functions
+
+The orchestrator MUST treat these as named functions, checked once per session and cached. Do NOT re-run `command -v` on every use.
+
+```bash
+# Token-efficient file inspection — ALWAYS preferred for large files
+has_rtk()      { command -v rtk      >/dev/null 2>&1; }
+
+# JSON inspection
+has_jq()       { command -v jq       >/dev/null 2>&1; }
+
+# Search
+has_rg()       { command -v rg       >/dev/null 2>&1; }
+
+# File discovery
+has_fd()       { command -v fd       >/dev/null 2>&1; }
+
+# Architecture knowledge graph
+has_gitnexus() { command -v gitnexus >/dev/null 2>&1; }
+
+# Structural code search / replace
+has_astgrep()  { command -v sg       >/dev/null 2>&1; }
+```
+
+---
+
+## Session Capability Cache
+
+Run ALL detections once at session start (after Skill Health Check). Record results in session memory — do NOT re-run `command -v` again unless a cached tool fails unexpectedly.
+
+```bash
+TOOL_RTK=$(has_rtk      && echo "true" || echo "false")
+TOOL_JQ=$(has_jq        && echo "true" || echo "false")
+TOOL_RG=$(has_rg        && echo "true" || echo "false")
+TOOL_FD=$(has_fd        && echo "true" || echo "false")
+TOOL_GITNEXUS=$(has_gitnexus && echo "true" || echo "false")
+TOOL_ASTGREP=$(has_astgrep   && echo "true" || echo "false")
+```
+
+Display capability summary to the user (informational only — does not block workflow):
+
+```
+🔧 Terminal Tool Capability Cache
+  rtk:      <available ✅ | missing ⚠️>
+  jq:       <available ✅ | missing ⚠️>
+  rg:       <available ✅ | missing ⚠️>
+  fd:       <available ✅ | missing ⚠️>
+  gitnexus: <available ✅ | missing ⚠️>
+  ast-grep: <available ✅ | missing ⚠️>
+```
+
+**If RTK is missing**, display this warning immediately — before any file inspection step:
+
+```
+⚠️ RTK (Rust Token Killer) is not installed.
+   RTK is the default file inspection tool for this repository.
+   Without it, large file reads may flood the AI context window.
+   Install: brew install rtk
+         or: curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+   Fallback active — all large file reads will be truncated to 100 lines with a warning.
+```
+
+**If `jq` is missing**, warn:
+
+```
+⚠️ jq is not installed. JSON inspection will fall back to python3.
+   Install: brew install jq
+   Fallback active — workflow will continue.
+```
+
+Cache scope: **AI session only**. Never persisted to disk. If a cached tool fails unexpectedly mid-session → re-run its `command -v` detection and update the cache entry.
+
+---
+
+## Tool Fallback Rules
+
+These rules apply to **every command block** in this orchestrator file. When a command uses a specific tool, always use the corresponding guarded block.
+
+### rtk summarize → head with warning
+
+This is the most critical fallback in the entire orchestrator. RTK prevents context window flooding. Without it, large file reads must be aggressively truncated.
+
+```bash
+# Inspect a file for AI reasoning
+inspect_file() {
+  local file="$1"
+  if $TOOL_RTK; then
+    rtk summarize "$file"
+  else
+    local lines
+    lines=$(wc -l < "$file")
+    if [ "$lines" -gt 500 ]; then
+      echo "⚠️  RTK unavailable. File is ${lines} lines — showing first 100 lines only."
+      echo "    Install RTK for full context: brew install rtk"
+      head -100 "$file"
+    else
+      cat "$file"
+    fi
+  fi
+}
+```
+
+Use `inspect_file <path>` everywhere a file needs to be read for AI reasoning (architecture brain, plan.md, tasks.md, spec.md inspection).
+
+### rtk gain — token measurement (informational)
+
+```bash
+# Measure context token usage — run after any large output
+if $TOOL_RTK; then
+  rtk gain
+else
+  echo "ℹ️  RTK unavailable — skipping token measurement."
+fi
+```
+
+### rtk trim — output reduction before AI analysis
+
+```bash
+# Trim a large output before passing to AI
+if $TOOL_RTK; then
+  <command> | rtk trim
+else
+  <command> | head -200
+fi
+```
+
+### jq → python3 / node
+
+```bash
+# Read a JSON field
+read_json_field() {
+  local file="$1"
+  local field="$2"
+  if $TOOL_JQ; then
+    jq "$field" "$file"
+  else
+    python3 -c "import json; d=json.load(open('$file')); print(d.get('${field#.}', ''))" 2>/dev/null \
+      || node -e "const d=require('./$file'); console.log(d${field});" 2>/dev/null \
+      || echo "⚠️  Cannot read JSON — jq, python3, and node all unavailable."
+  fi
+}
+```
+
+### rg → grep
+
+```bash
+# Search for a pattern in scoped path
+search_pattern() {
+  local pattern="$1"
+  local path="$2"
+  if $TOOL_RG; then
+    rg "$pattern" "$path"
+  else
+    grep -r "$pattern" "$path"
+  fi
+}
+```
+
+Always scope searches — never run `rg <pattern>` or `grep -r <pattern>` on the repo root.
+
+### fd → find
+
+```bash
+# Discover files by name or extension
+discover_files() {
+  local pattern="$1"
+  local path="$2"
+  if $TOOL_FD; then
+    fd "$pattern" "$path"
+  else
+    find "$path" -name "$pattern"
+  fi
+}
+```
+
+### gitnexus → rg + ARCHITECTURE_MAP.json
+
+```bash
+# Architecture impact query
+query_architecture_impact() {
+  local symbol="$1"
+  if $TOOL_GITNEXUS; then
+    gitnexus impact "$symbol"
+  else
+    echo "⚠️  GitNexus unavailable — falling back to static search."
+    if $TOOL_RG; then
+      rg "$symbol" apps/ packages/
+    else
+      grep -r "$symbol" apps/ packages/
+    fi
+    echo "Also inspect: docs/architecture/intelligence/ARCHITECTURE_MAP.json for module rules."
+  fi
+}
+
+# Architecture context lookup
+query_architecture_context() {
+  local symbol="$1"
+  if $TOOL_GITNEXUS; then
+    gitnexus context "$symbol"
+  else
+    echo "⚠️  GitNexus unavailable — using ARCHITECTURE_MAP.json only."
+    if $TOOL_JQ; then
+      jq ".modules | to_entries[] | select(.key | contains(\"$symbol\"))" \
+        docs/architecture/intelligence/ARCHITECTURE_MAP.json
+    else
+      python3 -c "
+import json
+d = json.load(open('docs/architecture/intelligence/ARCHITECTURE_MAP.json'))
+for k, v in d.get('modules', {}).items():
+    if '$symbol' in k:
+        print(k, ':', json.dumps(v, indent=2))
+"
+    fi
+  fi
+}
+```
+
+### stat (file age check) — macOS vs Linux
+
+`stat` syntax differs between macOS and Linux. Always use the portable wrapper:
+
+```bash
+# Portable file modification time in epoch seconds
+get_mtime() {
+  if stat -f %m "$1" >/dev/null 2>&1; then
+    stat -f %m "$1"   # macOS
+  else
+    stat -c %Y "$1"   # Linux (GNU stat)
+  fi
+}
+
+# Usage
+now=$(date +%s)
+file_mtime=$(get_mtime "<file>")
+age_hours=$(( (now - file_mtime) / 3600 ))
+```
+
+---
+
 # Session Mode Detection
 
 Note:
 Operational behaviors such as Git validation, RTK rewriting, MCP routing, retry logic, and terminal safety are handled by skills. The orchestrator only coordinates workflow progression.
+
+> **Tool detection runs here.** Before presenting intake or detecting sessions, execute the Terminal Tool Capability Layer detection block to populate `TOOL_JQ`, `TOOL_RG`, `TOOL_FD`, `TOOL_RTK`, `TOOL_GITNEXUS`, `TOOL_ASTGREP`. All subsequent commands use these cached values — never re-detect mid-session.
 
 Before presenting intake, the orchestrator MUST determine whether this is a **new session** or a **resume session**.
 
@@ -683,7 +973,12 @@ Before presenting intake, the orchestrator MUST determine whether this is a **ne
 Check for existing workflow state:
 
 ```bash
-find specs/runtime/ -name ".workflow-state.json" | head -20
+# Use fd if available, fall back to find
+if $TOOL_FD; then
+  fd '.workflow-state.json' specs/runtime/ --max-depth 2
+else
+  find specs/runtime/ -name ".workflow-state.json" | head -20
+fi
 ```
 
 If one or more `.workflow-state.json` files are found that are NOT in `stage_status: PRODUCTION READY` or `stage_status: PRODUCTION HARDENED`, surface them as resumable sessions.
@@ -1330,14 +1625,16 @@ Verify that all required commit and report templates exist before any workflow s
 ```bash
 # Commit templates
 for tpl in commit-pre-step commit-specify commit-clarify commit-plan commit-tasks commit-analyze commit-implement commit-closure; do
-  [[ -f "specs/templates/commits/${tpl}.md" ]] || echo "MISSING: specs/templates/commits/${tpl}.md"
+  [ -f "specs/templates/commits/${tpl}.md" ] || echo "MISSING: specs/templates/commits/${tpl}.md"
 done
 
 # Report templates
 for tpl in clarify-report-template plan-report-template tasks-report-template analyze-report-template implement-report-template closure-report-template; do
-  [[ -f "specs/templates/reports/${tpl}.md" ]] || echo "MISSING: specs/templates/reports/${tpl}.md"
+  [ -f "specs/templates/reports/${tpl}.md" ] || echo "MISSING: specs/templates/reports/${tpl}.md"
 done
 ```
+
+> Note: Uses POSIX `[` not `[[` for sh compatibility. Works in all environments.
 
 If any template is missing → STOP Pre-Step with:
 
@@ -1353,11 +1650,17 @@ If any template is missing → STOP Pre-Step with:
 Verify that AI architecture intelligence artifacts are fresh (≤24 hours old):
 
 ```bash
-for artifact in docs/ai/context/ai-architecture-brain.json docs/ai/context/ai-module-map.json docs/ai/context/ai-dependency-graph.json; do
-  if [[ -f "$artifact" ]]; then
-    age=$(( ($(date +%s) - $(stat -f %m "$artifact")) / 3600 ))
-    if (( age > 24 )); then
-      echo "STALE: $artifact (${age}h old)"
+# Uses get_mtime() from Terminal Tool Capability Layer — portable macOS/Linux
+now=$(date +%s)
+
+for artifact in docs/ai/context/ai-architecture-brain.json \
+                docs/ai/context/ai-module-map.json \
+                docs/ai/context/ai-dependency-graph.json; do
+  if [ -f "$artifact" ]; then
+    file_mtime=$(get_mtime "$artifact")
+    age_hours=$(( (now - file_mtime) / 3600 ))
+    if [ "$age_hours" -gt 24 ]; then
+      echo "STALE: $artifact (${age_hours}h old)"
     fi
   else
     echo "MISSING: $artifact"
@@ -2209,6 +2512,18 @@ If any check fails:
 
 → STOP. Implementation forbidden until resolved.
 
+## 6.1B — Governance Gate (Changed-Files)
+
+Run before any implementation begins:
+
+```bash
+bun run governance:gate:changed
+```
+
+If exit code is `1` → **STOP.** Surface the full gate output. Blocked until all violations are resolved and the gate exits `0`.
+
+This gate runs `arch:guard:changed` + `validate:runtime:scripts` scoped to changed files. It is a hard blocking gate — implementation cannot proceed with unresolved violations.
+
 ## 6.2 — Check SpecKit Checklists Before Implementation
 
 **What speckit.implement does first:** It scans all files in `specs/runtime/<STAGE_DIR_NAME>/checklists/` and displays a pass/fail table. If any checklist has incomplete items, it will STOP and ask the user whether to proceed.
@@ -2745,6 +3060,16 @@ Known local limitations (not blocking):
 
 Only execute after explicit user approval at the Pre-Closure Review Gate.
 
+## 7.0 — Final Governance Gate
+
+Before writing any closure artifacts, run the full governance gate:
+
+```bash
+bun run governance:gate
+```
+
+If exit code is `1` → **STOP.** Surface the full gate output. The stage **cannot close with governance violations.** All 6 guards must pass before closure proceeds.
+
 ## 7.1 — Write Closure Report
 
 Load `specs/templates/reports/closure-report-template.md`.  
@@ -2919,26 +3244,42 @@ If ANY item is unchecked:
 Run the following validations against `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`:
 
 ```bash
-# Validate status fields
-jq '.stage_status' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
-# Expected: "PRODUCTION READY"
+STATE="specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json"
 
-jq '.current_step' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
-# Expected: "stage_production_ready"
+if $TOOL_JQ; then
+  # Validate status fields
+  jq '.stage_status' "$STATE"
+  # Expected: "PRODUCTION READY"
 
-# Validate task completion
-jq '.tasks_completed, .tasks_total' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
-# Expected: Both same (e.g., 30, 30)
+  jq '.current_step' "$STATE"
+  # Expected: "stage_production_ready"
 
-# Validate history completeness
-jq '.history | length' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
-# Expected: >= 9 (all events present)
+  # Validate task completion
+  jq '.tasks_completed, .tasks_total' "$STATE"
+  # Expected: Both same (e.g., 30, 30)
 
-jq '.history | map(.event)' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
-# Expected array contains (in order):
-# "branch_created", "specify_complete", "clarifications_locked",
-# "plan_complete", "tasks_complete", "drift_analysis_passed",
-# "stage_backend_closed", "pre_closure_review_approved", "stage_production_ready"
+  # Validate history completeness
+  jq '.history | length' "$STATE"
+  # Expected: >= 9 (all events present)
+
+  jq '.history | map(.event)' "$STATE"
+  # Expected array contains (in order):
+  # "branch_created", "specify_complete", "clarifications_locked",
+  # "plan_complete", "tasks_complete", "drift_analysis_passed",
+  # "stage_backend_closed", "pre_closure_review_approved", "stage_production_ready"
+else
+  # Fallback: python3
+  python3 -c "
+import json, sys
+d = json.load(open('$STATE'))
+print('stage_status:', d.get('stage_status'))
+print('current_step:', d.get('current_step'))
+print('tasks_completed:', d.get('tasks_completed'))
+print('tasks_total:', d.get('tasks_total'))
+print('history_length:', len(d.get('history', [])))
+print('events:', [e.get('event') for e in d.get('history', [])])
+"
+fi
 ```
 
 **Block Criteria (STOP if ANY true):**
@@ -2986,12 +3327,22 @@ git status --porcelain  # Verify clean
 Verify final state without staging:
 
 ```bash
-# Read directly from working tree (not from git)
-jq '.stage_status' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
-# Should show: "PRODUCTION READY"
+STATE="specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json"
 
-jq '.current_step' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json
-# Should show: "stage_production_ready"
+if $TOOL_JQ; then
+  jq '.stage_status' "$STATE"
+  # Should show: "PRODUCTION READY"
+
+  jq '.current_step' "$STATE"
+  # Should show: "stage_production_ready"
+else
+  python3 -c "
+import json
+d = json.load(open('$STATE'))
+print('stage_status:', d.get('stage_status'))
+print('current_step:', d.get('current_step'))
+"
+fi
 ```
 
 If both match expected values → Governance gate PASSED. Proceed to Step 7.9.
@@ -3111,10 +3462,13 @@ Read `.workflow-state.json` to determine:
 - `current_step` — the step that failed
 - `history` — find the last successful commit event
 
+Read state using the tool-checked JSON pattern (see Terminal Tool Capability Layer).
+
 Determine the rollback target commit:
 
 ```bash
 # Find the last successful step commit
+# git log uses --grep natively — no rg/grep needed here
 git log --oneline --grep="spec(<STAGE_DIR_NAME>)" | head -10
 ```
 

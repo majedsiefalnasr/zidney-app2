@@ -1,0 +1,494 @@
+{
+  "schema_version": "1.0.0",
+  "assessment_id": "2073d445b102241176a0a57b6ebabbd56a0b6eea",
+  "generated_at": "2026-03-25T11:56:09.458Z",
+  "overall": {
+    "score": 90,
+    "health_state": "EXCELLENT",
+    "threshold": {
+      "policy_id": "default-health-threshold-v1",
+      "minimum_passing_score": 80
+    },
+    "verdict": "PASS"
+  },
+  "threshold_policy": {
+    "policy_id": "default-health-threshold-v1",
+    "minimum_passing_score": 80,
+    "weights": {
+      "dependency_integrity": 30,
+      "layer_integrity": 20,
+      "circular_dependency_risk": 15,
+      "type_safety_governance": 15,
+      "architecture_drift": 10,
+      "intelligence_synchronization": 10
+    },
+    "hard_fail_conditions": [
+      "invalid_architecture_intelligence"
+    ],
+    "status_mapping": {
+      "excellent_minimum": 90,
+      "healthy_minimum": 75,
+      "warning_minimum": 50
+    }
+  },
+  "signals": [
+    {
+      "signal_id": "dependency_integrity",
+      "weight": 30,
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "Dependency violations: 0",
+      "sources": [
+        "architecture-guard",
+        "infra-audit --quick"
+      ]
+    },
+    {
+      "signal_id": "layer_integrity",
+      "weight": 20,
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "Layer violations: 0",
+      "sources": [
+        "architecture-guard",
+        "infra-audit --quick"
+      ]
+    },
+    {
+      "signal_id": "circular_dependency_risk",
+      "weight": 15,
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "Circular dependencies: 0",
+      "sources": [
+        "architecture-guard",
+        "infra-audit --quick"
+      ]
+    },
+    {
+      "signal_id": "type_safety_governance",
+      "weight": 15,
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "Type safety violations: 0",
+      "sources": [
+        "type-safety-guard",
+        "arch:validate-brain"
+      ]
+    },
+    {
+      "signal_id": "architecture_drift",
+      "weight": 10,
+      "status": "FAIL",
+      "score_delta": 10,
+      "finding_count": 16,
+      "summary": "Architecture drift and map violations: 14; GitNexus enrichment findings: 2",
+      "sources": [
+        "architecture-guard",
+        "infra-audit --quick"
+      ]
+    },
+    {
+      "signal_id": "intelligence_synchronization",
+      "weight": 10,
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "All required architecture intelligence artifacts are present and current.",
+      "sources": [
+        "docs/ai/context",
+        "arch:validate-brain"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "non-negotiables.arch-drift-0-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (packages/types).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-1-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (packages/logger).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-10-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (apps/frontoffice).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-11-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (apps/backoffice).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-12-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (apps/api).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-13-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (apps/worker).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-2-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (packages/config).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-3-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (packages/redis-utils).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-4-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (packages/ui-system).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-5-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (packages/api-client).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-6-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (packages/domain-core).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-7-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (packages/validation).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-8-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (packages/job-queue).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "non-negotiables.arch-drift-9-docs/ai/context/ai-dependency-graph.json",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "high",
+      "impacted_surface": "governance-contract",
+      "location": {
+        "file": "docs/ai/context/ai-dependency-graph.json"
+      },
+      "message": "Architecture drift detected: module missing from dependency graph (apps/mmc).",
+      "remediation": "Regenerate architecture context artifacts and align map/graph consistency before merging.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "gitnexus-query-failed",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "medium",
+      "impacted_surface": "gitnexus query",
+      "message": "GitNexus query failed during architecture-health enrichment.",
+      "remediation": "/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:22\n  process.dlopen(lbugNativeModule, modulePath);\n          ^\n\nError: dlopen(/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node, 0x0001): tried: '/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file), '/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:22:11)\n    at Module._compile (node:internal/modules/cjs/loader:1734:14)\n    at Object..js (node:internal/modules/cjs/loader:1899:10)\n    at Module.load (node:internal/modules/cjs/loader:1469:32)\n    at Function._load (node:internal/modules/cjs/loader:1286:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)\n    at Module.require (node:internal/modules/cjs/loader:1491:12)\n    at require (node:internal/modules/helpers:135:16)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/connection.js:3:20) {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v23.11.0",
+      "source_tools": [
+        "gitnexus"
+      ]
+    },
+    {
+      "finding_id": "gitnexus-impact-failed",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "medium",
+      "impacted_surface": "gitnexus impact",
+      "message": "GitNexus impact failed during architecture-health enrichment.",
+      "remediation": "/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:22\n  process.dlopen(lbugNativeModule, modulePath);\n          ^\n\nError: dlopen(/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node, 0x0001): tried: '/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file), '/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:22:11)\n    at Module._compile (node:internal/modules/cjs/loader:1734:14)\n    at Object..js (node:internal/modules/cjs/loader:1899:10)\n    at Module.load (node:internal/modules/cjs/loader:1469:32)\n    at Function._load (node:internal/modules/cjs/loader:1286:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)\n    at Module.require (node:internal/modules/cjs/loader:1491:12)\n    at require (node:internal/modules/helpers:135:16)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/connection.js:3:20) {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v23.11.0",
+      "source_tools": [
+        "gitnexus"
+      ]
+    }
+  ],
+  "intelligence_snapshot": {
+    "snapshot_id": "current-5",
+    "artifacts": [
+      {
+        "artifact_name": "ai-dependency-graph.json",
+        "path": "docs/ai/context/ai-dependency-graph.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-03-25T11:56:09.372Z"
+      },
+      {
+        "artifact_name": "ai-module-map.json",
+        "path": "docs/ai/context/ai-module-map.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-03-25T11:56:09.372Z"
+      },
+      {
+        "artifact_name": "ai-layer-model.json",
+        "path": "docs/ai/context/ai-layer-model.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-03-25T11:56:09.372Z"
+      },
+      {
+        "artifact_name": "ai-runtime-map.json",
+        "path": "docs/ai/context/ai-runtime-map.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-03-25T11:56:09.372Z"
+      },
+      {
+        "artifact_name": "ai-architecture-brain.json",
+        "path": "docs/ai/context/ai-architecture-brain.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-03-25T11:56:09.394Z",
+        "validator": "bun run arch:validate:brain"
+      }
+    ],
+    "validation_status": "CURRENT",
+    "validation_notes": "All required architecture intelligence artifacts are present and current."
+  },
+  "source_runs": [
+    {
+      "tool": "arch_guard_ci",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/architecture-guard/architecture-guard.ts --ci --output json",
+      "timeout_ms": 30000,
+      "duration_ms": 818,
+      "timed_out": false,
+      "started_at": "2026-03-25T11:56:08.580Z",
+      "finished_at": "2026-03-25T11:56:09.398Z",
+      "exit_code": 1,
+      "output_format": "json"
+    },
+    {
+      "tool": "infra_audit_quick",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/infra-audit.ts --quick",
+      "timeout_ms": 60000,
+      "duration_ms": 501,
+      "timed_out": false,
+      "started_at": "2026-03-25T11:56:08.582Z",
+      "finished_at": "2026-03-25T11:56:09.083Z",
+      "exit_code": 0,
+      "output_format": "text"
+    },
+    {
+      "tool": "type_safety_guard_json",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/type-safety-guard.ts --json --no-exit-error",
+      "timeout_ms": 30000,
+      "duration_ms": 152,
+      "timed_out": false,
+      "started_at": "2026-03-25T11:56:08.583Z",
+      "finished_at": "2026-03-25T11:56:08.735Z",
+      "exit_code": 0,
+      "output_format": "json"
+    },
+    {
+      "tool": "arch_validate_brain",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/governance/validate-architecture-brain.ts",
+      "timeout_ms": 30000,
+      "duration_ms": 25,
+      "timed_out": false,
+      "started_at": "2026-03-25T11:56:08.583Z",
+      "finished_at": "2026-03-25T11:56:08.608Z",
+      "exit_code": 0,
+      "output_format": "text"
+    },
+    {
+      "tool": "gitnexus_query",
+      "command": "gitnexus query architecture health governance drift",
+      "enrichment_mode": "gitnexus_query",
+      "timeout_ms": 15000,
+      "duration_ms": 57,
+      "timed_out": false,
+      "started_at": "2026-03-25T11:56:09.400Z",
+      "finished_at": "2026-03-25T11:56:09.457Z",
+      "exit_code": 1,
+      "output_format": "text"
+    },
+    {
+      "tool": "gitnexus_impact",
+      "command": "gitnexus impact scripts/architecture-health/architecture-health.ts",
+      "enrichment_mode": "gitnexus_impact",
+      "timeout_ms": 15000,
+      "duration_ms": 56,
+      "timed_out": false,
+      "started_at": "2026-03-25T11:56:09.401Z",
+      "finished_at": "2026-03-25T11:56:09.457Z",
+      "exit_code": 1,
+      "output_format": "text"
+    }
+  ]
+}

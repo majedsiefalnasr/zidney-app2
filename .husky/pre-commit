@@ -99,5 +99,12 @@ bun run infra:security:secrets --staged || {
   exit 1
 }
 
+# ── Unified Governance Gate (changed-files scope) ─────────────────────────
+echo "Running unified governance gate (changed-files scope)…"
+bun run governance:gate:changed || {
+  echo "❌ Unified governance gate blocked the commit."
+  echo "   Run: bun run governance:gate:changed to see all violations."
+  exit 1
+}
 
 echo "✔ Pre-commit checks passed"
