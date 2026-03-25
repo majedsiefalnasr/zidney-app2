@@ -63,7 +63,7 @@ if [ -n "$CODE_FILES" ]; then
   # reads staged files via `git diff --cached` internally, so passing them
   # via env var was redundant AND it shadowed the STAGED_FILES variable used
   # by the brain validation check below.
-  bun scripts/ai-guard.ts
+  bun ai:guard
 else
   echo "Skipping architecture checks (no code files changed)"
 fi
@@ -77,7 +77,7 @@ BRAIN_FILES=$(echo "$STAGED_FILES" | grep -E 'docs/ai/context/ai-architecture-br
 if [ -n "$BRAIN_FILES" ]; then
   echo "Validating architecture brain integrity…"
   set +e  # Temporarily disable exit-on-error to capture exit code
-  bun scripts/governance/validate-architecture-brain.ts
+  bun arch:validate:brain
   BRAIN_EXIT=$?
   set -e  # Re-enable exit-on-error
 
@@ -85,7 +85,7 @@ if [ -n "$BRAIN_FILES" ]; then
     echo "❌ Architecture brain validation failed"
     echo "   The ai-architecture-brain.json has invalid or malformed dependency paths."
     echo "   This prevents AI Guard from validating correctly."
-    echo "   Run: bun scripts/infra-audit.ts to regenerate a valid brain."
+    echo "   Run: bun arch:audit to regenerate a valid brain."
     exit 1
   elif [ "$BRAIN_EXIT" -eq 2 ]; then
     echo "⚠️  Architecture brain has warnings but is valid"

@@ -39,7 +39,7 @@ jobs:
 
       # ── 4. Build and Validate GitNexus Context ─────────────────────────
       - name: Build and Validate GitNexus Context
-        run: bun run context:build && bun run context:validate
+        run: bun run arch:context:build && bun run arch:context:validate
 
       # ── 5. Verify AI Bootstrap Exists ──────────────────────────────────
       - name: Verify AI Bootstrap Exists
