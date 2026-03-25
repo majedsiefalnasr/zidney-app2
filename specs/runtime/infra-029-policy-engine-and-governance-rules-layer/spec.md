@@ -140,6 +140,8 @@ CI pipelines and audit tools need machine-readable output from policy checks to 
 - What happens when a new domain type is introduced that is not in the `PolicyRule.domain` union? → TypeScript type-check catches it at compile time; the engine rejects the rule at registration.
 - What happens when two rules produce conflicting results for the same file? → Both results are emitted independently. Deduplication is not performed; each rule is authoritative for its own assertion.
 - What happens when `policy:check --full` is run in CI and the Trivy adapter requires network access that is unavailable? → The adapter emits an `error` result indicating the check could not complete; the CI run fails with an explicit message.
+- What happens when an adapter's spawned subprocess exits non-zero (e.g., the legacy tool crashes or returns an unexpected exit code)? → The adapter catches the subprocess failure, emits a single `error`-severity `PolicyResult` with a diagnostic message (including exit code and stderr excerpt), and returns. The engine continues evaluating remaining rules (consistent with FR-007).
+- What happens when `--changed` is run but git cannot determine the working tree state? → The engine emits a `warning`-severity result indicating the fallback reason and proceeds with full evaluation (i.e., all rules run as if `--full` was specified). See FR-003.
 
 ---
 
@@ -151,7 +153,7 @@ CI pipelines and audit tools need machine-readable output from policy checks to 
 
 - **FR-001**: The system MUST provide a single CLI entry point `bun run policy:check` that executes all registered governance rules.
 - **FR-002**: The CLI MUST support a `--full` flag that evaluates all rules across the entire repository.
-- **FR-003**: The CLI MUST support a `--changed` flag that evaluates only rules applicable to files changed since the last git commit.
+- **FR-003**: The CLI MUST support a `--changed` flag that evaluates only rules applicable to files changed since the last git commit. When the git working tree state cannot be determined (e.g., detached HEAD with no prior commits, bare clone, non-git directory), the engine MUST emit a `warning`-severity result indicating the fallback reason and evaluate all rules as if `--full` was specified.
 - **FR-004**: The engine MUST exit with code `1` if any rule with severity `error` produces a violation; otherwise exit with code `0`.
 - **FR-005**: The engine MUST NOT exit with a non-zero code on `warning`-only results.
 - **FR-006**: The engine MUST execute all registered rules deterministically — the same inputs MUST always produce the same outputs.
@@ -162,7 +164,7 @@ CI pipelines and audit tools need machine-readable output from policy checks to 
 - **FR-008**: The system MUST maintain a central rule registry where all `PolicyRule` definitions are registered.
 - **FR-009**: Every active governance rule MUST be registered in the engine registry. No unregistered enforcement logic is permitted anywhere in the repository.
 - **FR-010**: The rule registry MUST support rules organized by domain: `architecture`, `scripts`, `types`, `ai`, `security`.
-- **FR-011**: Each rule MUST declare: `id`, `domain`, `description`, `severity`, and an `evaluate` function.
+- **FR-011**: Each rule MUST declare: `id`, `domain`, `description`, `severity`, and an `evaluate` function. Rules MAY declare an optional `sequential: true` flag to opt out of parallel execution (e.g., rules with shared mutable context requirements). The absence of this flag implies the rule is safe to run in parallel.
 - **FR-012**: Rule IDs MUST be unique across the entire registry. Duplicate IDs MUST be rejected at registration time.
 
 #### GitNexus Context Integration
@@ -170,7 +172,7 @@ CI pipelines and audit tools need machine-readable output from policy checks to 
 - **FR-013**: The engine MUST load a `PolicyContext` object before executing rules, containing at minimum: `changedFiles`, `dependencyGraph`.
 - **FR-014**: The context loader MUST source `changedFiles` from the current git working state.
 - **FR-015**: The context loader MUST source `dependencyGraph` from the GitNexus index when available.
-- **FR-016**: When GitNexus is unavailable or the index is stale, the context loader MUST construct a degraded context from the file system and emit a warning.
+- **FR-016**: When GitNexus is unavailable or the index is stale, the context loader MUST construct a degraded context from the file system and emit a warning. The index is considered stale when its last-analyzed timestamp is older than the value of the `GITNEXUS_MAX_AGE_HOURS` environment variable (default: `24` hours). A missing index file is always treated as unavailable regardless of age threshold.
 - **FR-017**: `PolicyContext` MUST support optional fields: `gitHistory`, `scripts`, `vulnerabilities`.
 
 #### Adapter Layer
@@ -225,7 +227,7 @@ CI pipelines and audit tools need machine-readable output from policy checks to 
 
 - **NFR-001**: `bun run policy:check --changed` MUST complete in under 2 seconds on a standard developer machine when evaluating a typical commit (1–15 changed files).
 - **NFR-002**: `bun run policy:check --full` SHOULD complete in under 60 seconds on the full monorepo.
-- **NFR-003**: Rules that can be safely parallelized MUST be executed in parallel to minimize total evaluation time.
+- **NFR-003**: Rules are executed in parallel by default via `Promise.all` — all rules are treated as parallelizable unless explicitly marked `sequential: true` on the `PolicyRule` interface. Rules declaring `sequential: true` are queued and executed after all parallel rules complete.
 - **NFR-004**: Rules MUST scope their evaluation to `changedFiles` when running in `--changed` mode — no full-repo scans are permitted in this mode.
 
 #### Determinism
@@ -258,6 +260,7 @@ CI pipelines and audit tools need machine-readable output from policy checks to 
 - **NFR-018**: The Trivy adapter MUST NOT transmit vulnerability report data outside the local process — all processing is local.
 - **NFR-019**: Rule `evaluate()` functions MUST be pure with respect to external I/O — they receive `PolicyContext` as input and return `PolicyResult[]` as output, with no side effects.
 - **NFR-020**: The policy engine MUST NOT accept rule definitions from runtime user input — the registry is compile-time only.
+- **NFR-021**: The engine MUST enforce a 2,000ms execution timeout per invocation in `--changed` mode and a 30,000ms timeout in `--full` mode. On timeout, the engine MUST abort remaining rule evaluation, emit an `error`-severity `PolicyResult` with `ruleId: 'ENGINE-001'` (conforming to the `<DOMAIN>-<NNN>` format from NFR-016; domain `ENGINE` is reserved for internal engine-generated results) and a message describing which mode timed out, and exit with code 1.
 
 ---
 
@@ -363,3 +366,37 @@ All four gates MUST pass before this stage is considered closed:
 | Gate 2 — Determinism             | Running `policy:check --full` twice on the same commit produces byte-identical JSON output                 | Determinism test: diff of two sequential runs                       |
 | Gate 3 — Coverage                | All five domains (architecture, scripts, types, ai, security) have at least one registered and active rule | Registry introspection test                                         |
 | Gate 4 — Orchestrator Dependency | Zero direct governance calls exist in orchestrator code outside of `policyEngine.check()`                  | Static analysis rule SCRIPTS-ORCH-001 enforced by the engine itself |
+
+---
+
+## Clarifications
+
+### Session 2026-03-25
+
+**Q: What timeout strategy should the Policy Engine enforce to satisfy NFR-001 (2s pre-commit budget) while avoiding false-positive timeouts on full CI runs?**
+**A: Two-tier timeout — 2,000ms for `--changed` mode, 30,000ms for `--full` mode. On timeout, engine aborts, emits `ENGINE-001` error result (domain `ENGINE` reserved for internal results, conforming to NFR-016 `<DOMAIN>-<NNN>` format), exits code 1.**
+**Impact: NFR-001 (enforced via 2,000ms limit in --changed), NFR-002 (bounded by 30,000ms in --full), NFR-021 (new requirement added).**
+
+---
+
+**Q: When `--changed` is invoked but the git working tree state cannot be determined (detached HEAD, bare clone, non-git directory), what should the engine do?**
+**A: Fall back to `--full` evaluation automatically and emit a `warning`-severity result explaining the reason for the fallback. No abort, no silent no-op.**
+**Impact: FR-003 (fallback behavior specified inline), Edge Cases section (new entry added for git-tree-unavailable scenario).**
+
+---
+
+**Q: How are policy rules marked as safe for parallel execution (NFR-003 requires parallel evaluation of eligible rules)?**
+**A: All rules are parallelizable by default (they are pure functions by contract). Rules opt out by declaring `sequential: true` on the `PolicyRule` interface. Parallel batch runs via `Promise.all`; sequential rules run after.**
+**Impact: NFR-003 (updated to reflect default-parallel with opt-out), FR-011 (sequential flag added to interface definition).**
+
+---
+
+**Q: When an adapter's spawned subprocess (e.g., Trivy, arch:guard CLI) exits non-zero or crashes, how should the adapter surface this failure?**
+**A: Adapter catches the subprocess failure, emits a single `error`-severity `PolicyResult` with a diagnostic message (including exit code and stderr excerpt), and returns. Engine continues evaluating remaining rules — consistent with FR-007 exception isolation.**
+**Impact: Edge Cases section (new entry added for adapter subprocess failure), aligns with existing FR-007 exception-isolation contract.**
+
+---
+
+**Q: What threshold defines a GitNexus index as "stale" for the purpose of FR-016 degraded-context fallback?**
+**A: Index is stale when its last-analyzed timestamp is older than `GITNEXUS_MAX_AGE_HOURS` env var (default: 24 hours). A missing index file is always treated as unavailable regardless of age threshold.**
+**Impact: FR-016 (stale threshold and env var specified inline).**

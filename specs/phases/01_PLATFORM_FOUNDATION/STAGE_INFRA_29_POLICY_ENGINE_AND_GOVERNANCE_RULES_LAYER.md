@@ -13,18 +13,19 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-25T00:05:00Z
+Step: clarify
+Risk Level: MEDIUM
+Last Updated: 2026-03-25T00:15:00Z
 
 Scope Defined:
 
 - Policy engine runtime (`scripts/policy-engine/`)
 - Rule system (PolicyRule, PolicyContext, PolicyResult types)
 - Rule registry (central authority for all governance rules)
-- GitNexus context integration with graceful degradation
+- GitNexus context integration with graceful degradation (stale = >24h, GITNEXUS_MAX_AGE_HOURS)
 - Adapter layer: architecture-guard, type-safety-guard, script-governance, Trivy
 - CLI: `bun run policy:check --full / --changed`
+- Two-tier timeout: 2,000ms (--changed), 30,000ms (--full)
 - CI + orchestrator integration
 - Script system unification (T010–T016)
 - Husky optimization (<2s pre-commit)
@@ -38,10 +39,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
+- NFR-016 naming convention enforced (ENGINE-001 ruleId fix applied)
 
 Notes:
-Specification complete. 43 FRs, 20 NFRs, 6 user stories, 8 success criteria. No clarifications required. Clarification step pending.
+All 5 clarifications resolved. NFR-021 added (two-tier timeout). Risk Level: MEDIUM. Ready for technical planning.
 
 ---
 
