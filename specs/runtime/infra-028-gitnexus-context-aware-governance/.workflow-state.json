@@ -6,9 +6,9 @@
   "branch": "spec/infra-028-gitnexus-context-aware-governance",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -19,9 +19,10 @@
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-03-25T00:00:00Z",
-  "last_updated": "2026-03-25T00:05:00Z",
+  "last_updated": "2026-03-25T00:10:00Z",
   "step_timings": {
-    "specify": { "started_at": "2026-03-25T00:01:00Z", "completed_at": "2026-03-25T00:05:00Z" }
+    "specify": { "started_at": "2026-03-25T00:01:00Z", "completed_at": "2026-03-25T00:05:00Z" },
+    "clarify": { "started_at": "2026-03-25T00:06:00Z", "completed_at": "2026-03-25T00:10:00Z" }
   },
   "history": [
     {
@@ -32,6 +33,10 @@
     {
       "event": "specify_complete",
       "timestamp": "2026-03-25T00:05:00Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "timestamp": "2026-03-25T00:10:00Z"
     }
   ]
 }
