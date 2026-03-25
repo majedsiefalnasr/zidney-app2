@@ -37,7 +37,6 @@ This stage introduces a single composable entry point — the **Governance Gate 
 - Database migrations or schema changes (this is a pure tooling stage)
 - Tenant isolation logic changes
 - Adding new guards not already implemented in prior INFRA stages
-- Updating the canonical 9-domain list in the script-system-governance skill to include `governance` (tracked separately)
 
 ---
 
@@ -78,20 +77,24 @@ A `governance:gate` script MUST be registered in root `package.json`. When invok
 5. `bun run infra:security:ci` _(canonical name — formerly listed as `security:scan:ci`)_
 6. `bun run ai-context:validate` _(alias must be created: chains `validate:ai-context-fresh && validate:ai-context-schemas`)_
 
-If any guard exits with a non-zero code, `governance:gate` MUST exit with code `1`. If all guards exit with code `0`, `governance:gate` MUST exit with code `0`. Warnings emitted by any guard MUST be forwarded to stdout but MUST NOT change the exit code.
+If any guard exits with a non-zero code, `governance:gate` MUST exit with code `1`. If all guards exit with code `0`, `governance:gate` MUST exit with code `0`. Warnings emitted by any guard MUST be forwarded to stdout but MUST NOT change the exit code. The stdout and stderr output of each composed guard MUST be forwarded to the invoking terminal without suppression. The gate MUST NOT run guards in silent/quiet mode or otherwise suppress sub-guard output.
 
 ### FR-002 — CI Governance Gate Variant (US2)
 
-A `governance:gate:ci` script MUST be registered in root `package.json`. It MUST invoke `governance:gate` and propagate its exit code unchanged. CI-specific behaviour (e.g., annotation formatting) may be implemented inside `scripts/governance/gate-ci.ts` without modifying the underlying guards.
+A `governance:gate:ci` script MUST be registered in root `package.json`. It MUST invoke `governance:gate` and propagate its exit code unchanged. CI-specific behaviour (e.g., annotation formatting) may be implemented inside `scripts/governance/gate-ci.ts` without modifying the underlying guards. The CI variant MAY emit GitHub Actions workflow commands (`::group::`/`::endgroup::` for output folding, `::error::` for inline annotations) to improve CI log readability. These annotations MUST NOT affect exit codes.
 
 ### FR-003 — Changed-Files Governance Gate Variant (US1, US3)
 
 A `governance:gate:changed` script MUST be registered in root `package.json`. It MUST run a scoped subset of guards over changed files only:
 
 1. `bun run arch:guard:changed`
-2. `bun run validate:runtime-scripts`
+2. `bun run validate:runtime:scripts`
 
-This command MUST complete in under 10 seconds on a standard developer machine for a typical pull request diff (≤ 50 changed files). Exit code semantics are identical to FR-001.
+This command MUST complete in under 10 seconds on a standard developer machine for a typical pull request diff (≤ 50 changed files). Exit code semantics: `0` = all ran guards passed, `1` = one or more failed.
+
+**Execution mode: fail-fast.** The changed-files variant uses `&&` short-circuit semantics for performance — if the first guard fails the second does not run. This is intentional for pre-commit speed. To surface all violations simultaneously, run the full `governance:gate` command.
+
+**Intentional scope exclusion:** `validate:script:usage`, `validate:types`, `infra:security:ci`, and `ai-context:validate` are excluded from the changed-files variant for performance. These checks are deferred to the full `governance:gate` (CI and orchestrator Step 7 closure).
 
 ### FR-004 — Governance Report Command (US5)
 
@@ -102,6 +105,8 @@ A `governance:report` script MUST be registered in root `package.json`. When inv
 3. Write a consolidated markdown report to `docs/governance/governance-report.md`
 
 The report MUST include: run timestamp, pass/fail status per guard, any blocking violations, and any non-blocking warnings.
+
+This command MUST **always exit with code `0`** regardless of violations found. It is a report and audit tool only — it MUST NOT block workflows, pre-commit hooks, or CI runs. Callers must read the report file to determine governance health; they MUST NOT rely on the exit code of `governance:report` as a pass/fail signal.
 
 ### FR-005 — Script File Location
 
@@ -179,7 +184,7 @@ No other exit codes are permitted. The gate MUST NOT swallow non-zero exit codes
 - **No DB access**: This stage introduces no database connections, queries, or migrations.
 - **No tenant isolation surface**: No workspace routes, no tenant resolution logic.
 - **No license middleware**: Not applicable — this stage introduces no HTTP routes.
-- **Script naming**: All new scripts MUST follow `governance:<action>[:<scope>]` pattern per stage mandate. Note: `governance` is not in the current 9-domain list in `script-system-governance/SKILL.md` — implementation MUST document this as a tracked exception pending skill update.
+- **Script naming**: All new scripts MUST follow `governance:<action>[:<scope>]` pattern per stage mandate. As a required INFRA-27 deliverable, `.agents/skills/script-system-governance/SKILL.md` MUST be updated to add `governance` as the 10th canonical domain and `scripts/governance/` MUST be added to the Script Location Policy table. This is not a tracked exception — it is in-scope work.
 - **Idempotency**: Running `governance:gate` multiple times with the same repository state MUST produce the same exit code.
 - **Fail-fast vs. report-all**: `governance:gate` runs each guard sequentially and reports all failures before exiting. It MUST NOT short-circuit after the first failing guard (report-all mode).
 
@@ -187,13 +192,13 @@ No other exit codes are permitted. The gate MUST NOT swallow non-zero exit codes
 
 ## Dependencies
 
-| Stage    | What It Provides                                                                                 |
-| -------- | ------------------------------------------------------------------------------------------------ |
-| INFRA-16 | `arch:guard` — architecture boundary enforcement                                                 |
-| INFRA-21 | `validate:types` — type-safety-guard                                                             |
-| INFRA-22 | `ai-context:validate` — AI context validation                                                    |
-| INFRA-25 | `validate:runtime:scripts`, `validate:script:usage` — script system governance (canonical names) |
-| INFRA-26 | `infra:security:ci` — Trivy security scanning (canonical name)                                   |
+| Stage    | What It Provides                                                                                                                                                                                                                                                                                         |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| INFRA-16 | `arch:guard` — architecture boundary enforcement                                                                                                                                                                                                                                                         |
+| INFRA-21 | `validate:types` — type-safety-guard                                                                                                                                                                                                                                                                     |
+| INFRA-22 | `validate:ai-context-fresh`, `validate:ai-context-schemas` — AI context validation (underlying scripts) ⚠️ The `ai-context:validate` alias used in FR-001 item 6 does **not** exist in INFRA-22; it is an **INFRA-27 deliverable** that must be created as a `package.json` alias chaining both scripts. |
+| INFRA-25 | `validate:runtime:scripts`, `validate:script:usage` — script system governance (canonical names)                                                                                                                                                                                                         |
+| INFRA-26 | `infra:security:ci` — Trivy security scanning (canonical name)                                                                                                                                                                                                                                           |
 
 All five upstream guards MUST be implemented and passing before `governance:gate` implementation begins. The gate MUST NOT be treated as a workaround for broken upstream guards.
 
@@ -217,13 +222,13 @@ All five upstream guards MUST be implemented and passing before `governance:gate
 
 ## Risks
 
-| Risk                                                                                                | Likelihood | Impact | Mitigation                                                                                                                                                                                   |
-| --------------------------------------------------------------------------------------------------- | ---------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| One or more upstream guards (INFRA-16, 21, 22, 25, 26) not yet implemented                          | Medium     | High   | Gate implementation is blocked until all five upstream scripts resolve to exit 0 on clean state. Verify each guard independently before wiring the gate.                                     |
-| `governance:gate:changed` exceeds 10-second target due to `arch:guard:changed` performance          | Medium     | Medium | Profile `arch:guard:changed` independently; if it exceeds budget, the scoped gate may be narrowed to only `validate:runtime-scripts` for the pre-commit context with a documented rationale. |
-| `governance` domain name conflicts with future expansion of the 9-domain naming policy              | Low        | Low    | Document `governance` as a tracked exception in the spec and in the script metadata. A separate task to update `script-system-governance/SKILL.md` is out of scope.                          |
-| Pre-commit hook slowdowns frustrate developer workflow                                              | Low        | Medium | `governance:gate:changed` is scoped to changed files only and skips full scans. Monitor p95 pre-commit time; adjust scope if needed.                                                         |
-| Report file (`docs/governance/governance-report.md`) committed accidentally to main with stale data | Low        | Low    | **Required:** Add `docs/governance/governance-report.md` to `.gitignore` as a mandatory deliverable of this stage. Confirmed NOT currently in `.gitignore` (see Clarifications Q3).          |
+| Risk                                                                                                | Likelihood | Impact | Mitigation                                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------- | ---------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| One or more upstream guards (INFRA-16, 21, 22, 25, 26) not yet implemented                          | Medium     | High   | Gate implementation is blocked until all five upstream scripts resolve to exit 0 on clean state. Verify each guard independently before wiring the gate.                                                                                                    |
+| `governance:gate:changed` exceeds 10-second target due to `arch:guard:changed` performance          | Medium     | Medium | Profile `arch:guard:changed` independently; if it exceeds budget, the scoped gate may be narrowed to only `validate:runtime:scripts` for the pre-commit context with a documented rationale.                                                                |
+| `governance` domain not yet registered in the 10th canonical domain slot of the naming policy       | Low        | Low    | Update `.agents/skills/script-system-governance/SKILL.md` to add `governance` as the 10th domain and `scripts/governance/` to the Script Location Policy table. This is a required INFRA-27 deliverable and must be completed before implementation begins. |
+| Pre-commit hook slowdowns frustrate developer workflow                                              | Low        | Medium | `governance:gate:changed` is scoped to changed files only and skips full scans. Monitor p95 pre-commit time; adjust scope if needed.                                                                                                                        |
+| Report file (`docs/governance/governance-report.md`) committed accidentally to main with stale data | Low        | Low    | **Required:** Add `docs/governance/governance-report.md` to `.gitignore` as a mandatory deliverable of this stage. Confirmed NOT currently in `.gitignore` (see Clarifications Q3).                                                                         |
 
 ---
 
@@ -262,7 +267,7 @@ A: **No.** The `.gitignore` file contains entries for `docs/ai/context/architect
 
 **Q4: Does `.github/workflows/architecture-governance.yml` already have a `Unified Governance Gate` step?**
 
-A: **No.** The workflow (10 numbered steps currently) contains no step named "Unified Governance Gate" and no invocation of `governance:gate:ci`. Steps 5–8 run individual guards (`ai-guard.ts`, `infra-audit.ts`, `architecture-diff.ts`, `arch:health:ci`) plus an AI execution validation step. FR-008 has **not** been partially satisfied. The new step must be inserted **after step 11** (`Run AI Execution Validation`) — or after the last existing individual guard step — as specified in FR-008.
+A: **No.** The workflow (**17 steps currently** — confirmed by live inspection of `.github/workflows/architecture-governance.yml`) contains no step named "Unified Governance Gate" and no invocation of `governance:gate:ci`. Steps 14–17 run the individual script-system-governance guards (`validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure`, `dev:generate:script-docs`). FR-008 has **not** been partially satisfied. The new step MUST be inserted **after step 17** (`Verify Script Registry Generation`) as the final step in the workflow, as specified in FR-008.
 
 ---
 

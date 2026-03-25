@@ -3,31 +3,36 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-25T00:20:00Z
+Last Updated: 2026-03-25T01:00:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Unified governance gate (`governance:gate`) composing 6 guards with corrected canonical script names
-- CI mode variant (`governance:gate:ci`)
-- Changed-files scoped variant (`governance:gate:changed`) using confirmed `arch:guard:changed`
-- Report generation command (`governance:report`) with `.gitignore` protection added to scope
-- Pre-commit, CI (`architecture-governance.yml` after step 11), and orchestrator integration
-- Implementation files under `scripts/governance/` (3 new files; existing files untouched)
+- Unified governance gate (`governance:gate`) composing 6 guards in report-all mode with canonical script names
+- CI mode variant (`governance:gate:ci`) with GitHub Actions annotation support
+- Changed-files scoped variant (`governance:gate:changed`) using fail-fast `&&` semantics (intentional)
+- Report generation command (`governance:report`) — always exits 0, audit tool only
+- `ai-context:validate` alias created in INFRA-27 (chaining `validate:ai-context-fresh && validate:ai-context-schemas`)
+- Pre-commit integration after Trivy secret scan
+- CI integration as step 18 after step 17 (`Verify Script Registry Generation`) in `architecture-governance.yml`
+- Orchestrator Step 6 / Step 7 gates documented
+- `governance` registered as 10th canonical domain in `script-system-governance/SKILL.md`
+- `docs/governance/governance-report.md` added to `.gitignore`
 
 Deferred Scope:
 
 - Runtime monitoring (explicitly out of scope)
 - External security tooling beyond Trivy (out of scope)
-- Updating 9-domain naming policy in skill (out of scope)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Architecture Guardian: PASS
+- API Designer: PASS
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Guardian validation passed (2 remediation rounds). Task breakdown in progress.
 
 ---
 

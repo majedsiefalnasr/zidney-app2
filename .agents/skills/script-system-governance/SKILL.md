@@ -42,19 +42,20 @@ Format:
 <domain>:<action>[:<scope>]
 ```
 
-**9 Canonical Domains:**
+**10 Canonical Domains:**
 
-| Domain     | Purpose                                    | Examples                              |
-|------------|---------------------------------------------|---------------------------------------|
-| `db`       | Database operations                         | `db:migrate`, `db:status:pool`        |
-| `arch`     | Architecture / governance checks            | `arch:audit`, `arch:diff`             |
-| `validate` | Validation guards                           | `validate:tsconfig`, `validate:runtime:scripts` |
-| `ai`       | AI context and execution tools              | `ai:guard`, `ai:context:generate`     |
-| `ci`       | CI / pipeline scripts                       | `ci:run-local`, `ci:smoke:staging`    |
-| `repo`     | Repo doctor / onboarding tools              | `repo:doctor`, `repo:status`          |
-| `dev`      | Developer tooling                           | `dev:hygiene:report`, `dev:refactor:scripts` |
-| `infra`    | Infrastructure / Docker / cache             | `infra:cache:clean`                   |
-| `test`     | Test-type aliases                            | `test:e2e:mmc`, `test:integration`   |
+| Domain       | Purpose                                    | Examples                              |
+|--------------|---------------------------------------------|---------------------------------------|
+| `db`         | Database operations                         | `db:migrate`, `db:status:pool`        |
+| `arch`       | Architecture / governance checks            | `arch:audit`, `arch:diff`             |
+| `validate`   | Validation guards                           | `validate:tsconfig`, `validate:runtime:scripts` |
+| `ai`         | AI context and execution tools              | `ai:guard`, `ai:context:generate`     |
+| `ci`         | CI / pipeline scripts                       | `ci:run-local`, `ci:smoke:staging`    |
+| `repo`       | Repo doctor / onboarding tools              | `repo:doctor`, `repo:status`          |
+| `dev`        | Developer tooling                           | `dev:hygiene:report`, `dev:refactor:scripts` |
+| `infra`      | Infrastructure / Docker / cache             | `infra:cache:clean`                   |
+| `test`       | Test-type aliases                            | `test:e2e:mmc`, `test:integration`   |
+| `governance` | Unified governance gate and reporting       | `governance:gate`, `governance:gate:ci`, `governance:gate:changed`, `governance:report` |
 
 **Rules:**
 - Use `:` as separator — NEVER `-` except within a segment-word (`scripts-infra` is valid inside a segment)
@@ -85,7 +86,7 @@ Example:
  * @script validate:script:naming
  * @domain validate
  * @category governance
- * @description Validates all package.json script names against the 9-domain naming convention.
+ * @description Validates all package.json script names against the 10-domain naming convention.
  * @usage bun run validate:script:naming
  */
 ```
@@ -109,6 +110,7 @@ Example:
 | Developer tooling     | `scripts/dev/`                  |
 | Generation / docs     | `scripts/generate/`             |
 | Infrastructure        | `scripts/maintenance/`          |
+| Governance gate       | `scripts/governance/`           |
 
 ---
 
@@ -193,7 +195,7 @@ bun run validate:script:naming
 
 Checks:
 - All scripts in `package.json` match `domain:action[:scope]` pattern
-- Domain is one of the 9 canonical domains
+- Domain is one of the 10 canonical domains
 - No lifecycle hooks incorrectly flagged
 
 ---
@@ -249,7 +251,7 @@ The following steps are in `.github/workflows/architecture-governance.yml` (step
 |---------------------------------------------|-------------------------------------------------|
 | `<script-name>` not in `package.json`       | Breaks CI, orchestrators, and refactor tracking |
 | Script key uses hyphens as separator (`-`)  | Illegal naming format — use `:` separator       |
-| Domain not in the 9 canonical domains       | Prevents categorization and discoverability     |
+| Domain not in the 10 canonical domains       | Prevents categorization and discoverability     |
 | Missing `@script` / `@domain` / `@category` / `@description` / `@usage` | Registry and CI validators will fail |
 | Renaming without running refactor engine    | Leaves dangling references in specs/CI/docs     |
 | Duplicate script names across domains       | Silent incorrect invocation                     |
