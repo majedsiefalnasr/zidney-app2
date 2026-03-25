@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * @script context:impact
- * @domain context
+ * @script arch:context:impact
+ * @domain arch
  * @category governance
  * @description Synthesizes risk indicators from docs/ai/context/gitnexus-context.json,
  *   filtered by the staged changed files recorded in context-changed.json. A risk

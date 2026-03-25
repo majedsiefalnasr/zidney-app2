@@ -47,14 +47,14 @@ This stage introduces **GitNexus** — a unified context-awareness layer that:
 
 ### Integration Points
 
-| Location                                        | Change                                                         |
-| ----------------------------------------------- | -------------------------------------------------------------- |
-| `package.json`                                  | Added 4 scripts: `context:{build,changed,impact,validate}`     |
-| `package.json`                                  | Updated `governance:gate:changed` to include `context:changed` |
-| `scripts/governance/gate.ts`                    | Prepended 2 guards: `Context Build`, `Context Validate`        |
-| `.husky/pre-commit`                             | Inserted GitNexus context block (changed + validate)           |
-| `.github/workflows/architecture-governance.yml` | Added step 4: Build and Validate GitNexus Context              |
-| `vitest.workspace.ts`                           | Added `context-scripts` test project                           |
+| Location                                        | Change                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| `package.json`                                  | Added 4 scripts: `arch:context:{build,changed,impact,validate}`     |
+| `package.json`                                  | Updated `governance:gate:changed` to include `arch:context:changed` |
+| `scripts/governance/gate.ts`                    | Prepended 2 guards: `Context Build`, `Context Validate`             |
+| `.husky/pre-commit`                             | Inserted GitNexus context block (changed + validate)                |
+| `.github/workflows/architecture-governance.yml` | Added step 4: Build and Validate GitNexus Context                   |
+| `vitest.workspace.ts`                           | Added `context-scripts` test project                                |
 
 ### Tests & Docs
 
@@ -88,8 +88,8 @@ renameSync(`${path}.tmp`, path);
 Hook now runs:
 
 ```bash
-bun run context:changed  # Stage changed file context
-bun run context:validate # Verify artifact freshness
+bun run arch:context:changed  # Stage changed file context
+bun run arch:context:validate # Verify artifact freshness
 ```
 
 ### 4. CI/CD Integration
@@ -98,7 +98,7 @@ New workflow step (architecture-governance.yml, step 4):
 
 ```yaml
 - name: Build and Validate GitNexus Context
-  run: bun run context:build && bun run context:validate
+  run: bun run arch:context:build && bun run arch:context:validate
 ```
 
 ---
@@ -107,9 +107,9 @@ New workflow step (architecture-governance.yml, step 4):
 
 - [x] Unit tests: `validate.test.ts` — 16/16 PASS
 - [x] TypeScript: `bun tsc --noEmit --skipLibCheck` — 0 errors
-- [x] CLI: `context:validate` — validates fresh artifact
-- [x] CLI: `context:build` — writes artifact atomically
-- [x] Pre-commit hook: context:changed + context:validate
+- [x] CLI: `arch:context:validate` — validates fresh artifact
+- [x] CLI: `arch:context:build` — writes artifact atomically
+- [x] Pre-commit hook: arch:context:changed + arch:context:validate
 - [x] Governance gate: Context Build + Context Validate guards prepended
 
 ---

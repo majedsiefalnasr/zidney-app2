@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * @script context:validate
- * @domain context
+ * @script arch:context:validate
+ * @domain arch
  * @category governance
  * @description Validates docs/ai/context/gitnexus-context.json against
  *   docs/ai/gitnexus-context.schema.json. No external schema library (NFR-005).

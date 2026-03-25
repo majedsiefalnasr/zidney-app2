@@ -41,13 +41,13 @@ fi
 # ── GitNexus Context (staged-file context + validation) ─────────────────────
 if [ -n "$STAGED_FILES" ]; then
   echo "Resolving GitNexus staged context…"
-  bun run context:changed || {
-    echo "❌ context:changed failed — commit blocked."
+  bun run arch:context:changed || {
+    echo "❌ arch:context:changed failed — commit blocked."
     exit 1
   }
   echo "Validating GitNexus context artifact…"
-  bun run context:validate || {
-    echo "❌ context:validate failed — run 'bun run context:build' to refresh artifact."
+  bun run arch:context:validate || {
+    echo "❌ arch:context:validate failed — run 'bun run arch:context:build' to refresh artifact."
     exit 1
   }
 fi

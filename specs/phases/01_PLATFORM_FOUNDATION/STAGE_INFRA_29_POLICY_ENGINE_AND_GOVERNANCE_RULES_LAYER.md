@@ -161,6 +161,41 @@ type PolicyResult = {
 
 ## Key Capabilities
 
+## Script System Governance (Extended)
+
+This stage enforces full script system normalization:
+
+### 1. No Duplicate Scripts
+
+- Same purpose → single script
+- Same name across domains → forbidden
+
+### 2. Unified Naming
+
+Format:
+
+```
+<domain>:<action>[:scope]
+```
+
+### 3. Script Authority Chain
+
+Every script must:
+
+- exist in `package.json`
+- resolve to `/scripts/`
+- be documented in `docs/scripts/`
+
+### 4. Script Usage Mapping
+
+Each script must declare:
+
+- called by (CI / dev / orchestrator)
+- origin spec
+- execution frequency
+
+---
+
 ### 1. Single Governance Entry Point
 
 ```
@@ -261,6 +296,66 @@ Used in:
 
 ### T009 – Documentation
 
+### T010 – Script System Unification
+
+- Detect duplicate scripts (name, purpose, usage)
+- Merge into single authoritative scripts
+- Enforce naming convention `<domain>:<action>[:scope]`
+- Remove dead or orphan scripts
+
+### T011 – package.json Hygiene
+
+- Normalize all script names
+- Remove unused scripts and dependencies
+- Ensure every script resolves to a valid file
+- Add inline documentation comments (where applicable)
+
+### T012 – Script Documentation System
+
+- Ensure every script has:
+  - Purpose
+  - Usage
+  - Source (spec/runtime)
+  - Invocation layer (CI / dev / orchestrator)
+- Sync with `docs/scripts/`
+
+### T013 – GitHub Workflows Alignment
+
+- Replace direct script calls with `policy:check` where possible
+- Remove duplicate CI checks
+- Ensure workflows reference valid scripts only
+- Validate workflow YAML integrity
+
+### T014 – Husky Optimization
+
+- Refactor `pre-commit`:
+  - fast checks only
+  - scoped (`--changed`)
+- Refactor `pre-push`:
+  - deeper checks
+  - optional full validation
+- Remove redundant executions
+
+### T015 – Generated Artifacts Policy
+
+- Classify generated outputs:
+  - MUST commit (e.g. architecture brain)
+  - MUST NOT commit (e.g. temp files)
+- Enforce via:
+  - `.gitignore`
+  - policy rules
+- Prevent accidental commits of volatile artifacts
+
+### T016 – Script Performance Optimization
+
+- Ensure scripts are:
+  - fast (<2s for pre-commit)
+  - scoped (changed files only)
+  - parallelized when safe
+- Eliminate unnecessary full-repo scans
+
+---
+
 ---
 
 ## Hard Mode Integration
@@ -309,6 +404,56 @@ ALL governance must:
 - be a policy rule
 - be registered in engine
 - NOT exist elsewhere
+
+---
+
+## Generated Files & Commit Policy
+
+### Classification
+
+| Type                    | Action |
+| ----------------------- | ------ |
+| Deterministic artifacts | commit |
+| Temporary outputs       | ignore |
+| Cache / runtime files   | ignore |
+
+### Enforcement
+
+- `.gitignore` must be authoritative
+- Policy engine must detect violations
+
+---
+
+## Performance Constraints
+
+### Pre-Commit
+
+- Must complete < 2s
+- Only changed files
+
+### Pre-Push
+
+- Incremental checks
+- Optional full validation
+
+### CI
+
+- Full validation allowed
+
+---
+
+## Workflow & Hook Consistency
+
+All layers must be aligned:
+
+| Layer        | Uses                     |
+| ------------ | ------------------------ |
+| CI           | `policy:check --full`    |
+| pre-commit   | `policy:check --changed` |
+| pre-push     | extended checks          |
+| orchestrator | policy engine API        |
+
+No layer may implement independent logic.
 
 ---
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * @script context:build
- * @domain context
+ * @script arch:context:build
+ * @domain arch
  * @category governance
  * @description Generates docs/ai/context/gitnexus-context.json via assembleContext().
  *   Uses atomic write (write to .tmp then renameSync) to prevent partial artifact state.

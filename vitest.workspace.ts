@@ -211,7 +211,7 @@ export default defineWorkspace([
     },
   }),
 
-  // Context scripts (context:build / context:validate / etc.)
+  // Context scripts (arch:context:build / arch:context:validate / etc.)
   defineProject({
     plugins: [tsconfigPaths()],
     test: {

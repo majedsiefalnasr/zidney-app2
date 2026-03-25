@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * @script context:changed
- * @domain context
+ * @script arch:context:changed
+ * @domain arch
  * @category governance
  * @description Resolves staged changed files via `git diff --cached` and writes the
  *   result to docs/ai/context/context-changed.json with a 5-minute freshness cache.
