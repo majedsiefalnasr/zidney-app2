@@ -24,9 +24,9 @@ No flags are supported. The script always reads the current staging area.
 
 ## Output
 
-| Artifact                                      | Description                                     |
-| --------------------------------------------- | ----------------------------------------------- |
-| `docs/ai/context/context-changed.json`        | List of staged files with timestamp.            |
+| Artifact                               | Description                          |
+| -------------------------------------- | ------------------------------------ |
+| `docs/ai/context/context-changed.json` | List of staged files with timestamp. |
 
 ### Artifact Schema
 

@@ -43,9 +43,7 @@ export function validateArtifact(options: ValidateOptions = {}): string {
 
   // 1. Artifact file exists
   if (!existsSync(artifactPath)) {
-    throw new Error(
-      `artifact not found — run 'bun run context:build' first: ${artifactPath}`,
-    )
+    throw new Error(`artifact not found — run 'bun run context:build' first: ${artifactPath}`)
   }
 
   // 2. Valid JSON
@@ -81,34 +79,32 @@ export function validateArtifact(options: ValidateOptions = {}): string {
 
   // 5. schemaVersion matches schema.version
   const expectedVersion = schema.version
-  if (expectedVersion !== undefined && artifact['schemaVersion'] !== expectedVersion) {
+  if (expectedVersion !== undefined && artifact.schemaVersion !== expectedVersion) {
     throw new Error(
-      `schemaVersion mismatch — artifact: ${String(artifact['schemaVersion'])}, schema: ${expectedVersion}`,
+      `schemaVersion mismatch — artifact: ${String(artifact.schemaVersion)}, schema: ${expectedVersion}`
     )
   }
 
   // 6. Freshness check — generatedAt must be < maxAgeHours old
-  const generatedAtRaw = artifact['generatedAt']
+  const generatedAtRaw = artifact.generatedAt
   if (typeof generatedAtRaw !== 'string') {
     throw new Error(`'generatedAt' is not a string`)
   }
   const generatedAt = new Date(generatedAtRaw)
   if (Number.isNaN(generatedAt.getTime())) {
-    throw new Error(
-      `'generatedAt' is not a valid ISO 8601 timestamp: '${generatedAtRaw}'`,
-    )
+    throw new Error(`'generatedAt' is not a valid ISO 8601 timestamp: '${generatedAtRaw}'`)
   }
   const ageMs = Date.now() - generatedAt.getTime()
   const ageHours = ageMs / (1000 * 60 * 60)
   if (ageHours >= maxAgeHours) {
     const ageDisplay = ageHours.toFixed(1)
     throw new Error(
-      `stale artifact — age: ${ageDisplay}h (max: ${maxAgeHours}h) — run 'bun run context:build --force'`,
+      `stale artifact — age: ${ageDisplay}h (max: ${maxAgeHours}h) — run 'bun run context:build --force'`
     )
   }
 
   const ageDisplay = ageHours.toFixed(1)
-  return `[context:validate] OK artifact valid (schemaVersion=${String(artifact['schemaVersion'])}, age=${ageDisplay}h)`
+  return `[context:validate] OK artifact valid (schemaVersion=${String(artifact.schemaVersion)}, age=${ageDisplay}h)`
 }
 
 function main(): void {
@@ -117,9 +113,7 @@ function main(): void {
     console.log(msg)
     process.exit(0)
   } catch (err) {
-    console.error(
-      `[context:validate] FAIL: ${err instanceof Error ? err.message : String(err)}`,
-    )
+    console.error(`[context:validate] FAIL: ${err instanceof Error ? err.message : String(err)}`)
     process.exit(1)
   }
 }

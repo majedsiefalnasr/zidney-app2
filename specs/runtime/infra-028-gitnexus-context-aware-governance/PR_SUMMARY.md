@@ -6,7 +6,7 @@
 **Phase:** 01_PLATFORM_FOUNDATION  
 **Branch:** `spec/infra-028-gitnexus-context-aware-governance`  
 **Status:** PRODUCTION READY  
-**Tasks:** 13 / 13 completed  
+**Tasks:** 13 / 13 completed
 
 ---
 
@@ -38,23 +38,23 @@ This stage introduces **GitNexus** — a unified context-awareness layer that:
 
 ### New Scripts (`scripts/context/`)
 
-| Script | Purpose |
-|--------|---------|
+| Script        | Purpose                                                                    |
+| ------------- | -------------------------------------------------------------------------- |
 | `validate.ts` | Validates `gitnexus-context.json` — 6 checks; exports `validateArtifact()` |
-| `build.ts` | Wraps `assembleContext()` from `gitnexus-context.ts` — atomic write |
-| `changed.ts` | Staged-file context — `git diff --cached`, 5-min cache |
-| `impact.ts` | Risk indicator filtering — intersect `affectedBy` with changed files |
+| `build.ts`    | Wraps `assembleContext()` from `gitnexus-context.ts` — atomic write        |
+| `changed.ts`  | Staged-file context — `git diff --cached`, 5-min cache                     |
+| `impact.ts`   | Risk indicator filtering — intersect `affectedBy` with changed files       |
 
 ### Integration Points
 
-| Location | Change |
-|----------|--------|
-| `package.json` | Added 4 scripts: `context:{build,changed,impact,validate}` |
-| `package.json` | Updated `governance:gate:changed` to include `context:changed` |
-| `scripts/governance/gate.ts` | Prepended 2 guards: `Context Build`, `Context Validate` |
-| `.husky/pre-commit` | Inserted GitNexus context block (changed + validate) |
-| `.github/workflows/architecture-governance.yml` | Added step 4: Build and Validate GitNexus Context |
-| `vitest.workspace.ts` | Added `context-scripts` test project |
+| Location                                        | Change                                                         |
+| ----------------------------------------------- | -------------------------------------------------------------- |
+| `package.json`                                  | Added 4 scripts: `context:{build,changed,impact,validate}`     |
+| `package.json`                                  | Updated `governance:gate:changed` to include `context:changed` |
+| `scripts/governance/gate.ts`                    | Prepended 2 guards: `Context Build`, `Context Validate`        |
+| `.husky/pre-commit`                             | Inserted GitNexus context block (changed + validate)           |
+| `.github/workflows/architecture-governance.yml` | Added step 4: Build and Validate GitNexus Context              |
+| `vitest.workspace.ts`                           | Added `context-scripts` test project                           |
 
 ### Tests & Docs
 
@@ -72,15 +72,15 @@ This stage introduces **GitNexus** — a unified context-awareness layer that:
 ✅ Schema file exists  
 ✅ All required fields present  
 ✅ schemaVersion matches schema  
-✅ generatedAt < 24h old  
+✅ generatedAt < 24h old
 
 ### 2. Atomic Writes
 
 All context scripts use `.tmp` → `renameSync` pattern to prevent partial reads:
 
 ```typescript
-writeFileSync(`${path}.tmp`, JSON.stringify(obj))
-renameSync(`${path}.tmp`, path)
+writeFileSync(`${path}.tmp`, JSON.stringify(obj));
+renameSync(`${path}.tmp`, path);
 ```
 
 ### 3. Pre-Commit Integration
@@ -121,7 +121,7 @@ New workflow step (architecture-governance.yml, step 4):
 ✅ Scripts scoped to `scripts/context/`  
 ✅ `import.meta.main` guard prevents side-effects on import  
 ✅ Atomic writes via `.tmp` + `renameSync`  
-✅ No new app-to-app imports  
+✅ No new app-to-app imports
 
 ---
 

@@ -63,7 +63,7 @@ function main(): void {
   const json = JSON.stringify(context, null, 2)
 
   if (dryRun) {
-    process.stdout.write(json + '\n')
+    process.stdout.write(`${json}\n`)
     process.exit(0)
   }
 

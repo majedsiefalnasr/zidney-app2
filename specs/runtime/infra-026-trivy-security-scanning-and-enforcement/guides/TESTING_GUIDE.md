@@ -601,9 +601,9 @@ All tests completed and passing? Mark below:
 - [ ] Documentation complete and accurate
 - [ ] Ready for production merge
 
-**Date Completed**: ******\_\_\_\_******  
-**Tested By**: ******\_\_\_\_******  
-**Approval**: ******\_\_\_\_******
+**Date Completed**: **\*\***\_\_\_\_**\*\***  
+**Tested By**: **\*\***\_\_\_\_**\*\***  
+**Approval**: **\*\***\_\_\_\_**\*\***
 
 ---
 

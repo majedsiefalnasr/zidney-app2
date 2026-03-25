@@ -29,15 +29,15 @@ bun run context:impact -- --json
 
 ## Options
 
-| Flag     | Effect                                                           |
-| -------- | ---------------------------------------------------------------- |
-| `--json` | Print the full `riskIndicators` array as JSON to stdout.        |
+| Flag     | Effect                                                   |
+| -------- | -------------------------------------------------------- |
+| `--json` | Print the full `riskIndicators` array as JSON to stdout. |
 
 ## Output
 
-| Artifact                                    | Description                                         |
-| ------------------------------------------- | --------------------------------------------------- |
-| `docs/ai/context/context-impact.json`       | Filtered risk indicators for current staged changes.|
+| Artifact                              | Description                                          |
+| ------------------------------------- | ---------------------------------------------------- |
+| `docs/ai/context/context-impact.json` | Filtered risk indicators for current staged changes. |
 
 ### Artifact Schema
 
@@ -57,10 +57,10 @@ bun run context:impact -- --json
 
 ## Exit Codes
 
-| Code | Meaning                                                                 |
-| ---- | ----------------------------------------------------------------------- |
-| `0`  | Risk indicators resolved and artifact written.                          |
-| `1`  | `gitnexus-context.json` not found or unreadable. Run `context:build`.  |
+| Code | Meaning                                                               |
+| ---- | --------------------------------------------------------------------- |
+| `0`  | Risk indicators resolved and artifact written.                        |
+| `1`  | `gitnexus-context.json` not found or unreadable. Run `context:build`. |
 
 ## Prerequisites
 

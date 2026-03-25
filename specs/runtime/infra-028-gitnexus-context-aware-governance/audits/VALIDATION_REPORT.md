@@ -24,6 +24,7 @@ bun run vitest run scripts/context/__tests__/validate.test.ts
 **Result: ✅ PASS — 16/16 tests passed**
 
 Test coverage:
+
 - Valid fresh artifact → returns OK string
 - Missing artifact file → throws "artifact not found"
 - Invalid JSON artifact → throws "invalid JSON in artifact"

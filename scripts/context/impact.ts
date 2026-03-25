@@ -81,7 +81,7 @@ function main(): void {
 
   // Filter risk indicators whose affectedBy intersects the changed file set
   const matched: RiskIndicator[] = (context.riskIndicators ?? []).filter((indicator) =>
-    indicator.affectedBy.some((f) => changedSet.has(f)),
+    indicator.affectedBy.some((f) => changedSet.has(f))
   )
 
   // Sort by riskScore descending, then module name ascending for determinism
@@ -96,12 +96,10 @@ function main(): void {
 
   const args = process.argv.slice(2)
   if (args.includes('--json')) {
-    process.stdout.write(JSON.stringify(matched, null, 2) + '\n')
+    process.stdout.write(`${JSON.stringify(matched, null, 2)}\n`)
   } else {
-    for (const indicator of matched
-      .map((i) => i.module)
-      .sort((a, b) => a.localeCompare(b))) {
-      process.stdout.write(indicator + '\n')
+    for (const indicator of matched.map((i) => i.module).sort((a, b) => a.localeCompare(b))) {
+      process.stdout.write(`${indicator}\n`)
     }
   }
 

@@ -58,7 +58,7 @@ function validSchema(): { version: string; required: string[] } {
 function writePair(
   dir: string,
   artifact: Record<string, unknown>,
-  schema = validSchema(),
+  schema = validSchema()
 ): { artifactPath: string; schemaPath: string } {
   const artifactPath = join(dir, 'gitnexus-context.json')
   const schemaPath = join(dir, 'gitnexus-context.schema.json')
@@ -101,17 +101,14 @@ describe('context:validate — validateArtifact()', () => {
     expect(() => validateArtifact({ artifactPath, schemaPath })).toThrow('invalid JSON in artifact')
   })
 
-  it.each(REQUIRED_FIELDS)(
-    'throws "missing required field: %s" when field is absent',
-    (field) => {
-      const artifact = validArtifact()
-      delete artifact[field]
-      const { artifactPath, schemaPath } = writePair(tmpDir, artifact)
-      expect(() => validateArtifact({ artifactPath, schemaPath })).toThrow(
-        `missing required field: ${field}`,
-      )
-    },
-  )
+  it.each(REQUIRED_FIELDS)('throws "missing required field: %s" when field is absent', (field) => {
+    const artifact = validArtifact()
+    delete artifact[field]
+    const { artifactPath, schemaPath } = writePair(tmpDir, artifact)
+    expect(() => validateArtifact({ artifactPath, schemaPath })).toThrow(
+      `missing required field: ${field}`
+    )
+  })
 
   it('throws "schemaVersion mismatch" when artifact version differs from schema', () => {
     const artifact = validArtifact({ schemaVersion: '0.9.0' })

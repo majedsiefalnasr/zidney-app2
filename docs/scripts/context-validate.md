@@ -16,14 +16,14 @@ pre-commit, the governance gate, and CI to block stale or malformed context arti
 
 ## Validation Checks (in order)
 
-| # | Check                        | Failure message                                      |
-| - | ---------------------------- | ---------------------------------------------------- |
-| 1 | Artifact file exists         | `artifact not found — run 'bun run context:build'`  |
-| 2 | Valid JSON                   | `invalid JSON in artifact — <parse error>`           |
-| 3 | Schema file exists           | `schema not found at <path>`                         |
-| 4 | All required fields present  | `missing required field: <fieldName>`                |
-| 5 | schemaVersion matches schema | `schemaVersion mismatch — artifact:<x> schema:<y>`   |
-| 6 | Artifact age ≤ 24 hours      | `stale artifact — age: <N>h (max: 24h)`              |
+| #   | Check                        | Failure message                                    |
+| --- | ---------------------------- | -------------------------------------------------- |
+| 1   | Artifact file exists         | `artifact not found — run 'bun run context:build'` |
+| 2   | Valid JSON                   | `invalid JSON in artifact — <parse error>`         |
+| 3   | Schema file exists           | `schema not found at <path>`                       |
+| 4   | All required fields present  | `missing required field: <fieldName>`              |
+| 5   | schemaVersion matches schema | `schemaVersion mismatch — artifact:<x> schema:<y>` |
+| 6   | Artifact age ≤ 24 hours      | `stale artifact — age: <N>h (max: 24h)`            |
 
 ## Usage
 
@@ -35,17 +35,17 @@ No flags are supported. The script always validates the canonical artifact path.
 
 ## Exit Codes
 
-| Code | Meaning                              |
-| ---- | ------------------------------------ |
-| `0`  | All 6 checks passed.                 |
-| `1`  | At least one check failed.           |
+| Code | Meaning                    |
+| ---- | -------------------------- |
+| `0`  | All 6 checks passed.       |
+| `1`  | At least one check failed. |
 
 ## Artifact
 
-| Path                                    | Role                              |
-| --------------------------------------- | --------------------------------- |
-| `docs/ai/context/gitnexus-context.json` | Validated (read-only)             |
-| `docs/ai/gitnexus-context.schema.json`  | Schema reference (read-only)      |
+| Path                                    | Role                         |
+| --------------------------------------- | ---------------------------- |
+| `docs/ai/context/gitnexus-context.json` | Validated (read-only)        |
+| `docs/ai/gitnexus-context.schema.json`  | Schema reference (read-only) |
 
 ## Integration
 

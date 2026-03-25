@@ -39,7 +39,7 @@ bun run context:build -- --dry-run
 
 ## Output
 
-| Artifact                                | Description                         |
+| Artifact                                | Description                          |
 | --------------------------------------- | ------------------------------------ |
 | `docs/ai/context/gitnexus-context.json` | GitNexus context artifact (primary). |
 
