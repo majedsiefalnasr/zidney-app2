@@ -16,14 +16,15 @@
 | Tasks     | ✅     | tasks.md                    | reports/TASKS_REPORT.md     |
 | Analyze   | ✅     | (read-only — no output)     | audits/ANALYZE_REPORT.md    |
 | Implement | ✅     | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
+| Validate  | ✅     | (read-only — no output)     | audits/VALIDATION_REPORT.md |
 | Closure   | ⬜     | —                           | reports/CLOSURE_REPORT.md   |
 
 ## Stage Artifacts
 
 | Artifact          | Owner        | Path                                                                                  | Generated At |
 | ----------------- | ------------ | ------------------------------------------------------------------------------------- | ------------ |
-| PR Summary        | Orchestrator | PR_SUMMARY.md                                                                         | Step 7       |
+| Validation Report | Orchestrator | audits/VALIDATION_REPORT.md                                                           | Step 7       |
 | Testing Guide     | Orchestrator | guides/TESTING_GUIDE.md                                                               | Step 7       |
-| Validation Report | Orchestrator | audits/VALIDATION_REPORT.md                                                           | Step 6       |
+| PR Summary        | Orchestrator | reports/PR_SUMMARY.md                                                                 | Step 8       |
 | Spec Checklist    | SpecKit      | checklists/requirements.md                                                            | Step 1       |
 | Workflow State    | Orchestrator | specs/runtime/infra-029-policy-engine-and-governance-rules-layer/.workflow-state.json | Pre-Step     |
