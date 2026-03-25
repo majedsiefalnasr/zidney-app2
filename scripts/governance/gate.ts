@@ -24,7 +24,7 @@ const GUARDS: Array<{ name: string; script: string }> = [
   { name: 'Runtime Scripts', script: 'validate:runtime:scripts' },
   { name: 'Script Usage', script: 'validate:script:usage' },
   { name: 'Security CI', script: 'infra:security:ci' },
-  { name: 'AI Context Validate', script: 'ai-context:validate' },
+  { name: 'AI Context Validate', script: 'ai:context:validate' },
 ]
 
 async function main(): Promise<void> {

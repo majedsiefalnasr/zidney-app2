@@ -26,6 +26,30 @@ export const EXCLUDED_NAMES = new Set<string>([
   // False positives from code literals in spec markdown files
   'references', // plan.md string literal matching false-positive pattern
   'json', // TESTING_GUIDE.md code false-positive pattern
+  // Parsing artifacts from markdown spec formatting
+  'biome', // formatting example code
+  'governance:', // incomplete domain example
+  'typecheck:', // incomplete domain example
+  'validate', // partial script name
+  'src', // directory reference
+  'domain', // template placeholder
+  'action', // template placeholder
+  'scope', // template placeholder
+  'reference', // template placeholder
+  'dev', // partial domain
+  'back', // partial script name
+  'domain:action:scope', // INFRA-025 guide template example
+  'dev:back', // 032-tags guide reference (partial/typo)
+  'ai-context:validate', // INFRA-022 historical reference (now ai:context:validate)
+  // Future planned scripts (not yet implemented)
+  'db:validate-migration',
+  'db:rollback',
+  'db:migrate:down',
+  'deploy:migrations:fan-out',
+  'test:smoke:baskets',
+  'precommit:test',
+  'security:scan:ci',
+  'infra:security:sbom',
 ])
 
 const REPO_ROOT = process.cwd()
