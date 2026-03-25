@@ -1,7 +1,7 @@
 # Zidney Architecture Dashboard
 
-**Generated:** 2026-03-25T13:04:20.522Z
-**Git SHA:** 9039cf3eba7e33e97cd036f1f2e8ade282046f29
+**Generated:** 2026-03-25T22:05:48.612Z
+**Git SHA:** 2e6c9adccb5475da8b772eb2588f21885d21551f
 
 ## Architecture Score
 
@@ -22,10 +22,10 @@
 
 ## Test Distribution
 
-Total Tests: 216
+Total Tests: 220
 
 - Unit: 85
-- Integration: 113
+- Integration: 117
 - E2E (spec): 18
 
 ## Dependency Graph

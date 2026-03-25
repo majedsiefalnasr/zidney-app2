@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-03-25T13:04:20.522Z",
-  "gitSha": "9039cf3eba7e33e97cd036f1f2e8ade282046f29",
+  "timestamp": "2026-03-25T22:05:48.612Z",
+  "gitSha": "2e6c9adccb5475da8b772eb2588f21885d21551f",
   "vitestConfigs": [
     {
       "path": "vitest.workspace.ts",
@@ -131,13 +131,13 @@
   ],
   "testDistribution": {
     "unit": 85,
-    "integration": 113,
+    "integration": 117,
     "spec": 18,
-    "total": 216,
+    "total": 220,
     "perApp": {
       "integration": {
         "unit": 0,
-        "integration": 69,
+        "integration": 73,
         "spec": 0
       },
       "mmc": {

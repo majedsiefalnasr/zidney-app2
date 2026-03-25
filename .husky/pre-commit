@@ -114,11 +114,11 @@ bun run infra:security:secrets --staged || {
   exit 1
 }
 
-# ── Unified Governance Gate (changed-files scope) ─────────────────────────
-echo "Running unified governance gate (changed-files scope)…"
-bun run governance:gate:changed || {
-  echo "❌ Unified governance gate blocked the commit."
-  echo "   Run: bun run governance:gate:changed to see all violations."
+# ── Policy Engine Gate (changed-files scope) ──────────────────────────────
+echo "Running policy engine governance gate (changed-files scope)…"
+bun run policy:check --changed || {
+  echo "❌ Policy engine gate blocked the commit."
+  echo "   Run: bun run policy:check --changed to see all violations."
   exit 1
 }
 
