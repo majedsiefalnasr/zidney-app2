@@ -6,7 +6,7 @@
   "branch": "spec/infra-027-unified-governance-gate-system",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
@@ -20,12 +20,18 @@
   "current_parallel_group": null,
   "session_started_at": "2026-03-25T00:00:00Z",
   "last_updated": "2026-03-25T00:00:00Z",
-  "step_timings": {},
+  "step_timings": {
+    "specify": { "started_at": "2026-03-25T00:05:00Z", "completed_at": "2026-03-25T00:10:00Z" }
+  },
   "history": [
     {
       "event": "branch_created",
       "branch": "spec/infra-027-unified-governance-gate-system",
       "timestamp": "2026-03-25T00:00:00Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-03-25T00:10:00Z"
     }
   ]
 }

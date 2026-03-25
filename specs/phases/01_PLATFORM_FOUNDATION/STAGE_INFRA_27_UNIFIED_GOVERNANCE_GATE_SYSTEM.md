@@ -3,20 +3,32 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-25T00:00:00Z
+Last Updated: 2026-03-25T00:10:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Unified governance gate (`governance:gate`) composing 6 existing guards
+- CI mode variant (`governance:gate:ci`)
+- Changed-files scoped variant (`governance:gate:changed`)
+- Report generation command (`governance:report`)
+- Pre-commit, CI, and orchestrator integration
+- Implementation files under `scripts/governance/`
+- Report output at `docs/governance/governance-report.md`
+
+Deferred Scope:
+
+- Runtime monitoring (explicitly out of scope)
+- External security tooling beyond Trivy (out of scope)
+- Rewriting/replacing existing guards (out of scope)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
