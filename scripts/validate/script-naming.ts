@@ -77,7 +77,7 @@ export const TOOLCHAIN_EXEMPT_PREFIXES = new Set([
 
 /** Full naming pattern: <domain>:<action>[:<scope>] */
 export const NAMING_RE =
-  /^(db|arch|validate|ai|ci|repo|dev|infra|test):[a-z][a-z0-9-]*(:[a-z][a-z0-9-]*)?$/
+  /^(db|arch|validate|ai|ci|repo|dev|infra|test|governance):[a-z][a-z0-9-]*(:[a-z][a-z0-9-]*)?$/
 
 export function collectPackageJsonFiles(repoRoot: string): string[] {
   const results: string[] = []
