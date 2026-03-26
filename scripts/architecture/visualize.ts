@@ -2,6 +2,7 @@
 import { execSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { flushAi, log } from '../utils/logger'
 
 const ROOT = process.cwd()
 const DEPENDENCY_GRAPH_PATH = join(ROOT, 'docs/architecture/graphs/dependency-graph.json')
@@ -317,9 +318,7 @@ function groupNodesByLayer(
 
 function loadDependencyGraph(filePath: string): DependencyGraph {
   if (!existsSync(filePath)) {
-    console.log(
-      `[VISUALIZE] ERROR: dependency-graph.json not found. Run 'bun run arch:audit' first.`
-    )
+    log.error(`[VISUALIZE] ERROR: dependency-graph.json not found. Run 'bun run arch:audit' first.`)
     process.exit(1)
   }
 
@@ -329,13 +328,13 @@ function loadDependencyGraph(filePath: string): DependencyGraph {
     graph = JSON.parse(raw)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    console.log(`[VISUALIZE] ERROR: Failed to parse dependency-graph.json — ${message}`)
+    log.error(`[VISUALIZE] ERROR: Failed to parse dependency-graph.json — ${message}`)
     process.exit(1)
   }
 
   const g = graph as Record<string, unknown>
   if (!Array.isArray(g?.nodes) || !Array.isArray(g?.edges)) {
-    console.log(
+    log.error(
       `[VISUALIZE] ERROR: dependency-graph.json is missing required 'nodes' or 'edges' arrays.`
     )
     process.exit(1)
@@ -346,7 +345,7 @@ function loadDependencyGraph(filePath: string): DependencyGraph {
 
 function loadArchitectureMap(filePath: string): ArchitectureMap | null {
   if (!existsSync(filePath)) {
-    console.log(
+    log.warn(
       `[VISUALIZE] WARNING: ARCHITECTURE_MAP.json not found — using heuristic layer classification.`
     )
     return null
@@ -357,7 +356,7 @@ function loadArchitectureMap(filePath: string): ArchitectureMap | null {
     return JSON.parse(raw) as ArchitectureMap
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    console.log(
+    log.warn(
       `[VISUALIZE] WARNING: Failed to parse ARCHITECTURE_MAP.json (${message}) — using heuristic layer classification.`
     )
     return null
@@ -377,7 +376,7 @@ function buildLayerMap(nodes: string[], archMap: ArchitectureMap | null): Map<st
     }
 
     if (layer === 'unknown') {
-      console.log(`[VISUALIZE] WARNING: No layer found for module ${node} — classified as Unknown`)
+      log.warn(`[VISUALIZE] WARNING: No layer found for module ${node} — classified as Unknown`)
     }
 
     result.set(node, layer)
@@ -397,6 +396,7 @@ function getGitSha(): string {
 // ─── CLI Entry Point ──────────────────────────────────────────────────────────
 
 function main(): void {
+  log.header('ARCHITECTURE VISUALIZE', 'Generates Mermaid diagrams from dependency graph')
   const graph = loadDependencyGraph(DEPENDENCY_GRAPH_PATH)
   const archMap = loadArchitectureMap(ARCHITECTURE_MAP_PATH)
 
@@ -417,7 +417,12 @@ function main(): void {
   writeFileSync(join(OUTPUT_DIR, 'system-overview-diagram.mmd'), systemOverview, 'utf-8')
   writeFileSync(join(OUTPUT_DIR, 'README.md'), readme, 'utf-8')
 
-  console.log(`[VISUALIZE] Done — 3 diagrams written to docs/architecture/visualization/`)
+  log.success(`[VISUALIZE] Done — 3 diagrams written to docs/architecture/visualization/`)
+  log.progressResult(
+    { success: 4 },
+    { title: '3 Diagrams + README Generated', showPercentage: false }
+  )
+  flushAi()
 }
 
 main()

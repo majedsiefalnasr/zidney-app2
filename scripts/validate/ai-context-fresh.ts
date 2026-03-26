@@ -3,18 +3,17 @@
  * @domain validate
  * @category validation
  * @description Check that the AI context mini artifact exists and is not older than 24 hours
- * @mode manual,ci
  * @usage bun run validate:ai-context-fresh
- * @dependencies node:fs,node:path,node:crypto
  */
 
 import { randomUUID } from 'node:crypto'
 import { existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const correlationId = randomUUID()
-const logger = createLogger('validate:ai-context-fresh')
+const isAiMode = process.argv.includes('--ai')
+const logger = createLogger('validate:ai-context-fresh', isAiMode)
 logger.setContext({ correlationId })
 
 const REPO_ROOT = process.cwd()
@@ -22,10 +21,12 @@ const AI_CONTEXT_MINI = join(REPO_ROOT, 'docs/ai/context/ai-context-mini.json')
 const MAX_AGE_MS = 24 * 60 * 60 * 1000 // 24 hours
 
 function main(): void {
+  log.start('Validate AI context freshness')
   logger.info('Checking AI context freshness', { path: AI_CONTEXT_MINI, maxAgeHours: 24 })
 
   if (!existsSync(AI_CONTEXT_MINI)) {
-    logger.error('AI context artifact missing', {
+    const msg = 'AI context artifact missing'
+    logger.error(msg, {
       path: AI_CONTEXT_MINI,
       hint: 'Run: bun run ai:context:generate',
     })
@@ -36,7 +37,8 @@ function main(): void {
   try {
     stat = statSync(AI_CONTEXT_MINI)
   } catch (err) {
-    logger.error('Failed to stat AI context file', {
+    const msg = 'Failed to stat AI context file'
+    logger.error(msg, {
       path: AI_CONTEXT_MINI,
       error: err instanceof Error ? err.message : String(err),
     })
@@ -47,7 +49,8 @@ function main(): void {
   const ageHours = ageMs / (60 * 60 * 1000)
 
   if (ageMs > MAX_AGE_MS) {
-    logger.error('AI context is stale', {
+    const msg = 'AI context is stale'
+    logger.error(msg, {
       path: AI_CONTEXT_MINI,
       ageHours: ageHours.toFixed(2),
       maxAgeHours: 24,
@@ -56,12 +59,21 @@ function main(): void {
     process.exit(1)
   }
 
-  logger.info('AI context is fresh', {
+  const msg = 'AI context is fresh'
+  logger.info(msg, {
     path: AI_CONTEXT_MINI,
     ageHours: ageHours.toFixed(2),
     maxAgeHours: 24,
     lastModified: stat.mtime.toISOString(),
   })
+  log.badge('CONTEXT FRESH', 'success')
+  log.result({
+    total: 1,
+    passed: 1,
+    failed: 0,
+    message: `AI context is fresh (${ageHours.toFixed(2)} hours old)`,
+  })
+  flushAi()
   process.exit(0)
 }
 

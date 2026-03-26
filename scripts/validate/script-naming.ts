@@ -1,24 +1,22 @@
 /**
- * @script validate:script:naming
+ * @script validate:scripts:naming
  * @domain validate
  * @category governance
  * @description Validates all package.json script keys conform to the
  *   <domain>:<action>[:<scope>] naming convention. Allowed domains: db, arch,
  *   validate, ai, ci, repo, dev, infra, test. Lifecycle-exempt names are skipped.
  *   Reports ALL violations before exiting non-zero.
- * @usage bun run validate:script:naming
- * @mode ci,manual
- * @dependencies node:fs,node:path,node:crypto
+ * @usage bun run validate:scripts:naming
  */
 
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 import type { ScriptEntry, ViolationRecord } from './types'
 
 const correlationId = randomUUID()
-const logger = createLogger('validate:script:naming')
+const logger = createLogger('validate:scripts:naming')
 logger.setContext({ correlationId })
 
 const REPO_ROOT = process.cwd()
@@ -160,6 +158,7 @@ export function validateNaming(entries: ScriptEntry[]): ViolationRecord[] {
 }
 
 function main(): void {
+  log.start('Validate script naming')
   logger.info('Starting script naming validation', { repoRoot: REPO_ROOT })
 
   const pkgFiles = collectPackageJsonFiles(REPO_ROOT)
@@ -175,21 +174,27 @@ function main(): void {
 
   if (violations.length === 0) {
     logger.info('All script names are compliant')
-    process.stdout.write('\n✓ validate:script:naming — all script names conform to convention\n')
+    log.badge('NAMING VALID', 'success')
+    log.progressResult(
+      { success: allEntries.length },
+      { title: 'Script Naming Validation', showPercentage: true }
+    )
+    flushAi()
     process.exit(0)
   }
 
   logger.error('Script naming violations found', { count: violations.length })
-  process.stderr.write(`\n❌ validate:script:naming — ${violations.length} violation(s) found:\n\n`)
-
   for (const v of violations) {
     const pkg = v.file.replace(`${REPO_ROOT}/`, '')
-    process.stderr.write(`  [${pkg}] "${v.scriptName}"\n`)
-    process.stderr.write(`    ${v.message}\n`)
-    if (v.hint) process.stderr.write(`    Hint: ${v.hint}\n`)
-    process.stderr.write('\n')
+    logger.error(`${pkg} "${v.scriptName}" - ${v.message}`, { hint: v.hint })
   }
 
+  log.badge('NAMING VIOLATIONS', 'error')
+  log.progressResult(
+    { success: allEntries.length - violations.length, error: violations.length },
+    { title: 'Naming Convention Check', showPercentage: true }
+  )
+  flushAi()
   process.exit(1)
 }
 

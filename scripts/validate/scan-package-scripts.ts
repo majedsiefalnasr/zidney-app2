@@ -3,15 +3,13 @@
  * @domain validate
  * @category governance
  * @description Walk all runtime spec docs and extract unique script references
- * @mode manual,ci
  * @usage bun run validate:scan:packages
- * @dependencies node:fs,node:path,node:crypto
  */
 
 import { randomUUID } from 'node:crypto'
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('scan-package-scripts')
@@ -99,6 +97,7 @@ function main(): void {
   const outputPath = outputArg ? outputArg.replace('--output=', '') : defaultOut
 
   const specsDir = join(REPO_ROOT, 'specs/runtime')
+  log.start('Scan runtime spec scripts')
   logger.info('Starting runtime spec scan', { specsDir, outputPath })
 
   const mdFiles = walkMarkdownFiles(specsDir)
@@ -165,6 +164,12 @@ function main(): void {
     excluded: excludedSet.size,
     outputPath,
   })
+  log.badge('SCAN COMPLETE', 'success')
+  log.progressResult(
+    { success: scripts.length },
+    { title: `Package Script Scan (${mdFiles.length} files)`, showPercentage: true }
+  )
+  flushAi()
 }
 
 main()

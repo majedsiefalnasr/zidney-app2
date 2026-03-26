@@ -1,17 +1,15 @@
 /**
- * @script validate:diff:registry
+ * @script validate:scripts:registry
  * @domain validate
  * @category governance
  * @description Compare scanned runtime spec script references against root package.json, produce diff report
- * @mode manual,ci
- * @usage bun run validate:diff:registry
- * @dependencies node:fs,node:path,node:crypto
+ * @usage bun run validate:scripts:registry
  */
 
 import { randomUUID } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('diff-script-registry')
@@ -99,6 +97,7 @@ function main(): void {
 
   const pkgPath = join(REPO_ROOT, 'package.json')
 
+  log.start('Diff script registry')
   logger.info('Loading scan output', { scanPath })
   const scan = loadScan(scanPath)
 
@@ -141,6 +140,12 @@ function main(): void {
   writeFileSync(outputPath, JSON.stringify(report, null, 2))
 
   logger.info('Diff report written', { outputPath, summary })
+  log.badge('DIFF COMPLETE', 'success')
+  log.progressResult(
+    { success: 1 },
+    { title: 'Registry Diff Generation', showPercentage: false }
+  )
+  flushAi()
 
   // Generate SCRIPT_REGISTRY.md if requested
   const registryArg = args.find((a) => a.startsWith('--registry='))

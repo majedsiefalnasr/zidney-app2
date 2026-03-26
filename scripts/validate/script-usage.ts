@@ -1,25 +1,23 @@
 /**
- * @script validate:script:usage
+ * @script validate:scripts:usage
  * @domain validate
  * @category governance
  * @description Scans all .ts, .json, .yml, .yaml, .md, and .sh files for
  *   "bun run <name>" references and validates that every referenced name exists
  *   in a package.json scripts block. Reports all broken/orphan references
  *   before exiting non-zero.
- * @usage bun run validate:script:usage
- * @mode ci,manual
- * @dependencies node:fs,node:path,node:crypto
+ * @usage bun run validate:scripts:usage
  */
 
 import { randomUUID } from 'node:crypto'
-import { statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 import { collectPackageJsonFiles, parseScriptEntries } from './script-naming'
 import type { ViolationRecord } from './types'
 
 const correlationId = randomUUID()
-const logger = createLogger('validate:script:usage')
+const logger = createLogger('validate:scripts:usage')
 logger.setContext({ correlationId })
 
 const REPO_ROOT = process.cwd()
@@ -145,6 +143,7 @@ export function validateUsages(
 }
 
 function main(): void {
+  log.start('Validate script usage')
   logger.info('Starting script usage validation', { repoRoot: REPO_ROOT })
 
   const knownScripts = collectKnownScripts(REPO_ROOT)
@@ -157,20 +156,26 @@ function main(): void {
 
   if (violations.length === 0) {
     logger.info('All script references are valid')
-    process.stdout.write('\n✓ validate:script:usage — all "bun run" references are valid\n')
+    log.badge('USAGE VALID', 'success')
+    log.progressResult(
+      { success: scanFiles.length },
+      { title: 'Script Reference Validation', showPercentage: true }
+    )
+    flushAi()
     process.exit(0)
   }
 
   logger.error('Script usage violations found', { count: violations.length })
-  process.stderr.write(`\n❌ validate:script:usage — ${violations.length} broken reference(s):\n\n`)
-
   for (const v of violations) {
-    process.stderr.write(`  ${v.file}:${v.line ?? '?'}\n`)
-    process.stderr.write(`    ${v.message}\n`)
-    if (v.hint) process.stderr.write(`    Hint: ${v.hint}\n`)
-    process.stderr.write('\n')
+    logger.error(`${v.file}:${v.line ?? '?'} — ${v.message}`, { hint: v.hint })
   }
 
+  log.badge('USAGE VIOLATIONS', 'error')
+  log.progressResult(
+    { error: violations.length },
+    { title: 'Invalid Script References', showPercentage: false }
+  )
+  flushAi()
   process.exit(1)
 }
 

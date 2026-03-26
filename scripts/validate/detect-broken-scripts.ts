@@ -1,16 +1,16 @@
 /**
- * @script validate:scripts-infra
+ * @script validate:scripts:broken
  * @domain validate
  * @category governance
  * @description Detect missing or broken TypeScript script files referenced in root package.json
- * @usage bun run validate:scripts-infra
+ * @usage bun run validate:scripts:broken
  */
 
 import { spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('detect-broken-scripts')
@@ -70,6 +70,7 @@ function checkFile(relPath: string): ScriptStatus {
 }
 
 function main(): void {
+  log.start('Detect broken scripts')
   const pkgPath = join(REPO_ROOT, 'package.json')
 
   let pkg: { scripts?: Record<string, string> }
@@ -139,10 +140,23 @@ function main(): void {
   }
 
   if (missing > 0 || broken > 0) {
+    log.badge('VALIDATION FAILED', 'error')
+    log.progressResult(
+      { error: missing + broken },
+      { title: 'Broken Scripts Detected', showPercentage: false }
+    )
+    flushAi()
     process.exit(1)
   }
 
   logger.info('All TypeScript script files are VALID')
+  log.badge('VALIDATION PASSED', 'success')
+  log.progressResult(
+    { success: results.length },
+    { title: 'Script Validation Results', showPercentage: true }
+  )
+  flushAi()
+  process.exit(0)
 }
 
 main()

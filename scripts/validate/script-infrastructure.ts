@@ -1,25 +1,23 @@
 /**
- * @script validate:script:infrastructure
+ * @script validate:scripts:infrastructure
  * @domain validate
  * @category governance
  * @description Validates that all scripts/*.ts files have the mandatory 5-field
  *   metadata header (@script, @domain, @category, @description, @usage) and that
  *   the SCRIPT_REGISTRY.md is up-to-date (no drift vs. what the generator would
  *   produce). Reports all violations before exiting non-zero.
- * @usage bun run validate:script:infrastructure
- * @mode ci,manual
- * @dependencies node:fs,node:path,node:crypto
+ * @usage bun run validate:scripts:infrastructure
  */
 
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
 import { generateRegistry, parseMetaHeader, walkTsFiles } from '../generate/script-docs'
+import { createLogger, flushAi, log } from '../utils/logger'
 import type { ViolationRecord } from './types'
 
 const correlationId = randomUUID()
-const logger = createLogger('validate:script:infrastructure')
+const logger = createLogger('validate:scripts:infrastructure')
 logger.setContext({ correlationId })
 
 const REPO_ROOT = process.cwd()
@@ -143,6 +141,7 @@ export function validateRegistryFreshness(
 }
 
 function main(): void {
+  log.start('Validate script infrastructure')
   logger.info('Starting script infrastructure validation', { repoRoot: REPO_ROOT })
 
   const violations: ViolationRecord[] = []
@@ -159,25 +158,27 @@ function main(): void {
 
   if (violations.length === 0) {
     logger.info('Script infrastructure is valid')
-    process.stdout.write(
-      '\n✓ validate:script:infrastructure — all scripts have valid metadata and registry is fresh\n'
+    log.badge('INFRASTRUCTURE VALID', 'success')
+    log.progressResult(
+      { success: 1 },
+      { title: 'Infrastructure Checks', showPercentage: true }
     )
+    flushAi()
     process.exit(0)
   }
 
   logger.error('Script infrastructure violations found', { count: violations.length })
-  process.stderr.write(
-    `\n❌ validate:script:infrastructure — ${violations.length} violation(s) found:\n\n`
-  )
-
   for (const v of violations) {
     const loc = v.line ? `${v.file}:${v.line}` : v.file
-    process.stderr.write(`  [${v.rule}] ${loc}\n`)
-    process.stderr.write(`    ${v.message}\n`)
-    if (v.hint) process.stderr.write(`    Hint: ${v.hint}\n`)
-    process.stderr.write('\n')
+    logger.error(`[${v.rule}] ${loc} — ${v.message}`, { hint: v.hint })
   }
 
+  log.badge('INFRASTRUCTURE FAILED', 'error')
+  log.progressResult(
+    { error: violations.length },
+    { title: 'Infrastructure Violations', showPercentage: false }
+  )
+  flushAi()
   process.exit(1)
 }
 

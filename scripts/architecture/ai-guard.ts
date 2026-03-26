@@ -10,9 +10,9 @@
  */
 
 import { readFileSync } from 'node:fs'
-import { createLogger } from '../core/logger-factory'
 import { getHealthStatus, Timer } from '../core/performance-profiler'
 import { validateArchitectureContract } from '../core/schema-validator'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('ai-guard')
 const timer = new Timer('ai-guard-execution')
@@ -21,6 +21,7 @@ const timer = new Timer('ai-guard-execution')
  * Main entry point for AI Guard with refactored utilities
  */
 async function main(): Promise<void> {
+  log.header('AI GUARD', 'Architecture rule enforcement with refactored utilities')
   timer.start()
 
   try {
@@ -72,8 +73,19 @@ async function main(): Promise<void> {
         actual: `${elapsed.toFixed(0)}ms`,
       })
     }
+
+    log.progressResult(
+      { success: 1, info: 1 },
+      { title: `AI Guard Health Check (${health})`, showPercentage: false }
+    )
+    flushAi()
   } catch (error) {
     logger.error('AI Guard failure', { error: String(error) })
+    log.progressResult(
+      { error: 1 },
+      { title: 'AI Guard Validation Failed', showPercentage: false }
+    )
+    flushAi()
     process.exit(1)
   }
 }
@@ -81,7 +93,7 @@ async function main(): Promise<void> {
 // Run if invoked directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
-    console.error('[ai-guard] Fatal error:', error)
+    log.error('[ai-guard] Fatal error: ' + String(error))
     process.exit(1)
   })
 }

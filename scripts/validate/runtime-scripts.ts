@@ -1,16 +1,16 @@
 /**
- * @script validate:runtime:scripts
+ * @script validate:scripts:runtime
  * @domain validate
  * @category governance
  * @description CI guard: hard-blocks (exit 1) when any bun run <script> reference in
  *   specs/runtime/** is absent from root package.json. Exits 0 when all are registered.
- * @usage bun run validate:runtime:scripts
+ * @usage bun run validate:scripts:runtime
  */
 
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('validate-runtime-scripts')
@@ -102,6 +102,7 @@ export function loadRegisteredScripts(pkgPath: string): Set<string> {
 }
 
 function main(): void {
+  log.start('Validate runtime script references')
   const specsDir = join(REPO_ROOT, 'specs/runtime')
   const pkgPath = join(REPO_ROOT, 'package.json')
 
@@ -148,6 +149,12 @@ function main(): void {
       count: missing.length,
       hint: 'Add missing scripts to root package.json scripts block',
     })
+    log.badge('CI GUARD FAILED', 'error')
+    log.progressResult(
+      { error: missing.length },
+      { title: 'Unregistered Runtime Scripts', showPercentage: false }
+    )
+    flushAi()
     process.exit(1)
   }
 
@@ -155,6 +162,12 @@ function main(): void {
     total: allRefs.size,
     registered: registered.size,
   })
+  log.badge('CI GUARD PASSED', 'success')
+  log.progressResult(
+    { success: registered.size },
+    { title: 'Runtime Script Registration', showPercentage: true }
+  )
+  flushAi()
   process.exit(0)
 }
 
