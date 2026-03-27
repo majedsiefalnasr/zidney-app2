@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres-test:
@@ -7,13 +7,13 @@ services:
     environment:
       POSTGRES_USER: zidney_test
       POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
-      POSTGRES_INITDB_ARGS: '-c max_connections=200'
+      POSTGRES_INITDB_ARGS: "-c max_connections=200"
     ports:
-      - '5433:5432'
+      - "5433:5432"
     volumes:
       - postgres_test_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U zidney_test -d postgres']
+      test: ["CMD-SHELL", "pg_isready -U zidney_test -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -26,11 +26,11 @@ services:
     container_name: redis-test-zidney
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
-      - '6380:6379'
+      - "6380:6379"
     volumes:
       - redis_test_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5

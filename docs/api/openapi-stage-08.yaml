@@ -32,9 +32,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: "#/components/schemas/LoginRequest"
       responses:
-        '200':
+        "200":
           description: Successfully authenticated
           headers:
             X-CSRF-TOKEN:
@@ -48,8 +48,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
-        '429':
+                $ref: "#/components/schemas/LoginResponse"
+        "429":
           description: Rate limit exceeded
           headers:
             Retry-After:
@@ -68,7 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RateLimitError'
+                $ref: "#/components/schemas/RateLimitError"
 
   /auth/logout:
     post:
@@ -79,18 +79,18 @@ paths:
       requestBody:
         required: false
       responses:
-        '200':
+        "200":
           description: Successfully logged out
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
-        '401':
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
           description: Unauthorized - invalid or missing JWT
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   /auth/password-reset:
     post:
@@ -103,20 +103,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PasswordResetRequest'
+              $ref: "#/components/schemas/PasswordResetRequest"
       responses:
-        '200':
+        "200":
           description: Password reset initiated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
-        '429':
+                $ref: "#/components/schemas/SuccessResponse"
+        "429":
           description: Rate limit exceeded
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RateLimitError'
+                $ref: "#/components/schemas/RateLimitError"
 
   /attempt/{id}/submit:
     post:
@@ -140,38 +140,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SubmitAttemptRequest'
+              $ref: "#/components/schemas/SubmitAttemptRequest"
       responses:
-        '200':
+        "200":
           description: Submission successful
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GradingResult'
-        '400':
+                $ref: "#/components/schemas/GradingResult"
+        "400":
           description: Invalid request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '410':
+                $ref: "#/components/schemas/ErrorResponse"
+        "410":
           description: Attempt expired
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '426':
+                $ref: "#/components/schemas/ErrorResponse"
+        "426":
           description: Schema version incompatible
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SchemaVersionError'
-        '429':
+                $ref: "#/components/schemas/SchemaVersionError"
+        "429":
           description: Rate limit exceeded
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RateLimitError'
+                $ref: "#/components/schemas/RateLimitError"
 
   /ws/attempt/{id}:
     get:
@@ -190,13 +190,13 @@ paths:
             type: string
             format: uuid
       responses:
-        '101':
+        "101":
           description: Switching protocols
-        '401':
+        "401":
           description: Unauthorized
-        '423':
+        "423":
           description: Workspace soft-locked
-        '426':
+        "426":
           description: Schema upgrade required
 
   /admin/workspace/{wsId}/dlq:
@@ -226,13 +226,13 @@ paths:
             type: integer
             default: 0
       responses:
-        '200':
+        "200":
           description: DLQ jobs retrieved
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DLQListResponse'
-        '403':
+                $ref: "#/components/schemas/DLQListResponse"
+        "403":
           description: Forbidden - insufficient permissions
 
   /admin/workspace/{wsId}/dlq/{dlqId}/retry:
@@ -255,15 +255,15 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Job re-enqueued
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
-        '404':
+                $ref: "#/components/schemas/SuccessResponse"
+        "404":
           description: Job not found
-        '403':
+        "403":
           description: Forbidden
 
 components:
@@ -296,7 +296,7 @@ components:
           minLength: 8
         workspace_slug:
           type: string
-          pattern: '^[a-z0-9-]+$'
+          pattern: "^[a-z0-9-]+$"
 
     LoginResponse:
       type: object
@@ -479,10 +479,10 @@ components:
               properties:
                 tenant_version:
                   type: string
-                  example: '1.0.0'
+                  example: "1.0.0"
                 app_version:
                   type: string
-                  example: '1.1.0'
+                  example: "1.1.0"
                 action:
                   type: string
                   enum:
