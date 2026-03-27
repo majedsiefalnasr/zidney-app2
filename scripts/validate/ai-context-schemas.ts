@@ -9,7 +9,7 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const isAiMode = process.argv.includes('--ai')
@@ -28,7 +28,12 @@ const REQUIRED_ARTIFACTS = [
 ] as const
 
 function main(): void {
-  log.start('Validate AI context schemas')
+  log.header(
+    'Validate AI context schemas',
+    'Validate that required AI context JSON artifacts exist and are valid JSON'
+  )
+  log.section('Validation')
+  log.step('Checking required AI context artifacts')
 
   const perfResults = [{ DIR: AI_CONTEXT_DIR, Required: REQUIRED_ARTIFACTS.length }]
   log.table(perfResults, {
@@ -72,25 +77,26 @@ function main(): void {
       failed: errors.length,
       hint: 'Run: bun run ai:context:generate to regenerate all artifacts',
     })
-    log.badge('VALIDATION FAILED', 'error')
     log.result({
       total: REQUIRED_ARTIFACTS.length,
       passed: REQUIRED_ARTIFACTS.length - errors.length,
       failed: errors.length,
       message: 'AI context schema validation failed',
     })
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
 
+  logger.info('All AI context artifacts valid', {
+    total: REQUIRED_ARTIFACTS.length,
+    validated: validationResults.length,
+  })
   log.result({
     total: REQUIRED_ARTIFACTS.length,
     passed: REQUIRED_ARTIFACTS.length,
     failed: 0,
     message: 'All AI context artifacts valid',
   })
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 main()
