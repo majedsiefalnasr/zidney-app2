@@ -85,9 +85,10 @@ function main(): void {
 
   const scripts = pkg.scripts ?? {}
   const results: ScriptResult[] = []
+  const scriptKeys = Object.keys(scripts)
 
   logger.info('Scanning package.json scripts for TS file references', {
-    totalScripts: Object.keys(scripts).length,
+    totalScripts: scriptKeys.length,
   })
 
   for (const [key, command] of Object.entries(scripts)) {
