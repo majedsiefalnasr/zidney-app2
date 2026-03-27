@@ -10,6 +10,10 @@
  *   changedFiles array rather than exiting non-zero.
  *
  * @usage bun run arch:context:changed
+ *
+ * Flags:
+ *   --ci      : CI / no-write mode — resolve changed files but do NOT write artifact
+ *   --dry-run : print the artifact JSON to stdout instead of writing
  */
 
 import { execFileSync } from 'node:child_process'
@@ -63,6 +67,10 @@ function writeArtifact(changedFiles: string[]): void {
 
 function main(): void {
   log.header('CONTEXT CHANGED', 'Resolves staged changed files and writes context-changed.json')
+  const args = process.argv.slice(2)
+  const ci = args.includes('--ci')
+  const dryRun = args.includes('--dry-run')
+
   const { fresh, artifact } = isFresh()
 
   if (fresh && artifact) {
@@ -89,6 +97,30 @@ function main(): void {
     .map((l) => l.trim())
     .filter(Boolean)
     .sort()
+
+  // CI / no-write mode: resolve staged files but do not modify workspace artifacts
+  if (ci) {
+    log.info(
+      `[context:changed] CI mode: resolved ${changedFiles.length} staged file(s); skipping artifact write`
+    )
+    log.result({
+      total: changedFiles.length,
+      passed: changedFiles.length,
+      failed: 0,
+      message: 'ci-skip',
+    })
+    flushAi()
+    process.exit(0)
+  }
+
+  if (dryRun) {
+    const artifact: ContextChangedArtifact = {
+      generatedAt: new Date().toISOString(),
+      changedFiles,
+    }
+    process.stdout.write(`${JSON.stringify(artifact, null, 2)}\n`)
+    process.exit(0)
+  }
 
   try {
     writeArtifact(changedFiles)

@@ -50,7 +50,7 @@ fi
 # ── GitNexus Context (staged-file context + validation) ─────────────────────
 if [ -n "$STAGED_FILES" ]; then
   echo "Resolving GitNexus staged context…"
-  bun run arch:context:changed || {
+  bun run arch:context:changed -- --ci || {
     echo "❌ arch:context:changed failed — commit blocked."
     exit 1
   }

@@ -36,6 +36,13 @@ if [ -z "$CHANGED_FILES" ]; then
   exit 0
 fi
 
+# ── Resolve GitNexus staged context (CI/no-write mode) ────────────────────
+echo "Resolving GitNexus staged context (CI mode — no writes)…"
+bun run arch:context:changed -- --ci || {
+  echo "❌ arch:context:changed failed — push blocked."
+  exit 1
+}
+
 
 # ── Architecture Governance (blocking) ──────────────────────────────────────
 # FIX #2 — removed --full flag (does not exist on ai-guard.ts).
