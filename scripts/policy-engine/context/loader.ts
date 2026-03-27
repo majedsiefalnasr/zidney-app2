@@ -13,6 +13,7 @@
  * 6. documentedScriptNames — docs/scripts/*.md filenames (stem = name)
  *
  * @module scripts/policy-engine/context/loader
+ * @library-module
  */
 
 import { join } from 'node:path'

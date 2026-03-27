@@ -4,6 +4,7 @@
  * These types define the schema for execution logs, sub-command results, brain status,
  * validation reports, execution plans, and CLI argument shapes used across all three
  * orchestration entry points (run-task.ts, plan-task.ts, validate-execution.ts).
+ * @library-module
  */
 
 /**

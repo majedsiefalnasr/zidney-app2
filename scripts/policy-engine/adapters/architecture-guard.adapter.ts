@@ -7,6 +7,7 @@
  * Never throws. All errors are returned as error-severity PolicyResult entries.
  *
  * @module scripts/policy-engine/adapters/architecture-guard.adapter
+ * @library-module
  */
 
 import { createLogger } from '@zidney/logger'

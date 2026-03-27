@@ -8,6 +8,7 @@
  * Never throws. All errors are returned as error-severity PolicyResult entries.
  *
  * @module scripts/policy-engine/adapters/trivy.adapter
+ * @library-module
  */
 
 import { join } from 'node:path'
