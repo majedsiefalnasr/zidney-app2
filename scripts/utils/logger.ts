@@ -478,7 +478,13 @@ class Logger {
    * @param summary - Object with optional `passed`, `failed`, `total`, and `message` fields
    */
   result(
-    summary: { passed?: number; failed?: number; total?: number; message?: string },
+    summary: {
+      passed?: number
+      failed?: number
+      total?: number
+      warnings?: number
+      message?: string
+    },
     options?: { align?: Align }
   ) {
     const duration = this.startTime ? Date.now() - this.startTime : undefined
@@ -493,6 +499,7 @@ class Logger {
           data: {
             passed: summary.passed,
             failed: summary.failed,
+            warnings: summary.warnings,
             total: summary.total,
           },
         })
@@ -525,6 +532,14 @@ class Logger {
       rows.push([
         'Failed',
         `${colors.red}${failed}${colors.reset} ${colors.dim}(${failedPct}%)${colors.reset}`,
+      ])
+    }
+
+    if (summary.warnings !== undefined) {
+      const warningPct = total > 0 ? Math.round((summary.warnings / total) * 100) : 0
+      rows.push([
+        'Warnings',
+        `${colors.yellow}${summary.warnings}${colors.reset} ${colors.dim}(${warningPct}%)${colors.reset}`,
       ])
     }
 
@@ -924,6 +939,19 @@ class Logger {
     console.log(`\n${colors.red}✖ ${title} (${items.length})${colors.reset}\n`)
     for (const item of items) {
       console.log(`  ${colors.red}•${colors.reset} ${item}`)
+    }
+  }
+
+  /**
+   * Render a list of warning items
+   */
+  warningList(title: string, items: string[]) {
+    if (isAiMode || isSilent) return
+    if (!items.length) return
+
+    console.log(`\n${colors.yellow}⚠ ${title} (${items.length})${colors.reset}\n`)
+    for (const item of items) {
+      console.log(`  ${colors.yellow}•${colors.reset} ${item}`)
     }
   }
 
