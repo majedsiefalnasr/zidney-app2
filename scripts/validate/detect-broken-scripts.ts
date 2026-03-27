@@ -142,20 +142,22 @@ function main(): void {
 
   if (missing > 0 || broken > 0) {
     log.badge('VALIDATION FAILED', 'error')
-    log.progressResult(
-      { error: missing + broken },
-      { title: 'Broken Scripts Detected', showPercentage: false }
-    )
+    log.result({
+      failed: missing + broken,
+      total: results.length,
+      message: 'Broken scripts detected',
+    })
     flushAi()
     process.exit(1)
   }
 
   logger.info('All TypeScript script files are VALID')
   log.badge('VALIDATION PASSED', 'success')
-  log.progressResult(
-    { success: results.length },
-    { title: 'Script Validation Results', showPercentage: true }
-  )
+  log.result({
+    passed: results.length,
+    total: results.length,
+    message: 'All TypeScript scripts validated',
+  })
   flushAi()
   process.exit(0)
 }
