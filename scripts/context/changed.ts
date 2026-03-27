@@ -13,7 +13,7 @@
  */
 
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, renameSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { flushAi, log } from '../utils/logger'
 
@@ -36,11 +36,12 @@ function isFresh(): { fresh: boolean; artifact?: ContextChangedArtifact } {
   if (!existsSync(OUTPUT_PATH)) return { fresh: false }
 
   try {
-    const raw = Bun.file(OUTPUT_PATH)
-    const ageMs = Date.now() - raw.mtimeMs
+    // Use fs.statSync to reliably obtain mtimeMs across runtimes
+    const stats = statSync(OUTPUT_PATH)
+    const ageMs = Date.now() - stats.mtimeMs
     if (ageMs >= CACHE_MAX_AGE_MS) return { fresh: false }
 
-    const text = require('node:fs').readFileSync(OUTPUT_PATH, 'utf8') as string
+    const text = readFileSync(OUTPUT_PATH, 'utf8') as string
     const artifact = JSON.parse(text) as ContextChangedArtifact
     return { fresh: true, artifact }
   } catch {
