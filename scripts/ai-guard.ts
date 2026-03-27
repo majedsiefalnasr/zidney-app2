@@ -29,6 +29,10 @@ import type { AIDependencyGraph } from '../packages/types/src/ai-context'
 import { runUnifiedArchitectureGuard } from './architecture-guard/runner'
 import { flushAi, log } from './utils/logger'
 
+// When invoked from hooks/CI set this flag to avoid regenerating large
+// AI-context artifacts that would modify the working tree.
+const NO_GENERATE = process.argv.includes('--ci') || process.env.ZIDNEY_NO_GENERATE === '1'
+
 function getCurrentBranch(): string {
   try {
     const branch = execSync('git rev-parse --abbrev-ref HEAD', {
@@ -893,6 +897,15 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
 
   if (loadResult.graph === null) {
     if (loadResult.reason === 'missing') {
+      if (NO_GENERATE) {
+        log.info(
+          'AI Guard (incremental): graph missing — --ci set, skipping regeneration and falling back to full scan.'
+        )
+        const result = runFullScanWithReason('graph_missing_no_generate', stagedFiles)
+        finalizeResult(result, config)
+        return result
+      }
+
       log.info('AI Guard (incremental): graph missing — regenerating...')
       try {
         execSync('bun scripts/infra-audit.ts --generate-graph', { stdio: 'inherit' })

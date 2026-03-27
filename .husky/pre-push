@@ -48,7 +48,7 @@ bun run arch:context:changed -- --ci || {
 # FIX #2 — removed --full flag (does not exist on ai-guard.ts).
 # ai-guard.ts runs a full staged/changed-file scan by default.
 echo "Running architecture governance validation..."
-bun scripts/ai-guard.ts || {
+bun scripts/ai-guard.ts --ci || {
   echo "❌ Architecture guard failed — push blocked."
   exit 1
 }

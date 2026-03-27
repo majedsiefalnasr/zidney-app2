@@ -72,7 +72,8 @@ if [ -n "$CODE_FILES" ]; then
   # reads staged files via `git diff --cached` internally, so passing them
   # via env var was redundant AND it shadowed the STAGED_FILES variable used
   # by the brain validation check below.
-  bun ai:guard
+  # Run in CI/no-generate mode to avoid regenerating AI-context artifacts
+  bun run ai:guard -- --ci
 else
   echo "Skipping architecture checks (no code files changed)"
 fi
