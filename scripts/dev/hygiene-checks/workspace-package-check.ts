@@ -1,13 +1,15 @@
 /**
  * T006 — Workspace Package Validation
  * Checks that every package under packages/ is consumed by at least one app.
- */
+ 
+ * @library-module
+*/
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { TaskFinding, TaskResult } from './types.ts'
 
-const ROOT = process.cwd()
+const _ROOT = process.cwd()
 const PACKAGES_DIR = join(ROOT, 'packages')
 const APPS_DIR = join(ROOT, 'apps')
 

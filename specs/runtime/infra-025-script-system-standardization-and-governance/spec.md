@@ -47,7 +47,7 @@ This stage establishes a **first-class governed script system** for the entire m
 ### Session 2026-03-21
 
 - Q: Does the refactor engine (FR-004) include `.sh` files in its scan-and-replace scope, given the engine skeleton in the stage file only matches `md|json|ts|yml|yaml|js`? → A: Yes — `.sh` files are explicitly in scope. Stage T003 and FR-004 both list shell scripts. The skeleton is illustrative; the implementation file-match regex must include `\.sh$` in addition to the other extensions.
-- Q: Should `validate:script:naming` and `validate:script:usage` (FR-008) operate in fail-fast mode or report-all mode? → A: Report-all. Both scripts must collect and emit the complete list of all violations before exiting non-zero, enabling developers to fix every issue in a single pass.
+- Q: Should `validate:scripts:naming` and `validate:scripts:usage` (FR-008) operate in fail-fast mode or report-all mode? → A: Report-all. Both scripts must collect and emit the complete list of all violations before exiting non-zero, enabling developers to fix every issue in a single pass.
 - Q: Which existing CI workflow file receives the four script validation steps from FR-009 — `ci.yml`, `architecture-governance.yml`, or a new dedicated file? → A: `.github/workflows/architecture-governance.yml`. Script governance is a governance concern matching the purpose of that workflow, which already houses `arch:guard`, `infra-audit.ts`, and `arch:health:ci`. No new workflow file is created.
 - Q: Does the "no duplicate script names across `package.json` files" rule in FR-002 apply to all script names (including universal lifecycle names like `build`, `test`) or only to governed `<domain>:<action>[:<scope>]` names? → A: Governed scripts only. The duplicate-name prohibition applies exclusively to scripts conforming to `<domain>:<action>[:<scope>]`. Standard lifecycle scripts (`build`, `test`, `lint`, `typecheck`, `dev`, `clean`, `check`) that exist across all workspaces are explicitly exempt.
 - Q: Does the new `script-system-governance` AI skill (FR-011) supersede or supplement existing script guidance in `AGENTS.md` and other documentation? → A: Supplements. The skill is additive — it becomes the canonical agent-facing interface for script governance operations. Existing `AGENTS.md` entries, README references, and CI comments are not removed. Agents must load the skill whenever creating, renaming, or validating scripts.
@@ -130,7 +130,7 @@ All scripts across the monorepo must follow this structure:
 | -------------------------- | -------------------------- |
 | `db:pool-status`           | `db:status:pool`           |
 | `db:validate-licenses`     | `db:validate:licenses`     |
-| `validate-runtime-scripts` | `validate:runtime:scripts` |
+| `validate-runtime-scripts` | `validate:scripts:runtime` |
 | `arch:validate-brain`      | `arch:validate:brain`      |
 
 ---
@@ -282,12 +282,12 @@ The following script validation steps must be added to the CI pipeline.
 
 **Target workflow file:** `.github/workflows/architecture-governance.yml`. Script governance is a governance concern; these steps are added as a new `# Script System Governance` block inside the existing `architecture-governance` job. No new workflow file is created.
 
-| CI Check                         | What it validates                             |
-| -------------------------------- | --------------------------------------------- |
-| `validate:script:naming`         | All script names follow convention            |
-| `validate:script:usage`          | No broken or orphan references                |
-| `validate:script:infrastructure` | Registry is current; metadata headers present |
-| `dev:generate:script-docs`       | Registry can be regenerated without errors    |
+| CI Check                          | What it validates                             |
+| --------------------------------- | --------------------------------------------- |
+| `validate:scripts:naming`         | All script names follow convention            |
+| `validate:scripts:usage`          | No broken or orphan references                |
+| `validate:scripts:infrastructure` | Registry is current; metadata headers present |
+| `dev:generate:script-docs`        | Registry can be regenerated without errors    |
 
 CI must fail if any check fails. No bypass is permitted.
 
@@ -331,8 +331,8 @@ The skill must be loaded by any AI agent that creates, renames, or validates scr
 
 - The script file is placed at `scripts/validate/<name>.ts` with a metadata header
 - A `validate:<action>:<scope>` entry is added to `package.json`
-- Running `bun run validate:script:naming` passes
-- Running `bun run validate:script:usage` passes
+- Running `bun run validate:scripts:naming` passes
+- Running `bun run validate:scripts:usage` passes
 
 ---
 
@@ -356,7 +356,7 @@ The skill must be loaded by any AI agent that creates, renames, or validates scr
 **When** CI runs
 **Then:**
 
-- `validate:script:naming` fails with a clear message identifying the non-compliant name
+- `validate:scripts:naming` fails with a clear message identifying the non-compliant name
 - The CI pipeline blocks the merge
 
 ---
@@ -367,7 +367,7 @@ The skill must be loaded by any AI agent that creates, renames, or validates scr
 **When** CI runs
 **Then:**
 
-- `validate:script:usage` fails identifying the broken reference and its location
+- `validate:scripts:usage` fails identifying the broken reference and its location
 - The pipeline blocks the merge
 
 ---
@@ -398,16 +398,16 @@ The skill must be loaded by any AI agent that creates, renames, or validates scr
 
 ## Success Criteria
 
-| #   | Criterion                                                                                      | Measurable Outcome                                                |
-| --- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| 1   | All scripts across the monorepo conform to the `<domain>:<action>[:<scope>]` naming convention | `validate:script:naming` passes with zero violations              |
-| 2   | No broken script references exist anywhere in the repository                                   | `validate:script:usage` passes with zero unresolved references    |
-| 3   | Every script file has a complete metadata header                                               | `validate:script:infrastructure` passes with zero missing headers |
-| 4   | The script registry is complete and accurate                                                   | Registry regenerates without errors; CI staleness check passes    |
-| 5   | CI prevents future regressions                                                                 | All four CI checks integrated and blocking on failure             |
-| 6   | The refactor engine produces a report with zero unresolved references                          | `reports/SCRIPT_REFACTOR_REPORT.md` shows 0 unresolved            |
-| 7   | AI agents can create or rename scripts without breaking the system                             | Governance skill is present and covers all required workflows     |
-| 8   | Orchestrator gate blocks closure if any validation fails                                       | Gate is defined and enforced in stage closure procedure           |
+| #   | Criterion                                                                                      | Measurable Outcome                                                 |
+| --- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 1   | All scripts across the monorepo conform to the `<domain>:<action>[:<scope>]` naming convention | `validate:scripts:naming` passes with zero violations              |
+| 2   | No broken script references exist anywhere in the repository                                   | `validate:scripts:usage` passes with zero unresolved references    |
+| 3   | Every script file has a complete metadata header                                               | `validate:scripts:infrastructure` passes with zero missing headers |
+| 4   | The script registry is complete and accurate                                                   | Registry regenerates without errors; CI staleness check passes     |
+| 5   | CI prevents future regressions                                                                 | All four CI checks integrated and blocking on failure              |
+| 6   | The refactor engine produces a report with zero unresolved references                          | `reports/SCRIPT_REFACTOR_REPORT.md` shows 0 unresolved             |
+| 7   | AI agents can create or rename scripts without breaking the system                             | Governance skill is present and covers all required workflows      |
+| 8   | Orchestrator gate blocks closure if any validation fails                                       | Gate is defined and enforced in stage closure procedure            |
 
 ---
 

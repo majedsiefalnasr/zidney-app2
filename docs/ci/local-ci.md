@@ -365,7 +365,7 @@ bun run ci:local       # fast mode: --pull=false, uses cached images
 ```
 
 This is faster than `bun run ci:run-local` but skips the governance steps (validate-runtime-scripts,
-validate:scripts-infra, arch:guard, etc.). Use `ci:run-local` before closing a stage.
+validate:scripts:broken, arch:guard, etc.). Use `ci:run-local` before closing a stage.
 
 ### Automated pre-push hook (optional)
 

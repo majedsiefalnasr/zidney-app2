@@ -40,8 +40,5 @@ writeFileSync(mapPath, JSON.stringify(json, null, 2))
 
 log.success(`Module added to ARCHITECTURE_MAP.json: ${moduleName}`)
 log.badge('MODULE ADDED', 'success')
-log.progressResult(
-  { success: 1 },
-  { title: `Module Added: ${moduleName}`, showPercentage: false }
-)
+log.progressResult({ success: 1 }, { title: `Module Added: ${moduleName}`, showPercentage: false })
 flushAi()

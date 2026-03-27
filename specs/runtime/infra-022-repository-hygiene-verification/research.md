@@ -93,24 +93,24 @@ No existing script covers T001, T002, T005, T006, T007, or T010 directly.
 
 Confirmed duplicates (root entry → subdir canonical):
 
-| Root-level                          | Subdir canonical                          |
-| ----------------------------------- | ----------------------------------------- |
-| scripts/ai-guard.ts                 | scripts/architecture/ai-guard.ts          |
-| scripts/architecture-diff.ts        | scripts/architecture/architecture-diff.ts |
-| scripts/check-store-cycles.ts       | scripts/dev/check-store-cycles.ts         |
-| scripts/check-tsconfig-strict.sh    | scripts/build/check-tsconfig-strict.sh    |
-| scripts/cleanup-test-env.sh         | scripts/build/cleanup-test-env.sh         |
-| scripts/deploy-production.sh        | scripts/ci/deploy-production.sh           |
-| scripts/deploy-staging.sh           | scripts/ci/deploy-staging.sh              |
-| scripts/generate-ai-context.ts      | scripts/dev/generate-ai-context.ts        |
-| scripts/infra-audit.ts              | scripts/architecture/infra-audit.ts       |
-| scripts/init-test-db.sh             | scripts/build/init-test-db.sh             |
-| scripts/reset-test-redis.sh         | scripts/build/reset-test-redis.sh         |
-| scripts/run-all-tests.sh            | scripts/ci/run-all-tests.sh               |
-| scripts/run-staging-smoke-tests.sh  | scripts/ci/run-staging-smoke-tests.sh     |
-| scripts/seed-dashboard-test-data.ts | scripts/dev/seed-dashboard-test-data.ts   |
-| scripts/type-safety-guard.ts        | scripts/governance/type-safety-guard.ts   |
-| scripts/verify-test-env.sh          | scripts/build/verify-test-env.sh          |
+| Root-level                                | Subdir canonical                          |
+| ----------------------------------------- | ----------------------------------------- |
+| scripts/ai-guard.ts                       | scripts/architecture/ai-guard.ts          |
+| scripts/architecture-diff.ts              | scripts/architecture/architecture-diff.ts |
+| scripts/check-store-cycles.ts             | scripts/dev/check-store-cycles.ts         |
+| scripts/validate/check-tsconfig-strict.sh | scripts/build/check-tsconfig-strict.sh    |
+| scripts/cleanup-test-env.sh               | scripts/build/cleanup-test-env.sh         |
+| scripts/deploy-production.sh              | scripts/ci/deploy-production.sh           |
+| scripts/deploy-staging.sh                 | scripts/ci/deploy-staging.sh              |
+| scripts/generate-ai-context.ts            | scripts/dev/generate-ai-context.ts        |
+| scripts/infra-audit.ts                    | scripts/architecture/infra-audit.ts       |
+| scripts/init-test-db.sh                   | scripts/build/init-test-db.sh             |
+| scripts/reset-test-redis.sh               | scripts/build/reset-test-redis.sh         |
+| scripts/run-all-tests.sh                  | scripts/ci/run-all-tests.sh               |
+| scripts/run-staging-smoke-tests.sh        | scripts/ci/run-staging-smoke-tests.sh     |
+| scripts/seed-dashboard-test-data.ts       | scripts/dev/seed-dashboard-test-data.ts   |
+| scripts/type-safety-guard.ts              | scripts/governance/type-safety-guard.ts   |
+| scripts/verify-test-env.sh                | scripts/build/verify-test-env.sh          |
 
 Root-level versions are the ones referenced by `package.json` scripts. The `scripts/dev/validate-script-duplication.ts` likely captures this pattern. T003 must flag these as "duplicate root stubs — review for consolidation" in the hygiene report.
 

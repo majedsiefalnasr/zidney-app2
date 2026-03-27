@@ -1,7 +1,7 @@
-import { execSync } from 'child_process'
-import * as fs from 'fs'
-import * as path from 'path'
-import { assertNoConsoleUsage, flushAi, log } from '../utils/logger'
+import { execSync } from 'node:child_process'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+import { assertNoConsoleUsage, exit, log } from '../utils/logger'
 
 const isFixMode = process.argv.includes('--fix')
 const isCI = process.env.CI === 'true' || process.env.CI === '1'
@@ -12,6 +12,9 @@ const isStagedMode = process.argv.includes('--staged') || isPreviewMode
 const isDryRun = process.argv.includes('--dry') || isPreviewMode
 
 const ROOT_DIR = path.join(process.cwd(), 'scripts')
+
+// Identify this script in the shared logger (used for AI-mode payloads)
+log.setScript('scripts/validate/validate-scripts-ux')
 
 const TARGET_EXTENSIONS = ['.js', '.ts', '.sh']
 
@@ -109,7 +112,12 @@ function hasResultBlock(content: string): boolean {
   // Raw terminal pattern (shell scripts or old style)
   if (content.includes('SUMMARY') || content.includes('RESULT')) return true
   // Logger API calls (preferred TS/JS style)
-  if (content.includes('log.result(') || content.includes('log.end(') || content.includes('log.progressResult(')) return true
+  if (
+    content.includes('log.result(') ||
+    content.includes('log.end(') ||
+    content.includes('log.progressResult(')
+  )
+    return true
   return false
 }
 
@@ -127,6 +135,11 @@ interface ValidationResult {
 }
 
 function validateFile(filePath: string) {
+  // If the file does not exist (deleted in staged changes), skip validation.
+  if (!fs.existsSync(filePath)) {
+    return { filePath, valid: true }
+  }
+
   const content = fs.readFileSync(filePath, 'utf-8')
 
   const issues: string[] = []
@@ -179,6 +192,10 @@ function validateFile(filePath: string) {
 
 function main() {
   const scriptFiles = isStagedMode ? getStagedFiles() : scanDir(ROOT_DIR)
+  if (scriptFiles.length === 0) {
+    log.empty('No scripts found to validate')
+    exit(0)
+  }
   log.header('SCRIPT UX VALIDATION', 'Validates scripts against UX and logging standards')
 
   const results = scriptFiles.map(validateFile) as ValidationResult[]
@@ -194,26 +211,23 @@ function main() {
       failed: 0,
       message: `All scripts valid${fixed.length ? ` (${fixed.length} fixed)` : ''}${dry.length ? ` (${dry.length} dry-run)` : ''}`,
     })
-
-    flushAi()
-    process.exit(0)
+    exit(0)
   }
 
-  log.step(`Checking ${scriptFiles.length} scripts`)
+  log.sectionStep(`Scanning ${scriptFiles.length} scripts`)
 
-  log.error(`Failed scripts: ${failed.length}`)
+  const failedFiles = failed.map((f) => f.filePath)
+  log.failList('Failed scripts', failedFiles)
 
   for (const f of failed) {
     log.group(f.filePath)
 
-    if (f.issues) {
-      for (const issue of f.issues) {
-        log.error(issue)
-      }
+    if (f.issues && f.issues.length > 0) {
+      log.failList('Issues', f.issues)
     }
 
     if (f.suggestion) {
-      log.info(`Fix preview:`)
+      log.step('Fix preview:')
       log.step(f.suggestion)
     }
 
@@ -226,9 +240,7 @@ function main() {
     failed: failed.length,
     message: 'Fix issues before commit',
   })
-
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 main()

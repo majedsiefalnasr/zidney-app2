@@ -239,7 +239,7 @@ All keys follow the `domain:action` naming convention required by Zidney script 
 - It must execute a **7-step governance sequence** in order (Step 0 is a Docker fail-fast check, Steps 1–7 are the governance checks):
   - Step 0: Docker availability check via `docker info` (fail-fast — abort if Docker not running)
   1. `validate-runtime-scripts`
-  2. `validate-script-infrastructure` (via `validate:scripts-infra`)
+  2. `validate-script-infrastructure` (via `validate:scripts:broken`)
   3. `generate-script-docs`
   4. `architecture-guard`
   5. `type-safety-guard`

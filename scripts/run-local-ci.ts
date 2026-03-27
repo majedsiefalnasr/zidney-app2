@@ -10,6 +10,7 @@
  */
 
 import { spawnSync } from 'node:child_process'
+import { flushAi, log } from './utils/logger'
 
 interface StepResult {
   step: number
@@ -24,7 +25,7 @@ const RESET = '\x1b[0m'
 const GREEN = '\x1b[32m'
 const RED = '\x1b[31m'
 const YELLOW = '\x1b[33m'
-const CYAN = '\x1b[36m'
+const _CYAN = '\x1b[36m'
 const BOLD = '\x1b[1m'
 
 function run(command: string, args: string[]): { success: boolean; output: string } {
@@ -56,8 +57,8 @@ function checkDocker(): { running: boolean; message: string } {
 }
 
 const STEPS: Array<{ name: string; scriptKey: string }> = [
-  { name: 'validate:runtime:scripts', scriptKey: 'validate:runtime:scripts' },
-  { name: 'validate:scripts-infra', scriptKey: 'validate:scripts-infra' },
+  { name: 'validate:scripts:runtime', scriptKey: 'validate:scripts:runtime' },
+  { name: 'validate:scripts:broken', scriptKey: 'validate:scripts:broken' },
   { name: 'dev:generate:script-docs', scriptKey: 'dev:generate:script-docs' },
   { name: 'arch:guard', scriptKey: 'arch:guard' },
   { name: 'arch:type-safety-guard', scriptKey: 'arch:type-safety-guard' },
@@ -66,31 +67,24 @@ const STEPS: Array<{ name: string; scriptKey: string }> = [
 ]
 
 function printSeparator(): void {
-  console.log('─'.repeat(70))
+  log.info('─'.repeat(70))
 }
 
 function main(): void {
-  console.log()
-  printSeparator()
-  console.log(`${BOLD}${CYAN}  Zidney Local CI Orchestrator${RESET}`)
-  console.log(`  7-step governance sequence + Docker fail-fast check`)
-  printSeparator()
-  console.log()
+  log.header('ZIDNEY LOCAL CI ORCHESTRATOR', '7-step governance sequence + Docker fail-fast check')
 
   // ── Step 0: Docker fail-fast check ────────────────────────────────────
   process.stdout.write(`${BOLD}[STEP 0/7]${RESET} Docker availability check ... `)
   const docker = checkDocker()
   if (!docker.running) {
-    console.log(`${RED}FAIL${RESET}`)
-    console.log()
-    console.error(`${RED}${BOLD}ABORT: Docker is not running.${RESET}`)
-    console.error(`  ${docker.message}`)
-    console.error(`  Start Docker Desktop and retry.`)
-    console.log()
+    log.error(`${RED}FAIL${RESET}`)
+    log.error(`ABORT: Docker is not running. ${docker.message}`)
+    log.error('Start Docker Desktop and retry.')
+    log.result({ total: 1, passed: 0, failed: 1 })
+    flushAi()
     process.exit(1)
   }
-  console.log(`${GREEN}PASS${RESET} (${docker.message})`)
-  console.log()
+  log.success(`Docker available: ${docker.message}`)
 
   // ── Steps 1–7: Governance sequence (fail-forward) ─────────────────────
   const results: StepResult[] = []
@@ -108,17 +102,17 @@ function main(): void {
     const status: 'PASS' | 'FAIL' = success ? 'PASS' : 'FAIL'
     const color = success ? GREEN : RED
 
-    console.log(`${color}${status}${RESET} ${YELLOW}(${durationMs}ms)${RESET}`)
+    log.info(`${color}${status}${RESET} ${YELLOW}(${durationMs}ms)${RESET}`)
 
     if (!success && output) {
-      console.log()
-      console.log(`  ${BOLD}Output from failed step [${stepNum}/${STEPS.length}] ${name}:${RESET}`)
+      log.info()
+      log.info(`  ${BOLD}Output from failed step [${stepNum}/${STEPS.length}] ${name}:${RESET}`)
       const indented = output
         .split('\n')
         .map((line) => `  ${line}`)
         .join('\n')
-      console.log(indented)
-      console.log()
+      log.info(indented)
+      log.info()
     }
 
     results.push({
@@ -132,9 +126,9 @@ function main(): void {
   }
 
   // ── Final summary table ───────────────────────────────────────────────
-  console.log()
+  log.info()
   printSeparator()
-  console.log(`${BOLD}  Step Summary${RESET}`)
+  log.info(`${BOLD}  Step Summary${RESET}`)
   printSeparator()
 
   const colW = { step: 10, name: 32, status: 8, duration: 12 }
@@ -144,8 +138,8 @@ function main(): void {
     'Status'.padEnd(colW.status),
     'Duration'.padEnd(colW.duration),
   ].join('  ')
-  console.log(`  ${BOLD}${header}${RESET}`)
-  console.log(`  ${'─'.repeat(colW.step + colW.name + colW.status + colW.duration + 6)}`)
+  log.info(`  ${BOLD}${header}${RESET}`)
+  log.info(`  ${'─'.repeat(colW.step + colW.name + colW.status + colW.duration + 6)}`)
 
   for (const r of results) {
     const statusColor = r.status === 'PASS' ? GREEN : RED
@@ -155,7 +149,7 @@ function main(): void {
       `${statusColor}${r.status}${RESET}`.padEnd(colW.status + statusColor.length + RESET.length),
       `${r.durationMs}ms`.padEnd(colW.duration),
     ].join('  ')
-    console.log(`  ${row}`)
+    log.info(`  ${row}`)
   }
 
   printSeparator()
@@ -164,17 +158,25 @@ function main(): void {
   const allPassed = failedSteps.length === 0
 
   if (allPassed) {
-    console.log()
-    console.log(`${GREEN}${BOLD}  ✓ All 7 steps passed. Local CI simulation complete.${RESET}`)
-    console.log()
+    log.info()
+    log.success(`All 7 steps passed. Local CI simulation complete.`)
+    log.info()
+    log.result({ total: STEPS.length, passed: STEPS.length, failed: 0 })
+    flushAi()
     process.exit(0)
   } else {
-    console.log()
-    console.log(`${RED}${BOLD}  ✗ ${failedSteps.length} step(s) failed:${RESET}`)
+    log.info()
+    log.error(`${failedSteps.length} step(s) failed:`)
     for (const r of failedSteps) {
-      console.log(`    • [Step ${r.step}/7] ${r.name}  →  ${r.command}`)
+      log.error(`  • [Step ${r.step}/7] ${r.name}  →  ${r.command}`)
     }
-    console.log()
+    log.info()
+    log.result({
+      total: STEPS.length,
+      passed: results.filter((r) => r.status === 'PASS').length,
+      failed: failedSteps.length,
+    })
+    flushAi()
     process.exit(1)
   }
 }

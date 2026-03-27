@@ -8,10 +8,12 @@
  * - All known modules in repository
  * - Direct dependencies per module
  * - Module metadata
- */
+ 
+ * @library-module
+*/
 
-import { createLogger } from '../../core/logger-factory'
 import { generateModuleRoster } from '../../core/module-roster'
+import { createLogger } from '../../utils/logger'
 
 const logger = createLogger('module-map-generator')
 

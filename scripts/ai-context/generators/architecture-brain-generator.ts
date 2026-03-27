@@ -9,11 +9,13 @@
  * - Rule set from contract
  * - Architecture scoring
  * - Violation detection
- */
+ 
+ * @library-module
+*/
 
 import type { GraphEdge } from '../../core/graph-analyzer'
 import { detectCycles } from '../../core/graph-analyzer'
-import { createLogger } from '../../core/logger-factory'
+import { createLogger } from '../../utils/logger'
 
 const logger = createLogger('architecture-brain-generator')
 

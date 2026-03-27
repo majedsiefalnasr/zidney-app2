@@ -12,7 +12,7 @@
 
 import { existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('archive-strategy')
 
@@ -35,6 +35,7 @@ interface ArchiveIndex {
 }
 
 async function main() {
+  log.header('ARCHIVE SNAPSHOT STRATEGY', 'Maintains rolling archive of AI context snapshots')
   const args = process.argv.slice(2)
   const prune = args.includes('--prune')
   const verbose = args.includes('--verbose')
@@ -70,9 +71,9 @@ async function main() {
     .sort((a, b) => b.timestamp - a.timestamp)
 
   if (verbose) {
-    console.log(`\n📋 Found ${filesByTime.length} artifact files`)
+    log.info(`Found ${filesByTime.length} artifact files`)
     for (const file of filesByTime.slice(0, 3)) {
-      console.log(`  - ${file.filename} (${(file.size_bytes / 1024).toFixed(1)}KB)`)
+      log.info(`  - ${file.filename} (${(file.size_bytes / 1024).toFixed(1)}KB)`)
     }
   }
 
@@ -85,15 +86,15 @@ async function main() {
   })
 
   if (verbose) {
-    console.log(`\n📊 Archive analysis:`)
-    console.log(
+    log.step('Archive analysis:')
+    log.info(
       `  Keep (live): ${filesByTime
         .slice(0, KEEP_LIVE)
         .map((f) => f.filename)
         .join(', ')}`
     )
-    console.log(`  Archive candidates: ${toArchive.length}`)
-    console.log(`  Prune candidates (>7 days old): ${toPrune.length}`)
+    log.info(`  Archive candidates: ${toArchive.length}`)
+    log.info(`  Prune candidates (>7 days old): ${toPrune.length}`)
   }
 
   // Perform archival if requested
@@ -109,7 +110,7 @@ async function main() {
       logger.info('Archived', { from: file.filename, to: archivedName })
 
       if (verbose) {
-        console.log(`  ✓ Archived ${file.filename} → ${archivedName}`)
+        log.success(`Archived ${file.filename} → ${archivedName}`)
       }
     }
   }
@@ -180,11 +181,12 @@ async function main() {
   logger.info('Archive markdown index created', { path: mdPath })
 
   // Report
-  console.log('\n📦 ARCHIVE STRATEGY COMPLETE\n')
-  console.log(`Live Snapshots (kept): ${KEEP_LIVE}`)
-  console.log(`Archived Snapshots: ${archiveFiles.length}`)
-  console.log(`Archive Index: ${mdPath}`)
-
+  log.step('ARCHIVE STRATEGY COMPLETE')
+  log.info(`Live Snapshots (kept): ${KEEP_LIVE}`)
+  log.info(`Archived Snapshots: ${archiveFiles.length}`)
+  log.info(`Archive Index: ${mdPath}`)
+  log.result({ total: filesByTime.length, passed: KEEP_LIVE, failed: 0 })
+  flushAi()
   process.exit(0)
 }
 

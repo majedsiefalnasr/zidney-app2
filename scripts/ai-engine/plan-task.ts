@@ -1,3 +1,4 @@
+/** @library-module */
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { createLogger } from '@zidney/logger'

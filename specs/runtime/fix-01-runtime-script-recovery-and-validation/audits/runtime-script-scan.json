@@ -1,25 +1,44 @@
 {
-  "scanDate": "2026-03-17T10:44:02.866Z",
-  "correlationId": "beee91db-bbc7-4e7b-8e7d-ccbdbed428b2",
+  "scanDate": "2026-03-26T17:07:47.798Z",
+  "correlationId": "25df0443-c137-47a2-b4a4-4da0366305a5",
   "specsDir": "specs/runtime",
-  "totalFiles": 1041,
-  "totalScanned": 89,
+  "totalFiles": 1357,
+  "totalScanned": 139,
   "excluded": 6,
   "excludedNames": ["json", "lint:staged", "my-new-script", "references", "scripts", "wrapper"],
-  "inScope": 83,
+  "inScope": 133,
   "scripts": [
     {
-      "name": "ai-context:generate",
+      "name": "ai-context:validate",
       "occurrences": 3,
       "files": [
-        "specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-009-ai-architecture-context/reports/CLOSURE_REPORT.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md"
+        "specs/runtime/infra-027-unified-governance-gate-system/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md"
       ]
     },
     {
-      "name": "ai-context:refresh",
-      "occurrences": 18,
+      "name": "ai:context:generate",
+      "occurrences": 13,
+      "files": [
+        "specs/runtime/infra-009-ai-architecture-context/contracts/artifact-consumer-interface.md",
+        "specs/runtime/infra-009-ai-architecture-context/contracts/artifact-generator-interface.md",
+        "specs/runtime/infra-009-ai-architecture-context/quickstart.md",
+        "specs/runtime/infra-009-ai-architecture-context/research.md",
+        "specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-009-ai-architecture-context/plan.md",
+        "specs/runtime/infra-009-ai-architecture-context/spec.md",
+        "specs/runtime/infra-009-ai-architecture-context/reports/PLAN_REPORT.md",
+        "specs/runtime/infra-009-ai-architecture-context/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-009-ai-architecture-context/reports/CLARIFY_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md"
+      ]
+    },
+    {
+      "name": "ai:context:refresh",
+      "occurrences": 20,
       "files": [
         "specs/runtime/infra-009-ai-architecture-context/PR_SUMMARY.md",
         "specs/runtime/infra-009-ai-architecture-context/reports/CLOSURE_REPORT.md",
@@ -28,6 +47,8 @@
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/quickstart.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/plan.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/spec.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/plan.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/PR_SUMMARY.md",
@@ -42,13 +63,16 @@
       ]
     },
     {
-      "name": "ai-context:status",
-      "occurrences": 1,
-      "files": ["specs/runtime/infra-009-ai-architecture-context/PR_SUMMARY.md"]
+      "name": "ai:context:status",
+      "occurrences": 2,
+      "files": [
+        "specs/runtime/infra-009-ai-architecture-context/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
     },
     {
-      "name": "ai-context:validate",
-      "occurrences": 7,
+      "name": "ai:context:validate",
+      "occurrences": 8,
       "files": [
         "specs/runtime/infra-022-repository-hygiene-verification/tasks.md",
         "specs/runtime/infra-022-repository-hygiene-verification/research.md",
@@ -56,12 +80,13 @@
         "specs/runtime/infra-022-repository-hygiene-verification/plan.md",
         "specs/runtime/infra-022-repository-hygiene-verification/spec.md",
         "specs/runtime/infra-022-repository-hygiene-verification/reports/SPECIFY_REPORT.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md"
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
-      "name": "ai-guard",
-      "occurrences": 13,
+      "name": "ai:guard",
+      "occurrences": 14,
       "files": [
         "specs/runtime/infra-007-module-boundaries/audits/ANALYZE_REPORT_ATTEMPT6_SPECKIT.md",
         "specs/runtime/infra-007-module-boundaries/audits/VALIDATION_REPORT.md",
@@ -75,13 +100,38 @@
         "specs/runtime/infra-007-module-boundaries/reports/SPECIFY_REPORT.md",
         "specs/runtime/infra-007-module-boundaries/reports/TASKS_REPORT.md",
         "specs/runtime/infra-007-module-boundaries/reports/IMPLEMENT_REPORT.md",
-        "specs/runtime/infra-007-module-boundaries/reports/CLARIFY_REPORT.md"
+        "specs/runtime/infra-007-module-boundaries/reports/CLARIFY_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
-      "name": "ai-runtime:status",
-      "occurrences": 5,
+      "name": "ai:plan",
+      "occurrences": 2,
       "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-020-ai-execution-orchestration-engine/guides/TESTING_GUIDE.md"
+      ]
+    },
+    {
+      "name": "ai:run",
+      "occurrences": 2,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-020-ai-execution-orchestration-engine/guides/TESTING_GUIDE.md"
+      ]
+    },
+    {
+      "name": "ai:runtime:refresh",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "ai:runtime:status",
+      "occurrences": 6,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/PR_SUMMARY.md",
@@ -90,32 +140,32 @@
       ]
     },
     {
-      "name": "ai:plan",
+      "name": "ai:runtime:validate",
       "occurrences": 1,
-      "files": ["specs/runtime/infra-020-ai-execution-orchestration-engine/guides/TESTING_GUIDE.md"]
-    },
-    {
-      "name": "ai:run",
-      "occurrences": 1,
-      "files": ["specs/runtime/infra-020-ai-execution-orchestration-engine/guides/TESTING_GUIDE.md"]
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
     },
     {
       "name": "ai:validate",
-      "occurrences": 2,
+      "occurrences": 3,
       "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-020-ai-execution-orchestration-engine/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-020-ai-execution-orchestration-engine/PR_SUMMARY.md"
       ]
     },
     {
       "name": "arch:add-module",
-      "occurrences": 8,
+      "occurrences": 10,
       "files": [
         "specs/runtime/infra-005-lint-governance/plan.md",
         "specs/runtime/infra-011-incremental-architecture-guard/quickstart.md",
         "specs/runtime/infra-007-module-boundaries/guides/TESTING_GUIDE.md",
+        "specs/runtime/030-categories/tasks.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/plan.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/spec.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/tasks.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/plan.md",
         "specs/runtime/infra-18-developer-experience-automation/plan.md"
@@ -123,7 +173,7 @@
     },
     {
       "name": "arch:audit",
-      "occurrences": 21,
+      "occurrences": 30,
       "files": [
         "specs/runtime/infra-005-lint-governance/checklists/requirements.md",
         "specs/runtime/infra-005-lint-governance/tasks.md",
@@ -131,8 +181,16 @@
         "specs/runtime/infra-005-lint-governance/spec.md",
         "specs/runtime/infra-005-lint-governance/reports/SPECIFY_REPORT.md",
         "specs/runtime/infra-005-lint-governance/reports/CLARIFY_REPORT.md",
+        "specs/runtime/infra-009-ai-architecture-context/quickstart.md",
+        "specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-009-ai-architecture-context/PR_SUMMARY.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/plan.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/reports/PLAN_REPORT.md",
+        "specs/runtime/infra-007-module-boundaries/audits/ANALYZE_REPORT_ATTEMPT6_SPECKIT.md",
         "specs/runtime/infra-007-module-boundaries/plan.md",
+        "specs/runtime/infra-007-module-boundaries/spec.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-015-autonomous-architecture-health/contracts/architecture-health-cli-contract.md",
         "specs/runtime/infra-015-autonomous-architecture-health/quickstart.md",
         "specs/runtime/infra-015-autonomous-architecture-health/guides/TESTING_GUIDE.md",
@@ -144,32 +202,128 @@
         "specs/runtime/infra-008-architecture-visualization/plan.md",
         "specs/runtime/infra-008-architecture-visualization/spec.md",
         "specs/runtime/infra-008-architecture-visualization/PR_SUMMARY.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md",
         "specs/runtime/infra-006-architecture-guard/plan.md",
         "specs/runtime/infra-006-architecture-guard/spec.md"
       ]
     },
     {
+      "name": "arch:audit:check",
+      "occurrences": 2,
+      "files": [
+        "specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "arch:check:store-cycles",
+      "occurrences": 2,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/ui-06-state-management/guides/TESTING_GUIDE.md"
+      ]
+    },
+    {
+      "name": "arch:context",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "arch:context:build",
+      "occurrences": 6,
+      "files": [
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/tasks.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/research.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/plan.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/spec.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/PR_SUMMARY.md"
+      ]
+    },
+    {
+      "name": "arch:context:changed",
+      "occurrences": 8,
+      "files": [
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/checklists/requirements.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/tasks.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/research.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/plan.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/spec.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/PR_SUMMARY.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/reports/SPECIFY_REPORT.md"
+      ]
+    },
+    {
+      "name": "arch:context:impact",
+      "occurrences": 3,
+      "files": [
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/plan.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/spec.md"
+      ]
+    },
+    {
+      "name": "arch:context:validate",
+      "occurrences": 7,
+      "files": [
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/checklists/requirements.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/tasks.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/research.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/plan.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/spec.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/PR_SUMMARY.md"
+      ]
+    },
+    {
       "name": "arch:fix",
-      "occurrences": 4,
+      "occurrences": 5,
       "files": [
         "specs/runtime/infra-005-lint-governance/tasks.md",
         "specs/runtime/infra-005-lint-governance/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-008-architecture-visualization/data-model.md",
         "specs/runtime/infra-006-architecture-guard/spec.md"
       ]
     },
     {
       "name": "arch:generate",
-      "occurrences": 3,
+      "occurrences": 4,
       "files": [
         "specs/runtime/infra-005-lint-governance/spec.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-008-architecture-visualization/data-model.md",
         "specs/runtime/infra-008-architecture-visualization/plan.md"
       ]
     },
     {
+      "name": "arch:gitnexus:context",
+      "occurrences": 4,
+      "files": [
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/plan.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/PR_SUMMARY.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/spec.md"
+      ]
+    },
+    {
+      "name": "arch:gitnexus:validate",
+      "occurrences": 6,
+      "files": [
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/research.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/plan.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/spec.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/PR_SUMMARY.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/reports/SPECIFY_REPORT.md"
+      ]
+    },
+    {
       "name": "arch:guard",
-      "occurrences": 37,
+      "occurrences": 47,
       "files": [
         "specs/runtime/infra-007-module-boundaries/tasks.md",
         "specs/runtime/infra-007-module-boundaries/plan.md",
@@ -180,6 +334,12 @@
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/plan.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/spec.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/checklists/zidney-constitutional-checklist.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/tasks.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/plan.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-013-unified-architecture-guard/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-013-unified-architecture-guard/contracts/unified-guard-cli-contract.md",
         "specs/runtime/infra-013-unified-architecture-guard/quickstart.md",
@@ -190,6 +350,10 @@
         "specs/runtime/infra-022-repository-hygiene-verification/plan.md",
         "specs/runtime/infra-022-repository-hygiene-verification/spec.md",
         "specs/runtime/infra-022-repository-hygiene-verification/reports/SPECIFY_REPORT.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/research.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/plan.md",
         "specs/runtime/infra-015-autonomous-architecture-health/guides/TESTING_GUIDE.md",
@@ -212,18 +376,27 @@
     },
     {
       "name": "arch:guard:changed",
-      "occurrences": 2,
+      "occurrences": 10,
       "files": [
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-013-unified-architecture-guard/quickstart.md",
-        "specs/runtime/infra-013-unified-architecture-guard/guides/TESTING_GUIDE.md"
+        "specs/runtime/infra-013-unified-architecture-guard/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/tasks.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/research.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/plan.md"
       ]
     },
     {
       "name": "arch:guard:ci",
-      "occurrences": 13,
+      "occurrences": 14,
       "files": [
         "specs/runtime/infra-013-unified-architecture-guard/quickstart.md",
         "specs/runtime/infra-013-unified-architecture-guard/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-015-autonomous-architecture-health/quickstart.md",
         "specs/runtime/infra-015-autonomous-architecture-health/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-015-autonomous-architecture-health/plan.md",
@@ -239,7 +412,7 @@
     },
     {
       "name": "arch:health",
-      "occurrences": 10,
+      "occurrences": 12,
       "files": [
         "specs/runtime/infra-022-repository-hygiene-verification/tasks.md",
         "specs/runtime/infra-022-repository-hygiene-verification/research.md",
@@ -247,6 +420,8 @@
         "specs/runtime/infra-022-repository-hygiene-verification/plan.md",
         "specs/runtime/infra-022-repository-hygiene-verification/spec.md",
         "specs/runtime/infra-022-repository-hygiene-verification/reports/SPECIFY_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
         "specs/runtime/infra-015-autonomous-architecture-health/contracts/architecture-health-cli-contract.md",
         "specs/runtime/infra-015-autonomous-architecture-health/quickstart.md",
         "specs/runtime/infra-015-autonomous-architecture-health/guides/TESTING_GUIDE.md",
@@ -255,35 +430,63 @@
     },
     {
       "name": "arch:health:ci",
-      "occurrences": 3,
+      "occurrences": 6,
       "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
         "specs/runtime/infra-015-autonomous-architecture-health/contracts/architecture-health-cli-contract.md",
         "specs/runtime/infra-015-autonomous-architecture-health/quickstart.md",
-        "specs/runtime/infra-020-ai-execution-orchestration-engine/plan.md"
+        "specs/runtime/infra-020-ai-execution-orchestration-engine/plan.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md"
       ]
     },
     {
       "name": "arch:refresh",
-      "occurrences": 2,
+      "occurrences": 3,
       "files": [
         "specs/runtime/infra-005-lint-governance/tasks.md",
-        "specs/runtime/infra-005-lint-governance/plan.md"
+        "specs/runtime/infra-005-lint-governance/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
-      "name": "arch:validate-brain",
-      "occurrences": 4,
+      "name": "arch:type-safety-guard",
+      "occurrences": 15,
       "files": [
+        "specs/runtime/infra-021-support-surface-routing-and-template-migration/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-021-support-surface-routing-and-template-migration/contracts/migration-batch-contract.md",
+        "specs/runtime/infra-021-support-surface-routing-and-template-migration/quickstart.md",
+        "specs/runtime/infra-021-support-surface-routing-and-template-migration/plan.md",
+        "specs/runtime/infra-021-support-surface-routing-and-template-migration/spec.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-015-autonomous-architecture-health/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-020-ai-execution-orchestration-engine/plan.md",
+        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/quickstart.md",
+        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/tasks.md",
+        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/plan.md",
+        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/spec.md",
+        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/reports/SANITIZATION_REPORT.md"
+      ]
+    },
+    {
+      "name": "arch:validate:brain",
+      "occurrences": 6,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-015-autonomous-architecture-health/quickstart.md",
         "specs/runtime/infra-015-autonomous-architecture-health/tasks.md",
         "specs/runtime/infra-015-autonomous-architecture-health/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-015-autonomous-architecture-health/plan.md"
+        "specs/runtime/infra-015-autonomous-architecture-health/plan.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md"
       ]
     },
     {
       "name": "arch:visualize",
-      "occurrences": 8,
+      "occurrences": 9,
       "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-008-architecture-visualization/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-008-architecture-visualization/tasks.md",
         "specs/runtime/infra-008-architecture-visualization/guides/TESTING_GUIDE.md",
@@ -296,15 +499,12 @@
     },
     {
       "name": "biome",
-      "occurrences": 2,
-      "files": [
-        "specs/runtime/infra-007-module-boundaries/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-007-module-boundaries/guides/TESTING_GUIDE.md"
-      ]
+      "occurrences": 1,
+      "files": ["specs/runtime/infra-027-unified-governance-gate-system/tasks.md"]
     },
     {
       "name": "build",
-      "occurrences": 18,
+      "occurrences": 20,
       "files": [
         "specs/runtime/infra-17-repository-size-and-performance-optimization/spec.md",
         "specs/runtime/infra-002-audit-checklist/quickstart.md",
@@ -316,6 +516,7 @@
         "specs/runtime/infra-002-audit-checklist/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md",
         "specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-012-typescript-type-safety-governance/quickstart.md",
         "specs/runtime/infra-governance/tasks.md",
         "specs/runtime/infra-governance/plan.md",
@@ -323,49 +524,129 @@
         "specs/runtime/infra-governance/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/017-tenant-bootstrap/audits/VALIDATION_REPORT.md",
         "specs/runtime/017-tenant-bootstrap/tasks.md",
-        "specs/runtime/017-tenant-bootstrap/guides/TESTING_GUIDE.md"
+        "specs/runtime/017-tenant-bootstrap/guides/TESTING_GUIDE.md",
+        "specs/runtime/023-departments/guides/TESTING_GUIDE.md"
       ]
     },
     {
       "name": "build:api",
-      "occurrences": 1,
-      "files": ["specs/runtime/021-role-permission-system/PR_SUMMARY.md"]
-    },
-    {
-      "name": "build:packages",
-      "occurrences": 1,
-      "files": ["specs/runtime/020-status-workflow-engine/guides/TESTING_GUIDE.md"]
-    },
-    {
-      "name": "cache-clean",
-      "occurrences": 1,
-      "files": ["specs/runtime/infra-012-typescript-type-safety-governance/quickstart.md"]
-    },
-    {
-      "name": "check:store-cycles",
-      "occurrences": 1,
-      "files": ["specs/runtime/ui-06-state-management/guides/TESTING_GUIDE.md"]
-    },
-    {
-      "name": "ci:test",
-      "occurrences": 1,
+      "occurrences": 2,
       "files": [
-        "specs/runtime/infra-17-repository-size-and-performance-optimization/guides/TESTING_GUIDE.md"
+        "specs/runtime/021-role-permission-system/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
-      "name": "db:console",
+      "name": "build:packages",
+      "occurrences": 2,
+      "files": [
+        "specs/runtime/020-status-workflow-engine/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "bun",
+      "occurrences": 1,
+      "files": ["specs/runtime/infra-028-gitnexus-context-aware-governance/guides/TESTING_GUIDE.md"]
+    },
+    {
+      "name": "ci:local",
+      "occurrences": 11,
+      "files": [
+        "specs/runtime/infra-023-local-ci-simulation-with-act/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/tasks.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/research.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/spec.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/PR_SUMMARY.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/SPECIFY_REPORT.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/CLARIFY_REPORT.md"
+      ]
+    },
+    {
+      "name": "ci:local:full",
+      "occurrences": 3,
+      "files": [
+        "specs/runtime/infra-023-local-ci-simulation-with-act/tasks.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/spec.md"
+      ]
+    },
+    {
+      "name": "ci:local:list",
+      "occurrences": 7,
+      "files": [
+        "specs/runtime/infra-023-local-ci-simulation-with-act/tasks.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/spec.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/PR_SUMMARY.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/IMPLEMENT_REPORT.md"
+      ]
+    },
+    {
+      "name": "ci:local:workflow",
+      "occurrences": 5,
+      "files": [
+        "specs/runtime/infra-023-local-ci-simulation-with-act/tasks.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/spec.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/PR_SUMMARY.md"
+      ]
+    },
+    {
+      "name": "ci:run-local",
       "occurrences": 4,
+      "files": [
+        "specs/runtime/infra-023-local-ci-simulation-with-act/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/PR_SUMMARY.md",
+        "specs/runtime/032-tags/PR_SUMMARY.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/guides/TESTING_GUIDE.md"
+      ]
+    },
+    {
+      "name": "ci:smoke:staging",
+      "occurrences": 2,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/ui-09-security-and-token-handling/PR_SUMMARY.md"
+      ]
+    },
+    {
+      "name": "ci:test",
+      "occurrences": 2,
+      "files": [
+        "specs/runtime/infra-17-repository-size-and-performance-optimization/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "context:",
+      "occurrences": 1,
+      "files": ["specs/runtime/infra-028-gitnexus-context-aware-governance/spec.md"]
+    },
+    {
+      "name": "db:console",
+      "occurrences": 8,
       "files": [
         "specs/runtime/018-workspace-settings/guides/TESTING_GUIDE.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/019-translation-system/guides/TESTING_GUIDE.md",
-        "specs/runtime/017-tenant-bootstrap/guides/TESTING_GUIDE.md"
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/017-tenant-bootstrap/guides/TESTING_GUIDE.md",
+        "specs/runtime/031-category-values/guides/TESTING_GUIDE.md"
       ]
     },
     {
       "name": "db:migrate",
-      "occurrences": 11,
+      "occurrences": 26,
       "files": [
         "specs/runtime/022-divisions/guides/TESTING_GUIDE.md",
         "specs/runtime/022-divisions/PR_SUMMARY.md",
@@ -373,37 +654,84 @@
         "specs/runtime/020-status-workflow-engine/PR_SUMMARY.md",
         "specs/runtime/018-workspace-settings/guides/TESTING_GUIDE.md",
         "specs/runtime/013-affiliates/quickstart.md",
+        "specs/runtime/030-categories/guides/TESTING_GUIDE.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/010-licenses-management/PR_SUMMARY.md",
+        "specs/runtime/026-teams-work-team-types/guides/TESTING_GUIDE.md",
+        "specs/runtime/033-mcq-baskets/guides/TESTING_GUIDE.md",
         "specs/runtime/019-translation-system/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-09-security-and-token-handling/guides/TESTING_GUIDE.md",
-        "specs/runtime/017-tenant-bootstrap/guides/TESTING_GUIDE.md"
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md",
+        "specs/runtime/017-tenant-bootstrap/guides/TESTING_GUIDE.md",
+        "specs/runtime/031-category-values/guides/TESTING_GUIDE.md",
+        "specs/runtime/031-category-values/PR_SUMMARY.md",
+        "specs/runtime/023-departments/guides/TESTING_GUIDE.md",
+        "specs/runtime/032-tags/guides/TESTING_GUIDE.md",
+        "specs/runtime/027-semesters/guides/TESTING_GUIDE.md",
+        "specs/runtime/028-subjects/guides/TESTING_GUIDE.md"
       ]
     },
     {
-      "name": "db:pool-status",
-      "occurrences": 3,
-      "files": [
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md"
-      ]
-    },
-    {
-      "name": "db:validate-licenses",
+      "name": "db:migrate:down",
       "occurrences": 2,
       "files": [
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md"
+        "specs/runtime/032-tags/guides/TESTING_GUIDE.md",
+        "specs/runtime/032-tags/PR_SUMMARY.md"
       ]
+    },
+    {
+      "name": "db:rollback",
+      "occurrences": 1,
+      "files": ["specs/runtime/033-mcq-baskets/guides/TESTING_GUIDE.md"]
+    },
+    {
+      "name": "db:status:pool",
+      "occurrences": 7,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md"
+      ]
+    },
+    {
+      "name": "db:validate-migration",
+      "occurrences": 1,
+      "files": ["specs/runtime/033-mcq-baskets/audits/VALIDATION_REPORT.md"]
+    },
+    {
+      "name": "db:validate:licenses",
+      "occurrences": 4,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "deploy:migrations:fan-out",
+      "occurrences": 1,
+      "files": ["specs/runtime/033-mcq-baskets/reports/IMPLEMENT_REPORT.md"]
     },
     {
       "name": "dev",
-      "occurrences": 7,
+      "occurrences": 10,
       "files": [
+        "specs/runtime/025-hierarchy-tree/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-05-env-configuration/guides/TESTING_GUIDE.md",
         "specs/runtime/013-affiliates/quickstart.md",
+        "specs/runtime/030-categories/audits/VALIDATION_REPORT.md",
         "specs/runtime/001-monorepo-setup/quickstart.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/002B-tenant-baseline-schema/quickstart.md",
         "specs/runtime/ui-06-state-management/audits/VALIDATION_REPORT.md",
         "specs/runtime/017-tenant-bootstrap/tasks.md",
@@ -412,54 +740,111 @@
     },
     {
       "name": "dev:all",
-      "occurrences": 2,
+      "occurrences": 3,
       "files": [
         "specs/runtime/infra-003-alignment/guides/TESTING_GUIDE.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md"
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
       "name": "dev:api",
-      "occurrences": 9,
+      "occurrences": 16,
       "files": [
         "specs/runtime/022-divisions/guides/TESTING_GUIDE.md",
         "specs/runtime/020-status-workflow-engine/guides/TESTING_GUIDE.md",
         "specs/runtime/018-workspace-settings/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-013-unified-architecture-guard/audits/VALIDATION_REPORT.md",
+        "specs/runtime/030-categories/guides/TESTING_GUIDE.md",
         "specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-001-typescript-stabilization/guides/TESTING_GUIDE.md",
+        "specs/runtime/033-mcq-baskets/guides/TESTING_GUIDE.md",
         "specs/runtime/019-translation-system/guides/TESTING_GUIDE.md",
         "specs/runtime/017-tenant-bootstrap/guides/TESTING_GUIDE.md",
-        "specs/runtime/ui-00-runtime-architecture/guides/TESTING_GUIDE.md"
+        "specs/runtime/ui-00-runtime-architecture/guides/TESTING_GUIDE.md",
+        "specs/runtime/031-category-values/guides/TESTING_GUIDE.md",
+        "specs/runtime/032-tags/guides/TESTING_GUIDE.md",
+        "specs/runtime/027-semesters/guides/TESTING_GUIDE.md",
+        "specs/runtime/028-subjects/guides/TESTING_GUIDE.md"
       ]
     },
     {
+      "name": "dev:back",
+      "occurrences": 1,
+      "files": ["specs/runtime/032-tags/guides/TESTING_GUIDE.md"]
+    },
+    {
       "name": "dev:backoffice",
-      "occurrences": 5,
+      "occurrences": 6,
       "files": [
         "specs/runtime/infra-003-alignment/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-003-alignment/plan.md",
         "specs/runtime/ui-07-layout-system-integration/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-governance/tasks.md",
         "specs/runtime/infra-governance/plan.md"
       ]
     },
     {
       "name": "dev:frontoffice",
-      "occurrences": 4,
+      "occurrences": 5,
       "files": [
         "specs/runtime/infra-003-alignment/plan.md",
         "specs/runtime/ui-07-layout-system-integration/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-governance/tasks.md",
         "specs/runtime/infra-governance/plan.md"
       ]
     },
     {
+      "name": "dev:generate:script-docs",
+      "occurrences": 13,
+      "files": [
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/tasks.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/reports/IMPLEMENT_REPORT.md"
+      ]
+    },
+    {
+      "name": "dev:hygiene:report",
+      "occurrences": 9,
+      "files": [
+        "specs/runtime/infra-022-repository-hygiene-verification/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-022-repository-hygiene-verification/tasks.md",
+        "specs/runtime/infra-022-repository-hygiene-verification/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-022-repository-hygiene-verification/plan.md",
+        "specs/runtime/infra-022-repository-hygiene-verification/PR_SUMMARY.md",
+        "specs/runtime/infra-022-repository-hygiene-verification/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-022-repository-hygiene-verification/reports/TASKS_REPORT.md",
+        "specs/runtime/infra-022-repository-hygiene-verification/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "dev:infra",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
       "name": "dev:mmc",
-      "occurrences": 6,
+      "occurrences": 7,
       "files": [
         "specs/runtime/infra-003-alignment/plan.md",
         "specs/runtime/ui-07-layout-system-integration/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/ui-01-auth-module/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-governance/tasks.md",
         "specs/runtime/infra-governance/plan.md",
@@ -467,36 +852,71 @@
       ]
     },
     {
+      "name": "dev:refactor:scripts",
+      "occurrences": 3,
+      "files": [
+        "specs/runtime/infra-025-script-system-standardization-and-governance/tasks.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md"
+      ]
+    },
+    {
+      "name": "dev:seed:dashboard-test-data",
+      "occurrences": 5,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/023-departments/guides/TESTING_GUIDE.md"
+      ]
+    },
+    {
       "name": "dev:worker",
-      "occurrences": 4,
+      "occurrences": 8,
       "files": [
         "specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/019-translation-system/guides/TESTING_GUIDE.md",
-        "specs/runtime/ui-00-runtime-architecture/guides/TESTING_GUIDE.md"
+        "specs/runtime/002B-tenant-baseline-schema/quickstart.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md",
+        "specs/runtime/ui-00-runtime-architecture/guides/TESTING_GUIDE.md",
+        "specs/runtime/032-tags/guides/TESTING_GUIDE.md"
+      ]
+    },
+    {
+      "name": "domain:action:scope",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md"
       ]
     },
     {
       "name": "format",
-      "occurrences": 7,
+      "occurrences": 8,
       "files": [
         "specs/runtime/infra-003-alignment/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-003-alignment/spec.md",
         "specs/runtime/infra-003-alignment/PR_SUMMARY.md",
         "specs/runtime/infra-004-biome/tasks.md",
         "specs/runtime/infra-004-biome/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/ui-09-security-and-token-handling/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-09-security-and-token-handling/reports/CLOSURE_REPORT.md"
       ]
     },
     {
       "name": "format:biome",
-      "occurrences": 1,
-      "files": ["specs/runtime/fix-01-runtime-script-recovery-and-validation/research.md"]
+      "occurrences": 2,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/research.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
     },
     {
       "name": "format:check",
-      "occurrences": 9,
+      "occurrences": 10,
       "files": [
         "specs/runtime/infra-003-alignment/tasks.md",
         "specs/runtime/infra-003-alignment/guides/TESTING_GUIDE.md",
@@ -506,80 +926,168 @@
         "specs/runtime/infra-004-biome/research.md",
         "specs/runtime/infra-004-biome/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-004-biome/plan.md",
-        "specs/runtime/infra-004-biome/PR_SUMMARY.md"
+        "specs/runtime/infra-004-biome/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "format:check:biome",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
       "name": "format:check:md",
-      "occurrences": 6,
+      "occurrences": 7,
       "files": [
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/tasks.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/plan.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/PR_SUMMARY.md",
-        "specs/runtime/infra-010-hybrid-lint-format-pipeline/reports/IMPLEMENT_REPORT.md"
+        "specs/runtime/infra-010-hybrid-lint-format-pipeline/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
       "name": "format:md",
-      "occurrences": 1,
-      "files": ["specs/runtime/fix-01-runtime-script-recovery-and-validation/research.md"]
-    },
-    {
-      "name": "generate-script-docs",
       "occurrences": 2,
       "files": [
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md"
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/research.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
-      "name": "generate:ai-context",
-      "occurrences": 8,
+      "name": "governance:",
+      "occurrences": 1,
+      "files": ["specs/runtime/infra-027-unified-governance-gate-system/spec.md"]
+    },
+    {
+      "name": "governance:gate",
+      "occurrences": 10,
       "files": [
-        "specs/runtime/infra-009-ai-architecture-context/contracts/artifact-consumer-interface.md",
-        "specs/runtime/infra-009-ai-architecture-context/contracts/artifact-generator-interface.md",
-        "specs/runtime/infra-009-ai-architecture-context/quickstart.md",
-        "specs/runtime/infra-009-ai-architecture-context/research.md",
-        "specs/runtime/infra-009-ai-architecture-context/plan.md",
-        "specs/runtime/infra-009-ai-architecture-context/spec.md",
-        "specs/runtime/infra-009-ai-architecture-context/reports/PLAN_REPORT.md",
-        "specs/runtime/infra-009-ai-architecture-context/reports/CLARIFY_REPORT.md"
+        "specs/runtime/infra-027-unified-governance-gate-system/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/PR_SUMMARY.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/reports/PLAN_REPORT.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/plan.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/spec.md"
       ]
     },
     {
-      "name": "hygiene:report",
-      "occurrences": 8,
+      "name": "governance:gate:changed",
+      "occurrences": 6,
       "files": [
-        "specs/runtime/infra-022-repository-hygiene-verification/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-022-repository-hygiene-verification/tasks.md",
-        "specs/runtime/infra-022-repository-hygiene-verification/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-022-repository-hygiene-verification/plan.md",
-        "specs/runtime/infra-022-repository-hygiene-verification/PR_SUMMARY.md",
-        "specs/runtime/infra-022-repository-hygiene-verification/reports/CLOSURE_REPORT.md",
-        "specs/runtime/infra-022-repository-hygiene-verification/reports/TASKS_REPORT.md",
-        "specs/runtime/infra-022-repository-hygiene-verification/reports/IMPLEMENT_REPORT.md"
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/PR_SUMMARY.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/reports/PLAN_REPORT.md"
       ]
     },
     {
-      "name": "infra-audit",
+      "name": "governance:gate:ci",
+      "occurrences": 6,
+      "files": [
+        "specs/runtime/infra-027-unified-governance-gate-system/tasks.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/PR_SUMMARY.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/reports/PLAN_REPORT.md"
+      ]
+    },
+    {
+      "name": "governance:report",
       "occurrences": 4,
       "files": [
-        "specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-009-ai-architecture-context/PR_SUMMARY.md",
-        "specs/runtime/infra-007-module-boundaries/audits/ANALYZE_REPORT_ATTEMPT6_SPECKIT.md",
-        "specs/runtime/infra-007-module-boundaries/spec.md"
+        "specs/runtime/infra-027-unified-governance-gate-system/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/PR_SUMMARY.md"
       ]
     },
     {
-      "name": "infra-audit:check",
+      "name": "infra:cache:clean",
+      "occurrences": 7,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/runtime-script-validation.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-012-typescript-type-safety-governance/quickstart.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md"
+      ]
+    },
+    {
+      "name": "infra:security",
+      "occurrences": 3,
+      "files": [
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md"
+      ]
+    },
+    {
+      "name": "infra:security:ci",
+      "occurrences": 5,
+      "files": [
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/plan.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md"
+      ]
+    },
+    {
+      "name": "infra:security:config",
+      "occurrences": 3,
+      "files": [
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md"
+      ]
+    },
+    {
+      "name": "infra:security:deps",
+      "occurrences": 6,
+      "files": [
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/plan.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/reports/IMPLEMENT_REPORT.md"
+      ]
+    },
+    {
+      "name": "infra:security:sbom",
       "occurrences": 1,
-      "files": ["specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md"]
+      "files": [
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/reports/IMPLEMENT_REPORT.md"
+      ]
+    },
+    {
+      "name": "infra:security:secrets",
+      "occurrences": 5,
+      "files": [
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/plan.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/reports/IMPLEMENT_REPORT.md"
+      ]
     },
     {
       "name": "lint",
-      "occurrences": 131,
+      "occurrences": 174,
       "files": [
         "specs/runtime/022-divisions/guides/TESTING_GUIDE.md",
         "specs/runtime/022-divisions/plan.md",
@@ -597,6 +1105,9 @@
         "specs/runtime/infra-005-lint-governance/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-005-lint-governance/reports/TASKS_REPORT.md",
         "specs/runtime/infra-005-lint-governance/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/025-hierarchy-tree/audits/VALIDATION_REPORT.md",
+        "specs/runtime/025-hierarchy-tree/guides/TESTING_GUIDE.md",
+        "specs/runtime/025-hierarchy-tree/plan.md",
         "specs/runtime/020-status-workflow-engine/audits/VALIDATION_REPORT.md",
         "specs/runtime/020-status-workflow-engine/PR_SUMMARY.md",
         "specs/runtime/infra-003-alignment/audits/VALIDATION_REPORT.md",
@@ -615,7 +1126,9 @@
         "specs/runtime/infra-004-biome/reports/PLAN_REPORT.md",
         "specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-009-ai-architecture-context/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-007-module-boundaries/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-007-module-boundaries/tasks.md",
+        "specs/runtime/infra-007-module-boundaries/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-007-module-boundaries/plan.md",
         "specs/runtime/infra-007-module-boundaries/spec.md",
         "specs/runtime/infra-007-module-boundaries/reports/IMPLEMENT_REPORT.md",
@@ -626,6 +1139,8 @@
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/plan.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/spec.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/PR_SUMMARY.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/tasks.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/ui-07-layout-system-integration/audits/ANALYZE_REPORT.md",
         "specs/runtime/ui-07-layout-system-integration/audits/VALIDATION_REPORT.md",
         "specs/runtime/ui-07-layout-system-integration/tasks.md",
@@ -641,8 +1156,16 @@
         "specs/runtime/infra-022-repository-hygiene-verification/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-022-repository-hygiene-verification/reports/TASKS_REPORT.md",
         "specs/runtime/infra-022-repository-hygiene-verification/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/030-categories/tasks.md",
+        "specs/runtime/030-categories/guides/TESTING_GUIDE.md",
+        "specs/runtime/030-categories/PR_SUMMARY.md",
         "specs/runtime/021-role-permission-system/audits/VALIDATION_REPORT.md",
         "specs/runtime/001-monorepo-setup/quickstart.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/spec.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/CLARIFY_REPORT.md",
         "specs/runtime/infra-002-audit-checklist/audits/ANALYZE_REPORT.md",
         "specs/runtime/infra-002-audit-checklist/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-002-audit-checklist/quickstart.md",
@@ -664,7 +1187,14 @@
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/spec.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/reports/CLARIFY_REPORT.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/ANALYZE_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/VALIDATION_REPORT.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/tasks.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/plan.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/reports/PLAN_REPORT.md",
@@ -673,12 +1203,16 @@
         "specs/runtime/010-licenses-management/STEP_6_COMPLETION_SUMMARY.md",
         "specs/runtime/010-licenses-management/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-18-developer-experience-automation/plan.md",
+        "specs/runtime/026-teams-work-team-types/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-015-autonomous-architecture-health/quickstart.md",
         "specs/runtime/infra-015-autonomous-architecture-health/plan.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-001-typescript-stabilization/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-001-typescript-stabilization/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-001-typescript-stabilization/PR_SUMMARY.md",
         "specs/runtime/infra-001-typescript-stabilization/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/033-mcq-baskets/plan.md",
+        "specs/runtime/033-mcq-baskets/spec.md",
         "specs/runtime/ui-03-router-and-guards/tasks.md",
         "specs/runtime/ui-03-router-and-guards/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-03-router-and-guards/PR_SUMMARY.md",
@@ -701,12 +1235,29 @@
         "specs/runtime/ui-06-state-management/audits/VALIDATION_REPORT.md",
         "specs/runtime/ui-06-state-management/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-06-state-management/PR_SUMMARY.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/tasks.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md",
         "specs/runtime/017-tenant-bootstrap/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-006-architecture-guard/spec.md",
         "specs/runtime/infra-014-architecture-alignment-migration/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-014-architecture-alignment-migration/contracts/alignment-verification-contract.md",
         "specs/runtime/infra-014-architecture-alignment-migration/quickstart.md",
         "specs/runtime/infra-014-architecture-alignment-migration/plan.md",
+        "specs/runtime/031-category-values/plan.md",
+        "specs/runtime/023-departments/guides/TESTING_GUIDE.md",
+        "specs/runtime/023-departments/PR_SUMMARY.md",
+        "specs/runtime/023-departments/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/032-tags/audits/VALIDATION_REPORT.md",
+        "specs/runtime/032-tags/guides/TESTING_GUIDE.md",
+        "specs/runtime/027-semesters/audits/VALIDATION_REPORT.md",
+        "specs/runtime/027-semesters/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/checklists/requirements.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md",
+        "specs/runtime/024-groups/plan.md",
+        "specs/runtime/028-subjects/audits/VALIDATION_REPORT.md",
+        "specs/runtime/028-subjects/PR_SUMMARY.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/quickstart.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/tasks.md",
@@ -716,7 +1267,7 @@
     },
     {
       "name": "lint:fix",
-      "occurrences": 8,
+      "occurrences": 11,
       "files": [
         "specs/runtime/infra-005-lint-governance/tasks.md",
         "specs/runtime/infra-005-lint-governance/research.md",
@@ -725,23 +1276,43 @@
         "specs/runtime/infra-005-lint-governance/spec.md",
         "specs/runtime/infra-005-lint-governance/reports/TASKS_REPORT.md",
         "specs/runtime/infra-005-lint-governance/reports/IMPLEMENT_REPORT.md",
-        "specs/runtime/infra-004-biome/PR_SUMMARY.md"
+        "specs/runtime/infra-004-biome/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/VALIDATION_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/IMPLEMENT_REPORT.md"
       ]
     },
     {
-      "name": "maintenance:cache-clean",
-      "occurrences": 1,
-      "files": ["specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md"]
+      "name": "policy:check",
+      "occurrences": 8,
+      "files": [
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/tasks.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/plan.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/spec.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/SPECIFY_REPORT.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/PLAN_REPORT.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/CLOSURE_REPORT.md"
+      ]
     },
     {
-      "name": "migrate",
+      "name": "precommit:check",
       "occurrences": 1,
-      "files": ["specs/runtime/013-affiliates/quickstart.md"]
+      "files": [
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/guides/TESTING_GUIDE.md"
+      ]
+    },
+    {
+      "name": "precommit:test",
+      "occurrences": 1,
+      "files": ["specs/runtime/033-mcq-baskets/guides/TESTING_GUIDE.md"]
     },
     {
       "name": "prepare",
-      "occurrences": 5,
+      "occurrences": 6,
       "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-18-developer-experience-automation/plan.md",
         "specs/runtime/infra-governance/tasks.md",
         "specs/runtime/infra-governance/plan.md",
@@ -750,23 +1321,70 @@
       ]
     },
     {
-      "name": "run-staging-smoke-tests",
+      "name": "reference",
       "occurrences": 1,
-      "files": ["specs/runtime/ui-09-security-and-token-handling/PR_SUMMARY.md"]
+      "files": [
+        "specs/runtime/infra-025-script-system-standardization-and-governance/reports/IMPLEMENT_REPORT.md"
+      ]
     },
     {
-      "name": "seed-dashboard-test-data",
+      "name": "repo:doctor",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "repo:fix",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "repo:onboard",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "repo:status",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "scripts:validate",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/IMPLEMENT_REPORT.md"
+      ]
+    },
+    {
+      "name": "security:scan:ci",
       "occurrences": 2,
       "files": [
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md"
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/checklists/requirements.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/reports/CLARIFY_REPORT.md"
+      ]
+    },
+    {
+      "name": "src",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md"
       ]
     },
     {
       "name": "test",
-      "occurrences": 48,
+      "occurrences": 108,
       "files": [
         "specs/runtime/022-divisions/plan.md",
+        "specs/runtime/025-hierarchy-tree/guides/TESTING_GUIDE.md",
+        "specs/runtime/025-hierarchy-tree/plan.md",
+        "specs/runtime/025-hierarchy-tree/PR_SUMMARY.md",
         "specs/runtime/020-status-workflow-engine/audits/VALIDATION_REPORT.md",
         "specs/runtime/020-status-workflow-engine/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-003-alignment/audits/VALIDATION_REPORT.md",
@@ -782,6 +1400,9 @@
         "specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-009-ai-architecture-context/PR_SUMMARY.md",
         "specs/runtime/infra-17-repository-size-and-performance-optimization/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/PR_SUMMARY.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/contracts/migration-batch-contract.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/quickstart.md",
@@ -789,25 +1410,79 @@
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/plan.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/spec.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/PR_SUMMARY.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/tasks.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-07-layout-system-integration/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-013-unified-architecture-guard/reports/TASKS_VALIDATION_REPORT.md",
         "specs/runtime/infra-022-repository-hygiene-verification/tasks.md",
         "specs/runtime/infra-022-repository-hygiene-verification/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-022-repository-hygiene-verification/plan.md",
         "specs/runtime/infra-022-repository-hygiene-verification/reports/TASKS_REPORT.md",
+        "specs/runtime/030-categories/audits/VALIDATION_REPORT.md",
+        "specs/runtime/030-categories/tasks.md",
+        "specs/runtime/030-categories/guides/TESTING_GUIDE.md",
+        "specs/runtime/030-categories/PR_SUMMARY.md",
         "specs/runtime/021-role-permission-system/audits/VALIDATION_REPORT.md",
         "specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md",
         "specs/runtime/001-monorepo-setup/quickstart.md",
+        "specs/runtime/infra-010-hybrid-lint-format-pipeline/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-010-hybrid-lint-format-pipeline/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/VALIDATION_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-19-ai-agent-runtime-environment/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-19-ai-agent-runtime-environment/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-19-ai-agent-runtime-environment/PR_SUMMARY.md",
+        "specs/runtime/infra-19-ai-agent-runtime-environment/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-19-ai-agent-runtime-environment/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-18-developer-experience-automation/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-18-developer-experience-automation/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-18-developer-experience-automation/PR_SUMMARY.md",
+        "specs/runtime/026-teams-work-team-types/audits/VALIDATION_REPORT.md",
+        "specs/runtime/026-teams-work-team-types/guides/TESTING_GUIDE.md",
+        "specs/runtime/026-teams-work-team-types/PR_SUMMARY.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-001-typescript-stabilization/audits/VALIDATION_REPORT.md",
+        "specs/runtime/019-translation-system/audits/VALIDATION_REPORT.md",
+        "specs/runtime/019-translation-system/guides/TESTING_GUIDE.md",
+        "specs/runtime/019-translation-system/PR_SUMMARY.md",
         "specs/runtime/ui-03-router-and-guards/tasks.md",
+        "specs/runtime/infra-020-ai-execution-orchestration-engine/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-020-ai-execution-orchestration-engine/PR_SUMMARY.md",
+        "specs/runtime/infra-008-architecture-visualization/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-008-architecture-visualization/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-008-architecture-visualization/PR_SUMMARY.md",
         "specs/runtime/infra-governance/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-governance/PR_SUMMARY.md",
         "specs/runtime/infra-governance/reports/CLOSURE_REPORT.md",
+        "specs/runtime/ui-09-security-and-token-handling/audits/VALIDATION_REPORT.md",
+        "specs/runtime/ui-09-security-and-token-handling/guides/TESTING_GUIDE.md",
+        "specs/runtime/ui-09-security-and-token-handling/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/tasks.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md",
+        "specs/runtime/017-tenant-bootstrap/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-006-architecture-guard/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-006-architecture-guard/checklists/requirements.md",
+        "specs/runtime/infra-006-architecture-guard/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-006-architecture-guard/spec.md",
+        "specs/runtime/infra-006-architecture-guard/PR_SUMMARY.md",
         "specs/runtime/infra-014-architecture-alignment-migration/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-014-architecture-alignment-migration/PR_SUMMARY.md",
+        "specs/runtime/031-category-values/guides/TESTING_GUIDE.md",
+        "specs/runtime/031-category-values/plan.md",
+        "specs/runtime/032-tags/tasks.md",
+        "specs/runtime/027-semesters/audits/VALIDATION_REPORT.md",
+        "specs/runtime/027-semesters/guides/TESTING_GUIDE.md",
+        "specs/runtime/027-semesters/PR_SUMMARY.md",
+        "specs/runtime/029-lessons/guides/TESTING_GUIDE.md",
+        "specs/runtime/029-lessons/PR_SUMMARY.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/reports/TASKS_REPORT.md",
+        "specs/runtime/024-groups/audits/VALIDATION_REPORT.md",
+        "specs/runtime/024-groups/plan.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/quickstart.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/tasks.md",
@@ -818,15 +1493,19 @@
     },
     {
       "name": "test:ci",
-      "occurrences": 1,
-      "files": ["specs/runtime/infra-17-repository-size-and-performance-optimization/spec.md"]
+      "occurrences": 2,
+      "files": [
+        "specs/runtime/infra-17-repository-size-and-performance-optimization/spec.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
     },
     {
       "name": "test:coverage",
-      "occurrences": 6,
+      "occurrences": 7,
       "files": [
         "specs/runtime/ui-07-layout-system-integration/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-governance/audits/ANALYZE_REPORT.md",
         "specs/runtime/infra-governance/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-governance/tasks.md",
@@ -835,61 +1514,80 @@
     },
     {
       "name": "test:e2e",
-      "occurrences": 4,
+      "occurrences": 6,
       "files": [
         "specs/runtime/infra-003-alignment/plan.md",
         "specs/runtime/infra-003-alignment/spec.md",
         "specs/runtime/infra-003-alignment/reports/PLAN_REPORT.md",
-        "specs/runtime/infra-003-alignment/reports/CLARIFY_REPORT.md"
+        "specs/runtime/infra-003-alignment/reports/CLARIFY_REPORT.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
       "name": "test:e2e:backoffice",
-      "occurrences": 3,
+      "occurrences": 4,
       "files": [
         "specs/runtime/infra-003-alignment/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-governance/tasks.md",
         "specs/runtime/infra-governance/plan.md"
       ]
     },
     {
       "name": "test:e2e:frontoffice",
-      "occurrences": 3,
+      "occurrences": 4,
       "files": [
         "specs/runtime/infra-003-alignment/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-governance/tasks.md",
         "specs/runtime/infra-governance/plan.md"
       ]
     },
     {
       "name": "test:e2e:mmc",
-      "occurrences": 3,
+      "occurrences": 4,
       "files": [
         "specs/runtime/infra-003-alignment/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-governance/tasks.md",
         "specs/runtime/infra-governance/plan.md"
       ]
     },
     {
       "name": "test:integration",
-      "occurrences": 7,
+      "occurrences": 8,
       "files": [
         "specs/runtime/infra-003-alignment/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-003-alignment/plan.md",
         "specs/runtime/infra-003-alignment/reports/CLOSURE_REPORT.md",
         "specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-001-typescript-stabilization/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-governance/plan.md",
         "specs/runtime/infra-governance/spec.md"
       ]
     },
     {
+      "name": "test:performance",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
+    },
+    {
+      "name": "test:smoke:baskets",
+      "occurrences": 1,
+      "files": ["specs/runtime/033-mcq-baskets/reports/IMPLEMENT_REPORT.md"]
+    },
+    {
       "name": "test:static",
-      "occurrences": 11,
+      "occurrences": 12,
       "files": [
         "specs/runtime/infra-007-module-boundaries/tasks.md",
         "specs/runtime/infra-007-module-boundaries/plan.md",
         "specs/runtime/infra-007-module-boundaries/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-015-autonomous-architecture-health/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-015-autonomous-architecture-health/PR_SUMMARY.md",
         "specs/runtime/infra-001-typescript-stabilization/audits/VALIDATION_REPORT.md",
@@ -902,7 +1600,7 @@
     },
     {
       "name": "test:unit",
-      "occurrences": 33,
+      "occurrences": 35,
       "files": [
         "specs/runtime/infra-005-lint-governance/tasks.md",
         "specs/runtime/infra-005-lint-governance/research.md",
@@ -919,6 +1617,7 @@
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/tasks.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/plan.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-015-autonomous-architecture-health/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-015-autonomous-architecture-health/PR_SUMMARY.md",
         "specs/runtime/infra-001-typescript-stabilization/audits/VALIDATION_REPORT.md",
@@ -936,125 +1635,78 @@
         "specs/runtime/infra-governance/PR_SUMMARY.md",
         "specs/runtime/infra-governance/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-governance/reports/IMPLEMENT_REPORT.md",
-        "specs/runtime/infra-006-architecture-guard/spec.md"
+        "specs/runtime/infra-006-architecture-guard/spec.md",
+        "specs/runtime/023-departments/audits/VALIDATION_REPORT.md"
       ]
     },
     {
       "name": "test:unit:boundaries",
-      "occurrences": 5,
+      "occurrences": 6,
       "files": [
         "specs/runtime/infra-007-module-boundaries/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-007-module-boundaries/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-007-module-boundaries/PR_SUMMARY.md",
         "specs/runtime/infra-013-unified-architecture-guard/quickstart.md",
-        "specs/runtime/infra-013-unified-architecture-guard/guides/TESTING_GUIDE.md"
+        "specs/runtime/infra-013-unified-architecture-guard/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
-      "name": "tsc",
-      "occurrences": 13,
-      "files": [
-        "specs/runtime/infra-007-module-boundaries/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-007-module-boundaries/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-002-audit-checklist/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-002-audit-checklist/quickstart.md",
-        "specs/runtime/infra-002-audit-checklist/tasks.md",
-        "specs/runtime/infra-002-audit-checklist/research.md",
-        "specs/runtime/infra-002-audit-checklist/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-002-audit-checklist/plan.md",
-        "specs/runtime/infra-002-audit-checklist/spec.md",
-        "specs/runtime/infra-002-audit-checklist/reports/IMPLEMENT_REPORT.md",
-        "specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md",
-        "specs/runtime/ui-03-router-and-guards/tasks.md",
-        "specs/runtime/ui-03-router-and-guards/reports/IMPLEMENT_REPORT.md"
-      ]
-    },
-    {
-      "name": "type-check",
-      "occurrences": 30,
-      "files": [
-        "specs/runtime/022-divisions/guides/TESTING_GUIDE.md",
-        "specs/runtime/022-divisions/plan.md",
-        "specs/runtime/022-divisions/PR_SUMMARY.md",
-        "specs/runtime/infra-005-lint-governance/audits/ANALYZE_REPORT.md",
-        "specs/runtime/infra-005-lint-governance/research.md",
-        "specs/runtime/infra-005-lint-governance/plan.md",
-        "specs/runtime/infra-005-lint-governance/spec.md",
-        "specs/runtime/infra-005-lint-governance/reports/SPECIFY_REPORT.md",
-        "specs/runtime/infra-011-incremental-architecture-guard/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-011-incremental-architecture-guard/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-011-incremental-architecture-guard/PR_SUMMARY.md",
-        "specs/runtime/infra-004-biome/spec.md",
-        "specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-17-repository-size-and-performance-optimization/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-17-repository-size-and-performance-optimization/spec.md",
-        "specs/runtime/ui-07-layout-system-integration/audits/ANALYZE_REPORT.md",
-        "specs/runtime/ui-07-layout-system-integration/tasks.md",
-        "specs/runtime/001-monorepo-setup/quickstart.md",
-        "specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md",
-        "specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md",
-        "specs/runtime/infra-002-audit-checklist/reports/RISK_CLASSIFICATION.md",
-        "specs/runtime/infra-19-ai-agent-runtime-environment/tasks.md",
-        "specs/runtime/infra-19-ai-agent-runtime-environment/reports/PLAN_REPORT.md",
-        "specs/runtime/infra-19-ai-agent-runtime-environment/reports/TASKS_REPORT.md",
-        "specs/runtime/010-licenses-management/STEP_6_COMPLETION_SUMMARY.md",
-        "specs/runtime/010-licenses-management/reports/IMPLEMENT_REPORT.md",
-        "specs/runtime/infra-governance/research.md",
-        "specs/runtime/infra-governance/plan.md",
-        "specs/runtime/infra-governance/reports/IMPLEMENT_REPORT.md",
-        "specs/runtime/002A-master-db-schema/PRE_MERGE_VERIFICATION.md"
-      ]
-    },
-    {
-      "name": "type-coverage",
+      "name": "test:unit:debug",
       "occurrences": 1,
-      "files": ["specs/runtime/infra-012-typescript-type-safety-governance/plan.md"]
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
     },
     {
       "name": "type-safety-guard",
-      "occurrences": 13,
+      "occurrences": 1,
       "files": [
-        "specs/runtime/infra-021-support-surface-routing-and-template-migration/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-021-support-surface-routing-and-template-migration/contracts/migration-batch-contract.md",
-        "specs/runtime/infra-021-support-surface-routing-and-template-migration/quickstart.md",
-        "specs/runtime/infra-021-support-surface-routing-and-template-migration/plan.md",
-        "specs/runtime/infra-021-support-surface-routing-and-template-migration/spec.md",
-        "specs/runtime/infra-015-autonomous-architecture-health/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-020-ai-execution-orchestration-engine/plan.md",
-        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/quickstart.md",
-        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/tasks.md",
-        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/plan.md",
-        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/spec.md",
-        "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/reports/SANITIZATION_REPORT.md"
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/checklists/zidney-constitutional-checklist.md"
       ]
     },
     {
       "name": "typecheck",
-      "occurrences": 90,
+      "occurrences": 161,
       "files": [
+        "specs/runtime/022-divisions/guides/TESTING_GUIDE.md",
+        "specs/runtime/022-divisions/plan.md",
+        "specs/runtime/022-divisions/PR_SUMMARY.md",
         "specs/runtime/infra-005-lint-governance/audits/ANALYZE_REPORT.md",
         "specs/runtime/infra-005-lint-governance/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-005-lint-governance/tasks.md",
         "specs/runtime/infra-005-lint-governance/research.md",
         "specs/runtime/infra-005-lint-governance/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-005-lint-governance/plan.md",
+        "specs/runtime/infra-005-lint-governance/spec.md",
         "specs/runtime/infra-005-lint-governance/PR_SUMMARY.md",
+        "specs/runtime/infra-005-lint-governance/reports/SPECIFY_REPORT.md",
         "specs/runtime/infra-005-lint-governance/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-005-lint-governance/reports/TASKS_REPORT.md",
         "specs/runtime/infra-005-lint-governance/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/025-hierarchy-tree/audits/VALIDATION_REPORT.md",
+        "specs/runtime/025-hierarchy-tree/guides/TESTING_GUIDE.md",
+        "specs/runtime/025-hierarchy-tree/plan.md",
         "specs/runtime/020-status-workflow-engine/audits/VALIDATION_REPORT.md",
         "specs/runtime/020-status-workflow-engine/guides/TESTING_GUIDE.md",
         "specs/runtime/020-status-workflow-engine/PR_SUMMARY.md",
         "specs/runtime/020-status-workflow-engine/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-003-alignment/plan.md",
+        "specs/runtime/infra-011-incremental-architecture-guard/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-011-incremental-architecture-guard/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-011-incremental-architecture-guard/PR_SUMMARY.md",
         "specs/runtime/ui-05-env-configuration/audits/VALIDATION_REPORT.md",
         "specs/runtime/ui-05-env-configuration/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-004-biome/tasks.md",
         "specs/runtime/infra-004-biome/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-004-biome/plan.md",
+        "specs/runtime/infra-004-biome/spec.md",
         "specs/runtime/infra-004-biome/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-004-biome/reports/TASKS_REPORT.md",
+        "specs/runtime/infra-009-ai-architecture-context/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-17-repository-size-and-performance-optimization/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-17-repository-size-and-performance-optimization/spec.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-007-module-boundaries/tasks.md",
         "specs/runtime/infra-007-module-boundaries/plan.md",
         "specs/runtime/infra-007-module-boundaries/reports/IMPLEMENT_REPORT.md",
@@ -1065,7 +1717,12 @@
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/plan.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/spec.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/PR_SUMMARY.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/tasks.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/ui-07-layout-system-integration/audits/ANALYZE_REPORT.md",
         "specs/runtime/ui-07-layout-system-integration/audits/VALIDATION_REPORT.md",
+        "specs/runtime/ui-07-layout-system-integration/tasks.md",
         "specs/runtime/ui-07-layout-system-integration/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-07-layout-system-integration/PR_SUMMARY.md",
         "specs/runtime/infra-013-unified-architecture-guard/audits/VALIDATION_REPORT.md",
@@ -1080,19 +1737,46 @@
         "specs/runtime/infra-022-repository-hygiene-verification/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-022-repository-hygiene-verification/reports/TASKS_REPORT.md",
         "specs/runtime/infra-022-repository-hygiene-verification/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/030-categories/audits/VALIDATION_REPORT.md",
+        "specs/runtime/030-categories/tasks.md",
+        "specs/runtime/030-categories/guides/TESTING_GUIDE.md",
+        "specs/runtime/030-categories/PR_SUMMARY.md",
+        "specs/runtime/001-monorepo-setup/quickstart.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/tasks.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/research.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md",
         "specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md",
+        "specs/runtime/infra-002-audit-checklist/reports/RISK_CLASSIFICATION.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/tasks.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/VALIDATION_REPORT.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-012-typescript-type-safety-governance/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/tasks.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-19-ai-agent-runtime-environment/tasks.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/plan.md",
+        "specs/runtime/infra-19-ai-agent-runtime-environment/reports/PLAN_REPORT.md",
+        "specs/runtime/infra-19-ai-agent-runtime-environment/reports/TASKS_REPORT.md",
         "specs/runtime/infra-19-ai-agent-runtime-environment/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/010-licenses-management/STEP_6_COMPLETION_SUMMARY.md",
+        "specs/runtime/010-licenses-management/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-18-developer-experience-automation/plan.md",
         "specs/runtime/infra-001-typescript-stabilization/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-001-typescript-stabilization/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-001-typescript-stabilization/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/033-mcq-baskets/audits/VALIDATION_REPORT.md",
+        "specs/runtime/033-mcq-baskets/plan.md",
+        "specs/runtime/033-mcq-baskets/spec.md",
         "specs/runtime/ui-03-router-and-guards/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-03-router-and-guards/PR_SUMMARY.md",
         "specs/runtime/infra-020-ai-execution-orchestration-engine/audits/VALIDATION_REPORT.md",
@@ -1108,6 +1792,7 @@
         "specs/runtime/infra-governance/PR_SUMMARY.md",
         "specs/runtime/infra-governance/reports/CLOSURE_REPORT.md",
         "specs/runtime/infra-governance/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/002A-master-db-schema/PRE_MERGE_VERIFICATION.md",
         "specs/runtime/ui-02-api-client-layer/audits/VALIDATION_REPORT.md",
         "specs/runtime/ui-02-api-client-layer/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-09-security-and-token-handling/audits/VALIDATION_REPORT.md",
@@ -1116,8 +1801,30 @@
         "specs/runtime/ui-09-security-and-token-handling/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/ui-06-state-management/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-06-state-management/PR_SUMMARY.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/tasks.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md",
         "specs/runtime/017-tenant-bootstrap/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-006-architecture-guard/spec.md",
+        "specs/runtime/031-category-values/guides/TESTING_GUIDE.md",
+        "specs/runtime/031-category-values/plan.md",
+        "specs/runtime/023-departments/guides/TESTING_GUIDE.md",
+        "specs/runtime/023-departments/PR_SUMMARY.md",
+        "specs/runtime/023-departments/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/032-tags/tasks.md",
+        "specs/runtime/032-tags/guides/TESTING_GUIDE.md",
+        "specs/runtime/032-tags/reports/TASKS_REPORT.md",
+        "specs/runtime/027-semesters/audits/VALIDATION_REPORT.md",
+        "specs/runtime/027-semesters/guides/TESTING_GUIDE.md",
+        "specs/runtime/029-lessons/audits/VALIDATION_REPORT.md",
+        "specs/runtime/029-lessons/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/checklists/requirements.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md",
+        "specs/runtime/024-groups/audits/VALIDATION_REPORT.md",
+        "specs/runtime/024-groups/plan.md",
+        "specs/runtime/024-groups/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/028-subjects/audits/VALIDATION_REPORT.md",
+        "specs/runtime/028-subjects/PR_SUMMARY.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/quickstart.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/tasks.md",
@@ -1126,29 +1833,50 @@
       ]
     },
     {
+      "name": "typecheck:",
+      "occurrences": 1,
+      "files": ["specs/runtime/033-mcq-baskets/audits/VALIDATION_REPORT.md"]
+    },
+    {
       "name": "typecheck:src",
-      "occurrences": 12,
+      "occurrences": 27,
       "files": [
         "specs/runtime/infra-005-lint-governance/research.md",
         "specs/runtime/infra-005-lint-governance/plan.md",
+        "specs/runtime/infra-007-module-boundaries/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-007-module-boundaries/guides/TESTING_GUIDE.md",
         "specs/runtime/ui-07-layout-system-integration/guides/TESTING_GUIDE.md",
         "specs/runtime/021-role-permission-system/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-002-audit-checklist/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-002-audit-checklist/quickstart.md",
+        "specs/runtime/infra-002-audit-checklist/tasks.md",
+        "specs/runtime/infra-002-audit-checklist/research.md",
+        "specs/runtime/infra-002-audit-checklist/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-002-audit-checklist/plan.md",
+        "specs/runtime/infra-002-audit-checklist/spec.md",
+        "specs/runtime/infra-002-audit-checklist/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md",
         "specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-012-typescript-type-safety-governance/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-012-typescript-type-safety-governance/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-001-typescript-stabilization/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-001-typescript-stabilization/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-001-typescript-stabilization/PR_SUMMARY.md",
-        "specs/runtime/infra-001-typescript-stabilization/reports/IMPLEMENT_REPORT.md"
+        "specs/runtime/infra-001-typescript-stabilization/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/ui-03-router-and-guards/tasks.md",
+        "specs/runtime/ui-03-router-and-guards/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md"
       ]
     },
     {
       "name": "typecheck:tests",
-      "occurrences": 8,
+      "occurrences": 9,
       "files": [
         "specs/runtime/infra-005-lint-governance/research.md",
         "specs/runtime/infra-005-lint-governance/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-012-typescript-type-safety-governance/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-012-typescript-type-safety-governance/reports/IMPLEMENT_REPORT.md",
         "specs/runtime/infra-001-typescript-stabilization/audits/VALIDATION_REPORT.md",
@@ -1158,43 +1886,139 @@
       ]
     },
     {
-      "name": "validate-runtime-scripts",
-      "occurrences": 2,
-      "files": [
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md"
-      ]
+      "name": "validate",
+      "occurrences": 1,
+      "files": ["specs/runtime/032-tags/guides/TESTING_GUIDE.md"]
     },
     {
       "name": "validate:ai-context-fresh",
-      "occurrences": 2,
+      "occurrences": 6,
       "files": [
         "specs/runtime/infra-009-ai-architecture-context/plan.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md"
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md"
       ]
     },
     {
       "name": "validate:ai-context-schemas",
-      "occurrences": 2,
+      "occurrences": 6,
       "files": [
         "specs/runtime/infra-009-ai-architecture-context/plan.md",
-        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md"
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md"
       ]
     },
     {
-      "name": "validate:architecture",
+      "name": "validate:scripts:broken",
       "occurrences": 1,
-      "files": ["specs/runtime/infra-009-ai-architecture-context/quickstart.md"]
+      "files": ["specs/runtime/infra-023-local-ci-simulation-with-act/plan.md"]
+    },
+    {
+      "name": "validate:scripts:infrastructure",
+      "occurrences": 11,
+      "files": [
+        "specs/runtime/infra-027-unified-governance-gate-system/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/tasks.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/tasks.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/reports/IMPLEMENT_REPORT.md"
+      ]
+    },
+    {
+      "name": "validate:scripts:naming",
+      "occurrences": 8,
+      "files": [
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/tasks.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/reports/IMPLEMENT_REPORT.md"
+      ]
+    },
+    {
+      "name": "validate:scripts:runtime",
+      "occurrences": 22,
+      "files": [
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/tasks.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/plan.md",
+        "specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/tasks.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/plan.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/reports/CLOSURE_REPORT.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/tasks.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/plan.md",
+        "specs/runtime/infra-023-local-ci-simulation-with-act/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/VALIDATION_REPORT.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/guides/TESTING_GUIDE.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/spec.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/PR_SUMMARY.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/PR_SUMMARY.md",
+        "specs/runtime/infra-028-gitnexus-context-aware-governance/spec.md"
+      ]
+    },
+    {
+      "name": "validate:scripts:usage",
+      "occurrences": 13,
+      "files": [
+        "specs/runtime/infra-027-unified-governance-gate-system/audits/VALIDATION_REPORT.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/tasks.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/research.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/reports/IMPLEMENT_REPORT.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/tasks.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/guides/TESTING_GUIDE.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/plan.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/tasks.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/spec.md",
+        "specs/runtime/infra-026-trivy-security-scanning-and-enforcement/reports/IMPLEMENT_REPORT.md"
+      ]
+    },
+    {
+      "name": "validate:tsconfig",
+      "occurrences": 1,
+      "files": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
+      ]
     },
     {
       "name": "validate:types",
-      "occurrences": 12,
+      "occurrences": 18,
       "files": [
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/tasks.md",
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/plan.md",
         "specs/runtime/fix-01-runtime-script-recovery-and-validation/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-012-typescript-type-safety-governance/quickstart.md",
         "specs/runtime/infra-012-typescript-type-safety-governance/tasks.md",
+        "specs/runtime/infra-012-typescript-type-safety-governance/plan.md",
+        "specs/runtime/infra-027-unified-governance-gate-system/spec.md",
         "specs/runtime/infra-015-autonomous-architecture-health/quickstart.md",
         "specs/runtime/infra-015-autonomous-architecture-health/plan.md",
+        "specs/runtime/infra-025-script-system-standardization-and-governance/research.md",
         "specs/runtime/infra-014-architecture-alignment-migration/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-014-architecture-alignment-migration/contracts/alignment-verification-contract.md",
         "specs/runtime/infra-014-architecture-alignment-migration/quickstart.md",
@@ -1206,7 +2030,7 @@
     },
     {
       "name": "validate:workflows",
-      "occurrences": 14,
+      "occurrences": 15,
       "files": [
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-021-support-surface-routing-and-template-migration/contracts/migration-batch-contract.md",
@@ -1217,6 +2041,7 @@
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/tasks.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/guides/TESTING_GUIDE.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/audits/VALIDATION_REPORT.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/quickstart.md",
         "specs/runtime/infra-016-repository-sanitization-and-dead-code-elimination/tasks.md",
@@ -1226,33 +2051,20 @@
     },
     {
       "name": "validate:yaml",
-      "occurrences": 3,
+      "occurrences": 4,
       "files": [
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/tasks.md",
         "specs/runtime/infra-010-hybrid-lint-format-pipeline/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-010-hybrid-lint-format-pipeline/plan.md"
+        "specs/runtime/infra-010-hybrid-lint-format-pipeline/plan.md",
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md"
       ]
     },
     {
       "name": "vitest",
-      "occurrences": 10,
-      "files": [
-        "specs/runtime/infra-008-architecture-visualization/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-008-architecture-visualization/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-008-architecture-visualization/PR_SUMMARY.md",
-        "specs/runtime/ui-09-security-and-token-handling/audits/VALIDATION_REPORT.md",
-        "specs/runtime/ui-09-security-and-token-handling/guides/TESTING_GUIDE.md",
-        "specs/runtime/ui-09-security-and-token-handling/reports/CLOSURE_REPORT.md",
-        "specs/runtime/017-tenant-bootstrap/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-006-architecture-guard/audits/VALIDATION_REPORT.md",
-        "specs/runtime/infra-006-architecture-guard/guides/TESTING_GUIDE.md",
-        "specs/runtime/infra-006-architecture-guard/PR_SUMMARY.md"
-      ]
-    },
-    {
-      "name": "worker",
       "occurrences": 1,
-      "files": ["specs/runtime/002B-tenant-baseline-schema/quickstart.md"]
+      "files": [
+        "specs/runtime/infra-029-policy-engine-and-governance-rules-layer/guides/TESTING_GUIDE.md"
+      ]
     }
   ]
 }

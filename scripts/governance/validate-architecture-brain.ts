@@ -22,8 +22,8 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { validateArtifactContent } from '../core/artifact-validator'
-import { createLogger } from '../core/logger-factory'
 import { Timer } from '../core/performance-profiler'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('validate-architecture-brain')
 
@@ -307,6 +307,10 @@ function validateBrain(): ValidationResult {
 
 // Main execution
 const result = validateBrain()
+log.header(
+  'VALIDATE ARCHITECTURE BRAIN',
+  'Validates ai-architecture-brain.json structure and dependency paths'
+)
 // Simple health evaluation based on execution time (ms)
 let health: 'PASS' | 'WARN' | 'FAIL' = 'PASS'
 if (result.executionTimeMs > 2000) {
@@ -329,37 +333,58 @@ logger.info('Architecture brain validation completed', {
 })
 
 if (result.errors.length > 0) {
-  console.error('\n[VALIDATE BRAIN] ❌ ERRORS DETECTED:\n')
+  log.error('[VALIDATE BRAIN] ERRORS DETECTED:')
   for (const err of result.errors) {
-    console.error(`  ❌ ${err}`)
+    log.error(`  ${err}`)
   }
 }
 
 if (result.warnings.length > 0) {
-  console.warn('\n[VALIDATE BRAIN] ⚠️  WARNINGS:\n')
+  log.warn('[VALIDATE BRAIN] WARNINGS:')
   for (const warn of result.warnings) {
-    console.warn(`  ⚠️  ${warn}`)
+    log.warn(`  ${warn}`)
   }
 }
 
-console.log(`\n[VALIDATE BRAIN] Statistics:`)
-console.log(`  Modules: ${result.stats.modules}`)
-console.log(`  Edges: ${result.stats.edges}`)
-console.log(`  Malformed Edges: ${result.stats.malformedEdges}`)
-console.log(`  Execution Time: ${result.executionTimeMs}ms`)
-console.log(`  Health: ${health}`)
+log.info(`[VALIDATE BRAIN] Statistics:`)
+log.step(`Modules: ${result.stats.modules}`)
+log.step(`Edges: ${result.stats.edges}`)
+log.step(`Malformed Edges: ${result.stats.malformedEdges}`)
+log.step(`Execution Time: ${result.executionTimeMs}ms`)
+log.step(`Health: ${health}`)
 
 if (!result.valid) {
-  console.error('\n[VALIDATE BRAIN] ❌ VALIDATION FAILED\n')
+  log.error('[VALIDATE BRAIN] VALIDATION FAILED')
+  log.result({
+    total: result.stats.modules,
+    passed: 0,
+    failed: result.errors.length,
+    message: 'Brain validation failed.',
+  })
+  flushAi()
   process.exit(1)
 }
 
 if (result.warnings.length > 0) {
-  console.log('\n[VALIDATE BRAIN] ⚠️  VALIDATION PASSED WITH WARNINGS (non-fatal)\n')
+  log.warn('[VALIDATE BRAIN] VALIDATION PASSED WITH WARNINGS (non-fatal)')
+  log.result({
+    total: result.stats.modules,
+    passed: result.stats.modules,
+    failed: 0,
+    message: `Passed with ${result.warnings.length} warning(s).`,
+  })
+  flushAi()
   process.exit(0)
 }
 
-console.log('\n[VALIDATE BRAIN] ✅ VALIDATION PASSED\n')
+log.success('[VALIDATE BRAIN] VALIDATION PASSED')
+log.result({
+  total: result.stats.modules,
+  passed: result.stats.modules,
+  failed: 0,
+  message: 'Brain validation passed.',
+})
+flushAi()
 process.exit(0)
 
 // Exports for testing

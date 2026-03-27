@@ -22,7 +22,8 @@ const timer = new Timer('architecture-diff-execution')
  * Main entry point for Architecture Diff with refactored utilities
  */
 async function main(): Promise<void> {
-  log.header('ARCHITECTURE DIFF', 'Compare architecture states and detect drift')\n  timer.start()
+  log.header('ARCHITECTURE DIFF', 'Compare architecture states and detect drift')
+  timer.start()
 
   try {
     logger.info('Architecture Diff started with refactored utilities')
@@ -112,14 +113,13 @@ async function main(): Promise<void> {
       })
     }
 
-    log.result({ message: `Architecture Diff completed in ${elapsed.toFixed(0)}ms (Health: ${health})` })
+    log.result({
+      message: `Architecture Diff completed in ${elapsed.toFixed(0)}ms (Health: ${health})`,
+    })
     flushAi()
   } catch (error) {
     logger.error('Architecture Diff failure', { error: String(error) })
-    log.progressResult(
-      { error: 1 },
-      { title: 'Architecture Diff Failed', showPercentage: false }
-    )
+    log.progressResult({ error: 1 }, { title: 'Architecture Diff Failed', showPercentage: false })
     flushAi()
     process.exit(1)
   }
@@ -128,7 +128,7 @@ async function main(): Promise<void> {
 // Run if invoked directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
-    log.error('[architecture-diff] Fatal error: ' + String(error))
+    log.error(`[architecture-diff] Fatal error: ${String(error)}`)
     process.exit(1)
   })
 }

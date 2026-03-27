@@ -18,8 +18,17 @@ fi
 # one pass. Running biome format --write first was redundant and created a race
 # condition where the file could be staged in a different state than what
 # lint-staged produced.
+
 echo "Running lint-staged (Biome check --write on staged files)…"
 bunx lint-staged
+
+# ── Script UX Validator (staged + autofix) ───────────────────────────────
+echo "Running Script UX validator (--staged --fix)…"
+bun run validate:scripts:ux --staged --fix || {
+  echo "❌ Script UX validation failed — commit blocked."
+  echo "   Run: bun run validate:scripts:ux --staged --fix to auto-fix issues."
+  exit 1
+}
 
 
 # ── TypeScript incremental validation (only if TS files changed) ────────────

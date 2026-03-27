@@ -9,7 +9,9 @@
  * - Topological sort
  * - Reachability analysis
  * - Path finding
- */
+ 
+ * @library-module
+*/
 
 export interface GraphEdge {
   from: string
@@ -315,3 +317,30 @@ export function getNodeDegrees(
 
   return degrees
 }
+
+export interface GraphEdge {
+  from: string
+  to: string
+  weight?: number
+  metadata?: Record<string, unknown>
+}
+
+export interface GraphNode {
+  id: string
+  metadata?: Record<string, unknown>
+}
+
+export interface CycleDetectionResult {
+  hasCycle: boolean
+  cycle?: string[]
+  cycleNodes?: Set<string>
+}
+
+export interface ReachabilityResult {
+  reachable: Set<string>
+  distance: Map<string, number>
+}
+
+/**
+ * Build adjacency list from edges
+ */

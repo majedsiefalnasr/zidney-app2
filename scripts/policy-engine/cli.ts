@@ -16,18 +16,21 @@
  *   1 — one or more error-severity violations (or ENGINE-001 timeout)
  *
  * @module scripts/policy-engine/cli
- */
+ 
+ * @library-module
+*/
 
 // ── Side-effect imports: trigger registerRule() in each rule file ─────────────
+import './rules/ai/AI-001.rule'
 import './rules/architecture/ARCH-001.rule'
 import './rules/scripts/SCRIPTS-001.rule'
 import './rules/scripts/SCRIPTS-002.rule'
 import './rules/scripts/SCRIPTS-003.rule'
 import './rules/scripts/SCRIPTS-004.rule'
-import './rules/types/TYPES-001.rule'
-import './rules/ai/AI-001.rule'
 import './rules/security/SECURITY-001.rule'
+import './rules/types/TYPES-001.rule'
 
+import { exit, log } from '../utils/logger'
 import { loadContext } from './context/loader'
 import { PolicyEngine } from './engine'
 import { ConsoleReporter } from './reporters/console'
@@ -71,6 +74,8 @@ function createReporter(type: ReporterType): Reporter {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
+log.header('POLICY ENGINE', 'Unified governance policy checks')
+
 const args = parseArgs(Bun.argv.slice(2))
 const reporter = createReporter(args.reporterType)
 const engine = new PolicyEngine()
@@ -81,4 +86,14 @@ const results = await engine.check(context, warnings)
 reporter.report(results)
 
 const hasErrors = results.some((r) => r.severity === 'error')
-process.exit(hasErrors ? 1 : 0)
+const passed = results.filter((r) => r.severity !== 'error').length
+const failed = results.filter((r) => r.severity === 'error').length
+
+log.result({
+  total: results.length,
+  passed,
+  failed,
+  message: hasErrors ? 'Policy violations detected' : 'All policies passed',
+})
+
+exit(hasErrors ? 1 : 0)

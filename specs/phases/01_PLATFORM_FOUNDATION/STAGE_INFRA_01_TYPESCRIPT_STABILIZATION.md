@@ -16,7 +16,7 @@ Scope Closed:
 - Test file strict compliance achieved (0 test typecheck errors)
 - CI gate created: `.github/workflows/typecheck.yml` (SHA-pinned, 3-step gate)
 - ESLint `ban-ts-comment` descriptionFormat enforced at error level
-- SC-07 tsconfig audit script created: `scripts/check-tsconfig-strict.sh`
+- SC-07 tsconfig audit script created: `scripts/validate/check-tsconfig-strict.sh`
 - 14 one-shot implementation tool scripts removed from repository
 
 Deferred Scope:

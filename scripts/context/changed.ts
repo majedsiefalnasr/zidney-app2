@@ -15,6 +15,7 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import { flushAi, log } from '../utils/logger'
 
 const OUTPUT_PATH = resolve('docs/ai/context/context-changed.json')
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
@@ -25,7 +26,9 @@ interface ContextChangedArtifact {
 }
 
 function fail(message: string): never {
-  console.error(`[context:changed] FAIL: ${message}`)
+  log.error(`[context:changed] FAIL: ${message}`)
+  log.result({ total: 1, passed: 0, failed: 1, message })
+  flushAi()
   process.exit(1)
 }
 
@@ -58,12 +61,15 @@ function writeArtifact(changedFiles: string[]): void {
 }
 
 function main(): void {
+  log.header('CONTEXT CHANGED', 'Resolves staged changed files and writes context-changed.json')
   const { fresh, artifact } = isFresh()
 
   if (fresh && artifact) {
     const n = artifact.changedFiles.length
     const ageS = Math.floor((Date.now() - new Date(artifact.generatedAt).getTime()) / 1000)
-    console.log(`[context:changed] OK cached (${n} staged files, age=${ageS}s)`)
+    log.info(`[context:changed] OK cached (${n} staged files, age=${ageS}s)`)
+    log.result({ total: n, passed: n, failed: 0, message: 'cached' })
+    flushAi()
     process.exit(0)
   }
 
@@ -90,7 +96,9 @@ function main(): void {
     fail(`atomic write failed — ${message}`)
   }
 
-  console.log(`[context:changed] OK ${changedFiles.length} staged files resolved and cached`)
+  log.success(`[context:changed] OK ${changedFiles.length} staged files resolved and cached`)
+  log.result({ total: changedFiles.length, passed: changedFiles.length, failed: 0 })
+  flushAi()
   process.exit(0)
 }
 

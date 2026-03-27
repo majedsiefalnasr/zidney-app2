@@ -5,7 +5,9 @@
  * No imports — pure type definitions only.
  *
  * @module scripts/policy-engine/types
- */
+ 
+ * @library-module
+*/
 
 // ─── Primitive Types ──────────────────────────────────────────────────────────
 
@@ -253,3 +255,12 @@ export interface RegistryStats {
   totalRules: number
   domainCounts: Partial<Record<PolicyDomain, number>>
 }
+
+// ─── Primitive Types ──────────────────────────────────────────────────────────
+
+/**
+ * The severity of a policy violation.
+ * - 'error'   → causes exit code 1
+ * - 'warning' → reported but does not fail the check
+ * - 'info'    → informational only
+ */

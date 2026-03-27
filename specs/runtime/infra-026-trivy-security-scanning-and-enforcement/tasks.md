@@ -63,9 +63,9 @@
 ### Phase 6 — Validation
 
 - [x] T024 Run `bun run dev:generate:script-docs` and verify the script registry updates cleanly (SC-008)
-- [x] T025 Run `bun run validate:script:naming` — verify new script names comply with governance (SC-008)
-- [x] T026 Run `bun run validate:script:usage` — verify all new references resolve (SC-008)
-- [x] T027 Run `bun run validate:script:infrastructure` — verify script metadata/header coverage and registry expectations (SC-008)
+- [x] T025 Run `bun run validate:scripts:naming` — verify new script names comply with governance (SC-008)
+- [x] T026 Run `bun run validate:scripts:usage` — verify all new references resolve (SC-008)
+- [x] T027 Run `bun run validate:scripts:infrastructure` — verify script metadata/header coverage and registry expectations (SC-008)
 - [x] T028 Run `bun run infra:security`, `bun run infra:security:deps`, `bun run infra:security:secrets`, and `bun run infra:security:config` locally on a clean repository and verify each mode is independently executable with the expected scope and non-blocking clean-path behavior (SC-001, NFR-004)
 - [x] T029 Run `bun run infra:security:ci` locally twice with identical inputs and verify clean exit, stable JSON artifact contract, and consistent documentation of the shared invocation contract across local dev, CI, and orchestrator contexts (SC-007, NFR-003, NFR-006)
 - [x] T030 Measure pre-commit path timing for dependency scan plus staged secret scan and verify total runtime stays within 30 seconds, including a HIGH-severity dependency fixture that proves hook-level dependency blocking and a staged secret fixture that proves local secret blocking without value echo (NFR-002, SC-003, SC-010)

@@ -8,11 +8,13 @@
  * - Comparison with previous state
  * - Drift detection
  * - Impact analysis summary
- */
+ 
+ * @library-module
+*/
 
 import { compareSnapshots, createSnapshot } from '../../architecture/core/diff-engine'
 import type { GraphEdge } from '../../core/graph-analyzer'
-import { createLogger } from '../../core/logger-factory'
+import { createLogger } from '../../utils/logger'
 
 const logger = createLogger('architecture-diff-generator')
 

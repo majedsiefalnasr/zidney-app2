@@ -7,7 +7,9 @@
  * Never throws. All errors are returned as error-severity PolicyResult entries.
  *
  * @module scripts/policy-engine/adapters/type-safety.adapter
- */
+ 
+ * @library-module
+*/
 
 import { createLogger } from '@zidney/logger'
 import type { PolicyContext, PolicyResult } from '../types'

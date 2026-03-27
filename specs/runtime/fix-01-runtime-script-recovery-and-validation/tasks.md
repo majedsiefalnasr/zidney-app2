@@ -116,13 +116,13 @@ validating all Phase 3 work.
 
 ## Phase 4 — US3: CI Guard Script
 
-> **US3 Goal:** `bun run validate:runtime:scripts` hard-blocks (exit 1) when any `bun run <script>`
+> **US3 Goal:** `bun run validate:scripts:runtime` hard-blocks (exit 1) when any `bun run <script>`
 > reference in `specs/runtime/**` is absent from root `package.json`; exits 0 when all are
 > registered.
 
 ### Independent Test Criteria
 
-- `bun run validate:runtime:scripts` exits 0 after Phase 3 registration is complete
+- `bun run validate:scripts:runtime` exits 0 after Phase 3 registration is complete
 - Unit test: `extractScriptReferences` correctly extracts script names from markdown content
 - Unit test: excluded names (`my-new-script`, `scripts`, `wrapper`, `lint:staged`) are filtered
 - Unit test: CLI flag forms (`bun run --watch`) do not produce a match
@@ -189,7 +189,7 @@ validating all Phase 3 work.
 - [x] T041 Update `docs/scripts/SCRIPT_REGISTRY.md` to post-fix status — run `bun run scripts/validate/diff-script-registry.ts` and apply final state (MISSING → RECONSTRUCTED, DUPLICATE → CANONICAL, UNREGISTERED → REGISTERED, ALIAS-NEEDED → REGISTERED) — docs/scripts/SCRIPT_REGISTRY.md
 - [x] T042 Execute T007 validation run — invoke each new/recovered script via `bun run <script>` from repo root, record exit code, stdout/stderr structured log output, and classification (PASS / PASS-INFRA-DEPENDENT / FAIL) for: `db:pool-status`, `db:validate-licenses`, `db:migrate`, `db:console`, `validate:ai-context-fresh`, `validate:ai-context-schemas`, `maintenance:cache-clean`, `seed-dashboard-test-data`, `validate-runtime-scripts`, `generate-script-docs` — (execution only, no file)
 - [x] T043 Write `audits/runtime-script-validation.md` — validation report with date, executor, and per-row results table (Script | Exit Code | Output Excerpt | Classification) from T042 execution — specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/runtime-script-validation.md
-- [x] T044 Execute `bun run validate:runtime:scripts` from repo root → confirm exit 0 (zero unregistered spec references); if exit 1, identify missing registrations and add them in root `package.json` before proceeding — package.json (if remediation needed)
+- [x] T044 Execute `bun run validate:scripts:runtime` from repo root → confirm exit 0 (zero unregistered spec references); if exit 1, identify missing registrations and add them in root `package.json` before proceeding — package.json (if remediation needed)
 - [x] T045 Run `bun run typecheck` → confirm zero TypeScript errors across all new script files — (validation only)
 - [x] T046 Run `bun run lint` → confirm zero Biome violations across all new script files — (validation only)
 

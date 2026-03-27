@@ -15,6 +15,7 @@
 import { readFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { $ } from 'bun'
+import { flushAi, log } from '../utils/logger'
 
 interface SkillAudit {
   path: string
@@ -25,7 +26,10 @@ interface SkillAudit {
 }
 
 async function auditSkillFiles(): Promise<void> {
-  console.log('📊 SKILL.md Audit - T096\n')
+  log.header(
+    'AUDIT SKILL SIZES',
+    'Scans all SKILL.md files and identifies files exceeding 500 line limit'
+  )
 
   // Find all SKILL.md files using bun shell
   const findResult = await $`find .agents -name "SKILL.md" -type f`.text()
@@ -35,7 +39,7 @@ async function auditSkillFiles(): Promise<void> {
     .filter((f) => f.length > 0)
     .map((f) => f.trim())
 
-  console.log(`Found ${skillFiles.length} SKILL.md files\n`)
+  log.info(`Found ${skillFiles.length} SKILL.md files`)
 
   const audits: SkillAudit[] = []
   let oversizedCount = 0
@@ -64,7 +68,7 @@ async function auditSkillFiles(): Promise<void> {
         status,
       })
     } catch (error) {
-      console.error(`Error reading ${filePath}:`, error)
+      log.error(`Error reading ${filePath}: ${String(error)}`)
     }
   }
 
@@ -72,36 +76,35 @@ async function auditSkillFiles(): Promise<void> {
   audits.sort((a, b) => b.lineCount - a.lineCount)
 
   // Print audit results
-  console.log('📋 SKILL.md Audit Results\n')
-  console.log('| Skill | Lines | Status | Action |')
-  console.log('|-------|-------|--------|--------|')
+  log.step('SKILL.md Audit Results')
+  log.info('| Skill | Lines | Status | Action |')
+  log.info('|-------|-------|--------|--------|')
 
   for (const audit of audits) {
     const statusIcon = audit.status === 'OVERSIZED' ? '⚠️' : audit.status === 'MARGINAL' ? '⚡' : '✓'
-    console.log(
+    log.info(
       `| ${audit.name.padEnd(40)} | ${String(audit.lineCount).padStart(5)} | ${statusIcon} ${audit.status.padEnd(8)} | ${
         audit.oversized ? 'SPLIT' : audit.status === 'MARGINAL' ? 'REVIEW' : 'OK'
       } |`
     )
   }
 
-  console.log('\n---\n')
-  console.log('📊 Summary Metrics:')
-  console.log(`  Total SKILL.md files: ${audits.length}`)
-  console.log(`  OK (<450 lines): ${audits.length - oversizedCount - marginalCount}`)
-  console.log(`  Marginal (450-500 lines): ${marginalCount}`)
-  console.log(`  Oversized (>500 lines): ${oversizedCount}`)
-  console.log(`\n✅ Phase 5 Target: All files <500 lines\n`)
+  log.step('Summary Metrics:')
+  log.info(`  Total SKILL.md files: ${audits.length}`)
+  log.info(`  OK (<450 lines): ${audits.length - oversizedCount - marginalCount}`)
+  log.info(`  Marginal (450-500 lines): ${marginalCount}`)
+  log.info(`  Oversized (>500 lines): ${oversizedCount}`)
+  log.info(`Phase 5 Target: All files <500 lines`)
 
   if (oversizedCount > 0) {
-    console.log('🔴 Action Required:')
+    log.warn('Action Required:')
     const oversized = audits.filter((a) => a.status === 'OVERSIZED')
     for (const audit of oversized) {
-      console.log(`  - ${audit.name}: ${audit.lineCount} lines → SPLIT`)
+      log.warn(`  - ${audit.name}: ${audit.lineCount} lines → SPLIT`)
     }
-    console.log('\n  Tasks T097-T102 will address these files.\n')
+    log.info('  Tasks T097-T102 will address these files.')
   } else {
-    console.log('✅ All SKILL.md files within limits!\n')
+    log.success('All SKILL.md files within limits!')
   }
 
   // Write audit report
@@ -118,13 +121,19 @@ async function auditSkillFiles(): Promise<void> {
   }
 
   await Bun.write(reportPath, JSON.stringify(report, null, 2))
-  console.log(`📄 Full audit report saved to: ${reportPath}\n`)
-
+  log.success(`Full audit report saved to: ${reportPath}`)
+  log.result({
+    total: audits.length,
+    passed: audits.length - oversizedCount - marginalCount,
+    failed: oversizedCount,
+  })
+  flushAi()
   // Exit with success (report generated regardless of status)
   process.exit(0)
 }
 
 auditSkillFiles().catch((error) => {
-  console.error('Audit failed:', error)
+  log.error(`Audit failed: ${String(error)}`)
+  flushAi()
   process.exit(1)
 })

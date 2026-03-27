@@ -60,7 +60,8 @@ export class ConsoleReporter implements Reporter {
     console.log()
 
     for (const domain of sortedDomains) {
-      const domainResults = byDomain.get(domain)!
+      const domainResults = byDomain.get(domain)
+      if (!domainResults) continue
 
       // Domain header
       const header = `━━━ ${domain} ${'━'.repeat(Math.max(0, 44 - domain.length))}`

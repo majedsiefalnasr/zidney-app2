@@ -33,7 +33,7 @@ endpoints, so idempotency replay and concurrency validations are N/A.
 | Lint                          | Yes         | `bun run lint`                            | ✅ EXIT 0   | 1 pre-existing warning (unrelated file)     |
 | Type check                    | Yes         | `bun run typecheck`                       | ✅ EXIT 0   | Zero TypeScript errors                      |
 | Migration validation          | Conditional | N/A                                       | ✅ N/A      | No schema changes                           |
-| Validate runtime scripts      | Yes         | `bun run validate:runtime:scripts`        | ✅ EXIT 0   | 83 spec refs / 95 registered                |
+| Validate runtime scripts      | Yes         | `bun run validate:scripts:runtime`        | ✅ EXIT 0   | 83 spec refs / 95 registered                |
 | Idempotency replay            | Yes         | N/A                                       | ✅ N/A      | Scripts are not API endpoints               |
 | Concurrency validation        | Yes         | N/A                                       | ✅ N/A      | Scripts are not concurrent request handlers |
 
@@ -101,7 +101,7 @@ N/A — no schema changes introduced by this stage.
 ### Validate Runtime Scripts
 
 ```text
-$ bun run validate:runtime:scripts
+$ bun run validate:scripts:runtime
 [validate-runtime-scripts] All spec references are registered (83 refs found, 95 scripts registered)
 EXIT:0
 ```

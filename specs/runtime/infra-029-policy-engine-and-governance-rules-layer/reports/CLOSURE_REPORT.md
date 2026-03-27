@@ -131,7 +131,7 @@ Replace existing governance commands in pre-commit hooks:
 
 ```bash
 # OLD:
-bun run arch:guard:changed && bun run validate:runtime:scripts && bun run typecheck
+bun run arch:guard:changed && bun run validate:scripts:runtime && bun run typecheck
 
 # NEW:
 bun run policy:check --changed
@@ -249,7 +249,7 @@ Status: PASS
 
 ```
 Blank grep for 'bun run arch:guard' outside adapter: ✓
-Blank grep for 'bun run validate:runtime:scripts' outside adapter: ✓
+Blank grep for 'bun run validate:scripts:runtime' outside adapter: ✓
 Blank grep for 'bun typecheck' direct call outside adapter: ✓
 Blank grep for 'trivy fs' outside adapter: ✓
 Status: PASS (4 tests)

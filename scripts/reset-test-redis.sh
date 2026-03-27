@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 # Reset Test Redis Data
 # Flushes Redis and reinitializes test data
 
@@ -28,4 +29,9 @@ echo "  • Initializing rate limit buckets (empty state)..."
 # No explicit initialization needed; buckets are created on-demand
 
 echo "✅ Redis reset complete"
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
 exit 0

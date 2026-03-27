@@ -35,7 +35,6 @@ export interface MigrationEntry {
   newName: string
 }
 
-
 /** A single script entry parsed from a package.json scripts block. */
 export interface ScriptEntry {
   /** The key name, e.g. "validate:scripts:naming" */

@@ -169,7 +169,7 @@ Stored verbatim at `docs/scripts/SCRIPT_MIGRATION_MAP.md`.
 
 | Old Name                   | Violation                     | New Name                       |
 | -------------------------- | ----------------------------- | ------------------------------ |
-| `validate-runtime-scripts` | no domain, uses `-` separator | `validate:runtime:scripts`     |
+| `validate-runtime-scripts` | no domain, uses `-` separator | `validate:scripts:runtime`     |
 | `ai-guard`                 | no domain                     | `ai:guard`                     |
 | `type-safety-guard`        | no domain                     | `arch:type-safety-guard`       |
 | `generate-script-docs`     | no domain, uses `-`           | `dev:generate:script-docs`     |
@@ -181,7 +181,7 @@ Stored verbatim at `docs/scripts/SCRIPT_MIGRATION_MAP.md`.
 | Old Name                  | Violation                                                             | New Name                                 |
 | ------------------------- | --------------------------------------------------------------------- | ---------------------------------------- |
 | `gitnexus:context`        | `gitnexus` not in domain map                                          | `arch:gitnexus:context`                  |
-| `gitnexus:validate`       | same                                                                  | `arch:validate:gitnexus`                 |
+| `gitnexus:validate`       | same                                                                  | `arch:gitnexus:validate`                 |
 | `hygiene:report`          | `hygiene` not in domain map                                           | `dev:hygiene:report`                     |
 | `maintenance:cache-clean` | `maintenance` not in domain map                                       | `infra:cache:clean`                      |
 | `check:tsconfig`          | `check` not in domain map                                             | `validate:tsconfig`                      |
@@ -222,7 +222,7 @@ Stored verbatim at `docs/scripts/SCRIPT_MIGRATION_MAP.md`.
 
 ### Already-Compliant Governed Scripts (No Action Required)
 
-`validate:yaml`, `validate:workflows`, `validate:types`, `validate:ai-context-fresh`, `validate:ai-context-schemas`, `validate:scripts-infra`, `arch:add-module`, `arch:generate`, `arch:audit`, `arch:context`, `arch:refresh`, `arch:fix`, `arch:guard`, `arch:guard:ci`, `arch:guard:changed`, `arch:health`, `arch:health:ci`, `arch:visualize`, `ai:run`, `ai:plan`, `ai:validate`, `repo:doctor`, `repo:fix`, `repo:onboard`, `repo:status`, `db:console`, `db:migrate`, `ci:test`, `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:job`, `ci:local:list`, `ci:local:dry`, `ci:run-local`
+`validate:yaml`, `validate:workflows`, `validate:types`, `validate:ai-context-fresh`, `validate:ai-context-schemas`, `validate:scripts:broken`, `arch:add-module`, `arch:generate`, `arch:audit`, `arch:context`, `arch:refresh`, `arch:fix`, `arch:guard`, `arch:guard:ci`, `arch:guard:changed`, `arch:health`, `arch:health:ci`, `arch:visualize`, `ai:run`, `ai:plan`, `ai:validate`, `repo:doctor`, `repo:fix`, `repo:onboard`, `repo:status`, `db:console`, `db:migrate`, `ci:test`, `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:job`, `ci:local:list`, `ci:local:dry`, `ci:run-local`
 
 ---
 
@@ -360,7 +360,7 @@ All three validators and the refactor engine import from `scripts/validate/types
 
 ### `scripts/validate/script-naming.ts`
 
-Package.json entry: `"validate:script:naming": "bun scripts/validate/script-naming.ts"`
+Package.json entry: `"validate:scripts:naming": "bun scripts/validate/script-naming.ts"`
 
 **Algorithm (report-all mode):**
 
@@ -380,7 +380,7 @@ Package.json entry: `"validate:script:naming": "bun scripts/validate/script-nami
 ❌ Script naming violations found: N
 
   validate-runtime-scripts (package.json)
-    ↳ Uses '-' separator. Use: validate:runtime:scripts
+    ↳ Uses '-' separator. Use: validate:scripts:runtime
 
   gitnexus:context (package.json)
     ↳ 'gitnexus' is not an allowed domain.
@@ -391,7 +391,7 @@ Package.json entry: `"validate:script:naming": "bun scripts/validate/script-nami
 
 ### `scripts/validate/script-usage.ts`
 
-Package.json entry: `"validate:script:usage": "bun scripts/validate/script-usage.ts"`
+Package.json entry: `"validate:scripts:usage": "bun scripts/validate/script-usage.ts"`
 
 **Algorithm (report-all mode):**
 
@@ -400,7 +400,7 @@ Package.json entry: `"validate:script:usage": "bun scripts/validate/script-usage
 2. Scan files in scope using pattern: /bun run (?:--?\S+ )*([\ w:.-]+)/g
    - The `(?:--?\S+ )*` prefix clause skips zero or more CLI flag tokens (e.g. --bun, --silent)
    - The captured group must begin with [a-zA-Z]; tokens starting with '-' are skipped
-   - Example: 'bun run --bun validate:script:naming' captures 'validate:script:naming'
+   - Example: 'bun run --bun validate:scripts:naming' captures 'validate:scripts:naming'
 3. For each match: if name not in reference set → broken reference
 4. After FULL scan: emit violations
 5. if violations > 0: process.exit(1)
@@ -419,7 +419,7 @@ Package.json entry: `"validate:script:usage": "bun scripts/validate/script-usage
 
 ### `scripts/validate/script-infrastructure.ts`
 
-Package.json entry: `"validate:script:infrastructure": "bun scripts/validate/script-infrastructure.ts"`
+Package.json entry: `"validate:scripts:infrastructure": "bun scripts/validate/script-infrastructure.ts"`
 
 **Validates:**
 
@@ -453,15 +453,15 @@ Current workflow ends at **step 13**. New block appended as steps 14–17:
 
 # ── 14. Validate Script Naming Convention ──────────────────────────
 - name: Validate Script Naming Convention
-  run: bun run validate:script:naming
+  run: bun run validate:scripts:naming
 
 # ── 15. Validate Script Usages ─────────────────────────────────────
 - name: Validate Script Usages (no broken or orphan references)
-  run: bun run validate:script:usage
+  run: bun run validate:scripts:usage
 
 # ── 16. Validate Script Infrastructure ────────────────────────────
 - name: Validate Script Infrastructure (headers + registry freshness)
-  run: bun run validate:script:infrastructure
+  run: bun run validate:scripts:infrastructure
 
 # ── 17. Verify Script Registry Generation ─────────────────────────
 - name: Verify Script Registry Generation
@@ -509,7 +509,7 @@ All four steps: `continue-on-error: false` (default). Any failure independently 
 | `db:status:pool` | `scripts/db/pool-status.ts` | runtime    | Check PostgreSQL connection pool health | `bun run db:status:pool` |
 ```
 
-**Staleness check** (`validate:script:infrastructure`): regenerate in-memory → normalize both versions (strip the `> Last generated: ...` timestamp line) → string diff of normalized content only. Any diff in the normalized content triggers failure. This prevents the timestamp line from causing permanent stale failures in CI.
+**Staleness check** (`validate:scripts:infrastructure`): regenerate in-memory → normalize both versions (strip the `> Last generated: ...` timestamp line) → string diff of normalized content only. Any diff in the normalized content triggers failure. This prevents the timestamp line from causing permanent stale failures in CI.
 
 ---
 
@@ -533,8 +533,8 @@ All four steps: `continue-on-error: false` (default). Any failure independently 
 | --------------------------------------- | ------------------------------------------ | -------------------------------------------------------- |
 | Inline shell command in package.json    | Not refactorable, no metadata, no registry | Create `scripts/<domain>/<file>.ts`                      |
 | `ts-node` or `npx tsx` instead of `bun` | Breaks invocation standardization          | Use `bun scripts/<domain>/<file>.ts`                     |
-| Omitting metadata header                | `validate:script:infrastructure` fails CI  | Add all 5 required `@` tags                              |
-| Non-allowed domain                      | `validate:script:naming` fails CI          | Use one of 9 allowed domains                             |
+| Omitting metadata header                | `validate:scripts:infrastructure` fails CI | Add all 5 required `@` tags                              |
+| Non-allowed domain                      | `validate:scripts:naming` fails CI         | Use one of 9 allowed domains                             |
 | Rename without running refactor engine  | Leaves broken references                   | Update migration map, run `bun run dev:refactor:scripts` |
 | Forgetting to update SCRIPT_REGISTRY    | CI staleness check fails                   | Run `bun run dev:generate:script-docs`                   |
 | Duplicate governed script name          | Ambiguous; naming validator catches it     | Choose unique name within domain                         |
@@ -555,7 +555,7 @@ All four steps: `continue-on-error: false` (default). Any failure independently 
  */
 ```
 
-All five fields are mandatory and enforced by `validate:script:infrastructure`.
+All five fields are mandatory and enforced by `validate:scripts:infrastructure`.
 
 ### Category Values
 
@@ -624,34 +624,34 @@ All `scripts/ai-engine/`, `scripts/architecture-guard/`, `scripts/architecture-h
 
 ## Implementation Sequence
 
-| Step | Action                                                                                                                                                                             |
-| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1    | Create `docs/scripts/SCRIPT_MIGRATION_MAP.md` with full table                                                                                                                      |
-| 2    | Implement `scripts/dev/refactor-scripts.ts`                                                                                                                                        |
-| 3    | Implement `scripts/validate/script-naming.ts`, `script-usage.ts`, `script-infrastructure.ts`                                                                                       |
-| 4    | Add to `package.json`: `validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure`, `dev:refactor:scripts` (plus renamed entry `dev:generate:script-docs`) |
-| 5    | Run `bun run dev:refactor:scripts --dry-run`; review output                                                                                                                        |
-| 6    | Apply all 33 renames/removals to root `package.json`                                                                                                                               |
-| 7    | Run `bun run dev:refactor:scripts` (live); confirm `reports/SCRIPT_REFACTOR_REPORT.md` shows 0 unresolved                                                                          |
-| 8    | Add `@category` and `@usage` to all scripts in §File Locations                                                                                                                     |
-| 9    | Update `scripts/generate/script-docs.ts` to enforce 5-field schema                                                                                                                 |
-| 10   | Run `bun run dev:generate:script-docs`; verify `docs/scripts/SCRIPT_REGISTRY.md` is complete                                                                                       |
-| 11   | Run `validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure` — all must exit 0                                                                          |
-| 12   | Update `.agents/skills/script-system-governance/SKILL.md`                                                                                                                          |
-| 13   | Append CI block to `.github/workflows/architecture-governance.yml`                                                                                                                 |
-| 14   | Full gate: `bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run typecheck && bun run test`                                                            |
+| Step | Action                                                                                                                                                                                |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | Create `docs/scripts/SCRIPT_MIGRATION_MAP.md` with full table                                                                                                                         |
+| 2    | Implement `scripts/dev/refactor-scripts.ts`                                                                                                                                           |
+| 3    | Implement `scripts/validate/script-naming.ts`, `script-usage.ts`, `script-infrastructure.ts`                                                                                          |
+| 4    | Add to `package.json`: `validate:scripts:naming`, `validate:scripts:usage`, `validate:scripts:infrastructure`, `dev:refactor:scripts` (plus renamed entry `dev:generate:script-docs`) |
+| 5    | Run `bun run dev:refactor:scripts --dry-run`; review output                                                                                                                           |
+| 6    | Apply all 33 renames/removals to root `package.json`                                                                                                                                  |
+| 7    | Run `bun run dev:refactor:scripts` (live); confirm `reports/SCRIPT_REFACTOR_REPORT.md` shows 0 unresolved                                                                             |
+| 8    | Add `@category` and `@usage` to all scripts in §File Locations                                                                                                                        |
+| 9    | Update `scripts/generate/script-docs.ts` to enforce 5-field schema                                                                                                                    |
+| 10   | Run `bun run dev:generate:script-docs`; verify `docs/scripts/SCRIPT_REGISTRY.md` is complete                                                                                          |
+| 11   | Run `validate:scripts:naming`, `validate:scripts:usage`, `validate:scripts:infrastructure` — all must exit 0                                                                          |
+| 12   | Update `.agents/skills/script-system-governance/SKILL.md`                                                                                                                             |
+| 13   | Append CI block to `.github/workflows/architecture-governance.yml`                                                                                                                    |
+| 14   | Full gate: `bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run typecheck && bun run test`                                                               |
 
 ---
 
 ## Failure Modes and Recovery
 
-| Failure                                                 | Recovery                                                       |
-| ------------------------------------------------------- | -------------------------------------------------------------- |
-| Refactor engine leaves unresolved references            | Extend scan scope or fix migration map entry; re-run engine    |
-| `validate:script:naming` finds violation after rename   | Old alias still in `package.json` — remove it                  |
-| `validate:script:usage` finds broken reference in `.sh` | Confirm `\.sh$` is in scan glob (it is per spec clarification) |
-| CI step 16 fails (stale registry)                       | Run `bun run dev:generate:script-docs` and commit              |
-| Metadata check fails for newly discovered script        | Add missing `@category`/`@usage` fields                        |
+| Failure                                                  | Recovery                                                       |
+| -------------------------------------------------------- | -------------------------------------------------------------- |
+| Refactor engine leaves unresolved references             | Extend scan scope or fix migration map entry; re-run engine    |
+| `validate:scripts:naming` finds violation after rename   | Old alias still in `package.json` — remove it                  |
+| `validate:scripts:usage` finds broken reference in `.sh` | Confirm `\.sh$` is in scan glob (it is per spec clarification) |
+| CI step 16 fails (stale registry)                        | Run `bun run dev:generate:script-docs` and commit              |
+| Metadata check fails for newly discovered script         | Add missing `@category`/`@usage` fields                        |
 
 ---
 
@@ -694,13 +694,13 @@ scripts/dev/__tests__/refactor-scripts.test.ts
 
 ### Integration Verification
 
-- `validate:script:naming` passes after all renames applied (zero violations)
-- `validate:script:usage` passes after refactor engine run (zero unresolved)
+- `validate:scripts:naming` passes after all renames applied (zero violations)
+- `validate:scripts:usage` passes after refactor engine run (zero unresolved)
 - `dev:generate:script-docs` is idempotent — running twice gives same `SCRIPT_REGISTRY.md`
 
 ### Existing Tests to Update
 
-`scripts/validate/__tests__/runtime-scripts.test.ts` — update references from `validate-runtime-scripts` to `validate:runtime:scripts`.
+`scripts/validate/__tests__/runtime-scripts.test.ts` — update references from `validate-runtime-scripts` to `validate:scripts:runtime`.
 
 ---
 
@@ -720,9 +720,9 @@ Fully reversible via git revert:
 Before closure, verify all three exit 0:
 
 ```bash
-bun run validate:script:naming
-bun run validate:script:usage
-bun run validate:script:infrastructure
+bun run validate:scripts:naming
+bun run validate:scripts:usage
+bun run validate:scripts:infrastructure
 ```
 
 Failure of any gate **blocks closure**.
@@ -743,9 +743,9 @@ Failure of any gate **blocks closure**.
 
 | #   | Criterion                                                 | Validation                                  |
 | --- | --------------------------------------------------------- | ------------------------------------------- |
-| 1   | All governed scripts follow `<domain>:<action>[:<scope>]` | `validate:script:naming` exits 0            |
-| 2   | No broken script references                               | `validate:script:usage` exits 0             |
-| 3   | Every `.ts` script has complete 5-field metadata header   | `validate:script:infrastructure` exits 0    |
+| 1   | All governed scripts follow `<domain>:<action>[:<scope>]` | `validate:scripts:naming` exits 0           |
+| 2   | No broken script references                               | `validate:scripts:usage` exits 0            |
+| 3   | Every `.ts` script has complete 5-field metadata header   | `validate:scripts:infrastructure` exits 0   |
 | 4   | Registry complete and accurate                            | Registry regenerates without diff           |
 | 5   | CI prevents future regressions                            | All 4 CI checks integrated and blocking     |
 | 6   | Refactor engine shows 0 unresolved                        | `reports/SCRIPT_REFACTOR_REPORT.md` shows 0 |

@@ -27,6 +27,7 @@ import { execSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import type { AIDependencyGraph } from '../packages/types/src/ai-context'
 import { runUnifiedArchitectureGuard } from './architecture-guard/runner'
+import { flushAi, log } from './utils/logger'
 
 function getCurrentBranch(): string {
   try {
@@ -177,7 +178,7 @@ function loadArchitectureBrain(): ArchitectureBrain | null {
 
 export function loadModuleBoundaries(): ModuleBoundaries | null {
   if (!existsSync(BOUNDARIES_PATH)) {
-    console.warn(
+    log.warn(
       '[ai-guard] WARNING: module-boundaries.json not found — falling back to ARCHITECTURE_MAP.json only'
     )
     return null
@@ -196,16 +197,14 @@ export function loadModuleBoundaries(): ModuleBoundaries | null {
       typeof parsed.forbidden_dependencies !== 'object' ||
       Array.isArray(parsed.forbidden_dependencies)
     ) {
-      console.error(
+      log.error(
         '[ai-guard] ERROR: module-boundaries.json is structurally invalid — missing required fields (layers, allowed_dependencies, forbidden_dependencies)'
       )
       process.exit(1)
     }
     return parsed
   } catch {
-    console.error(
-      '[ai-guard] ERROR: module-boundaries.json is malformed — cannot validate boundaries'
-    )
+    log.error('[ai-guard] ERROR: module-boundaries.json is malformed — cannot validate boundaries')
     process.exit(1)
   }
 }
@@ -246,9 +245,8 @@ export function loadTsAliases(): TsAliasMap[] {
         result.push({ alias: cleanKey, target: cleanTarget })
       }
     } catch (err) {
-      console.warn(
-        `[ai-guard] WARNING: failed to load aliases from ${configFile} — alias-based boundary checks may be incomplete`,
-        err instanceof Error ? err.message : String(err)
+      log.warn(
+        `[ai-guard] WARNING: failed to load aliases from ${configFile} — alias-based boundary checks may be incomplete. ${err instanceof Error ? err.message : String(err)}`
       )
     }
   }
@@ -643,11 +641,11 @@ function validateBranchNaming(changedFiles: string[]): void {
       const branchStage = branch.replace('spec/', '').toUpperCase()
 
       if (!branchStage.includes(expectedStage)) {
-        console.error('\nAI Guard: Stage branch mismatch.')
-        console.error(`Stage file modified: ${expectedStage}`)
-        console.error(`Current branch: ${branch}`)
-        console.error(`Expected branch to include: spec/${expectedStage}`)
-        console.error('Example: spec/STAGE_21_ROLE_PERMISSION_SYSTEM\n')
+        log.error('AI Guard: Stage branch mismatch.')
+        log.error(`Stage file modified: ${expectedStage}`)
+        log.error(`Current branch: ${branch}`)
+        log.error(`Expected branch to include: spec/${expectedStage}`)
+        log.error('Example: spec/STAGE_21_ROLE_PERMISSION_SYSTEM')
 
         process.exit(1)
       }
@@ -855,6 +853,7 @@ function runFullScanWithReason(
 }
 
 export async function runIncremental(config: GuardConfig): Promise<ValidationResult> {
+  log.header('AI GUARD (INCREMENTAL)', 'Validates architecture rules for staged files')
   const stagedEnv = process.env.STAGED_FILES ?? ''
   const stagedFiles = stagedEnv
     .split('\n')
@@ -862,7 +861,9 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
     .filter(Boolean)
 
   if (stagedFiles.length === 0) {
-    console.log('AI Guard (incremental): no staged files — skipping.')
+    log.info('AI Guard (incremental): no staged files — skipping.')
+    log.result({ total: 0, passed: 0, failed: 0, message: 'no staged files' })
+    flushAi()
     process.exit(0)
   }
 
@@ -875,14 +876,14 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
   )
 
   if (mapChanged) {
-    console.log('AI Guard (incremental): ARCHITECTURE_MAP changed — running full scan.')
+    log.info('AI Guard (incremental): ARCHITECTURE_MAP changed — running full scan.')
     const result = runFullScanWithReason('map_changed', stagedFiles)
     finalizeResult(result, config)
     return result
   }
 
   if (detectNewModules(moduleKeys)) {
-    console.log('AI Guard (incremental): new module detected — running full scan.')
+    log.info('AI Guard (incremental): new module detected — running full scan.')
     const result = runFullScanWithReason('new_module_detected', stagedFiles)
     finalizeResult(result, config)
     return result
@@ -892,13 +893,11 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
 
   if (loadResult.graph === null) {
     if (loadResult.reason === 'missing') {
-      console.log('AI Guard (incremental): graph missing — regenerating...')
+      log.info('AI Guard (incremental): graph missing — regenerating...')
       try {
         execSync('bun scripts/infra-audit.ts --generate-graph', { stdio: 'inherit' })
       } catch {
-        console.warn(
-          'AI Guard (incremental): graph regeneration failed — falling back to full scan.'
-        )
+        log.warn('AI Guard (incremental): graph regeneration failed — falling back to full scan.')
         const result = runFullScanWithReason('graph_missing', stagedFiles)
         finalizeResult(result, config)
         return result
@@ -911,15 +910,13 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
       }
       loadResult = retry
     } else if (loadResult.reason === 'stale') {
-      console.log('AI Guard (incremental): graph stale — running full scan.')
+      log.info('AI Guard (incremental): graph stale — running full scan.')
       const result = runFullScanWithReason('graph_stale', stagedFiles)
       finalizeResult(result, config)
       return result
     } else {
       // 'corrupt' or 'schema_mismatch' — do not attempt regen
-      console.log(
-        `AI Guard (incremental): graph unusable (${loadResult.reason}) — running full scan.`
-      )
+      log.info(`AI Guard (incremental): graph unusable (${loadResult.reason}) — running full scan.`)
       const result = runFullScanWithReason('graph_unusable', stagedFiles)
       finalizeResult(result, config)
       return result
@@ -941,7 +938,7 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
   }
 
   if (scope.size >= moduleKeys.length) {
-    console.log('AI Guard (incremental): full scope — running full scan.')
+    log.info('AI Guard (incremental): full scope — running full scan.')
     const result = runFullScanWithReason('full_scope', stagedFiles)
     finalizeResult(result, config)
     return result
@@ -953,9 +950,7 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
     return matched ? scope.has(matched) : false
   })
 
-  console.log(
-    `AI Guard (incremental): validating ${scope.size} module(s): ${[...scope].join(', ')}`
-  )
+  log.info(`AI Guard (incremental): validating ${scope.size} module(s): ${[...scope].join(', ')}`)
 
   const violations: string[] = []
   const archMapForIncremental = archMap
@@ -1029,11 +1024,13 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
 
 function finalizeResult(result: ValidationResult, config: GuardConfig): void {
   if (result.violations.length > 0) {
-    console.error('\nAI Guard: Architecture violations detected\n')
+    log.error('AI Guard: Architecture violations detected')
     for (const v of result.violations) {
-      console.error(' -', v)
+      log.error(` - ${v}`)
     }
-    console.error('\nCommit rejected by Zidney AI Guard. Fix architecture violations.')
+    log.error('Commit rejected by Zidney AI Guard. Fix architecture violations.')
+    log.result({ total: result.modules_validated, passed: 0, failed: result.violations.length })
+    flushAi()
     process.exit(1)
   }
 
@@ -1050,18 +1047,19 @@ function finalizeResult(result: ValidationResult, config: GuardConfig): void {
       violations: result.violations,
       duration_ms: 0,
     }
-    console.log(JSON.stringify(report, null, 2))
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
   }
 }
 
 function runGuard() {
+  log.header('AI GUARD', 'Enforces architecture rules and import boundaries')
   const changedFiles = getChangedFiles()
 
   validateBranchNaming(changedFiles)
 
   const brain = loadArchitectureBrain()
   if (brain) {
-    console.log('AI Guard: using ai-architecture-brain.json for rule validation.')
+    log.info('AI Guard: using ai-architecture-brain.json for rule validation.')
   }
 
   const contract = brain?.rules
@@ -1077,11 +1075,13 @@ function runGuard() {
   const aliases = loadTsAliases()
 
   if (boundaries) {
-    console.log('AI Guard: module-boundaries.json loaded — layer boundary validation enabled.')
+    log.info('AI Guard: module-boundaries.json loaded — layer boundary validation enabled.')
   }
 
   if (changedFiles.length === 0) {
-    console.log('AI Guard: no changed files detected.')
+    log.info('AI Guard: no changed files detected.')
+    log.result({ total: 0, passed: 0, failed: 0, message: 'no changed files' })
+    flushAi()
     process.exit(0)
   }
 
@@ -1119,10 +1119,10 @@ function runGuard() {
     // DEBUG: Log violations for packages/ui-system
     if (file.includes('packages/ui-system')) {
       if (layerBoundaryViolations.length > 0) {
-        console.error(
+        log.error(
           `DEBUG [${file}]: Got ${layerBoundaryViolations.length} violations from validateLayerBoundaries`
         )
-        console.error(
+        log.error(
           `  Imports checked: ${imports.slice(0, 3).join(', ')}${imports.length > 3 ? '...' : ''}`
         )
       }
@@ -1158,18 +1158,21 @@ function runGuard() {
   }
 
   if (violations.length > 0) {
-    console.error('\nAI Guard: Architecture violations detected\n')
+    log.error('AI Guard: Architecture violations detected')
 
     for (const v of violations) {
-      console.error(' -', v)
+      log.error(` - ${v}`)
     }
 
-    console.error('\nCommit rejected by Zidney AI Guard. Fix architecture violations.')
-
+    log.error('Commit rejected by Zidney AI Guard. Fix architecture violations.')
+    log.result({ total: changedFiles.length, passed: 0, failed: violations.length })
+    flushAi()
     process.exit(1)
   }
 
-  console.log('AI Guard: architecture validation passed.')
+  log.success('AI Guard: architecture validation passed.')
+  log.result({ total: changedFiles.length, passed: changedFiles.length, failed: 0 })
+  flushAi()
 }
 
 // Only execute when run directly (not when imported for unit testing)

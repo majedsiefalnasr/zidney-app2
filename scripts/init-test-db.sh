@@ -1,6 +1,8 @@
 #!/bin/bash
-# Initialize Test Databases
+# ───────────────────────────────────────────────────────────────────────────
+# START: Initialize Test Databases
 # Creates and provisions master and tenant test databases with baseline schema
+# ───────────────────────────────────────────────────────────────────────────
 
 set -e
 
@@ -94,4 +96,9 @@ run_sql -d "$MASTER_DB_NAME" -c "
 "
 
 echo "✅ Test database initialization complete"
+echo ""
+echo "───────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Database initialization successful"
+echo "───────────────────────────────────────────────────────────────────────────"
 exit 0

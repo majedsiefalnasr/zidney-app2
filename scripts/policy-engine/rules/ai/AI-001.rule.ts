@@ -10,7 +10,9 @@
  * Self-registers on import via side-effect call to registerRule().
  *
  * @module scripts/policy-engine/rules/ai/AI-001.rule
- */
+ 
+ * @library-module
+*/
 
 import { registerRule } from '../../registry'
 import type { PolicyContext, PolicyResult } from '../../types'

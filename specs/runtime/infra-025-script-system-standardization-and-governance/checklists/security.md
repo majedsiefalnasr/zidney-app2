@@ -20,7 +20,7 @@
 
 ## Secrets and Sensitive Data in Outputs
 
-- [ ] CHK006 — Does the spec explicitly prohibit script validation outputs (`validate:script:naming`, `validate:script:usage`) from echoing file contents that could expose secrets or credentials? [Gap, Spec §FR-008]
+- [ ] CHK006 — Does the spec explicitly prohibit script validation outputs (`validate:scripts:naming`, `validate:scripts:usage`) from echoing file contents that could expose secrets or credentials? [Gap, Spec §FR-008]
 - [ ] CHK007 — Is there a requirement that the refactor report (`reports/SCRIPT_REFACTOR_REPORT.md`) must not persist environment variable values, tokens, or credentials captured during script execution? [Gap, Spec §FR-004]
 - [ ] CHK008 — Are requirements defined to prevent the `@description` and `@usage` fields of the metadata header (FR-006) from containing sensitive deployment details (e.g., internal hostnames, credentials, environment-specific paths)? [Gap, Spec §FR-006]
 - [ ] CHK009 — Does the spec define whether the script registry (`docs/scripts/SCRIPT_REGISTRY.md`) is safe to commit publicly — specifically that it must not include environment-dependent invocation strings that reveal infra topology? [Gap, Spec §FR-007]

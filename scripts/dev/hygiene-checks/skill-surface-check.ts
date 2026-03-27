@@ -2,7 +2,9 @@
  * T007 — Skill Surface Validation
  * Checks every .agents/skills/ subdirectory is referenced in SKILLS_INDEX.md and/or AGENTS.md.
  * Also flags stale index entries (in index but directory missing on disk).
- */
+ 
+ * @library-module
+*/
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'

@@ -8,7 +8,9 @@
  * - Repository-wide architecture auditing
  * - Module discovery and analysis
  * - Violation reporting and scoring
- */
+ 
+ * @library-module
+*/
 
 import { findOversizedFiles } from '../../core/file-analyzer'
 import type { GraphEdge } from '../../core/graph-analyzer'
@@ -303,4 +305,30 @@ export function runIncrementalAudit(
     modulesAnalyzed: modulesToAnalyze.size,
     score,
   }
+}
+
+export interface AuditFinding {
+  type: 'error' | 'warning' | 'info'
+  module: string
+  message: string
+  severity: 'critical' | 'high' | 'medium' | 'low'
+}
+
+export interface AuditReport {
+  timestamp: number
+  moduleCount: number
+  edgeCount: number
+  findings: AuditFinding[]
+  cycleDetected: boolean
+  cycles?: string[][]
+  oversizedModules?: string[]
+  score: number
+  analysisScope?: 'full' | 'incremental'
+  modulesAnalyzed?: number
+}
+
+export interface IncrementalAuditOptions {
+  changedModules: string[]
+  allModules: string[]
+  includeTransitiveDependencies: boolean
 }

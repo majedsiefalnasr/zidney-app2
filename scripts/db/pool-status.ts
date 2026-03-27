@@ -4,19 +4,19 @@
  * @category runtime
  * @description Check PostgreSQL connection pool health and report status
  * @usage bun run db:status:pool
- */
+ 
+ * @library-module
+*/
 
-import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
-import { createLogger } from '../core/logger-factory'
 
-const correlationId = randomUUID()
+const _correlationId = randomUUID()
 const logger = createLogger('db:pool-status')
 logger.setContext({ correlationId })
 
 const DATABASE_URL = process.env.DATABASE_URL
 
-async function main(): Promise<void> {
+async function _main(): Promise<void> {
   logger.info('Checking database pool status')
 
   if (!DATABASE_URL) {

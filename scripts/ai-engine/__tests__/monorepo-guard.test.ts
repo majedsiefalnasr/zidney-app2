@@ -1,3 +1,4 @@
+/** @library-module */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock node:fs before importing the module under test

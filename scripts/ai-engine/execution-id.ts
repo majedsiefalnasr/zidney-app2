@@ -1,3 +1,4 @@
+/** @library-module */
 import { createHash } from 'node:crypto'
 
 /**

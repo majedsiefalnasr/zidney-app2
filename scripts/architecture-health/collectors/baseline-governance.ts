@@ -1,3 +1,4 @@
+/** @library-module */
 import type { GuardRunReport, ViolationRecord } from '../architecture-guard-types'
 import { DEFAULT_THRESHOLD_POLICY } from '../score-model'
 import type { HealthFinding, HealthSignalResult } from '../types'

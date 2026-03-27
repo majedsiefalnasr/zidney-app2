@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 
 # T075: Deploy MMC Dashboard to Staging Environment
 #
@@ -252,4 +253,9 @@ log_success "Staging deployment ready for smoke testing"
 # Clean up plan file
 rm -f "${PLAN_FILE}"
 
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
 exit 0

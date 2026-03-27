@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { existsSync, readFileSync } from 'node:fs'
+import { flushAi, log } from '../utils/logger'
 import { runContextGenerationHook } from './hooks/generate-context'
 import { runBrainValidationHook } from './hooks/validate-brain'
 import { resolveMode } from './mode'
@@ -92,6 +93,7 @@ function downgradeToWarnings(violations: ViolationRecord[]): ViolationRecord[] {
 }
 
 export async function runUnifiedArchitectureGuard(args = process.argv.slice(2)): Promise<number> {
+  log.header('UNIFIED ARCHITECTURE GUARD', 'Validates architecture rules and import boundaries')
   const start = Date.now()
   const repoRoot = process.cwd()
   const mode = resolveMode(args)
@@ -165,31 +167,37 @@ export async function runUnifiedArchitectureGuard(args = process.argv.slice(2)):
   })
 
   if (mode.outputJson) {
-    console.log(reportToJson(report))
+    process.stdout.write(`${reportToJson(report)}\n`)
   } else {
-    console.log(
-      `Unified Architecture Guard mode=${report.validation_mode} verdict=${report.verdict}`
-    )
-    console.log(`Rules executed: ${rules.map((rule) => rule.id).join(', ')}`)
-    console.log(
+    log.info(`Unified Architecture Guard mode=${report.validation_mode} verdict=${report.verdict}`)
+    log.info(`Rules executed: ${rules.map((rule) => rule.id).join(', ')}`)
+    log.info(
       `Scope: validated=${report.scope.modules_validated} skipped=${report.scope.modules_skipped}`
     )
     if (report.fallback_reason) {
-      console.log(`Fallback reason: ${report.fallback_reason}`)
+      log.warn(`Fallback reason: ${report.fallback_reason}`)
     }
 
     if (report.violations.length > 0) {
-      console.log('Violations:')
+      log.warn('Violations:')
       for (const violation of report.violations) {
         const location = violation.location.line
           ? `${violation.location.file}:${violation.location.line}`
           : violation.location.file
-        console.log(` - [${violation.rule}] ${location} ${violation.message}`)
+        log.error(` - [${violation.rule}] ${location} ${violation.message}`)
       }
     }
   }
 
-  return report.verdict === 'BLOCKED' ? 1 : 0
+  const exitCode = report.verdict === 'BLOCKED' ? 1 : 0
+  log.result({
+    total: report.violations.length,
+    passed: report.violations.filter((v) => v.severity !== 'error').length,
+    failed: report.violations.filter((v) => v.severity === 'error').length,
+    message: `verdict=${report.verdict}`,
+  })
+  flushAi()
+  return exitCode
 }
 
 if ((import.meta as { main?: boolean }).main) {

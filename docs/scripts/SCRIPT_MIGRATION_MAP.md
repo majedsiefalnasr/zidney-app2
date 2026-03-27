@@ -30,7 +30,7 @@
 
 | Old Name                   | Type | Violation                     | New Name                       |
 | -------------------------- | ---- | ----------------------------- | ------------------------------ |
-| `validate-runtime-scripts` | C    | no domain, uses `-` separator | `validate:runtime:scripts`     |
+| `validate-runtime-scripts` | C    | no domain, uses `-` separator | `validate:scripts:runtime`     |
 | `ai-guard`                 | C    | no domain                     | `ai:guard`                     |
 | `type-safety-guard`        | C    | no domain                     | `arch:type-safety-guard`       |
 | `generate-script-docs`     | C    | no domain, uses `-`           | `dev:generate:script-docs`     |
@@ -46,7 +46,7 @@
 | `context:impact`          | D    | `context` not in domain map                                      | `arch:context:impact`     |
 | `context:validate`        | D    | `context` not in domain map                                      | `arch:context:validate`   |
 | `gitnexus:context`        | D    | `gitnexus` not in domain map                                     | `arch:gitnexus:context`   |
-| `gitnexus:validate`       | D    | `gitnexus` not in domain map                                     | `arch:validate:gitnexus`  |
+| `gitnexus:validate`       | D    | `gitnexus` not in domain map                                     | `arch:gitnexus:validate`  |
 | `hygiene:report`          | D    | `hygiene` not in domain map                                      | `dev:hygiene:report`      |
 | `maintenance:cache-clean` | D    | `maintenance` not in domain map                                  | `infra:cache:clean`       |
 | `check:tsconfig`          | D    | `check` not in domain map                                        | `validate:tsconfig`       |

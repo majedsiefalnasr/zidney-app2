@@ -1,5 +1,6 @@
 /**
  * @script infra:security:internal
+ * @library-module
  * @domain infra
  * @category analysis
  * @description Shared Trivy helpers for running scans, sanitizing output, and evaluating blocking policies.
@@ -9,6 +10,7 @@
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, relative } from 'node:path'
+import { log } from '../utils/logger'
 
 export type FindingKind = 'vulnerability' | 'misconfiguration' | 'secret'
 export type Severity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN'
@@ -205,13 +207,13 @@ export function printReport(report: SanitizedReport): void {
   const findings = visibleFindings(report)
 
   if (findings.length === 0) {
-    console.log('Trivy scan clean — no MEDIUM/HIGH/CRITICAL or secret findings detected.')
+    log.info('Trivy scan clean — no MEDIUM/HIGH/CRITICAL or secret findings detected.')
     return
   }
 
   for (const finding of findings) {
     const prefix = finding.severity === 'MEDIUM' ? 'WARN' : 'ERROR'
-    console.log(`[${prefix}] ${formatFinding(finding)}`)
+    log.info(`[${prefix}] ${formatFinding(finding)}`)
   }
 }
 

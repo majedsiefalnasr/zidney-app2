@@ -13,7 +13,7 @@
 
 import { existsSync } from 'node:fs'
 import { createCacheManager } from '../core/cache-manager'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('cache-effectiveness-validator')
 
@@ -148,6 +148,10 @@ async function testWarmRun(): Promise<CacheEffectivenessReport> {
 }
 
 async function main() {
+  log.header(
+    'CACHE EFFECTIVENESS VALIDATION',
+    'Validates cache hit ratio exceeds 80% in warm run scenarios'
+  )
   logger.info('Cache Effectiveness Validation starting...')
 
   try {
@@ -158,36 +162,49 @@ async function main() {
     const warmRunReport = await testWarmRun()
 
     // Generate report
-    console.log('\n📊 CACHE EFFECTIVENESS REPORT\n')
-    console.log('## Cold Run (No Cache)')
-    console.log(`- Status: ${coldRunReport.status}`)
-    console.log(`- Total Runs: ${coldRunReport.totalRuns}`)
-    console.log(`- Hit Ratio: ${(coldRunReport.hitRatio * 100).toFixed(1)}%`)
-    console.log(`- Avg Duration: ${coldRunReport.avgGenerationTimeMs}ms`)
+    log.step('Cold Run (No Cache)')
+    log.info(`Status: ${coldRunReport.status}`)
+    log.info(`Total Runs: ${coldRunReport.totalRuns}`)
+    log.info(`Hit Ratio: ${(coldRunReport.hitRatio * 100).toFixed(1)}%`)
+    log.info(`Avg Duration: ${coldRunReport.avgGenerationTimeMs}ms`)
 
-    console.log('\n## Warm Run (With Cache)')
-    console.log(`- Status: ${warmRunReport.status}`)
-    console.log(`- Total Runs: ${warmRunReport.totalRuns}`)
-    console.log(`- Hits: ${warmRunReport.hits}`)
-    console.log(`- Misses: ${warmRunReport.misses}`)
-    console.log(`- Hit Ratio: ${(warmRunReport.hitRatio * 100).toFixed(1)}%`)
-    console.log(`- Avg Duration: ${warmRunReport.avgGenerationTimeMs}ms`)
+    log.step('Warm Run (With Cache)')
+    log.info(`Status: ${warmRunReport.status}`)
+    log.info(`Total Runs: ${warmRunReport.totalRuns}`)
+    log.info(`Hits: ${warmRunReport.hits}`)
+    log.info(`Misses: ${warmRunReport.misses}`)
+    log.info(`Hit Ratio: ${(warmRunReport.hitRatio * 100).toFixed(1)}%`)
+    log.info(`Avg Duration: ${warmRunReport.avgGenerationTimeMs}ms`)
 
-    console.log('\n## Success Criteria')
-    console.log(`✓ Cold run has 0% cache hits (baseline)`)
-    console.log(
-      `${warmRunReport.status === 'PASS' ? '✓' : '✗'} Warm run achieves >80% cache hit ratio (achieved ${(warmRunReport.hitRatio * 100).toFixed(1)}%)`
-    )
+    log.step('Success Criteria')
+    log.success('Cold run has 0% cache hits (baseline)')
+    if (warmRunReport.status === 'PASS') {
+      log.success(
+        `Warm run achieves >80% cache hit ratio (achieved ${(warmRunReport.hitRatio * 100).toFixed(1)}%)`
+      )
+    } else {
+      log.error(`Warm run below target: ${(warmRunReport.hitRatio * 100).toFixed(1)}% < 80%`)
+    }
 
     // Overall status
     const allPass = warmRunReport.hitRatio >= 0.8
-    console.log(
-      `\n${allPass ? '✓ CACHE EFFECTIVENESS VALIDATED' : '✗ CACHE EFFECTIVENESS BELOW TARGET'}`
-    )
+    if (allPass) {
+      log.success('CACHE EFFECTIVENESS VALIDATED')
+    } else {
+      log.error('CACHE EFFECTIVENESS BELOW TARGET')
+    }
 
+    log.result({
+      total: warmRunReport.totalRuns,
+      passed: warmRunReport.hits,
+      failed: warmRunReport.misses,
+    })
+    flushAi()
     process.exit(allPass ? 0 : 1)
   } catch (error) {
     logger.error('Validation failed', { error: String(error) })
+    log.result({ total: 0, passed: 0, failed: 1 })
+    flushAi()
     process.exit(1)
   }
 }

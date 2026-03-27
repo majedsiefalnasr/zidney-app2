@@ -8,6 +8,7 @@
  * - Execution timing measurement
  * - Statistical analysis (percentiles, mean, std-dev)
  * - Performance reporting
+ * @library-module
  */
 
 export interface TimeMeasurement {
@@ -191,4 +192,24 @@ export function getHealthStatus(
     return 'WARN'
   }
   return 'FAIL'
+}
+
+export interface TimeMeasurement {
+  name: string
+  durationMs: number
+  timestamp: number
+}
+
+export interface PerformanceStats {
+  name: string
+  runs: number
+  totalMs: number
+  meanMs: number
+  minMs: number
+  maxMs: number
+  medianMs: number
+  p95Ms: number
+  p99Ms: number
+  stdDevMs: number
+  measurements: TimeMeasurement[]
 }

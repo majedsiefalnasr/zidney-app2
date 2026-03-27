@@ -1,3 +1,4 @@
+/** @library-module */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -36,7 +37,7 @@ describe('NAMING_RE', () => {
   })
 
   it('passes valid 3-segment names', () => {
-    expect(NAMING_RE.test('validate:script:naming')).toBe(true)
+    expect(NAMING_RE.test('validate:scripts:naming')).toBe(true)
     expect(NAMING_RE.test('db:status:pool')).toBe(true)
   })
 
@@ -80,12 +81,12 @@ describe('parseScriptEntries', () => {
   it('parses scripts from a valid package.json', () => {
     const pkgPath = writePkg(tmpDir, {
       'db:migrate': 'bun scripts/db/migrate.ts',
-      'validate:script:naming': 'bun scripts/validate/script-naming.ts',
+      'validate:scripts:naming': 'bun scripts/validate/script-naming.ts',
     })
     const entries = parseScriptEntries(pkgPath)
     expect(entries).toHaveLength(2)
     expect(entries[0].name).toBe('db:migrate')
-    expect(entries[1].name).toBe('validate:script:naming')
+    expect(entries[1].name).toBe('validate:scripts:naming')
   })
 
   it('returns empty array for invalid JSON', () => {
@@ -104,7 +105,7 @@ describe('validateNaming', () => {
     const entries: ScriptEntry[] = [
       { name: 'db:migrate', command: 'bun x', packageFile: 'package.json', workspaceName: null },
       {
-        name: 'validate:script:naming',
+        name: 'validate:scripts:naming',
         command: 'bun y',
         packageFile: 'package.json',
         workspaceName: null,

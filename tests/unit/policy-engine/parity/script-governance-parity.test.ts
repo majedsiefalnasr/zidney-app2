@@ -2,7 +2,9 @@
  * Gate 1 Parity Test: script-governance adapter output matches governance output
  *
  * Validates that the SCRIPTS adapter captures the same violations
- * that validate:runtime:scripts produces directly.
+ * that validate:scripts:runtime produces directly.
+ *
+ * @library-module
  */
 
 import { fileURLToPath } from 'node:url'
@@ -10,7 +12,7 @@ import { describe, expect, it } from 'vitest'
 
 const __dir = fileURLToPath(new URL('.', import.meta.url))
 
-describe('SCRIPTS parity with validate:runtime:scripts', () => {
+describe('SCRIPTS parity with validate:scripts:runtime', () => {
   it('runScriptGovernance adapter is exported and callable', async () => {
     const mod = await import('../../../../scripts/policy-engine/adapters/script-governance.adapter')
     expect(typeof mod.runScriptGovernance).toBe('function')
@@ -59,7 +61,7 @@ describe('SCRIPTS parity with validate:runtime:scripts', () => {
     }
   })
 
-  it('adapter returns [] gracefully when validate:runtime:scripts unavailable', async () => {
+  it('adapter returns [] gracefully when validate:scripts:runtime unavailable', async () => {
     // Same graceful degradation pattern as other adapters
     const { runScriptGovernance } = await import(
       '../../../../scripts/policy-engine/adapters/script-governance.adapter'

@@ -175,7 +175,7 @@ AI must use GitNexus for: understanding modules, impact analysis, dependency tra
 | Tools & schema reference          | `.agents/skills/gitnexus/gitnexus-guide/SKILL.md`           |
 | CLI commands                      | `.agents/skills/gitnexus/gitnexus-cli/SKILL.md`             |
 
-**Context artifact:** `docs/ai/context/gitnexus-context.json` — regenerate with `bun run arch:gitnexus:context`, validate with `bun run arch:validate:gitnexus`. Refresh if >24h old.
+**Context artifact:** `docs/ai/context/gitnexus-context.json` — regenerate with `bun run arch:gitnexus:context`, validate with `bun run arch:gitnexus:validate`. Refresh if >24h old.
 
 <!-- gitnexus:end -->
 

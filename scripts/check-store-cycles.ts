@@ -23,6 +23,7 @@ import { resolve } from 'node:path'
  * Refs: SC-007, QA-H003, FR-033
  */
 import madge from 'madge'
+import { flushAi, log } from './utils/logger'
 
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
@@ -46,6 +47,7 @@ const STATE_DIRS = [
 // ─── Main ──────────────────────────────────────────────────────────────────────
 
 async function checkCycles(): Promise<void> {
+  log.header('STORE CYCLE CHECK', 'Validates zero circular dependencies in app state dirs')
   let totalCycles = 0
   const results: Array<{ app: string; cycles: string[][] }> = []
 
@@ -62,7 +64,8 @@ async function checkCycles(): Promise<void> {
       })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
-      console.error(`[check-store-cycles] ERROR: Failed to analyze ${app} — ${msg}`)
+      log.error(`[check-store-cycles] ERROR: Failed to analyze ${app} — ${msg}`)
+      flushAi()
       process.exit(2)
     }
 
@@ -70,27 +73,34 @@ async function checkCycles(): Promise<void> {
     results.push({ app, cycles: circular })
 
     if (circular.length === 0) {
-      console.log(`[check-store-cycles] ✓  ${app}: no circular dependencies`)
+      log.success(`${app}: no circular dependencies`)
     } else {
-      console.error(
-        `[check-store-cycles] ✗  ${app}: ${circular.length} circular dependency chain(s) found:`
-      )
+      log.error(`${app}: ${circular.length} circular dependency chain(s) found:`)
       for (const chain of circular) {
-        console.error(`    → ${chain.join(' → ')} → ${chain[0]}`)
+        log.step(`→ ${chain.join(' → ')} → ${chain[0]}`)
       }
       totalCycles += circular.length
     }
   }
 
   if (totalCycles > 0) {
-    console.error(
-      `\n[check-store-cycles] FAIL: ${totalCycles} cycle(s) detected across all store directories.`
-    )
-    console.error('[check-store-cycles] Fix circular imports before merging. See SC-007, FR-033.')
+    log.result({
+      total: STATE_DIRS.length,
+      passed: STATE_DIRS.length - results.filter((r) => r.cycles.length > 0).length,
+      failed: results.filter((r) => r.cycles.length > 0).length,
+      message: `${totalCycles} cycle(s) detected. Fix circular imports before merging. See SC-007, FR-033.`,
+    })
+    flushAi()
     process.exit(1)
   }
 
-  console.log('\n[check-store-cycles] PASS: Zero circular dependencies in all store directories.')
+  log.result({
+    total: STATE_DIRS.length,
+    passed: STATE_DIRS.length,
+    failed: 0,
+    message: 'Zero circular dependencies in all store directories.',
+  })
+  flushAi()
   process.exit(0)
 }
 

@@ -34,8 +34,8 @@ Governance gate (6 guards) passes after fixing EXCLUDED_NAMES in runtime-scripts
 | Migration validation            | Conditional | N/A                                                  | ✅ N/A      | No schema changes                                 |
 | Idempotency replay              | Conditional | N/A                                                  | ✅ N/A      | No HTTP endpoints                                 |
 | Concurrency validation          | Conditional | N/A                                                  | ✅ N/A      | No concurrent flows                               |
-| validate:script:infrastructure  | Yes         | `bun run validate:script:infrastructure`             | ✅ PASS     | 0 violations                                      |
-| validate:script:usage           | Yes         | `bun run validate:script:usage`                      | ✅ PASS     | 0 violations                                      |
+| validate:scripts:infrastructure | Yes         | `bun run validate:scripts:infrastructure`            | ✅ PASS     | 0 violations                                      |
+| validate:scripts:usage          | Yes         | `bun run validate:scripts:usage`                     | ✅ PASS     | 0 violations                                      |
 | governance:gate full            | Yes         | `bun run governance:gate`                            | ✅ PASS     | All 6 guards pass                                 |
 
 ---

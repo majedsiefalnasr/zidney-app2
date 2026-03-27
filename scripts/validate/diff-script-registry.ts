@@ -141,10 +141,7 @@ function main(): void {
 
   logger.info('Diff report written', { outputPath, summary })
   log.badge('DIFF COMPLETE', 'success')
-  log.progressResult(
-    { success: 1 },
-    { title: 'Registry Diff Generation', showPercentage: false }
-  )
+  log.progressResult({ success: 1 }, { title: 'Registry Diff Generation', showPercentage: false })
   flushAi()
 
   // Generate SCRIPT_REGISTRY.md if requested

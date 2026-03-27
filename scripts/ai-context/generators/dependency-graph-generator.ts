@@ -9,11 +9,13 @@
  * - Complete module dependency graph
  * - Cycle detection results
  * - Graph metrics
- */
+ 
+ * @library-module
+*/
 
 import { createCacheManager } from '../../core/cache-manager'
 import { detectCycles, getNodeDegrees } from '../../core/graph-analyzer'
-import { createLogger } from '../../core/logger-factory'
+import { createLogger } from '../../utils/logger'
 
 const logger = createLogger('dependency-graph-generator')
 

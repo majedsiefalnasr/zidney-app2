@@ -32,11 +32,11 @@ Local CI simulation for GitHub Actions. Developers can now **run all CI workflow
 
 ### Files Modified (3)
 
-| File           | Change     | Details                                                                                                     |
-| -------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
-| `package.json` | +6 scripts | `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:list`, `validate:scripts-infra`, `ci:run-local` |
-| `.gitignore`   | +1 entry   | `.act.secrets` (protects GitHub tokens from git history)                                                    |
-| `AGENTS.md`    | +section   | Local CI Simulation Gate (mandatory pre-closure validation)                                                 |
+| File           | Change     | Details                                                                                                      |
+| -------------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
+| `package.json` | +6 scripts | `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:list`, `validate:scripts:broken`, `ci:run-local` |
+| `.gitignore`   | +1 entry   | `.act.secrets` (protects GitHub tokens from git history)                                                     |
+| `AGENTS.md`    | +section   | Local CI Simulation Gate (mandatory pre-closure validation)                                                  |
 
 ### Directories Created (1)
 
@@ -73,7 +73,7 @@ bun run ci:local:workflow <workflow-name>
 bun run ci:run-local
 # 7-step validation pipeline:
 # 1. validate-runtime-scripts
-# 2. validate:scripts-infra
+# 2. validate:scripts:broken
 # 3. generate-script-docs
 # 4. arch:guard
 # 5. type-safety-guard

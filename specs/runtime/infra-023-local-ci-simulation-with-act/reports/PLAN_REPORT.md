@@ -55,7 +55,7 @@ CI Parity Contract satisfied from day 1.
 | 3   | `ci:local` uses `--pull=false` to override `.actrc`'s `--pull=true`   | Fast daily-use profile; `ci:local:full` provides fresh-image variant                |
 | 4   | `.actrc` is NOT modified — existing config is already comprehensive   | Contains Apple Silicon support; overwriting would break M1/M2/M3 developer machines |
 | 5   | `.secrets` is primary secrets file (referenced by `.actrc`)           | Already configured; `.act.secrets` gitignore entry added as optional secondary      |
-| 6   | `validate:scripts-infra` maps to existing `detect-broken-scripts.ts`  | Avoids creating a new script file; follows domain:action naming convention          |
+| 6   | `validate:scripts:broken` maps to existing `detect-broken-scripts.ts` | Avoids creating a new script file; follows domain:action naming convention          |
 | 7   | `run-local-ci.ts` runs all 7 steps (not halt on first fail)           | Provides full summary table; developer sees all failures at once                    |
 
 ---

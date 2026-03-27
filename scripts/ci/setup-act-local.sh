@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# START: Script execution
 #
 # setup-act-local.sh - Configure act (GitHub Actions local runner) for Zidney
 #
@@ -126,3 +127,10 @@ echo "  act -j lint"
 echo "  act -j typecheck"
 echo "  act -W .github/workflows/hard-mode-guard.yml"
 echo ""
+
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
+exit 0

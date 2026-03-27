@@ -8,9 +8,11 @@
  * - Service definitions (API, Worker, MMC, Backoffice, Frontoffice)
  * - Service-to-service communication patterns
  * - Runtime configuration
- */
+ 
+ * @library-module
+*/
 
-import { createLogger } from '../../core/logger-factory'
+import { createLogger } from '../../utils/logger'
 
 const logger = createLogger('runtime-map-generator')
 

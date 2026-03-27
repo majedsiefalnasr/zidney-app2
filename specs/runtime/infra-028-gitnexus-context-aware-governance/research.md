@@ -100,8 +100,8 @@ File: `scripts/governance/gate.ts`
 const GUARDS = [
   { name: "Architecture Guard", script: "arch:guard" },
   { name: "Type Safety", script: "validate:types" },
-  { name: "Runtime Scripts", script: "validate:runtime:scripts" },
-  { name: "Script Usage", script: "validate:script:usage" },
+  { name: "Runtime Scripts", script: "validate:scripts:runtime" },
+  { name: "Script Usage", script: "validate:scripts:usage" },
   { name: "Security CI", script: "infra:security:ci" },
   { name: "AI Context Validate", script: "ai:context:validate" },
 ];

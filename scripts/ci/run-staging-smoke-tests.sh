@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 
 # T042 (moved from scripts/): Run Staging Smoke Tests for MMC Dashboard
 #
@@ -250,3 +251,10 @@ log_info "Full test output: staging-test-results.log"
 echo ""
 
 exit "${TEST_EXIT_CODE}"
+
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
+exit 0

@@ -21,7 +21,7 @@ import { createHash } from 'node:crypto'
 import { readFileSync, statSync } from 'node:fs'
 import { basename } from 'node:path'
 import { gzipSync } from 'node:zlib'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('artifact-size-validator')
 
@@ -135,6 +135,7 @@ async function validateArtifactSize(target: ArtifactTarget): Promise<ValidationR
 }
 
 async function main() {
+  log.header('ARTIFACT SIZE VALIDATION', 'Verifies all artifacts meet Phase 3 size targets')
   logger.info('Starting artifact size validation...')
 
   const results: ValidationResult[] = []
@@ -144,9 +145,9 @@ async function main() {
   }
 
   // Generate report
-  console.log('\n📊 ARTIFACT SIZE VALIDATION REPORT\n')
-  console.log('| Artifact | Status | Size (KB) | Target (KB) | Compression | Checksum |')
-  console.log('|----------|--------|-----------|-------------|-------------|----------|')
+  log.step('Artifact Size Validation Report')
+  log.info('| Artifact | Status | Size (KB) | Target (KB) | Compression | Checksum |')
+  log.info('|----------|--------|-----------|-------------|-------------|----------|')
 
   let passCount = 0
   let failCount = 0
@@ -154,7 +155,7 @@ async function main() {
 
   for (const result of results) {
     const statusIcon = result.status === 'PASS' ? '✓' : result.status === 'MISSING' ? '?' : '✗'
-    console.log(
+    log.info(
       `| ${result.artifact} | ${statusIcon} ${result.status} | ${result.sizeKb} | ${result.targetKb} | ${result.compressionRatio}x | ${result.checksum} |`
     )
 
@@ -163,16 +164,22 @@ async function main() {
     else if (result.status === 'MISSING') missingCount++
   }
 
-  console.log('\n📈 SUMMARY\n')
-  console.log(`Total Artifacts: ${results.length}`)
-  console.log(`✓ Passing: ${passCount}`)
-  console.log(`✗ Failing: ${failCount}`)
-  console.log(`? Missing: ${missingCount}`)
+  log.step('Summary')
+  log.info(`Total Artifacts: ${results.length}`)
+  log.info(`\u2713 Passing: ${passCount}`)
+  log.info(`\u2717 Failing: ${failCount}`)
+  log.info(`? Missing: ${missingCount}`)
 
   // Overall status
   const allPass = passCount === results.length
-  console.log(`\n${allPass ? '✓ ALL ARTIFACTS WITHIN TARGETS' : '✗ SOME ARTIFACTS OUT OF TARGET'}`)
+  if (allPass) {
+    log.success('ALL ARTIFACTS WITHIN TARGETS')
+  } else {
+    log.error('SOME ARTIFACTS OUT OF TARGET')
+  }
 
+  log.result({ total: results.length, passed: passCount, failed: failCount + missingCount })
+  flushAi()
   // Return exit code
   process.exit(allPass ? 0 : 1)
 }

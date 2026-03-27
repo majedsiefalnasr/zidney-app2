@@ -17,24 +17,24 @@ import {
   FileSizeAnalyzer,
   ScriptPerformanceProfiler,
 } from '../../tests/audit-helpers'
+import { flushAi, log } from '../utils/logger'
 
 const rootDir = process.cwd()
 const reportDir = path.join(rootDir, 'docs/audit-reports')
 const contextDir = path.join(rootDir, 'docs/ai/context')
 
-console.log('📋 Generating Phase 1 Baseline Report...\n')
+log.header('GENERATE BASELINE REPORT', 'Generates Phase 1 baseline diagnostic report')
 
-// Collect all diagnostics
-console.log('  Analyzing file sizes...')
+log.step('Analyzing file sizes...')
 const fileSizes = FileSizeAnalyzer.findOversizedFiles(rootDir, 2000, 1_000_000)
 
-console.log('  Measuring directory sizes...')
+log.step('Measuring directory sizes...')
 const dirSizes = DirectorySizeAnalyzer.analyzeKeyDirectories(rootDir)
 
-console.log('  Analyzing AI context artifacts...')
+log.step('Analyzing AI context artifacts...')
 const aiArtifacts = AIContextAnalyzer.analyzeArtifactDirectory(contextDir)
 
-console.log('  Profiling script performance...')
+log.step('Profiling script performance...')
 const scripts = [
   'scripts/ai-guard.ts',
   'scripts/infra-audit.ts',
@@ -229,12 +229,18 @@ Save these for comparison after each phase:
 const reportPath = path.join(reportDir, 'BASELINE_REPORT.md')
 fs.writeFileSync(reportPath, report)
 
-console.log(`\n✅ Baseline report generated: ${reportPath}\n`)
+log.success(`Baseline report generated: ${reportPath}`)
 
-// Summary
-console.log('📊 Phase 1 Complete Summary:')
-console.log(`  Files oversized: ${fileSizes.length}`)
-console.log(`  Directory count analyzed: ${dirSizes.length}`)
-console.log(`  Artifact count: ${aiArtifacts.length}`)
-console.log(`  Scripts profiled: ${scriptProfiles.length}`)
-console.log(`  Report location: docs/audit-reports/BASELINE_REPORT.md`)
+log.step('Phase 1 Complete Summary:')
+log.info(`  Files oversized: ${fileSizes.length}`)
+log.info(`  Directory count analyzed: ${dirSizes.length}`)
+log.info(`  Artifact count: ${aiArtifacts.length}`)
+log.info(`  Scripts profiled: ${scriptProfiles.length}`)
+log.info(`  Report location: docs/audit-reports/BASELINE_REPORT.md`)
+log.result({
+  total: fileSizes.length + aiArtifacts.length,
+  passed: 0,
+  failed: 0,
+  message: 'Baseline captured',
+})
+flushAi()

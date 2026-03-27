@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * @script dev:demo-logger-features
  * @domain dev
@@ -7,15 +8,60 @@
  * @usage bun run dev:demo-logger-features
  */
 
-import { createLogger, flushAi, log } from '../utils/logger'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { createLogger, exit, log } from '../utils/logger'
+
+const CACHE_PATH = resolve(process.cwd(), '.cache/logger-demo.json')
+
+function loadPrevious() {
+  if (!existsSync(CACHE_PATH)) return null
+  try {
+    return JSON.parse(readFileSync(CACHE_PATH, 'utf-8'))
+  } catch {
+    return null
+  }
+}
+
+function saveCurrent(data: unknown) {
+  try {
+    mkdirSync(dirname(CACHE_PATH), { recursive: true })
+    writeFileSync(CACHE_PATH, JSON.stringify(data, null, 2))
+  } catch {}
+}
 
 const logger = createLogger('demo-logger-features')
 
 async function main(): Promise<void> {
+  const isBenchmark = process.argv.includes('--benchmark')
+  const isCiSim = process.argv.includes('--ci-sim')
   log.header(
     'Logger Features Demo',
     'Comprehensive guide to all available logger customization options'
   )
+
+  if (isCiSim) {
+    process.env.GITHUB_ACTIONS = 'true'
+    log.badge('CI SIMULATION MODE ENABLED', 'warning')
+  }
+
+  log.section('Usage Modes')
+  log.line([
+    { content: '--json', color: 'cyan' },
+    { content: '→ machine readable output', color: 'dim' },
+  ])
+  log.line([
+    { content: '--pretty', color: 'cyan' },
+    { content: '→ formatted JSON output', color: 'dim' },
+  ])
+  log.line([
+    { content: '--compact', color: 'cyan' },
+    { content: '→ minimal output mode', color: 'dim' },
+  ])
+
+  log.section('Export Modes Example')
+  log.line([{ content: 'bun run script --json', color: 'cyan' }])
+  log.line([{ content: 'bun run script --json --pretty', color: 'cyan' }])
 
   // Demo 1: Single badges (basic)
   log.section('Demo 1: Single Badges (All Color Types)')
@@ -83,8 +129,31 @@ async function main(): Promise<void> {
 
   // Demo 10: Box display
   log.section('Demo 10: Boxed Messages')
-  log.box('Important', 'Review deployment checklist before proceeding')
-  log.box('Config', 'Environment: production, Region: us-east-1')
+  log.line([{ content: 'Box alignment examples:', color: 'dim' }])
+  // Explicit alignment options
+  log.box('Important (start)', 'Review deployment checklist before proceeding', { align: 'start' })
+  log.box('Important (center)', 'Review deployment checklist before proceeding', {
+    align: 'center',
+  })
+  log.box('Important (end)', 'Review deployment checklist before proceeding', { align: 'end' })
+  // Env-driven alignment (LOG_BOX_ALIGN)
+  process.env.LOG_BOX_ALIGN = 'center'
+  log.line([{ content: 'Env-driven alignment example (LOG_BOX_ALIGN=center):', color: 'dim' }])
+  log.box('Env Aligned', 'This box uses LOG_BOX_ALIGN=center')
+  delete process.env.LOG_BOX_ALIGN
+  // Traditional config box (left-aligned)
+  log.box('Config', 'Environment: production, Region: us-east-1', { align: 'start' })
+
+  // Demo 10A: Header & Result Alignment
+  log.section('Demo 10A: Header & Result Alignment')
+  log.header('Centered Header Example', 'Header aligned to center', { align: 'center' })
+  log.header('End Aligned Header Example', 'Header aligned to end', { align: 'end' })
+
+  log.section('Demo 10A: Result Alignment')
+  const sampleSummary = { total: 10, passed: 8, failed: 2, message: '2 failures found' }
+  log.result(sampleSummary, { align: 'start' })
+  log.result(sampleSummary, { align: 'center' })
+  log.result(sampleSummary, { align: 'end' })
 
   // Demo 11: Progress bar
   log.section('Demo 11: Progress Bar (Extended - 5 seconds)')
@@ -186,6 +255,23 @@ async function main(): Promise<void> {
     message: '85 tests passed, 5 failed, 10 skipped',
   })
 
+  log.section('Demo 15A: Trend Comparison')
+  log.trend(5, 8, 'Failures')
+  log.trend(85, 80, 'Passed')
+
+  log.section('Demo 15B: Persistent Trend (Real Previous Run)')
+  const prevData = loadPrevious()
+  const currData = { passed: 85, failed: 5 }
+
+  if (prevData) {
+    log.trend(currData.failed, prevData.failed, 'Failures')
+    log.trend(currData.passed, prevData.passed, 'Passed')
+  } else {
+    log.empty('No previous run data found (first run)')
+  }
+
+  saveCurrent(currData)
+
   // Demo 16: Mixed results (warning case)
   log.section('Demo 16: Mixed Results (With Warnings)')
   log.badge('VALIDATION COMPLETE WITH WARNINGS', 'warning')
@@ -195,6 +281,15 @@ async function main(): Promise<void> {
     failed: 2,
     message: '45 items valid, 2 errors, 3 warnings',
   })
+
+  log.section('Demo 16A: CI Annotations')
+
+  if (isCiSim) {
+    log.error('Simulated CI error (should appear as annotation)')
+    log.warn('Simulated CI warning (slow execution)')
+  } else {
+    log.empty('Run with --ci-sim to enable GitHub Actions annotations')
+  }
 
   // Demo 17: Spinner
   log.section('Demo 17: Spinner Animation (4 seconds)')
@@ -304,6 +399,11 @@ async function main(): Promise<void> {
     { operation: 'Test suite', time: '3.0s', status: '✓ OK' },
   ]
   log.table(perfResults, { title: 'Operation Times', colors: true, borderless: true })
+
+  log.section('Demo 24A: Benchmark Comparison')
+  const prevTime = 4500
+  const currentTime = isBenchmark ? Math.floor(Math.random() * 6000) : 5042
+  log.trend(currentTime, prevTime, 'Execution Time (ms)')
 
   log.result({
     total: 5,
@@ -422,6 +522,37 @@ async function main(): Promise<void> {
     'Complete AI mode compatibility',
   ])
 
+  log.section('Demo 30A: Performance Threshold Warning')
+  await new Promise((r) => setTimeout(r, 2200))
+  log.result({
+    total: 1,
+    passed: 1,
+    failed: 0,
+    message: 'Simulated slow operation (threshold demo)',
+  })
+
+  log.section('Export Mode Demo')
+
+  if (process.argv.includes('--json')) {
+    log.success('JSON mode active')
+    log.result({
+      total: 2,
+      passed: 2,
+      failed: 0,
+      message: 'JSON export working',
+    })
+  } else if (process.argv.includes('--pretty')) {
+    log.success('Pretty JSON mode active')
+    log.result({
+      total: 2,
+      passed: 2,
+      failed: 0,
+      message: 'Pretty export working',
+    })
+  } else {
+    log.empty('Run with --json or --pretty to see structured output')
+  }
+
   logger.info('Full comprehensive demo completed with all features')
   log.badge('ALL FEATURES DEMONSTRATED', 'success')
   log.result({
@@ -431,8 +562,7 @@ async function main(): Promise<void> {
     message: 'All logger customization options available and working',
   })
 
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 main()

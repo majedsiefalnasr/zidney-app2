@@ -14,9 +14,10 @@
 
 import { readFileSync } from 'node:fs'
 import { $ } from 'bun'
+import { flushAi, log } from '../utils/logger'
 
 async function analyzeDependencies(): Promise<void> {
-  console.log('📊 Dependency Analysis - T103\n')
+  log.header('ANALYZE DEPENDENCIES', 'Analyzes bun.lock file and identifies all dependencies')
 
   try {
     // Read package.json to get direct dependencies
@@ -28,21 +29,21 @@ async function analyzeDependencies(): Promise<void> {
       ...Object.keys(pkg.devDependencies || {}),
     ])
 
-    console.log(`📦 Direct Dependencies: ${directDeps.size}\n`)
+    log.info(`Direct Dependencies: ${directDeps.size}`)
 
     // List direct dependencies
-    console.log('# Dependencies (from package.json)\n')
+    log.step('Dependencies (from package.json)')
     if (pkg.dependencies) {
-      console.log('## Production Dependencies\n')
+      log.step('Production Dependencies')
       for (const [name, version] of Object.entries(pkg.dependencies)) {
-        console.log(`- ${name}@${version}`)
+        log.info(`- ${name}@${version}`)
       }
     }
 
     if (pkg.devDependencies) {
-      console.log('\n## Development Dependencies\n')
+      log.step('Development Dependencies')
       for (const [name, version] of Object.entries(pkg.devDependencies)) {
-        console.log(`- ${name}@${version}`)
+        log.info(`- ${name}@${version}`)
       }
     }
 
@@ -51,22 +52,21 @@ async function analyzeDependencies(): Promise<void> {
     const sizeMatch = lsResult.match(/(\d+\.?\d*[KMG]?)/)
     const lockFileSize = sizeMatch ? sizeMatch[1] : 'unknown'
 
-    console.log(`\n---\n`)
-    console.log(`📊 Lock File Metrics:\n`)
-    console.log(`- File: bun.lock`)
-    console.log(`- Size: ${lockFileSize}`)
-    console.log(`- Format: Bun lock file format (YAML-based)`)
+    log.step('Lock File Metrics:')
+    log.info(`- File: bun.lock`)
+    log.info(`- Size: ${lockFileSize}`)
+    log.info(`- Format: Bun lock file format (YAML-based)`)
 
     // Try to get install size of node_modules
     const nodeModulesSize = await $`du -sh node_modules | cut -f1`.text().catch(() => 'N/A')
-    console.log(`- node_modules size: ${nodeModulesSize.trim()}`)
+    log.info(`- node_modules size: ${nodeModulesSize.trim()}`)
 
     // Count entries in lock file (approximate)
     const wc = await $`wc -l < bun.lock`.text().catch(() => '0')
-    console.log(`- Lock file lines: ${wc.trim()}`)
+    log.info(`- Lock file lines: ${wc.trim()}`)
 
     // Analyze which dependencies are large
-    console.log(`\n📈 Largest Dependencies (by common patterns):\n`)
+    log.step('Largest Dependencies (by common patterns):')
     const largePatterns = [
       'typescript',
       '@types/node',
@@ -85,7 +85,7 @@ async function analyzeDependencies(): Promise<void> {
       if (directDeps.has(pattern)) {
         const version = pkg.dependencies?.[pattern] || pkg.devDependencies?.[pattern] || 'unknown'
         const isDev = pattern in (pkg.devDependencies || {}) ? '(dev)' : ''
-        console.log(`- ${pattern}@${version} ${isDev}`.trim())
+        log.info(`- ${pattern}@${version} ${isDev}`.trim())
       }
     }
 
@@ -105,13 +105,15 @@ async function analyzeDependencies(): Promise<void> {
     }
 
     await Bun.write('reports/dependency-analysis-report.json', JSON.stringify(report, null, 2))
-    console.log(`\n📄 Analysis report saved to: reports/dependency-analysis-report.json\n`)
-
-    console.log('✅ T103 Complete: Dependency analysis baseline established\n')
-
+    log.success(`Analysis report saved to: reports/dependency-analysis-report.json`)
+    log.success('T103 Complete: Dependency analysis baseline established')
+    log.result({ total: directDeps.size, passed: directDeps.size, failed: 0 })
+    flushAi()
     process.exit(0)
   } catch (error) {
-    console.error('Analysis failed:', error)
+    log.error(`Analysis failed: ${String(error)}`)
+    log.result({ total: 0, passed: 0, failed: 1 })
+    flushAi()
     process.exit(1)
   }
 }

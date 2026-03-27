@@ -31,7 +31,7 @@ The stage must not replace or rewrite any existing guard. It is a composition an
 - Establish `scripts/context/` as the canonical location for all GitNexus context scripts
 - Register `context:build`, `context:changed`, `context:impact`, `context:validate` in root `package.json`
 - Extend `governance:gate` to run `context:build` and `context:validate` as its first two steps
-- Enable existing guards (`arch:guard`, `validate:runtime:scripts`) to receive scoped context via the built artifact
+- Enable existing guards (`arch:guard`, `validate:scripts:runtime`) to receive scoped context via the built artifact
 - Integrate `context:changed` into `.husky/pre-commit` for sub-second scope resolution
 - Integrate `context:validate` into `.github/workflows/architecture-governance.yml` as a pre-gate integrity check
 - Update the orchestrator to run `context:build` at Step 5 (Analyze) and pass context into skills
@@ -59,7 +59,7 @@ The stage must not replace or rewrite any existing guard. It is a composition an
 | ------------------------------------ | ------------------------------------------------- | ----------- |
 | `scripts/gitnexus-context.ts`        | Generates `docs/ai/context/gitnexus-context.json` | INFRA-24    |
 | `arch:gitnexus:context` script alias | `package.json`                                    | INFRA-24    |
-| `arch:validate:gitnexus`             | Validates gitnexus-context.json schema            | INFRA-24    |
+| `arch:gitnexus:validate`             | Validates gitnexus-context.json schema            | INFRA-24    |
 | `governance:gate`                    | Runs all guards unconditionally                   | INFRA-27    |
 | `governance:gate:changed`            | Scoped changed-files variant                      | INFRA-27    |
 | `arch:guard:changed`                 | Architecture guard scoped to diff                 | INFRA-11/16 |
@@ -71,7 +71,7 @@ The stage must not replace or rewrite any existing guard. It is a composition an
 - `governance:gate` does not build or validate context before running guards
 - No dedicated `context:changed` script for pre-commit scope extraction
 - No `context:impact` script for dependency radius analysis
-- No `context:validate` entry point separate from `arch:validate:gitnexus`
+- No `context:validate` entry point separate from `arch:gitnexus:validate`
 
 ---
 
@@ -217,7 +217,7 @@ All four files MUST be pure TypeScript targeting the Bun runtime. No framework i
 4. Validate `generatedAt` is a valid ISO 8601 timestamp.
 5. Fail with exit code `1` and a named diagnostic if the artifact is absent, any required field is missing, the schema version does not match, or `generatedAt` is older than 24 hours.
 6. Exit code `0` if all checks pass.
-7. This MUST NOT replace or alias `arch:validate:gitnexus` — both may coexist. `context:validate` is a superset that includes freshness checks.
+7. This MUST NOT replace or alias `arch:gitnexus:validate` — both may coexist. `context:validate` is a superset that includes freshness checks.
 
 ---
 
@@ -263,8 +263,8 @@ Step 0: arch:context:build      — Generate fresh context artifact
 Step 1: arch:context:validate   — Validate context artifact integrity
 Step 2: arch:guard         (existing)
 Step 3: validate:types     (existing)
-Step 4: validate:runtime:scripts (existing)
-Step 5: validate:script:usage    (existing)
+Step 4: validate:scripts:runtime (existing)
+Step 5: validate:scripts:usage    (existing)
 Step 6: infra:security:ci        (existing)
 Step 7: ai:context:validate      (existing)
 ```
@@ -275,12 +275,12 @@ If `context:build` or `context:validate` fail, the gate MUST exit immediately wi
 
 ### FR-009 — `governance:gate:changed` Scoping Update
 
-`governance:gate:changed` (defined in INFRA-27 as `arch:guard:changed && validate:runtime:scripts`) MUST be updated to prepend `context:changed` as an additional first step:
+`governance:gate:changed` (defined in INFRA-27 as `arch:guard:changed && validate:scripts:runtime`) MUST be updated to prepend `context:changed` as an additional first step:
 
 ```
 Step 0: arch:context:changed    — Resolve changed file scope
 Step 1: arch:guard:changed (existing, reads context output)
-Step 2: validate:runtime:scripts (existing)
+Step 2: validate:scripts:runtime (existing)
 ```
 
 The changed-files variant retains fail-fast semantics (short-circuit on first failure).
@@ -354,9 +354,9 @@ Strategy (1) is preferred for type-safety. Strategy (2) is acceptable if `gitnex
 
 ---
 
-### FR-016 — `validate:runtime:scripts` Alignment
+### FR-016 — `validate:scripts:runtime` Alignment
 
-The new `scripts/context/*.ts` files MUST pass the `validate:runtime:scripts` (INFRA-25) check without exception. Specifically:
+The new `scripts/context/*.ts` files MUST pass the `validate:scripts:runtime` (INFRA-25) check without exception. Specifically:
 
 - Each file MUST have the `@script`, `@domain`, `@category`, `@description`, `@usage` header fields.
 - Each `package.json` entry MUST match the file path exactly.
@@ -408,7 +408,7 @@ Any CLI arguments passed to `context:*` scripts MUST be validated against an all
 
 ### NFR-007 — Backward Compatibility
 
-- Existing `arch:gitnexus:context`, `arch:context`, and `arch:validate:gitnexus` script aliases MUST continue to work unchanged.
+- Existing `arch:gitnexus:context`, `arch:context`, and `arch:gitnexus:validate` script aliases MUST continue to work unchanged.
 - The `gitnexus-context.json` artifact schema MUST NOT change. New fields may be added (additive), but existing required fields MUST NOT be removed or renamed.
 
 ---
@@ -419,7 +419,7 @@ Any CLI arguments passed to `context:*` scripts MUST be validated against an all
 | ----- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | AC-01 | `scripts/context/` directory exists with all four `.ts` files                                         | `ls scripts/context/`                                  |
 | AC-02 | All four `context:*` scripts are registered in root `package.json`                                    | `grep context: package.json`                           |
-| AC-03 | All four scripts include 5-field metadata headers                                                     | `bun run validate:runtime:scripts` passes              |
+| AC-03 | All four scripts include 5-field metadata headers                                                     | `bun run validate:scripts:runtime` passes              |
 | AC-04 | `bun run arch:context:build` exits `0` and writes `docs/ai/context/gitnexus-context.json`             | Manual run + file check                                |
 | AC-05 | `bun run arch:context:changed` exits `0` and outputs file list                                        | Manual run on a dirty tree                             |
 | AC-06 | `bun run arch:context:impact` exits `0` and lists affected modules                                    | Manual run after a shared-package change               |
@@ -457,7 +457,7 @@ Any CLI arguments passed to `context:*` scripts MUST be validated against an all
 | INFRA-24    | `scripts/gitnexus-context.ts` (exists)                                | `context:build` delegates to it         |
 | INFRA-24    | `docs/ai/context/gitnexus-context.json` schema                        | `context:validate` validates against it |
 | INFRA-24    | `docs/ai/context/ai-architecture-brain.json`                          | Required input for `context:build`      |
-| INFRA-25    | `validate:runtime:scripts` passes on all `scripts/context/*.ts` files | Script-system compliance                |
+| INFRA-25    | `validate:scripts:runtime` passes on all `scripts/context/*.ts` files | Script-system compliance                |
 | INFRA-27    | `governance:gate` at `scripts/governance/gate.ts`                     | Extended by FR-008                      |
 | INFRA-27    | `governance:gate:changed`                                             | Extended by FR-009                      |
 | INFRA-11/16 | `arch:guard:changed`                                                  | Used inside `governance:gate:changed`   |

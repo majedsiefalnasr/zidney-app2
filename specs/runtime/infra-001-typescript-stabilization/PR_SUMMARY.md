@@ -115,7 +115,7 @@ bun run typecheck:src    # 0 errors
 bun run typecheck:tests  # 0 errors
 bun run lint             # 0 errors
 bun run test:unit        # 416 passed
-bash scripts/check-tsconfig-strict.sh  # PASS
+bash scripts/validate/check-tsconfig-strict.sh  # PASS
 ```
 
 ---

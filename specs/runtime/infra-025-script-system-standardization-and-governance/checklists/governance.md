@@ -15,7 +15,7 @@
 - [ ] CHK004 — Is "Separator must be `:` (not `-` between domain segments)" unambiguous — does the spec clarify whether `:` is permitted within a single segment (e.g., `validate:script:v2:alpha`)? [Clarity, Spec §FR-002]
 - [ ] CHK005 — Is the lifecycle script exemption list (`build`, `test`, `lint`, `typecheck`, `dev`, `clean`, `check`) declared as exhaustive or extensible — can teams add lifecycle names without a governance review? [Clarity, Spec Clarifications §4]
 - [ ] CHK006 — Does the spec define whether `pre*` and `post*` lifecycle hooks (e.g., `prebuild`, `posttest`) are governed by the naming convention or exempt alongside their parent lifecycle scripts? [Gap, Spec §FR-002]
-- [ ] CHK007 — Are requirements specified for how `validate:script:naming` reports remediation hints — is the hint format standardized so violations are actionable without ambiguity? [Clarity, Spec §FR-008]
+- [ ] CHK007 — Are requirements specified for how `validate:scripts:naming` reports remediation hints — is the hint format standardized so violations are actionable without ambiguity? [Clarity, Spec §FR-008]
 
 ---
 
@@ -66,11 +66,11 @@
 
 ## CI Gate Correctness
 
-- [ ] CHK028 — Are the four CI check names (`validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure`, `generate:script:docs`) defined as both `package.json` script names and workflow step labels — or only one of these? [Clarity, Spec §FR-009]
+- [ ] CHK028 — Are the four CI check names (`validate:scripts:naming`, `validate:scripts:usage`, `validate:scripts:infrastructure`, `generate:script:docs`) defined as both `package.json` script names and workflow step labels — or only one of these? [Clarity, Spec §FR-009]
 - [ ] CHK029 — Is bypass prevention for the four CI checks stated as a hard requirement — does the spec define that no `continue-on-error`, `if: false`, or equivalent override is permitted for these steps? [Gap, Spec §FR-009]
 - [ ] CHK030 — Does the spec define whether the CI steps must be placed as blocking gates (failing the PR) or informational steps — and is this traceable to a specific workflow job configuration requirement? [Clarity, Spec §FR-009]
 - [ ] CHK031 — Are requirements defined for how the `architecture-governance.yml` workflow is updated — is there a structural constraint on where the `# Script System Governance` block must appear relative to existing steps? [Gap, Spec §FR-009, Clarifications §3]
-- [ ] CHK032 — Does the spec define what `validate:script:infrastructure` validates beyond "registry is current" and "metadata headers present" — are additional infrastructure integrity checks required or excluded? [Clarity, Spec §FR-009]
+- [ ] CHK032 — Does the spec define what `validate:scripts:infrastructure` validates beyond "registry is current" and "metadata headers present" — are additional infrastructure integrity checks required or excluded? [Clarity, Spec §FR-009]
 
 ---
 

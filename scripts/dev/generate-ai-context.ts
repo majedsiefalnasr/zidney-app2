@@ -12,6 +12,7 @@
 import { join } from 'node:path'
 import { generateAllArtifacts } from '../ai-context/artifact-generator'
 import { detectChanges, updateChangeCache } from '../ai-context/change-detector'
+import { flushAi, log } from '../utils/logger'
 
 const REPO_ROOT = process.cwd()
 const OUTPUT_DIR = join(REPO_ROOT, 'docs/ai/context')
@@ -39,33 +40,34 @@ function parseArgs(): {
  * Main entry point
  */
 async function main() {
+  log.header('AI CONTEXT GENERATE', 'Generate AI context artifacts from repo source')
   const opts = parseArgs()
 
   try {
     if (opts.verbose) {
-      console.log('🚀 AI Context Artifact Generation')
-      console.log(`   Repository: ${REPO_ROOT}`)
-      console.log(`   Output: ${opts.outputDir}`)
-      console.log('')
+      log.info('AI Context Artifact Generation')
+      log.info(`Repository: ${REPO_ROOT}`)
+      log.info(`Output: ${opts.outputDir}`)
     }
 
     // Check for changes (unless --force)
     if (!opts.force) {
-      if (opts.verbose) console.log('🔍 Checking for source changes...')
+      if (opts.verbose) log.info('Checking for source changes...')
 
       // Create a dummy source content for change detection
       const sourceContent = `${Date.now()}-generation`
       const changes = await detectChanges(REPO_ROOT, sourceContent)
 
       if (!changes.should_regenerate) {
-        console.log('✓ Artifacts are up-to-date (use --force to regenerate)')
+        log.success('Artifacts are up-to-date (use --force to regenerate)')
+        log.result({ total: 1, passed: 1, failed: 0, message: 'up-to-date' })
+        flushAi()
         process.exit(0)
       }
 
       if (opts.verbose) {
-        console.log(`   Last generated: ${changes.last_generated_at}`)
-        console.log(`   Time since: ${changes.time_since_generation_seconds}s`)
-        console.log('')
+        log.info(`Last generated: ${changes.last_generated_at}`)
+        log.info(`Time since: ${changes.time_since_generation_seconds}s`)
       }
     }
 
@@ -81,33 +83,44 @@ async function main() {
     const sourceContent = `${Date.now()}-generation`
     await updateChangeCache(REPO_ROOT, sourceContent)
 
-    // Report results
-    console.log('')
-    console.log('📊 Generation Results:')
-    console.log(`   Status: ${result.success ? '✓ SUCCESS' : '✗ FAILED'}`)
-    console.log(`   Artifacts: ${result.artifacts_generated.length}`)
-    console.log(`   Duration: ${result.duration_ms}ms`)
-    console.log(`   Modules: ${result.metrics.total_modules}`)
-    console.log(`   Violations: ${result.metrics.total_violations}`)
+    log.step('Generation Results:')
+    log.info(`Status: ${result.success ? 'SUCCESS' : 'FAILED'}`)
+    log.info(`Artifacts: ${result.artifacts_generated.length}`)
+    log.info(`Duration: ${result.duration_ms}ms`)
+    log.info(`Modules: ${result.metrics.total_modules}`)
+    log.info(`Violations: ${result.metrics.total_violations}`)
 
     if (result.warnings.length > 0) {
-      console.log(`\n⚠️  Warnings: ${result.warnings.length}`)
+      log.warn(`Warnings: ${result.warnings.length}`)
       for (const warning of result.warnings.slice(0, 5)) {
-        console.log(`   - ${warning.message}`)
+        log.warn(`  - ${warning.message}`)
       }
     }
 
     if (result.errors.length > 0) {
-      console.log(`\n❌ Errors: ${result.errors.length}`)
+      log.error(`Errors: ${result.errors.length}`)
       for (const error of result.errors.slice(0, 5)) {
-        console.log(`   - ${error.message}`)
+        log.error(`  - ${error.message}`)
       }
+      log.result({
+        total: result.artifacts_generated.length,
+        passed: 0,
+        failed: result.errors.length,
+      })
+      flushAi()
       process.exit(1)
     }
 
+    log.result({
+      total: result.artifacts_generated.length,
+      passed: result.success ? result.artifacts_generated.length : 0,
+      failed: result.success ? 0 : result.artifacts_generated.length,
+    })
+    flushAi()
     process.exit(result.success ? 0 : 1)
   } catch (err) {
-    console.error('❌ Fatal error:', err)
+    log.error(`Fatal error: ${String(err)}`)
+    flushAi()
     process.exit(1)
   }
 }

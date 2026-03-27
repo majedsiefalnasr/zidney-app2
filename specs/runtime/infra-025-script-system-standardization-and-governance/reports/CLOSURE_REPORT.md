@@ -36,13 +36,13 @@ INFRA-025 Script System Standardization And Governance has successfully complete
 - **T005**: script-infrastructure.ts validator — Validates 5-field metadata headers (@script, @domain, @category, @description, @usage) and registry freshness
 - **T006**: refactor-scripts.ts engine — Types A–E migration engine with dry-run mode and comprehensive test suite
 - **T007**: script-docs.ts generator — Updated to enforce 5-field metadata and regenerate registry on demand
-- **T008**: 5 new governed package.json entries — `validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure`, `validate:diff:registry`, `validate:scan:packages`, `ai:validate:prompts`
+- **T008**: 5 new governed package.json entries — `validate:scripts:naming`, `validate:scripts:usage`, `validate:scripts:infrastructure`, `validate:scripts:registry`, `validate:scan:packages`, `ai:validate:prompts`
 - **T009**: @category + @usage metadata — All 27 tracked scripts now have complete standardized metadata
 - **T010**: 33 script migrations — Applied full rename/removal refactoring from SCRIPT_MIGRATION_MAP
 - **T011**: dev:refactor:scripts live run — Completed and verified; engine produces accurate migration reports
 - **T012**: CI validation block — Integrated into architecture-governance.yml to enforce script governance on every commit
 - **T013**: script-system-governance SKILL.md — Comprehensive governance rules documented for AI agents
-- **T014**: All 4 validators passing — `validate:script:naming` ✅, `validate:script:usage` ✅, `validate:script:infrastructure` ✅, `dev:generate:script-docs` ✅
+- **T014**: All 4 validators passing — `validate:scripts:naming` ✅, `validate:scripts:usage` ✅, `validate:scripts:infrastructure` ✅, `dev:generate:script-docs` ✅
 
 ---
 

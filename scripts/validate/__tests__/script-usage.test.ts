@@ -1,3 +1,4 @@
+/** @library-module */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -24,8 +25,8 @@ describe('USAGE_RE', () => {
 
   it('matches bun run with a flag before script name', () => {
     USAGE_RE.lastIndex = 0
-    const m = USAGE_RE.exec('bun run --silent validate:script:naming')
-    expect(m?.[1]).toBe('validate:script:naming')
+    const m = USAGE_RE.exec('bun run --silent validate:scripts:naming')
+    expect(m?.[1]).toBe('validate:scripts:naming')
   })
 
   it('does not match plain bun without run', () => {
@@ -41,12 +42,12 @@ describe('extractUsages', () => {
       'echo "starting"',
       'bun run db:migrate',
       '# then',
-      'bun run validate:script:naming',
+      'bun run validate:scripts:naming',
     ].join('\n')
     const usages = extractUsages('test.sh', content)
     expect(usages).toHaveLength(2)
     expect(usages[0]).toEqual({ name: 'db:migrate', line: 2 })
-    expect(usages[1]).toEqual({ name: 'validate:script:naming', line: 4 })
+    expect(usages[1]).toEqual({ name: 'validate:scripts:naming', line: 4 })
   })
 
   it('returns empty array for content with no bun run', () => {
@@ -63,8 +64,8 @@ describe('extractUsages', () => {
 
 describe('validateUsages', () => {
   it('returns no violations when all references are known', () => {
-    const knownScripts = new Set(['db:migrate', 'validate:script:naming'])
-    const content = 'bun run db:migrate && bun run validate:script:naming'
+    const knownScripts = new Set(['db:migrate', 'validate:scripts:naming'])
+    const content = 'bun run db:migrate && bun run validate:scripts:naming'
     const filePath = join(tmpDir, 'test-valid.sh')
     writeFileSync(filePath, content, 'utf-8')
 

@@ -665,8 +665,8 @@ Required behavior:
 - Suggested automatic checks:
 
   ```bash
-  bun run validate:runtime:scripts
-  bun run validate:script:usage
+  bun run validate:scripts:runtime
+  bun run validate:scripts:usage
   ```
 
 - If drift is detected, suggest:
@@ -2621,7 +2621,7 @@ bun run governance:gate:changed
 
 If exit code is `1` → **STOP.** Surface the full gate output. Blocked until all violations are resolved and the gate exits `0`.
 
-This gate runs `arch:guard:changed` + `validate:runtime:scripts` scoped to changed files. It is a hard blocking gate — implementation cannot proceed with unresolved violations.
+This gate runs `arch:guard:changed` + `validate:scripts:runtime` scoped to changed files. It is a hard blocking gate — implementation cannot proceed with unresolved violations.
 
 ## 6.2 — Check SpecKit Checklists Before Implementation
 
@@ -2652,14 +2652,14 @@ options:
    ```
 3. Validate the artifact:
    ```bash
-   bun run arch:validate:gitnexus
+   bun run arch:gitnexus:validate
    ```
 4. If validation fails → **STOP. Do NOT begin implementation.**
    ```
    ❌ GitNexus context validation failed — implementation blocked.
       The gitnexus-context.json has invalid or missing dependency data.
       Why it matters: AI Guard uses this artifact for impact analysis.
-      Run: bun run arch:gitnexus:context && bun run arch:validate:gitnexus to fix.
+      Run: bun run arch:gitnexus:context && bun run arch:gitnexus:validate to fix.
    ```
 5. If validation passes → proceed to 6.3.
 
@@ -2903,7 +2903,7 @@ Validation:
 - Run global validation:
 
 ```bash
-bun run validate:runtime:scripts
+bun run validate:scripts:runtime
 ```
 
 Failure Handling:

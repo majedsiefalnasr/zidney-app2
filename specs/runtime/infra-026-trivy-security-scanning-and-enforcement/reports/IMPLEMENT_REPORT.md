@@ -79,9 +79,9 @@
 | Task     | Status | Description                                                                                                           |
 | -------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
 | T024     | ✅     | `bun run dev:generate:script-docs` — script registry updated cleanly                                                  |
-| T025     | ✅     | `bun run validate:script:naming` — naming compliance verified                                                         |
-| T026     | ✅     | `bun run validate:script:usage` — all script references resolve                                                       |
-| T027     | ✅     | `bun run validate:script:infrastructure` — metadata headers & registry coverage confirmed                             |
+| T025     | ✅     | `bun run validate:scripts:naming` — naming compliance verified                                                        |
+| T026     | ✅     | `bun run validate:scripts:usage` — all script references resolve                                                      |
+| T027     | ✅     | `bun run validate:scripts:infrastructure` — metadata headers & registry coverage confirmed                            |
 | T028     | ✅     | All 4 security scripts (`infra:security:*`) run locally — clean-path verified                                         |
 | T029     | ✅     | `infra:security:ci` executed twice — stable JSON artifact, idempotent behavior                                        |
 | T030     | ✅     | Pre-commit timing < 30 seconds (deps + staged secrets) — with HIGH-severity fixture proving blocking                  |

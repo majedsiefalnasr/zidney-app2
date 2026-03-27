@@ -9,12 +9,14 @@
  * - Coordinated caching across generators
  * - Artifact size and performance tracking
  * - Snapshot archival management
- */
+ 
+ * @library-module
+*/
 
 import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, setGlobalLoggerContext } from '../core/logger-factory'
 import { Timer } from '../core/performance-profiler'
+import { createLogger, setGlobalLoggerContext } from '../utils/logger'
 
 const logger = createLogger('ai-context-orchestrator')
 

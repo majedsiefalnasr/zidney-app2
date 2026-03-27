@@ -49,24 +49,24 @@ would have blocked the governance gate and all future commits.
 
 ## Tasks Completion
 
-| Task ID | Description                                   | Layer          | Status |
-| ------- | --------------------------------------------- | -------------- | ------ |
-| T001    | Verify SKILL.md governance domain             | Governance     | ✅     |
-| T002    | Add ai-context:validate alias to package.json | Infrastructure | ✅     |
-| T003    | Add 4 governance scripts to package.json      | Infrastructure | ✅     |
-| T004    | Create scripts/governance/gate.ts             | Scripts        | ✅     |
-| T005    | Create scripts/governance/report.ts           | Scripts        | ✅     |
-| T006    | Create scripts/governance/gate-ci.ts          | Scripts        | ✅     |
-| T007    | Update .husky/pre-commit                      | Infrastructure | ✅     |
-| T008    | Update architecture-governance.yml step 18    | CI             | ✅     |
-| T009    | Update .gitignore                             | Infrastructure | ✅     |
-| T010    | Update orchestrator.agent.md §6.1B + §7.0     | Documentation  | ✅     |
-| T011    | Regenerate SCRIPT_REGISTRY.md                 | Documentation  | ✅     |
-| T012    | Write gate.test.ts unit tests                 | Tests          | ✅     |
-| T013    | bun run typecheck → PASS                      | Validation     | ✅     |
-| T014    | bun run lint → PASS                           | Validation     | ✅     |
-| T015    | bun run validate:script:infrastructure → PASS | Validation     | ✅     |
-| T016    | bun run validate:script:usage → PASS          | Validation     | ✅     |
+| Task ID | Description                                    | Layer          | Status |
+| ------- | ---------------------------------------------- | -------------- | ------ |
+| T001    | Verify SKILL.md governance domain              | Governance     | ✅     |
+| T002    | Add ai-context:validate alias to package.json  | Infrastructure | ✅     |
+| T003    | Add 4 governance scripts to package.json       | Infrastructure | ✅     |
+| T004    | Create scripts/governance/gate.ts              | Scripts        | ✅     |
+| T005    | Create scripts/governance/report.ts            | Scripts        | ✅     |
+| T006    | Create scripts/governance/gate-ci.ts           | Scripts        | ✅     |
+| T007    | Update .husky/pre-commit                       | Infrastructure | ✅     |
+| T008    | Update architecture-governance.yml step 18     | CI             | ✅     |
+| T009    | Update .gitignore                              | Infrastructure | ✅     |
+| T010    | Update orchestrator.agent.md §6.1B + §7.0      | Documentation  | ✅     |
+| T011    | Regenerate SCRIPT_REGISTRY.md                  | Documentation  | ✅     |
+| T012    | Write gate.test.ts unit tests                  | Tests          | ✅     |
+| T013    | bun run typecheck → PASS                       | Validation     | ✅     |
+| T014    | bun run lint → PASS                            | Validation     | ✅     |
+| T015    | bun run validate:scripts:infrastructure → PASS | Validation     | ✅     |
+| T016    | bun run validate:scripts:usage → PASS          | Validation     | ✅     |
 
 **Completed:** 16 / 16
 
@@ -101,8 +101,8 @@ would have blocked the governance gate and all future commits.
 
 ## Open Risks
 
-- `validate:runtime:scripts` EXCLUDED_NAMES now contains 9 future planned scripts. These should be removed from exclusion when each respective stage implements those scripts.
-- `governance:gate:changed` (pre-commit) runs only `arch:guard:changed` — full `validate:runtime:scripts` is reserved for the CI-time `governance:gate`.
+- `validate:scripts:runtime` EXCLUDED_NAMES now contains 9 future planned scripts. These should be removed from exclusion when each respective stage implements those scripts.
+- `governance:gate:changed` (pre-commit) runs only `arch:guard:changed` — full `validate:scripts:runtime` is reserved for the CI-time `governance:gate`.
 
 ---
 

@@ -12,6 +12,7 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { flushAi, log } from '../utils/logger'
 import { line, section, summary } from './formatter'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -232,6 +233,7 @@ export function checkTypeScript(): boolean {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 if (import.meta.main) {
+  log.header('REPOSITORY DOCTOR', 'Runs 7 sequential health checks and reports pass/warn/fail')
   section('Repository Doctor')
 
   const checks = [
@@ -250,5 +252,7 @@ if (import.meta.main) {
   }
 
   summary(checks.length - errorCount, checks.length)
+  log.result({ total: checks.length, passed: checks.length - errorCount, failed: errorCount })
+  flushAi()
   process.exit(errorCount > 0 ? 1 : 0)
 }

@@ -8,7 +8,9 @@
  * Self-registers on import via side-effect call to registerRule().
  *
  * @module scripts/policy-engine/rules/types/TYPES-001.rule
- */
+ 
+ * @library-module
+*/
 
 import { runTypeSafety } from '../../adapters/type-safety.adapter'
 import { registerRule } from '../../registry'

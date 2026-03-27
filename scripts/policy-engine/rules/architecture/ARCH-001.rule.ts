@@ -5,7 +5,9 @@
  * Self-registers on import via side-effect call to registerRule().
  *
  * @module scripts/policy-engine/rules/architecture/ARCH-001.rule
- */
+ 
+ * @library-module
+*/
 
 import { runArchitectureGuard } from '../../adapters/architecture-guard.adapter'
 import { registerRule } from '../../registry'

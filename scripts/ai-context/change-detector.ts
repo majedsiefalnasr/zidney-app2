@@ -2,10 +2,12 @@
  * Change Detector - Detect source changes for intelligent regeneration
  * Task: T025
  * Path: scripts/ai-context/change-detector.ts
+ * @library-module
  */
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { log } from '../utils/logger'
 import type { ChangeDetectionResult } from './types'
 
 const CACHE_DIR = '.ai-context-cache'
@@ -77,7 +79,7 @@ export async function detectChanges(
       should_regenerate: hashChanged || tooOld,
     }
   } catch (err) {
-    console.warn('Error reading cache:', err)
+    log.warn(`Error reading cache:${String(err)}`)
     return {
       changed: true,
       changed_sources: {},
@@ -109,6 +111,6 @@ export async function updateChangeCache(repoRoot: string, sourceContent: string)
     // Ensure cache dir is in gitignore
     await writeFile(cacheFile, '', 'utf-8')
   } catch (err) {
-    console.warn('Could not update change cache:', err)
+    log.warn(`Could not update change cache:${String(err)}`)
   }
 }

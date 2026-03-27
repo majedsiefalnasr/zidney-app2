@@ -1,3 +1,4 @@
+/** @library-module */
 import type { HealthFinding, HealthFindingSeverity, HealthSignalId } from './types'
 
 const SEVERITY_RANK: Record<HealthFindingSeverity, number> = {

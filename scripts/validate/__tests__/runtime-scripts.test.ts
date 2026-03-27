@@ -2,12 +2,14 @@
  * Unit tests for scripts/validate/runtime-scripts.ts
  * Covers: script reference extraction, exclusion filtering, CLI-flag non-match,
  *         loadRegisteredScripts, missing-script detection, all-registered pass
- */
+ 
+ * @library-module
+*/
 
 import { writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, expect, it } from 'vitest'
 import {
   EXCLUDED_NAMES,
   extractScriptReferences,

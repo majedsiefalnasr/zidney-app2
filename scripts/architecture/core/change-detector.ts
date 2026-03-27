@@ -9,7 +9,9 @@
  * 2. Compare current package.json/tsconfig hashes
  * 3. Return list of changed modules
  * 4. Trigger full analysis on first run
- */
+ 
+ * @library-module
+*/
 
 import { execSync } from 'node:child_process'
 import { createHash } from 'node:crypto'

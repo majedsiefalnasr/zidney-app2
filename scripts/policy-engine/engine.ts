@@ -5,7 +5,9 @@
  * enforces timeout, and returns sorted PolicyResult[].
  *
  * @module scripts/policy-engine/engine
- */
+ 
+ * @library-module
+*/
 
 import { createLogger } from '@zidney/logger'
 import { getRules } from './registry'

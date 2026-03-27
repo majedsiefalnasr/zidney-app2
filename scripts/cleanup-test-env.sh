@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 # Post-Test Cleanup Script
 # Cleans up test databases, Redis data, and temporary files
 
@@ -35,4 +36,9 @@ echo "  • Cleaning coverage reports..."
 rm -rf coverage/
 
 echo "✅ Cleanup complete"
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
 exit 0

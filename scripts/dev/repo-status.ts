@@ -12,6 +12,7 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { flushAi, log } from '../utils/logger'
 import { section } from './formatter'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -97,6 +98,7 @@ export function checkTypeScript(): boolean {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 function main(): void {
+  log.header('REPOSITORY STATUS', 'Read-only repository health summary reporter')
   section('Repository Status')
 
   const ciStatus = readCiStatus()
@@ -112,6 +114,12 @@ function main(): void {
   process.stdout.write(`${pad('type safety')} : ${statusSymbol(tsOk)} ${tsOk ? 'pass' : 'fail'}\n`)
 
   // repo:status always exits 0
+  log.result({
+    total: 4,
+    passed: [archOk, aiOk, tsOk].filter(Boolean).length + 1,
+    failed: [archOk, aiOk, tsOk].filter((x) => !x).length,
+  })
+  flushAi()
   process.exit(0)
 }
 

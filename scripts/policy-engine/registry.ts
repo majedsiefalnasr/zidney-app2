@@ -8,7 +8,9 @@
  * No dynamic loading — registry is populated only by static imports.
  *
  * @module scripts/policy-engine/registry
- */
+ 
+ * @library-module
+*/
 
 import type { PolicyDomain, PolicyRule, RegistryStats } from './types'
 

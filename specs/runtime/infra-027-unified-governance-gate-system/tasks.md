@@ -57,5 +57,5 @@
 
 - [ ] T013 [P] Verify `bun run biome check` passes across all new and modified files
 - [ ] T014 [P] Verify `bun run typecheck` passes across the workspace
-- [ ] T015 [P] Verify `bun run validate:script:infrastructure` passes (5-field headers on all three new scripts)
-- [ ] T016 [P] Verify `bun run validate:script:usage` passes (all `governance:*` references resolve correctly)
+- [ ] T015 [P] Verify `bun run validate:scripts:infrastructure` passes (5-field headers on all three new scripts)
+- [ ] T016 [P] Verify `bun run validate:scripts:usage` passes (all `governance:*` references resolve correctly)

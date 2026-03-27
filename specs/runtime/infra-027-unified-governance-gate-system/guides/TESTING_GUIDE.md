@@ -66,10 +66,10 @@ bun run governance:gate
 ▶ Running: Type Safety (validate:types)
   ...
   ✔ Type Safety — PASS
-▶ Running: Runtime Scripts (validate:runtime:scripts)
+▶ Running: Runtime Scripts (validate:scripts:runtime)
   ...
   ✔ Runtime Scripts — PASS
-▶ Running: Script Usage (validate:script:usage)
+▶ Running: Script Usage (validate:scripts:usage)
   ...
   ✔ Script Usage — PASS
 ▶ Running: Security CI (infra:security:ci)

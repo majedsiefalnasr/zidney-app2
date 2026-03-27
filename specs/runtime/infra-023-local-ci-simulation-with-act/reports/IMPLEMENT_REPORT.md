@@ -28,9 +28,9 @@
 | ---- | -------------------------------------------------------------------------------------- | ------- |
 | T001 | Verify `act` v0.2.84 + Docker v29.2.1 prerequisites                                    | ✅ PASS |
 | T002 | Verify `.actrc` content (read-only, no modifications)                                  | ✅ PASS |
-| T003 | Add 5 `ci:local*` + `validate:scripts-infra` script keys to `package.json`             | ✅ PASS |
+| T003 | Add 5 `ci:local*` + `validate:scripts:broken` script keys to `package.json`            | ✅ PASS |
 | T004 | Add `.act.secrets` to `.gitignore` under act section                                   | ✅ PASS |
-| T005 | `bun run validate:runtime:scripts` gate: 5 new scripts resolve correctly               | ✅ PASS |
+| T005 | `bun run validate:scripts:runtime` gate: 5 new scripts resolve correctly               | ✅ PASS |
 | T006 | Audit all 5 GitHub workflows for `act` compatibility; findings documented              | ✅ PASS |
 | T007 | Create `scripts/run-local-ci.ts` (7-step orchestrator) + add `ci:run-local` key        | ✅ PASS |
 | T008 | `bun run typecheck` exits 0; `ci:run-local` resolves in validate-runtime-scripts       | ✅ PASS |
@@ -49,17 +49,17 @@
 
 ### Created
 
-| File                      | Description                                                                                                                                                                                                                                                                                                                              |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scripts/run-local-ci.ts` | 7-step governance orchestrator. Step 0: Docker fail-fast via `docker info`. Steps 1–7: validate-runtime-scripts → validate:scripts-infra → generate-script-docs → arch:guard → type-safety-guard → lint → ci:local. Fail-forward with summary table. Uses `spawnSync` (not `exec`). Single-quotes/no-semicolons per biome project style. |
-| `docs/ci/local-ci.md`     | Full developer reference for local CI simulation: What Is act, Installation, Configuration (.actrc, .act.secrets), Running CI Locally (all `ci:local*` commands + orchestrator), Troubleshooting table (11 entries including GITHUB_TOKEN), Differences from GitHub CI table, CI Parity Contract, Developer Workflow section.            |
-| `docs/ci/`                | Directory — created as part of T013.                                                                                                                                                                                                                                                                                                     |
+| File                      | Description                                                                                                                                                                                                                                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/run-local-ci.ts` | 7-step governance orchestrator. Step 0: Docker fail-fast via `docker info`. Steps 1–7: validate-runtime-scripts → validate:scripts:broken → generate-script-docs → arch:guard → type-safety-guard → lint → ci:local. Fail-forward with summary table. Uses `spawnSync` (not `exec`). Single-quotes/no-semicolons per biome project style. |
+| `docs/ci/local-ci.md`     | Full developer reference for local CI simulation: What Is act, Installation, Configuration (.actrc, .act.secrets), Running CI Locally (all `ci:local*` commands + orchestrator), Troubleshooting table (11 entries including GITHUB_TOKEN), Differences from GitHub CI table, CI Parity Contract, Developer Workflow section.             |
+| `docs/ci/`                | Directory — created as part of T013.                                                                                                                                                                                                                                                                                                      |
 
 ### Modified
 
 | File                  | Change Summary                                                                                                                                                                                                                                                                                       |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `package.json` (root) | Added 6 script keys: `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:list`, `validate:scripts-infra`, `ci:run-local`. All additive — no existing entries modified.                                                                                                                       |
+| `package.json` (root) | Added 6 script keys: `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:list`, `validate:scripts:broken`, `ci:run-local`. All additive — no existing entries modified.                                                                                                                      |
 | `.gitignore` (root)   | Added `.act.secrets` entry under `# act (local GitHub Actions runner)` section, immediately after `.secrets`.                                                                                                                                                                                        |
 | `AGENTS.md` (root)    | Inserted `### Local CI Simulation Gate (Mandatory Pre-Closure)` section under AI Behavioral Enforcement block, between `### Escalation Rule` and `### Stage Lifecycle Enforcement`. Section declares `bun run ci:local` as non-bypassable pre-closure gate with CI parity contract enforcement rule. |
 

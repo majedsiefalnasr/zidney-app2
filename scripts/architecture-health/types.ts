@@ -1,3 +1,4 @@
+/** @library-module */
 export type HealthVerdict = 'PASS' | 'BLOCKED'
 export type HealthState = 'EXCELLENT' | 'HEALTHY' | 'WARNING' | 'CRITICAL'
 export type HealthSignalStatus = 'PASS' | 'WARN' | 'FAIL'

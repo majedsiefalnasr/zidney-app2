@@ -6,7 +6,9 @@
  * Self-registers on import via side-effect call to registerRule().
  *
  * @module scripts/policy-engine/rules/security/SECURITY-001.rule
- */
+ 
+ * @library-module
+*/
 
 import { runTrivy } from '../../adapters/trivy.adapter'
 import { registerRule } from '../../registry'

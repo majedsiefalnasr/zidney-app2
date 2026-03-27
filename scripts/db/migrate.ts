@@ -6,20 +6,20 @@
  * @mode manual,ci
  * @usage bun run db:migrate
  * @dependencies drizzle-kit,node:crypto,node:child_process
- */
+ 
+ * @library-module
+*/
 
 import { execSync } from 'node:child_process'
-import { randomUUID } from 'node:crypto'
-import { createLogger } from '../core/logger-factory'
 
-const correlationId = randomUUID()
+const _correlationId = randomUUID()
 const logger = createLogger('db:migrate')
 logger.setContext({ correlationId })
 
 const DATABASE_URL = process.env.DATABASE_URL
 const REPO_ROOT = process.cwd()
 
-function main(): void {
+function _main(): void {
   logger.info('Starting database migration')
 
   if (!DATABASE_URL) {

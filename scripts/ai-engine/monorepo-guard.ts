@@ -1,3 +1,4 @@
+/** @library-module */
 import { existsSync } from 'node:fs'
 
 const MARKERS = ['package.json', 'docs/ai/context']

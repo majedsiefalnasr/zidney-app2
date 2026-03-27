@@ -17,7 +17,7 @@
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('github-actions-cache-config')
 
@@ -213,6 +213,10 @@ Example: \`ai-context-cache-a1b2c3d4e5f6...\`
 }
 
 async function main() {
+  log.header(
+    'CONFIGURE GITHUB ACTIONS CACHE',
+    'Documents and validates GitHub Actions caching strategy for AI context artifacts'
+  )
   logger.info('Generating GitHub Actions cache configuration...')
 
   // Create cache config
@@ -237,17 +241,18 @@ async function main() {
   logger.info('Workflow example written', { path: workflowPath })
 
   // Report
-  console.log('\n✅ GitHub Actions Cache Configuration Generated\n')
-  console.log('Files Created:')
-  console.log(`  1. ${configPath}`)
-  console.log(`  2. ${strategyPath}`)
-  console.log(`  3. ${workflowPath}`)
-  console.log('')
-  console.log('Next Steps:')
-  console.log('  • Review cache strategy in docs/ci-cd-integration/ARTIFACT_CACHING_STRATEGY.md')
-  console.log('  • Apply cache steps from workflow example to .github/workflows/ci.yml')
-  console.log('  • Validate cache effectiveness with validate-cache-effectiveness.ts')
+  log.success('GitHub Actions Cache Configuration Generated')
+  log.step('Files Created:')
+  log.info(`  1. ${configPath}`)
+  log.info(`  2. ${strategyPath}`)
+  log.info(`  3. ${workflowPath}`)
+  log.step('Next Steps:')
+  log.info('  \u2022 Review cache strategy in docs/ci-cd-integration/ARTIFACT_CACHING_STRATEGY.md')
+  log.info('  \u2022 Apply cache steps from workflow example to .github/workflows/ci.yml')
+  log.info('  \u2022 Validate cache effectiveness with validate-cache-effectiveness.ts')
 
+  log.result({ total: 3, passed: 3, failed: 0, message: 'Cache configuration files generated' })
+  flushAi()
   process.exit(0)
 }
 

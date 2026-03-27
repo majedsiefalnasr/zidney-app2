@@ -7,7 +7,9 @@
  *   stdout format: lines with "USED:" or "UNUSED:" prefix per dependency
  *   exit code 0: analysis complete (unused deps are STATUS: UNUSED in output)
  *   exit code non-zero: script error — fall back to direct source scan
- */
+ 
+ * @library-module
+*/
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'

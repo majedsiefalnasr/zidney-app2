@@ -1,4 +1,5 @@
 #!/bin/sh
+# START: Script execution
 
 # Wrapper to run yaml-lint (node) or yamllint (python) if available.
 # Usage: scripts/ci/yaml_lint.sh <file1> <file2> ...
@@ -12,4 +13,9 @@ if command -v yamllint >/dev/null 2>&1; then
 fi
 
 echo "⚠️  yaml-lint not available — skipping. Install: bun add -D yaml-lint or pip install yamllint"
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
 exit 0

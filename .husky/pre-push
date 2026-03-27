@@ -123,6 +123,14 @@ else
 fi
 
 
+# ── Script UX Validator (full scan, blocking) ───────────────────────────────
+echo "Running Script UX validator (full scan)…"
+bun run validate:scripts:ux || {
+  echo "❌ Script UX validation failed — push blocked."
+  echo "   Run: bun run validate:scripts:ux --fix to auto-fix issues."
+  exit 1
+}
+
 # ── Final Summary ────────────────────────────────────────────────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

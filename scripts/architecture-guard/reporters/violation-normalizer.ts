@@ -1,3 +1,4 @@
+/** @library-module */
 import type { ViolationRecord } from '../types'
 
 const REMEDIATION_BY_RULE: Record<string, string> = {

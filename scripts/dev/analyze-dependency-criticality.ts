@@ -11,6 +11,7 @@
  */
 
 import { readFileSync } from 'node:fs'
+import { flushAi, log } from '../utils/logger'
 
 interface DepAnalysis {
   name: string
@@ -23,7 +24,10 @@ interface DepAnalysis {
 }
 
 async function conservativeDependencyAnalysis(): Promise<void> {
-  console.log('🔍 Conservative Dependency Removal Analysis - T105-T110\n')
+  log.header(
+    'ANALYZE DEPENDENCY CRITICALITY',
+    'Conservative dependency removal analysis (T105-T110)'
+  )
 
   const pkgContent = readFileSync('package.json', 'utf-8')
   const pkg = JSON.parse(pkgContent)
@@ -87,10 +91,9 @@ async function conservativeDependencyAnalysis(): Promise<void> {
     })
   }
 
-  // Print analysis
-  console.log('# Dependency Removal Assessment\n')
-  console.log('| Name | Version | Type | Category | Risk | Recommendation | Reason |\n')
-  console.log('|------|---------|------|----------|------|-----------------|--------|\n')
+  log.step('Dependency Removal Assessment')
+  log.info('| Name | Version | Type | Category | Risk | Recommendation | Reason |')
+  log.info('|------|---------|------|----------|------|-----------------|--------|')
 
   for (const dep of analysis.sort((a, b) => {
     // Sort by risk level (critical first) then by alphabetical
@@ -98,7 +101,7 @@ async function conservativeDependencyAnalysis(): Promise<void> {
     const riskDiff = riskOrder[a.removalRisk] - riskOrder[b.removalRisk]
     return riskDiff !== 0 ? riskDiff : a.name.localeCompare(b.name)
   })) {
-    console.log(
+    log.info(
       `| ${dep.name.padEnd(25)} | ${dep.version.padEnd(7)} | ${dep.type.padEnd(4)} | ${dep.category.padEnd(8)} | ${dep.removalRisk.padEnd(8)} | ${dep.recommendation.padEnd(12)} | ${dep.reason} |`
     )
   }
@@ -109,24 +112,23 @@ async function conservativeDependencyAnalysis(): Promise<void> {
   const safe = analysis.filter((d) => d.removalRisk === 'SAFE')
   const candidates = analysis.filter((d) => d.recommendation === 'CANDIDATE')
 
-  console.log('\n---\n')
-  console.log('# Summary\n')
-  console.log(`- Total dependencies: ${analysis.length}`)
-  console.log(`- Critical (must keep): ${critical.length}`)
-  console.log(`- Risky to remove: ${risky.length}`)
-  console.log(`- Safe to review: ${safe.length}`)
-  console.log(`- Removal candidates: ${candidates.length}`)
+  log.step('Summary')
+  log.info(`Total dependencies: ${analysis.length}`)
+  log.info(`Critical (must keep): ${critical.length}`)
+  log.info(`Risky to remove: ${risky.length}`)
+  log.info(`Safe to review: ${safe.length}`)
+  log.info(`Removal candidates: ${candidates.length}`)
 
   if (candidates.length === 0) {
-    console.log('\n✅ **Q5 Conservative Assessment**: No clear candidates for removal')
-    console.log('All 22 dependencies serve essential functions in the monorepo.\n')
-    console.log(
-      '**Recommendation**: Focus on other optimization areas (lock file cleanup, dependency consolidation)\n'
+    log.success('Q5 Conservative Assessment: No clear candidates for removal')
+    log.info('All 22 dependencies serve essential functions in the monorepo.')
+    log.info(
+      'Recommendation: Focus on other optimization areas (lock file cleanup, dependency consolidation)'
     )
   } else {
-    console.log(`\n⚠️  Potential review candidates (${candidates.length}):\n`)
+    log.warn(`Potential review candidates (${candidates.length}):`)
     for (const dep of candidates) {
-      console.log(`- ${dep.name}@${dep.version} (${dep.type})`)
+      log.warn(`  ${dep.name}@${dep.version} (${dep.type})`)
     }
   }
 
@@ -147,8 +149,13 @@ async function conservativeDependencyAnalysis(): Promise<void> {
   }
 
   await Bun.write('reports/.dependency-removal-report.json', JSON.stringify(report, null, 2))
-  console.log('📄 Report saved to: reports/.dependency-removal-report.json\n')
-
+  log.success('Report saved to: reports/.dependency-removal-report.json')
+  log.result({
+    total: analysis.length,
+    passed: analysis.length - candidates.length,
+    failed: candidates.length,
+  })
+  flushAi()
   process.exit(0)
 }
 

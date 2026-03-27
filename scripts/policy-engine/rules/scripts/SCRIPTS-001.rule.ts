@@ -8,7 +8,9 @@
  * Self-registers on import via side-effect call to registerRule().
  *
  * @module scripts/policy-engine/rules/scripts/SCRIPTS-001.rule
- */
+ 
+ * @library-module
+*/
 
 import { registerRule } from '../../registry'
 import type { PolicyContext, PolicyResult } from '../../types'

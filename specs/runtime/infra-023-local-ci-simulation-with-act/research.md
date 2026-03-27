@@ -254,7 +254,7 @@ Pre-implementation verification of all scripts that `run-local-ci.ts` will invok
 | `type-safety-guard`        | ✅ EXISTS              | 58                | `bun scripts/type-safety-guard.ts`                                     |
 | `lint`                     | ✅ EXISTS              | ~11               | `biome check .`                                                        |
 | `type-check`               | ✅ EXISTS              | 98                | `bun run typecheck` (alias)                                            |
-| `validate:scripts-infra`   | ❌ MISSING             | —                 | **Must be added**: maps to `scripts/validate/detect-broken-scripts.ts` |
+| `validate:scripts:broken`  | ❌ MISSING             | —                 | **Must be added**: maps to `scripts/validate/detect-broken-scripts.ts` |
 | `ci:local`                 | ❌ MISSING             | —                 | **Must be added by T003**: `act --pull=false`                          |
 | `ci:local:full`            | ❌ MISSING             | —                 | **Must be added by T003**: `act`                                       |
 | `ci:local:workflow`        | ❌ MISSING             | —                 | **Must be added by T003**: `act -W .github/workflows`                  |
@@ -264,8 +264,8 @@ Pre-implementation verification of all scripts that `run-local-ci.ts` will invok
 the actual registered key in `package.json` is `type-check` (hyphen). `run-local-ci.ts` must call
 `bun run typecheck` (the registered key). The plan documents this mapping explicitly.
 
-**Note on `validate:scripts-infra`:** This key is referenced in the spec (FR-06 as
-`validate-script-infrastructure`) and the user request as `validate:scripts-infra`. The closest
+**Note on `validate:scripts:broken`:** This key is referenced in the spec (FR-06 as
+`validate-script-infrastructure`) and the user request as `validate:scripts:broken`. The closest
 existing script implementation is `scripts/validate/detect-broken-scripts.ts` (validates missing
 or broken TypeScript script files referenced in `package.json`). This entry must be added to
 `package.json` as T003 (alongside the `ci:local*` entries).
@@ -386,7 +386,7 @@ All NEEDS CLARIFICATION items are resolved:
 | Item                                      | Resolution                                                   |
 | ----------------------------------------- | ------------------------------------------------------------ |
 | act runner image                          | `ghcr.io/catthehacker/ubuntu:act-latest` — confirmed optimal |
-| `validate:scripts-infra` script key       | Must be added: maps to `detect-broken-scripts.ts`            |
+| `validate:scripts:broken` script key      | Must be added: maps to `detect-broken-scripts.ts`            |
 | `type-check` vs `type:check`              | Use `type-check` (existing registered key in package.json)   |
 | `.act.secrets` vs `.secrets` in gitignore | Explicit `.act.secrets` entry required — confirmed gap       |
 | `docs/ci/` directory                      | Does not exist yet — must be created as part of T012         |

@@ -25,7 +25,7 @@ Key outcomes:
 - `bun run typecheck:src` passes with 0 errors on every PR
 - `bun run typecheck:tests` passes with 0 errors on every PR
 - `bun run lint` passes with 0 errors (ban-ts-comment format enforced)
-- `bash scripts/check-tsconfig-strict.sh` confirms all 7 strict flags are present and no package is
+- `bash scripts/validate/check-tsconfig-strict.sh` confirms all 7 strict flags are present and no package is
   weakening them
 - All 152 `@ts-ignore` comments carry a `[INFRA-001-LOGIC-XX]` reference traceable to a follow-up
   ticket
@@ -57,7 +57,7 @@ tests/shims/            — added bullmq.d.ts, uuid.d.ts, vue.d.ts
 .eslintrc.json          — ban-ts-comment upgraded to error level
 package.json            — check:tsconfig script added
 .github/workflows/      — typecheck.yml CI gate added
-scripts/check-tsconfig-strict.sh — tsconfig audit script
+scripts/validate/check-tsconfig-strict.sh — tsconfig audit script
 ```
 
 ---
@@ -75,7 +75,7 @@ bun install
 bun run typecheck:src
 bun run typecheck:tests
 bun run lint
-bash scripts/check-tsconfig-strict.sh
+bash scripts/validate/check-tsconfig-strict.sh
 ```
 
 ---
@@ -102,7 +102,7 @@ bun run lint
 # Expected: 0 errors, some warnings
 
 # 5. tsconfig strict audit
-bash scripts/check-tsconfig-strict.sh
+bash scripts/validate/check-tsconfig-strict.sh
 # Expected: PASS — all 7 flags present, no weakening overrides found
 
 # 6. Unit tests (should still pass)
@@ -160,12 +160,12 @@ Troubleshooting: If the error is not raised, check `.eslintrc.json` — the
 
 1. Open `packages/domain-core/tsconfig.json` (or any package tsconfig).
 2. Add `"strict": false` inside `compilerOptions`.
-3. Run `bash scripts/check-tsconfig-strict.sh`
+3. Run `bash scripts/validate/check-tsconfig-strict.sh`
 
 Expected: Script prints a warning/error about a weakening override found in that file and exits with
 code 1.
 
-Troubleshooting: If exit code is 0, check `scripts/check-tsconfig-strict.sh` — Phase 2 of the script
+Troubleshooting: If exit code is 0, check `scripts/validate/check-tsconfig-strict.sh` — Phase 2 of the script
 must scan for `"strict": false`, `"noImplicitAny": false`, etc. across all package tsconfigs.
 
 Undo:
@@ -241,7 +241,7 @@ After merging or pushing to a tracked branch, confirm that the GitHub Actions wo
 - [ ] `bun run typecheck:src` → 0 errors
 - [ ] `bun run typecheck:tests` → 0 errors
 - [ ] `bun run lint` → 0 errors
-- [ ] `bash scripts/check-tsconfig-strict.sh` → PASS
+- [ ] `bash scripts/validate/check-tsconfig-strict.sh` → PASS
 - [ ] `bun run test:unit` → all pass
 - [ ] Deliberate-error scenario confirms CI gate blocks regression
 - [ ] Bare `@ts-ignore` scenario confirms ESLint blocks non-compliant suppression
@@ -257,7 +257,7 @@ After merging or pushing to a tracked branch, confirm that the GitHub Actions wo
 - `specs/runtime/infra-001-typescript-stabilization/audits/VALIDATION_REPORT.md`
 - `specs/runtime/infra-001-typescript-stabilization/audits/ANALYZE_REPORT.md`
 - `.github/workflows/typecheck.yml`
-- `scripts/check-tsconfig-strict.sh`
+- `scripts/validate/check-tsconfig-strict.sh`
 
 ---
 

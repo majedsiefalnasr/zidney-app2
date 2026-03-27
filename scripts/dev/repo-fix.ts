@@ -12,6 +12,7 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { flushAi, log } from '../utils/logger'
 import { line, section, summary } from './formatter'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -136,6 +137,7 @@ export function cleanBuildArtifacts(): boolean {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 if (import.meta.main) {
+  log.header('REPOSITORY FIX', 'Automated repository repair runner — 5 sequential steps')
   section('Repository Fix')
 
   const steps = buildSteps()
@@ -159,5 +161,7 @@ if (import.meta.main) {
   const total = steps.length + 1 // +1 for cleanup step
   const passed = hasError ? 0 : total // approximate — cleanup always passes
   summary(passed, total)
+  log.result({ total, passed, failed: total - passed })
+  flushAi()
   process.exit(hasError ? 1 : 0)
 }

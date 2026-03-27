@@ -159,10 +159,7 @@ function main(): void {
   if (violations.length === 0) {
     logger.info('Script infrastructure is valid')
     log.badge('INFRASTRUCTURE VALID', 'success')
-    log.progressResult(
-      { success: 1 },
-      { title: 'Infrastructure Checks', showPercentage: true }
-    )
+    log.progressResult({ success: 1 }, { title: 'Infrastructure Checks', showPercentage: true })
     flushAi()
     process.exit(0)
   }

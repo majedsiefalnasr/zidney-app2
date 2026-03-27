@@ -205,7 +205,7 @@ bun run governance:gate
 bun test scripts/governance/__tests__/gate.test.ts
 
 # Verify script registry:
-bun run validate:runtime:scripts
+bun run validate:scripts:runtime
 
 # Full pre-commit simulation:
 bun run governance:gate:changed

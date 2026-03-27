@@ -120,7 +120,7 @@ bun test --project=validate-scripts
 bun test scripts/validate/__tests__/runtime-scripts.test.ts
 
 # CI validation suite for this stage
-bun run validate:runtime:scripts  # EXIT 0 if all 83 spec refs registered
+bun run validate:scripts:runtime  # EXIT 0 if all 83 spec refs registered
 bun run typecheck                 # EXIT 0 if no TS errors
 bun run lint                      # EXIT 0 if no Biome violations
 
@@ -133,7 +133,7 @@ bun run validate:ai-context-fresh
 bun run validate:ai-context-schemas
 bun run infra:cache:clean
 bun run dev:seed:dashboard-test-data
-bun run validate:runtime:scripts
+bun run validate:scripts:runtime
 bun run dev:generate:script-docs
 ```
 
@@ -146,7 +146,7 @@ bun run dev:generate:script-docs
 **Expected:** Exit 0, no unregistered references found.
 
 ```bash
-bun run validate:runtime:scripts
+bun run validate:scripts:runtime
 ```
 
 **What to check:** Output should list all 83 spec references as `registered` under their corresponding script keys.
@@ -255,7 +255,7 @@ Use this checklist when reviewing the PR:
 
 - [ ] All 46 tasks completed and marked `[X]` in tasks.md
 - [ ] Unit tests pass: `bun test --project=validate-scripts`
-- [ ] CI gates pass: `bun run validate:runtime:scripts && bun run typecheck && bun run lint`
+- [ ] CI gates pass: `bun run validate:scripts:runtime && bun run typecheck && bun run lint`
 - [ ] All new scripts execute without errors: manual scenario tests 1–7 pass
 - [ ] Documentation complete: `docs/scripts/` has 12 pages + README + REGISTRY
 - [ ] No `console.log` in any new `.ts` files (structured logging via `createLogger` only)

@@ -1,3 +1,4 @@
+/** @library-module */
 import { existsSync, readFileSync } from 'node:fs'
 import { createLogger } from '@zidney/logger'
 import { deriveTaskId, generateExecutionId } from './execution-id'

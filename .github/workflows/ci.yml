@@ -194,6 +194,55 @@ jobs:
       - name: Run repo:doctor
         run: bun repo:doctor
 
+  # ── Job 5. Script UX Validator (CI Preview Mode) ───────────────────────
+  script-ux-validator:
+    name: "Script UX Validator — Preview"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Restore node_modules from cache
+        uses: actions/cache@v4
+        id: cache-nodemodules
+        with:
+          path: node_modules
+          key: nodemodules-${{ hashFiles('bun.lock') }}
+          restore-keys: nodemodules-
+
+      - name: Install dependencies
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Run Script UX Validator (CI auto preview mode)
+        id: script_ux
+        run: |
+          bun run validate:scripts:ux --ai | tee script-ux-output.log
+        continue-on-error: true
+
+      - name: Upload Script UX report
+        uses: actions/upload-artifact@v4
+        with:
+          name: script-ux-report
+          path: script-ux-output.log
+          retention-days: 7
+
+      - name: Annotate failures (GitHub UI)
+        if: always()
+        run: |
+          if grep -q '"status":"error"' script-ux-output.log; then
+            echo "::error title=Script UX Validation Failed::Check script-ux-report artifact for details"
+            exit 1
+          else
+            echo "Script UX validation passed"
+          fi
+
   security:
     name: "Trivy Security Scan"
     runs-on: ubuntu-latest

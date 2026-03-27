@@ -10,19 +10,26 @@
  */
 
 import { $ } from 'bun'
+import { flushAi, log } from '../utils/logger'
 
 async function main(): Promise<void> {
-  console.log('::group::Unified Governance Gate')
+  log.header('GOVERNANCE GATE CI', 'CI variant of the governance gate with GHA annotations')
+
+  log.step('::group::Unified Governance Gate')
 
   const proc = await $`bun run governance:gate`.nothrow()
   const exitCode = proc.exitCode ?? 1
 
-  console.log('::endgroup::')
+  log.step('::endgroup::')
 
   if (exitCode !== 0) {
-    console.error('::error::Governance gate failed — see output above')
+    log.error('::error::Governance gate failed — see output above')
+    log.result({ failed: 1, message: 'Governance gate CI failed.' })
+  } else {
+    log.result({ passed: 1, failed: 0, message: 'Governance gate CI passed.' })
   }
 
+  flushAi()
   process.exit(exitCode)
 }
 

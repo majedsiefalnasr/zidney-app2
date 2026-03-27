@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 # Run All Tests for STAGE_TEST_01_PLATFORM_FOUNDATION
 # Executes all test suites in dependency order
 
@@ -75,8 +76,12 @@ echo "Phase Groups Failed: $TESTS_FAILED/4"
 
 if [ $TESTS_FAILED -eq 0 ]; then
   echo -e "${GREEN}✅ All tests passed!${NC}"
+  echo ""
+  echo "RESULT: All tests passed"
   exit 0
 else
   echo -e "${RED}❌ Some tests failed!${NC}"
+  echo ""
+  echo "RESULT: Some tests failed"
   exit 1
 fi

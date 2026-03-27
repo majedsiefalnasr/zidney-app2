@@ -54,7 +54,7 @@ layer. All 16 FRs, 7 NFRs, and 18 ACs captured with zero clarification markers.
 - FR-013: Deterministic output — same git state produces identical artifacts
 - FR-014: Atomic writes — tmp + rename pattern for all context JSON files
 - FR-015: No logic duplication with existing `gitnexus-context.ts`
-- FR-016: `validate:runtime:scripts` compliance for all new scripts
+- FR-016: `validate:scripts:runtime` compliance for all new scripts
 
 ---
 

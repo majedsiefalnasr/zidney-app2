@@ -9,10 +9,12 @@
  * - Who depends on each module
  * - Blast radius analysis
  * - Change impact prediction
- */
+ 
+ * @library-module
+*/
 
 import { createCacheManager } from '../../core/cache-manager'
-import { createLogger } from '../../core/logger-factory'
+import { createLogger } from '../../utils/logger'
 
 const logger = createLogger('runtime-dependents-generator')
 

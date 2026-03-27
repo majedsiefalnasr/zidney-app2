@@ -20,6 +20,7 @@
 
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import { flushAi, log } from './utils/logger'
 
 type ArchitectureContract = {
   dependencyRules?: {
@@ -130,12 +131,15 @@ function validateDependencyRules(
 }
 
 function runArchitectureDiff() {
+  log.header('ARCHITECTURE DIFF', 'Detect architecture violations in the current change set')
   const contract = loadContract()
 
   const changedFiles = getChangedFiles()
 
   if (changedFiles.length === 0) {
-    console.log('Architecture Diff: no changed files detected.')
+    log.info('Architecture Diff: no changed files detected.')
+    log.result({ total: 0, passed: 0, failed: 0, message: 'No changed files to validate.' })
+    flushAi()
     process.exit(0)
   }
 
@@ -157,21 +161,31 @@ function runArchitectureDiff() {
   }
 
   if (violations.length > 0) {
-    console.error('\nArchitecture Diff: violations detected\n')
-
+    log.error('Architecture Diff: violations detected')
     for (const v of violations) {
-      console.error(' -', v)
+      log.error(` - ${v}`)
     }
-
-    console.error('\nPR rejected due to architecture rule violations.')
-
+    log.result({
+      total: changedFiles.length,
+      passed: 0,
+      failed: violations.length,
+      message: 'PR rejected due to architecture rule violations.',
+    })
+    flushAi()
     process.exit(1)
   }
 
-  console.log('Architecture Diff: no violations detected.')
-  console.log(
+  log.success('Architecture Diff: no violations detected.')
+  log.info(
     'Architecture Diff: support-surface routing decisions must consult docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md.'
   )
+  log.result({
+    total: changedFiles.length,
+    passed: changedFiles.length,
+    failed: 0,
+    message: 'No violations detected.',
+  })
+  flushAi()
 }
 
 runArchitectureDiff()

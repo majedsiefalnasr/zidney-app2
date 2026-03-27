@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 # T100: Pre-commit enforcement for SKILL.md files
 # Validates that all SKILL.md files are <500 lines (Q4 requirement)
 # Usage: bash scripts/ci/validate-skill-sizes.sh [files...]
@@ -47,8 +48,12 @@ done
 echo "---"
 if [[ $FAILED -eq 0 ]]; then
   echo "✅ All SKILL.md files within limits (<$MAX_LINES lines)"
+  echo ""
+  echo "RESULT: All SKILL.md files within size limits"
   exit 0
 else
   echo "❌ $FAILED SKILL.md file(s) exceed limit. Please refactor to <$MAX_LINES lines."
+  echo ""
+  echo "RESULT: SKILL.md size validation failed"
   exit 1
 fi

@@ -19,6 +19,7 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { flushAi, log } from '../utils/logger'
 
 const DEFAULT_ARTIFACT_PATH = resolve('docs/ai/context/gitnexus-context.json')
 const DEFAULT_SCHEMA_PATH = resolve('docs/ai/gitnexus-context.schema.json')
@@ -108,12 +109,17 @@ export function validateArtifact(options: ValidateOptions = {}): string {
 }
 
 function main(): void {
+  log.header('CONTEXT VALIDATE', 'Validates gitnexus-context.json against schema')
   try {
     const msg = validateArtifact()
-    console.log(msg)
+    log.success(msg)
+    log.result({ total: 1, passed: 1, failed: 0 })
+    flushAi()
     process.exit(0)
   } catch (err) {
-    console.error(`[context:validate] FAIL: ${err instanceof Error ? err.message : String(err)}`)
+    log.error(`[context:validate] FAIL: ${err instanceof Error ? err.message : String(err)}`)
+    log.result({ total: 1, passed: 0, failed: 1 })
+    flushAi()
     process.exit(1)
   }
 }

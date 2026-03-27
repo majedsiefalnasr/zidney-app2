@@ -8,7 +8,9 @@
  * - File hash-based cache validation
  * - TTL-based expiry
  * - Cache hit/miss tracking
- */
+ 
+ * @library-module
+*/
 
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'

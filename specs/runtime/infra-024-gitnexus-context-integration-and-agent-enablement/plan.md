@@ -402,7 +402,7 @@ Add GitNexus validation to the parallel guardian list:
 ```markdown
 #### GitNexus Context Validation (Pre-Closure)
 
-Execute: `bun run arch:validate:gitnexus`
+Execute: `bun run arch:gitnexus:validate`
 
 BLOCK CLOSURE if:
 
@@ -468,9 +468,9 @@ Two new script keys added to root `package.json`:
 
 ### 6.2 — CI Gate Documentation
 
-The CI gate `bun run arch:validate:gitnexus` must be documented. Reference from `docs/ci/` or create `docs/ci/gitnexus-validation.md` noting:
+The CI gate `bun run arch:gitnexus:validate` must be documented. Reference from `docs/ci/` or create `docs/ci/gitnexus-validation.md` noting:
 
-- Gate command: `bun run arch:validate:gitnexus`
+- Gate command: `bun run arch:gitnexus:validate`
 - Failure conditions (non-zero exit, schema violation, script error)
 - Pass condition (empty arrays are valid)
 - Typical CI execution time: < 60 seconds (NFR-003)
@@ -479,7 +479,7 @@ The CI gate `bun run arch:validate:gitnexus` must be documented. Reference from 
 
 ### 6.3 — `validate-runtime-scripts` Compliance
 
-After adding new script keys, `bun run validate:runtime:scripts` must pass. The scripts follow `<domain>:<action>` naming:
+After adding new script keys, `bun run validate:scripts:runtime` must pass. The scripts follow `<domain>:<action>` naming:
 
 - `gitnexus:context` ✅
 - `gitnexus:validate` ✅ (follows `<domain>:<action>` format per script governance rules)

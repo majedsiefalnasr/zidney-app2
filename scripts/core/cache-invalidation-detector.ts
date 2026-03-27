@@ -2,6 +2,7 @@
  * Cache Invalidation Detector — Detect when cache should be invalidated
  *
  * Purpose: Monitor critical configuration files and invalidate cache when they change
+ * @library-module
  *
  * Files monitored:
  * - package.json / bun.lock (dependency changes)
@@ -13,6 +14,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { log } from '../utils/logger'
 
 interface ConfigSnapshot {
   timestamp: number
@@ -90,7 +92,7 @@ export class CacheInvalidationDetector {
       // No changes detected
       return { invalid: false }
     } catch (error) {
-      console.warn(`[CacheInvalidationDetector] Error checking invalidation: ${String(error)}`)
+      log.warn(`[CacheInvalidationDetector] Error checking invalidation: ${String(error)}`)
       return { invalid: false }
     }
   }
@@ -115,7 +117,7 @@ export class CacheInvalidationDetector {
     try {
       writeFileSync(this.snapshotPath, JSON.stringify(snapshot, null, 2), 'utf-8')
     } catch (error) {
-      console.warn(`[CacheInvalidationDetector] Failed to save snapshot: ${String(error)}`)
+      log.warn(`[CacheInvalidationDetector] Failed to save snapshot: ${String(error)}`)
     }
   }
 

@@ -8,7 +8,9 @@
  * - Artifact integrity checking
  * - Schema validation for all artifact types
  * - Freshness validation
- */
+ 
+ * @library-module
+*/
 
 import { readFileSync } from 'node:fs'
 import {

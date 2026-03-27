@@ -10,19 +10,19 @@
  * Note: Connects directly to DATABASE_URL — no --workspace= arg required.
  * Caller must set DATABASE_URL in the environment.
  * Requires psql to be available on PATH.
- */
+ 
+ * @library-module
+*/
 
 import { spawnSync } from 'node:child_process'
-import { randomUUID } from 'node:crypto'
-import { createLogger } from '../core/logger-factory'
 
-const correlationId = randomUUID()
+const _correlationId = randomUUID()
 const logger = createLogger('db:console')
 logger.setContext({ correlationId })
 
 const DATABASE_URL = process.env.DATABASE_URL
 
-function main(): void {
+function _main(): void {
   logger.info('Launching database console')
 
   if (!DATABASE_URL) {

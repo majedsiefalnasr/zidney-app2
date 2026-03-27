@@ -6,12 +6,14 @@
  * No timestamps, correlation IDs, or non-deterministic fields.
  *
  * @module scripts/policy-engine/reporters/json
+ * @library-module
  */
 
 import type { PolicyResult, Reporter } from '../types'
 
 export class JsonReporter implements Reporter {
   report(results: PolicyResult[]): void {
-    console.log(JSON.stringify(results, null, 2))
+    process.stdout.write(`${JSON.stringify(results, null, 2)}
+`)
   }
 }

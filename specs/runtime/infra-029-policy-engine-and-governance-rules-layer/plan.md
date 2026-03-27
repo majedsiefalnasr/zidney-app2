@@ -81,7 +81,7 @@ scripts/
     ├── adapters/
     │   ├── architecture-guard.adapter.ts   # Wraps: bun run arch:guard
     │   ├── type-safety.adapter.ts          # Wraps: bun typecheck + arch:type-safety-guard
-    │   ├── script-governance.adapter.ts    # Wraps: bun run validate:runtime:scripts
+    │   ├── script-governance.adapter.ts    # Wraps: bun run validate:scripts:runtime
     │   └── trivy.adapter.ts                # Reads: tmp/trivy-report.json
     │
     ├── rules/
@@ -313,7 +313,7 @@ export async function runTypeSafety(context: PolicyContext): Promise<PolicyResul
 
 ### `adapters/script-governance.adapter.ts`
 
-**Purpose**: Wraps `bun run validate:runtime:scripts` and maps output to `PolicyResult[]`.  
+**Purpose**: Wraps `bun run validate:scripts:runtime` and maps output to `PolicyResult[]`.  
 **Exports**:
 
 ```typescript
@@ -322,7 +322,7 @@ export async function runScriptGovernance(context: PolicyContext): Promise<Polic
 
 **Behavior**:
 
-- Spawns `Bun.spawn(['bun', 'run', 'validate:runtime:scripts', '--json'], { signal: context.abortSignal })`.
+- Spawns `Bun.spawn(['bun', 'run', 'validate:scripts:runtime', '--json'], { signal: context.abortSignal })`.
 - Parses JSON output into script violation objects.
 - Maps each to a `SCRIPTS-*` domain `PolicyResult` using violation type:
   - naming-violation → `SCRIPTS-001`
@@ -524,7 +524,7 @@ Add to root `package.json` `scripts`:
 "policy:check": "bun scripts/policy-engine/cli.ts"
 ```
 
-No changes to existing scripts. Existing `arch:guard`, `typecheck`, `validate:runtime:scripts` scripts remain and continue to work independently (adapter-first migration — no removal).
+No changes to existing scripts. Existing `arch:guard`, `typecheck`, `validate:scripts:runtime` scripts remain and continue to work independently (adapter-first migration — no removal).
 
 ### 5.2 CI Integration (FR-035, FR-036)
 
@@ -639,7 +639,7 @@ For each adapter, run both the legacy tool and the adapter on the same repo stat
 | ---------------------------------- | ---------------------------------- | ------------------------ |
 | `arch-guard-parity.test.ts`        | `bun run arch:guard`               | `runArchitectureGuard()` |
 | `type-safety-parity.test.ts`       | `bun run validate:types`           | `runTypeSafety()`        |
-| `script-governance-parity.test.ts` | `bun run validate:runtime:scripts` | `runScriptGovernance()`  |
+| `script-governance-parity.test.ts` | `bun run validate:scripts:runtime` | `runScriptGovernance()`  |
 
 Trivy parity test not applicable (adapter reads the same file the legacy tool would read).
 
@@ -717,7 +717,7 @@ Run `bun run policy:check --changed` against a set of 10 staged files and assert
 
 **Deferred** (out of scope for INFRA-29):
 
-- Removing legacy `arch:guard`, `type-safety-guard`, `validate:runtime:scripts` invocations from CI YAML (FR-036) — tracked as follow-up stage.
+- Removing legacy `arch:guard`, `type-safety-guard`, `validate:scripts:runtime` invocations from CI YAML (FR-036) — tracked as follow-up stage.
 - Removing legacy script implementations from `scripts/` directory.
 
 ---

@@ -240,9 +240,9 @@ bun run infra:security:deps
 bun run infra:security:secrets
 bun run infra:security:config
 bun run infra:security:ci
-bun run validate:script:naming
-bun run validate:script:usage
-bun run validate:script:infrastructure
+bun run validate:scripts:naming
+bun run validate:scripts:usage
+bun run validate:scripts:infrastructure
 bun run dev:generate:script-docs
 bun scripts/ai-guard.ts
 bun scripts/infra-audit.ts

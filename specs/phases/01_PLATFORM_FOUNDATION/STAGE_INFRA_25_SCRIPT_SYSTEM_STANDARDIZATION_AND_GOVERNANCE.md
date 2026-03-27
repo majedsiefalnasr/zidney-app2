@@ -19,13 +19,13 @@ Scope Closed:
 - T005: script-infrastructure.ts validator implemented (5-field metadata + registry freshness)
 - T006: refactor-scripts.ts engine implemented (Type A–E logic + dry-run mode)
 - T007: script-docs.ts generator updated (enforces 5-field metadata)
-- T008: 5 new governed package.json entries added (validate:script:\*, validate:diff:registry, validate:scan:packages, ai:validate:prompts)
+- T008: 5 new governed package.json entries added (validate:script:\*, validate:scripts:registry, validate:scan:packages, ai:validate:prompts)
 - T009: @category + @usage metadata added to all tracked scripts (27 registered)
 - T010: 33 renames/removals applied from SCRIPT_MIGRATION_MAP
 - T011: dev:refactor:scripts live run completed and verified
 - T012: CI validation block added to architecture-governance.yml
 - T013: script-system-governance SKILL.md updated with governance rules
-- T014: Full validation gate passed — validate:script:naming, validate:script:usage, validate:script:infrastructure, dev:generate:script-docs ✅
+- T014: Full validation gate passed — validate:scripts:naming, validate:scripts:usage, validate:scripts:infrastructure, dev:generate:script-docs ✅
 
 Deferred Scope:
 
@@ -117,7 +117,7 @@ Current issues:
 | ------------------------ | ------------------------ |
 | db:pool-status           | db:status:pool           |
 | db:validate-licenses     | db:validate:licenses     |
-| validate-runtime-scripts | validate:runtime:scripts |
+| validate-runtime-scripts | validate:scripts:runtime |
 | arch:validate-brain      | arch:validate:brain      |
 
 ---

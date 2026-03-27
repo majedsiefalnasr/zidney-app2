@@ -27,7 +27,7 @@
 - [ ] CHK010 - Is the meaning of "same git state" for the determinism guarantee (staged files, HEAD ref, or both) explicitly defined? [Completeness, Spec §FR-013]
 - [ ] CHK011 - Is the 5-minute freshness window for `context:changed` artifact cache explicitly cross-referenced in all scripts that read from it? [Completeness, Spec §FR-003]
 - [ ] CHK012 - Are `CONTEXT_MAX_AGE_HOURS` override semantics (default value, env var name, scope) documented and traceable to an NFR or Risk entry? [Completeness, Spec §Risk Assessment]
-- [ ] CHK013 - Is the expected downstream behavior when `context:changed` returns an empty list explicitly defined for `arch:guard:changed` and `validate:runtime:scripts`? [Completeness, Spec §Edge Cases]
+- [ ] CHK013 - Is the expected downstream behavior when `context:changed` returns an empty list explicitly defined for `arch:guard:changed` and `validate:scripts:runtime`? [Completeness, Spec §Edge Cases]
 - [ ] CHK014 - Is the `RiskIndicator[]` schema for `context:impact --json` (`module`, `riskScore`, `reason`, `affectedBy`) traced to a single canonical source (`gitnexus-context.ts`)? [Completeness, Spec §FR-004, §Clarifications]
 
 ---
@@ -38,7 +38,7 @@
 - [ ] CHK016 - Does FR-003 make clear that `context:changed` outputs to **stdout only** (not to a separate `context-changed.json` file) and that caching occurs via the shared `gitnexus-context.json`? [Clarity, Spec §FR-003]
 - [ ] CHK017 - Does FR-004 make clear that `context:impact` outputs to **stdout only** (not to a separate `context-impact.json` file)? [Clarity, Spec §FR-004]
 - [ ] CHK018 - Is the 5-minute freshness threshold used in FR-003 (cache hit window) consistent with and differentiated from the 24-hour threshold in FR-005 (staleness gate)? [Consistency, Spec §FR-003, §FR-005]
-- [ ] CHK019 - Is the requirement that `context:validate` is a superset of `arch:validate:gitnexus` (adds freshness) and must NOT replace or alias it sufficiently explicit? [Clarity, Spec §FR-005]
+- [ ] CHK019 - Is the requirement that `context:validate` is a superset of `arch:gitnexus:validate` (adds freshness) and must NOT replace or alias it sufficiently explicit? [Clarity, Spec §FR-005]
 - [ ] CHK020 - Is the POSIX atomic rename behavior (write to `.tmp` then rename) specified with enough precision to cover the cross-device failure edge case documented in the Risk table? [Clarity, Spec §FR-014, §Risk Assessment]
 - [ ] CHK021 - Does the spec define whether `.husky/pre-commit` also requires `bun run arch:context:validate` — FR-010 only names `context:changed`, yet full-gate integrity implies validate should also run pre-commit? [Clarity, Gap, Spec §FR-010]
 
@@ -49,15 +49,15 @@
 - [ ] CHK022 - Are exactly four files (`build.ts`, `changed.ts`, `impact.ts`, `validate.ts`) and no others specified for `scripts/context/`? [Completeness, Spec §FR-001, §AC-01]
 - [ ] CHK023 - Are all five metadata header fields (`@script`, `@domain`, `@category`, `@description`, `@usage`) required for each `scripts/context/*.ts` file? [Completeness, Spec §FR-007, §AC-03]
 - [ ] CHK024 - Is `context` registered as a new canonical domain in the `script-system-governance` skill, and is this treated as an in-scope INFRA-28 deliverable? [Completeness, Spec §FR-007, §AC-18, §Assumptions §5]
-- [ ] CHK025 - Does `validate:runtime:scripts` (INFRA-25) pass for all four new scripts without requiring exception entries in any allowlist? [Acceptance, Spec §FR-016, §AC-03]
-- [ ] CHK026 - Are all four `scripts/context/*.ts` files listed in the script registry that `validate:runtime:scripts` checks — no orphan scripts? [Completeness, Spec §FR-016]
+- [ ] CHK025 - Does `validate:scripts:runtime` (INFRA-25) pass for all four new scripts without requiring exception entries in any allowlist? [Acceptance, Spec §FR-016, §AC-03]
+- [ ] CHK026 - Are all four `scripts/context/*.ts` files listed in the script registry that `validate:scripts:runtime` checks — no orphan scripts? [Completeness, Spec §FR-016]
 
 ---
 
 ## Script Command Registration & Backward Compatibility (FR-006, NFR-007)
 
 - [ ] CHK027 - Are all four `context:*` entries registered in root `package.json` with exact file paths matching the FR-006 table? [Completeness, Spec §FR-006, §AC-02]
-- [ ] CHK028 - Are `arch:gitnexus:context`, `arch:context`, and `arch:validate:gitnexus` aliases specified as preserved unchanged — not removed, not redirected? [Completeness, Spec §NFR-007, §AC-15]
+- [ ] CHK028 - Are `arch:gitnexus:context`, `arch:context`, and `arch:gitnexus:validate` aliases specified as preserved unchanged — not removed, not redirected? [Completeness, Spec §NFR-007, §AC-15]
 - [ ] CHK029 - Is `arch:gitnexus:context` explicitly specified to delegate to `scripts/gitnexus-context.ts` directly, not through `context:build`, to avoid a circular dependency risk? [Clarity, Spec §NFR-007]
 
 ---
@@ -102,7 +102,7 @@
 
 - [ ] CHK046 - Is `governance:gate` specified with `context:build` as Step 0 and `context:validate` as Step 1 before all pre-existing guards? [Completeness, Spec §FR-008, §AC-09]
 - [ ] CHK047 - Is fail-fast behavior on `context:build` or `context:validate` failure (no subsequent guards run) specified as the only exception to the report-all behavior from INFRA-27? [Completeness, Spec §FR-008, §AC-10]
-- [ ] CHK048 - Is `governance:gate:changed` specified with `context:changed` as Step 0 before `arch:guard:changed` (Step 1) and `validate:runtime:scripts` (Step 2)? [Completeness, Spec §FR-009, §AC-11]
+- [ ] CHK048 - Is `governance:gate:changed` specified with `context:changed` as Step 0 before `arch:guard:changed` (Step 1) and `validate:scripts:runtime` (Step 2)? [Completeness, Spec §FR-009, §AC-11]
 - [ ] CHK049 - Is the fail-fast semantics for `governance:gate:changed` (short-circuit on first failure) explicitly retained from INFRA-27? [Consistency, Spec §FR-009]
 
 ---

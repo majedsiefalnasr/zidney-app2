@@ -1,3 +1,4 @@
+/** @library-module */
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import type { BrainStatus } from './types'

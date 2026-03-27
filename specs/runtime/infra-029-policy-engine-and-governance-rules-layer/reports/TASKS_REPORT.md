@@ -65,7 +65,7 @@ update, CI workflow, and 4 gate validation runs. No database migrations or HTTP 
 | ---- | ------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | T006 | `arch:guard`, `arch:guard:changed` scripts | Adapter wraps existing CLI; must return `PolicyResult[]` JSON when `--json` flag is added |
 | T007 | `bun typecheck`, `arch:type-safety-guard`  | Parses tsc stderr diagnostics                                                             |
-| T008 | `validate:runtime:scripts --json`          | Requires `--json` flag support to be verified                                             |
+| T008 | `validate:scripts:runtime --json`          | Requires `--json` flag support to be verified                                             |
 | T009 | `tmp/trivy-report.json`                    | Reads Trivy output file; absent file returns `[]`                                         |
 | T005 | `docs/ai/context/gitnexus-context.json`    | GitNexus context artifact; stale detection via `GITNEXUS_MAX_AGE_HOURS`                   |
 | T050 | `oven-sh/setup-bun@v1` GitHub Action       | CI workflow requires this Action                                                          |
@@ -113,7 +113,7 @@ Not applicable — no database writes in this stage. All tasks produce read-only
 
 | Risk                                                                                                                                | Mitigation                                                                                                   |
 | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `validate:runtime:scripts` may not support `--json` flag                                                                            | Verify in T008; if missing, the adapter must parse text output or the flag must be added via a separate task |
+| `validate:scripts:runtime` may not support `--json` flag                                                                            | Verify in T008; if missing, the adapter must parse text output or the flag must be added via a separate task |
 | Husky hook replacement (T049) could break existing pre-commit gates if `policy:check --changed` does not fully cover the same scope | Gate 1 parity tests (T043–T045) must pass before T049 is committed                                           |
 | `arch:guard` `--json` flag availability                                                                                             | Verified in plan.md Section 4.1; document expected output format in adapter                                  |
 

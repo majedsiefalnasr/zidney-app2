@@ -1,11 +1,13 @@
 /**
  * Artifact Generator Orchestrator - Coordinate all builders
+ * @library-module
  * Task: T024
  * Path: scripts/ai-context/artifact-generator.ts
  */
 
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { log } from '../utils/logger'
 import { buildArchitectureBrain } from './artifact-builders/architecture-brain-builder'
 import { buildArchitectureSummary } from './artifact-builders/architecture-summary-builder'
 import { buildContextMini } from './artifact-builders/context-mini-builder'
@@ -34,7 +36,7 @@ export async function generateAllArtifacts(
 
   try {
     // Step 1: Load source metadata
-    if (options.verbose) console.log('📋 Loading source metadata...')
+    if (options.verbose) log.info('Loading source metadata...')
     const metadata = await loadSourceMetadata(options.repoRoot)
 
     if (metadata.errors.length > 0) {
@@ -47,7 +49,7 @@ export async function generateAllArtifacts(
     }
 
     // Step 2: Build all artifacts in parallel
-    if (options.verbose) console.log('🏗️  Building artifacts in parallel...')
+    if (options.verbose) log.info('Building artifacts in parallel...')
     const [moduleMap, layerModel, dependencyGraph, architectureSummary, runtimeMap] =
       await Promise.all([
         buildModuleMap(metadata),
@@ -58,7 +60,7 @@ export async function generateAllArtifacts(
       ])
 
     // Step 3: Build architecture brain (depends on above results)
-    if (options.verbose) console.log('🧠 Building architecture brain...')
+    if (options.verbose) log.info('Building architecture brain...')
     const architectureBrain = await buildArchitectureBrain(
       metadata,
       moduleMap,
@@ -67,12 +69,12 @@ export async function generateAllArtifacts(
     )
 
     // Step 4: Build context mini (depends on brain)
-    if (options.verbose) console.log('⚡ Building lightweight context...')
+    if (options.verbose) log.info('Building lightweight context...')
     const contextMini = await buildContextMini(architectureBrain)
 
     // Step 5: Validate all artifacts
     if (options.validate) {
-      if (options.verbose) console.log('✓ Validating artifacts...')
+      if (options.verbose) log.info('Validating artifacts...')
       const validationResult = validateAllArtifacts({
         module_map: moduleMap,
         layer_model: layerModel,
@@ -99,7 +101,7 @@ export async function generateAllArtifacts(
     }
 
     // Step 6: Write artifacts to output directory
-    if (options.verbose) console.log('💾 Writing artifacts...')
+    if (options.verbose) log.info('Writing artifacts...')
     await mkdir(options.outputDir, { recursive: true })
 
     const artifactData = {
@@ -116,7 +118,7 @@ export async function generateAllArtifacts(
       const filepath = join(options.outputDir, filename)
       await writeFile(filepath, content as string, 'utf-8')
       artifacts.push(filename)
-      if (options.verbose) console.log(`  ✓ ${filename}`)
+      if (options.verbose) log.success(`  ${filename}`)
     }
 
     const duration = performance.now() - startTime

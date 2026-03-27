@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 
 # T077: Deploy MMC Dashboard to Production Environment
 #
@@ -409,4 +410,9 @@ log_success "Service deployed and monitoring"
 # Clean up
 rm -f "${PLAN_FILE}"
 
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
 exit 0

@@ -81,10 +81,7 @@ async function main(): Promise<void> {
     flushAi()
   } catch (error) {
     logger.error('AI Guard failure', { error: String(error) })
-    log.progressResult(
-      { error: 1 },
-      { title: 'AI Guard Validation Failed', showPercentage: false }
-    )
+    log.progressResult({ error: 1 }, { title: 'AI Guard Validation Failed', showPercentage: false })
     flushAi()
     process.exit(1)
   }
@@ -93,7 +90,7 @@ async function main(): Promise<void> {
 // Run if invoked directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
-    log.error('[ai-guard] Fatal error: ' + String(error))
+    log.error(`[ai-guard] Fatal error: ${String(error)}`)
     process.exit(1)
   })
 }
