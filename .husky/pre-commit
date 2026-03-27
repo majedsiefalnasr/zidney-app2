@@ -131,4 +131,8 @@ bun run policy:check --changed || {
   exit 1
 }
 
-echo "✔ Pre-commit checks passed"
+# ── Final Summary ────────────────────────────────────────────────────────────
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Pre-commit checks passed"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
