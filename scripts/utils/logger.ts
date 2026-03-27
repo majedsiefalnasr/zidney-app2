@@ -890,6 +890,99 @@ class Logger {
   }
 
   /**
+   * Render a compact result box that only contains a title with a status badge.
+   *
+   * Useful for scripts that have no numeric summary data but want a
+   * visually consistent success/error badge with a boxed title.
+   *
+   * @param title - Label to display in the box
+   * @param status - One of `success|error|warning|info` controlling color
+   * @param options - Optional alignment for the badge/title
+   */
+  resultSimple(
+    title: string,
+    status: 'success' | 'error' | 'warning' | 'info' = 'info',
+    options?: { align?: Align }
+  ) {
+    if (isAiMode || isSilent) {
+      if (isAiMode) {
+        pushAi({ status: status as AiStatus, script: this.scriptName, message: title })
+      }
+      return
+    }
+
+    const badgeText = status.toUpperCase()
+
+    // width calculations (minimal and responsive)
+    const contentWidth = Math.max(stringWidth(title), stringWidth(badgeText)) + 4
+    const envBoxWidth = Number(process.env.LOG_BOX_WIDTH || '')
+    const termCols =
+      process.stdout && typeof process.stdout.columns === 'number' ? process.stdout.columns : 60
+
+    let boxWidth = Math.max(contentWidth, LOG_MIN_WIDTH)
+    if (Number.isFinite(envBoxWidth) && envBoxWidth > 0) {
+      boxWidth = Math.max(10, Math.min(envBoxWidth, termCols - 2))
+    } else {
+      boxWidth = Math.min(boxWidth, Math.max(20, termCols - 2))
+    }
+
+    boxWidth = Math.max(boxWidth, LOG_MIN_WIDTH)
+    const innerWidth = boxWidth - 2
+
+    // badge background mapping
+    const badgeBg =
+      status === 'error'
+        ? colors.bgRed
+        : status === 'success'
+          ? colors.bgGreen
+          : status === 'warning'
+            ? colors.bgYellow
+            : colors.bgBlue
+
+    // alignment
+    const envAlign = (process.env.LOG_BOX_ALIGN || '').toLowerCase()
+    const align = (options?.align ||
+      (envAlign === 'center' ? 'center' : envAlign === 'end' ? 'end' : 'start')) as Align
+
+    const badgeVisible = stringWidth(badgeText)
+    let badgePadLeft = 0
+    let badgePadRight = 0
+    if (align === 'center') {
+      badgePadLeft = Math.floor((innerWidth - badgeVisible) / 2)
+      badgePadRight = Math.max(0, innerWidth - badgeVisible - badgePadLeft)
+    } else if (align === 'end') {
+      badgePadRight = 1
+      badgePadLeft = Math.max(0, innerWidth - badgeVisible - badgePadRight)
+    } else {
+      badgePadLeft = 1
+      badgePadRight = Math.max(0, innerWidth - badgeVisible - badgePadLeft)
+    }
+
+    const topBorder = `┌${'─'.repeat(innerWidth)}┐`
+    const bottomBorder = `└${'─'.repeat(innerWidth)}┘`
+
+    const badgeLine =
+      badgeBg +
+      colors.bold +
+      colors.white +
+      ' '.repeat(badgePadLeft) +
+      badgeText +
+      ' '.repeat(badgePadRight) +
+      colors.reset
+
+    console.log(`\n${topBorder}`)
+    console.log(`│${badgeLine}│`)
+    console.log(`│${' '.repeat(innerWidth)}│`)
+
+    // title (single-line, aligned)
+    const titleInner = Math.max(0, innerWidth - 2)
+    const titleAligned = alignText(title, titleInner, align)
+    console.log(`│ ${titleAligned} │`)
+
+    console.log(bottomBorder)
+  }
+
+  /**
    * Print a compact labeled statistic line.
    *
    * @param label - Name of the metric

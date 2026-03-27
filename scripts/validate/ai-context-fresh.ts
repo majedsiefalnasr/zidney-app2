@@ -9,7 +9,7 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const isAiMode = process.argv.includes('--ai')
@@ -21,7 +21,12 @@ const AI_CONTEXT_MINI = join(REPO_ROOT, 'docs/ai/context/ai-context-mini.json')
 const MAX_AGE_MS = 24 * 60 * 60 * 1000 // 24 hours
 
 function main(): void {
-  log.start('Validate AI context freshness')
+  log.header(
+    'Validate AI context freshness',
+    'Check that the AI context mini artifact exists and is not older than 24 hours'
+  )
+  log.section('Validation')
+  log.step('Checking AI context freshness')
   logger.info('Checking AI context freshness', { path: AI_CONTEXT_MINI, maxAgeHours: 24 })
 
   if (!existsSync(AI_CONTEXT_MINI)) {
@@ -30,7 +35,7 @@ function main(): void {
       path: AI_CONTEXT_MINI,
       hint: 'Run: bun run ai:context:generate',
     })
-    process.exit(1)
+    exit(1)
   }
 
   let stat: ReturnType<typeof statSync>
@@ -42,7 +47,7 @@ function main(): void {
       path: AI_CONTEXT_MINI,
       error: err instanceof Error ? err.message : String(err),
     })
-    process.exit(1)
+    exit(1)
   }
 
   const ageMs = Date.now() - stat.mtimeMs
@@ -56,7 +61,7 @@ function main(): void {
       maxAgeHours: 24,
       hint: 'Run: bun run ai:context:refresh',
     })
-    process.exit(1)
+    exit(1)
   }
 
   const msg = 'AI context is fresh'
@@ -66,15 +71,8 @@ function main(): void {
     maxAgeHours: 24,
     lastModified: stat.mtime.toISOString(),
   })
-  log.badge('CONTEXT FRESH', 'success')
-  log.result({
-    total: 1,
-    passed: 1,
-    failed: 0,
-    message: `AI context is fresh (${ageHours.toFixed(2)} hours old)`,
-  })
-  flushAi()
-  process.exit(0)
+  log.resultSimple(`CONTEXT FRESH`, 'success')
+  exit(0)
 }
 
 main()

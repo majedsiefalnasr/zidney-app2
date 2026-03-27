@@ -115,7 +115,9 @@ function hasResultBlock(content: string): boolean {
   if (
     content.includes('log.result(') ||
     content.includes('log.end(') ||
-    content.includes('log.progressResult(')
+    content.includes('log.progressResult(') ||
+    content.includes('log.resultSimple(') ||
+    content.includes('log.badge(')
   )
     return true
   return false

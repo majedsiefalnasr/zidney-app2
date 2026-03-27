@@ -155,6 +155,14 @@ async function main(): Promise<void> {
   log.result(sampleSummary, { align: 'center' })
   log.result(sampleSummary, { align: 'end' })
 
+  // Demo 10B: Title-only Result (Simple)
+  log.section('Demo 10B: Title-only Result (Simple)')
+  log.line([
+    { content: 'Use log.resultSimple(title, status) for title-only results', color: 'dim' },
+  ])
+  log.resultSimple('CONTEXT FRESH', 'success')
+  log.resultSimple('CONTEXT STALE', 'error')
+
   // Demo 11: Progress bar
   log.section('Demo 11: Progress Bar (Extended - 5 seconds)')
   log.info('Processing 20 tasks with 250ms each...')
