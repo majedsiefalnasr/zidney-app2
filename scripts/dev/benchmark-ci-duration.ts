@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { writeFileSync } from 'fs'
+import { writeFileSync } from 'node:fs'
 /**
  * Script: CI Performance Benchmarking
  * Purpose: Measure and analyze GitHub Actions CI pipeline duration

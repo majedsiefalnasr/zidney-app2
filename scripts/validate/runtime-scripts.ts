@@ -157,7 +157,7 @@ function main(): void {
   )
   const pkgPath = join(REPO_ROOT, 'package.json')
 
-  const startTime = Date.now()
+  const _startTime = Date.now()
 
   logger.info('Scanning project for script references')
 

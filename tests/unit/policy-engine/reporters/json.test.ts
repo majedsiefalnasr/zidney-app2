@@ -2,7 +2,7 @@
  * Unit Tests: reporters/json.ts
  *
  * Covers:
- * - Empty results → console.log("[]")
+ * - Empty results → log.info("[]")
  * - Results serialized to valid JSON array
  * - Deep equality of roundtripped results
  */
@@ -12,14 +12,15 @@ import type { PolicyResult } from '../../../../scripts/policy-engine/types'
 
 describe('JsonReporter', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let consoleSpy: any
+  let stdoutSpy: any
 
   beforeEach(() => {
-    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    stdoutSpy = vi.spyOn(process.stdout, 'write' as any).mockImplementation(() => true)
   })
 
   afterEach(() => {
-    consoleSpy.mockRestore()
+    stdoutSpy.mockRestore()
   })
 
   it('exports JsonReporter class', async () => {
@@ -33,9 +34,9 @@ describe('JsonReporter', () => {
     const reporter = new JsonReporter()
     reporter.report([])
 
-    expect(consoleSpy).toHaveBeenCalledTimes(1)
-    const output = consoleSpy.mock.calls[0]![0] as string
-    expect(JSON.parse(output)).toEqual([])
+    expect(stdoutSpy).toHaveBeenCalledTimes(1)
+    const output = stdoutSpy.mock.calls[0]![0] as string
+    expect(JSON.parse(output.trim())).toEqual([])
   })
 
   it('results serialized as valid JSON array', async () => {
@@ -48,16 +49,14 @@ describe('JsonReporter', () => {
         severity: 'error',
         message: 'Boundary violation in apps/mmc → apps/api',
         file: 'apps/mmc/src/utils.ts',
-        line: 10,
-        column: 1,
         suggestion: 'Move shared logic to packages/',
       },
     ]
 
     reporter.report(results)
 
-    const output = consoleSpy.mock.calls[0]![0] as string
-    const parsed = JSON.parse(output)
+    const output = stdoutSpy.mock.calls[0]![0] as string
+    const parsed = JSON.parse(output.trim())
     expect(Array.isArray(parsed)).toBe(true)
     expect(parsed).toHaveLength(1)
     expect(parsed[0]!).toMatchObject({
@@ -90,8 +89,8 @@ describe('JsonReporter', () => {
 
     reporter.report(original)
 
-    const output = consoleSpy.mock.calls[0]![0] as string
-    const parsed = JSON.parse(output)
+    const output = stdoutSpy.mock.calls[0]![0] as string
+    const parsed = JSON.parse(output.trim())
     expect(parsed).toEqual(original)
   })
 
@@ -100,7 +99,7 @@ describe('JsonReporter', () => {
     const reporter = new JsonReporter()
     reporter.report([{ ruleId: 'AI-001', domain: 'AI', severity: 'info', message: 'test' }])
 
-    const output = consoleSpy.mock.calls[0]![0] as string
+    const output = stdoutSpy.mock.calls[0]![0] as string
     // Pretty-printed JSON has newlines
     expect(output).toContain('\n')
   })
