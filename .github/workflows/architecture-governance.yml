@@ -14,6 +14,7 @@ on:
 
 env:
   BUN_VERSION: "1.3.11"
+  TRIVY_VERSION: "v0.59.1"
 
 jobs:
   architecture-governance:
@@ -166,6 +167,28 @@ jobs:
       # ── 17. Verify Script Registry Generation ─────────────────────────
       - name: Verify Script Registry Generation
         run: bun run dev:generate:script-docs
+
+      # ── 17.5 Install Trivy (required by infra:security:ci) ──────────────
+      - name: Restore Trivy cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ env.TRIVY_VERSION }}
+          restore-keys: trivy-db-${{ runner.os }}-
+
+      - name: Install Trivy
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION_NO_V="${TRIVY_VERSION#v}"
+          ASSET="trivy_${VERSION_NO_V}_Linux-64bit.tar.gz"
+          CHECKSUMS="trivy_${VERSION_NO_V}_checksums.txt"
+
+          curl -fsSLO "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/${ASSET}"
+          curl -fsSLO "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/${CHECKSUMS}"
+          grep " ${ASSET}$" "${CHECKSUMS}" | shasum -a 256 -c -
+          tar -xzf "${ASSET}" trivy
+          sudo install -m 0755 trivy /usr/local/bin/trivy
 
       # ── 18. Unified Governance Gate ─────────────────────────────────────
       - name: Unified Governance Gate
