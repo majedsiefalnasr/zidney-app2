@@ -33,6 +33,7 @@ export const ALLOWED_DOMAINS = new Set([
   'infra',
   'test',
   'governance',
+  'policy',
 ])
 
 /** Names exempt from validation (lifecycle scripts defined by package managers / tools) */
@@ -75,7 +76,7 @@ export const TOOLCHAIN_EXEMPT_PREFIXES = new Set([
 
 /** Full naming pattern: <domain>:<action>[:<scope>] */
 export const NAMING_RE =
-  /^(db|arch|validate|ai|ci|repo|dev|infra|test|governance):[a-z][a-z0-9-]*(:[a-z][a-z0-9-]*)?$/
+  /^(db|arch|validate|ai|ci|repo|dev|infra|test|governance|policy):[a-z][a-z0-9-]*(:[a-z][a-z0-9-]*)?$/
 
 export function collectPackageJsonFiles(repoRoot: string): string[] {
   const results: string[] = []
