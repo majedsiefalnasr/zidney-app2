@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-03-27T15:54:42.282Z",
+  "generatedAt": "2026-03-28T16:53:15.880Z",
   "analysisMode": "changed-only",
   "changedFiles": [],
   "impactedModules": [],
@@ -8,64 +8,64 @@
   "architectureLayerMap": {},
   "recentCommits": [
     {
-      "hash": "81723c845083d674125ca28c91ee1f20f380242b",
-      "message": "feat: Add progressResult() logger and update validation scripts",
+      "hash": "693ec8b8056da2f61eb696b1bbc32814876daffb",
+      "message": "feat(validate): add 'policy' to allowed domains for script naming validation",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-26T23:50:18+02:00"
+      "date": "2026-03-28T14:41:20+02:00"
     },
     {
-      "hash": "daddbb1798366a2107478564e68f2512fa1a3eab",
-      "message": "feat(infra-029): step 8 closure — policy engine and governance rules layer delivery complete",
+      "hash": "af6be87e1084a710c1b8e0372d597204ffc0bb50",
+      "message": "fix(arch): suppress decorative logger output in JSON mode for guard scripts",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-26T00:35:05+02:00"
+      "date": "2026-03-28T14:19:46+02:00"
     },
     {
-      "hash": "d1c7919b3f75de60f01d934bf5cb6b6ea14a31c0",
-      "message": "chore(infra-029): step 7 validate — policy engine gate validation complete",
+      "hash": "a951cbfd973ed0705619f2f1ca64096c48338b4f",
+      "message": "chore(infra-29): close policy engine and governance rules layer stage",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-26T00:33:32+02:00"
+      "date": "2026-03-28T13:59:28+02:00"
     },
     {
-      "hash": "089bafc66db81566fbedac9fecc7a4e0ef478c04",
-      "message": "feat(infra-029): step 6 implement — policy engine and governance rules layer",
+      "hash": "bc3de2d13d240dbbb079f6c56629dc3abf769846",
+      "message": "fix(scripts): import flushAi and avoid passing undefined metrics to logger",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-26T00:23:14+02:00"
+      "date": "2026-03-28T13:23:39+02:00"
     },
     {
-      "hash": "2e6c9adccb5475da8b772eb2588f21885d21551f",
-      "message": "chore(infra-029-policy-engine-and-governance-rules-layer): complete analyze step",
+      "hash": "59043bbcc6650454ced88bc693c470d27701c5c1",
+      "message": "chore(validate): improve UX for validate:ai-context-schemas (header, sections, exit wrapper)",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T21:12:57+02:00"
+      "date": "2026-03-28T00:09:47+02:00"
     },
     {
-      "hash": "e95a13e14a2881f49a3f93bb830fec724af0aedc",
-      "message": "chore(infra-029-policy-engine-and-governance-rules-layer): complete tasks step",
+      "hash": "8bf2bcdd4e8a8f3ead3437897785a8f350c030b1",
+      "message": "chore(logger): add resultSimple API; use in ai-context-fresh; update validator & demo",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T20:56:49+02:00"
+      "date": "2026-03-28T00:05:51+02:00"
     },
     {
-      "hash": "e524610052a1d10c277f6b25f3febcb5f229aa54",
-      "message": "spec(infra-027-unified-governance-gate-system): plan - Unified Governance Gate System",
+      "hash": "ea84432de8b335c9a5e0e5cf8cc612bcfd535eb8",
+      "message": "chore(hooks): run ai-guard with --ci to avoid regenerating AI-context artifacts during hooks",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T20:46:01+02:00"
+      "date": "2026-03-27T23:36:09+02:00"
     },
     {
-      "hash": "635962f4f5800302c9d36aae555a65cbcf866eb5",
-      "message": "chore(infra-029-policy-engine-and-governance-rules-layer): complete clarify step",
+      "hash": "0226ff07a121ff42fd7bbfa7912658d7c88d4991",
+      "message": "chore(hooks): add --ci/--dry-run to arch:context:changed and use --ci in hooks",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T20:08:12+02:00"
+      "date": "2026-03-27T23:27:47+02:00"
     },
     {
-      "hash": "52137825e3224d5ff008d555f6c4a3b2c03bac14",
-      "message": "spec(infra-029-policy-engine-and-governance-rules-layer): Step 1 — Specify complete",
+      "hash": "7f6a1c06a590f2559ca98bcfa9b562a874869abf",
+      "message": "fix: update context-changed.json generation to reflect recent changes and improve file timestamp handling",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T19:25:06+02:00"
+      "date": "2026-03-27T23:10:29+02:00"
     },
     {
-      "hash": "0c469b25be4d20d354089c608dfbb0fc2b2c5775",
-      "message": "chore(infra-029-policy-engine-and-governance-rules-layer): initialize stage branch and directory",
+      "hash": "0dd3fac509e9b8d6b86e4459dd78ff67d97ebe02",
+      "message": "fix(scripts): satisfy validate:scripts:ux — add headers, library markers, and use shared logger",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T19:16:12+02:00"
+      "date": "2026-03-27T22:55:16+02:00"
     }
   ],
   "riskIndicators": []

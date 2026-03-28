@@ -1,3 +1,11 @@
+/**
+ * @script validate:scripts:ux
+ * @domain validate
+ * @category governance
+ * @description Validates scripts for consistent UX, logging, and exit usage.
+ * @usage bun run validate:scripts:ux
+ */
+
 import { execSync } from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'

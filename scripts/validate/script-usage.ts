@@ -145,7 +145,7 @@ export function validateUsages(
 function main(): void {
   log.header(
     'Validate script usage',
-    'Scan files for bun run references and validate known scripts'
+    'Scan files for bun run repo:references and validate known scripts'
   )
   logger.info('Starting script usage validation', { repoRoot: REPO_ROOT })
 

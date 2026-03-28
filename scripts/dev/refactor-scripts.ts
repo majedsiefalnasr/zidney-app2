@@ -249,7 +249,7 @@ export function writeReport(
 function main(): void {
   log.header(
     'REFACTOR SCRIPTS',
-    'Applies SCRIPT_MIGRATION_MAP to rename bun run references across the repository'
+    'Applies SCRIPT_MIGRATION_MAP to rename bun run repo:references across the repository'
   )
   if (DRY_RUN) {
     logger.info('Running in DRY RUN mode — no files will be written')

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-03-26T17:10:20.472Z",
-  "correlationId": "2c88ce91-a551-4c86-8829-ed9974edf084",
+  "generatedAt": "2026-03-28T15:58:08.308Z",
+  "correlationId": "aa3e75ed-9f22-48a4-9fa0-141a29f552de",
   "summary": {
     "total": 133,
-    "valid": 101,
-    "missing": 32,
+    "valid": 102,
+    "missing": 31,
     "unregistered": 0,
     "aliasNeeded": 0
   },
@@ -274,8 +274,9 @@
     },
     {
       "name": "ci:test",
-      "status": "MISSING",
-      "occurrences": 2
+      "status": "VALID",
+      "occurrences": 2,
+      "packageJsonValue": "vitest run --reporter=verbose"
     },
     {
       "name": "context:",

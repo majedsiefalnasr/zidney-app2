@@ -4,7 +4,7 @@
  * @category governance
  * @description Validates all package.json script keys conform to the
  *   <domain>:<action>[:<scope>] naming convention. Allowed domains: db, arch,
- *   validate, ai, ci, repo, dev, infra, test. Lifecycle-exempt names are skipped.
+ *   validate, ai, ci, repo, dev, infra, test, governance, policy. Lifecycle-exempt names are skipped.
  *   Reports ALL violations before exiting non-zero.
  * @usage bun run validate:scripts:naming
  */
@@ -150,7 +150,7 @@ export function validateNaming(entries: ScriptEntry[]): ViolationRecord[] {
         message: `"${entry.name}" does not match <domain>:<action>[:<scope>] pattern`,
         hint: knownDomain
           ? `Domain "${firstSegment}" is valid — check action/scope segments`
-          : `Unknown domain "${firstSegment}". Allowed: ${[...ALLOWED_DOMAINS].join(', ')}`,
+          : `Unknown domain "${firstSegment}". Allowed: ${Array.from(ALLOWED_DOMAINS).join(', ')}`,
       })
     }
   }
@@ -200,6 +200,5 @@ function main(): void {
   exit(1)
 }
 
-if (import.meta.main) {
-  main()
-}
+// Run as standalone script - called directly via bun scripts/validate/script-naming.ts
+main()

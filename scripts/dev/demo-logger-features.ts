@@ -60,8 +60,8 @@ async function main(): Promise<void> {
   ])
 
   log.section('Export Modes Example')
-  log.line([{ content: 'bun run script --json', color: 'cyan' }])
-  log.line([{ content: 'bun run script --json --pretty', color: 'cyan' }])
+  log.line([{ content: 'bun run repo:script --json', color: 'cyan' }])
+  log.line([{ content: 'bun run repo:script --json --pretty', color: 'cyan' }])
 
   // Demo 1: Single badges (basic)
   log.section('Demo 1: Single Badges (All Color Types)')
