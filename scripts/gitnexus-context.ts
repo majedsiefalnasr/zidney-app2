@@ -19,7 +19,7 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { exit, flushAi, log } from './utils/logger'
+import { exit, flushAi, hasCiFlag, log } from './utils/logger'
 
 log.setScript('arch:gitnexus:context')
 
@@ -353,6 +353,10 @@ export function assembleContext(options: AssembleOptions): GitNexusContext {
 export function main(): void {
   log.header('GITNEXUS CONTEXT', 'Generates structured GitNexus context JSON artifact')
   const args = process.argv.slice(2)
+  const isCi = hasCiFlag(args)
+  if (isCi) {
+    log.info('[arch:gitnexus:context] CI mode enabled')
+  }
 
   const changedFilesOnly = args.includes('--changed-files-only')
   const dryRun = args.includes('--dry-run')

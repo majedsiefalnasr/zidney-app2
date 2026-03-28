@@ -23,9 +23,10 @@ import { resolve } from 'node:path'
  * Refs: SC-007, QA-H003, FR-033
  */
 import madge from 'madge'
-import { exit, log } from './utils/logger'
+import { exit, hasCiFlag, log } from './utils/logger'
 
 log.setScript('arch:check:store-cycles')
+const isCi = hasCiFlag()
 
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
@@ -50,6 +51,9 @@ const STATE_DIRS = [
 
 async function checkCycles(): Promise<void> {
   log.header('STORE CYCLE CHECK', 'Validates zero circular dependencies in app state dirs')
+  if (isCi) {
+    log.info('[check-store-cycles] CI mode enabled')
+  }
   let totalCycles = 0
   const results: Array<{ app: string; cycles: string[][] }> = []
 

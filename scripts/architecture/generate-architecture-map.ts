@@ -1,8 +1,9 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { flushAi, log } from '../utils/logger'
+import { flushAi, hasCiFlag, log } from '../utils/logger'
 
 const ROOT = process.cwd()
+const isCi = hasCiFlag()
 
 const ARCH_PATH = join(ROOT, 'docs', 'architecture', 'intelligence', 'ARCHITECTURE_MAP.json')
 
@@ -83,6 +84,9 @@ function generateMap() {
     'GENERATE ARCHITECTURE MAP',
     'Regenerates ARCHITECTURE_MAP.json from workspace modules'
   )
+  if (isCi) {
+    log.info('[generate-architecture-map] CI mode enabled')
+  }
   const modules = scanModules()
 
   const existing = existsSync(ARCH_PATH)

@@ -9,12 +9,14 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, exit, log } from '../utils/logger'
+import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 
 const correlationId = randomUUID()
+const args = process.argv.slice(2)
+const isCi = hasCiFlag(args)
 const isAiMode = process.argv.includes('--ai')
 const logger = createLogger('validate:ai-context-schemas', isAiMode)
-logger.setContext({ correlationId })
+logger.setContext({ correlationId, ci: isCi })
 
 const REPO_ROOT = process.cwd()
 const AI_CONTEXT_DIR = join(REPO_ROOT, 'docs/ai/context')

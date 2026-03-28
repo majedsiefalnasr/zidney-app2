@@ -10,20 +10,21 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { flushAi, log } from '../utils/logger'
-import { runAiContextCheck } from './hygiene-checks/ai-context-check.ts'
-import { runArchGuardCheck } from './hygiene-checks/arch-guard-check.ts'
-import { runCiWorkflowCheck } from './hygiene-checks/ci-workflow-check.ts'
-import { runDeadScriptCheck } from './hygiene-checks/dead-script-check.ts'
-import { runDependencyHygieneCheck } from './hygiene-checks/dependency-hygiene-check.ts'
-import { runRoutingAuthorityCheck } from './hygiene-checks/routing-authority-check.ts'
-import { runSkillSurfaceCheck } from './hygiene-checks/skill-surface-check.ts'
-import { runTemplateConsolidationCheck } from './hygiene-checks/template-consolidation-check.ts'
-import type { TaskResult } from './hygiene-checks/types.ts'
-import { runWorkspacePackageCheck } from './hygiene-checks/workspace-package-check.ts'
+import { flushAi, hasCiFlag, log } from '../utils/logger'
+import { runAiContextCheck } from './hygiene-checks/ai-context-check'
+import { runArchGuardCheck } from './hygiene-checks/arch-guard-check'
+import { runCiWorkflowCheck } from './hygiene-checks/ci-workflow-check'
+import { runDeadScriptCheck } from './hygiene-checks/dead-script-check'
+import { runDependencyHygieneCheck } from './hygiene-checks/dependency-hygiene-check'
+import { runRoutingAuthorityCheck } from './hygiene-checks/routing-authority-check'
+import { runSkillSurfaceCheck } from './hygiene-checks/skill-surface-check'
+import { runTemplateConsolidationCheck } from './hygiene-checks/template-consolidation-check'
+import type { TaskResult } from './hygiene-checks/types'
+import { runWorkspacePackageCheck } from './hygiene-checks/workspace-package-check'
 
 const ROOT = process.cwd()
 const REPORT_PATH = join(ROOT, 'docs', 'reports', 'REPOSITORY_HYGIENE_REPORT.md')
+const isCi = hasCiFlag(process.argv.slice(2))
 
 // NOTE-01: Sanitize rawOutput — strip absolute user paths and env var assignments
 function sanitizeOutput(raw: string | undefined): string {
@@ -156,6 +157,9 @@ async function main(): Promise<void> {
     'REPOSITORY HYGIENE REPORT',
     'Runs all hygiene checks and writes a structured Markdown report'
   )
+  if (isCi) {
+    log.info('[dev:hygiene:report] CI mode enabled')
+  }
   log.step('Running repository hygiene checks...')
 
   const checks: Array<{ label: string; fn: () => Promise<TaskResult> }> = [

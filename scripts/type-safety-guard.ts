@@ -11,7 +11,7 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { runUnifiedArchitectureGuard } from './architecture-guard/runner'
-import { exit, flushAi, log } from './utils/logger'
+import { exit, flushAi, hasCiFlag, log } from './utils/logger'
 
 log.setScript('arch:type-safety-guard')
 
@@ -42,6 +42,7 @@ interface Violation {
 interface CliArgs {
   output: 'json' | 'markdown' | 'text'
   noExitError: boolean
+  ci: boolean
 }
 
 // Parse command line arguments
@@ -50,6 +51,7 @@ function parseArgs(): CliArgs {
   return {
     output: args.includes('--json') ? 'json' : args.includes('--markdown') ? 'markdown' : 'text',
     noExitError: args.includes('--no-exit-error'),
+    ci: hasCiFlag(args),
   }
 }
 

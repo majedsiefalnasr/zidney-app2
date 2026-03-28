@@ -78,6 +78,7 @@
     "dev:demo:logger": "bun scripts/dev/demo-logger-features.ts",
     "dev:hygiene:report": "bun scripts/dev/hygiene-report-generator.ts",
     "dev:generate:script-docs": "bun scripts/generate/script-docs.ts",
+    "dev:generate:package-docs": "bun scripts/generate/package-docs.ts",
     "dev:seed:dashboard-test-data": "bun run scripts/seed/dashboard-test-data.ts",
     "dev:refactor:scripts": "bun scripts/dev/refactor-scripts.ts",
     "ai:runtime:status": "bun scripts/ai-runtime/runtime-status.ts",

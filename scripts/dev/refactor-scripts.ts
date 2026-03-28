@@ -16,18 +16,20 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, exit, log } from '../utils/logger'
+import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 import type { MigrationEntry } from '../validate/types'
 
 const correlationId = randomUUID()
+const args = process.argv.slice(2)
+const isCi = hasCiFlag(args)
 const logger = createLogger('dev:refactor:scripts')
-logger.setContext({ correlationId })
+logger.setContext({ correlationId, ci: isCi })
 
 const REPO_ROOT = process.cwd()
 const MIGRATION_MAP_PATH = join(REPO_ROOT, 'docs/scripts/SCRIPT_MIGRATION_MAP.md')
 const REPORT_PATH = join(REPO_ROOT, 'reports/SCRIPT_REFACTOR_REPORT.md')
 
-const DRY_RUN = process.argv.includes('--dry-run')
+const DRY_RUN = args.includes('--dry-run')
 
 /** File patterns to scan and rewrite */
 const SCAN_EXTENSIONS = new Set(['.json', '.ts', '.yml', '.yaml', '.md', '.sh'])
@@ -140,7 +142,7 @@ export function replaceInFile(
     const replacement = `bun run ${newName}`
     if (updated.includes(pattern)) {
       const count = updated.split(pattern).length - 1
-      updated = updated.replaceAll(pattern, replacement)
+      updated = updated.split(pattern).join(replacement)
       replacements.push({ oldRef: pattern, newRef: replacement, count })
     }
   }
@@ -251,6 +253,10 @@ function main(): void {
     'REFACTOR SCRIPTS',
     'Applies SCRIPT_MIGRATION_MAP to rename bun run repo:references across the repository'
   )
+  if (isCi) {
+    logger.error('dev:refactor:scripts mutates repository files and cannot run with --ci')
+    exit(1)
+  }
   if (DRY_RUN) {
     logger.info('Running in DRY RUN mode — no files will be written')
   }
@@ -298,6 +304,11 @@ function main(): void {
   exit(0)
 }
 
-if (import.meta.main) {
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])refactor-scripts\.ts$/.test(entry)
+}
+
+if (isDirectExecution()) {
   main()
 }

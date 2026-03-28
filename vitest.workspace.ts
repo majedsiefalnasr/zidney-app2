@@ -221,4 +221,15 @@ export default defineWorkspace([
       include: ['scripts/context/__tests__/**/*.test.ts'],
     },
   }),
+
+  // Package docs generator tests
+  defineProject({
+    plugins: [tsconfigPaths()],
+    test: {
+      name: 'generate-scripts',
+      globals: true,
+      environment: 'node',
+      include: ['scripts/generate/__tests__/**/*.test.ts'],
+    },
+  }),
 ])

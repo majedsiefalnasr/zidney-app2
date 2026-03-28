@@ -20,9 +20,10 @@
 
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
-import { exit, flushAi, log } from './utils/logger'
+import { exit, flushAi, hasCiFlag, log } from './utils/logger'
 
 log.setScript('arch:diff')
+const isCi = hasCiFlag()
 
 type ArchitectureContract = {
   dependencyRules?: {
@@ -134,6 +135,9 @@ function validateDependencyRules(
 
 function runArchitectureDiff() {
   log.header('ARCHITECTURE DIFF', 'Detect architecture violations in the current change set')
+  if (isCi) {
+    log.info('[arch:diff] CI mode enabled')
+  }
   const contract = loadContract()
 
   const changedFiles = getChangedFiles()

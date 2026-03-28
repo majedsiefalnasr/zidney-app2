@@ -21,7 +21,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import type { GitNexusContext, RiskIndicator } from '../gitnexus-context.ts'
-import { exit, flushAi, log } from '../utils/logger'
+import { exit, flushAi, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('arch:context:impact')
 
@@ -67,6 +67,11 @@ function writeArtifact(indicators: RiskIndicator[]): void {
 
 function main(): void {
   log.header('CONTEXT IMPACT', 'Synthesizes risk indicators from gitnexus-context.json')
+  const args = process.argv.slice(2)
+  const isCi = hasCiFlag(args)
+  if (isCi) {
+    log.info('[context:impact] CI mode enabled')
+  }
   if (!existsSync(ARTIFACT_PATH)) {
     fail(`artifact not found — run 'bun run arch:context:build' first (expected: ${ARTIFACT_PATH})`)
   }
@@ -99,7 +104,6 @@ function main(): void {
     fail(`atomic write failed — ${message}`)
   }
 
-  const args = process.argv.slice(2)
   if (args.includes('--json')) {
     process.stdout.write(`${JSON.stringify(matched, null, 2)}\n`)
   } else {

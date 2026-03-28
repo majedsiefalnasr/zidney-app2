@@ -19,9 +19,10 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { exit, flushAi, log } from '../utils/logger'
+import { exit, flushAi, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('arch:context:validate')
+const isCi = hasCiFlag()
 
 const DEFAULT_ARTIFACT_PATH = resolve('docs/ai/context/gitnexus-context.json')
 const DEFAULT_SCHEMA_PATH = resolve('docs/ai/gitnexus-context.schema.json')
@@ -112,6 +113,9 @@ export function validateArtifact(options: ValidateOptions = {}): string {
 
 function main(): void {
   log.header('CONTEXT VALIDATE', 'Validates gitnexus-context.json against schema')
+  if (isCi) {
+    log.info('[context:validate] CI mode enabled')
+  }
   try {
     const msg = validateArtifact()
     log.success(msg)

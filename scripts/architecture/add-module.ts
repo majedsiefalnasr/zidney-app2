@@ -1,15 +1,23 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { flushAi, log } from '../utils/logger'
+import { flushAi, hasCiFlag, log } from '../utils/logger'
 
 const ROOT = process.cwd()
 
 const mapPath = join(ROOT, 'docs', 'architecture', 'intelligence', 'ARCHITECTURE_MAP.json')
 
-const moduleName = process.argv[2]
+const args = process.argv.slice(2)
+const isCi = hasCiFlag(args)
+const moduleName = args.find((arg) => !arg.startsWith('--'))
 const SCRIPT = 'arch:add-module'
 log.setScript(SCRIPT)
 log.start('Add architecture module')
+
+if (isCi) {
+  log.error('arch:add-module is a local mutation helper and cannot run with --ci')
+  flushAi()
+  process.exit(1)
+}
 
 if (!moduleName) {
   log.error('Usage: bun arch:add-module <module-path>')

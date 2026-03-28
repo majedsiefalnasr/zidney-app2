@@ -23,9 +23,10 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { validateArtifactContent } from '../core/artifact-validator'
 import { Timer } from '../core/performance-profiler'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, flushAi, hasCiFlag, log } from '../utils/logger'
 
 const logger = createLogger('validate-architecture-brain')
+logger.setContext({ ci: hasCiFlag(process.argv.slice(2)) })
 
 const ROOT = process.cwd()
 const BRAIN_PATH = join(ROOT, 'docs', 'ai', 'context', 'ai-architecture-brain.json')

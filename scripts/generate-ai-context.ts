@@ -18,7 +18,7 @@
 import { join } from 'node:path'
 import { generateAllArtifacts } from './ai-context/artifact-generator'
 import { detectChanges, updateChangeCache } from './ai-context/change-detector'
-import { exit, log } from './utils/logger'
+import { exit, hasCiFlag, log } from './utils/logger'
 
 log.setScript('ai:context:generate')
 
@@ -33,6 +33,7 @@ function parseArgs(): {
   validate: boolean
   verbose: boolean
   outputDir: string
+  ci: boolean
 } {
   const args = process.argv.slice(2)
 
@@ -41,6 +42,7 @@ function parseArgs(): {
     validate: args.includes('--validate'),
     verbose: args.includes('--verbose'),
     outputDir: OUTPUT_DIR,
+    ci: hasCiFlag(args),
   }
 }
 
@@ -53,6 +55,9 @@ async function main() {
     'Generate AI context artifacts for architecture brain and module map'
   )
   const opts = parseArgs()
+  if (opts.ci) {
+    log.info('[ai:context:generate] CI mode enabled')
+  }
 
   try {
     if (opts.verbose) {

@@ -30,7 +30,7 @@ import './rules/scripts/SCRIPTS-004.rule'
 import './rules/security/SECURITY-001.rule'
 import './rules/types/TYPES-001.rule'
 
-import { exit, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 import { loadContext } from './context/loader'
 import { PolicyEngine } from './engine'
 import { ConsoleReporter } from './reporters/console'
@@ -43,12 +43,14 @@ interface ParsedArgs {
   mode: 'changed' | 'full'
   timeout: number
   reporterType: ReporterType
+  ci: boolean
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
   let mode: 'changed' | 'full' = 'changed'
   let timeout = 2_000
   let reporterType: ReporterType = 'console'
+  const ci = hasCiFlag(argv)
 
   for (const arg of argv) {
     if (arg === '--full') {
@@ -64,7 +66,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     }
   }
 
-  return { mode, timeout, reporterType }
+  return { mode, timeout, reporterType, ci }
 }
 
 function createReporter(type: ReporterType): Reporter {
@@ -77,6 +79,9 @@ function createReporter(type: ReporterType): Reporter {
 log.header('POLICY ENGINE', 'Unified governance policy checks')
 
 const args = parseArgs(Bun.argv.slice(2))
+if (args.ci) {
+  log.info('[policy:check] CI mode enabled')
+}
 const reporter = createReporter(args.reporterType)
 const engine = new PolicyEngine()
 

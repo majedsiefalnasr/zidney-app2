@@ -9,9 +9,10 @@
  */
 
 import { spawnSync } from 'node:child_process'
-import { exit, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('db:console')
+const isCi = hasCiFlag()
 
 function hasHelpFlag(argv: string[]): boolean {
   return argv.includes('--help') || argv.includes('-h')
@@ -29,6 +30,11 @@ async function main(): Promise<void> {
   if (hasHelpFlag(process.argv)) {
     printHelp()
     exit(0)
+  }
+
+  if (isCi) {
+    log.error('db:console is interactive and cannot run with --ci')
+    exit(1)
   }
 
   log.header('DB CONSOLE', 'Opens an interactive psql session using DATABASE_URL')

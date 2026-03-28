@@ -13,7 +13,7 @@
  * - `exit(code)`: flush AI logs and exit the process safely
  *
  * Notes:
- * - Methods check `--ai` and `--silent` flags and become no-ops when set.
+ * - Methods check `--ai`, `--ci`, and `--silent` flags and adapt output accordingly.
  * - Colors use ANSI escape codes and are disabled in AI mode.
  */
 
@@ -73,8 +73,12 @@ function serializeError(err: unknown): LogData {
   return { error: String(err) }
 }
 
+export function hasCiFlag(args: readonly string[] = process.argv.slice(2)): boolean {
+  return args.includes('--ci') || process.env.CI === 'true' || process.env.CI === '1'
+}
+
 const isAiMode = process.argv.includes('--ai')
-const isCI = process.env.CI === 'true' || process.env.CI === '1'
+const isCI = hasCiFlag(process.argv.slice(2))
 
 const isSilent = process.argv.includes('--silent')
 const isJson = process.argv.includes('--json')
@@ -1624,6 +1628,7 @@ export interface LogContext {
   userId?: string
   attemptId?: string
   module?: string
+  ci?: boolean
 }
 
 const asyncContext = new AsyncLocalStorage<LogContext>()

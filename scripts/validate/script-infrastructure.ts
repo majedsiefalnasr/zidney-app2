@@ -13,12 +13,14 @@ import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { generateRegistry, parseMetaHeader, walkTsFiles } from '../generate/script-docs'
-import { createLogger, exit, log } from '../utils/logger'
+import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 import type { ViolationRecord } from './types'
 
 const correlationId = randomUUID()
+const args = process.argv.slice(2)
+const isCi = hasCiFlag(args)
 const logger = createLogger('validate:scripts:infrastructure')
-logger.setContext({ correlationId })
+logger.setContext({ correlationId, ci: isCi })
 
 const REPO_ROOT = process.cwd()
 const SCRIPTS_DIR = join(REPO_ROOT, 'scripts')

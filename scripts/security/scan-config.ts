@@ -6,13 +6,17 @@
  * @usage bun run infra:security:config
  */
 
-import { exit, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 import { materializeTrackedFiles, printReport, runTrivyFs } from './trivy-config'
 
 log.setScript('infra:security:config')
+const isCi = hasCiFlag()
 
 async function main(): Promise<void> {
   log.header('SECURITY SCAN CONFIG', 'Trivy misconfiguration scan')
+  if (isCi) {
+    log.info('[infra:security:config] CI mode enabled')
+  }
   const tracked = await materializeTrackedFiles()
   try {
     const report = await runTrivyFs({

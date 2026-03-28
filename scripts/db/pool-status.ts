@@ -8,9 +8,10 @@
  * @usage bun run db:status:pool
  */
 
-import { exit, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('db:status:pool')
+const isCi = hasCiFlag()
 
 function hasHelpFlag(argv: string[]): boolean {
   return argv.includes('--help') || argv.includes('-h')
@@ -34,6 +35,9 @@ async function main(): Promise<void> {
   }
 
   log.header('DB POOL STATUS', 'Checks PostgreSQL connection pool health and reports latency')
+  if (isCi) {
+    log.info('[db:status:pool] CI mode enabled')
+  }
 
   const databaseUrl = process.env.DATABASE_URL
   if (!databaseUrl) {

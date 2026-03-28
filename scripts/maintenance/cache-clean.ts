@@ -11,12 +11,12 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
-import { exit, log } from '../utils/logger'
+import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('maintenance:cache-clean')
-logger.setContext({ correlationId })
+const isCi = hasCiFlag(process.argv.slice(2))
+logger.setContext({ correlationId, ci: isCi })
 
 log.setScript('infra:cache:clean')
 log.header('Cache Clean', 'Remove build caches and temporary output directories to free disk space')
@@ -42,6 +42,10 @@ function getAppDistDirs(): string[] {
 const CACHE_DIRS = [...STATIC_CACHE_DIRS, ...getAppDistDirs()]
 
 function main(): void {
+  if (isCi) {
+    logger.error('infra:cache:clean is a local cleanup command and cannot run with --ci')
+    exit(1)
+  }
   logger.info('Starting cache clean', { dirs: CACHE_DIRS })
 
   let removed = 0

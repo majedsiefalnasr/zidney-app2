@@ -8,9 +8,10 @@
  * @usage bun run db:validate:licenses
  */
 
-import { exit, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('db:validate:licenses')
+const isCi = hasCiFlag()
 
 interface LicenseStatusRow {
   status: string | null
@@ -44,6 +45,9 @@ async function main(): Promise<void> {
   }
 
   log.header('DB LICENSE VALIDATION', 'Reports master license counts grouped by status')
+  if (isCi) {
+    log.info('[db:validate:licenses] CI mode enabled')
+  }
 
   const databaseUrl = process.env.DATABASE_URL
   if (!databaseUrl) {

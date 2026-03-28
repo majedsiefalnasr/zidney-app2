@@ -12,11 +12,13 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, exit, log } from '../utils/logger'
+import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 
 const correlationId = randomUUID()
+const args = process.argv.slice(2)
+const isCi = hasCiFlag(args)
 const logger = createLogger('dev:generate:script-docs')
-logger.setContext({ correlationId })
+logger.setContext({ correlationId, ci: isCi })
 
 const REPO_ROOT = process.cwd()
 const SCRIPTS_DIR = join(REPO_ROOT, 'scripts')
@@ -139,6 +141,9 @@ function main(): void {
     'SCRIPT REGISTRY GENERATOR',
     'Generates docs/scripts/SCRIPT_REGISTRY.md from @script metadata'
   )
+  if (isCi) {
+    log.info('[dev:generate:script-docs] CI mode enabled')
+  }
   logger.info('Generating script registry', { scriptsDir: SCRIPTS_DIR })
 
   if (!existsSync(DOCS_DIR)) {

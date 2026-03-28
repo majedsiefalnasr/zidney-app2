@@ -12,11 +12,13 @@
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { extname, join, relative } from 'node:path'
-import { createLogger, exit, log } from '../utils/logger'
+import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 
 const correlationId = randomUUID()
+const args = process.argv.slice(2)
+const isCi = hasCiFlag(args)
 const logger = createLogger('validate-runtime-scripts')
-logger.setContext({ correlationId })
+logger.setContext({ correlationId, ci: isCi })
 // Set script name for AI-mode payloads and structured logs
 try {
   log.setScript('validate:scripts:runtime')

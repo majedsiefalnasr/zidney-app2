@@ -9,11 +9,13 @@
 import { randomUUID } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { createLogger, exit, flushAi, log } from '../utils/logger'
+import { createLogger, exit, flushAi, hasCiFlag, log } from '../utils/logger'
 
 const correlationId = randomUUID()
+const args = process.argv.slice(2)
+const isCi = hasCiFlag(args)
 const logger = createLogger('diff-script-registry')
-logger.setContext({ correlationId })
+logger.setContext({ correlationId, ci: isCi })
 
 const REPO_ROOT = process.cwd()
 
@@ -77,8 +79,6 @@ function loadRegisteredScripts(pkgPath: string): Map<string, string> {
 }
 
 function main(): void {
-  const args = process.argv.slice(2)
-
   const scanPathArg = args.find((a) => a.startsWith('--scan='))
   const scanPath = scanPathArg
     ? scanPathArg.replace('--scan=', '')

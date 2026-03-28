@@ -12,8 +12,10 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { flushAi, log } from '../utils/logger'
+import { flushAi, hasCiFlag, log } from '../utils/logger'
 import { line, section, summary } from './formatter'
+
+const isCi = hasCiFlag()
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -138,6 +140,11 @@ export function cleanBuildArtifacts(): boolean {
 
 if (import.meta.main) {
   log.header('REPOSITORY FIX', 'Automated repository repair runner — 5 sequential steps')
+  if (isCi) {
+    log.error('repo:fix is a local repair command and cannot run with --ci')
+    flushAi()
+    process.exit(1)
+  }
   section('Repository Fix')
 
   const steps = buildSteps()

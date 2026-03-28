@@ -39,16 +39,16 @@
 
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
-import { createLogger } from '../core/logger-factory'
-import { exit, log } from '../utils/logger'
+import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
 
 const correlationId = randomUUID()
+const isCi = hasCiFlag(process.argv.slice(2))
 const logger = createLogger('seed:dashboard-test-data')
-logger.setContext({ correlationId })
+logger.setContext({ correlationId, ci: isCi })
 
 log.setScript('dev:seed:dashboard-test-data')
 log.header(
@@ -58,6 +58,11 @@ log.header(
 
 const ENVIRONMENT = process.env.NODE_ENV || 'development'
 const DATABASE_URL = process.env.DATABASE_URL
+
+if (isCi) {
+  logger.error('dev:seed:dashboard-test-data seeds master_db state and cannot run with --ci')
+  exit(1)
+}
 
 // Safety check: prevent running in production
 if (ENVIRONMENT === 'production') {

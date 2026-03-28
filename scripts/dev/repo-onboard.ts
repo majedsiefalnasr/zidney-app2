@@ -12,8 +12,10 @@
  */
 
 import * as net from 'node:net'
-import { flushAi, log } from '../utils/logger'
+import { flushAi, hasCiFlag, log } from '../utils/logger'
 import { line, section, summary } from './formatter'
+
+const isCi = hasCiFlag()
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -191,6 +193,11 @@ async function main(): Promise<void> {
     'REPOSITORY ONBOARD',
     'Prepares a complete local development environment in a single command'
   )
+  if (isCi) {
+    log.error('repo:onboard is a local bootstrap command and cannot run with --ci')
+    flushAi()
+    process.exit(1)
+  }
   section('Repository Onboard')
 
   let hasError = false

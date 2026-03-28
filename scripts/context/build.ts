@@ -15,7 +15,7 @@ import { existsSync, renameSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { assembleContext } from '../gitnexus-context'
 import type { AssembleOptions } from '../gitnexus-context.ts'
-import { exit, flushAi, log } from '../utils/logger'
+import { exit, flushAi, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('arch:context:build')
 
@@ -39,9 +39,14 @@ function isStale(): boolean {
 function main(): void {
   log.header('CONTEXT BUILD', 'Generates gitnexus-context.json artifact')
   const args = process.argv.slice(2)
+  const isCi = hasCiFlag(args)
   const dryRun = args.includes('--dry-run')
   const all = args.includes('--all')
   const force = args.includes('--force')
+
+  if (isCi) {
+    log.info('[context:build] CI mode enabled')
+  }
 
   // Skip rebuild if artifact is fresh and --force not given
   if (!dryRun && !force && !isStale()) {

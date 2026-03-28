@@ -10,7 +10,7 @@
 
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { exit, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('db:migrate')
 
@@ -69,6 +69,7 @@ function resolveMigrationPath(
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv)
+  const isCi = hasCiFlag(process.argv.slice(2))
 
   if (args.help) {
     printHelp()
@@ -76,6 +77,9 @@ async function main(): Promise<void> {
   }
 
   log.header('DB MIGRATE', 'Checks migration prerequisites and reports the execution path')
+  if (isCi) {
+    log.info('[db:migrate] CI mode enabled')
+  }
 
   const databaseUrl = process.env.DATABASE_URL
   if (!databaseUrl) {

@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-03-28T20:12:21.189Z",
+  "audits": {
+    "ai:validate": {
+      "script": "ai:validate",
+      "command": "bun run ai:validate -- --ci",
+      "usedCi": true,
+      "exitCode": 4,
+      "changedFiles": [],
+      "note": "Output note: error: script \"ai:validate\" exited with code 4",
+      "generatedAt": "2026-03-28T20:12:10.043Z"
+    },
+    "arch:guard": {
+      "script": "arch:guard",
+      "command": "bun run arch:guard",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Failed                                  0 (0%) │ │ verdict=PASS                                   │",
+      "generatedAt": "2026-03-28T20:12:12.977Z"
+    },
+    "arch:guard:ci": {
+      "script": "arch:guard:ci",
+      "command": "bun run arch:guard:ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json",
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: │ Failed                                  0 (0%) │ │ verdict=PASS                                   │",
+      "generatedAt": "2026-03-28T20:12:15.377Z"
+    },
+    "governance:gate:ci": {
+      "script": "governance:gate:ci",
+      "command": "bun run governance:gate:ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: ✖ ::error::Governance gate failed — see output above error: script \"governance:gate:ci\" exited with code 1",
+      "generatedAt": "2026-03-28T20:12:21.189Z"
+    }
+  }
+}

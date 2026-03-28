@@ -10,9 +10,10 @@
  */
 
 import { spawnSync } from 'node:child_process'
-import { exit, flushAi, log } from './utils/logger'
+import { exit, flushAi, hasCiFlag, log } from './utils/logger'
 
 log.setScript('ci:run-local')
+const isCi = hasCiFlag()
 
 interface StepResult {
   step: number
@@ -47,7 +48,18 @@ function run(command: string, args: string[]): { success: boolean; output: strin
 }
 
 function runBunScript(scriptKey: string): { success: boolean; output: string } {
-  return run('bun', ['run', scriptKey])
+  const ciEligible = new Set([
+    'validate:scripts:runtime',
+    'validate:scripts:broken',
+    'dev:generate:script-docs',
+    'arch:guard',
+    'arch:type-safety-guard',
+  ])
+
+  return run(
+    'bun',
+    isCi && ciEligible.has(scriptKey) ? ['run', scriptKey, '--', '--ci'] : ['run', scriptKey]
+  )
 }
 
 function checkDocker(): { running: boolean; message: string } {
@@ -74,6 +86,9 @@ function printSeparator(): void {
 
 function main(): void {
   log.header('ZIDNEY LOCAL CI ORCHESTRATOR', '7-step governance sequence + Docker fail-fast check')
+  if (isCi) {
+    log.info('[ci:run-local] CI mode enabled for internal script-backed steps')
+  }
 
   // ── Step 0: Docker fail-fast check ────────────────────────────────────
   process.stdout.write(`${BOLD}[STEP 0/7]${RESET} Docker availability check ... `)

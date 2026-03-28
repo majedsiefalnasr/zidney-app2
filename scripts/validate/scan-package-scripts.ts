@@ -9,11 +9,13 @@
 import { randomUUID } from 'node:crypto'
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { createLogger, exit, log } from '../utils/logger'
+import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 
 const correlationId = randomUUID()
+const args = process.argv.slice(2)
+const isCi = hasCiFlag(args)
 const logger = createLogger('scan-package-scripts')
-logger.setContext({ correlationId })
+logger.setContext({ correlationId, ci: isCi })
 
 const SCRIPT_REGEX = /bun run ([a-zA-Z][a-zA-Z0-9:_-]*)/g
 const EXCLUDED_NAMES = new Set([
@@ -88,7 +90,6 @@ interface ScanOutput {
 }
 
 function main(): void {
-  const args = process.argv.slice(2)
   const outputArg = args.find((a) => a.startsWith('--output='))
   const defaultOut = join(
     REPO_ROOT,

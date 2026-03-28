@@ -2,12 +2,13 @@
 import { execSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { flushAi, log } from '../utils/logger'
+import { flushAi, hasCiFlag, log } from '../utils/logger'
 
 const ROOT = process.cwd()
 const DEPENDENCY_GRAPH_PATH = join(ROOT, 'docs/architecture/graphs/dependency-graph.json')
 const ARCHITECTURE_MAP_PATH = join(ROOT, 'docs/architecture/intelligence/ARCHITECTURE_MAP.json')
 const OUTPUT_DIR = join(ROOT, 'docs/architecture/visualization')
+const isCi = hasCiFlag()
 
 // ─── Type Definitions ────────────────────────────────────────────────────────
 
@@ -397,6 +398,9 @@ function getGitSha(): string {
 
 function main(): void {
   log.header('ARCHITECTURE VISUALIZE', 'Generates Mermaid diagrams from dependency graph')
+  if (isCi) {
+    log.info('[arch:visualize] CI mode enabled')
+  }
   const graph = loadDependencyGraph(DEPENDENCY_GRAPH_PATH)
   const archMap = loadArchitectureMap(ARCHITECTURE_MAP_PATH)
 

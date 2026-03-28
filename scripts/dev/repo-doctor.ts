@@ -12,8 +12,10 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { flushAi, log } from '../utils/logger'
+import { flushAi, hasCiFlag, log } from '../utils/logger'
 import { line, section, summary } from './formatter'
+
+const isCi = hasCiFlag()
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -234,6 +236,9 @@ export function checkTypeScript(): boolean {
 
 if (import.meta.main) {
   log.header('REPOSITORY DOCTOR', 'Runs 7 sequential health checks and reports pass/warn/fail')
+  if (isCi) {
+    log.info('[repo:doctor] CI mode enabled')
+  }
   section('Repository Doctor')
 
   const checks = [

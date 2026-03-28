@@ -10,9 +10,10 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { exit, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('arch:gitnexus:validate')
+const isCi = hasCiFlag()
 
 const CONTEXT_PATH = resolve(process.cwd(), 'docs/ai/context/gitnexus-context.json')
 const SCHEMA_PATH = resolve(process.cwd(), 'docs/ai/gitnexus-context.schema.json')
@@ -269,6 +270,9 @@ function main(): void {
     'GITNEXUS CONTEXT VALIDATION',
     'Validates gitnexus-context.json structure, semantics, and freshness'
   )
+  if (isCi) {
+    log.info('[arch:gitnexus:validate] CI mode enabled')
+  }
 
   const report = validate()
 

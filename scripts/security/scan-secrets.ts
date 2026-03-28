@@ -6,7 +6,7 @@
  * @usage bun run infra:security:secrets [--staged]
  */
 
-import { exit, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 import {
   hasBlockingFindings,
   materializeStagedFiles,
@@ -15,12 +15,17 @@ import {
   runTrivyFs,
 } from './trivy-config'
 
-const stagedOnly = process.argv.includes('--staged')
+const args = process.argv.slice(2)
+const stagedOnly = args.includes('--staged')
+const isCi = hasCiFlag(args)
 
 log.setScript('infra:security:secrets')
 
 async function main(): Promise<void> {
   log.header('SECURITY SCAN SECRETS', 'Trivy secret scan across repo or staged files')
+  if (isCi) {
+    log.info('[infra:security:secrets] CI mode enabled')
+  }
   if (stagedOnly) {
     const staged = await materializeStagedFiles()
     try {

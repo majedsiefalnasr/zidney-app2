@@ -10,9 +10,10 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { exit, log } from './utils/logger'
+import { exit, hasCiFlag, log } from './utils/logger'
 
 log.setScript('ai:validate:prompts')
+const isCi = hasCiFlag()
 
 const ROOT = join(import.meta.dir, '..')
 const AGENTS_DIR = join(ROOT, '.agents', 'agents')
@@ -193,6 +194,9 @@ function checkOrphanedSkillDirs() {
 
 // --- Run all checks ---
 log.header('PROMPT & AGENT QA VALIDATOR', 'Validates AI agent and prompt file structural integrity')
+if (isCi) {
+  log.info('[ai:validate:prompts] CI mode enabled')
+}
 
 checkAgentPromptParity()
 checkAgentFrontmatter()

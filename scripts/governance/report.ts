@@ -11,9 +11,10 @@
 
 import { mkdir, writeFile } from 'node:fs/promises'
 import { $ } from 'bun'
-import { exit, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('governance:report')
+const isCi = hasCiFlag()
 
 interface GuardResult {
   name: string
@@ -67,13 +68,18 @@ _None_
 
 async function main(): Promise<void> {
   log.header('GOVERNANCE REPORT', 'Generates a consolidated governance health report')
+  if (isCi) {
+    log.info('[governance:report] CI mode enabled')
+  }
   const timestamp = new Date().toISOString()
 
   const results: GuardResult[] = []
 
   for (const guard of REPORT_GUARDS) {
     log.step(`Running: ${guard.name} (${guard.script})`)
-    const proc = await $`bun run ${guard.script}`.nothrow()
+    const proc = isCi
+      ? await $`bun run ${guard.script} -- --ci`.nothrow()
+      : await $`bun run ${guard.script}`.nothrow()
     const exitCode = proc.exitCode ?? 1
     const passed = exitCode === 0
     results.push({ name: guard.name, script: guard.script, exitCode, passed })
