@@ -6,42 +6,38 @@
 bun run infra:security:config
 ```
 
+Registered package.json runner:
+
+```sh
+bun scripts/security/scan-config.ts
+```
+
 ## Purpose
 
-Runs the Trivy misconfiguration scanner against the repository filesystem to surface
-infrastructure issues in Docker, Compose, Terraform, and related IaC assets.
+Run a Trivy misconfiguration scan and print visible findings without blocking on non-clean results.
 
-Scans use tracked working-tree content so findings reflect repository-managed infrastructure files.
+## Why It Exists
 
-## Trigger Context
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/security/scan-config.ts and is exposed through the root package.json interface.
 
-- Manual infrastructure hardening review
-- Docker or Terraform change verification before push
+## Source
 
-## Execution Mode
+- Implementation: scripts/security/scan-config.ts
+- Metadata-backed script file: `scripts/security/scan-config.ts`
 
-`manual`
+## CI Behavior
 
-## Severity Policy
+Supported explicitly in the implementation.
 
-Always exits 0 after printing findings. MEDIUM/HIGH/CRITICAL issues remain visible in stdout so
-developers can inspect infrastructure hardening work without turning this command into a blocking
-local gate.
+## When to Run
 
-## Prerequisites
+- When running repository security scans locally or in hardened validation pipelines.
 
-- Trivy `v0.69.3` or a CLI-compatible version available on `PATH`
-- Tracked infrastructure files in the working tree
+## Related Scripts
 
-## Output
+- Depends on: None
+- Used by other root scripts: None found
 
-- Human-readable summary to stdout
-- File path or target recorded in each finding line
+## Audit Notes
 
-## Failure Modes
-
-| Scenario            | Exit Code | Behavior                           |
-| ------------------- | --------- | ---------------------------------- |
-| Trivy missing       | non-zero  | Shell/runtime failure              |
-| Invalid JSON output | non-zero  | Script fails closed                |
-| Findings detected   | 0         | Findings printed for manual review |
+- Not audited automatically: external scanner dependency or long-running security scan.

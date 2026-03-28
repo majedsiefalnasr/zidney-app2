@@ -6,44 +6,38 @@
 bun run infra:security
 ```
 
+Registered package.json runner:
+
+```sh
+bun scripts/security/scan.ts
+```
+
 ## Purpose
 
-Runs the full repository Trivy filesystem scan across dependency vulnerabilities, secrets, and
-infrastructure misconfigurations. This is the widest local visibility command and is intended for
-manual inspection before pushing a branch or when investigating a security regression.
+Run a full Trivy filesystem scan and print visible findings without blocking on non-clean results.
 
-Scans use a tracked-file snapshot of the working tree so results align with repository content
-rather than local untracked files or vendored directories.
+## Why It Exists
 
-## Trigger Context
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/security/scan.ts and is exposed through the root package.json interface.
 
-- Manual local inspection before a push
-- Security triage after dependency or infrastructure changes
+## Source
 
-## Execution Mode
+- Implementation: scripts/security/scan.ts
+- Metadata-backed script file: `scripts/security/scan.ts`
 
-`manual`
+## CI Behavior
 
-## Severity Policy
+Supported explicitly in the implementation.
 
-Always exits 0 after printing findings. LOW severities stay suppressed in output; MEDIUM findings
-are warnings; HIGH and CRITICAL findings are shown as errors but do not block this informational
-command.
+## When to Run
 
-## Prerequisites
+- When running repository security scans locally or in hardened validation pipelines.
 
-- Trivy `v0.69.3` installed locally
-- Repository dependencies installed with `bun install`
+## Related Scripts
 
-## Output
+- Depends on: None
+- Used by other root scripts: None found
 
-- Human-readable summary to stdout
-- No retained report file
+## Audit Notes
 
-## Failure Modes
-
-| Scenario            | Exit Code | Behavior                                   |
-| ------------------- | --------- | ------------------------------------------ |
-| Trivy not installed | non-zero  | Shell/runtime failure before scan starts   |
-| Invalid Trivy JSON  | non-zero  | Script throws parse error and fails closed |
-| Findings detected   | 0         | Findings printed, command remains advisory |
+- Not audited automatically: external scanner dependency or long-running security scan.

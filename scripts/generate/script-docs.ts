@@ -3,10 +3,9 @@
  * @domain dev
  * @category dev
  * @description Walk scripts/**\/*.ts, parse @script metadata headers, generate
- *   docs/scripts/SCRIPT_REGISTRY.md. Exits 1 on missing required metadata fields.
+ *   docs/scripts/SCRIPT_REGISTRY.md plus one page per root package.json runner.
+ *   Exits 1 on missing required metadata fields.
  * @usage bun run dev:generate:script-docs
- * @mode manual,ci
- * @dependencies node:fs,node:path,node:crypto
  */
 
 import { randomUUID } from 'node:crypto'
@@ -23,7 +22,11 @@ logger.setContext({ correlationId, ci: isCi })
 const REPO_ROOT = process.cwd()
 const SCRIPTS_DIR = join(REPO_ROOT, 'scripts')
 const DOCS_DIR = join(REPO_ROOT, 'docs/scripts')
+const PACKAGE_JSON_PATH = join(REPO_ROOT, 'package.json')
+const PACKAGE_REFERENCE_PATH = join(REPO_ROOT, 'package.md')
+const DOCS_INDEX_PATH = join(DOCS_DIR, 'README.md')
 const REGISTRY_PATH = join(DOCS_DIR, 'SCRIPT_REGISTRY.md')
+const RESERVED_DOC_FILES = new Set(['README.md', 'SCRIPT_REGISTRY.md', 'SCRIPT_MIGRATION_MAP.md'])
 
 const ALLOWED_DOMAINS = new Set([
   'db',
@@ -36,6 +39,7 @@ const ALLOWED_DOMAINS = new Set([
   'infra',
   'test',
   'governance',
+  'policy',
 ])
 
 export interface ScriptMeta {
@@ -45,6 +49,28 @@ export interface ScriptMeta {
   description: string
   usage: string
   filePath: string
+}
+
+interface PackageReferenceSection {
+  power?: string
+  purpose?: string
+  source?: string
+  ciFlag?: string
+  updatedGeneratedFiles?: string
+  removalAssessment?: string
+  dependsOn: string[]
+  usedBy: string[]
+}
+
+interface RootScriptDocEntry {
+  script: string
+  command: string
+  filePath: string
+  sourcePath?: string
+  meta?: ScriptMeta
+  reference?: PackageReferenceSection
+  dependsOn: string[]
+  usedBy: string[]
 }
 
 export function walkTsFiles(dir: string, excludeDirs: string[] = ['__tests__']): string[] {
@@ -77,23 +103,428 @@ export function parseMetaHeader(content: string, filePath: string): ScriptMeta |
 
   const domainMatch = content.match(/@domain\s+([^\n*]+)/)
   const categoryMatch = content.match(/@category\s+([^\n*]+)/)
-  const descMatch = content.match(/@description\s+([\s\S]*?)(?=\s*\*\s*@|\s*\*\/)/)
   const usageMatch = content.match(/@usage\s+([^\n*]+)/)
+  const description = readMultilineHeaderValue(content, '@description')
 
   return {
     script: scriptMatch[1].trim(),
     domain: domainMatch ? domainMatch[1].trim() : 'unknown',
     category: categoryMatch ? categoryMatch[1].trim() : 'unknown',
-    description: descMatch
-      ? descMatch[1]
-          .split('\n')
-          .map((l) => l.replace(/^\s*\*\s?/, '').trim())
-          .filter(Boolean)
-          .join(' ')
-      : '',
+    description,
     usage: usageMatch ? usageMatch[1].trim() : `bun run ${scriptMatch[1].trim()}`,
     filePath: filePath.replace(`${REPO_ROOT}/`, ''),
   }
+}
+
+function readMultilineHeaderValue(content: string, tag: string): string {
+  const lines = content.split(/\r?\n/)
+  const parts: string[] = []
+  let collecting = false
+
+  for (const line of lines) {
+    const normalized = line.replace(/^\s*\/??\*+\s?/, '').trimEnd()
+
+    if (!collecting) {
+      if (normalized.startsWith(`${tag} `)) {
+        parts.push(normalized.slice(tag.length + 1).trim())
+        collecting = true
+      }
+      continue
+    }
+
+    if (normalized.startsWith('@') || normalized === '/' || normalized === '*/') {
+      break
+    }
+
+    if (normalized.trim().length === 0) {
+      continue
+    }
+
+    parts.push(normalized.trim())
+  }
+
+  return parts.join(' ').trim()
+}
+
+export function parsePackageReferenceSections(
+  content: string
+): Map<string, PackageReferenceSection> {
+  const sections = new Map<string, PackageReferenceSection>()
+  const headingRegex = /^### (.+)$/gm
+  const matches: Array<{ name: string; start: number; headingIndex: number }> = []
+  let match = headingRegex.exec(content)
+
+  while (match !== null) {
+    matches.push({
+      name: match[1].trim(),
+      start: headingRegex.lastIndex,
+      headingIndex: match.index,
+    })
+    match = headingRegex.exec(content)
+  }
+
+  for (let index = 0; index < matches.length; index += 1) {
+    const current = matches[index]
+    const next = index + 1 < matches.length ? matches[index + 1] : undefined
+    const body = content.slice(current.start, next?.headingIndex ?? content.length)
+    sections.set(current.name, {
+      power: readBulletField(body, 'Power'),
+      purpose: readBulletField(body, 'Purpose'),
+      source: readBulletField(body, 'Source'),
+      ciFlag: readBulletField(body, 'CI flag'),
+      updatedGeneratedFiles: readBulletField(body, 'Updated or generated files'),
+      removalAssessment: readBulletField(body, 'Removal assessment'),
+      dependsOn: parseScriptList(readBulletField(body, 'Depends on')),
+      usedBy: parseScriptList(readBulletField(body, 'Used by other root scripts')),
+    })
+  }
+
+  return sections
+}
+
+function readBulletField(body: string, label: string): string | undefined {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const fieldMatch = body.match(new RegExp(`^- ${escaped}: (.*)$`, 'm'))
+  return fieldMatch?.[1].trim()
+}
+
+function parseScriptList(raw?: string): string[] {
+  if (!raw || raw === 'None' || raw === 'None found') {
+    return []
+  }
+
+  return raw
+    .split(',')
+    .map((value) => value.replace(/`/g, '').trim())
+    .filter(Boolean)
+}
+
+function loadRootScripts(): Array<[string, string]> {
+  const packageJson = JSON.parse(readFileSync(PACKAGE_JSON_PATH, 'utf-8')) as {
+    scripts?: Record<string, string>
+  }
+  return Object.entries(packageJson.scripts ?? {})
+}
+
+function resolveSourcePath(command: string): string | undefined {
+  const sourceMatch = command.match(/(?:^|\s)(scripts\/[^\s'"`]+\.ts)(?=\s|$)/)
+  return sourceMatch?.[1]
+}
+
+function loadSourceMeta(sourcePath?: string): ScriptMeta | undefined {
+  if (!sourcePath) {
+    return undefined
+  }
+
+  const absolutePath = join(REPO_ROOT, sourcePath)
+  if (!existsSync(absolutePath)) {
+    return undefined
+  }
+
+  const content = readFileSync(absolutePath, 'utf-8')
+  return parseMetaHeader(content, absolutePath) ?? undefined
+}
+
+function detectScriptDependencies(
+  command: string,
+  scriptNames: readonly string[],
+  selfName: string
+): string[] {
+  const found = new Set<string>()
+  const orderedNames = Array.from(scriptNames).sort((left, right) => right.length - left.length)
+
+  for (const candidate of orderedNames) {
+    if (candidate === selfName) {
+      continue
+    }
+
+    if (
+      command.includes(`bun run ${candidate}`) ||
+      command.includes(`bun ${candidate}`) ||
+      command.includes(`&& bun ${candidate}`) ||
+      command.includes(`|| bun ${candidate}`)
+    ) {
+      found.add(candidate)
+    }
+  }
+
+  return Array.from(found)
+}
+
+function buildUsedByMap(entries: readonly RootScriptDocEntry[]): Map<string, string[]> {
+  const usedBy = new Map<string, string[]>()
+
+  for (const entry of entries) {
+    for (const dependency of entry.dependsOn) {
+      const current = usedBy.get(dependency) ?? []
+      current.push(entry.script)
+      usedBy.set(dependency, current)
+    }
+  }
+
+  return usedBy
+}
+
+function loadExistingDocNameMap(): Map<string, string> {
+  const mappings = new Map<string, string>()
+  if (!existsSync(DOCS_DIR)) {
+    return mappings
+  }
+
+  for (const entry of readdirSync(DOCS_DIR)) {
+    if (!entry.endsWith('.md') || RESERVED_DOC_FILES.has(entry)) {
+      continue
+    }
+
+    const content = readFileSync(join(DOCS_DIR, entry), 'utf-8')
+    const commandMatch = content.match(/bun run ([A-Za-z][A-Za-z0-9:_-]*)/)
+    if (commandMatch) {
+      mappings.set(commandMatch[1], entry)
+    }
+  }
+
+  return mappings
+}
+
+export function resolveDocFileName(scriptName: string, existingFileName?: string): string {
+  return existingFileName ?? `${scriptName.replace(/:/g, '-')}.md`
+}
+
+function buildRootScriptDocs(
+  references: Map<string, PackageReferenceSection>,
+  existingDocNames: Map<string, string>
+): RootScriptDocEntry[] {
+  const rootScripts = loadRootScripts()
+  const scriptNames = rootScripts.map(([script]) => script)
+
+  const entries = rootScripts.map(([script, command]) => {
+    const sourcePath = resolveSourcePath(command)
+    const reference = references.get(script)
+    return {
+      script,
+      command,
+      filePath: resolveDocFileName(script, existingDocNames.get(script)),
+      sourcePath,
+      meta: loadSourceMeta(sourcePath),
+      reference,
+      dependsOn: reference?.dependsOn.length
+        ? reference.dependsOn
+        : detectScriptDependencies(command, scriptNames, script),
+      usedBy: reference?.usedBy ?? [],
+    } satisfies RootScriptDocEntry
+  })
+
+  const usedByMap = buildUsedByMap(entries)
+  return entries.map((entry) => ({
+    ...entry,
+    usedBy: entry.usedBy.length > 0 ? entry.usedBy : (usedByMap.get(entry.script) ?? []),
+  }))
+}
+
+function inferPurpose(entry: RootScriptDocEntry): string {
+  if (entry.reference?.purpose) {
+    return entry.reference.purpose
+  }
+  if (entry.meta?.description) {
+    return entry.meta.description
+  }
+  if (entry.command.startsWith('echo ')) {
+    return 'Placeholder root runner retained for compatibility or future implementation.'
+  }
+  if (entry.command.startsWith('vitest run')) {
+    return 'Run the configured Vitest scope from the repository root.'
+  }
+  if (entry.command.startsWith('tsc --noEmit')) {
+    return 'Run the TypeScript compiler in type-check-only mode.'
+  }
+  if (entry.command.startsWith('biome check')) {
+    return 'Run Biome checks for the configured scope.'
+  }
+  if (entry.command.startsWith('prettier --')) {
+    return 'Run Prettier for the configured scope.'
+  }
+  return 'Execute the registered repository runner for this workflow.'
+}
+
+function stripWrapping(value?: string): string | undefined {
+  return value?.replace(/`/g, '').trim()
+}
+
+function inferWhyItExists(entry: RootScriptDocEntry): string {
+  const power = entry.reference?.power
+    ? `This runner is currently classified as ${entry.reference.power}. `
+    : ''
+  const removal = entry.reference?.removalAssessment
+    ? `${stripWrapping(entry.reference.removalAssessment)} `
+    : ''
+  const source = entry.sourcePath
+    ? `Its implementation lives in ${entry.sourcePath} and is exposed through the root package.json interface.`
+    : 'It provides a stable root package.json interface over underlying tools or chained child runners.'
+  return `${power}${removal}${source}`.trim()
+}
+
+function inferWhenToRun(entry: RootScriptDocEntry): string[] {
+  const script = entry.script
+  const bullets: string[] = []
+
+  if (script.endsWith(':ci') || entry.reference?.ciFlag?.includes('CI')) {
+    bullets.push('When reproducing CI behavior locally or validating CI-only output paths.')
+  }
+  if (/^(validate|arch|governance|policy):/.test(script)) {
+    bullets.push(
+      'Before opening or updating a pull request that touches the related governance surface.'
+    )
+  }
+  if (/^(test|lint|typecheck|format|build)/.test(script)) {
+    bullets.push('When running repository quality checks before commit or push.')
+  }
+  if (/^dev:/.test(script)) {
+    bullets.push('During local development when you need the associated developer workflow.')
+  }
+  if (/^db:/.test(script)) {
+    bullets.push(
+      'When operating against a configured database environment for maintenance or diagnostics.'
+    )
+  }
+  if (/^infra:security/.test(script)) {
+    bullets.push(
+      'When running repository security scans locally or in hardened validation pipelines.'
+    )
+  }
+  if (bullets.length === 0) {
+    bullets.push('When the corresponding repository workflow requires this root runner.')
+  }
+
+  return Array.from(new Set(bullets))
+}
+
+function inferCiBehavior(entry: RootScriptDocEntry): string {
+  if (entry.reference?.ciFlag) {
+    return stripWrapping(entry.reference.ciFlag) ?? 'No explicit CI behavior documented.'
+  }
+  if (entry.script.endsWith(':ci') || entry.command.includes('--ci')) {
+    return 'This runner is already the CI-specific entrypoint.'
+  }
+  return 'No explicit root-level `--ci` contract was detected for this runner.'
+}
+
+function inferAuditNote(entry: RootScriptDocEntry): string {
+  return (
+    stripWrapping(entry.reference?.updatedGeneratedFiles) ??
+    'No isolated execution audit note is currently recorded.'
+  )
+}
+
+function renderRelationships(entry: RootScriptDocEntry): string[] {
+  return [
+    '## Related Scripts',
+    '',
+    `- Depends on: ${entry.dependsOn.length > 0 ? entry.dependsOn.map((value) => `\`${value}\``).join(', ') : 'None'}`,
+    `- Used by other root scripts: ${entry.usedBy.length > 0 ? entry.usedBy.map((value) => `\`${value}\``).join(', ') : 'None found'}`,
+    '',
+  ]
+}
+
+export function generateScriptDoc(entry: RootScriptDocEntry): string {
+  const purpose = inferPurpose(entry)
+  const source =
+    stripWrapping(entry.reference?.source) ??
+    (entry.sourcePath ? entry.sourcePath : 'Wrapper only; no single scripts/*.ts source file.')
+
+  const lines = [
+    `# ${entry.script}`,
+    '',
+    '## Command',
+    '',
+    '```sh',
+    `bun run ${entry.script}`,
+    '```',
+    '',
+    'Registered package.json runner:',
+    '',
+    '```sh',
+    entry.command,
+    '```',
+    '',
+    '## Purpose',
+    '',
+    purpose,
+    '',
+    '## Why It Exists',
+    '',
+    inferWhyItExists(entry),
+    '',
+    '## Source',
+    '',
+    `- Implementation: ${source}`,
+    `- Metadata-backed script file: ${entry.meta?.filePath ? `\`${entry.meta.filePath}\`` : 'No metadata-backed implementation file detected.'}`,
+    '',
+    '## CI Behavior',
+    '',
+    inferCiBehavior(entry),
+    '',
+    '## When to Run',
+    '',
+    ...inferWhenToRun(entry).map((bullet) => `- ${bullet}`),
+    '',
+    ...renderRelationships(entry),
+    '## Audit Notes',
+    '',
+    `- ${inferAuditNote(entry)}`,
+    '',
+  ]
+
+  return `${lines.join('\n').trimEnd()}\n`
+}
+
+function groupHeading(script: string): string {
+  if (!script.includes(':')) {
+    if (['build', 'format', 'lint', 'prepare', 'typecheck'].includes(script)) {
+      return 'quality'
+    }
+    return 'misc'
+  }
+
+  return script.split(':')[0]
+}
+
+function generateDocsIndex(entries: readonly RootScriptDocEntry[]): string {
+  const grouped = new Map<string, RootScriptDocEntry[]>()
+  const orderedEntries = Array.from(entries).sort((left, right) =>
+    left.script.localeCompare(right.script)
+  )
+
+  for (const entry of orderedEntries) {
+    const key = groupHeading(entry.script)
+    const current = grouped.get(key) ?? []
+    current.push(entry)
+    grouped.set(key, current)
+  }
+
+  const lines = [
+    '# Script Knowledge Base',
+    '',
+    '> Auto-generated by `bun run dev:generate:script-docs`. Do not edit manually.',
+    '',
+    'This directory contains one page per root `package.json` script runner, plus the metadata-backed script registry used by governance validation.',
+    '',
+    '## Scope',
+    '',
+    `- Root package.json runners documented: ${entries.length}`,
+    '- Metadata-backed script implementations are also listed in `SCRIPT_REGISTRY.md`.',
+    '',
+  ]
+
+  for (const group of Array.from(grouped.keys()).sort((left, right) => left.localeCompare(right))) {
+    lines.push(`## ${group}`, '')
+    const items = grouped.get(group) ?? []
+    for (const entry of items) {
+      lines.push(`- [${entry.script}](${entry.filePath}) — ${inferPurpose(entry)}`)
+    }
+    lines.push('')
+  }
+
+  return `${lines.join('\n').trimEnd()}\n`
 }
 
 export function generateRegistry(metas: ScriptMeta[]): string {
@@ -119,7 +550,8 @@ export function generateRegistry(metas: ScriptMeta[]): string {
     '',
   ]
 
-  for (const [domain, scripts] of byDomain) {
+  for (const domain of Array.from(byDomain.keys())) {
+    const scripts = byDomain.get(domain) ?? []
     lines.push(`## ${domain}`, '')
     lines.push(
       '| Script Name | Source File | Category | Description | Usage |',
@@ -134,6 +566,14 @@ export function generateRegistry(metas: ScriptMeta[]): string {
   }
 
   return lines.join('\n')
+}
+
+function loadPackageReferenceSections(): Map<string, PackageReferenceSection> {
+  if (!existsSync(PACKAGE_REFERENCE_PATH)) {
+    return new Map<string, PackageReferenceSection>()
+  }
+
+  return parsePackageReferenceSections(readFileSync(PACKAGE_REFERENCE_PATH, 'utf-8'))
 }
 
 function main(): void {
@@ -196,16 +636,29 @@ function main(): void {
   }
 
   const registry = generateRegistry(metas)
+  const rootScriptDocs = buildRootScriptDocs(
+    loadPackageReferenceSections(),
+    loadExistingDocNameMap()
+  )
   writeFileSync(REGISTRY_PATH, registry, 'utf-8')
+  for (const entry of rootScriptDocs) {
+    writeFileSync(join(DOCS_DIR, entry.filePath), generateScriptDoc(entry), 'utf-8')
+  }
+  writeFileSync(DOCS_INDEX_PATH, generateDocsIndex(rootScriptDocs), 'utf-8')
 
   logger.info('Registry written', { path: REGISTRY_PATH, scripts: metas.length })
   process.stdout.write(
-    `\n✓ Registry written to docs/scripts/SCRIPT_REGISTRY.md (${metas.length} scripts)\n`
+    `\n✓ Script docs written to docs/scripts/ (${rootScriptDocs.length} root runners)\n`
   )
-  log.result({ total: metas.length, passed: metas.length, failed: 0 })
+  log.result({ total: rootScriptDocs.length, passed: rootScriptDocs.length, failed: 0 })
   exit(0)
 }
 
-if (import.meta.main) {
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])script-docs\.ts$/.test(entry)
+}
+
+if (isDirectExecution()) {
   main()
 }

@@ -6,50 +6,38 @@
 bun run infra:security:deps
 ```
 
+Registered package.json runner:
+
+```sh
+bun scripts/security/scan-deps.ts
+```
+
 ## Purpose
 
-Runs the dependency-only Trivy vulnerability scan used by local pre-commit enforcement. MEDIUM
-findings are warnings; HIGH and CRITICAL dependency vulnerabilities block the command.
+Run a dependency-only Trivy scan, warning on MEDIUM findings and blocking on HIGH/CRITICAL vulnerabilities.
 
-The scan runs against tracked working-tree content so local `node_modules` and untracked files do
-not distort results.
+## Why It Exists
 
-## Trigger Context
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/security/scan-deps.ts and is exposed through the root package.json interface.
 
-- Mandatory pre-commit dependency gate
-- Manual dependency triage before pushing or merging
+## Source
 
-## Execution Mode
+- Implementation: scripts/security/scan-deps.ts
+- Metadata-backed script file: `scripts/security/scan-deps.ts`
 
-`manual` and `pre-commit`
+## CI Behavior
 
-## Severity Policy
+Supported explicitly in the implementation.
 
-- LOW: suppressed
-- MEDIUM: warning only
-- HIGH/CRITICAL: blocking
+## When to Run
 
-## Prerequisites
+- When running repository security scans locally or in hardened validation pipelines.
 
-- Trivy `v0.69.3` or a CLI-compatible version available on `PATH`
-- A tracked lockfile or dependency manifest for vulnerability analysis
+## Related Scripts
 
-## Output
+- Depends on: None
+- Used by other root scripts: None found
 
-- Human-readable summary to stdout
-- Package name and vulnerability identifier included for blocking findings
+## Audit Notes
 
-## Exit Semantics
-
-| Finding level | Exit Code |
-| ------------- | --------- |
-| None / MEDIUM | 0         |
-| HIGH/CRITICAL | 1         |
-
-## Failure Modes
-
-| Scenario            | Exit Code | Behavior                            |
-| ------------------- | --------- | ----------------------------------- |
-| Trivy missing       | non-zero  | Hook or shell fails before scanning |
-| Invalid JSON output | non-zero  | Script fails closed                 |
-| Blocking CVE found  | 1         | Commit/CI stops with package + CVE  |
+- Not audited automatically: external scanner dependency or long-running security scan.

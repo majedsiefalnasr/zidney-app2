@@ -6,55 +6,38 @@
 bun run db:console
 ```
 
+Registered package.json runner:
+
+```sh
+bun run scripts/db/console.ts
+```
+
 ## Purpose
 
-Launches an interactive `psql` session connected to the database specified by `DATABASE_URL`.
-Provides direct SQL access to master_db for debugging, inspection, and ad-hoc queries.
+Launch an interactive psql session connected to DATABASE_URL.
 
 ## Why It Exists
 
-Developers often need direct SQL access to inspect schema state, query data, or run ad-hoc
-fixes during development. This script provides a zero-configuration launcher that connects
-psql to the configured `DATABASE_URL` without requiring manual URL handling.
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/db/console.ts and is exposed through the root package.json interface.
+
+## Source
+
+- Implementation: scripts/db/console.ts
+- Metadata-backed script file: `scripts/db/console.ts`
+
+## CI Behavior
+
+Explicitly rejected in the implementation; this is an interactive command and must not run with --ci.
 
 ## When to Run
 
-- During local development for database inspection
-- During incident triage to query live data
-- After running migrations to verify schema changes
+- When operating against a configured database environment for maintenance or diagnostics.
 
-**Not intended for production use.** Direct production DB access must go through approved
-operational procedures.
+## Related Scripts
 
-## Execution Mode
+- Depends on: None
+- Used by other root scripts: None found
 
-`manual`
+## Audit Notes
 
-Infra-dependent: exits 0 with structured warn log if `DATABASE_URL` is not set or psql is
-not on PATH. No `--workspace=` argument — caller sets `DATABASE_URL` directly.
-
-## Dependencies
-
-- `psql` binary must be on PATH (install: `brew install postgresql` / `apt-get install postgresql-client`)
-- `DATABASE_URL` environment variable
-
-## Example Usage
-
-```sh
-# Connect to local development database
-DATABASE_URL=postgres://user:pass@localhost:5432/master_db bun run db:console
-
-# Inside psql:
-# \dt               — list tables
-# SELECT * FROM licenses LIMIT 5;
-# \q                — quit
-```
-
-## Known Failure Modes
-
-| Scenario               | Exit Code            | Behavior                                |
-| ---------------------- | -------------------- | --------------------------------------- |
-| `DATABASE_URL` not set | 0                    | Structured warn log — infra-absent pass |
-| `psql` not on PATH     | 0                    | Structured error with install hint      |
-| Connection refused     | Non-zero (from psql) | psql error output to terminal           |
-| Authentication failure | Non-zero (from psql) | psql error output to terminal           |
+- Not audited automatically: requires database connectivity or interactive/manual access.

@@ -6,60 +6,39 @@
 bun run infra:security:ci
 ```
 
+Registered package.json runner:
+
+```sh
+bun scripts/security/scan-ci.ts
+```
+
 ## Purpose
 
-Runs the CI-authoritative Trivy scan, writes a sanitized JSON summary to `tmp/trivy-report.json`,
-and enforces repository security policy. This command is used by GitHub Actions and by the
-orchestrator security gate.
+Run the CI-equivalent Trivy scan, write a sanitized report, and block on CI-grade findings.
 
-The scan uses tracked working-tree content so local untracked files do not create false CI
-failures.
+## Why It Exists
 
-## Trigger Context
+This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml. Its implementation lives in scripts/security/scan-ci.ts and is exposed through the root package.json interface.
 
-- GitHub Actions `security` job
-- Orchestrator validation gate input generation
-- Manual local reproduction of CI security behavior
+## Source
 
-## Execution Mode
+- Implementation: scripts/security/scan-ci.ts
+- Metadata-backed script file: `scripts/security/scan-ci.ts`
 
-`ci`, `manual`, and `orchestrator`
+## CI Behavior
 
-## Severity Policy
+Dedicated CI runner by name; this entrypoint is already the CI-specific variant.
 
-- LOW: suppressed
-- MEDIUM: warning only
-- HIGH/CRITICAL vulnerabilities: blocking
-- HIGH/CRITICAL misconfigurations: blocking
-- Any secret: blocking
+## When to Run
 
-## Prerequisites
+- When reproducing CI behavior locally or validating CI-only output paths.
+- When running repository security scans locally or in hardened validation pipelines.
 
-- Trivy `v0.69.3` or a CLI-compatible version available on `PATH`
-- Writable `tmp/` directory for retained report output
+## Related Scripts
 
-## Output
+- Depends on: None
+- Used by other root scripts: None found
 
-- Human-readable summary to stdout
-- Sanitized report at `tmp/trivy-report.json`
+## Audit Notes
 
-The retained report includes severity, identifier, package or file path metadata, and generated-at
-timestamp. It never retains raw matched secret values.
-
-## Exit Semantics
-
-| Condition                                          | Exit Code |
-| -------------------------------------------------- | --------- |
-| Only MEDIUM findings or clean scan                 | 0         |
-| HIGH/CRITICAL dependency vulnerabilities           | 1         |
-| HIGH/CRITICAL infrastructure misconfigurations     | 1         |
-| Any secret finding                                 | 1         |
-| Corrupt or unreadable retained JSON consumed later | non-zero  |
-
-## Failure Modes
-
-| Scenario                  | Exit Code | Behavior                                    |
-| ------------------------- | --------- | ------------------------------------------- |
-| Trivy missing             | non-zero  | CI job fails before scan execution          |
-| Invalid Trivy stdout JSON | non-zero  | Script fails closed                         |
-| Blocking findings present | 1         | CI/orchestrator blocks using sanitized data |
+- Not audited automatically: external scanner dependency or long-running security scan.

@@ -4,44 +4,40 @@
 
 ```sh
 bun run infra:security:secrets
-bun run infra:security:secrets --staged
+```
+
+Registered package.json runner:
+
+```sh
+bun scripts/security/scan-secrets.ts
 ```
 
 ## Purpose
 
-Runs Trivy secret detection across the full repository or staged files only. The staged mode is
-used by pre-commit so secret enforcement stays bounded to the commit payload.
+Run a Trivy secret scan across the repo or staged files only and block on any detected secret.
 
-Repo-wide scans operate on tracked files only. Staged mode operates on the git index snapshot.
+## Why It Exists
 
-## Trigger Context
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/security/scan-secrets.ts and is exposed through the root package.json interface.
 
-- Mandatory pre-commit staged secret gate
-- Manual repository secret sweep
+## Source
 
-## Execution Mode
+- Implementation: scripts/security/scan-secrets.ts
+- Metadata-backed script file: `scripts/security/scan-secrets.ts`
 
-`manual` and `pre-commit`
+## CI Behavior
 
-## Severity Policy
+Supported explicitly in the implementation.
 
-Any secret finding exits 1. Output includes rule type and file path, but never retains or echoes
-the secret value itself.
+## When to Run
 
-## Prerequisites
+- When running repository security scans locally or in hardened validation pipelines.
 
-- Trivy `v0.69.3` or a CLI-compatible version available on `PATH`
-- A git repository when using `--staged`
+## Related Scripts
 
-## Output
+- Depends on: None
+- Used by other root scripts: None found
 
-- Human-readable summary to stdout
-- No retained report file
+## Audit Notes
 
-## Failure Modes
-
-| Scenario                | Exit Code | Behavior                                    |
-| ----------------------- | --------- | ------------------------------------------- |
-| Staged file unavailable | non-zero  | Temp materialization fails closed           |
-| Secret detected         | 1         | Commit or manual run stops immediately      |
-| Invalid JSON output     | non-zero  | Script fails closed and reports parse error |
+- Not audited automatically: external scanner dependency or long-running security scan.

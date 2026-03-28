@@ -5,6 +5,7 @@ import {
   detectScriptDependencies,
   formatUpdatedGeneratedFiles,
   parseExistingPackageSections,
+  shouldScanUsageFile,
 } from '../package-docs'
 
 describe('parseExistingPackageSections', () => {
@@ -75,5 +76,13 @@ describe('formatUpdatedGeneratedFiles', () => {
         'fallback'
       )
     ).toContain('exited non-zero before tracked file changes were observed')
+  })
+})
+
+describe('shouldScanUsageFile', () => {
+  it('skips markdown files so documentation-only mentions do not count as usage', () => {
+    expect(shouldScanUsageFile('docs/scripts/arch-guard.md')).toBe(false)
+    expect(shouldScanUsageFile('README.md')).toBe(false)
+    expect(shouldScanUsageFile('scripts/governance/gate.ts')).toBe(true)
   })
 })

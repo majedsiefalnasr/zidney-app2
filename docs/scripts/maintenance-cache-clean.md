@@ -1,4 +1,4 @@
-# maintenance:cache-clean
+# infra:cache:clean
 
 ## Command
 
@@ -6,60 +6,38 @@
 bun run infra:cache:clean
 ```
 
+Registered package.json runner:
+
+```sh
+bun run scripts/maintenance/cache-clean.ts
+```
+
 ## Purpose
 
-Removes build cache directories and compiled output directories to free disk space and eliminate
-stale build artifacts. Safe to run at any time — only removes directories, never source files.
+Remove build caches and temporary output directories to free disk space
 
 ## Why It Exists
 
-Build caches accumulate over time and can cause hard-to-diagnose issues when cached artifacts
-become stale. This script provides a standardized, idempotent way to clean all known cache
-locations in one command.
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/maintenance/cache-clean.ts and is exposed through the root package.json interface.
+
+## Source
+
+- Implementation: scripts/maintenance/cache-clean.ts
+- Metadata-backed script file: `scripts/maintenance/cache-clean.ts`
+
+## CI Behavior
+
+Explicitly rejected in the implementation; this is a local cleanup command and must not run with --ci.
 
 ## When to Run
 
-- When experiencing unexpected build or hot-reload behavior
-- Before a clean CI build to ensure no stale artifacts
-- When disk space is low
-- After major dependency updates or framework upgrades
+- When the corresponding repository workflow requires this root runner.
 
-## Execution Mode
+## Related Scripts
 
-`manual`
+- Depends on: None
+- Used by other root scripts: None found
 
-Idempotent: skips directories that don't exist. Always exits 0. Reports removed/skipped counts
-via structured log.
+## Audit Notes
 
-## Dependencies
-
-- No external dependencies (uses Node.js built-in `fs` module)
-
-## Cache Directories Cleaned
-
-| Directory             | Description                         |
-| --------------------- | ----------------------------------- |
-| `.turbo`              | Turborepo task cache                |
-| `node_modules/.cache` | Bundler and build tool cache        |
-| `apps/*/dist`         | Per-app compiled output directories |
-
-## Example Usage
-
-```sh
-bun run infra:cache:clean
-```
-
-Expected output:
-
-```json
-{ "level": "info", "message": "Removed cache directory", "metadata": { "dir": ".turbo" } }
-{ "level": "info", "message": "Cache clean complete", "metadata": { "removed": 3, "skipped": 1, "total": 4 } }
-```
-
-## Known Failure Modes
-
-| Scenario                | Exit Code | Behavior                                      |
-| ----------------------- | --------- | --------------------------------------------- |
-| Directory doesn't exist | 0         | Skipped with info log                         |
-| Permission denied       | 0         | Warn log with skip, continues with other dirs |
-| All dirs removed        | 0         | Structured completion log                     |
+- Not audited automatically: destructive maintenance command.

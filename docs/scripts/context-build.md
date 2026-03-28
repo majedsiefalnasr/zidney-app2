@@ -1,63 +1,43 @@
 # arch:context:build
 
-**Script:** `context:build`  
-**File:** `scripts/context/build.ts`  
-**Domain:** `context`  
-**Category:** `governance`
+## Command
 
-## Description
-
-Generates `docs/ai/context/gitnexus-context.json` by invoking `assembleContext()` from
-`scripts/gitnexus-context.ts`. Writes the artifact atomically (`.tmp` file ➜ `renameSync`)
-to prevent partial-write corruption.
-
-Skips regeneration when the artifact is ≤24 hours old unless `--force` is supplied.
-
-## Usage
-
-```bash
-# Standard rebuild (skips if artifact is fresh)
+```sh
 bun run arch:context:build
-
-# Force rebuild regardless of artifact age
-bun run arch:context:build -- --force
-
-# All-workspace analysis (not just changed files)
-bun run arch:context:build -- --all
-
-# Dry-run: print context JSON to stdout without writing
-bun run arch:context:build -- --dry-run
 ```
 
-## Options
+Registered package.json runner:
 
-| Flag        | Effect                                                              |
-| ----------- | ------------------------------------------------------------------- |
-| `--dry-run` | Print the assembled context JSON to stdout. Does not write to disk. |
-| `--all`     | Run full-workspace analysis (`changedFilesOnly: false`).            |
-| `--force`   | Bypass the 24-hour freshness check and always regenerate.           |
+```sh
+bun scripts/context/build.ts
+```
 
-## Output
+## Purpose
 
-| Artifact                                | Description                          |
-| --------------------------------------- | ------------------------------------ |
-| `docs/ai/context/gitnexus-context.json` | GitNexus context artifact (primary). |
+Generates docs/ai/context/gitnexus-context.json via assembleContext(). Uses atomic write (write to .tmp then renameSync) to prevent partial artifact state. Supports --dry-run (print to stdout only), --all (full workspace), --force (skip freshness check and always regenerate).
 
-## Exit Codes
+## Why It Exists
 
-| Code | Meaning                                        |
-| ---- | ---------------------------------------------- |
-| `0`  | Artifact written (or skipped — already fresh). |
-| `1`  | `assembleContext()` or atomic write failed.    |
+This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml. Its implementation lives in scripts/context/build.ts and is exposed through the root package.json interface.
+
+## Source
+
+- Implementation: scripts/context/build.ts
+- Metadata-backed script file: `scripts/context/build.ts`
+
+## CI Behavior
+
+Supported explicitly in the implementation.
+
+## When to Run
+
+- Before opening or updating a pull request that touches the related governance surface.
 
 ## Related Scripts
 
-- `context:validate` — validates the artifact written by this script
-- `context:changed` — resolves staged files consumed by `assembleContext()`
-- `context:impact` — synthesizes risk indicators from this artifact
-- `arch:gitnexus:context` — lower-level alias for `scripts/gitnexus-context.ts`
+- Depends on: None
+- Used by other root scripts: None found
 
-## Registry
+## Audit Notes
 
-- **Naming convention:** `<domain>:<action>` — `context:build`
-- **Documentation:** `docs/scripts/context-build.md` (this file)
+- Observed in isolated worktree run: no tracked file changes.

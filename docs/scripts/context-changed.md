@@ -1,69 +1,43 @@
 # arch:context:changed
 
-**Script:** `context:changed`  
-**File:** `scripts/context/changed.ts`  
-**Domain:** `context`  
-**Category:** `governance`
+## Command
 
-## Description
-
-Resolves staged changed files via `git diff --cached --name-only --diff-filter=ACM` and
-writes the result to `docs/ai/context/context-changed.json`. Uses a 5-minute freshness
-cache to avoid redundant git invocations within a single pre-commit run.
-
-A clean staging area (no changed files) is a valid outcome — the artifact is written with
-`changedFiles: []` rather than exiting non-zero.
-
-## Usage
-
-```bash
+```sh
 bun run arch:context:changed
 ```
 
-No flags are supported. The script always reads the current staging area.
+Registered package.json runner:
 
-## Output
-
-| Artifact                               | Description                          |
-| -------------------------------------- | ------------------------------------ |
-| `docs/ai/context/context-changed.json` | List of staged files with timestamp. |
-
-### Artifact Schema
-
-```json
-{
-  "generatedAt": "2024-01-01T00:00:00.000Z",
-  "changedFiles": ["apps/api/src/routes/exam.ts", "packages/domain-core/src/exam.ts"]
-}
+```sh
+bun scripts/context/changed.ts
 ```
 
-## Exit Codes
+## Purpose
 
-| Code | Meaning                                           |
-| ---- | ------------------------------------------------- |
-| `0`  | Staged files resolved and written (or cache hit). |
-| `1`  | `git` is unavailable or the write failed.         |
+Resolves staged changed files via `git diff --cached` and writes the result to docs/ai/context/context-changed.json with a 5-minute freshness cache. Subsequent reads within the cache window skip the git invocation. A clean staging area (no changed files) is a valid state — the artifact is written with an empty changedFiles array rather than exiting non-zero.
 
-## Caching
+## Why It Exists
 
-The artifact is considered fresh for **5 minutes** from its `generatedAt` timestamp.
-If the artifact is fresh when the script runs, it exits immediately with a cache-hit log
-line and does not invoke `git`.
+This runner is currently classified as medium. Not safe to remove directly. Other root scripts depend on it: governance:gate:changed. Its implementation lives in scripts/context/changed.ts and is exposed through the root package.json interface.
 
-## Integration
+## Source
 
-This script is integrated into:
+- Implementation: scripts/context/changed.ts
+- Metadata-backed script file: `scripts/context/changed.ts`
 
-- **`.husky/pre-commit`** — runs on every commit (before architecture guard)
-- **`package.json` `governance:gate:changed`** — `bun run arch:context:changed && bun run arch:guard:changed`
+## CI Behavior
+
+Supported explicitly in the implementation.
+
+## When to Run
+
+- Before opening or updating a pull request that touches the related governance surface.
 
 ## Related Scripts
 
-- `context:build` — full artifact rebuild used by the governance gate
-- `context:impact` — uses this artifact to filter risk indicators
-- `context:validate` — validates the main `gitnexus-context.json` artifact
+- Depends on: None
+- Used by other root scripts: `governance:gate:changed`
 
-## Registry
+## Audit Notes
 
-- **Naming convention:** `<domain>:<action>` — `context:changed`
-- **Documentation:** `docs/scripts/context-changed.md` (this file)
+- Observed in isolated worktree run: no tracked file changes.

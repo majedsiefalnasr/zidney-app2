@@ -6,60 +6,38 @@
 bun run db:migrate
 ```
 
-Optional CLI arguments:
+Registered package.json runner:
 
 ```sh
-bun run db:migrate --migration=<migration-name>
+bun run scripts/db/migrate.ts
 ```
 
 ## Purpose
 
-Applies pending database migrations to master_db using `drizzle-kit push`. When `--migration=`
-is not specified, all pending migrations are applied. When specified, only the named migration
-is applied.
+Validate migration inputs and delegate master migration execution guidance.
 
 ## Why It Exists
 
-Schema changes must be applied in a controlled, forward-only manner per the Zidney migration
-discipline (ADR-0008). This script provides the standard developer and CI interface for
-triggering migrations against the configured `DATABASE_URL`.
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/db/migrate.ts and is exposed through the root package.json interface.
+
+## Source
+
+- Implementation: scripts/db/migrate.ts
+- Metadata-backed script file: `scripts/db/migrate.ts`
+
+## CI Behavior
+
+Supported explicitly in the implementation.
 
 ## When to Run
 
-- During local development after pulling schema changes
-- In CI/CD pipelines before running integration tests
-- During staging and production deployments (with snapshot backup first)
-- After creating a new migration file
+- When operating against a configured database environment for maintenance or diagnostics.
 
-## Execution Mode
+## Related Scripts
 
-`manual` | `ci`
+- Depends on: None
+- Used by other root scripts: None found
 
-Infra-dependent: exits 0 with structured warn log if `DATABASE_URL` is not set. Exits 0 on
-successful migration. Exits 0 with error log if migration fails (infra-absent pass — prevents
-CI failure when database is unavailable in certain pipeline stages).
+## Audit Notes
 
-## Dependencies
-
-- `drizzle-kit` (available in apps/api dependencies)
-- `DATABASE_URL` environment variable pointing to master_db
-
-## Example Usage
-
-```sh
-# Apply all pending migrations
-DATABASE_URL=postgres://user:pass@localhost:5432/master_db bun run db:migrate
-
-# Apply a specific named migration
-DATABASE_URL=postgres://... bun run db:migrate --migration=0001_initial_schema
-```
-
-## Known Failure Modes
-
-| Scenario               | Exit Code | Behavior                                 |
-| ---------------------- | --------- | ---------------------------------------- |
-| `DATABASE_URL` not set | 0         | Structured warn log — infra-absent pass  |
-| Migration conflict     | 0         | Structured error log — infra-absent pass |
-| drizzle-kit not found  | 0         | Structured error log — infra-absent pass |
-| All current            | 0         | Structured info log — no-op              |
-| Success                | 0         | Structured info with migration output    |
+- Not audited automatically: requires database connectivity or interactive/manual access.

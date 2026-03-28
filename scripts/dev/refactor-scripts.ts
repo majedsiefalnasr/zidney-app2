@@ -138,12 +138,19 @@ export function replaceInFile(
   const replacements: ReplaceSummary['replacements'] = []
 
   for (const { oldName, newName } of migrations) {
-    const pattern = `bun run ${oldName}`
-    const replacement = `bun run ${newName}`
-    if (updated.includes(pattern)) {
-      const count = updated.split(pattern).length - 1
-      updated = updated.split(pattern).join(replacement)
-      replacements.push({ oldRef: pattern, newRef: replacement, count })
+    const patterns = [
+      { oldRef: `bun run ${oldName}`, newRef: `bun run ${newName}` },
+      { oldRef: `bun ${oldName}`, newRef: `bun ${newName}` },
+    ]
+
+    for (const pattern of patterns) {
+      if (!updated.includes(pattern.oldRef)) {
+        continue
+      }
+
+      const count = updated.split(pattern.oldRef).length - 1
+      updated = updated.split(pattern.oldRef).join(pattern.newRef)
+      replacements.push({ oldRef: pattern.oldRef, newRef: pattern.newRef, count })
     }
   }
 
@@ -175,7 +182,7 @@ export function validateNoRemnants(
     }
     const found: string[] = []
     for (const { oldName } of migrations) {
-      if (content.includes(`bun run ${oldName}`)) {
+      if (content.includes(`bun run ${oldName}`) || content.includes(`bun ${oldName}`)) {
         found.push(oldName)
       }
     }

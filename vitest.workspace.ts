@@ -190,6 +190,17 @@ export default defineWorkspace([
     },
   }),
 
+  // Developer tooling scripts
+  defineProject({
+    plugins: [tsconfigPaths()],
+    test: {
+      name: 'dev-scripts',
+      globals: true,
+      environment: 'node',
+      include: ['scripts/dev/__tests__/**/*.test.ts'],
+    },
+  }),
+
   // Shared packages
   'packages/api-client/vitest.config.ts',
   'packages/domain-core/vitest.config.ts',
@@ -219,6 +230,28 @@ export default defineWorkspace([
       globals: true,
       environment: 'node',
       include: ['scripts/context/__tests__/**/*.test.ts'],
+    },
+  }),
+
+  // Security scripts
+  defineProject({
+    plugins: [tsconfigPaths()],
+    test: {
+      name: 'security-scripts',
+      globals: true,
+      environment: 'node',
+      include: ['scripts/security/__tests__/**/*.test.ts'],
+    },
+  }),
+
+  // Governance scripts
+  defineProject({
+    plugins: [tsconfigPaths()],
+    test: {
+      name: 'governance-scripts',
+      globals: true,
+      environment: 'node',
+      include: ['scripts/governance/__tests__/**/*.test.ts'],
     },
   }),
 

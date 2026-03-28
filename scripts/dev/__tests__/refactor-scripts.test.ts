@@ -96,7 +96,7 @@ describe('buildFileList', () => {
 describe('replaceInFile', () => {
   it('replaces matching references', () => {
     const filePath = join(tmpDir, 'replace-test.sh')
-    writeFileSync(filePath, 'bun run db:migrate\nbun run ai:guard', 'utf-8')
+    writeFileSync(filePath, 'bun run migrate\nbun run ai-guard', 'utf-8')
 
     const summary = replaceInFile(filePath, SAMPLE_MIGRATIONS, false)
     expect(summary).not.toBeNull()
@@ -105,7 +105,21 @@ describe('replaceInFile', () => {
     const updated = readFileSync(filePath, 'utf-8')
     expect(updated).toContain('bun run db:migrate')
     expect(updated).toContain('bun run ai:guard')
-    expect(updated).not.toContain('bun run db:migrate\n')
+    expect(updated).not.toContain('bun run migrate')
+    expect(updated).not.toContain('bun run ai-guard')
+  })
+
+  it('replaces direct bun script references', () => {
+    const filePath = join(tmpDir, 'replace-direct.sh')
+    writeFileSync(filePath, 'bun migrate && bun ai-guard', 'utf-8')
+
+    const summary = replaceInFile(filePath, SAMPLE_MIGRATIONS, false)
+    expect(summary).not.toBeNull()
+    expect(summary?.replacements).toHaveLength(2)
+
+    const updated = readFileSync(filePath, 'utf-8')
+    expect(updated).toContain('bun db:migrate')
+    expect(updated).toContain('bun ai:guard')
   })
 
   it('returns null when no replacements are needed', () => {
@@ -117,7 +131,7 @@ describe('replaceInFile', () => {
 
   it('does not write in dry-run mode', () => {
     const filePath = join(tmpDir, 'dry-run.sh')
-    const original = 'bun run db:migrate'
+    const original = 'bun run migrate'
     writeFileSync(filePath, original, 'utf-8')
 
     replaceInFile(filePath, SAMPLE_MIGRATIONS, true)
@@ -139,10 +153,18 @@ describe('validateNoRemnants', () => {
 
   it('detects remaining old references', () => {
     const filePath = join(tmpDir, 'stale.sh')
-    writeFileSync(filePath, 'bun run db:migrate', 'utf-8')
+    writeFileSync(filePath, 'bun run migrate', 'utf-8')
     const remnants = validateNoRemnants([filePath], SAMPLE_MIGRATIONS)
     expect(remnants).toHaveLength(1)
     expect(remnants[0].refs).toContain('migrate')
+  })
+
+  it('detects direct bun references that still use old script names', () => {
+    const filePath = join(tmpDir, 'stale-direct.sh')
+    writeFileSync(filePath, 'bun ai-guard', 'utf-8')
+    const remnants = validateNoRemnants([filePath], SAMPLE_MIGRATIONS)
+    expect(remnants).toHaveLength(1)
+    expect(remnants[0].refs).toContain('ai-guard')
   })
 })
 

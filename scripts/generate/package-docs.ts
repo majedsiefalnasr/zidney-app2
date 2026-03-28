@@ -300,6 +300,10 @@ function walkScannableFiles(dir: string): string[] {
   return files
 }
 
+export function shouldScanUsageFile(relativePath: string): boolean {
+  return !relativePath.endsWith('.md')
+}
+
 function scanUsageReferences(scriptNames: readonly string[]): Map<string, ScriptUsageRefs> {
   const refs = new Map<string, ScriptUsageRefs>()
   const knownScripts = new Set(scriptNames)
@@ -311,6 +315,9 @@ function scanUsageReferences(scriptNames: readonly string[]): Map<string, Script
 
   for (const absolutePath of walkScannableFiles(REPO_ROOT)) {
     const relativePath = relative(REPO_ROOT, absolutePath)
+    if (!shouldScanUsageFile(relativePath)) {
+      continue
+    }
     const content = readFileSync(absolutePath, 'utf-8')
     const lines = content.split(/\r?\n/)
 
