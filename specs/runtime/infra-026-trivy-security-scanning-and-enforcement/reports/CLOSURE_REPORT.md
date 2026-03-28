@@ -53,7 +53,7 @@ INFRA-026 introduces automated security scanning and enforcement across the Zidn
 
 ### Clarifications
 
-- Trivy version: Pinned to v0.59.1 (verified pinning with checksum in CI job)
+- Trivy version: Pinned to v0.69.3 (verified pinning with checksum in CI job)
 - Severity thresholds: MEDIUM=warn, HIGH=block CI, CRITICAL=block CI + orchestrator
 - Staged secret mode: Only scans staged files in pre-commit (efficiency) vs. full repo in CI
 - Database involvement: NONE (INFRA-only scope)
@@ -161,7 +161,7 @@ INFRA-026 introduces automated security scanning and enforcement across the Zidn
 
 | Risk                       | Mitigation                                                                       | Status       |
 | -------------------------- | -------------------------------------------------------------------------------- | ------------ |
-| Trivy CLI binary not found | Version pinned (v0.59.1) + checksum verification in CI                           | ✅ Mitigated |
+| Trivy CLI binary not found | Version pinned (v0.69.3) + checksum verification in CI                           | ✅ Mitigated |
 | CI job timeout             | DB cache + incremental scanning; measured <65s vs 180s budget                    | ✅ Mitigated |
 | Pre-commit slowdown        | Staged-file mode for secrets, dependency snapshot only; <12s vs 30s budget       | ✅ Mitigated |
 | Secret value leakage       | Sanitized JSON report (no values in artifact) + staged secret scanning redaction | ✅ Mitigated |
@@ -173,7 +173,7 @@ INFRA-026 introduces automated security scanning and enforcement across the Zidn
 | --------------------------- | --------------------------------------------------------------------------------------------- | ------------ |
 | Developers bypass hooks     | Hard-fail secrets enforcement (cannot be skipped); pre-commit is optional but CI is mandatory | ✅ Mitigated |
 | False positives block merge | Exclusion patterns via `.trivyignore`; severity thresholds (MEDIUM=warn only)                 | ✅ Mitigated |
-| Dependency version drift    | Trivy pinned to v0.59.1 with checksum verification; explicit version env var                  | ✅ Mitigated |
+| Dependency version drift    | Trivy pinned to v0.69.3 with checksum verification; explicit version env var                  | ✅ Mitigated |
 
 ### Security Risks: **IMPROVED** ✅
 

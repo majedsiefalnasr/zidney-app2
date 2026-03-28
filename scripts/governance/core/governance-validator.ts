@@ -10,7 +10,9 @@
  * - Exception registry validation
  *
  * Phase 2: Script Modularization — Governance Tools
- */
+ 
+ * @library-module
+*/
 
 /**
  * Type Safety Violation Patterns

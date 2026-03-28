@@ -1,8 +1,14 @@
 #!/bin/bash
+# START: Script execution
 # Post-Test Cleanup Script
 # Cleans up test databases, Redis data, and temporary files
 
 set -e
+
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/cleanup-test-env.sh"
 
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5433}"
@@ -35,4 +41,9 @@ echo "  • Cleaning coverage reports..."
 rm -rf coverage/
 
 echo "✅ Cleanup complete"
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
 exit 0

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/** @library-module */
 
 /**
  * Infrastructure Audit — Refactored Entry Point
@@ -16,9 +17,9 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { createArchitectureGraphCache } from '../core/architecture-graph-cache'
 import { createCacheManager } from '../core/cache-manager'
-import { createLogger } from '../core/logger-factory'
 import { getHealthStatus, Timer } from '../core/performance-profiler'
 import { validateDependencyGraph } from '../core/schema-validator'
+import { createLogger, log } from '../utils/logger'
 import { computeModuleHashes, detectChangedModules } from './core/change-detector'
 
 const logger = createLogger('infra-audit')
@@ -28,6 +29,7 @@ const timer = new Timer('infra-audit-execution')
  * Main entry point for Infrastructure Audit with refactored utilities
  */
 async function main(): Promise<void> {
+  log.header('ARCHITECTURE INFRA AUDIT', 'Architecture audit with refactored utilities')
   timer.start()
 
   try {
@@ -131,7 +133,7 @@ async function main(): Promise<void> {
 // Run if invoked directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
-    console.error('[infra-audit] Fatal error:', error)
+    log.error(`[infra-audit] Fatal error: ${String(error)}`)
     process.exit(1)
   })
 }

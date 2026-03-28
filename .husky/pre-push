@@ -36,12 +36,19 @@ if [ -z "$CHANGED_FILES" ]; then
   exit 0
 fi
 
+# ── Resolve GitNexus staged context (CI/no-write mode) ────────────────────
+echo "Resolving GitNexus staged context (CI mode — no writes)…"
+bun run arch:context:changed -- --ci || {
+  echo "❌ arch:context:changed failed — push blocked."
+  exit 1
+}
+
 
 # ── Architecture Governance (blocking) ──────────────────────────────────────
 # FIX #2 — removed --full flag (does not exist on ai-guard.ts).
 # ai-guard.ts runs a full staged/changed-file scan by default.
 echo "Running architecture governance validation..."
-bun scripts/ai-guard.ts || {
+bun scripts/ai-guard.ts --ci || {
   echo "❌ Architecture guard failed — push blocked."
   exit 1
 }
@@ -122,6 +129,14 @@ else
   echo "   Install: brew install actionlint"
 fi
 
+
+# ── Script UX Validator (full scan, blocking) ───────────────────────────────
+echo "Running Script UX validator (full scan)…"
+bun run validate:scripts:ux || {
+  echo "❌ Script UX validation failed — push blocked."
+  echo "   Run: bun run validate:scripts:ux --fix to auto-fix issues."
+  exit 1
+}
 
 # ── Final Summary ────────────────────────────────────────────────────────────
 echo ""

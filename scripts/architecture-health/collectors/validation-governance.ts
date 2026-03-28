@@ -1,3 +1,4 @@
+/** @library-module */
 import { DEFAULT_THRESHOLD_POLICY } from '../score-model'
 import type { HealthFinding, HealthSignalResult, SourceRun } from '../types'
 

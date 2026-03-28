@@ -1,8 +1,15 @@
 #!/bin/bash
-# Initialize Test Databases
+# ───────────────────────────────────────────────────────────────────────────
+# START: Initialize Test Databases
 # Creates and provisions master and tenant test databases with baseline schema
+# ───────────────────────────────────────────────────────────────────────────
 
 set -e
+
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/init-test-db.sh"
 
 DB_HOST="${DB_HOST:-localhost}"
 # Default to CI postgres service port and CI credentials when not overridden
@@ -94,4 +101,9 @@ run_sql -d "$MASTER_DB_NAME" -c "
 "
 
 echo "✅ Test database initialization complete"
+echo ""
+echo "───────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Database initialization successful"
+echo "───────────────────────────────────────────────────────────────────────────"
 exit 0

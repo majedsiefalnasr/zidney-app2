@@ -392,20 +392,18 @@ See `docs/architecture/intelligence/ARCHITECTURE_SCORE_REFERENCE.md` for scoring
 
 At the beginning of each step output, render this banner:
 
-═══════════════════════════════════════
-HARD MODE WORKFLOW
-═══════════════════════════════════════
-Stage:       <STAGE_NAME>
-Phase:       <PHASE_NAME>
-Branch:      spec/<STAGE_DIR_NAME>
-Current Step: <current_step>
-Status:      <displayed_status>
-Package Mgr: <PKG_MANAGER>
-Started:     <session_started_at from .workflow-state.json>
+**HARD MODE WORKFLOW**
 
-Progress:
-<STEP_INDEX>/<TOTAL_STEPS>: <current_step>
-═══════════════════════════════════════
+| Field        | Value                                          |
+| ------------ | ---------------------------------------------- |
+| Stage        | <STAGE_NAME>                                   |
+| Phase        | <PHASE_NAME>                                   |
+| Branch       | spec/<STAGE_DIR_NAME>                          |
+| Current Step | <current_step>                                 |
+| Status       | <displayed_status>                             |
+| Package Mgr  | <PKG_MANAGER>                                  |
+| Started      | <session_started_at from .workflow-state.json> |
+| Progress     | <STEP_INDEX>/<TOTAL_STEPS>: <current_step>     |
 
 Example:
 
@@ -584,8 +582,8 @@ Required behavior:
 - Suggested automatic checks:
 
   ```bash
-  bun run validate:runtime:scripts
-  bun run validate:script:usage
+  bun run validate:scripts:runtime
+  bun run validate:scripts:usage
   ```
 
 - If drift is detected, suggest:
@@ -705,16 +703,16 @@ rtk gain
 
 The orchestrator MUST follow this preference order for every terminal operation. These are not suggestions — they are execution policy.
 
-| Operation | Preferred | Fallback |
-|---|---|---|
-| Large file inspection | `rtk summarize` | `head -100 <file>` with warning |
-| Search | `rg` | `grep -r` |
-| File discovery | `fd` | `find` |
-| JSON inspection | `jq` | `python3 -c` / `node -e` |
-| Token measurement | `rtk gain` | N/A — informational only |
-| Output trimming | `rtk trim` | N/A — skip if unavailable |
-| Code transformation | `ast-grep` (`sg`) | `sed` |
-| Formatting | `biome` | `prettier` |
+| Operation             | Preferred         | Fallback                        |
+| --------------------- | ----------------- | ------------------------------- |
+| Large file inspection | `rtk summarize`   | `head -100 <file>` with warning |
+| Search                | `rg`              | `grep -r`                       |
+| File discovery        | `fd`              | `find`                          |
+| JSON inspection       | `jq`              | `python3 -c` / `node -e`        |
+| Token measurement     | `rtk gain`        | N/A — informational only        |
+| Output trimming       | `rtk trim`        | N/A — skip if unavailable       |
+| Code transformation   | `ast-grep` (`sg`) | `sed`                           |
+| Formatting            | `biome`           | `prettier`                      |
 
 **Never use `cat` on files in `apps/`, `packages/`, or `docs/ai/context/` without checking line count first.** These files are large and will flood the context window.
 
@@ -2522,7 +2520,7 @@ bun run governance:gate:changed
 
 If exit code is `1` → **STOP.** Surface the full gate output. Blocked until all violations are resolved and the gate exits `0`.
 
-This gate runs `arch:guard:changed` + `validate:runtime:scripts` scoped to changed files. It is a hard blocking gate — implementation cannot proceed with unresolved violations.
+This gate runs `arch:guard:changed` + `validate:scripts:runtime` scoped to changed files. It is a hard blocking gate — implementation cannot proceed with unresolved violations.
 
 ## 6.2 — Check SpecKit Checklists Before Implementation
 
@@ -2553,14 +2551,14 @@ options:
    ```
 3. Validate the artifact:
    ```bash
-   bun run arch:validate:gitnexus
+   bun run arch:gitnexus:validate
    ```
 4. If validation fails → **STOP. Do NOT begin implementation.**
    ```
    ❌ GitNexus context validation failed — implementation blocked.
       The gitnexus-context.json has invalid or missing dependency data.
       Why it matters: AI Guard uses this artifact for impact analysis.
-      Run: bun run arch:gitnexus:context && bun run arch:validate:gitnexus to fix.
+      Run: bun run arch:gitnexus:context && bun run arch:gitnexus:validate to fix.
    ```
 5. If validation passes → proceed to 6.3.
 
@@ -2802,7 +2800,7 @@ Validation:
 - Run global validation:
 
 ```bash
-bun run validate:runtime:scripts
+bun run validate:scripts:runtime
 ```
 
 Failure Handling:

@@ -10,6 +10,7 @@
  */
 
 import { ScriptPerformanceProfiler } from '../../tests/audit-helpers'
+import { flushAi, log } from '../utils/logger'
 
 const scriptsToProfile = [
   'scripts/ai-guard.ts',
@@ -21,7 +22,11 @@ const scriptsToProfile = [
 
 const runs = parseInt(process.argv[2] || '10', 10)
 
-console.log(`⏱️  Profiling ${scriptsToProfile.length} scripts (${runs} runs each)...\n`)
+log.header(
+  'PROFILE SCRIPT PERFORMANCE',
+  'Profiles governance script execution times across multiple runs'
+)
+log.info(`Profiling ${scriptsToProfile.length} scripts (${runs} runs each)...`)
 
 const results = ScriptPerformanceProfiler.profileMultipleScripts(scriptsToProfile, runs)
 
@@ -38,11 +43,10 @@ const targets: Record<string, number> = {
 }
 
 // Display results
-console.log('📊 Performance Profile Results:\n')
-console.log(
+log.step('Performance Profile Results:')
+log.info(
   'Script Name                      Min (ms)  Max (ms)  Avg (ms)  P95 (ms)  Target (ms)  Status'
 )
-console.log('─'.repeat(95))
 
 for (const result of results) {
   const target = targets[result.scriptName] || 2000
@@ -59,13 +63,13 @@ for (const result of results) {
     status = '⚠️ WARN'
   }
 
-  console.log(
+  log.info(
     `${result.scriptName.padEnd(32)} ${minStr}    ${maxStr}    ${avgStr}    ${p95Str}    ${targetStr}    ${status}`
   )
 }
 
 // Summary by status
-console.log('\n📈 Summary:\n')
+log.step('Summary:')
 
 const passing = results.filter((r) => {
   const target = targets[r.scriptName] || 2000
@@ -82,21 +86,21 @@ const failing = results.filter((r) => {
   return r.p95TimeMs > target * 1.1
 })
 
-console.log(`✓ Passing targets: ${passing.length}/${results.length}`)
-console.log(`⚠️  Warning (within 10%): ${warning.length}`)
-console.log(`🔴 Failing (>10% over): ${failing.length}`)
+log.info(`✓ Passing targets: ${passing.length}/${results.length}`)
+log.info(`⚠️  Warning (within 10%): ${warning.length}`)
+log.info(`🔴 Failing (>10% over): ${failing.length}`)
 
 if (failing.length > 0) {
-  console.log(`\nScripts needing optimization:`)
+  log.warn(`Scripts needing optimization:`)
   for (const result of failing) {
     const target = targets[result.scriptName] || 2000
     const excess = result.p95TimeMs - target
-    console.log(`  • ${result.scriptName}: ${excess.toFixed(0)}ms over target`)
+    log.warn(`  \u2022 ${result.scriptName}: ${excess.toFixed(0)}ms over target`)
   }
 }
 
 // Variability analysis
-console.log('\n🔄 Variability Analysis (Consistency):\n')
+log.step('Variability Analysis (Consistency):')
 for (const result of results) {
   const variance = result.maxTimeMs - result.minTimeMs
   const cv = (variance / result.avgTimeMs) * 100 // Coefficient of variation
@@ -104,40 +108,43 @@ for (const result of results) {
   if (cv > 30) {
     consistency = '⚠️ Variable (35% variance)'
   }
-  console.log(
+  log.info(
     `${result.scriptName.padEnd(32)} Variance: ${variance.toFixed(0)}ms (CV: ${cv.toFixed(1)}%) ${consistency}`
   )
 }
 
 // Recommendations
-console.log('\n💡 Recommendations for Phase 2:\n')
+log.step('Recommendations for Phase 2:')
 
 if (failing.length > 0) {
-  console.log('Priority 1 (High Impact):')
+  log.info('Priority 1 (High Impact):')
   for (const result of failing.slice(0, 3)) {
     const target = targets[result.scriptName] || 2000
     const reduction = ((result.p95TimeMs - target) / result.p95TimeMs) * 100
-    console.log(
-      `  • ${result.scriptName}: Needs ${reduction.toFixed(0)}% reduction (extract utilities, optimize hotspots)`
+    log.info(
+      `  \u2022 ${result.scriptName}: Needs ${reduction.toFixed(0)}% reduction (extract utilities, optimize hotspots)`
     )
   }
 }
 
 if (warning.length > 0) {
-  console.log('\nPriority 2 (Medium Impact):')
+  log.info('Priority 2 (Medium Impact):')
   for (const result of warning) {
-    console.log(`  • ${result.scriptName}: Monitor during Phase 2 refactoring`)
+    log.info(`  \u2022 ${result.scriptName}: Monitor during Phase 2 refactoring`)
   }
 }
 
-console.log(`\nPhase 2 targets: Reduce all scripts by 15-30% through utility extraction & caching`)
+log.info(`Phase 2 targets: Reduce all scripts by 15-30% through utility extraction & caching`)
 
 // Raw data export (for trend tracking)
-console.log('\n📥 Raw Profile Data (comma-separated):\n')
-console.log('Script,Run1,Run2,Run3,Run4,Run5,Run6,Run7,Run8,Run9,Run10,Min,Max,Avg,P95')
+log.step('Raw Profile Data (comma-separated):')
+log.info('Script,Run1,Run2,Run3,Run4,Run5,Run6,Run7,Run8,Run9,Run10,Min,Max,Avg,P95')
 for (const result of results) {
   const times = result.executionTimeMs.map((t) => t.toFixed(0)).join(',')
-  console.log(
+  log.info(
     `${result.scriptName},${times},${result.minTimeMs.toFixed(0)},${result.maxTimeMs.toFixed(0)},${result.avgTimeMs.toFixed(0)},${result.p95TimeMs.toFixed(0)}`
   )
 }
+
+log.result({ total: results.length, passed: passing.length, failed: failing.length })
+flushAi()

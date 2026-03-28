@@ -74,7 +74,7 @@ bun run db:validate:licenses
 bun run infra:cache:clean
 bun run dev:generate:script-docs
 bun run dev:seed:dashboard-test-data
-bun run validate:runtime:scripts
+bun run validate:scripts:runtime
 bun run validate:ai-context-fresh
 bun run validate:ai-context-schemas
 bun run ai:guard

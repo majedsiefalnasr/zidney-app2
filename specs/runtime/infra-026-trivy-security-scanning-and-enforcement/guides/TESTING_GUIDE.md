@@ -26,7 +26,7 @@ Each test can be run independently. All tests should PASS before merging to `dev
 - Working Zidney monorepo clone with `spec/infra-026-trivy-security-scanning-and-enforcement` branch checked out
 - Bun package manager installed (`bun --version` should succeed)
 - Git with Husky hooks enabled (`git hooks path` should show `.husky`)
-- Trivy v0.59.1 available on PATH (installed via CI job or `bun run infra:security:ci`)
+- Trivy v0.69.3 available on PATH (installed via CI job or `bun run infra:security:ci`)
 
 ### Quick Setup
 
@@ -565,7 +565,7 @@ mv /usr/local/bin/trivy.bak /usr/local/bin/trivy 2>/dev/null || true
 | Issue                              | Symptoms                                    | Resolution                                                                            |
 | ---------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------- |
 | Pre-commit hook not running        | `git commit` proceeds without security scan | Run `git hooks install` or `husky install` to re-enable hooks                         |
-| Trivy not found                    | "trivy: command not found" or similar       | Install Trivy v0.59.1 manually or run CI job first: `bun run infra:security:ci`       |
+| Trivy not found                    | "trivy: command not found" or similar       | Install Trivy v0.69.3 manually or run CI job first: `bun run infra:security:ci`       |
 | Permission denied on scripts       | Hook execution fails with permission error  | `chmod +x scripts/security/*.ts` to ensure executable                                 |
 | CI workflow fails to find artifact | "tmp/trivy-report.json not found"           | Artifact is in `tmp/` which is gitignored; re-run `bun run infra:security:ci` locally |
 | JSON parsing error in orchestrator | "Failed to parse JSON"                      | Verify `tmp/trivy-report.json` is valid: `cat tmp/trivy-report.json \| jq '.'`        |

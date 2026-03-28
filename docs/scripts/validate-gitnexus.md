@@ -14,7 +14,7 @@ any downstream consumer (AI agent, architecture reporter, drift detector) proces
 ## Usage
 
 ```bash
-bun run arch:validate:gitnexus
+bun run arch:gitnexus:validate
 ```
 
 Exits with code `0` on success, `1` on any failure.

@@ -16,7 +16,7 @@
 import { execSync } from 'node:child_process'
 import { existsSync, rmSync, writeFileSync } from 'node:fs'
 import { performance } from 'node:perf_hooks'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('benchmark-cold-generation')
 
@@ -33,12 +33,14 @@ async function main() {
   const TARGET_MS = 2000 // 2 seconds
   const results: BenchmarkResult[] = []
 
+  log.header(
+    'AI CONTEXT COLD RUN BENCHMARK',
+    'Measures ai-context generation time from scratch (no cache)'
+  )
   logger.info('Starting AI Context cold run benchmarks', { runs: RUNS, target_ms: TARGET_MS })
-
-  console.log('\n📊 AI CONTEXT COLD RUN BENCHMARK\n')
-  console.log(`Test: Generate fresh artifacts (no cache)`)
-  console.log(`Target: <${TARGET_MS}ms`)
-  console.log(`Runs: ${RUNS}\n`)
+  log.info(`Test: Generate fresh artifacts (no cache)`)
+  log.info(`Target: <${TARGET_MS}ms`)
+  log.info(`Runs: ${RUNS}`)
 
   for (let i = 1; i <= RUNS; i++) {
     // Clear cache before each cold run
@@ -68,7 +70,7 @@ async function main() {
         message: `${durationMs.toFixed(0)}ms${status === 'PASS' ? ' ✓' : ' ✗ (over target)'}`,
       })
 
-      console.log(`Run ${i}: ${results[i - 1].message}`)
+      log.info(`Run ${i}: ${results[i - 1].message}`)
     } catch (error) {
       const durationMs = performance.now() - startTime
       results.push({
@@ -79,7 +81,7 @@ async function main() {
         message: `Error: ${String(error).substring(0, 50)}...`,
       })
 
-      console.log(`Run ${i}: FAIL - ${String(error).substring(0, 50)}...`)
+      log.error(`Run ${i}: FAIL - ${String(error).substring(0, 50)}...`)
     }
   }
 
@@ -94,17 +96,17 @@ async function main() {
   const p95Index = Math.ceil(sorted.length * 0.95) - 1
   const p95Duration = sorted[p95Index]?.duration_ms || maxDuration
 
-  console.log('\n📈 BENCHMARK RESULTS\n')
-  console.log(`Passing Runs: ${passingRuns}/${RUNS}`)
-  console.log(`Average: ${Math.round(avgDuration)}ms`)
-  console.log(`Min: ${minDuration}ms`)
-  console.log(`Max: ${maxDuration}ms`)
-  console.log(`95th Percentile: ${p95Duration}ms`)
+  log.step('BENCHMARK RESULTS')
+  log.info(`Passing Runs: ${passingRuns}/${RUNS}`)
+  log.info(`Average: ${Math.round(avgDuration)}ms`)
+  log.info(`Min: ${minDuration}ms`)
+  log.info(`Max: ${maxDuration}ms`)
+  log.info(`95th Percentile: ${p95Duration}ms`)
 
   // Overall result
   const overallPass = p95Duration <= TARGET_MS
-  console.log(
-    `\nStatus: ${overallPass ? '✓ PASS' : '✗ FAIL'} (95th percentile ${overallPass ? '<=' : '>'} ${TARGET_MS}ms)`
+  log.info(
+    `Status: ${overallPass ? '\u2713 PASS' : '\u2717 FAIL'} (95th percentile ${overallPass ? '<=' : '>'} ${TARGET_MS}ms)`
   )
 
   // Save results
@@ -134,11 +136,14 @@ async function main() {
   )
 
   logger.info('Benchmark complete', { report: reportPath, status: overallPass ? 'PASS' : 'FAIL' })
-
+  log.result({ total: RUNS, passed: passingRuns, failed: RUNS - passingRuns })
+  flushAi()
   process.exit(overallPass ? 0 : 1)
 }
 
 main().catch((err) => {
   logger.error('Benchmark failed', { error: String(err) })
+  log.result({ total: 0, passed: 0, failed: 1 })
+  flushAi()
   process.exit(1)
 })

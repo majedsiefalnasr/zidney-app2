@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-03-25T16:08:38.199Z",
+  "generatedAt": "2026-03-28T16:53:15.880Z",
   "analysisMode": "changed-only",
   "changedFiles": [],
   "impactedModules": [],
@@ -8,64 +8,64 @@
   "architectureLayerMap": {},
   "recentCommits": [
     {
-      "hash": "dfc9aaf0c0dddf59856e05ba33779b028303ebdc",
-      "message": "docs(infra-028): closure — production ready",
+      "hash": "693ec8b8056da2f61eb696b1bbc32814876daffb",
+      "message": "feat(validate): add 'policy' to allowed domains for script naming validation",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T18:00:02+02:00"
+      "date": "2026-03-28T14:41:20+02:00"
     },
     {
-      "hash": "062a4336cb181907b55106704c48fd09f80dd89c",
-      "message": "feat(infra-028): implement gitnexus context-aware governance scripts",
+      "hash": "af6be87e1084a710c1b8e0372d597204ffc0bb50",
+      "message": "fix(arch): suppress decorative logger output in JSON mode for guard scripts",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T17:41:47+02:00"
+      "date": "2026-03-28T14:19:46+02:00"
     },
     {
-      "hash": "4d49c618b7706b7f77093f189592380a4ef0e0f4",
-      "message": "chore(infra-028-gitnexus-context-aware-governance): complete analyze step",
+      "hash": "a951cbfd973ed0705619f2f1ca64096c48338b4f",
+      "message": "chore(infra-29): close policy engine and governance rules layer stage",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T17:12:45+02:00"
+      "date": "2026-03-28T13:59:28+02:00"
     },
     {
-      "hash": "033a5a96356443018d2daedad2b7543cc43d0d68",
-      "message": "chore(infra-028-gitnexus-context-aware-governance): complete tasks step",
+      "hash": "bc3de2d13d240dbbb079f6c56629dc3abf769846",
+      "message": "fix(scripts): import flushAi and avoid passing undefined metrics to logger",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T17:11:59+02:00"
+      "date": "2026-03-28T13:23:39+02:00"
     },
     {
-      "hash": "85456bd305965bd04192c79f1782a6323c062d58",
-      "message": "chore(infra-028-gitnexus-context-aware-governance): complete plan step",
+      "hash": "59043bbcc6650454ced88bc693c470d27701c5c1",
+      "message": "chore(validate): improve UX for validate:ai-context-schemas (header, sections, exit wrapper)",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T16:43:04+02:00"
+      "date": "2026-03-28T00:09:47+02:00"
     },
     {
-      "hash": "d8928842493b3b09f6d425fda1c00dd78e6370f1",
-      "message": "chore(infra-028-gitnexus-context-aware-governance): complete clarify step",
+      "hash": "8bf2bcdd4e8a8f3ead3437897785a8f350c030b1",
+      "message": "chore(logger): add resultSimple API; use in ai-context-fresh; update validator & demo",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T15:42:12+02:00"
+      "date": "2026-03-28T00:05:51+02:00"
     },
     {
-      "hash": "8ce8c0ccc6f0971913717632c0e9a67ac95f67ca",
-      "message": "spec(infra-028-gitnexus-context-aware-governance): Step 1 — Specify",
+      "hash": "ea84432de8b335c9a5e0e5cf8cc612bcfd535eb8",
+      "message": "chore(hooks): run ai-guard with --ci to avoid regenerating AI-context artifacts during hooks",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T15:18:07+02:00"
+      "date": "2026-03-27T23:36:09+02:00"
     },
     {
-      "hash": "dcb074772ee4b5f5472850875bdc75b39ab7fbe0",
-      "message": "chore(arch): update architecture intelligence context artifacts",
+      "hash": "0226ff07a121ff42fd7bbfa7912658d7c88d4991",
+      "message": "chore(hooks): add --ci/--dry-run to arch:context:changed and use --ci in hooks",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T15:09:00+02:00"
+      "date": "2026-03-27T23:27:47+02:00"
     },
     {
-      "hash": "e23ed724dc7d10175609a49829ea3897e26a1668",
-      "message": "chore(infra-028-gitnexus-context-aware-governance): initialize stage branch and directory",
+      "hash": "7f6a1c06a590f2559ca98bcfa9b562a874869abf",
+      "message": "fix: update context-changed.json generation to reflect recent changes and improve file timestamp handling",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T15:03:42+02:00"
+      "date": "2026-03-27T23:10:29+02:00"
     },
     {
-      "hash": "9039cf3eba7e33e97cd036f1f2e8ade282046f29",
-      "message": "Merge pull request #76 from majedsiefalnasr/spec/infra-027-unified-governance-gate-system",
+      "hash": "0dd3fac509e9b8d6b86e4459dd78ff67d97ebe02",
+      "message": "fix(scripts): satisfy validate:scripts:ux — add headers, library markers, and use shared logger",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-25T14:37:48+02:00"
+      "date": "2026-03-27T22:55:16+02:00"
     }
   ],
   "riskIndicators": []

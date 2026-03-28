@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+/** @library-module */
 
 import { createHash } from 'node:crypto'
 import {

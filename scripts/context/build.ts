@@ -13,16 +13,20 @@
 
 import { existsSync, renameSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { assembleContext } from '../gitnexus-context'
 import type { AssembleOptions } from '../gitnexus-context.ts'
-import { assembleContext } from '../gitnexus-context.ts'
+import { exit, flushAi, log } from '../utils/logger'
+
+log.setScript('arch:context:build')
 
 const OUTPUT_PATH = resolve('docs/ai/context/gitnexus-context.json')
 const TMP_PATH = `${OUTPUT_PATH}.tmp`
 const MAX_AGE_HOURS = 24
 
 function fail(message: string): never {
-  console.error(`[context:build] FAIL: ${message}`)
-  process.exit(1)
+  log.error(`[context:build] FAIL: ${message}`)
+  log.result({ total: 1, passed: 0, failed: 1, message })
+  exit(1)
 }
 
 function isStale(): boolean {
@@ -33,6 +37,7 @@ function isStale(): boolean {
 }
 
 function main(): void {
+  log.header('CONTEXT BUILD', 'Generates gitnexus-context.json artifact')
   const args = process.argv.slice(2)
   const dryRun = args.includes('--dry-run')
   const all = args.includes('--all')
@@ -40,8 +45,10 @@ function main(): void {
 
   // Skip rebuild if artifact is fresh and --force not given
   if (!dryRun && !force && !isStale()) {
-    console.log('[context:build] OK artifact is fresh — skipping rebuild (use --force to override)')
-    process.exit(0)
+    log.info('[context:build] OK artifact is fresh — skipping rebuild (use --force to override)')
+    log.result({ total: 1, passed: 1, failed: 0, message: 'artifact is fresh' })
+    flushAi()
+    exit(0)
   }
 
   const options: AssembleOptions = {
@@ -64,7 +71,7 @@ function main(): void {
 
   if (dryRun) {
     process.stdout.write(`${json}\n`)
-    process.exit(0)
+    exit(0)
   }
 
   try {
@@ -75,8 +82,10 @@ function main(): void {
     fail(`atomic write failed — ${message}`)
   }
 
-  console.log(`[context:build] OK Written: ${OUTPUT_PATH}`)
-  process.exit(0)
+  log.success(`[context:build] OK Written: ${OUTPUT_PATH}`)
+  log.result({ total: 1, passed: 1, failed: 0 })
+  flushAi()
+  exit(0)
 }
 
 main()

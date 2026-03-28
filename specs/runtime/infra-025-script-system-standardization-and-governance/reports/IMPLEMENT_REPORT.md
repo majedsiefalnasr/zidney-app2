@@ -71,8 +71,8 @@ All 14 tasks completed. Script system governance foundation established with:
 | `scripts/prompt-qa.ts`                             | Modified        | Fixed @script→ai:validate:prompts, @domain→ai + @category/@usage           |
 | `scripts/validate/ai-context-fresh.ts`             | Modified        | Added @category validation, @usage                                         |
 | `scripts/validate/ai-context-schemas.ts`           | Modified        | Added @category validation, @usage                                         |
-| `scripts/validate/validate-gitnexus.ts`            | Modified        | Fixed @script→arch:validate:gitnexus, @domain→arch + @category/@usage      |
-| `scripts/validate/diff-script-registry.ts`         | Modified        | Fixed @script→validate:diff:registry + @category/@usage                    |
+| `scripts/validate/validate-gitnexus.ts`            | Modified        | Fixed @script→arch:gitnexus:validate, @domain→arch + @category/@usage      |
+| `scripts/validate/diff-script-registry.ts`         | Modified        | Fixed @script→validate:scripts:registry + @category/@usage                 |
 | `scripts/validate/scan-package-scripts.ts`         | Modified        | Fixed @script→validate:scan:packages + @category/@usage                    |
 | `scripts/validate/runtime-scripts.ts`              | Modified        | Fixed false-positive comment triggers                                      |
 | `.agents/agents/zidney-orchestrator.agent.md`      | Modified        | Fixed 5 stale script name references                                       |
@@ -89,14 +89,14 @@ All 14 tasks completed. Script system governance foundation established with:
 
 Full evidence in `audits/VALIDATION_REPORT.md`.
 
-| Check                          | Result                                                    |
-| ------------------------------ | --------------------------------------------------------- |
-| validate:script:naming         | ✅ PASS — all script names conform to convention          |
-| validate:script:usage          | ✅ PASS — all "bun run" references are valid              |
-| validate:script:infrastructure | ✅ PASS — all scripts have valid metadata, registry fresh |
-| dev:generate:script-docs       | ✅ PASS — 27 scripts registered                           |
-| Unit tests (refactor-scripts)  | ✅ PASS                                                   |
-| Unit tests (script validators) | ✅ PASS                                                   |
+| Check                           | Result                                                    |
+| ------------------------------- | --------------------------------------------------------- |
+| validate:scripts:naming         | ✅ PASS — all script names conform to convention          |
+| validate:scripts:usage          | ✅ PASS — all "bun run" references are valid              |
+| validate:scripts:infrastructure | ✅ PASS — all scripts have valid metadata, registry fresh |
+| dev:generate:script-docs        | ✅ PASS — 27 scripts registered                           |
+| Unit tests (refactor-scripts)   | ✅ PASS                                                   |
+| Unit tests (script validators)  | ✅ PASS                                                   |
 
 ---
 
@@ -105,4 +105,4 @@ Full evidence in `audits/VALIDATION_REPORT.md`.
 - Tenant isolation: Not applicable (script tooling only)
 - Database changes: None
 - Breaking changes: None (all old script names preserved as aliases or redirected)
-- New package.json entries: `validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure`, `validate:diff:registry`, `validate:scan:packages`, `ai:validate:prompts`, `dev:refactor:scripts`, `dev:generate:script-docs`
+- New package.json entries: `validate:scripts:naming`, `validate:scripts:usage`, `validate:scripts:infrastructure`, `validate:scripts:registry`, `validate:scan:packages`, `ai:validate:prompts`, `dev:refactor:scripts`, `dev:generate:script-docs`

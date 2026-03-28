@@ -8,7 +8,9 @@
  * - Architecture state comparison
  * - Drift detection
  * - Change reporting
- */
+ 
+ * @library-module
+*/
 
 import { createHash } from 'node:crypto'
 import type { GraphEdge } from '../../core/graph-analyzer'

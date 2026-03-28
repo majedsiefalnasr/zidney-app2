@@ -75,7 +75,7 @@
 - [x] INFRA-16 (`arch:guard`) listed as dependency
 - [x] INFRA-21 (`validate:types`) listed as dependency
 - [x] INFRA-22 (`ai-context:validate`) listed as dependency
-- [x] INFRA-25 (`validate:runtime-scripts`, `script:usage-scan`) listed as dependency
+- [x] INFRA-25 (`validate:scripts:runtime`, `script:usage-scan`) listed as dependency
 - [x] INFRA-26 (`security:scan:ci`) listed as dependency
 - [x] Dependency blocking rule stated — gate MUST NOT be implemented until all five upstream guards are passing
 
@@ -85,7 +85,7 @@
 
 - [x] Guard execution order is explicitly specified (FR-001, items 1–6)
 - [x] Report-all vs. fail-fast mode explicitly specified (Technical Constraints + FR-001)
-- [x] `governance:gate:changed` subset explicitly defined (FR-003: `arch:guard:changed` + `validate:runtime-scripts`)
+- [x] `governance:gate:changed` subset explicitly defined (FR-003: `arch:guard:changed` + `validate:scripts:runtime`)
 - [x] Warnings behavior explicitly specified (FR-001, FR-011)
 - [x] No duplicate logic requirement explicitly stated (FR-010)
 

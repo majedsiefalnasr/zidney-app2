@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 
 # T076: Run Staging Smoke Tests for MMC Dashboard
 #
@@ -26,6 +27,11 @@
 #   ./scripts/run-staging-smoke-tests.sh
 
 set -euo pipefail
+
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/run-staging-smoke-tests.sh"
 
 # ────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
@@ -250,3 +256,10 @@ log_info "Full test output: staging-test-results.log"
 echo ""
 
 exit "${TEST_EXIT_CODE}"
+
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
+exit 0

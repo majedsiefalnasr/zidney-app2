@@ -1,63 +1,171 @@
+#!/usr/bin/env bun
+
 /**
  * @script db:migrate
  * @domain db
  * @category runtime
- * @description Run database migrations via drizzle-kit push — applies pending schema changes to master_db
- * @mode manual,ci
+ * @description Validate migration inputs and delegate master migration execution guidance.
  * @usage bun run db:migrate
- * @dependencies drizzle-kit,node:crypto,node:child_process
  */
 
-import { execSync } from 'node:child_process'
-import { randomUUID } from 'node:crypto'
-import { createLogger } from '../core/logger-factory'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { exit, log } from '../utils/logger'
 
-const correlationId = randomUUID()
-const logger = createLogger('db:migrate')
-logger.setContext({ correlationId })
+log.setScript('db:migrate')
 
-const DATABASE_URL = process.env.DATABASE_URL
 const REPO_ROOT = process.cwd()
+const MASTER_MIGRATIONS = join(REPO_ROOT, 'apps/api/src/db/master/migrations')
+const TENANT_MIGRATIONS = join(REPO_ROOT, 'apps/api/src/db/tenant/migrations')
 
-function main(): void {
-  logger.info('Starting database migration')
+interface ParsedArgs {
+  workspace?: string
+  migration?: string
+  help: boolean
+}
 
-  if (!DATABASE_URL) {
-    logger.warn('Infrastructure dependency unavailable: DATABASE_URL not set', {
-      service: 'db:migrate',
-    })
-    process.exit(0)
-  }
+function parseArgs(argv: string[]): ParsedArgs {
+  const args = argv.slice(2)
+  const getValue = (prefix: string) =>
+    args.find((arg) => arg.startsWith(prefix))?.slice(prefix.length)
 
-  const args = process.argv.slice(2)
-  const migrationArg = args.find((a) => a.startsWith('--migration='))
-  const migration = migrationArg ? migrationArg.replace('--migration=', '') : undefined
-
-  const cmd = migration
-    ? `bunx drizzle-kit migrate --config=apps/api/drizzle.config.ts --name=${migration}`
-    : 'bunx drizzle-kit push --config=apps/api/drizzle.config.ts'
-
-  logger.info('Executing migration command', { cmd, migration: migration ?? 'all-pending' })
-
-  try {
-    const output = execSync(cmd, {
-      cwd: REPO_ROOT,
-      env: { ...process.env, DATABASE_URL },
-      stdio: 'pipe',
-      timeout: 120_000,
-    })
-
-    logger.info('Migration completed successfully', {
-      output: output.toString().trim().slice(0, 500),
-    })
-    process.exit(0)
-  } catch (error) {
-    logger.error('Migration failed', {
-      error: error instanceof Error ? error.message : String(error),
-    })
-    // Infra-absent graceful pass
-    process.exit(0)
+  return {
+    workspace: getValue('--workspace='),
+    migration: getValue('--migration='),
+    help: args.includes('--help') || args.includes('-h'),
   }
 }
 
-main()
+function printHelp(): void {
+  log.header(
+    'DB MIGRATE',
+    'Validates migration inputs and reports the available migration surfaces'
+  )
+  log.info('Usage: bun run db:migrate [--workspace=<slug>] [--migration=<name>]')
+  log.info('Examples:')
+  log.info('  bun run db:migrate')
+  log.info('  bun run db:migrate --migration=20260321_007_lessons.ts')
+  log.info(
+    '  bun run db:migrate --workspace=demo-school --migration=20260301_002_workflow_engine.ts'
+  )
+  log.result({ total: 1, passed: 1, failed: 0, message: 'Help displayed' })
+}
+
+function resolveMigrationPath(
+  migration: string
+): { path: string; scope: 'master' | 'tenant' } | null {
+  const masterPath = join(MASTER_MIGRATIONS, migration)
+  if (existsSync(masterPath)) {
+    return { path: masterPath, scope: 'master' }
+  }
+
+  const tenantPath = join(TENANT_MIGRATIONS, migration)
+  if (existsSync(tenantPath)) {
+    return { path: tenantPath, scope: 'tenant' }
+  }
+
+  return null
+}
+
+async function main(): Promise<void> {
+  const args = parseArgs(process.argv)
+
+  if (args.help) {
+    printHelp()
+    exit(0)
+  }
+
+  log.header('DB MIGRATE', 'Checks migration prerequisites and reports the execution path')
+
+  const databaseUrl = process.env.DATABASE_URL
+  if (!databaseUrl) {
+    log.warn('DATABASE_URL not set; skipping migration execution')
+    log.result({
+      total: 1,
+      passed: 1,
+      failed: 0,
+      warnings: 1,
+      status: 'warning',
+      message: 'Migration skipped',
+      details: {
+        infraDependent: true,
+      },
+    })
+    exit(0)
+  }
+
+  const masterExists = existsSync(MASTER_MIGRATIONS)
+  const tenantExists = existsSync(TENANT_MIGRATIONS)
+
+  if (!masterExists) {
+    log.error(`Master migration directory not found: ${MASTER_MIGRATIONS}`)
+    log.result({
+      total: 1,
+      passed: 0,
+      failed: 1,
+      message: 'Migration directories are incomplete',
+      details: {
+        masterMigrations: false,
+        tenantMigrations: tenantExists,
+      },
+    })
+    exit(1)
+  }
+
+  if (args.migration) {
+    const resolvedMigration = resolveMigrationPath(args.migration)
+    if (!resolvedMigration) {
+      log.error(`Migration not found: ${args.migration}`)
+      log.result({
+        total: 1,
+        passed: 0,
+        failed: 1,
+        message: 'Requested migration was not found',
+      })
+      exit(1)
+    }
+
+    if (resolvedMigration.scope === 'tenant' && !args.workspace) {
+      log.warn('Tenant migration selected without --workspace; reporting only')
+    }
+
+    log.step(`Resolved ${resolvedMigration.scope} migration: ${resolvedMigration.path}`)
+    log.info('Live migration execution is delegated to the API migration surface for now')
+    log.result({
+      total: 1,
+      passed: 1,
+      failed: 0,
+      warnings: resolvedMigration.scope === 'tenant' && !args.workspace ? 1 : 0,
+      status: resolvedMigration.scope === 'tenant' && !args.workspace ? 'warning' : 'success',
+      message: 'Migration prerequisites validated',
+      details: {
+        masterMigrations: masterExists,
+        tenantMigrations: tenantExists,
+        scope: resolvedMigration.scope,
+        workspaceProvided: Boolean(args.workspace),
+      },
+    })
+    exit(0)
+  }
+
+  log.info('Master and tenant migration directories are available')
+  log.info('This wrapper validates inputs and leaves live execution to the API migration runner')
+  log.result({
+    total: 2,
+    passed: masterExists ? 1 : 0 + (tenantExists ? 1 : 0),
+    failed: tenantExists ? 0 : 1,
+    warnings: 1,
+    status: tenantExists ? 'warning' : 'error',
+    message: tenantExists
+      ? 'Migration prerequisites validated; live execution delegated'
+      : 'Tenant migration directory missing',
+    details: {
+      masterMigrations: masterExists,
+      tenantMigrations: tenantExists,
+      workspaceProvided: Boolean(args.workspace),
+    },
+  })
+  exit(tenantExists ? 0 : 1)
+}
+
+void main()

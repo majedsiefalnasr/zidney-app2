@@ -6,7 +6,9 @@
  *   - exit 0 → PASS
  *   - exit non-zero with actual artifact errors → WARNING
  * NOTE-02: 60s subprocess timeout
- */
+ 
+ * @library-module
+*/
 
 import type { TaskResult } from './types.ts'
 

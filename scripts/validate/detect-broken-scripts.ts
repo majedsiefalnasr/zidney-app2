@@ -1,16 +1,16 @@
 /**
- * @script validate:scripts-infra
+ * @script validate:scripts:broken
  * @domain validate
  * @category governance
  * @description Detect missing or broken TypeScript script files referenced in root package.json
- * @usage bun run validate:scripts-infra
+ * @usage bun run validate:scripts:broken
  */
 
 import { spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, exit, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('detect-broken-scripts')
@@ -70,6 +70,10 @@ function checkFile(relPath: string): ScriptStatus {
 }
 
 function main(): void {
+  log.header(
+    'Detect broken scripts',
+    'Detect missing or broken TypeScript script files referenced in root package.json'
+  )
   const pkgPath = join(REPO_ROOT, 'package.json')
 
   let pkg: { scripts?: Record<string, string> }
@@ -79,14 +83,15 @@ function main(): void {
     logger.error('Failed to load package.json', {
       error: err instanceof Error ? err.message : String(err),
     })
-    process.exit(1)
+    exit(1)
   }
 
   const scripts = pkg.scripts ?? {}
   const results: ScriptResult[] = []
+  const scriptKeys = Object.keys(scripts)
 
   logger.info('Scanning package.json scripts for TS file references', {
-    totalScripts: Object.keys(scripts).length,
+    totalScripts: scriptKeys.length,
   })
 
   for (const [key, command] of Object.entries(scripts)) {
@@ -139,10 +144,37 @@ function main(): void {
   }
 
   if (missing > 0 || broken > 0) {
-    process.exit(1)
+    log.badge('VALIDATION FAILED', 'error')
+    log.result({
+      passed: valid,
+      failed: missing + broken,
+      total: results.length,
+      message: 'Broken scripts detected',
+      details: {
+        missing,
+        broken,
+        shell,
+        command,
+      },
+    })
+    exit(1)
   }
 
   logger.info('All TypeScript script files are VALID')
+  log.badge('VALIDATION PASSED', 'success')
+  log.result({
+    passed: valid,
+    failed: 0,
+    total: results.length,
+    message: 'All TypeScript scripts validated',
+    details: {
+      missing,
+      broken,
+      shell,
+      command,
+    },
+  })
+  exit(0)
 }
 
 main()

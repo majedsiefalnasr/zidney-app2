@@ -32,7 +32,7 @@ architecture and governance validation across local development, pre-commit, and
 
 ## Scope Delivered
 
-- `scripts/governance/gate.ts` — 6-guard sequential report-all runner (arch:guard, validate:types, validate:runtime:scripts, validate:script:usage, infra:security:ci, ai-context:validate). Exits 0 (all pass) or 1 (any fail). Never exits 2+.
+- `scripts/governance/gate.ts` — 6-guard sequential report-all runner (arch:guard, validate:types, validate:scripts:runtime, validate:scripts:usage, infra:security:ci, ai-context:validate). Exits 0 (all pass) or 1 (any fail). Never exits 2+.
 - `scripts/governance/gate-ci.ts` — CI variant with `::group::Unified Governance Gate` / `::endgroup::` / `::error::` GitHub Actions annotations. Propagates gate.ts exit code unchanged.
 - `scripts/governance/report.ts` — 3-guard informational generator (arch:health, validate:ai-context-fresh, validate:ai-context-schemas). Always exits 0. Writes `docs/governance/governance-report.md`.
 - `scripts/governance/__tests__/gate.test.ts` — 9 unit tests, all passing.

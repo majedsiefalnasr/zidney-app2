@@ -1,24 +1,22 @@
 /**
- * @script validate:script:naming
+ * @script validate:scripts:naming
  * @domain validate
  * @category governance
  * @description Validates all package.json script keys conform to the
  *   <domain>:<action>[:<scope>] naming convention. Allowed domains: db, arch,
- *   validate, ai, ci, repo, dev, infra, test. Lifecycle-exempt names are skipped.
+ *   validate, ai, ci, repo, dev, infra, test, governance, policy. Lifecycle-exempt names are skipped.
  *   Reports ALL violations before exiting non-zero.
- * @usage bun run validate:script:naming
- * @mode ci,manual
- * @dependencies node:fs,node:path,node:crypto
+ * @usage bun run validate:scripts:naming
  */
 
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, exit, log } from '../utils/logger'
 import type { ScriptEntry, ViolationRecord } from './types'
 
 const correlationId = randomUUID()
-const logger = createLogger('validate:script:naming')
+const logger = createLogger('validate:scripts:naming')
 logger.setContext({ correlationId })
 
 const REPO_ROOT = process.cwd()
@@ -35,6 +33,7 @@ export const ALLOWED_DOMAINS = new Set([
   'infra',
   'test',
   'governance',
+  'policy',
 ])
 
 /** Names exempt from validation (lifecycle scripts defined by package managers / tools) */
@@ -77,7 +76,7 @@ export const TOOLCHAIN_EXEMPT_PREFIXES = new Set([
 
 /** Full naming pattern: <domain>:<action>[:<scope>] */
 export const NAMING_RE =
-  /^(db|arch|validate|ai|ci|repo|dev|infra|test|governance):[a-z][a-z0-9-]*(:[a-z][a-z0-9-]*)?$/
+  /^(db|arch|validate|ai|ci|repo|dev|infra|test|governance|policy):[a-z][a-z0-9-]*(:[a-z][a-z0-9-]*)?$/
 
 export function collectPackageJsonFiles(repoRoot: string): string[] {
   const results: string[] = []
@@ -151,7 +150,7 @@ export function validateNaming(entries: ScriptEntry[]): ViolationRecord[] {
         message: `"${entry.name}" does not match <domain>:<action>[:<scope>] pattern`,
         hint: knownDomain
           ? `Domain "${firstSegment}" is valid — check action/scope segments`
-          : `Unknown domain "${firstSegment}". Allowed: ${[...ALLOWED_DOMAINS].join(', ')}`,
+          : `Unknown domain "${firstSegment}". Allowed: ${Array.from(ALLOWED_DOMAINS).join(', ')}`,
       })
     }
   }
@@ -160,6 +159,10 @@ export function validateNaming(entries: ScriptEntry[]): ViolationRecord[] {
 }
 
 function main(): void {
+  log.header(
+    'Validate script naming',
+    'Validates package.json script keys conform to the naming convention'
+  )
   logger.info('Starting script naming validation', { repoRoot: REPO_ROOT })
 
   const pkgFiles = collectPackageJsonFiles(REPO_ROOT)
@@ -175,24 +178,27 @@ function main(): void {
 
   if (violations.length === 0) {
     logger.info('All script names are compliant')
-    process.stdout.write('\n✓ validate:script:naming — all script names conform to convention\n')
-    process.exit(0)
+    log.badge('NAMING VALID', 'success')
+    log.progressResult(
+      { success: allEntries.length },
+      { title: 'Script Naming Validation', showPercentage: true }
+    )
+    exit(0)
   }
 
   logger.error('Script naming violations found', { count: violations.length })
-  process.stderr.write(`\n❌ validate:script:naming — ${violations.length} violation(s) found:\n\n`)
-
   for (const v of violations) {
     const pkg = v.file.replace(`${REPO_ROOT}/`, '')
-    process.stderr.write(`  [${pkg}] "${v.scriptName}"\n`)
-    process.stderr.write(`    ${v.message}\n`)
-    if (v.hint) process.stderr.write(`    Hint: ${v.hint}\n`)
-    process.stderr.write('\n')
+    logger.error(`${pkg} "${v.scriptName}" - ${v.message}`, { hint: v.hint })
   }
 
-  process.exit(1)
+  log.badge('NAMING VIOLATIONS', 'error')
+  log.progressResult(
+    { success: allEntries.length - violations.length, error: violations.length },
+    { title: 'Naming Convention Check', showPercentage: true }
+  )
+  exit(1)
 }
 
-if (import.meta.main) {
-  main()
-}
+// Run as standalone script - called directly via bun scripts/validate/script-naming.ts
+main()

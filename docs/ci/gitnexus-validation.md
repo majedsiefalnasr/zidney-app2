@@ -19,7 +19,7 @@ and semantically valid before it is consumed by AI orchestrators or architecture
 bun run arch:gitnexus:context
 
 # Then validate
-bun run arch:validate:gitnexus
+bun run arch:gitnexus:validate
 ```
 
 Exit codes:
@@ -88,5 +88,5 @@ In `.github/workflows/*.yml`, add a step after `arch:context`:
 
 ```yaml
 - name: Validate GitNexus context artifact
-  run: bun run arch:validate:gitnexus
+  run: bun run arch:gitnexus:validate
 ```

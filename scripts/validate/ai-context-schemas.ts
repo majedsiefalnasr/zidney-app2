@@ -3,18 +3,17 @@
  * @domain validate
  * @category validation
  * @description Validate that all required AI context JSON artifacts exist and are valid JSON
- * @mode manual,ci
  * @usage bun run validate:ai-context-schemas
- * @dependencies node:fs,node:path,node:crypto
  */
 
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, exit, log } from '../utils/logger'
 
 const correlationId = randomUUID()
-const logger = createLogger('validate:ai-context-schemas')
+const isAiMode = process.argv.includes('--ai')
+const logger = createLogger('validate:ai-context-schemas', isAiMode)
 logger.setContext({ correlationId })
 
 const REPO_ROOT = process.cwd()
@@ -29,18 +28,28 @@ const REQUIRED_ARTIFACTS = [
 ] as const
 
 function main(): void {
-  logger.info('Validating AI context schema artifacts', {
-    dir: AI_CONTEXT_DIR,
-    required: REQUIRED_ARTIFACTS.length,
+  log.header(
+    'Validate AI context schemas',
+    'Validate that required AI context JSON artifacts exist and are valid JSON'
+  )
+  log.section('Validation')
+  log.step('Checking required AI context artifacts')
+
+  const perfResults = [{ DIR: AI_CONTEXT_DIR, Required: REQUIRED_ARTIFACTS.length }]
+  log.table(perfResults, {
+    colors: true,
+    borderless: true,
   })
 
   const errors: Array<{ artifact: string; reason: string }> = []
+  const validationResults: Array<{ artifact: string; status: string; details: string }> = []
 
   for (const artifact of REQUIRED_ARTIFACTS) {
     const fullPath = join(AI_CONTEXT_DIR, artifact)
 
     if (!existsSync(fullPath)) {
       errors.push({ artifact, reason: 'File not found' })
+      validationResults.push({ artifact, status: '✖ FAIL', details: 'File not found' })
       logger.error('AI context artifact missing', { artifact, path: fullPath })
       continue
     }
@@ -48,13 +57,18 @@ function main(): void {
     try {
       const content = readFileSync(fullPath, 'utf-8')
       JSON.parse(content)
-      logger.info('AI context artifact valid', { artifact })
+      validationResults.push({ artifact, status: '✓ PASS', details: 'Valid JSON' })
+      // logger.info('AI context artifact valid', { artifact })
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
       errors.push({ artifact, reason })
+      validationResults.push({ artifact, status: '✖ FAIL', details: reason })
       logger.error('AI context artifact invalid JSON', { artifact, path: fullPath, reason })
     }
   }
+
+  // Display validation results in a table
+  log.table(validationResults, { title: 'AI Context Schema Validation Results', colors: true })
 
   if (errors.length > 0) {
     logger.error('AI context schema validation failed', {
@@ -63,14 +77,26 @@ function main(): void {
       failed: errors.length,
       hint: 'Run: bun run ai:context:generate to regenerate all artifacts',
     })
-    process.exit(1)
+    log.result({
+      total: REQUIRED_ARTIFACTS.length,
+      passed: REQUIRED_ARTIFACTS.length - errors.length,
+      failed: errors.length,
+      message: 'AI context schema validation failed',
+    })
+    exit(1)
   }
 
   logger.info('All AI context artifacts valid', {
     total: REQUIRED_ARTIFACTS.length,
-    passed: REQUIRED_ARTIFACTS.length,
+    validated: validationResults.length,
   })
-  process.exit(0)
+  log.result({
+    total: REQUIRED_ARTIFACTS.length,
+    passed: REQUIRED_ARTIFACTS.length,
+    failed: 0,
+    message: 'All AI context artifacts valid',
+  })
+  exit(0)
 }
 
 main()

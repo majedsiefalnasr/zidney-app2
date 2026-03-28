@@ -1,5 +1,6 @@
 /**
  * Architecture Graph Cache — Persistent caching layer for dependency graphs
+ * @library-module
  *
  * Purpose: Cache architecture dependency graphs to avoid regenerating them on every run
  *
@@ -13,6 +14,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { log } from '../utils/logger'
 
 interface CachedGraph {
   timestamp: number
@@ -84,7 +86,7 @@ export class ArchitectureGraphCache {
       writeFileSync(this.cacheFilePath, JSON.stringify(graph, null, 2), 'utf-8')
       this.misses++
     } catch (error) {
-      console.warn(`[ArchitectureGraphCache] Failed to write cache: ${String(error)}`)
+      log.warn(`[ArchitectureGraphCache] Failed to write cache: ${String(error)}`)
     }
   }
 
@@ -120,7 +122,7 @@ export class ArchitectureGraphCache {
       }
     } catch (error) {
       this.misses++
-      console.warn(`[ArchitectureGraphCache] Failed to load cache: ${String(error)}`)
+      log.warn(`[ArchitectureGraphCache] Failed to load cache: ${String(error)}`)
       return null
     }
   }
@@ -160,7 +162,7 @@ export class ArchitectureGraphCache {
       }
       this.misses++
     } catch (error) {
-      console.warn(`[ArchitectureGraphCache] Failed to invalidate cache: ${String(error)}`)
+      log.warn(`[ArchitectureGraphCache] Failed to invalidate cache: ${String(error)}`)
     }
   }
 

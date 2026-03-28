@@ -44,8 +44,8 @@ reports all failures, exits `1` if any failed.
 
 ```
 main()
-  guards = [arch:guard, validate:types, validate:runtime:scripts,
-            validate:script:usage, infra:security:ci, ai-context:validate]
+  guards = [arch:guard, validate:types, validate:scripts:runtime,
+            validate:scripts:usage, infra:security:ci, ai-context:validate]
   results = []
   FOR each guard (sequential, no short-circuit):
     spawn: await $`bun run <script>`.nothrow()
@@ -136,7 +136,7 @@ Add the following entries to the `"scripts"` section of root `package.json`. Ins
 ```json
 "governance:gate": "bun scripts/governance/gate.ts",
 "governance:gate:ci": "bun scripts/governance/gate-ci.ts",
-"governance:gate:changed": "bun run arch:guard:changed && bun run validate:runtime:scripts",
+"governance:gate:changed": "bun run arch:guard:changed && bun run validate:scripts:runtime",
 "governance:report": "bun scripts/governance/report.ts",
 ```
 
@@ -172,7 +172,7 @@ bun run governance:gate:changed || {
 **Design rationale:**
 
 - Runs unconditionally — not gated on `$CODE_FILES` — because `arch:guard:changed` internally
-  handles changed-file detection, and `validate:runtime:scripts` is also file-aware.
+  handles changed-file detection, and `validate:scripts:runtime` is also file-aware.
 - The existing `bun scripts/ai-guard.ts` block (in the "Architecture Guard" section) uses the full
   guard without `--changed`. The new `governance:gate:changed` uses `arch:guard:changed` (`--changed`
   flag). While there is some conceptual overlap, FR-010 confirms the gate is an orchestration layer —
@@ -460,9 +460,9 @@ git check-ignore -v docs/governance/governance-report.md
 ### V-9: Script Registry Compliance
 
 ```bash
-bun run validate:script:infrastructure
+bun run validate:scripts:infrastructure
 # Expected: exit 0 — new scripts have valid 5-field headers and are registered
-bun run validate:script:usage
+bun run validate:scripts:usage
 # Expected: exit 0 — all governance:* script references are valid
 ```
 
@@ -487,8 +487,8 @@ git branch -D test/governance-hook-smoke
 | -------- | ------------------- | -------------------------- | -------------------------------------------------------------------------------- |
 | 1        | Architecture Guard  | `arch:guard`               | `bun scripts/architecture-guard/architecture-guard.ts`                           |
 | 2        | Type Safety         | `validate:types`           | `bun typecheck && bun arch:type-safety-guard --json`                             |
-| 3        | Runtime Scripts     | `validate:runtime:scripts` | `bun run scripts/validate/runtime-scripts.ts`                                    |
-| 4        | Script Usage        | `validate:script:usage`    | `bun scripts/validate/script-usage.ts`                                           |
+| 3        | Runtime Scripts     | `validate:scripts:runtime` | `bun run scripts/validate/runtime-scripts.ts`                                    |
+| 4        | Script Usage        | `validate:scripts:usage`   | `bun scripts/validate/script-usage.ts`                                           |
 | 5        | Security CI         | `infra:security:ci`        | `bun scripts/security/scan-ci.ts`                                                |
 | 6        | AI Context Validate | `ai-context:validate`      | `validate:ai-context-fresh && validate:ai-context-schemas` (**alias to create**) |
 
@@ -497,7 +497,7 @@ git branch -D test/governance-hook-smoke
 | Position | Guard Name                   | Script                     |
 | -------- | ---------------------------- | -------------------------- |
 | 1        | Architecture Guard (changed) | `arch:guard:changed`       |
-| 2        | Runtime Scripts              | `validate:runtime:scripts` |
+| 2        | Runtime Scripts              | `validate:scripts:runtime` |
 
 **Report guards (FR-004):**
 

@@ -10,10 +10,10 @@
 
 ## Validation Script Execution Time Requirements
 
-- [ ] CHK001 — Are maximum acceptable wall-clock time budgets defined for `validate:script:naming` on a repository with the current number of `package.json` files? [Gap, Spec §FR-008]
-- [ ] CHK002 — Are maximum acceptable wall-clock time budgets defined for `validate:script:usage` given the full scan scope (all `.ts`, `.md`, `.yml`, `.sh`, `.json` files)? [Gap, Spec §FR-008]
+- [ ] CHK001 — Are maximum acceptable wall-clock time budgets defined for `validate:scripts:naming` on a repository with the current number of `package.json` files? [Gap, Spec §FR-008]
+- [ ] CHK002 — Are maximum acceptable wall-clock time budgets defined for `validate:scripts:usage` given the full scan scope (all `.ts`, `.md`, `.yml`, `.sh`, `.json` files)? [Gap, Spec §FR-008]
 - [ ] CHK003 — Are performance baseline assumptions documented — specifically the expected number of `package.json` files, total script count, and total file count the validators must handle? [Gap, Spec §FR-008]
-- [ ] CHK004 — Does the spec define whether `validate:script:naming` and `validate:script:usage` are required to complete within CI step timeout limits, and if so, what those limits are? [Gap, Spec §FR-008, FR-009]
+- [ ] CHK004 — Does the spec define whether `validate:scripts:naming` and `validate:scripts:usage` are required to complete within CI step timeout limits, and if so, what those limits are? [Gap, Spec §FR-008, FR-009]
 - [ ] CHK005 — Is "report-all mode" (collect all violations before exit, per Clarifications) analyzed for its performance implications — specifically, is there a cap on the maximum violation list that prevents memory exhaustion on pathologically large violation sets? [Clarity, Spec Clarifications §2, Spec §FR-008]
 
 ---
@@ -30,7 +30,7 @@
 
 ## CI Pipeline Step Overhead
 
-- [ ] CHK011 — Is the cumulative CI time budget for all four governance steps (`validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure`, `generate:script:docs`) within the existing `architecture-governance` job estimated or bounded? [Gap, Spec §FR-009]
+- [ ] CHK011 — Is the cumulative CI time budget for all four governance steps (`validate:scripts:naming`, `validate:scripts:usage`, `validate:scripts:infrastructure`, `generate:script:docs`) within the existing `architecture-governance` job estimated or bounded? [Gap, Spec §FR-009]
 - [ ] CHK012 — Does the spec specify whether the four CI checks may run in parallel within the job, or are they required to run sequentially? [Gap, Spec §FR-009]
 - [ ] CHK013 — Are requirements defined for the performance cost added to the `architecture-governance` job, which already contains `arch:guard`, `infra-audit.ts`, and `arch:health:ci` steps? [Gap, Spec §FR-009, Clarifications §3]
 - [ ] CHK014 — Is there a requirement that `generate:script:docs` (registry regeneration) must not introduce a slow I/O operation that dominates total CI job time? [Gap, Spec §FR-009]

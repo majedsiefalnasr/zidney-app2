@@ -34,7 +34,7 @@
 - **Boundaries touched:** Script layer only (`scripts/`, `docs/`, `tests/`, `package.json`).
   No API routes, no database schema, no tenant isolation, no attempt engine involvement.
 - **Why it is safe:** All changes are pure offline tooling. No runtime code paths were modified.
-  The only new runtime surface is `bun run arch:gitnexus:context` and `bun run arch:validate:gitnexus`
+  The only new runtime surface is `bun run arch:gitnexus:context` and `bun run arch:gitnexus:validate`
   which are developer/CI commands only.
 - **Constitutional guarantees intact:** Database-per-tenant unchanged. License middleware
   unchanged. Attempt engine unchanged. Version enforcement unchanged.

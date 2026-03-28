@@ -1,3 +1,4 @@
+/** @library-module */
 import type { ValidationMode } from './types'
 
 export interface ModeResolution {

@@ -12,6 +12,7 @@
  */
 
 import * as net from 'node:net'
+import { flushAi, log } from '../utils/logger'
 import { line, section, summary } from './formatter'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -186,6 +187,10 @@ export function validateArchitecture(): boolean {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
+  log.header(
+    'REPOSITORY ONBOARD',
+    'Prepares a complete local development environment in a single command'
+  )
   section('Repository Onboard')
 
   let hasError = false
@@ -211,6 +216,8 @@ async function main(): Promise<void> {
   if (validateArchitecture()) hasError = true
 
   summary(hasError ? 0 : totalChecks, totalChecks)
+  log.result({ total: totalChecks, passed: hasError ? 0 : totalChecks, failed: hasError ? 1 : 0 })
+  flushAi()
   process.exit(hasError ? 1 : 0)
 }
 

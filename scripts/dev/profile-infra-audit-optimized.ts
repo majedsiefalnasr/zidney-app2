@@ -15,6 +15,7 @@
 
 import { execSync } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
+import { flushAi, log } from '../utils/logger'
 
 interface ProfileRun {
   run: number
@@ -57,7 +58,7 @@ function runInfraAuditProfiled(
     const args = incremental ? '--incremental' : ''
     const cmd = `bun scripts/architecture/infra-audit.ts ${args} 2>&1`
 
-    console.log(`  Run ${runNumber}: executing...`)
+    log.step(`  Run ${runNumber}: executing...`)
     const output = execSync(cmd, {
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -66,11 +67,11 @@ function runInfraAuditProfiled(
     const duration = Date.now() - startTime
     const cacheHit = output.includes('cache_hitratio') || output.includes('Graph cache')
 
-    console.log(`  Run ${runNumber}: ${duration}ms (cache_hit: ${cacheHit})`)
+    log.info(`  Run ${runNumber}: ${duration}ms (cache_hit: ${cacheHit})`)
     return { duration, cacheHit }
   } catch (error) {
     const duration = Date.now() - startTime
-    console.error(`  Run ${runNumber}: FAILED (${duration}ms)`)
+    log.error(`  Run ${runNumber}: FAILED (${duration}ms)`)
     throw error
   }
 }
@@ -111,15 +112,18 @@ function analyzeResults(runs: ProfileRun[]): ProfileResult['statistics'] {
  * Main profiling function
  */
 async function profileInfraAudit(): Promise<void> {
-  console.log('\n[Profile] Infra-Audit Performance Optimization Test')
-  console.log('======================================================\n')
+  log.header(
+    'PROFILE INFRA AUDIT OPTIMIZED',
+    'Benchmarks infra-audit with incremental mode and caching'
+  )
+  log.step('[Profile] Infra-Audit Performance Optimization Test')
 
-  console.log('Target: <3000ms (95th percentile)')
-  console.log('Runs: 10 iterations\n')
+  log.info('Target: <3000ms (95th percentile)')
+  log.info('Runs: 10 iterations\n')
 
   const allRuns: ProfileRun[] = []
 
-  console.log('Running profiling tests...\n')
+  log.step('Running profiling tests...')
 
   // Run 10 iterations
   for (let i = 1; i <= 10; i++) {
@@ -132,7 +136,9 @@ async function profileInfraAudit(): Promise<void> {
         cacheHit: result.cacheHit,
       })
     } catch (_error) {
-      console.error(`Profiling failed at run ${i}`)
+      log.error(`Profiling failed at run ${i}`)
+      log.result({ total: 10, passed: i - 1, failed: 1 })
+      flushAi()
       process.exit(1)
     }
   }
@@ -164,28 +170,27 @@ async function profileInfraAudit(): Promise<void> {
   }
 
   // Display results
-  console.log('\n======================================================')
-  console.log('Profile Results (All 10 Runs)\n')
-  console.log(`  Mean:         ${result.statistics.meanMs}ms`)
-  console.log(`  Median:       ${result.statistics.medianMs}ms`)
-  console.log(`  95th %-ile:   ${result.statistics.percentile95Ms}ms`)
-  console.log(`  Min:          ${result.statistics.minMs}ms`)
-  console.log(`  Max:          ${result.statistics.maxMs}ms`)
-  console.log(`  Std Dev:      ${result.statistics.stdDevMs}ms`)
-  console.log(`  Status:       ${result.statistics.targetStatus} (target: <3000ms)\n`)
+  log.step('Profile Results (All 10 Runs)')
+  log.info(`  Mean:         ${result.statistics.meanMs}ms`)
+  log.info(`  Median:       ${result.statistics.medianMs}ms`)
+  log.info(`  95th %-ile:   ${result.statistics.percentile95Ms}ms`)
+  log.info(`  Min:          ${result.statistics.minMs}ms`)
+  log.info(`  Max:          ${result.statistics.maxMs}ms`)
+  log.info(`  Std Dev:      ${result.statistics.stdDevMs}ms`)
+  log.info(`  Status:       ${result.statistics.targetStatus} (target: <3000ms)\n`)
 
-  console.log('Cold vs. Warm Run Analysis')
-  console.log(`  Cold Run Mean  (Run 1):  ${result.coldWarming.coldMeanMs}ms`)
-  console.log(`  Warm Runs Mean (2-10):   ${result.coldWarming.warmMeanMs}ms`)
-  console.log(`  Improvement:             ${result.coldWarming.improvementPercent}%\n`)
+  log.step('Cold vs. Warm Run Analysis')
+  log.info(`  Cold Run Mean  (Run 1):  ${result.coldWarming.coldMeanMs}ms`)
+  log.info(`  Warm Runs Mean (2-10):   ${result.coldWarming.warmMeanMs}ms`)
+  log.info(`  Improvement:             ${result.coldWarming.improvementPercent}%\n`)
 
   // Detailed breakdown
-  console.log('Detailed Run Times:')
+  log.step('Detailed Run Times:')
   allRuns.forEach((run) => {
     const mode = run.isIncremental ? 'incremental' : 'cold'
     const cache = run.cacheHit ? 'hit' : 'miss'
-    const status = run.durationMs <= 3000 ? '✓' : '✗'
-    console.log(
+    const status = run.durationMs <= 3000 ? 'OK' : 'FAIL'
+    log.info(
       `  Run ${String(run.run).padStart(2)}: ${String(run.durationMs).padStart(4)}ms [${mode}/${cache}] ${status}`
     )
   })
@@ -200,23 +205,29 @@ async function profileInfraAudit(): Promise<void> {
       fs.mkdirSync('docs/reports', { recursive: true })
     }
     writeFileSync(reportPath, reportContent, 'utf-8')
-    console.log(`\n✓ Report written to: ${reportPath}`)
+    log.success(`Report written to: ${reportPath}`)
   } catch (error) {
-    console.warn(`Failed to write report: ${String(error)}`)
+    log.warn(`Failed to write report: ${String(error)}`)
   }
 
   // Exit with success if target met
   const exitCode = result.statistics.targetStatus === 'FAIL' ? 1 : 0
   if (exitCode !== 0) {
-    console.log(
-      `\n⚠ Performance target NOT met. 95th percentile: ${result.statistics.percentile95Ms}ms (target: 3000ms)`
+    log.warn(
+      `Performance target NOT met. 95th percentile: ${result.statistics.percentile95Ms}ms (target: 3000ms)`
     )
   } else {
-    console.log(
-      `\n✓ Performance target MET. 95th percentile: ${result.statistics.percentile95Ms}ms (target: 3000ms)`
+    log.success(
+      `Performance target MET. 95th percentile: ${result.statistics.percentile95Ms}ms (target: 3000ms)`
     )
   }
 
+  log.result({
+    total: result.totalRuns,
+    passed: exitCode === 0 ? result.totalRuns : 0,
+    failed: exitCode !== 0 ? result.totalRuns : 0,
+  })
+  flushAi()
   process.exit(exitCode)
 }
 
@@ -291,6 +302,7 @@ Generated by Phase 6 Optimization Profiler (T118)
 
 // Run profiler
 profileInfraAudit().catch((error) => {
-  console.error('[Profile] Fatal error:', error)
+  log.error(`[Profile] Fatal error: ${String(error)}`)
+  flushAi()
   process.exit(1)
 })

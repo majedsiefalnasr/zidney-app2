@@ -143,7 +143,7 @@ bun run ci:run-local
 
 2. Observe the output:
    - Step 1: `validate-runtime-scripts` — all scripts resolve
-   - Step 2: `validate:scripts-infra` — infrastructure scripts OK
+   - Step 2: `validate:scripts:broken` — infrastructure scripts OK
    - Step 3: `generate-script-docs` — docs are current
    - Step 4: `arch:guard` — no boundary violations
    - Step 5: `type-safety-guard` — type safety enforced
@@ -157,7 +157,7 @@ bun run ci:run-local
    │ Step │ Command         │ Status │ Exit Code
    ├──────┼─────────────────┼────────┼──────────
    │ 1    │ validate-runtime-scripts  │ 0
-   │ 2    │ validate:scripts-infra    │ 0
+   │ 2    │ validate:scripts:broken    │ 0
    ...
    │ 7    │ ci:local        │ [0 or 1, see note]
    └─ Summary: N/7 steps passed
@@ -262,7 +262,7 @@ bun run ci:run-local
    ci:local:full
    ci:local:workflow
    ci:local:list
-   validate:scripts-infra
+   validate:scripts:broken
    ci:run-local
    ```
 
@@ -354,14 +354,14 @@ It's a **fast feedback loop for developers before pushing.**
 
 ## Script Reference
 
-| Script                   | Command                           | Purpose                        |
-| ------------------------ | --------------------------------- | ------------------------------ |
-| `ci:local`               | `act --pull=false`                | Run all workflows locally      |
-| `ci:local:full`          | `act` (with pull)                 | Run with image updates         |
-| `ci:local:workflow`      | `act -j <job>`                    | Run single workflow            |
-| `ci:local:list`          | `act -l`                          | List workflows without running |
-| `validate:scripts-infra` | `bun scripts/validate-scripts...` | Check script registration      |
-| `ci:run-local`           | `bun scripts/run-local-ci.ts`     | 7-step orchestrator pipeline   |
+| Script                    | Command                           | Purpose                        |
+| ------------------------- | --------------------------------- | ------------------------------ |
+| `ci:local`                | `act --pull=false`                | Run all workflows locally      |
+| `ci:local:full`           | `act` (with pull)                 | Run with image updates         |
+| `ci:local:workflow`       | `act -j <job>`                    | Run single workflow            |
+| `ci:local:list`           | `act -l`                          | List workflows without running |
+| `validate:scripts:broken` | `bun scripts/validate-scripts...` | Check script registration      |
+| `ci:run-local`            | `bun scripts/run-local-ci.ts`     | 7-step orchestrator pipeline   |
 
 ---
 

@@ -8,6 +8,7 @@
  * - Fast module lookup
  * - Module dependency tracking
  * - Module inventory management
+ * @library-module
  */
 
 import { createHash } from 'node:crypto'
@@ -291,4 +292,27 @@ export function formatRosterReport(roster: ModuleRoster): string {
   }
 
   return lines.join('\n')
+}
+
+export interface ModuleInfo {
+  name: string
+  type: 'package' | 'app'
+  packagePath: string
+  mainFile: string
+  dependencies: string[]
+  dependents: string[]
+  version?: string
+  description?: string
+}
+
+export interface ModuleRoster {
+  timestamp: number
+  version: number
+  modules: ModuleInfo[]
+  moduleIndex: Record<string, ModuleInfo>
+  totalModuleCount: number
+  fileHashes: Record<string, string>
+  generationTimeMs: number
+  lastUpdated: number
+  nextScanRequired: boolean
 }

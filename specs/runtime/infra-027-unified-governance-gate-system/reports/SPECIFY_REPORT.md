@@ -8,7 +8,7 @@
 
 ## Summary
 
-Specification complete. INFRA-27 introduces a unified governance gate system that composes 5 existing guards (`arch:guard`, `validate:types`, `validate:runtime-scripts`, `script:usage-scan`, `security:scan:ci`, `ai-context:validate`) into a single deterministic pipeline callable via `governance:gate`, `governance:gate:ci`, and `governance:gate:changed`. The spec captures pre-commit, CI, and orchestrator integration points along with a report generation command. 5 user stories and 11 functional requirements defined. No architectural decisions required — this is a pure script-composition stage.
+Specification complete. INFRA-27 introduces a unified governance gate system that composes 5 existing guards (`arch:guard`, `validate:types`, `validate:scripts:runtime`, `script:usage-scan`, `security:scan:ci`, `ai-context:validate`) into a single deterministic pipeline callable via `governance:gate`, `governance:gate:ci`, and `governance:gate:changed`. The spec captures pre-commit, CI, and orchestrator integration points along with a report generation command. 5 user stories and 11 functional requirements defined. No architectural decisions required — this is a pure script-composition stage.
 
 ---
 
@@ -27,7 +27,7 @@ Specification complete. INFRA-27 introduces a unified governance gate system tha
 | #   | Decision                                                                                   | Rationale                                                                                            |
 | --- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
 | 1   | Gate runs all guards sequentially in report-all mode                                       | Fail-fast would hide multiple violations; report-all lets developers fix all issues in one pass      |
-| 2   | `governance:gate:changed` scoped to `arch:guard:changed` + `validate:runtime-scripts` only | Fast pre-commit feedback budget (< 10s); full security and type scans run in CI                      |
+| 2   | `governance:gate:changed` scoped to `arch:guard:changed` + `validate:scripts:runtime` only | Fast pre-commit feedback budget (< 10s); full security and type scans run in CI                      |
 | 3   | Gate is an orchestration layer only — no new validation logic                              | Prevents drift and duplication across the governance stack                                           |
 | 4   | `governance` domain registered as tracked exception to 9-domain naming policy              | Separate concern from existing domains; pending skill update tracked as risk                         |
 | 5   | Report output to `docs/governance/governance-report.md`                                    | Consistent with existing `docs/` artefact patterns; `.gitignore` treatment deferred to clarification |

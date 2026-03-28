@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 
 # T077: Deploy MMC Dashboard to Production Environment
 #
@@ -32,6 +33,11 @@
 #   ./scripts/deploy-production.sh
 
 set -euo pipefail
+
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/deploy-production.sh"
 
 # ────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
@@ -409,4 +415,9 @@ log_success "Service deployed and monitoring"
 # Clean up
 rm -f "${PLAN_FILE}"
 
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
 exit 0

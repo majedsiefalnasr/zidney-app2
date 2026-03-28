@@ -25,8 +25,8 @@ Key outcomes:
 
 - Running `bun run arch:gitnexus:context` generates `docs/ai/context/gitnexus-context.json` from live
   git state and the architecture brain.
-- Running `bun run arch:validate:gitnexus` validates the artifact in 5 steps; exits 0 = valid, 1 = invalid.
-- Running `bun run arch:validate:gitnexus` (via `ts-node`/bun) produces a human-readable CI report.
+- Running `bun run arch:gitnexus:validate` validates the artifact in 5 steps; exits 0 = valid, 1 = invalid.
+- Running `bun run arch:gitnexus:validate` (via `ts-node`/bun) produces a human-readable CI report.
 - 15 unit tests covering all 8 exported functions and CLI flag parsing pass in < 2s.
 - The orchestrator includes a bootstrap block to auto-invoke GitNexus context before implementation.
 
@@ -78,7 +78,7 @@ cat package.json | grep gitnexus
 bun run arch:gitnexus:context
 
 # Validate the generated artifact
-bun run arch:validate:gitnexus
+bun run arch:gitnexus:validate
 
 # Run with --dry-run (no file write)
 bun run scripts/gitnexus-context.ts --dry-run
@@ -142,7 +142,7 @@ That is expected in environments without the global binary. The artefact is stil
 **Purpose:** Confirm the artifact passes all 5 validation steps.
 
 1. Generate artifact first: `bun run arch:gitnexus:context`
-2. Run: `bun run arch:validate:gitnexus`
+2. Run: `bun run arch:gitnexus:validate`
 3. Observe console output from the validation pipeline
 
 **Expected:**
@@ -207,9 +207,9 @@ That is expected in environments without the global binary. The artefact is stil
 
 | Scenario                   | Trigger                                                                                     | Expected Response                                               |
 | -------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Stale artifact (>24h old)  | Manually set `generatedAt` to yesterday's ISO date, then `bun run arch:validate:gitnexus`   | Step 5 FAIL → exit code 1 with "Artifact is stale" message      |
-| Missing artifact file      | `rm docs/ai/context/gitnexus-context.json && bun run arch:validate:gitnexus`                | Step 1 FAIL → exit code 1 with "File not found" message         |
-| Corrupt JSON               | `echo "not-json" > docs/ai/context/gitnexus-context.json && bun run arch:validate:gitnexus` | Step 2 FAIL → exit code 1 with "Invalid JSON" message           |
+| Stale artifact (>24h old)  | Manually set `generatedAt` to yesterday's ISO date, then `bun run arch:gitnexus:validate`   | Step 5 FAIL → exit code 1 with "Artifact is stale" message      |
+| Missing artifact file      | `rm docs/ai/context/gitnexus-context.json && bun run arch:gitnexus:validate`                | Step 1 FAIL → exit code 1 with "File not found" message         |
+| Corrupt JSON               | `echo "not-json" > docs/ai/context/gitnexus-context.json && bun run arch:gitnexus:validate` | Step 2 FAIL → exit code 1 with "Invalid JSON" message           |
 | Missing required field     | Remove `schemaVersion` from JSON manually, then validate                                    | Step 3 FAIL → exit code 1 listing missing field                 |
 | Invalid `--output` path    | `bun run scripts/gitnexus-context.ts --output /etc/forbidden.json`                          | Process exits with error: path outside workspace boundary       |
 | Invalid `--base-ref` value | `bun run scripts/gitnexus-context.ts --base-ref "../../malicious"`                          | Process exits with error: ref failed `sanitizeRef()` validation |
@@ -245,7 +245,7 @@ To verify the CI gate script works as expected in CI:
 ```bash
 # Simulate the CI validation step
 bun run arch:gitnexus:context
-bun run arch:validate:gitnexus
+bun run arch:gitnexus:validate
 echo "Exit code: $?"
 ```
 

@@ -8,7 +8,9 @@
  * - Rule evaluation engine
  * - Violation reporting
  * - Rule matching logic
- */
+ 
+ * @library-module
+*/
 
 export interface Rule {
   name: string
@@ -278,4 +280,18 @@ export function checkRulesSatisfied(
   maxAllowed: number = 0
 ): boolean {
   return violations.length <= maxAllowed
+}
+
+export interface Rule {
+  name: string
+  description?: string
+  pattern?: RegExp
+  forbidden?: Record<string, string[]>
+}
+
+export interface ValidationViolation {
+  rule: string
+  source: string
+  target: string
+  message: string
 }

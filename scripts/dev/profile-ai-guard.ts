@@ -15,13 +15,13 @@
  */
 
 import { spawn } from 'node:child_process'
-import { createLogger } from '../core/logger-factory'
 import {
   calculatePercentile,
   calculateStdDev,
   getHealthStatus,
   Timer,
 } from '../core/performance-profiler'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('profile-ai-guard')
 
@@ -65,13 +65,14 @@ async function runAiGuard(): Promise<number> {
 }
 
 async function profileAiGuard(): Promise<void> {
+  log.header('PROFILE AI GUARD', 'Profiles ai-guard.ts execution across 10 runs')
   const NUM_RUNS = 10
   const EXPECTED_TARGET_MS = 1000 // 1 second target
   const results: ProfileResult[] = []
 
   logger.info('Starting ai-guard profiling', { runs: NUM_RUNS, target_ms: EXPECTED_TARGET_MS })
 
-  console.log(`\n📊 Profiling ai-guard.ts (${NUM_RUNS} runs)\n`)
+  log.step(`Profiling ai-guard.ts (${NUM_RUNS} runs)`)
 
   for (let i = 1; i <= NUM_RUNS; i++) {
     const _startTime = Date.now()
@@ -85,7 +86,7 @@ async function profileAiGuard(): Promise<void> {
       results.push(result)
 
       logger.info(`Run ${i} completed`, { duration_ms: duration, success: result.success })
-      console.log(`  Run ${i}: ${duration}ms ${result.success ? '✓' : '⚠'}`)
+      log.info(`  Run ${i}: ${duration}ms ${result.success ? 'OK' : 'WARN'}`)
     } catch (error) {
       results.push({
         run: i,
@@ -102,7 +103,9 @@ async function profileAiGuard(): Promise<void> {
   const failureCount = results.filter((r) => !r.success).length
 
   if (durations.length === 0) {
-    console.log('\n❌ All profiles failed')
+    log.error('All profiles failed')
+    log.result({ total: NUM_RUNS, passed: 0, failed: NUM_RUNS })
+    flushAi()
     process.exit(1)
   }
 
@@ -119,17 +122,17 @@ async function profileAiGuard(): Promise<void> {
     p99_ms: 980,
   })
 
-  console.log(`\n📈 Statistics (${durations.length}/${NUM_RUNS} successful runs):`)
-  console.log(`  Min:    ${min}ms`)
-  console.log(`  Max:    ${max}ms`)
-  console.log(`  Avg:    ${Math.round(avg)}ms`)
-  console.log(`  P95:    ${Math.round(p95)}ms`)
-  console.log(`  Std:    ${Math.round(stdDev)}ms`)
-  console.log(`  Target: ${EXPECTED_TARGET_MS}ms`)
-  console.log(`  Health: ${health}`)
+  log.step(`Statistics (${durations.length}/${NUM_RUNS} successful runs):`)
+  log.info(`  Min:    ${min}ms`)
+  log.info(`  Max:    ${max}ms`)
+  log.info(`  Avg:    ${Math.round(avg)}ms`)
+  log.info(`  P95:    ${Math.round(p95)}ms`)
+  log.info(`  Std:    ${Math.round(stdDev)}ms`)
+  log.info(`  Target: ${EXPECTED_TARGET_MS}ms`)
+  log.info(`  Health: ${health}`)
 
   if (failureCount > 0) {
-    console.log(`\n⚠️  ${failureCount} runs exceeded timeout`)
+    log.warn(`${failureCount} runs exceeded timeout`)
   }
 
   logger.info('Profiling complete', {
@@ -142,14 +145,14 @@ async function profileAiGuard(): Promise<void> {
   // Exit with status
   const passed = p95 <= EXPECTED_TARGET_MS && failureCount === 0
   if (passed) {
-    console.log(
-      `\n✅ PASS: ai-guard meets <${EXPECTED_TARGET_MS}ms target (p95: ${Math.round(p95)}ms)\n`
-    )
+    log.success(`PASS: ai-guard meets <${EXPECTED_TARGET_MS}ms target (p95: ${Math.round(p95)}ms)`)
+    log.result({ total: NUM_RUNS, passed: durations.length, failed: failureCount })
+    flushAi()
     process.exit(0)
   } else {
-    console.log(
-      `\n❌ FAIL: ai-guard exceeds <${EXPECTED_TARGET_MS}ms target (p95: ${Math.round(p95)}ms)\n`
-    )
+    log.error(`FAIL: ai-guard exceeds <${EXPECTED_TARGET_MS}ms target (p95: ${Math.round(p95)}ms)`)
+    log.result({ total: NUM_RUNS, passed: durations.length, failed: failureCount })
+    flushAi()
     process.exit(1)
   }
 }

@@ -7,11 +7,12 @@
  */
 
 import { createCacheManager } from '../core/cache-manager'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('cache-test')
 
 async function main() {
+  log.header('TEST CACHE BASIC', 'Tests that cache correctly stores and retrieves artifacts')
   logger.info('Testing cache functionality...')
 
   const cacheManager = createCacheManager('dependency-graph')
@@ -54,11 +55,11 @@ async function main() {
 
   // Test 4: Check stats
   const stats = cacheManager.getStats()
-  console.log('\n📊 CACHE STATS\n')
-  console.log(`Hits: ${stats.hits}`)
-  console.log(`Misses: ${stats.misses}`)
-  console.log(`Hit Ratio: ${(stats.hitratio * 100).toFixed(1)}%`)
-  console.log(`Expirations: ${stats.expirations}`)
+  log.step('Cache Stats')
+  log.info(`Hits: ${stats.hits}`)
+  log.info(`Misses: ${stats.misses}`)
+  log.info(`Hit Ratio: ${(stats.hitratio * 100).toFixed(1)}%`)
+  log.info(`Expirations: ${stats.expirations}`)
 
   // Test 5: Runtime dependents cache (second artifact type)
   logger.info('Test 4: Testing runtime-dependents cache')
@@ -80,22 +81,27 @@ async function main() {
   }
 
   const rtStats = rtCache.getStats()
-  console.log('\n## Runtime Dependents Cache\n')
-  console.log(`Hits: ${rtStats.hits}`)
-  console.log(`Hit Ratio: ${(rtStats.hitratio * 100).toFixed(1)}%`)
+  log.step('Runtime Dependents Cache')
+  log.info(`Hits: ${rtStats.hits}`)
+  log.info(`Hit Ratio: ${(rtStats.hitratio * 100).toFixed(1)}%`)
 
   // Overall result
   const depGraphStats = cacheManager.getStats()
   const overallSuccess = depGraphStats.hitratio > 0 && rtStats.hits > 0
 
-  console.log(
-    `\n${overallSuccess ? '✓' : '✗'} CACHE FUNCTIONALITY ${overallSuccess ? 'WORKING' : 'NEEDS DEBUGGING'}`
-  )
-
+  if (overallSuccess) {
+    log.success('CACHE FUNCTIONALITY WORKING')
+  } else {
+    log.error('CACHE FUNCTIONALITY NEEDS DEBUGGING')
+  }
+  log.result({ total: 5, passed: overallSuccess ? 5 : 3, failed: overallSuccess ? 0 : 2 })
+  flushAi()
   process.exit(overallSuccess ? 0 : 1)
 }
 
 main().catch((err) => {
   logger.error('Test failed', { error: String(err) })
+  log.result({ total: 0, passed: 0, failed: 1 })
+  flushAi()
   process.exit(1)
 })

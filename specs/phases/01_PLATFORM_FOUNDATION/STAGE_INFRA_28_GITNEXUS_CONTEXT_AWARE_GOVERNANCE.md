@@ -152,7 +152,7 @@ governance:gate
 ├── arch:context:build
 ├── arch:context:validate
 ├── arch:guard (scoped)
-├── validate:runtime-scripts (scoped)
+├── validate:scripts:runtime (scoped)
 ├── security:scan:ci (scoped)
 └── ai-context:validate
 ```

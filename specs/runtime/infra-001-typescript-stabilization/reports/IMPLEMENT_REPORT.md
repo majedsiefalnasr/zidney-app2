@@ -91,7 +91,7 @@
   `Function` type, 2 useless escapes)
 - Reformatted 6 `packages/domain-core/mmc-dashboard/queries/*.ts` files from single-line to properly
   newline-separated
-- Created `scripts/check-tsconfig-strict.sh` with `pnpm check:tsconfig` script entry — implements
+- Created `scripts/validate/check-tsconfig-strict.sh` with `pnpm check:tsconfig` script entry — implements
   SC-07 automated tsconfig conformance audit
 - All final validation gates passed
 
@@ -117,16 +117,16 @@ separate tickets for proper resolution.
 
 Full evidence in `audits/VALIDATION_REPORT.md`.
 
-| Gate                                    | Status                                                                       |
-| --------------------------------------- | ---------------------------------------------------------------------------- |
-| `bun run typecheck:src`                 | ✅ 0 errors                                                                  |
-| `bun run typecheck:tests`               | ✅ 0 errors                                                                  |
-| `bun run lint`                          | ✅ 0 errors (2142 warnings — non-blocking)                                   |
-| `bun run typecheck` (aggregator)        | ✅ EXIT 0                                                                    |
-| `bun run test:unit`                     | ✅ 416 passed / 21 skipped                                                   |
-| `bun run test:static`                   | ✅ 3 passed                                                                  |
-| `bash scripts/check-tsconfig-strict.sh` | ✅ PASS                                                                      |
-| Integration tests                       | ⚠️ ECONNREFUSED — server not running in local dev (infrastructure, not code) |
+| Gate                                             | Status                                                                       |
+| ------------------------------------------------ | ---------------------------------------------------------------------------- |
+| `bun run typecheck:src`                          | ✅ 0 errors                                                                  |
+| `bun run typecheck:tests`                        | ✅ 0 errors                                                                  |
+| `bun run lint`                                   | ✅ 0 errors (2142 warnings — non-blocking)                                   |
+| `bun run typecheck` (aggregator)                 | ✅ EXIT 0                                                                    |
+| `bun run test:unit`                              | ✅ 416 passed / 21 skipped                                                   |
+| `bun run test:static`                            | ✅ 3 passed                                                                  |
+| `bash scripts/validate/check-tsconfig-strict.sh` | ✅ PASS                                                                      |
+| Integration tests                                | ⚠️ ECONNREFUSED — server not running in local dev (infrastructure, not code) |
 
 ---
 

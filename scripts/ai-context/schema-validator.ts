@@ -2,6 +2,7 @@
  * Schema Validator - Validate generated artifacts against JSON schemas
  * Task: T015
  * Path: scripts/ai-context/schema-validator.ts
+ * @library-module
  */
 
 import type {

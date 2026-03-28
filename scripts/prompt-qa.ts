@@ -10,6 +10,9 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { exit, log } from './utils/logger'
+
+log.setScript('ai:validate:prompts')
 
 const ROOT = join(import.meta.dir, '..')
 const AGENTS_DIR = join(ROOT, '.agents', 'agents')
@@ -189,7 +192,7 @@ function checkOrphanedSkillDirs() {
 }
 
 // --- Run all checks ---
-console.log('🔍 Zidney Prompt & Agent QA Validator\n')
+log.header('PROMPT & AGENT QA VALIDATOR', 'Validates AI agent and prompt file structural integrity')
 
 checkAgentPromptParity()
 checkAgentFrontmatter()
@@ -200,13 +203,19 @@ checkOrphanedSkillDirs()
 
 // --- Report ---
 if (violations.length === 0) {
-  console.log('✅ All checks passed — 0 violations\n')
-  process.exit(0)
+  log.result({ total: 0, passed: 0, failed: 0, message: 'All checks passed — 0 violations' })
+  exit(0)
 } else {
-  console.log(`❌ ${violations.length} violation(s) found:\n`)
+  log.error(`${violations.length} violation(s) found:`)
   for (const v of violations) {
-    console.log(`  [${v.rule}] ${v.file}`)
-    console.log(`    → ${v.message}\n`)
+    log.step(`[${v.rule}] ${v.file}`)
+    log.step(`  → ${v.message}`)
   }
-  process.exit(1)
+  log.result({
+    total: violations.length,
+    passed: 0,
+    failed: violations.length,
+    message: 'Fix violations before merging.',
+  })
+  exit(1)
 }

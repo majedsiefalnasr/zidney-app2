@@ -1,3 +1,4 @@
+/** @library-module */
 import type { ArchitectureHealthAssessment } from './types'
 import { SIGNAL_ORDER } from './types'
 

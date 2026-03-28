@@ -115,7 +115,7 @@ bun test
 bun test --project=validate-scripts
 
 # Full CI suite for this stage
-bun run validate:runtime:scripts   # EXIT 0 (83 spec refs / 95 registered)
+bun run validate:scripts:runtime   # EXIT 0 (83 spec refs / 95 registered)
 bun run typecheck                  # EXIT 0
 bun run lint                       # EXIT 0
 ```
@@ -211,7 +211,7 @@ cache-clean
 | Type Check    | `bun run typecheck`                       | ✅ EXIT 0 (zero errors)                         |
 | Lint          | `bun run lint`                            | ✅ EXIT 0 (1 pre-existing warning, zero errors) |
 | Unit Tests    | `bun run test --project=validate-scripts` | ✅ 9/9 PASS                                     |
-| Runtime Guard | `bun run validate:runtime:scripts`        | ✅ EXIT 0 (83 refs / 95 registered)             |
+| Runtime Guard | `bun run validate:scripts:runtime`        | ✅ EXIT 0 (83 refs / 95 registered)             |
 
 ---
 

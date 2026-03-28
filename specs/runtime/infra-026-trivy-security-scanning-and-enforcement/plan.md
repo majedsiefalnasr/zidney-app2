@@ -84,7 +84,7 @@ All scripts use a shared helper built on `Bun.spawn()` to invoke the Trivy CLI b
 
 > **Note**: The implementation uses JSON output plus wrapper-controlled exit semantics so MEDIUM findings can be surfaced as warnings while HIGH/CRITICAL still block CI and pre-commit. For CI and orchestrator report generation, HIGH/CRITICAL infrastructure misconfigurations use the same blocking classification as HIGH/CRITICAL vulnerabilities.
 
-**Trivy version to pin**: `v0.59.1`. The CI YAML, local install docs, and validation tasks will all use this exact `TRIVY_VERSION` literal.
+**Trivy version to pin**: `v0.69.3`. The CI YAML, local install docs, and validation tasks will all use this exact `TRIVY_VERSION` literal.
 
 ---
 
@@ -156,7 +156,7 @@ security:
 **`env` section addition** (at top of `ci.yml` `env:` block):
 
 ```yaml
-TRIVY_VERSION: "v0.59.1"
+TRIVY_VERSION: "v0.69.3"
 ```
 
 **Placement**: The `security` job block is inserted immediately after **Job 4 (repo-doctor)** and before the `# GROUP 2: TESTS` divider comment.
@@ -206,7 +206,7 @@ if command -v trivy >/dev/null 2>&1; then
 else
   echo "⚠️  Trivy not installed — security scans cannot run locally."
   echo "   Install Trivy: https://trivy.dev/latest/getting-started/installation/"
-  echo "   Or install the pinned v0.59.1 release asset and verify its checksum before placing the binary on PATH."
+  echo "   Or install the pinned v0.69.3 release asset and verify its checksum before placing the binary on PATH."
   echo "   Commit blocked until Trivy is installed because secret enforcement is mandatory."
   exit 1
 fi
@@ -317,7 +317,7 @@ Not applicable.
 
 ## STRIDE Threat Model
 
-- **Spoofing**: Untrusted Trivy binaries are mitigated by downloading the pinned `v0.59.1` release asset and verifying its published checksum before installation.
+- **Spoofing**: Untrusted Trivy binaries are mitigated by downloading the pinned `v0.69.3` release asset and verifying its published checksum before installation.
 - **Tampering**: The orchestrator consumes only the sanitized JSON summary contract and fails closed on malformed, unreadable, or incomplete reports.
 - **Repudiation**: CI logs, uploaded sanitized artifacts, and git-tracked `.trivyignore` changes provide reviewable audit trails.
 - **Information Disclosure**: Secret values are never retained in persisted JSON artifacts; only sanitized metadata is stored and uploaded.

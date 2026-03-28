@@ -1,3 +1,4 @@
+/** @library-module */
 import { execSync } from 'node:child_process'
 
 export function runContextGenerationHook(): void {

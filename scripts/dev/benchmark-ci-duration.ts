@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { writeFileSync } from 'node:fs'
 /**
  * Script: CI Performance Benchmarking
  * Purpose: Measure and analyze GitHub Actions CI pipeline duration
@@ -14,6 +15,7 @@
  * 4. Validates all checks still run without skipping
  * 5. Generates performance report
  */
+import { flushAi, log } from '../utils/logger'
 
 interface CIRunMetrics {
   duration: number // seconds
@@ -57,7 +59,10 @@ interface PerformanceReport {
 }
 
 async function generateCIPerformanceReport(): Promise<void> {
-  console.log('🔍 Analyzing CI Pipeline Performance...\n')
+  log.header(
+    'CI PERFORMANCE BENCHMARK',
+    'Measures and analyzes GitHub Actions CI pipeline duration'
+  )
 
   // Simulated baseline metrics (from Phase 4 initial analysis)
   const baseline: CIRunMetrics = {
@@ -402,7 +407,7 @@ Generated: ${new Date().toISOString()}
   // Write report
   const reportPath = 'docs/reports/CI_PERFORMANCE_REPORT.md'
   writeFileSync(reportPath, reportContent)
-  console.log(`✅ CI Performance Report: ${reportPath}\n`)
+  log.success(`CI Performance Report: ${reportPath}`)
 
   // Also create a dashboard JSON
   const dashboardData = {
@@ -435,25 +440,34 @@ Generated: ${new Date().toISOString()}
     dashboardPath,
     `# CI Performance Dashboard\n\n\`\`\`json\n${JSON.stringify(dashboardData, null, 2)}\n\`\`\`\n`
   )
-  console.log(`✅ CI Performance Dashboard: ${dashboardPath}\n`)
+  log.success(`CI Performance Dashboard: ${dashboardPath}`)
 
   // Print summary
-  console.log('📊 PERFORMANCE SUMMARY')
-  console.log('================================')
-  console.log(`Baseline Duration:      ${Math.round(baseline.duration / 60)} minutes`)
-  console.log(`Optimized Duration:     ${Math.round(optimized.duration / 60)} minutes`)
-  console.log(
+  log.step('PERFORMANCE SUMMARY')
+  log.info(`Baseline Duration:      ${Math.round(baseline.duration / 60)} minutes`)
+  log.info(`Optimized Duration:     ${Math.round(optimized.duration / 60)} minutes`)
+  log.info(
     `Total Savings:          ${Math.round(durationSavings / 60)} minutes (${report.savings.percentReduction}%)`
   )
-  console.log(
+  log.info(
     `Critical Path:          ${Math.round(baseline.criticalPath / 60)} → ${Math.round(optimized.criticalPath / 60)} min`
   )
-  console.log(`Parallel Groups:        1 → 4`)
-  console.log(`Cache Hit Ratio:        0% → ${Math.round(optimized.cacheHits * 100)}%`)
-  console.log(
+  log.info(`Parallel Groups:        1 → 4`)
+  log.info(`Cache Hit Ratio:        0% → ${Math.round(optimized.cacheHits * 100)}%`)
+  log.info(
     `Jobs Validated:         ${report.jobStatus.filter((j) => j.status === '✓').length}/${report.jobStatus.length}`
   )
-  console.log('\n✅ Phase 4 Complete: CI Pipeline Optimization\n')
+  log.success('Phase 4 Complete: CI Pipeline Optimization')
+  log.result({
+    total: report.jobStatus.length,
+    passed: report.jobStatus.filter((j) => j.status === '✓').length,
+    failed: 0,
+  })
+  flushAi()
 }
 
-generateCIPerformanceReport().catch(console.error)
+generateCIPerformanceReport().catch((err) => {
+  log.error(`CI benchmark failed: ${String(err)}`)
+  flushAi()
+  process.exit(1)
+})

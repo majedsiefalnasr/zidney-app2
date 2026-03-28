@@ -8,7 +8,9 @@
  * - JSON structure validation
  * - Artifact-specific schema enforcement
  * - Error reporting with context
- */
+ 
+ * @library-module
+*/
 
 export interface ValidationResult {
   valid: boolean
@@ -361,3 +363,36 @@ export function formatValidationErrors(result: ValidationResult): string {
 
   return lines.join('\n')
 }
+
+export interface ValidationResult {
+  valid: boolean
+  errors: ValidationError[]
+  warnings: string[]
+}
+
+export interface ValidationError {
+  path: string
+  message: string
+  expected?: string
+  actual?: string
+}
+
+export interface SchemaDefinition {
+  type: 'object' | 'array' | 'string' | 'number' | 'boolean'
+  required?: string[]
+  properties?: Record<string, SchemaDefinition>
+  items?: SchemaDefinition
+  minItems?: number
+  maxItems?: number
+  minLength?: number
+  maxLength?: number
+  pattern?: string
+  enum?: unknown[]
+  minimum?: number
+  maximum?: number
+  additionalProperties?: boolean | SchemaDefinition
+}
+
+/**
+ * Validate JSON object against a schema definition
+ */

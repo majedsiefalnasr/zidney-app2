@@ -12,7 +12,7 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, exit, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('dev:generate:script-docs')
@@ -135,6 +135,10 @@ export function generateRegistry(metas: ScriptMeta[]): string {
 }
 
 function main(): void {
+  log.header(
+    'SCRIPT REGISTRY GENERATOR',
+    'Generates docs/scripts/SCRIPT_REGISTRY.md from @script metadata'
+  )
   logger.info('Generating script registry', { scriptsDir: SCRIPTS_DIR })
 
   if (!existsSync(DOCS_DIR)) {
@@ -182,7 +186,8 @@ function main(): void {
     for (const v of violations) {
       process.stderr.write(`${v}\n\n`)
     }
-    process.exit(1)
+    log.result({ total: metas.length, passed: 0, failed: violations.length })
+    exit(1)
   }
 
   const registry = generateRegistry(metas)
@@ -192,6 +197,8 @@ function main(): void {
   process.stdout.write(
     `\n✓ Registry written to docs/scripts/SCRIPT_REGISTRY.md (${metas.length} scripts)\n`
   )
+  log.result({ total: metas.length, passed: metas.length, failed: 0 })
+  exit(0)
 }
 
 if (import.meta.main) {

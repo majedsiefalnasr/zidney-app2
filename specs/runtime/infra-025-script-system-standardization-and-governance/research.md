@@ -19,20 +19,20 @@ This document captures empirical findings from scanning the current repository s
 
 The following `.ts` scripts exist directly at `scripts/` root — **not** under a `scripts/<domain>/` subfolder. They lack the required `@script`, `@domain`, `@category`, `@usage` metadata headers and are flagged for header additions.
 
-| File                                 | Current Package.json Name                               |
-| ------------------------------------ | ------------------------------------------------------- |
-| `scripts/ai-guard.ts`                | `ai-guard` (non-compliant)                              |
-| `scripts/architecture-diff.ts`       | (invoked directly, no governed name)                    |
-| `scripts/check-store-cycles.ts`      | `check:store-cycles` (non-compliant domain)             |
-| `scripts/check-tsconfig-strict.sh`   | (shell, exempt from TS header requirement)              |
-| `scripts/generate-ai-context.ts`     | `ai-context:generate` (non-compliant)                   |
-| `scripts/gitnexus-context.ts`        | `gitnexus:context` (non-compliant domain)               |
-| `scripts/infra-audit.ts`             | `arch:audit` (compliant), also aliased as `infra-audit` |
-| `scripts/prompt-qa.ts`               | (no package.json entry found)                           |
-| `scripts/run-local-ci.ts`            | `ci:run-local` (compliant format)                       |
-| `scripts/run-staging-smoke-tests.sh` | `run-staging-smoke-tests` (non-compliant)               |
-| `scripts/type-safety-guard.ts`       | `type-safety-guard` (non-compliant)                     |
-| `scripts/architecture-diff.ts`       | (called directly from CI, no package.json wrapper)      |
+| File                                        | Current Package.json Name                               |
+| ------------------------------------------- | ------------------------------------------------------- |
+| `scripts/ai-guard.ts`                       | `ai-guard` (non-compliant)                              |
+| `scripts/architecture-diff.ts`              | (invoked directly, no governed name)                    |
+| `scripts/check-store-cycles.ts`             | `check:store-cycles` (non-compliant domain)             |
+| `scripts/validate/check-tsconfig-strict.sh` | (shell, exempt from TS header requirement)              |
+| `scripts/generate-ai-context.ts`            | `ai-context:generate` (non-compliant)                   |
+| `scripts/gitnexus-context.ts`               | `gitnexus:context` (non-compliant domain)               |
+| `scripts/infra-audit.ts`                    | `arch:audit` (compliant), also aliased as `infra-audit` |
+| `scripts/prompt-qa.ts`                      | (no package.json entry found)                           |
+| `scripts/run-local-ci.ts`                   | `ci:run-local` (compliant format)                       |
+| `scripts/run-staging-smoke-tests.sh`        | `run-staging-smoke-tests` (non-compliant)               |
+| `scripts/type-safety-guard.ts`              | `type-safety-guard` (non-compliant)                     |
+| `scripts/architecture-diff.ts`              | (called directly from CI, no package.json wrapper)      |
 
 ### Domain Subdirectory Contents
 
@@ -188,8 +188,8 @@ The root `package.json` defines **113 script entries** as of the research scan.
 
 - **Current command:** `bun run scripts/validate/runtime-scripts.ts`
 - **Issue:** No domain format, uses hyphen
-- **New name:** `validate:runtime:scripts`
-- **Note:** The script header currently has `@script validate-runtime-scripts` — must be updated to `@script validate:runtime:scripts`
+- **New name:** `validate:scripts:runtime`
+- **Note:** The script header currently has `@script validate-runtime-scripts` — must be updated to `@script validate:scripts:runtime`
 
 #### `run-staging-smoke-tests`
 
@@ -206,7 +206,7 @@ The root `package.json` defines **113 script entries** as of the research scan.
 #### `gitnexus:validate`
 
 - **Current command:** `bun scripts/validate/validate-gitnexus.ts`
-- **New name:** `arch:validate:gitnexus`
+- **New name:** `arch:gitnexus:validate`
 
 #### `hygiene:report`
 
@@ -222,7 +222,7 @@ The root `package.json` defines **113 script entries** as of the research scan.
 
 #### `check:tsconfig`
 
-- **Current command:** `bash scripts/check-tsconfig-strict.sh`
+- **Current command:** `bash scripts/validate/check-tsconfig-strict.sh`
 - **Issue:** `check` not in allowed domains
 - **New name:** `validate:tsconfig`
 
@@ -273,15 +273,15 @@ These are all lifecycle-exempt. **Zero non-compliant governed scripts found in w
 
 - **Current `@script`:** `validate:detect-broken`
 - **Purpose:** Detects TypeScript script files referenced in root `package.json` that do not exist on disk
-- **Status:** Partially functional, different scope from the new `validate:script:usage` (which also checks non-package.json invocation sites)
-- **Action:** Superseded by `validate:script:usage` but can remain as a utility; its `@script` name needs to be updated to comply
+- **Status:** Partially functional, different scope from the new `validate:scripts:usage` (which also checks non-package.json invocation sites)
+- **Action:** Superseded by `validate:scripts:usage` but can remain as a utility; its `@script` name needs to be updated to comply
 
 ### `scripts/validate/runtime-scripts.ts`
 
 - **Current `@script`:** `validate-runtime-scripts`
 - **Purpose:** CI guard verifying that all `bun run <script>` references in `specs/runtime/**` exist in root `package.json`
 - **Status:** Name non-compliant; different scope than new validators (it checks specs directory, not all scan surfaces)
-- **Action:** Rename to `validate:runtime:scripts`; update header
+- **Action:** Rename to `validate:scripts:runtime`; update header
 
 ### `scripts/validate/scan-package-scripts.ts`
 
@@ -293,7 +293,7 @@ These are all lifecycle-exempt. **Zero non-compliant governed scripts found in w
 
 - **Purpose:** Diffs script registry
 - **Status:** Exists but no active package.json entry
-- **Action:** Can be absorbed into `validate:script:infrastructure`
+- **Action:** Can be absorbed into `validate:scripts:infrastructure`
 
 ---
 

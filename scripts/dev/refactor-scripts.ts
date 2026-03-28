@@ -16,7 +16,7 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, exit, log } from '../utils/logger'
 import type { MigrationEntry } from '../validate/types'
 
 const correlationId = randomUUID()
@@ -247,6 +247,10 @@ export function writeReport(
 // ---------------------------------------------------------------------------
 
 function main(): void {
+  log.header(
+    'REFACTOR SCRIPTS',
+    'Applies SCRIPT_MIGRATION_MAP to rename bun run repo:references across the repository'
+  )
   if (DRY_RUN) {
     logger.info('Running in DRY RUN mode — no files will be written')
   }
@@ -254,7 +258,7 @@ function main(): void {
   if (!existsSync(MIGRATION_MAP_PATH)) {
     logger.error('Migration map not found', { path: MIGRATION_MAP_PATH })
     process.stderr.write(`\n❌ Migration map not found: ${MIGRATION_MAP_PATH}\n`)
-    process.exit(1)
+    exit(1)
   }
 
   const mapContent = readFileSync(MIGRATION_MAP_PATH, 'utf-8')
@@ -285,10 +289,13 @@ function main(): void {
 
   if (remnants.length > 0) {
     logger.error('Unresolved references remain', { count: remnants.length })
-    process.exit(1)
+    log.result({ total: migrations.length, passed: summaries.length, failed: remnants.length })
+    exit(1)
   }
 
   logger.info('Refactor complete', { changed: summaries.length, dryRun: DRY_RUN })
+  log.result({ total: migrations.length, passed: summaries.length, failed: 0 })
+  exit(0)
 }
 
 if (import.meta.main) {

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# START: Script execution
 #
 # setup-act-local.sh - Configure act (GitHub Actions local runner) for Zidney
 #
@@ -14,6 +15,11 @@
 #
 
 set -euo pipefail
+
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/../utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/ci/setup-act-local.sh"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 SECRETS_FILE="$SCRIPT_DIR/.secrets"
@@ -126,3 +132,10 @@ echo "  act -j lint"
 echo "  act -j typecheck"
 echo "  act -W .github/workflows/hard-mode-guard.yml"
 echo ""
+
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
+exit 0

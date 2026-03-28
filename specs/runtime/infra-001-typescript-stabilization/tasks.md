@@ -345,7 +345,7 @@ CLOSED.
       same line as the directive (not on a preceding line); this is the canonical CL-05 format after
       amendment (see spec.md CL-05 and plan.md Design Decision 6)
 - [x] T087 Create a CI-executable tsconfig inheritance audit script at
-      `scripts/check-tsconfig-strict.sh`: the script must `grep` all `tsconfig.json` and
+      `scripts/validate/check-tsconfig-strict.sh`: the script must `grep` all `tsconfig.json` and
       `tsconfig.app.json` files in `apps/` and `packages/` for any occurrence of `"strict": false`,
       `"noImplicitAny": false`, `"strictNullChecks": false`, or `"noUncheckedIndexedAccess": false`;
       the script exits non-zero (and prints the violating file + line) if any such weakening

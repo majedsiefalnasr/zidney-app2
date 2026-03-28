@@ -1,3 +1,4 @@
+/** @library-module */
 import { describe, expect, it } from 'bun:test'
 import { $ } from 'bun'
 

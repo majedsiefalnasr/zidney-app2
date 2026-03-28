@@ -67,41 +67,41 @@
 
 ### specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/tasks.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (1x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (1x)
 
 ### specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/research.md
 
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (1x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (1x)
 
 ### specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/guides/TESTING_GUIDE.md
 
 - `bun run gitnexus:context` → `bun run arch:gitnexus:context` (6x)
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (8x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (8x)
 - `bun run vitest` → `bun run test` (2x)
 
 ### specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/plan.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (1x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (1x)
 - `bun run gitnexus:context` → `bun run arch:gitnexus:context` (4x)
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (3x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (3x)
 
 ### specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/spec.md
 
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (4x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (4x)
 
 ### specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/PR_SUMMARY.md
 
 - `bun run gitnexus:context` → `bun run arch:gitnexus:context` (1x)
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (1x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (1x)
 - `bun run vitest` → `bun run test` (3x)
 
 ### specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/reports/SPECIFY_REPORT.md
 
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (1x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (1x)
 
 ### specs/runtime/infra-024-gitnexus-context-integration-and-agent-enablement/reports/IMPLEMENT_REPORT.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (1x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (1x)
 - `bun run vitest` → `bun run test` (1x)
 
 ### specs/runtime/infra-007-module-boundaries/audits/ANALYZE_REPORT_ATTEMPT6_SPECKIT.md
@@ -240,17 +240,17 @@
 
 ### specs/runtime/infra-023-local-ci-simulation-with-act/tasks.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (2x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (2x)
 
 ### specs/runtime/infra-023-local-ci-simulation-with-act/plan.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (3x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (3x)
 - `bun run type-safety-guard` → `bun run arch:type-safety-guard` (1x)
 - `bun run generate-script-docs` → `bun run dev:generate:script-docs` (1x)
 
 ### specs/runtime/infra-023-local-ci-simulation-with-act/reports/IMPLEMENT_REPORT.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (1x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (1x)
 
 ### specs/runtime/infra-002-audit-checklist/audits/VALIDATION_REPORT.md
 
@@ -298,13 +298,13 @@
 
 ### specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/VALIDATION_REPORT.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (2x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (2x)
 
 ### specs/runtime/fix-01-runtime-script-recovery-and-validation/tasks.md
 
 - `bun run db:pool-status` → `bun run db:status:pool` (1x)
 - `bun run db:validate-licenses` → `bun run db:validate:licenses` (1x)
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (3x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (3x)
 - `bun run generate-script-docs` → `bun run dev:generate:script-docs` (3x)
 - `bun run seed-dashboard-test-data` → `bun run dev:seed:dashboard-test-data` (1x)
 - `bun run maintenance:cache-clean` → `bun run infra:cache:clean` (1x)
@@ -314,7 +314,7 @@
 - `bun run db:pool-status` → `bun run db:status:pool` (4x)
 - `bun run db:validate-licenses` → `bun run db:validate:licenses` (2x)
 - `bun run ai-context:refresh` → `bun run ai:context:refresh` (1x)
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (4x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (4x)
 - `bun run generate-script-docs` → `bun run dev:generate:script-docs` (2x)
 - `bun run seed-dashboard-test-data` → `bun run dev:seed:dashboard-test-data` (1x)
 - `bun run maintenance:cache-clean` → `bun run infra:cache:clean` (2x)
@@ -329,13 +329,13 @@
 
 - `bun run db:pool-status` → `bun run db:status:pool` (2x)
 - `bun run db:validate-licenses` → `bun run db:validate:licenses` (2x)
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (3x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (3x)
 - `bun run generate-script-docs` → `bun run dev:generate:script-docs` (1x)
 - `bun run seed-dashboard-test-data` → `bun run dev:seed:dashboard-test-data` (1x)
 
 ### specs/runtime/fix-01-runtime-script-recovery-and-validation/PR_SUMMARY.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (2x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (2x)
 
 ### specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md
 
@@ -349,7 +349,7 @@
 - `bun run ai-runtime:status` → `bun run ai:runtime:status` (1x)
 - `bun run ai-runtime:refresh` → `bun run ai:runtime:refresh` (1x)
 - `bun run ai-runtime:validate` → `bun run ai:runtime:validate` (1x)
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (1x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (1x)
 - `bun run ai-guard` → `bun run ai:guard` (1x)
 - `bun run type-safety-guard` → `bun run arch:type-safety-guard` (1x)
 - `bun run generate-script-docs` → `bun run dev:generate:script-docs` (1x)
@@ -373,7 +373,7 @@
 
 ### specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/IMPLEMENT_REPORT.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (1x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (1x)
 - `bun run generate-script-docs` → `bun run dev:generate:script-docs` (1x)
 - `bun run maintenance:cache-clean` → `bun run infra:cache:clean` (1x)
 
@@ -568,7 +568,7 @@
 
 ### specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_24_GITNEXUS_CONTEXT_INTEGRATION_AND_AGENT_ENABLEMENT.md
 
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (1x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (1x)
 
 ### specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_06_ARCHITECTURE_GUARD.md
 
@@ -591,15 +591,15 @@
 
 - `bun run db:pool-status` → `bun run db:status:pool` (1x)
 - `bun run db:validate-licenses` → `bun run db:validate:licenses` (1x)
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (2x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (2x)
 - `bun run generate-script-docs` → `bun run dev:generate:script-docs` (2x)
 - `bun run seed-dashboard-test-data` → `bun run dev:seed:dashboard-test-data` (1x)
 
 ### .agents/agents/zidney-orchestrator.agent.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (1x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (1x)
 - `bun run gitnexus:context` → `bun run arch:gitnexus:context` (2x)
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (2x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (2x)
 
 ### docs/database/LICENSES_MIGRATION_GUIDE.md
 
@@ -608,7 +608,7 @@
 ### docs/ci/gitnexus-validation.md
 
 - `bun run gitnexus:context` → `bun run arch:gitnexus:context` (7x)
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (2x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (2x)
 
 ### docs/operations/LICENSES_OPERATIONAL_RUNBOOK.md
 
@@ -649,7 +649,7 @@
 ### docs/ai/gitnexus.md
 
 - `bun run gitnexus:context` → `bun run arch:gitnexus:context` (7x)
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (2x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (2x)
 
 ### docs/scripts/generate-script-docs.md
 
@@ -670,7 +670,7 @@
 ### docs/scripts/validate-gitnexus.md
 
 - `bun run gitnexus:context` → `bun run arch:gitnexus:context` (6x)
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (1x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (1x)
 
 ### docs/scripts/README.md
 
@@ -682,7 +682,7 @@
 
 ### docs/scripts/gitnexus-validate.md
 
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (2x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (2x)
 
 ### docs/scripts/validate-ai-context-fresh.md
 
@@ -696,7 +696,7 @@
 
 ### docs/scripts/validate-runtime-scripts.md
 
-- `bun run validate-runtime-scripts` → `bun run validate:runtime:scripts` (2x)
+- `bun run validate-runtime-scripts` → `bun run validate:scripts:runtime` (2x)
 
 ### docs/scripts/seed-dashboard-test-data.md
 
@@ -705,7 +705,7 @@
 ### docs/audit-reports/AI_SYSTEM_AUDIT_REPORT.md
 
 - `bun run gitnexus:context` → `bun run arch:gitnexus:context` (1x)
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (1x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (1x)
 
 ### scripts/architecture-health/collectors/validation-governance.ts
 
@@ -791,7 +791,7 @@
 ### AGENTS.md
 
 - `bun run gitnexus:context` → `bun run arch:gitnexus:context` (1x)
-- `bun run gitnexus:validate` → `bun run arch:validate:gitnexus` (1x)
+- `bun run gitnexus:validate` → `bun run arch:gitnexus:validate` (1x)
 
 ### apps/mmc/README.md
 

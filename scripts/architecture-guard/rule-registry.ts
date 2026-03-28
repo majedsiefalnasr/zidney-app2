@@ -1,3 +1,4 @@
+/** @library-module */
 import { circularDependencyRule } from './rules/circular-dependency.rule'
 import { dependencyBoundariesRule } from './rules/dependency-boundaries.rule'
 import { nonNegotiablesRule } from './rules/non-negotiables.rule'

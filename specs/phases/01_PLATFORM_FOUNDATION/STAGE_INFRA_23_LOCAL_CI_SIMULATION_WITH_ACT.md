@@ -16,7 +16,7 @@ Scope Delivered:
 - ✅ Local CI simulation via `act` v0.2.84 with Docker v29.2.1
 - ✅ 7-step governance orchestrator (`scripts/run-local-ci.ts`) — Docker validation, fail-forward reporting
 - ✅ Developer reference documentation (`docs/ci/local-ci.md`) — 2,500+ words
-- ✅ 6 npm scripts: `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:list`, `validate:scripts-infra`, `ci:run-local`
+- ✅ 6 npm scripts: `ci:local`, `ci:local:full`, `ci:local:workflow`, `ci:local:list`, `validate:scripts:broken`, `ci:run-local`
 - ✅ Infrastructure governance enforcement (script registration, .act.secrets gitignoring)
 - ✅ Mandatory pre-closure gate (non-bypassable, enforces local CI validation)
 - ✅ Complete acceptance testing suite (T015: Docker, act, containers, state validation; T016: failure modes)

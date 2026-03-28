@@ -1,3 +1,4 @@
+/** @library-module */
 import type { GovernanceCommandSpec } from './source-runner'
 import { resolveGovernanceCommand } from './source-runner'
 import type { HealthFinding } from './types'

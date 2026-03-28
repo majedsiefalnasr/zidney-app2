@@ -51,7 +51,7 @@ Technical plan produced for INFRA-026. This is a pure INFRA stage: 5 TypeScript 
 | 4   | Pre-commit scope: `scan-deps` only (not `scan-ci`)                               | 30-second budget constraint; full scan reserved for CI where time is less critical                                                      |
 | 5   | CI: manual curl install (not `aquasecurity/trivy-action`)                        | Avoids action abstraction; keeps CI step aligned with local dev invocation pattern                                                      |
 | 6   | Security job added to `ci.yml` Group 1 (not separate file)                       | Clarification Q4: single workflow file, parallel with lint/typecheck/arch-guard                                                         |
-| 7   | Trivy version pinned as `TRIVY_VERSION: "v0.59.1"` in CI env                     | SC-001 — supply chain protection; version string determined at implementation time                                                      |
+| 7   | Trivy version pinned as `TRIVY_VERSION: "v0.69.3"` in CI env                     | SC-001 — supply chain protection; version string determined at implementation time                                                      |
 | 8   | Orchestrator gate: CRITICAL blocks, HIGH warns only                              | Clarification aligns with FR-008; HIGH already blocks CI merge so orchestrator gate adds only CRITICAL hard-block                       |
 
 ---

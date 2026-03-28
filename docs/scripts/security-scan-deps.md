@@ -31,7 +31,7 @@ not distort results.
 
 ## Prerequisites
 
-- Trivy `v0.59.1` or a CLI-compatible version available on `PATH`
+- Trivy `v0.69.3` or a CLI-compatible version available on `PATH`
 - A tracked lockfile or dependency manifest for vulnerability analysis
 
 ## Output

@@ -63,9 +63,9 @@ Triggers: `pull_request` (main, develop), `push` (main, develop), nightly schedu
 | 11   | Run AI Execution Validation          | `bun ai:validate --ci`                           |
 | 12   | Upload AI Execution Artifact         | `actions/upload-artifact@v4` (always)            |
 | 13   | Publish AI Execution Summary         | shell summary to `$GITHUB_STEP_SUMMARY` (always) |
-| 14   | Validate Script Naming Convention    | `bun run validate:script:naming`                 |
-| 15   | Validate Script Usages               | `bun run validate:script:usage`                  |
-| 16   | Validate Script Infrastructure       | `bun run validate:script:infrastructure`         |
+| 14   | Validate Script Naming Convention    | `bun run validate:scripts:naming`                |
+| 15   | Validate Script Usages               | `bun run validate:scripts:usage`                 |
+| 16   | Validate Script Infrastructure       | `bun run validate:scripts:infrastructure`        |
 | 17   | Verify Script Registry Generation    | `bun run dev:generate:script-docs`               |
 
 **Total: 17 steps. No "Unified Governance Gate" step exists.**
@@ -105,8 +105,8 @@ There is no overlap — `gate.ts` MUST NOT import from `governance-validator.ts`
 | `arch:health`                 | `bun scripts/architecture-health/architecture-health.ts`                   |
 | `arch:health:ci`              | `bun scripts/architecture-health/architecture-health.ts --ci`              |
 | `validate:types`              | `bun typecheck && bun arch:type-safety-guard --json`                       |
-| `validate:runtime:scripts`    | `bun run scripts/validate/runtime-scripts.ts`                              |
-| `validate:script:usage`       | `bun scripts/validate/script-usage.ts`                                     |
+| `validate:scripts:runtime`    | `bun run scripts/validate/runtime-scripts.ts`                              |
+| `validate:scripts:usage`      | `bun scripts/validate/script-usage.ts`                                     |
 | `infra:security:ci`           | `bun scripts/security/scan-ci.ts`                                          |
 | `validate:ai-context-fresh`   | `bun run scripts/validate/ai-context-fresh.ts`                             |
 | `validate:ai-context-schemas` | `bun run scripts/validate/ai-context-schemas.ts`                           |
@@ -116,7 +116,7 @@ There is no overlap — `gate.ts` MUST NOT import from `governance-validator.ts`
 - `ai-context:validate` — alias chaining `validate:ai-context-fresh && validate:ai-context-schemas`
 - `governance:gate` — `bun scripts/governance/gate.ts`
 - `governance:gate:ci` — `bun scripts/governance/gate-ci.ts`
-- `governance:gate:changed` — single-line shell: `bun run arch:guard:changed && bun run validate:runtime:scripts`
+- `governance:gate:changed` — single-line shell: `bun run arch:guard:changed && bun run validate:scripts:runtime`
 - `governance:report` — `bun scripts/governance/report.ts`
 
 ---

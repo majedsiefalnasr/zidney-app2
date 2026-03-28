@@ -1,29 +1,21 @@
+#!/usr/bin/env bun
+
 /**
- * @script arch:validate:gitnexus
+ * @script arch:gitnexus:validate
  * @domain arch
  * @category governance
- * @description Validates the gitnexus-context.json artifact against the JSON Schema and
- *   performs structural integrity checks. Exits with code 0 if valid, 1 if invalid.
- *   Designed to run as a CI gate before any AI agent consumes the context artifact.
- * @mode cli
- * @usage bun run arch:validate:gitnexus
- * @dependencies node:fs, node:path, docs/ai/context/gitnexus-context.json,
- *   docs/ai/gitnexus-context.schema.json
+ * @description Validates the gitnexus-context.json artifact for file presence, structure, semantics, and freshness.
+ * @usage bun run arch:gitnexus:validate
  */
 
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { exit, log } from '../utils/logger'
 
-// ---------------------------------------------------------------------------
-// Paths
-// ---------------------------------------------------------------------------
+log.setScript('arch:gitnexus:validate')
 
 const CONTEXT_PATH = resolve(process.cwd(), 'docs/ai/context/gitnexus-context.json')
 const SCHEMA_PATH = resolve(process.cwd(), 'docs/ai/gitnexus-context.schema.json')
-
-// ---------------------------------------------------------------------------
-// Type stubs (subset needed for structural validation without ajv dependency)
-// ---------------------------------------------------------------------------
 
 interface ValidationError {
   step: string
@@ -41,30 +33,25 @@ interface ValidationReport {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Step 1: File existence
-// ---------------------------------------------------------------------------
-
 function checkFilesExist(): ValidationError[] {
   const errors: ValidationError[] = []
+
   if (!existsSync(CONTEXT_PATH)) {
     errors.push({
       step: 'file-existence',
       message: `gitnexus-context.json not found at: ${CONTEXT_PATH}. Run: bun run arch:gitnexus:context`,
     })
   }
+
   if (!existsSync(SCHEMA_PATH)) {
     errors.push({
       step: 'file-existence',
       message: `gitnexus-context.schema.json not found at: ${SCHEMA_PATH}`,
     })
   }
+
   return errors
 }
-
-// ---------------------------------------------------------------------------
-// Step 2: JSON parse
-// ---------------------------------------------------------------------------
 
 function parseContextJson(): {
   context: Record<string, unknown> | null
@@ -75,23 +62,18 @@ function parseContextJson(): {
   let raw: string
   try {
     raw = readFileSync(CONTEXT_PATH, 'utf-8')
-  } catch (err) {
-    errors.push({ step: 'json-parse', message: `Failed to read context file: ${err}` })
+  } catch (error) {
+    errors.push({ step: 'json-parse', message: `Failed to read context file: ${String(error)}` })
     return { context: null, errors }
   }
 
   try {
-    const context = JSON.parse(raw) as Record<string, unknown>
-    return { context, errors }
-  } catch (err) {
-    errors.push({ step: 'json-parse', message: `Context file is not valid JSON: ${err}` })
+    return { context: JSON.parse(raw) as Record<string, unknown>, errors }
+  } catch (error) {
+    errors.push({ step: 'json-parse', message: `Context file is not valid JSON: ${String(error)}` })
     return { context: null, errors }
   }
 }
-
-// ---------------------------------------------------------------------------
-// Step 3: Required field presence
-// ---------------------------------------------------------------------------
 
 const REQUIRED_FIELDS: Array<{ field: string; expectedType: string }> = [
   { field: 'schemaVersion', expectedType: 'string' },
@@ -128,23 +110,17 @@ function checkRequiredFields(context: Record<string, unknown>): ValidationError[
   return errors
 }
 
-// ---------------------------------------------------------------------------
-// Step 4: Semantic constraints
-// ---------------------------------------------------------------------------
-
 function checkSemanticConstraints(context: Record<string, unknown>): ValidationError[] {
   const errors: ValidationError[] = []
-
-  // analysisMode enum
   const analysisMode = context.analysisMode
+
   if (analysisMode !== 'changed-only' && analysisMode !== 'full') {
     errors.push({
       step: 'semantic-constraints',
-      message: `"analysisMode" must be "changed-only" or "full", got: "${analysisMode}"`,
+      message: `"analysisMode" must be "changed-only" or "full", got: "${String(analysisMode)}"`,
     })
   }
 
-  // generatedAt ISO timestamp
   const generatedAt = context.generatedAt
   if (typeof generatedAt === 'string' && Number.isNaN(Date.parse(generatedAt))) {
     errors.push({
@@ -153,57 +129,61 @@ function checkSemanticConstraints(context: Record<string, unknown>): ValidationE
     })
   }
 
-  // recentCommits structure
   const recentCommits = context.recentCommits
   if (Array.isArray(recentCommits)) {
-    const SHA_PATTERN = /^[0-9a-f]{40}$/
-    for (let i = 0; i < recentCommits.length; i++) {
-      const commit = recentCommits[i] as Record<string, unknown>
+    const shaPattern = /^[0-9a-f]{40}$/
+    for (let index = 0; index < recentCommits.length; index += 1) {
+      const commit = recentCommits[index] as Record<string, unknown>
       if (typeof commit !== 'object' || commit === null) {
         errors.push({
           step: 'semantic-constraints',
-          message: `recentCommits[${i}] is not an object`,
+          message: `recentCommits[${index}] is not an object`,
         })
         continue
       }
+
       for (const requiredKey of ['hash', 'message', 'author', 'date']) {
         if (typeof commit[requiredKey] !== 'string') {
           errors.push({
             step: 'semantic-constraints',
-            message: `recentCommits[${i}].${requiredKey} must be a string`,
+            message: `recentCommits[${index}].${requiredKey} must be a string`,
           })
         }
       }
-      if (typeof commit.hash === 'string' && !SHA_PATTERN.test(commit.hash)) {
+
+      if (typeof commit.hash === 'string' && !shaPattern.test(commit.hash)) {
         errors.push({
           step: 'semantic-constraints',
-          message: `recentCommits[${i}].hash must be a 40-char hex SHA, got: "${commit.hash}"`,
+          message: `recentCommits[${index}].hash must be a 40-char hex SHA, got: "${commit.hash}"`,
         })
       }
     }
   }
 
-  // riskIndicators structure
   const riskIndicators = context.riskIndicators
   if (Array.isArray(riskIndicators)) {
-    for (let i = 0; i < riskIndicators.length; i++) {
-      const indicator = riskIndicators[i] as Record<string, unknown>
+    for (let index = 0; index < riskIndicators.length; index += 1) {
+      const indicator = riskIndicators[index] as Record<string, unknown>
       if (typeof indicator !== 'object' || indicator === null) {
         errors.push({
           step: 'semantic-constraints',
-          message: `riskIndicators[${i}] is not an object`,
+          message: `riskIndicators[${index}] is not an object`,
         })
         continue
       }
+
       if (typeof indicator.riskScore !== 'number') {
         errors.push({
           step: 'semantic-constraints',
-          message: `riskIndicators[${i}].riskScore must be a number`,
+          message: `riskIndicators[${index}].riskScore must be a number`,
         })
-      } else if ((indicator.riskScore as number) < 0 || (indicator.riskScore as number) > 100) {
+        continue
+      }
+
+      if (indicator.riskScore < 0 || indicator.riskScore > 100) {
         errors.push({
           step: 'semantic-constraints',
-          message: `riskIndicators[${i}].riskScore must be between 0 and 100, got: ${indicator.riskScore}`,
+          message: `riskIndicators[${index}].riskScore must be between 0 and 100, got: ${indicator.riskScore}`,
         })
       }
     }
@@ -212,109 +192,114 @@ function checkSemanticConstraints(context: Record<string, unknown>): ValidationE
   return errors
 }
 
-// ---------------------------------------------------------------------------
-// Step 5: Freshness check (warn if older than 24h)
-// ---------------------------------------------------------------------------
-
 function checkFreshness(context: Record<string, unknown>): ValidationError[] {
-  const errors: ValidationError[] = []
-
   const generatedAt = context.generatedAt
-  if (typeof generatedAt !== 'string') return errors
+  if (typeof generatedAt !== 'string') {
+    return []
+  }
 
   const generatedMs = Date.parse(generatedAt)
-  if (Number.isNaN(generatedMs)) return errors
+  if (Number.isNaN(generatedMs)) {
+    return []
+  }
 
+  const maxAgeMs = 24 * 60 * 60 * 1000
   const ageMs = Date.now() - generatedMs
-  const maxAgeMs = 24 * 60 * 60 * 1000 // 24 hours
+  if (ageMs <= maxAgeMs) {
+    return []
+  }
 
-  if (ageMs > maxAgeMs) {
-    const ageHours = Math.round(ageMs / (1000 * 60 * 60))
-    errors.push({
+  const ageHours = Math.round(ageMs / (1000 * 60 * 60))
+  return [
+    {
       step: 'freshness',
       message: `gitnexus-context.json is ${ageHours}h old (>24h). Run: bun run arch:gitnexus:context`,
-    })
-  }
-
-  return errors
-}
-
-// ---------------------------------------------------------------------------
-// Main validation pipeline
-// ---------------------------------------------------------------------------
-
-function validate(): ValidationReport {
-  const allErrors: ValidationError[] = []
-  let totalChecks = 0
-
-  // Step 1
-  totalChecks++
-  const existenceErrors = checkFilesExist()
-  allErrors.push(...existenceErrors)
-
-  if (existenceErrors.some((e) => e.step === 'file-existence')) {
-    // Cannot proceed without the file
-    return buildReport(allErrors, totalChecks)
-  }
-
-  // Step 2
-  totalChecks++
-  const { context, errors: parseErrors } = parseContextJson()
-  allErrors.push(...parseErrors)
-
-  if (context === null) {
-    return buildReport(allErrors, totalChecks)
-  }
-
-  // Step 3
-  totalChecks++
-  allErrors.push(...checkRequiredFields(context))
-
-  // Step 4
-  totalChecks++
-  allErrors.push(...checkSemanticConstraints(context))
-
-  // Step 5
-  totalChecks++
-  allErrors.push(...checkFreshness(context))
-
-  return buildReport(allErrors, totalChecks)
+    },
+  ]
 }
 
 function buildReport(errors: ValidationError[], totalChecks: number): ValidationReport {
   const failed = errors.length
   const passed = totalChecks - Math.min(failed, totalChecks)
+
   return {
     valid: failed === 0,
     contextPath: CONTEXT_PATH,
     errors,
-    summary: { totalChecks, passed, failed },
+    summary: {
+      totalChecks,
+      passed,
+      failed,
+    },
   }
 }
 
-// ---------------------------------------------------------------------------
-// CLI output
-// ---------------------------------------------------------------------------
+function validate(): ValidationReport {
+  const allErrors: ValidationError[] = []
+  let totalChecks = 0
+
+  totalChecks += 1
+  const fileErrors = checkFilesExist()
+  allErrors.push(...fileErrors)
+  if (fileErrors.length > 0) {
+    return buildReport(allErrors, totalChecks)
+  }
+
+  totalChecks += 1
+  const { context, errors: parseErrors } = parseContextJson()
+  allErrors.push(...parseErrors)
+  if (context === null) {
+    return buildReport(allErrors, totalChecks)
+  }
+
+  totalChecks += 1
+  allErrors.push(...checkRequiredFields(context))
+
+  totalChecks += 1
+  allErrors.push(...checkSemanticConstraints(context))
+
+  totalChecks += 1
+  allErrors.push(...checkFreshness(context))
+
+  return buildReport(allErrors, totalChecks)
+}
 
 function main(): void {
+  log.header(
+    'GITNEXUS CONTEXT VALIDATION',
+    'Validates gitnexus-context.json structure, semantics, and freshness'
+  )
+
   const report = validate()
 
   if (report.valid) {
-    process.stdout.write(
-      `[validate-gitnexus] PASSED — ${report.summary.passed}/${report.summary.totalChecks} checks passed\n`
-    )
-    process.stdout.write(`[validate-gitnexus] Context: ${report.contextPath}\n`)
-    process.exit(0)
-  } else {
-    process.stderr.write(`[validate-gitnexus] FAILED — ${report.summary.failed} error(s) found\n`)
-    for (const error of report.errors) {
-      process.stderr.write(`  [${error.step}] ${error.message}\n`)
-    }
-    process.stderr.write(
-      `\n[validate-gitnexus] ${report.summary.passed}/${report.summary.totalChecks} checks passed\n`
-    )
-    process.exit(1)
+    log.success(`Context artifact valid: ${report.contextPath}`)
+    log.result({
+      total: report.summary.totalChecks,
+      passed: report.summary.passed,
+      failed: 0,
+      message: 'GitNexus context artifact is valid',
+      details: {
+        contextPath: report.contextPath,
+      },
+    })
+    exit(0)
   }
+
+  log.failList(
+    'Validation errors',
+    report.errors.map((error) => `[${error.step}] ${error.message}`)
+  )
+  log.result({
+    total: report.summary.totalChecks,
+    passed: report.summary.passed,
+    failed: report.summary.failed,
+    message: 'GitNexus context artifact validation failed',
+    details: {
+      contextPath: report.contextPath,
+    },
+  })
+  exit(1)
 }
 
 main()

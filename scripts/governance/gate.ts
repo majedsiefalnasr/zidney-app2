@@ -10,6 +10,9 @@
  */
 
 import { $ } from 'bun'
+import { exit, log } from '../utils/logger'
+
+log.setScript('governance:gate')
 
 interface GuardResult {
   name: string
@@ -23,58 +26,53 @@ const GUARDS: Array<{ name: string; script: string }> = [
   { name: 'Context Validate', script: 'arch:context:validate' },
   { name: 'Architecture Guard', script: 'arch:guard' },
   { name: 'Type Safety', script: 'validate:types' },
-  { name: 'Runtime Scripts', script: 'validate:runtime:scripts' },
-  { name: 'Script Usage', script: 'validate:script:usage' },
+  { name: 'Runtime Scripts', script: 'validate:scripts:runtime' },
+  { name: 'Script Usage', script: 'validate:scripts:usage' },
   { name: 'Security CI', script: 'infra:security:ci' },
   { name: 'AI Context Validate', script: 'ai:context:validate' },
 ]
 
 async function main(): Promise<void> {
-  console.log('╔══════════════════════════════════════════════╗')
-  console.log('║         Unified Governance Gate              ║')
-  console.log('╚══════════════════════════════════════════════╝')
-  console.log('')
+  log.header('GOVERNANCE GATE', 'Unified governance gate — composes all guards in sequence')
 
   const results: GuardResult[] = []
 
   for (const guard of GUARDS) {
-    console.log(`▶ Running: ${guard.name} (${guard.script})`)
+    log.step(`Running: ${guard.name} (${guard.script})`)
     const proc = await $`bun run ${guard.script}`.nothrow()
     const exitCode = proc.exitCode ?? 1
     const passed = exitCode === 0
     results.push({ name: guard.name, script: guard.script, exitCode, passed })
-    console.log(passed ? `  ✔ ${guard.name} — PASS` : `  ✖ ${guard.name} — FAIL (exit ${exitCode})`)
-    console.log('')
+    if (passed) {
+      log.success(`${guard.name} — PASS`)
+    } else {
+      log.error(`${guard.name} — FAIL (exit ${exitCode})`)
+    }
   }
-
-  // Summary table
-  console.log('══════════════════════════════════════════════')
-  console.log('  Guard Summary')
-  console.log('══════════════════════════════════════════════')
-
-  const nameWidth = Math.max(...results.map((r) => r.name.length), 20)
-  const header = `  ${'Guard'.padEnd(nameWidth)}  Status`
-  console.log(header)
-  console.log(`  ${'─'.repeat(nameWidth)}  ──────`)
-
-  for (const r of results) {
-    const status = r.passed ? '✔ PASS' : '✖ FAIL'
-    console.log(`  ${r.name.padEnd(nameWidth)}  ${status}`)
-  }
-
-  console.log('══════════════════════════════════════════════')
 
   const failures = results.filter((r) => !r.passed)
 
   if (failures.length > 0) {
-    console.error(`\n❌ Governance gate FAILED — ${failures.length} guard(s) did not pass.`)
+    log.error(`Governance gate FAILED — ${failures.length} guard(s) did not pass.`)
     for (const f of failures) {
-      console.error(`   • ${f.name} (${f.script}) — exit code ${f.exitCode}`)
+      log.error(`  • ${f.name} (${f.script}) — exit code ${f.exitCode}`)
     }
-    process.exit(1)
+    log.result({
+      total: results.length,
+      passed: results.length - failures.length,
+      failed: failures.length,
+      message: 'Governance gate failed.',
+    })
+    exit(1)
   } else {
-    console.log(`\n✔ Governance gate PASSED — all ${results.length} guards passed.`)
-    process.exit(0)
+    log.success(`Governance gate PASSED — all ${results.length} guards passed.`)
+    log.result({
+      total: results.length,
+      passed: results.length,
+      failed: 0,
+      message: 'Governance gate passed.',
+    })
+    exit(0)
   }
 }
 

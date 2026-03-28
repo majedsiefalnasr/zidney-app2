@@ -52,7 +52,7 @@
 
 | Task | Status | Description                                                                          |
 | ---- | ------ | ------------------------------------------------------------------------------------ |
-| T013 | ✅     | `TRIVY_VERSION: v0.59.1` added to `.github/workflows/ci.yml`                         |
+| T013 | ✅     | `TRIVY_VERSION: v0.69.3` added to `.github/workflows/ci.yml`                         |
 | T014 | ✅     | `security` job scaffolded with version-pinned Trivy download + checksum verification |
 | T015 | ✅     | Trivy DB cache + `infra:security:ci` execution + sanitized artifact upload           |
 | T016 | ✅     | Downstream build/test jobs now `needs: security` (merge-blocking gate)               |
@@ -79,9 +79,9 @@
 | Task     | Status | Description                                                                                                           |
 | -------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
 | T024     | ✅     | `bun run dev:generate:script-docs` — script registry updated cleanly                                                  |
-| T025     | ✅     | `bun run validate:script:naming` — naming compliance verified                                                         |
-| T026     | ✅     | `bun run validate:script:usage` — all script references resolve                                                       |
-| T027     | ✅     | `bun run validate:script:infrastructure` — metadata headers & registry coverage confirmed                             |
+| T025     | ✅     | `bun run validate:scripts:naming` — naming compliance verified                                                        |
+| T026     | ✅     | `bun run validate:scripts:usage` — all script references resolve                                                      |
+| T027     | ✅     | `bun run validate:scripts:infrastructure` — metadata headers & registry coverage confirmed                            |
 | T028     | ✅     | All 4 security scripts (`infra:security:*`) run locally — clean-path verified                                         |
 | T029     | ✅     | `infra:security:ci` executed twice — stable JSON artifact, idempotent behavior                                        |
 | T030     | ✅     | Pre-commit timing < 30 seconds (deps + staged secrets) — with HIGH-severity fixture proving blocking                  |
@@ -232,7 +232,7 @@ security:
   steps:
     - Checkout
     - Setup Bun + dependencies
-    - Download/verify Trivy v0.59.1
+   - Download/verify Trivy v0.69.3
     - Restore Trivy DB from cache
     - Run infra:security:ci (generates tmp/trivy-report.json)
     - Upload sanitized artifact
@@ -306,7 +306,7 @@ security:
 
 ### Operational Risk: **LOW**
 
-✅ **Trivy availability**: Pinned to v0.59.1 with checksum verification  
+✅ **Trivy availability**: Pinned to v0.69.3 with checksum verification  
 ✅ **DB cache**: Reduces CI runtime to < 3 minutes  
 ✅ **Staged secrets scanning**: Efficient for developer workflow (only scans staged files)  
 ✅ **Sanitized artifacts**: No value leakage to logs or uploaded artifacts
@@ -368,7 +368,7 @@ security:
 - [x] `.husky/pre-commit` updated with dependency + secret gates
 - [x] Orchestrator agent extended (Step 5 capture, Step 6.5 failing-closed JSON parsing)
 - [x] Sanitized artifact contract defined (no values leaked)
-- [x] Trivy v0.59.1 version-pinned with checksum verification
+- [x] Trivy v0.69.3 version-pinned with checksum verification
 - [x] Architecture intelligence regenerated (0 violations)
 
 ---

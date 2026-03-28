@@ -1,3 +1,4 @@
+/** @library-module */
 import { mkdir, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { ExecutionLog } from './types'

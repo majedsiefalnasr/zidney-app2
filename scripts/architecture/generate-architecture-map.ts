@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { flushAi, log } from '../utils/logger'
 
 const ROOT = process.cwd()
 
@@ -78,6 +79,10 @@ function inferLayer(module: string) {
 }
 
 function generateMap() {
+  log.header(
+    'GENERATE ARCHITECTURE MAP',
+    'Regenerates ARCHITECTURE_MAP.json from workspace modules'
+  )
   const modules = scanModules()
 
   const existing = existsSync(ARCH_PATH)
@@ -125,8 +130,13 @@ function generateMap() {
 
   writeFileSync(ARCH_PATH, JSON.stringify(result, null, 2))
 
-  console.log('ARCHITECTURE_MAP.json regenerated')
-  console.log('Modules:', Object.keys(newModules).length)
+  log.success('ARCHITECTURE_MAP.json regenerated')
+  log.info(`Modules: ${Object.keys(newModules).length}`)
+  log.progressResult(
+    { success: Object.keys(newModules).length },
+    { title: 'Architecture Map Regenerated', showPercentage: true }
+  )
+  flushAi()
 }
 
 generateMap()

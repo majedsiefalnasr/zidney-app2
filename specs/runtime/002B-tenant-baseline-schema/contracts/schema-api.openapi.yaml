@@ -3,12 +3,12 @@ info:
   title: Tenant Baseline Schema API
   description: |
     Tenant provisioning and schema management endpoints.
-    
+
     All endpoints require:
     - Tenant resolver middleware (resolves workspace_id from slug)
     - License middleware (validates ACTIVE/TRIAL status)
     - Schema version middleware (ensures compatibility)
-    
+
     Error responses follow the standard error contract:
     ```json
     {
@@ -45,15 +45,15 @@ paths:
       description: |
         Enqueue schema initialization for a workspace. Creates all 38–40 baseline tables 
         in the tenant database.
-        
+
         **Middleware chain**:
         1. Tenant resolver (validates workspace_id, resolves tenant)
         2. License middleware (validates ACTIVE/TRIAL status)
         3. Rate limiting (5 requests/minute per workspace)
-        
+
         **Idempotency**: Duplicate requests with same Idempotency-Key return cached response
         (202 Accepted). If schema_version table already exists, request is idempotent.
-        
+
         **Response**:
         - 202 Accepted: Schema initialization queued
         - 400 Bad Request: Invalid input
@@ -64,7 +64,7 @@ paths:
         - 423 Locked: License soft-locked
         - 429 Too Many Requests: Rate limit exceeded
         - 503 Service Unavailable: Database unavailable
-      
+
       operationId: initializeSchema
       parameters:
         - name: workspace_id
@@ -75,7 +75,7 @@ paths:
             type: string
             format: uuid
             example: \"550e8400-e29b-41d4-a716-446655440000\"
-        
+
         - name: Idempotency-Key
           in: header
           description: |
@@ -86,7 +86,7 @@ paths:
             type: string
             format: uuid
             example: \"f47ac10b-58cc-4372-a567-0e02b2c3d479\"
-      
+
       requestBody:
         description: Schema initialization request
         required: true
@@ -102,9 +102,9 @@ paths:
               required: []
             example:
               notify_on_complete: false
-      
+
       responses:
-        '202':
+        "202":
           description: Schema initialization queued
           content:
             application/json:
@@ -134,61 +134,61 @@ paths:
                         type: integer
                         example: 5
                   error:
-                    type: 'null'
-        
-        '400':
+                    type: "null"
+
+        "400":
           description: Invalid request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 data: null
                 error:
                   code: \"INVALID_REQUEST\"
                   message: \"workspace_id must be a valid UUID\"
-        
-        '401':
+
+        "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 data: null
                 error:
                   code: \"UNAUTHORIZED\"
                   message: \"JWT token missing or invalid\"
-        
-        '403':
+
+        "403":
           description: Forbidden (not member of workspace)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 data: null
                 error:
                   code: \"FORBIDDEN\"
                   message: \"User not authorized for this workspace\"
-        
-        '404':
+
+        "404":
           description: Workspace not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 data: null
                 error:
                   code: \"WORKSPACE_NOT_FOUND\"
                   message: \"Workspace with ID not found\"
-        
-        '409':
+
+        "409":
           description: |
             Conflict. Schema already initialized (idempotent replay).
             This is a successful response (same as 202 if retry).
@@ -217,40 +217,40 @@ paths:
                         type: string
                         example: \"1.0.0\"
                   error:
-                    type: 'null'
-        
-        '423':
+                    type: "null"
+
+        "423":
           description: License soft-locked
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 data: null
                 error:
                   code: \"LICENSE_SOFT_LOCKED\"
                   message: \"Workspace license is soft-locked. Features restricted.\"
-        
-        '429':
+
+        "429":
           description: Rate limit exceeded
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 data: null
                 error:
                   code: \"RATE_LIMIT_EXCEEDED\"
                   message: \"Rate limit 5 requests per minute per workspace\"
-        
-        '503':
+
+        "503":
           description: Service unavailable (migration in progress or DB down)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 data: null
@@ -267,7 +267,7 @@ components:
           type: boolean
           example: false
         data:
-          type: 'null'
+          type: "null"
         error:
           type: object
           properties:
@@ -302,7 +302,7 @@ components:
       description: |
         JWT token with embedded workspace_id and user_id.
         Token format: JWT headers.payload.signature
-        
+
         Payload must include:
         {
           \"sub\": \"user_id\",

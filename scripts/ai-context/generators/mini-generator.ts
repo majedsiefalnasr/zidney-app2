@@ -8,9 +8,11 @@
  * - Layer model definition
  * - Critical boundaries definition
  * - Quick reference for AI agent startup
- */
+ 
+ * @library-module
+*/
 
-import { createLogger } from '../../core/logger-factory'
+import { createLogger } from '../../utils/logger'
 
 const logger = createLogger('mini-context-generator')
 

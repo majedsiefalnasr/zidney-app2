@@ -35,7 +35,7 @@ failures.
 
 ## Prerequisites
 
-- Trivy `v0.59.1` or a CLI-compatible version available on `PATH`
+- Trivy `v0.69.3` or a CLI-compatible version available on `PATH`
 - Writable `tmp/` directory for retained report output
 
 ## Output

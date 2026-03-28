@@ -6,9 +6,13 @@
  * @usage bun run infra:security:config
  */
 
+import { exit, log } from '../utils/logger'
 import { materializeTrackedFiles, printReport, runTrivyFs } from './trivy-config'
 
+log.setScript('infra:security:config')
+
 async function main(): Promise<void> {
+  log.header('SECURITY SCAN CONFIG', 'Trivy misconfiguration scan')
   const tracked = await materializeTrackedFiles()
   try {
     const report = await runTrivyFs({
@@ -18,12 +22,13 @@ async function main(): Promise<void> {
     })
 
     printReport(report)
+    log.result({ total: 1, passed: 1, failed: 0 })
   } finally {
     tracked.cleanup()
   }
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error))
-  process.exit(1)
+  log.error(error instanceof Error ? error.message : String(error))
+  exit(1)
 })

@@ -18,7 +18,7 @@
 import { createHash } from 'node:crypto'
 import { readdir, readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('validate-script-duplication')
 
@@ -92,7 +92,11 @@ async function validateScriptDuplication(): Promise<void> {
 
   logger.info('Starting script duplication analysis', { target: `<${duplicationTarget * 100}%` })
 
-  console.log(`\n📊 Analyzing script duplication in scripts/\n`)
+  log.header(
+    'VALIDATE SCRIPT DUPLICATION',
+    'Analyzes scripts/ directory to measure code duplication'
+  )
+  log.info(`Analyzing script duplication in scripts/ (target: <${duplicationTarget * 100}%)`)
 
   // Collect all script files
   const scriptFiles = await getScriptFiles(scriptsDir)
@@ -102,7 +106,7 @@ async function validateScriptDuplication(): Promise<void> {
   })
 
   logger.info('Files analyzed', { count: filteredFiles.length })
-  console.log(`  Found ${filteredFiles.length} script files\n`)
+  log.info(`Found ${filteredFiles.length} script files`)
 
   // Read and hash all files
   const fileHashes: FileHash[] = []
@@ -190,39 +194,42 @@ async function validateScriptDuplication(): Promise<void> {
     health: metrics.health,
   })
 
-  // Report results
-  console.log(`📈 Duplication Metrics:`)
-  console.log(`  Total Files: ${metrics.totalFiles}`)
-  console.log(`  Total Lines: ${metrics.totalLines}`)
-  console.log(`  Duplicated Lines: ${metrics.duplicatedLines}`)
-  console.log(`  Duplication: ${(metrics.duplicationPercentage * 100).toFixed(2)}%`)
-  console.log(`  Target: <${(duplicationTarget * 100).toFixed(1)}%`)
-  console.log(`  Health: ${metrics.health}`)
+  log.step('Duplication Metrics:')
+  log.info(`  Total Files: ${metrics.totalFiles}`)
+  log.info(`  Total Lines: ${metrics.totalLines}`)
+  log.info(`  Duplicated Lines: ${metrics.duplicatedLines}`)
+  log.info(`  Duplication: ${(metrics.duplicationPercentage * 100).toFixed(2)}%`)
+  log.info(`  Target: <${(duplicationTarget * 100).toFixed(1)}%`)
+  log.info(`  Health: ${metrics.health}`)
 
   if (metrics.duplicateBlocks.length > 0 && metrics.duplicateBlocks.length <= 10) {
-    console.log(`\n  Duplicate Blocks (top 10):`)
+    log.info(`  Duplicate Blocks (top 10):`)
     for (const block of metrics.duplicateBlocks.slice(0, 10)) {
-      console.log(`    ${block.hash}: ${block.files.length} files × ${block.lines} lines`)
+      log.info(`    ${block.hash}: ${block.files.length} files \u00d7 ${block.lines} lines`)
     }
   }
 
-  console.log('')
-
   // Exit with status
   if (metrics.health === 'PASS') {
-    console.log(
-      `✅ PASS: Script duplication at ${(metrics.duplicationPercentage * 100).toFixed(2)}% (target: <${duplicationTarget * 100}%)\n`
+    log.success(
+      `PASS: Script duplication at ${(metrics.duplicationPercentage * 100).toFixed(2)}% (target: <${duplicationTarget * 100}%)`
     )
+    log.result({ total: metrics.totalFiles, passed: metrics.totalFiles, failed: 0 })
+    flushAi()
     process.exit(0)
   } else if (metrics.health === 'WARN') {
-    console.log(
-      `⚠️  WARN: Script duplication at ${(metrics.duplicationPercentage * 100).toFixed(2)}% (target: <${duplicationTarget * 100}%)\n`
+    log.warn(
+      `WARN: Script duplication at ${(metrics.duplicationPercentage * 100).toFixed(2)}% (target: <${duplicationTarget * 100}%)`
     )
+    log.result({ total: metrics.totalFiles, passed: metrics.totalFiles, failed: 0 })
+    flushAi()
     process.exit(0)
   } else {
-    console.log(
-      `❌ FAIL: Script duplication at ${(metrics.duplicationPercentage * 100).toFixed(2)}% exceeds target (<${duplicationTarget * 100}%)\n`
+    log.error(
+      `FAIL: Script duplication at ${(metrics.duplicationPercentage * 100).toFixed(2)}% exceeds target (<${duplicationTarget * 100}%)`
     )
+    log.result({ total: metrics.totalFiles, passed: 0, failed: metrics.totalFiles })
+    flushAi()
     process.exit(1)
   }
 }

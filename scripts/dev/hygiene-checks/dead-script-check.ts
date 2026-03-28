@@ -3,7 +3,9 @@
  * Enumerates all *.ts and *.sh under scripts/; classifies each as
  * ACTIVE, DUPLICATE_ROOT_STUB, or POTENTIALLY_DEAD.
  * Reports only — no deletions.
- */
+ 
+ * @library-module
+*/
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join, relative } from 'node:path'

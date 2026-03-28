@@ -9,7 +9,9 @@
  * - File size measurement
  * - Directory traversal
  * - Large file detection
- */
+ 
+ * @library-module
+*/
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'

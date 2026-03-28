@@ -1,7 +1,9 @@
 /**
  * T002 — Routing Authority Verification
  * Confirms one authoritative root per routing surface pair (agents, prompts, templates).
- */
+ 
+ * @library-module
+*/
 
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'

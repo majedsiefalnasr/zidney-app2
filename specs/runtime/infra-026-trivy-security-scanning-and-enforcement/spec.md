@@ -245,7 +245,7 @@ An infrastructure engineer consulting the repository documentation can find a de
 - **SC-005**: All five `docs/scripts/security-*.md` documentation files exist and contain the required sections (purpose, usage, trigger, severity policy).
 - **SC-006**: The orchestrator validation gate halts execution when given a Trivy report containing CRITICAL findings, producing a block diagnostic message.
 - **SC-007**: `bun run infra:security:ci` run locally on the current main branch exits with code 0 (baseline clean state confirmed).
-- **SC-008**: All scripts pass script-system-governance validation (`bun run validate:script:naming && bun run validate:script:usage && bun run validate:script:infrastructure && bun run dev:generate:script-docs`) without violations.
+- **SC-008**: All scripts pass script-system-governance validation (`bun run validate:scripts:naming && bun run validate:scripts:usage && bun run validate:scripts:infrastructure && bun run dev:generate:script-docs`) without violations.
 - **SC-009**: Running the full governance validation pipeline (`bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run typecheck && bun run test`) passes with no new violations introduced by this stage.
 - **SC-010**: The pre-commit secret scan blocks a staged fixture secret without echoing the secret value, and the orchestrator gate fails closed on corrupt or unreadable Trivy JSON.
 
@@ -276,7 +276,7 @@ An infrastructure engineer consulting the repository documentation can find a de
 ---
 
 **Q: Which specific Trivy version should be pinned for this stage — a hardcoded stage-local version or a floating range?**
-**A:** Pin to `v0.59.1` for this stage. The CI install step, local install docs, and validation tasks all use this exact version so behavior stays deterministic across environments.
+**A:** Pin to `v0.69.3` for this stage. The CI install step, local install docs, and validation tasks all use this exact version so behavior stays deterministic across environments.
 **Impact:** SEC-001, SC-001, NFR-006, Risk Assessment row "Trivy version changes break scan behavior between environments".
 
 ---

@@ -40,6 +40,7 @@
 import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
 import { createLogger } from '../core/logger-factory'
+import { exit, log } from '../utils/logger'
 
 // ============================================================================
 // CONFIGURATION
@@ -49,6 +50,12 @@ const correlationId = randomUUID()
 const logger = createLogger('seed:dashboard-test-data')
 logger.setContext({ correlationId })
 
+log.setScript('dev:seed:dashboard-test-data')
+log.header(
+  'Seed Dashboard Test Data',
+  'Seed realistic MMC dashboard test data into master_db for dashboard testing'
+)
+
 const ENVIRONMENT = process.env.NODE_ENV || 'development'
 const DATABASE_URL = process.env.DATABASE_URL
 
@@ -57,14 +64,14 @@ if (ENVIRONMENT === 'production') {
   logger.error('ABORT: seed-dashboard-test-data cannot run in production environment', {
     environment: ENVIRONMENT,
   })
-  process.exit(1)
+  exit(1)
 }
 
 if (!DATABASE_URL) {
   logger.warn('Infrastructure dependency unavailable: DATABASE_URL not set', {
     service: 'seed:dashboard-test-data',
   })
-  process.exit(0)
+  exit(0)
 }
 
 // ============================================================================
@@ -327,9 +334,11 @@ async function seedDashboardTestData(): Promise<void> {
 seedDashboardTestData()
   .then(() => {
     logger.info('Process complete')
-    process.exit(0)
+    log.result({ total: 1, passed: 1, failed: 0, message: 'Seeding complete' })
+    exit(0)
   })
   .catch((error) => {
     logger.error('Fatal error', { error: error instanceof Error ? error.message : String(error) })
-    process.exit(1)
+    log.result({ total: 1, passed: 0, failed: 1, message: 'Seeding failed' })
+    exit(1)
   })

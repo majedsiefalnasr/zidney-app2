@@ -20,7 +20,7 @@ components:
           type: object
           description: Database connection pool
         license:
-          $ref: '#/components/schemas/License'
+          $ref: "#/components/schemas/License"
         schemaVersion:
           type: string
         productVersion:
@@ -77,49 +77,49 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             error:
-              code: 'TENANT_NOT_FOUND'
-              message: 'Workspace not found'
-              workspace: 'unknown'
-              request_id: 'uuid'
+              code: "TENANT_NOT_FOUND"
+              message: "Workspace not found"
+              workspace: "unknown"
+              request_id: "uuid"
 
     LicenseBlocked:
       description: License status blocks access
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             error:
-              code: 'LICENSE_BLOCKED'
-              message: 'License status prevents access'
-              workspace: 'example'
-              request_id: 'uuid'
+              code: "LICENSE_BLOCKED"
+              message: "License status prevents access"
+              workspace: "example"
+              request_id: "uuid"
 
     VersionMismatch:
       description: Schema or product version incompatible
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             error:
-              code: 'VERSION_MISMATCH'
-              message: 'Version incompatible'
-              workspace: 'example'
-              request_id: 'uuid'
+              code: "VERSION_MISMATCH"
+              message: "Version incompatible"
+              workspace: "example"
+              request_id: "uuid"
 
     DatabaseUnavailable:
       description: Database connection failed
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           example:
             error:
-              code: 'DATABASE_UNAVAILABLE'
-              message: 'Database connection failed'
-              workspace: 'example'
-              request_id: 'uuid'
+              code: "DATABASE_UNAVAILABLE"
+              message: "Database connection failed"
+              workspace: "example"
+              request_id: "uuid"

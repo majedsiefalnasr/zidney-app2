@@ -30,6 +30,9 @@ import { execSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, join, relative } from 'node:path'
 import type { AIDependencyGraph } from '../packages/types/src/ai-context'
+import { exit, flushAi, log } from './utils/logger'
+
+log.setScript('arch:audit')
 
 const ROOT = process.cwd()
 const QUICK_MODE = process.argv.includes('--quick')
@@ -131,7 +134,7 @@ function loadModuleBoundariesForAudit(): ModuleBoundariesForAudit | null {
   try {
     return JSON.parse(readFileSync(boundariesPath, 'utf-8')) as ModuleBoundariesForAudit
   } catch {
-    console.warn(
+    log.warn(
       '[INFRA AUDIT] WARNING: Failed to parse module-boundaries.json — undeclared module check skipped'
     )
     return null
@@ -1086,14 +1089,14 @@ function validateDependencyGraphEdges(edges: { from: string; to: string }[]): nu
     // Both from and to must be valid module paths OR valid external indicators
     // Valid monorepo paths: packages/<name> or apps/<name>
     if (!isValidModulePath(edge.from)) {
-      console.warn(
+      log.warn(
         `[INFRA AUDIT] WARNING: Malformed edge source: "${edge.from}" (not a valid module path)`
       )
       malformed++
     }
 
     if (!isValidModulePath(edge.to)) {
-      console.warn(
+      log.warn(
         `[INFRA AUDIT] WARNING: Malformed edge target: "${edge.to}" (not a valid module path or external npm)`
       )
       malformed++
@@ -1145,7 +1148,7 @@ function buildDependencyGraph(files: Map<string, string>): DependencyGraph {
   // Validate final edges before export
   const malformedCount = validateDependencyGraphEdges(edges)
   if (malformedCount > 0) {
-    console.warn(
+    log.warn(
       `[INFRA AUDIT] WARNING: ${malformedCount} malformed edges detected and filtered. Check logs above.`
     )
   }
@@ -1197,8 +1200,8 @@ function exportAIGraph(graph: DependencyGraph): AIDependencyGraphVizLegacy {
 export function generateDependencyGraph(): void {
   const archMap = loadArchitectureMap()
   if (!archMap || !archMap.modules) {
-    console.error('[GEN-GRAPH] ARCHITECTURE_MAP.json not found or invalid — aborting')
-    process.exit(1)
+    log.error('[GEN-GRAPH] ARCHITECTURE_MAP.json not found or invalid — aborting')
+    exit(1)
   }
 
   const moduleKeys: string[] = Object.keys(archMap.modules)
@@ -1341,8 +1344,8 @@ export function generateDependencyGraph(): void {
 
   const outPath = join(AI_CONTEXT_DIR, 'ai-dependency-graph.json')
   writeFileSync(outPath, `${JSON.stringify(output, null, 2)}\n`, 'utf-8')
-  console.log(`[GEN-GRAPH] Written: ${outPath}`)
-  console.log(`[GEN-GRAPH] Modules: ${moduleKeys.length}`)
+  log.success(`[GEN-GRAPH] Written: ${outPath}`)
+  log.info(`[GEN-GRAPH] Modules: ${moduleKeys.length}`)
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1460,13 +1463,17 @@ const ARCH_SCORE_THRESHOLD = 85
 if ((import.meta as { main?: boolean }).main) {
   if (GENERATE_GRAPH_MODE) {
     generateDependencyGraph()
-    process.exit(0)
+    exit(0)
   }
   runMain()
 }
 
 function runMain() {
-  console.log('[INFRA AUDIT] Starting...')
+  log.header(
+    'INFRA AUDIT',
+    'Monorepo governance scanner — audits architecture, imports, and test coverage'
+  )
+  log.info('[INFRA AUDIT] Starting...')
 
   const files = new Map<string, string>()
   walk(ROOT, files)
@@ -1509,7 +1516,7 @@ function runMain() {
   const FIX_MAP = process.argv.includes('--fix-map')
 
   if (FIX_MAP && architectureMap && architectureMap.modules && undeclaredModules.length > 0) {
-    console.log('[INFRA AUDIT] Applying self‑healing update to ARCHITECTURE_MAP.json')
+    log.info('[INFRA AUDIT] Applying self‑healing update to ARCHITECTURE_MAP.json')
 
     for (const m of undeclaredModules) {
       const layer = m.startsWith('packages/') ? 'domain' : m.startsWith('apps/') ? 'ui' : 'unknown'
@@ -1521,7 +1528,7 @@ function runMain() {
         forbidden_dependencies: [],
       }
 
-      console.log(`  + Added module to architecture map: ${m}`)
+      log.info(`  + Added module to architecture map: ${m}`)
     }
 
     try {
@@ -1529,9 +1536,9 @@ function runMain() {
 
       writeFileSync(archPath, JSON.stringify(architectureMap, null, 2))
 
-      console.log('[INFRA AUDIT] ARCHITECTURE_MAP.json updated automatically.')
+      log.success('[INFRA AUDIT] ARCHITECTURE_MAP.json updated automatically.')
     } catch (_err) {
-      console.error('[INFRA AUDIT] Failed to update ARCHITECTURE_MAP.json')
+      log.error('[INFRA AUDIT] Failed to update ARCHITECTURE_MAP.json')
     }
   }
   const architectureDrift = detectArchitectureDrift(dependencyGraph)
@@ -2143,29 +2150,29 @@ new vis.Network(container, data, options)
     writeFileSync(join(ARCH_GRAPHS_DIR, 'architecture-graph.html'), interactiveGraphHtml)
   } // end if (!QUICK_MODE)
 
-  console.log('[INFRA AUDIT] Complete')
-  console.log('Vitest configs:', vitest.length)
-  console.log('Playwright configs:', playwright.length)
-  console.log('Total tests:', tests.total)
-  console.log('Skipped tests:', stability.skipped.length)
-  console.log('Flaky tests:', stability.flaky.length)
-  console.log('Quarantined tests:', stability.quarantined.length)
-  console.log('Dependency violations:', depViolations.length)
-  console.log('Circular dependencies:', circularDependencies.length)
-  console.log('Layer violations:', layerViolations.length)
-  console.log('Architecture map violations:', architectureMapViolations.length)
-  console.log('Architecture drift:', architectureDrift.length)
-  console.log('Architecture score:', architectureScore, '/ 100')
+  log.success('[INFRA AUDIT] Complete')
+  log.info(`Vitest configs: ${vitest.length}`)
+  log.info(`Playwright configs: ${playwright.length}`)
+  log.info(`Total tests: ${tests.total}`)
+  log.info(`Skipped tests: ${stability.skipped.length}`)
+  log.info(`Flaky tests: ${stability.flaky.length}`)
+  log.info(`Quarantined tests: ${stability.quarantined.length}`)
+  log.info(`Dependency violations: ${depViolations.length}`)
+  log.info(`Circular dependencies: ${circularDependencies.length}`)
+  log.info(`Layer violations: ${layerViolations.length}`)
+  log.info(`Architecture map violations: ${architectureMapViolations.length}`)
+  log.info(`Architecture drift: ${architectureDrift.length}`)
+  log.info(`Architecture score: ${architectureScore} / 100`)
 
   if (undeclaredModules.length > 0) {
-    console.warn('\n[INFRA AUDIT] ⚠️ Undeclared modules detected (not in module-boundaries.json):')
+    log.warn('[INFRA AUDIT] Undeclared modules detected (not in module-boundaries.json):')
 
     for (const m of undeclaredModules) {
-      console.warn(`undeclared module: ${m}`)
+      log.warn(`undeclared module: ${m}`)
     }
 
-    console.warn('\nTo register, add them to: docs/architecture/module-boundaries.json')
-    console.warn('Or run: bun run arch:add-module <module-path>')
+    log.warn('To register, add them to: docs/architecture/module-boundaries.json')
+    log.warn('Or run: bun run arch:add-module <module-path>')
   }
 
   if (architectureScoreDelta !== null) {
@@ -2174,39 +2181,37 @@ new vis.Network(container, data, options)
         ? `+${architectureScoreDelta} improvement`
         : `${architectureScoreDelta} regression`
 
-    console.log('Architecture trend since last audit:', trend)
+    log.info(`Architecture trend since last audit: ${trend}`)
   }
-  console.log('Dependency graph nodes:', dependencyGraph.nodes.length)
-  console.log('Dependency graph edges:', dependencyGraph.edges.length)
+  log.info(`Dependency graph nodes: ${dependencyGraph.nodes.length}`)
+  log.info(`Dependency graph edges: ${dependencyGraph.edges.length}`)
   const hottest = Object.entries(aiGraph.centrality)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
-  console.log('Top architectural hotspots:', hottest.map(([k, v]) => `${k}(${v})`).join(', '))
+  log.info(`Top architectural hotspots: ${hottest.map(([k, v]) => `${k}(${v})`).join(', ')}`)
   const highRiskModules = Object.entries(moduleRisk)
     .filter(([, r]) => r === 'HIGH')
     .map(([m]) => m)
 
   if (highRiskModules.length) {
-    console.log('High risk modules:', highRiskModules.join(', '))
+    log.warn(`High risk modules: ${highRiskModules.join(', ')}`)
   }
-  console.log('Architecture graphs exported to docs/architecture/graphs/')
-  console.log('Interactive architecture graph: docs/architecture/graphs/architecture-graph.html')
-  console.log(
+  log.info('Architecture graphs exported to docs/architecture/graphs/')
+  log.info('Interactive architecture graph: docs/architecture/graphs/architecture-graph.html')
+  log.info(
     'Architecture dashboard exported: docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md'
   )
-  console.log(
-    'Architecture heatmap exported: docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md'
-  )
-  console.log(
+  log.info('Architecture heatmap exported: docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md')
+  log.info(
     'AI architecture context exported: docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json'
   )
-  console.log(
+  log.info(
     'AI architecture contract exported: docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json'
   )
-  console.log('Architecture history stored in docs/architecture/audits/history/')
-  console.log('Audit report exported to docs/reports/')
-  console.log('AI architecture context exported to docs/ai/context/')
-  console.log(
+  log.info('Architecture history stored in docs/architecture/audits/history/')
+  log.info('Audit report exported to docs/reports/')
+  log.info('AI architecture context exported to docs/ai/context/')
+  log.info(
     'Support-surface routing decisions must consult docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md'
   )
 
@@ -2250,17 +2255,20 @@ new vis.Network(container, data, options)
     }
 
     if (failures.length > 0) {
-      console.error('\n[INFRA AUDIT][CI] ❌ Governance violations detected:')
+      log.error('[INFRA AUDIT][CI] Governance violations detected:')
 
       for (const f of failures) {
-        console.error(` - ${f}`)
+        log.error(` - ${f}`)
       }
 
-      console.error('\n[INFRA AUDIT][CI] Failing build due to governance violations.')
-
-      process.exit(1)
+      log.error('[INFRA AUDIT][CI] Failing build due to governance violations.')
+      log.result({ total: failures.length, passed: 0, failed: failures.length })
+      flushAi()
+      exit(1)
     } else {
-      console.log('\n[INFRA AUDIT][CI] ✅ Governance checks passed.')
+      log.success('[INFRA AUDIT][CI] Governance checks passed.')
+      log.result({ total: 7, passed: 7, failed: 0, message: 'All governance checks passed' })
+      flushAi()
     }
   }
 } // end runMain

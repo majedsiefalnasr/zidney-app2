@@ -6,6 +6,7 @@
  * @usage bun run infra:security:ci
  */
 
+import { exit, log } from '../utils/logger'
 import {
   hasBlockingFindings,
   materializeTrackedFiles,
@@ -15,7 +16,10 @@ import {
   writeSanitizedReport,
 } from './trivy-config'
 
+log.setScript('infra:security:ci')
+
 async function main(): Promise<void> {
+  log.header('SECURITY SCAN CI', 'CI-grade Trivy scan with sanitized report')
   const tracked = await materializeTrackedFiles()
   try {
     const report = await runTrivyFs({
@@ -26,13 +30,15 @@ async function main(): Promise<void> {
 
     await writeSanitizedReport(report, REPORT_PATH)
     printReport(report)
-    process.exit(hasBlockingFindings(report, 'ci') ? 1 : 0)
+    const blocked = hasBlockingFindings(report, 'ci')
+    log.result({ total: 1, passed: blocked ? 0 : 1, failed: blocked ? 1 : 0 })
+    exit(blocked ? 1 : 0)
   } finally {
     tracked.cleanup()
   }
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error))
-  process.exit(1)
+  log.error(error instanceof Error ? error.message : String(error))
+  exit(1)
 })

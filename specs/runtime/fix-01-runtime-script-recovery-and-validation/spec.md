@@ -206,7 +206,7 @@ source code
 
 **Given** a developer adds a new `bun run my-new-script` reference to a spec file  
 **When** they push to CI without registering the script in `package.json`  
-**Then** `bun run validate:runtime:scripts` exits with code 1 and lists the missing script
+**Then** `bun run validate:scripts:runtime` exits with code 1 and lists the missing script
 
 ### Scenario 4 — Script deduplication complete
 
@@ -219,7 +219,7 @@ source code
 ### Scenario 5 — No spec-to-script drift after stage completion
 
 **Given** the full T001–T012 workflow has been executed  
-**When** `bun run validate:runtime:scripts` is run  
+**When** `bun run validate:scripts:runtime` is run  
 **Then** it exits with code 0 — every script referenced in runtime specs exists and is
 registered
 
@@ -313,7 +313,7 @@ All criteria are technology-agnostic and user/operator observable:
 4. **Full documentation coverage** — Every recovered script has an individual documentation page
    in `docs/scripts/`.
 
-5. **CI guard operational** — Running `bun run validate:runtime:scripts` exits with code 0 when
+5. **CI guard operational** — Running `bun run validate:scripts:runtime` exits with code 0 when
    all referenced scripts are registered, and exits with code 1 when any are missing.
 
 6. **Governance rule in place** — The script governance rule is recorded in `AGENTS.md` and is

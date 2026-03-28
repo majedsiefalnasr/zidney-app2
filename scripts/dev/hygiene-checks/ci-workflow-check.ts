@@ -2,7 +2,9 @@
  * T008 — CI Workflow Hygiene Check
  * Reads .github/workflows/*.yml; flags duplicate run: step commands across workflows.
  * Identifies consolidation candidates. No changes made.
- */
+ 
+ * @library-module
+*/
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'

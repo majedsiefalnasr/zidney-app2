@@ -363,6 +363,10 @@ export function printResults(results: CheckResult[]): void {
 // ─── Entry Point ─────────────────────────────────────────────────────────────
 
 export async function main(): Promise<void> {
+  process.stdout.write('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+  process.stdout.write('AI RUNTIME STATUS CHECK\n')
+  process.stdout.write('Checks all 5 layers of the AI Agent Runtime Environment\n')
+  process.stdout.write('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n')
   const root = process.cwd()
 
   const results: CheckResult[] = [
@@ -374,6 +378,21 @@ export async function main(): Promise<void> {
   ]
 
   printResults(results)
+
+  const errors = results.filter((r) => r.status === 'error').length
+  const _warnings = results.filter((r) => r.status === 'warning').length
+  const healthy = results.length - errors
+
+  process.stdout.write(
+    `\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\\n`
+  )
+  process.stdout.write('RESULT\\n')
+  process.stdout.write(`Total: ${results.length}\\n`)
+  process.stdout.write(`Healthy: ${healthy}\\n`)
+  process.stdout.write(`Failed: ${errors}\\n`)
+  process.stdout.write(
+    `\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\\n`
+  )
 
   process.exit(results.some((r) => r.status === 'error') ? 1 : 0)
 }

@@ -14,6 +14,7 @@
 
 import { readFileSync } from 'node:fs'
 import { $ } from 'bun'
+import { flushAi, log } from '../utils/logger'
 
 interface DependencyUsage {
   name: string
@@ -26,7 +27,8 @@ interface DependencyUsage {
 }
 
 async function verifyDependencyUsage(): Promise<void> {
-  console.log('🔍 Dependency Usage Verification - T104\n')
+  log.header('VERIFY DEPENDENCY USAGE', 'Checks codebase usage of all declared dependencies')
+  log.step('Dependency Usage Verification - T104')
 
   const pkgContent = readFileSync('package.json', 'utf-8')
   const pkg = JSON.parse(pkgContent)
@@ -37,11 +39,11 @@ async function verifyDependencyUsage(): Promise<void> {
   const directDeps = Object.entries(pkg.dependencies || {})
   const devDeps = Object.entries(pkg.devDependencies || {})
 
-  console.log(`Scanning ${directDeps.length + devDeps.length} dependencies...\n`)
+  log.info(`Scanning ${directDeps.length + devDeps.length} dependencies...`)
 
   // Analyze production dependencies
   if (directDeps.length > 0) {
-    console.log('# Production Dependencies\n')
+    log.step('Production Dependencies')
     for (const [name, version] of directDeps) {
       await analyzeDependency(name, version as string, false, false, usageMap)
     }
@@ -49,7 +51,7 @@ async function verifyDependencyUsage(): Promise<void> {
 
   // Analyze dev dependencies
   if (devDeps.length > 0) {
-    console.log('\n# Development Dependencies\n')
+    log.step('Development Dependencies')
     for (const [name, version] of devDeps) {
       await analyzeDependency(name, version as string, true, false, usageMap)
     }
@@ -58,35 +60,34 @@ async function verifyDependencyUsage(): Promise<void> {
   // Sort by usage
   const sorted = Array.from(usageMap.values()).sort((a, b) => b.usageCount - a.usageCount)
 
-  console.log('\n---\n')
-  console.log('📊 Dependency Usage Summary\n')
+  log.step('Dependency Usage Summary')
 
   const used = sorted.filter((d) => d.status === 'USED')
   const unused = sorted.filter((d) => d.status === 'UNUSED')
   const indirect = sorted.filter((d) => d.status === 'INDIRECT')
 
-  console.log(`| Dependency | Version | Type | Usage | Status |`)
-  console.log(`|------------|---------|------|-------|--------|`)
+  log.info(`| Dependency | Version | Type | Usage | Status |`)
+  log.info(`|------------|---------|------|-------|--------|`)
 
   for (const dep of sorted.slice(0, 10)) {
     const type = dep.isDev ? 'dev' : 'prod'
-    const status = dep.status === 'USED' ? '✓' : dep.status === 'UNUSED' ? '✗' : '→'
-    console.log(
+    const status = dep.status === 'USED' ? 'OK' : dep.status === 'UNUSED' ? 'UNUSED' : 'INDIRECT'
+    log.info(
       `| ${dep.name.padEnd(25)} | ${dep.version.padEnd(7)} | ${type.padEnd(4)} | ${String(dep.usageCount).padStart(5)} | ${status} |`
     )
   }
 
-  console.log(`\n### Summary\n`)
-  console.log(`- Total dependencies: ${sorted.length}`)
-  console.log(`- Used: ${used.length}`)
-  console.log(`- Unused (candidates): ${unused.length}`)
-  console.log(`- Indirect only: ${indirect.length}`)
+  log.step('Summary')
+  log.info(`Total dependencies: ${sorted.length}`)
+  log.info(`Used: ${used.length}`)
+  log.info(`Unused (candidates): ${unused.length}`)
+  log.info(`Indirect only: ${indirect.length}`)
 
   if (unused.length > 0) {
-    console.log(`\n### Unused Dependency Candidates\n`)
+    log.step('Unused Dependency Candidates')
     for (const dep of unused) {
       const type = dep.isDev ? '(dev)' : '(prod)'
-      console.log(`- ${dep.name}@${dep.version} ${type}`)
+      log.warn(`${dep.name}@${dep.version} ${type}`)
     }
   }
 
@@ -109,8 +110,9 @@ async function verifyDependencyUsage(): Promise<void> {
   }
 
   await Bun.write('.dependency-usage-report.json', JSON.stringify(report, null, 2))
-  console.log(`\n📄 Usage report saved to: .dependency-usage-report.json\n`)
-
+  log.success(`Usage report saved to: .dependency-usage-report.json`)
+  log.result({ total: sorted.length, passed: used.length, failed: unused.length })
+  flushAi()
   process.exit(0)
 }
 
@@ -167,7 +169,7 @@ async function analyzeDependency(
   usageMap.set(name, entry)
 
   const icon = status === 'USED' ? '✓' : '✗'
-  console.log(`${icon} ${name}@${version} — ${totalCount} references`)
+  log.info(`${icon} ${name}@${version} — ${totalCount} references`)
 }
 
 function escapeRegex(str: string): string {

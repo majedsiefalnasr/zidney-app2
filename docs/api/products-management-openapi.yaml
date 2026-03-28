@@ -31,7 +31,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateProductRequest'
+              $ref: "#/components/schemas/CreateProductRequest"
             examples:
               english_only:
                 summary: English-only product
@@ -56,12 +56,12 @@ paths:
                     - GRADING
                     - FEEDBACK
       responses:
-        '201':
+        "201":
           description: Product created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: "#/components/schemas/ApiResponse"
               examples:
                 success:
                   summary: Successful creation
@@ -78,23 +78,23 @@ paths:
                         - GRADING
                       status: ACTIVE
                       current_version: 1
-                      created_at: '2026-02-22T10:30:00Z'
-                      updated_at: '2026-02-22T10:30:00Z'
+                      created_at: "2026-02-22T10:30:00Z"
+                      updated_at: "2026-02-22T10:30:00Z"
                     error: null
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '423':
-          $ref: '#/components/responses/WorkspaceLocked'
-        '429':
-          $ref: '#/components/responses/RateLimitExceeded'
-        '500':
-          $ref: '#/components/responses/InternalError'
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
     get:
       summary: List products with filtering and pagination
@@ -137,18 +137,18 @@ paths:
             default: 0
           description: Number of items to skip
       responses:
-        '200':
+        "200":
           description: Product list retrieved
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponseList'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '429':
-          $ref: '#/components/responses/RateLimitExceeded'
+                $ref: "#/components/schemas/ApiResponseList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
 
   /products/{product_id}:
     get:
@@ -164,20 +164,20 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Product retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '429':
-          $ref: '#/components/responses/RateLimitExceeded'
+                $ref: "#/components/schemas/ApiResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
 
     put:
       summary: Update a product (increments version if changes detected)
@@ -196,28 +196,28 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateProductRequest'
+              $ref: "#/components/schemas/UpdateProductRequest"
       responses:
-        '200':
+        "200":
           description: Product updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '423':
-          $ref: '#/components/responses/WorkspaceLocked'
-        '429':
-          $ref: '#/components/responses/RateLimitExceeded'
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
 
     delete:
       summary: Delete a product (fails if licenses exist)
@@ -232,20 +232,20 @@ paths:
             type: string
             format: uuid
       responses:
-        '204':
+        "204":
           description: Product deleted successfully
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '423':
-          $ref: '#/components/responses/WorkspaceLocked'
-        '429':
-          $ref: '#/components/responses/RateLimitExceeded'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
 
   /products/{product_id}/status:
     patch:
@@ -265,26 +265,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StatusChangeRequest'
+              $ref: "#/components/schemas/StatusChangeRequest"
       responses:
-        '200':
+        "200":
           description: Status changed successfully (version not incremented)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '423':
-          $ref: '#/components/responses/WorkspaceLocked'
-        '429':
-          $ref: '#/components/responses/RateLimitExceeded'
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
 
   /products/{product_id}/audit-log:
     get:
@@ -331,26 +331,26 @@ paths:
             minimum: 0
             default: 0
       responses:
-        '200':
+        "200":
           description: Audit log retrieved
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponseAuditLog'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          description: 'Forbidden: User lacks AUDIT_READ permission'
+                $ref: "#/components/schemas/ApiResponseAuditLog"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: "Forbidden: User lacks AUDIT_READ permission"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '423':
-          $ref: '#/components/responses/WorkspaceLocked'
-        '429':
-          $ref: '#/components/responses/RateLimitExceeded'
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
 
 components:
   securitySchemes:
@@ -401,7 +401,7 @@ components:
         - enabled_modules
       properties:
         name:
-          $ref: '#/components/schemas/LocalizedString'
+          $ref: "#/components/schemas/LocalizedString"
         slug:
           type: string
           pattern: '^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$'
@@ -412,7 +412,7 @@ components:
         enabled_modules:
           type: array
           items:
-            $ref: '#/components/schemas/Module'
+            $ref: "#/components/schemas/Module"
           minItems: 1
           description: At least one module required
 
@@ -420,14 +420,14 @@ components:
       type: object
       properties:
         name:
-          $ref: '#/components/schemas/LocalizedString'
+          $ref: "#/components/schemas/LocalizedString"
         description:
           type: string
           nullable: true
         enabled_modules:
           type: array
           items:
-            $ref: '#/components/schemas/Module'
+            $ref: "#/components/schemas/Module"
           minItems: 1
 
     StatusChangeRequest:
@@ -436,7 +436,7 @@ components:
         - status
       properties:
         status:
-          $ref: '#/components/schemas/ProductStatus'
+          $ref: "#/components/schemas/ProductStatus"
 
     Product:
       type: object
@@ -445,7 +445,7 @@ components:
           type: string
           format: uuid
         name:
-          $ref: '#/components/schemas/LocalizedString'
+          $ref: "#/components/schemas/LocalizedString"
         slug:
           type: string
         description:
@@ -454,9 +454,9 @@ components:
         enabled_modules:
           type: array
           items:
-            $ref: '#/components/schemas/Module'
+            $ref: "#/components/schemas/Module"
         status:
-          $ref: '#/components/schemas/ProductStatus'
+          $ref: "#/components/schemas/ProductStatus"
         current_version:
           type: integer
           minimum: 1
@@ -508,7 +508,7 @@ components:
         success:
           type: boolean
         data:
-          $ref: '#/components/schemas/Product'
+          $ref: "#/components/schemas/Product"
           nullable: true
         error:
           type: object
@@ -537,7 +537,7 @@ components:
             items:
               type: array
               items:
-                $ref: '#/components/schemas/Product'
+                $ref: "#/components/schemas/Product"
             total:
               type: integer
             limit:
@@ -565,7 +565,7 @@ components:
             items:
               type: array
               items:
-                $ref: '#/components/schemas/AuditLogEntry'
+                $ref: "#/components/schemas/AuditLogEntry"
             total:
               type: integer
             limit:
@@ -589,7 +589,7 @@ components:
           type: boolean
           example: false
         data:
-          type: 'null'
+          type: "null"
         error:
           type: object
           required:
@@ -624,7 +624,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             invalid_slug:
               summary: Invalid slug format
@@ -642,7 +642,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             missing_token:
               summary: Missing JWT token
@@ -658,14 +658,14 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
 
     Conflict:
       description: Resource conflict (409)
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
           examples:
             duplicate_slug:
               summary: Slug already exists
@@ -681,7 +681,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
 
     RateLimitExceeded:
       description: Rate limit exceeded (429)
@@ -701,21 +701,21 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
 
     InternalError:
       description: Internal server error (500)
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
 
     NotFound:
       description: Resource not found (404)
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
 
 tags:
   - name: Products

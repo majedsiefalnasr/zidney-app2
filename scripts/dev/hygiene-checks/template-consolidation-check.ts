@@ -2,7 +2,9 @@
  * T003 — Template System Consolidation Check
  * Scans for legacy .specify/templates/ path references across key surfaces.
  * Checks template parity gap between legacy and canonical roots.
- */
+ 
+ * @library-module
+*/
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'

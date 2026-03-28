@@ -16,7 +16,7 @@
 import { execSync } from 'node:child_process'
 import { existsSync, rmSync, writeFileSync } from 'node:fs'
 import { performance } from 'node:perf_hooks'
-import { createLogger } from '../core/logger-factory'
+import { createLogger, flushAi, log } from '../utils/logger'
 
 const logger = createLogger('benchmark-warm-generation')
 
@@ -29,6 +29,10 @@ interface BenchmarkResult {
 }
 
 async function main() {
+  log.header(
+    'BENCHMARK AI CONTEXT WARM',
+    'Measures warm-run (cached) ai-context generation duration'
+  )
   const WARM_RUNS = 5
   const TARGET_MS = 500 // 500ms for warm runs
   const results: BenchmarkResult[] = []
@@ -38,13 +42,10 @@ async function main() {
     target_ms: TARGET_MS,
   })
 
-  console.log('\n📊 AI CONTEXT WARM RUN BENCHMARK\n')
-  console.log(`Test: Generate with cached artifacts`)
-  console.log(`Target: <${TARGET_MS}ms per run`)
-  console.log(`Warm Runs: ${WARM_RUNS}\n`)
+  log.step(`AI Context Warm Run Benchmark (target: <${TARGET_MS}ms, ${WARM_RUNS} runs)`)
 
   // Step 1: Clear cache and do one cold run to populate cache
-  console.log('Step 1: Cold run to populate cache...')
+  log.step('Step 1: Cold run to populate cache...')
   const cacheDir = 'docs/ai/context/.cache'
   if (existsSync(cacheDir)) {
     rmSync(cacheDir, { recursive: true, force: true })
@@ -55,15 +56,17 @@ async function main() {
       stdio: 'pipe',
       cwd: process.cwd(),
     })
-    console.log('✓ Cache populated\n')
+    log.success('Cache populated')
   } catch (error) {
     logger.error('Cold run failed', { error: String(error) })
-    console.log('✗ Failed to populate cache\n')
+    log.error('Failed to populate cache')
+    log.result({ total: WARM_RUNS, passed: 0, failed: WARM_RUNS })
+    flushAi()
     process.exit(1)
   }
 
   // Step 2: Run warm generation without clearing cache
-  console.log('Step 2: Warm runs (without clearing cache)...\n')
+  log.step('Step 2: Warm runs (without clearing cache)...')
   for (let i = 1; i <= WARM_RUNS; i++) {
     const startTime = performance.now()
 
@@ -84,8 +87,8 @@ async function main() {
         cached: true,
       })
 
-      console.log(
-        `Run ${i}: ${durationMs.toFixed(0)}ms${status === 'PASS' ? ' ✓' : ' (over target)'}`
+      log.info(
+        `Run ${i}: ${durationMs.toFixed(0)}ms${status === 'PASS' ? ' OK' : ' (over target)'}`
       )
     } catch (error) {
       const durationMs = performance.now() - startTime
@@ -97,7 +100,7 @@ async function main() {
         cached: false,
       })
 
-      console.log(`Run ${i}: FAIL - ${String(error).substring(0, 50)}...`)
+      log.warn(`Run ${i}: FAIL - ${String(error).substring(0, 50)}...`)
     }
   }
 
@@ -112,18 +115,19 @@ async function main() {
   const p95Index = Math.ceil(sorted.length * 0.95) - 1
   const p95Duration = sorted[p95Index]?.duration_ms || maxDuration
 
-  console.log('\n📈 BENCHMARK RESULTS\n')
-  console.log(`Passing Runs: ${passingRuns}/${WARM_RUNS}`)
-  console.log(`Average: ${Math.round(avgDuration)}ms`)
-  console.log(`Min: ${minDuration}ms`)
-  console.log(`Max: ${maxDuration}ms`)
-  console.log(`95th Percentile: ${p95Duration}ms`)
+  log.step('Benchmark Results')
+  log.info(`Passing Runs: ${passingRuns}/${WARM_RUNS}`)
+  log.info(`Average: ${Math.round(avgDuration)}ms`)
+  log.info(`Min: ${minDuration}ms`)
+  log.info(`Max: ${maxDuration}ms`)
+  log.info(`95th Percentile: ${p95Duration}ms`)
 
-  // Overall result
   const overallPass = p95Duration <= TARGET_MS
-  console.log(
-    `\nStatus: ${overallPass ? '✓ PASS' : '✗ FAIL'} (95th percentile ${overallPass ? '<=' : '>'} ${TARGET_MS}ms)`
-  )
+  if (overallPass) {
+    log.success(`PASS (95th percentile ${p95Duration}ms <= ${TARGET_MS}ms)`)
+  } else {
+    log.error(`FAIL (95th percentile ${p95Duration}ms > ${TARGET_MS}ms)`)
+  }
 
   // Save results
   const reportPath = 'docs/reports/warm-generation-benchmark.json'
@@ -153,6 +157,8 @@ async function main() {
 
   logger.info('Benchmark complete', { report: reportPath, status: overallPass ? 'PASS' : 'FAIL' })
 
+  log.result({ total: WARM_RUNS, passed: passingRuns, failed: WARM_RUNS - passingRuns })
+  flushAi()
   process.exit(overallPass ? 0 : 1)
 }
 

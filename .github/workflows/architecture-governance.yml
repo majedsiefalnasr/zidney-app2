@@ -14,6 +14,7 @@ on:
 
 env:
   BUN_VERSION: "1.3.11"
+  TRIVY_VERSION: "v0.69.3"
 
 jobs:
   architecture-governance:
@@ -153,19 +154,34 @@ jobs:
 
       # ── 14. Validate Script Naming Convention ──────────────────────────
       - name: Validate Script Naming Convention
-        run: bun run validate:script:naming
+        run: bun run validate:scripts:naming
 
       # ── 15. Validate Script Usages ─────────────────────────────────────
       - name: Validate Script Usages (no broken or orphan references)
-        run: bun run validate:script:usage
+        run: bun run validate:scripts:usage
 
       # ── 16. Validate Script Infrastructure ────────────────────────────
       - name: Validate Script Infrastructure (headers + registry freshness)
-        run: bun run validate:script:infrastructure
+        run: bun run validate:scripts:infrastructure
 
       # ── 17. Verify Script Registry Generation ─────────────────────────
       - name: Verify Script Registry Generation
         run: bun run dev:generate:script-docs
+
+      # ── 17.5 Install Trivy (required by infra:security:ci) ──────────────
+      - name: Restore Trivy cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ env.TRIVY_VERSION }}
+          restore-keys: trivy-db-${{ runner.os }}-
+
+      - name: Install Trivy
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh" | sudo sh -s -- -b /usr/local/bin "${TRIVY_VERSION}"
+          trivy --version
 
       # ── 18. Unified Governance Gate ─────────────────────────────────────
       - name: Unified Governance Gate

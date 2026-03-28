@@ -1,4 +1,5 @@
 #!/bin/bash
+# START: Script execution
 
 # T075: Deploy MMC Dashboard to Staging Environment
 #
@@ -17,6 +18,11 @@
 #   ./scripts/deploy-staging.sh
 
 set -euo pipefail
+
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/deploy-staging.sh"
 
 # ────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
@@ -157,6 +163,8 @@ read -p "Approve deployment? (yes/no): " CONFIRM
 
 if [ "${CONFIRM}" != "yes" ]; then
   log_warn "Deployment cancelled by user"
+  shell_ai_set_status warning
+  shell_ai_set_message "Deployment cancelled by user"
   exit 0
 fi
 
@@ -252,4 +260,9 @@ log_success "Staging deployment ready for smoke testing"
 # Clean up plan file
 rm -f "${PLAN_FILE}"
 
+echo ""
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: Script execution successful"
+echo "─────────────────────────────────────────────────────────────────────────────"
 exit 0

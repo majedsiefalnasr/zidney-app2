@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { spawnSync } from 'node:child_process'
+import { flushAi, log } from '../utils/logger'
 
 interface BenchmarkOptions {
   runs: number
@@ -74,9 +75,17 @@ export function runBenchmark(options: BenchmarkOptions): BenchmarkResult {
 }
 
 function main(): void {
+  log.header('ARCHITECTURE BENCHMARK', 'Measures architecture-health P95 duration against budget')
   const options = parseBenchmarkArgs()
   const result = runBenchmark(options)
-  console.log(JSON.stringify(result, null, 2))
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+  log.result({
+    total: result.runs,
+    passed: result.within_budget ? result.runs : 0,
+    failed: result.within_budget ? 0 : result.runs,
+    message: result.within_budget ? 'within budget' : 'over budget',
+  })
+  flushAi()
   process.exitCode = result.within_budget ? 0 : 1
 }
 

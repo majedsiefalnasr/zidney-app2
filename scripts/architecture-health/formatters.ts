@@ -1,3 +1,4 @@
+/** @library-module */
 import type { ArchitectureHealthAssessment } from './types'
 
 export function formatAssessmentAsJson(assessment: ArchitectureHealthAssessment): string {

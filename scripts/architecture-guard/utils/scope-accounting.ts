@@ -1,3 +1,4 @@
+/** @library-module */
 import type { ScopeMetrics } from '../types'
 
 export function buildScopeMetrics(

@@ -1,3 +1,4 @@
+/** @library-module */
 export type ValidationMode = 'development' | 'strict' | 'changed'
 
 export type GuardVerdict = 'PASS' | 'BLOCKED'

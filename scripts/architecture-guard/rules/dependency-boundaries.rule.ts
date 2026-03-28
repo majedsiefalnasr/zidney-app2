@@ -1,3 +1,4 @@
+/** @library-module */
 import { existsSync, readFileSync } from 'node:fs'
 import {
   detectFileModule,

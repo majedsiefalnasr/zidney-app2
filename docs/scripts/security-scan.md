@@ -32,7 +32,7 @@ command.
 
 ## Prerequisites
 
-- Trivy `v0.59.1` installed locally
+- Trivy `v0.69.3` installed locally
 - Repository dependencies installed with `bun install`
 
 ## Output

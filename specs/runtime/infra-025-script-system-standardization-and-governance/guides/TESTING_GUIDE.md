@@ -21,19 +21,19 @@ This guide provides step-by-step instructions for testing the INFRA-025 Script S
 
 ## Component Overview
 
-### 1. Script Naming Validator (`validate:script:naming`)
+### 1. Script Naming Validator (`validate:scripts:naming`)
 
 **Purpose:** Enforces `domain:action[:scope]` naming convention  
 **Languages:** TypeScript/Bun  
 **Files:** `scripts/validate/script-naming.ts` + test suite
 
-### 2. Script Usage Validator (`validate:script:usage`)
+### 2. Script Usage Validator (`validate:scripts:usage`)
 
 **Purpose:** Scans repo for `bun run` references and validates against known scripts  
 **Languages:** TypeScript/Bun  
 **Files:** `scripts/validate/script-usage.ts` + test suite
 
-### 3. Script Infrastructure Validator (`validate:script:infrastructure`)
+### 3. Script Infrastructure Validator (`validate:scripts:infrastructure`)
 
 **Purpose:** Validates metadata headers and registry freshness  
 **Languages:** TypeScript/Bun  
@@ -49,7 +49,7 @@ This guide provides step-by-step instructions for testing the INFRA-025 Script S
 
 ## Manual Test Scenarios
 
-### Scenario 1: Validator Accuracy — validate:script:naming
+### Scenario 1: Validator Accuracy — validate:scripts:naming
 
 **Objective:** Verify that the naming validator correctly identifies compliant and non-compliant script names.
 
@@ -65,7 +65,7 @@ git checkout spec/infra-025-script-system-standardization-and-governance
 1. **Verify validator passes on compliant scripts:**
 
    ```bash
-   bun run validate:script:naming
+   bun run validate:scripts:naming
    ```
 
    **Expected:** Exits with code 0 (no violations)
@@ -89,19 +89,19 @@ git checkout spec/infra-025-script-system-standardization-and-governance
 
 4. **Expected zero violations:**
    ```bash
-   bun run validate:script:naming 2>&1 | grep -E "violation|error|FAIL" || echo "PASS: No violations"
+   bun run validate:scripts:naming 2>&1 | grep -E "violation|error|FAIL" || echo "PASS: No violations"
    ```
 
 ---
 
-### Scenario 2: Validator Accuracy — validate:script:usage
+### Scenario 2: Validator Accuracy — validate:scripts:usage
 
 **Objective:** Verify that the usage validator correctly identifies missing and present `bun run` references.
 
 **Setup:**
 
 ```bash
-bun run validate:script:usage
+bun run validate:scripts:usage
 ```
 
 **Test Steps:**
@@ -140,14 +140,14 @@ bun run validate:script:usage
 
 ---
 
-### Scenario 3: Validator Accuracy — validate:script:infrastructure
+### Scenario 3: Validator Accuracy — validate:scripts:infrastructure
 
 **Objective:** Verify that metadata validation catches missing or malformed headers.
 
 **Setup:**
 
 ```bash
-bun run validate:script:infrastructure
+bun run validate:scripts:infrastructure
 ```
 
 **Test Steps:**
@@ -233,9 +233,9 @@ cat .github/workflows/architecture-governance.yml | grep -A 20 "validate:script"
 1. **Run all 4 validators locally:**
 
    ```bash
-   bun run validate:script:naming && echo "✅ naming"
-   bun run validate:script:usage && echo "✅ usage"
-   bun run validate:script:infrastructure && echo "✅ infrastructure"
+   bun run validate:scripts:naming && echo "✅ naming"
+   bun run validate:scripts:usage && echo "✅ usage"
+   bun run validate:scripts:infrastructure && echo "✅ infrastructure"
    bun run dev:generate:script-docs && echo "✅ docs"
    ```
 
@@ -244,7 +244,7 @@ cat .github/workflows/architecture-governance.yml | grep -A 20 "validate:script"
 2. **Verify CI will enforce these validators:**
 
    ```bash
-   grep -B 2 -A 5 "validate:script:infrastructure" .github/workflows/architecture-governance.yml
+   grep -B 2 -A 5 "validate:scripts:infrastructure" .github/workflows/architecture-governance.yml
    ```
 
    **Expected:** Validator is listed as a required check step
@@ -285,7 +285,7 @@ bun run validate:ai-context-fresh --help 2>&1 | head -5
    bun run lint 2>&1 | head -3
 
    # Test validate scripts
-   bun run validate:script:naming 2>&1 | tail -1
+   bun run validate:scripts:naming 2>&1 | tail -1
    ```
 
    **Expected:** All scripts execute without errors
@@ -319,7 +319,7 @@ bun run validate:ai-context-fresh --help 2>&1 | head -5
    # Temporarily add a bare name without domain prefix
    # e.g., "migrate-db": "bun scripts/db/migrate.ts"
    # Then run the validator
-   bun run validate:script:naming
+   bun run validate:scripts:naming
    ```
 
    **Expected:** Validator reports the violation and exits with non-zero code
@@ -356,16 +356,16 @@ bun run test -- scripts/dev/__tests__/refactor-scripts.test.ts
 
 ```bash
 # Time the validators on the full repository
-time bun run validate:script:naming
-time bun run validate:script:usage
-time bun run validate:script:infrastructure
+time bun run validate:scripts:naming
+time bun run validate:scripts:usage
+time bun run validate:scripts:infrastructure
 ```
 
 **Expected SLO:**
 
-- `validate:script:naming` — < 500ms
-- `validate:script:usage` — < 2s (repo scan)
-- `validate:script:infrastructure` — < 500ms
+- `validate:scripts:naming` — < 500ms
+- `validate:scripts:usage` — < 2s (repo scan)
+- `validate:scripts:infrastructure` — < 500ms
 
 ### Migration Engine Performance
 
@@ -436,7 +436,7 @@ time bun run dev:refactor:scripts --dry-run
 
 ```bash
 git checkout spec/infra-025-script-system-standardization-and-governance
-bun run validate:script:naming
+bun run validate:scripts:naming
 ```
 
 ### Question: Can I skip a validator if I know it's safe?
@@ -460,8 +460,8 @@ bun run validate:script:naming
    ```
 3. Run validators to verify:
    ```bash
-   bun run validate:script:naming
-   bun run validate:script:usage
+   bun run validate:scripts:naming
+   bun run validate:scripts:usage
    bun run dev:generate:script-docs
    ```
 

@@ -10,9 +10,9 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs'
-import { createLogger } from '../core/logger-factory'
 import { getHealthStatus, Timer } from '../core/performance-profiler'
 import { validateDependencyGraph } from '../core/schema-validator'
+import { createLogger, flushAi, log } from '../utils/logger'
 import { compareSnapshots, createSnapshot } from './core/diff-engine'
 
 const logger = createLogger('architecture-diff')
@@ -22,6 +22,7 @@ const timer = new Timer('architecture-diff-execution')
  * Main entry point for Architecture Diff with refactored utilities
  */
 async function main(): Promise<void> {
+  log.header('ARCHITECTURE DIFF', 'Compare architecture states and detect drift')
   timer.start()
 
   try {
@@ -111,8 +112,15 @@ async function main(): Promise<void> {
         actual: `${elapsed.toFixed(0)}ms`,
       })
     }
+
+    log.result({
+      message: `Architecture Diff completed in ${elapsed.toFixed(0)}ms (Health: ${health})`,
+    })
+    flushAi()
   } catch (error) {
     logger.error('Architecture Diff failure', { error: String(error) })
+    log.progressResult({ error: 1 }, { title: 'Architecture Diff Failed', showPercentage: false })
+    flushAi()
     process.exit(1)
   }
 }
@@ -120,7 +128,7 @@ async function main(): Promise<void> {
 // Run if invoked directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
-    console.error('[architecture-diff] Fatal error:', error)
+    log.error(`[architecture-diff] Fatal error: ${String(error)}`)
     process.exit(1)
   })
 }

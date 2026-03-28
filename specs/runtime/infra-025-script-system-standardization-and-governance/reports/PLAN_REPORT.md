@@ -40,15 +40,15 @@ No `data-model.md` or `contracts/` — not applicable for developer tooling stag
 
 ## Key Technical Decisions
 
-| #   | Decision                                                                                                                                    | Rationale                                                                                                                                                                       |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Refactor engine at `scripts/dev/refactor-scripts.ts` (`dev:refactor:scripts`)                                                               | `refactor` is not an allowed domain; `dev` domain covers developer utilities and repo hygiene. Ensures the engine satisfies its own governance gate.                            |
-| 2   | Staleness check normalizes (strips) `> Last generated: <ISO timestamp>` before diffing                                                      | A full string diff against a live-timestamp line would cause CI step 16 to permanently report stale on every run. Content hash of table rows is the only meaningful comparison. |
-| 3   | Script naming convention: `<domain>:<action>[:<scope>]` — 9 allowed domains                                                                 | Unambiguous, consistent, machine-parseable. Allows AI and CI to verify all entrypoints without ambiguity.                                                                       |
-| 4   | Script metadata header (5 fields: `@script`, `@domain`, `@category`, `@description`, `@usage`) enforced by `validate:script:infrastructure` | Registry cannot be auto-generated without all fields present; CI enforcement prevents silent omission.                                                                          |
-| 5   | Migration map (`SCRIPT_MIGRATION_MAP.md`) as source of truth for renames                                                                    | Decouples the rename decision from the refactor engine; enables dry-run previews; creates an auditable record of all renames.                                                   |
-| 6   | Forward-only rename (no removal without replacement)                                                                                        | Prevents broken `bun run` invocations in CI, docs, and agent skills during the migration window.                                                                                |
-| 7   | Lifecycle scripts (`build`, `test`, `lint`, `dev`) exempt from naming convention                                                            | These are universal Node/bun conventions. Renaming them would break standard tooling assumptions.                                                                               |
+| #   | Decision                                                                                                                                     | Rationale                                                                                                                                                                       |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Refactor engine at `scripts/dev/refactor-scripts.ts` (`dev:refactor:scripts`)                                                                | `refactor` is not an allowed domain; `dev` domain covers developer utilities and repo hygiene. Ensures the engine satisfies its own governance gate.                            |
+| 2   | Staleness check normalizes (strips) `> Last generated: <ISO timestamp>` before diffing                                                       | A full string diff against a live-timestamp line would cause CI step 16 to permanently report stale on every run. Content hash of table rows is the only meaningful comparison. |
+| 3   | Script naming convention: `<domain>:<action>[:<scope>]` — 9 allowed domains                                                                  | Unambiguous, consistent, machine-parseable. Allows AI and CI to verify all entrypoints without ambiguity.                                                                       |
+| 4   | Script metadata header (5 fields: `@script`, `@domain`, `@category`, `@description`, `@usage`) enforced by `validate:scripts:infrastructure` | Registry cannot be auto-generated without all fields present; CI enforcement prevents silent omission.                                                                          |
+| 5   | Migration map (`SCRIPT_MIGRATION_MAP.md`) as source of truth for renames                                                                     | Decouples the rename decision from the refactor engine; enables dry-run previews; creates an auditable record of all renames.                                                   |
+| 6   | Forward-only rename (no removal without replacement)                                                                                         | Prevents broken `bun run` invocations in CI, docs, and agent skills during the migration window.                                                                                |
+| 7   | Lifecycle scripts (`build`, `test`, `lint`, `dev`) exempt from naming convention                                                             | These are universal Node/bun conventions. Renaming them would break standard tooling assumptions.                                                                               |
 
 ---
 
@@ -96,7 +96,7 @@ All filesystem writes in the refactor engine are idempotent (replaceAll is safe 
 ## Idempotency Strategy
 
 - Refactor engine: running twice produces the same output (all legacy names already replaced on first run — second run finds zero matches).
-- `validate:script:infrastructure`: deterministic — same registry content → same exit code.
+- `validate:scripts:infrastructure`: deterministic — same registry content → same exit code.
 - `dev:generate:script-docs`: deterministic — same script metadata → same registry output.
 
 ---
@@ -135,7 +135,7 @@ All filesystem writes in the refactor engine are idempotent (replaceAll is safe 
 - Architecture Checker: `arch:type-safety-guard` has compound hyphen — syntactically valid; may be aligned in a future stage.
 - Architecture Checker: CI steps 14–17 may benefit from a visual comment header demarcating them from existing steps.
 - API Designer: Implementation Sequence step 14 uses direct file invocations; can be updated to governed `bun run` commands after renames stabilize.
-- API Designer: `validate:scripts-infra` entry disposition (retain/deprecate/remove) to be clarified in tasks.
+- API Designer: `validate:scripts:broken` entry disposition (retain/deprecate/remove) to be clarified in tasks.
 - API Designer: CI step 17 could add `git diff --exit-code docs/scripts/SCRIPT_REGISTRY.md` guard for stricter staleness detection in CI.
 
 ---

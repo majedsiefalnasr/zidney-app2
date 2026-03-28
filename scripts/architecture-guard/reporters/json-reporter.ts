@@ -1,3 +1,4 @@
+/** @library-module */
 import type {
   FallbackReason,
   GuardRunReport,

@@ -2,10 +2,12 @@
  * Source Loader - Load and parse metadata from ADRs, module boundaries, and directory structure
  * Task: T014
  * Path: scripts/ai-context/source-loader.ts
+ * @library-module
  */
 
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { log } from '../utils/logger'
 import type { GenerationError } from './types'
 
 interface CanonicalArchitectureContext {
@@ -99,7 +101,7 @@ async function loadADRs(adrDir: string): Promise<ADRFile[]> {
         content,
       })
     } catch (err) {
-      console.error(`Error loading ADR ${file}:`, err)
+      log.error(`Error loading ADR ${file}: ${String(err)}`)
     }
   }
 
@@ -114,7 +116,7 @@ async function loadModuleBoundaries(boundariesPath: string): Promise<ModuleBound
     const content = await readFile(boundariesPath, 'utf-8')
     return JSON.parse(content)
   } catch (err) {
-    console.error(`Error loading module boundaries: ${err}`)
+    log.error(`Error loading module boundaries: ${err}`)
     throw new Error(`Failed to load module-boundaries.json: ${String(err)}`)
   }
 }
@@ -146,7 +148,7 @@ async function scanModules(repoRoot: string): Promise<ModuleInfo[]> {
       }
     }
   } catch (err) {
-    console.warn('Could not scan apps directory:', err)
+    log.warn(`Could not scan apps directory: ${String(err)}`)
   }
 
   // Scan packages
@@ -167,7 +169,7 @@ async function scanModules(repoRoot: string): Promise<ModuleInfo[]> {
       }
     }
   } catch (err) {
-    console.warn('Could not scan packages directory:', err)
+    log.warn(`Could not scan packages directory: ${String(err)}`)
   }
 
   return modules

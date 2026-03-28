@@ -1,3 +1,4 @@
+/** @library-module */
 import { existsSync, readdirSync } from 'node:fs'
 
 const SKILLS_DIR = '.agents/skills'

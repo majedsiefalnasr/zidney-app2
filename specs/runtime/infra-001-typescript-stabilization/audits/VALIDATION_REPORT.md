@@ -9,18 +9,18 @@
 
 ## Gate Results Summary
 
-| Gate                 | Command                                 | Exit Code | Status                  |
-| -------------------- | --------------------------------------- | --------- | ----------------------- |
-| Source typecheck     | `bun run typecheck:src`                 | 0         | ✅ PASS                 |
-| Test typecheck       | `bun run typecheck:tests`               | 0         | ✅ PASS                 |
-| Typecheck aggregator | `bun run typecheck`                     | 0         | ✅ PASS                 |
-| Lint (errors)        | `bunx eslint . --quiet`                 | 0         | ✅ PASS                 |
-| Lint (full)          | `bun run lint`                          | 0         | ✅ PASS (2142 warnings) |
-| Unit tests           | `bun run test:unit`                     | 0         | ✅ PASS                 |
-| Static tests         | `bun run test:static`                   | 0         | ✅ PASS                 |
-| tsconfig audit       | `bash scripts/check-tsconfig-strict.sh` | 0         | ✅ PASS                 |
-| Integration tests    | `bun run test:integration`              | 1         | ⚠️ ENV (ECONNREFUSED)   |
-| Full test suite      | `bun run test`                          | 1         | ⚠️ ENV (ECONNREFUSED)   |
+| Gate                 | Command                                          | Exit Code | Status                  |
+| -------------------- | ------------------------------------------------ | --------- | ----------------------- |
+| Source typecheck     | `bun run typecheck:src`                          | 0         | ✅ PASS                 |
+| Test typecheck       | `bun run typecheck:tests`                        | 0         | ✅ PASS                 |
+| Typecheck aggregator | `bun run typecheck`                              | 0         | ✅ PASS                 |
+| Lint (errors)        | `bunx eslint . --quiet`                          | 0         | ✅ PASS                 |
+| Lint (full)          | `bun run lint`                                   | 0         | ✅ PASS (2142 warnings) |
+| Unit tests           | `bun run test:unit`                              | 0         | ✅ PASS                 |
+| Static tests         | `bun run test:static`                            | 0         | ✅ PASS                 |
+| tsconfig audit       | `bash scripts/validate/check-tsconfig-strict.sh` | 0         | ✅ PASS                 |
+| Integration tests    | `bun run test:integration`                       | 1         | ⚠️ ENV (ECONNREFUSED)   |
+| Full test suite      | `bun run test`                                   | 1         | ⚠️ ENV (ECONNREFUSED)   |
 
 ---
 
@@ -114,7 +114,7 @@ Compose test environment).
 
 ---
 
-## tsconfig Audit: `bash scripts/check-tsconfig-strict.sh`
+## tsconfig Audit: `bash scripts/validate/check-tsconfig-strict.sh`
 
 ```
 === Zidney tsconfig Strict Flag Validator ===

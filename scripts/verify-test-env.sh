@@ -1,8 +1,13 @@
 #!/bin/bash
-# Verify Test Environment Prerequisites
+# START: Verify Test Environment Prerequisites
 # Checks that all external dependencies are available for test execution
 
 set -e
+
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/verify-test-env.sh"
 
 echo "🔍 Verifying Zidney test environment..."
 
@@ -57,4 +62,6 @@ fi
 
 echo ""
 echo "✅ All test environment prerequisites verified"
+echo ""
+echo "RESULT: Test environment verification successful"
 exit 0

@@ -66,7 +66,7 @@ All new `package.json` entries follow the Zidney script governance naming rule:
 - `ci:local:workflow` — single-workflow targeted run
 - `ci:local:list` — list available workflows
 
-### AD-04 — `validate:scripts-infra` Must Be Added
+### AD-04 — `validate:scripts:broken` Must Be Added
 
 This script key does not exist in `package.json`. It is required by `run-local-ci.ts` (FR-06,
 step 2). It maps to the existing `scripts/validate/detect-broken-scripts.ts` which validates that
@@ -77,16 +77,16 @@ is part of T003 (not a new script file — only a new `package.json` registratio
 
 The following mapping between conceptual names and actual registered keys has been verified:
 
-| Conceptual Name (spec/FR-06)     | Registered key in `package.json`            | Verified            |
-| -------------------------------- | ------------------------------------------- | ------------------- |
-| `validate-runtime-scripts`       | `validate-runtime-scripts`                  | ✅                  |
-| `validate-script-infrastructure` | `validate:scripts-infra` (to be added T003) | ➕ ADD              |
-| `generate-script-docs`           | `generate-script-docs`                      | ✅                  |
-| `architecture-guard`             | `arch:guard`                                | ✅                  |
-| `type-safety-guard`              | `type-safety-guard`                         | ✅                  |
-| `lint (full-repo)`               | `lint`                                      | ✅                  |
-| `type:check` (user request)      | `type-check` (actual key)                   | ✅ use `type-check` |
-| `ci:local`                       | (to be added T003)                          | ➕ ADD              |
+| Conceptual Name (spec/FR-06)     | Registered key in `package.json`             | Verified            |
+| -------------------------------- | -------------------------------------------- | ------------------- |
+| `validate-runtime-scripts`       | `validate-runtime-scripts`                   | ✅                  |
+| `validate-script-infrastructure` | `validate:scripts:broken` (to be added T003) | ➕ ADD              |
+| `generate-script-docs`           | `generate-script-docs`                       | ✅                  |
+| `architecture-guard`             | `arch:guard`                                 | ✅                  |
+| `type-safety-guard`              | `type-safety-guard`                          | ✅                  |
+| `lint (full-repo)`               | `lint`                                       | ✅                  |
+| `type:check` (user request)      | `type-check` (actual key)                    | ✅ use `type-check` |
+| `ci:local`                       | (to be added T003)                           | ➕ ADD              |
 
 ### AD-06 — Secrets Strategy: `.secrets` Is Primary, `.act.secrets` Is Optional
 
@@ -103,7 +103,7 @@ gitignored. T004 scope: add `.act.secrets` to `.gitignore` only. Do **not** modi
 
 The orchestrator script `scripts/run-local-ci.ts` must be registered in `package.json` as
 `"ci:run-local": "bun scripts/run-local-ci.ts"`. T003 adds this key alongside the 5 `ci:local*`
-scripts. Running `bun run validate:runtime:scripts` then confirms the key exists and the script
+scripts. Running `bun run validate:scripts:runtime` then confirms the key exists and the script
 file parses. **Correction:** `ci:local` maps to `act --pull=false`, NOT to `run-local-ci.ts` —
 these are separate commands. `ci:run-local` is the key that invokes the orchestrator script.
 
@@ -202,7 +202,7 @@ Add the following entries to the `"scripts"` block:
 "ci:local:full": "act",
 "ci:local:workflow": "act -W .github/workflows",
 "ci:local:list": "act -l",
-"validate:scripts-infra": "bun run scripts/validate/detect-broken-scripts.ts"
+"validate:scripts:broken": "bun run scripts/validate/detect-broken-scripts.ts"
 ```
 
 **Key notes:**
@@ -210,7 +210,7 @@ Add the following entries to the `"scripts"` block:
 - `ci:local:workflow` runs all workflows by default (directory target). To target a single file,
   developers append the filename. The `run-local-ci.ts` script calls `bun run ci:local` (the
   full-directory run). The `ci:local:workflow` variant is for interactive developer use.
-- `validate:scripts-infra` maps to the existing `detect-broken-scripts.ts` validation tool,
+- `validate:scripts:broken` maps to the existing `detect-broken-scripts.ts` validation tool,
   satisfying FR-06 step 2 without creating a new script file.
 - All keys follow `domain:action` convention (FR-03, Zidney script governance).
 
@@ -305,8 +305,8 @@ The script must execute the following steps in order, stopping to collect status
 | Step | Command                            | Purpose                                       |
 | ---- | ---------------------------------- | --------------------------------------------- |
 | 0    | `docker info`                      | Fail-fast: verify Docker is running           |
-| 1    | `bun run validate:runtime:scripts` | Verify all script files in package.json exist |
-| 2    | `bun run validate:scripts-infra`   | Verify no broken script references            |
+| 1    | `bun run validate:scripts:runtime` | Verify all script files in package.json exist |
+| 2    | `bun run validate:scripts:broken`  | Verify no broken script references            |
 | 3    | `bun run dev:generate:script-docs` | Regenerate script documentation               |
 | 4    | `bun run arch:guard`               | Architecture boundary enforcement             |
 | 5    | `bun run arch:type-safety-guard`   | TypeScript type safety validation             |
@@ -323,7 +323,7 @@ shown. Steps 1–7 are all tracked in the summary table.
 
 ```
 [STEP 1/7] validate-runtime-scripts ... PASS
-[STEP 2/7] validate:scripts-infra ... FAIL
+[STEP 2/7] validate:scripts:broken ... FAIL
 [STEP 3/7] generate-script-docs ... PASS
 ...
 ```
@@ -340,14 +340,14 @@ suppress output (summary-only mode).
 ║ STEP  │ NAME                       │ RESULT          ║
 ╠══════════════════════════════════════════════════════╣
 ║   1   │ validate-runtime-scripts   │ ✅ PASS         ║
-║   2   │ validate:scripts-infra     │ ❌ FAIL         ║
+║   2   │ validate:scripts:broken     │ ❌ FAIL         ║
 ║   3   │ generate-script-docs       │ ✅ PASS         ║
 ║   4   │ arch:guard                 │ ✅ PASS         ║
 ║   5   │ type-safety-guard          │ ✅ PASS         ║
 ║   6   │ lint                       │ ✅ PASS         ║
 ║   7   │ ci:local                   │ ✅ PASS         ║
 ╠══════════════════════════════════════════════════════╣
-║ RESULT: FAIL — Step 2 failed (validate:scripts-infra)║
+║ RESULT: FAIL — Step 2 failed (validate:scripts:broken)║
 ╚══════════════════════════════════════════════════════╝
 ```
 
@@ -424,7 +424,7 @@ function main(): void {
 
   const steps: Array<{ name: string; command: string }> = [
     { name: "validate-runtime-scripts", command: "validate-runtime-scripts" },
-    { name: "validate:scripts-infra", command: "validate:scripts-infra" },
+    { name: "validate:scripts:broken", command: "validate:scripts:broken" },
     { name: "generate-script-docs", command: "generate-script-docs" },
     { name: "arch:guard", command: "arch:guard" },
     { name: "type-safety-guard", command: "type-safety-guard" },
@@ -873,7 +873,7 @@ This stage introduces no business logic. Testing is validating that the delivera
 | Workflow parity    | All workflows listed by `bun run ci:local:list`    | AC-08        |
 | Secrets audit      | `git log --diff-filter=A -- .act.secrets` is empty | AC-12        |
 | Gitignore check    | `git check-ignore -v .act.secrets` returns match   | AC-02        |
-| Script governance  | `bun run validate:runtime:scripts` passes          | AC-06        |
+| Script governance  | `bun run validate:scripts:runtime` passes          | AC-06        |
 | AGENTS.md rule     | grep for "bun run ci:local" in AGENTS.md           | AC-10        |
 | .actrc presence    | `test -f .actrc && cat .actrc`                     | AC-01        |
 
@@ -938,7 +938,7 @@ T002 → T003 → T004 → T007 (gitignore) → T005 (audit documented) → T006
 Simplified linear sequence:
 
 1. **T002** — Verify `.actrc` (VERIFY/NO-OP — existing config is authoritative, do not overwrite)
-2. **T003** — Add `package.json` script entries (ci:local\*, validate:scripts-infra)
+2. **T003** — Add `package.json` script entries (ci:local\*, validate:scripts:broken)
 3. **T004** — Add `.act.secrets` to `.gitignore` (gitignore-only — no `.actrc` changes per AD-06)
 4. **Developer note** — `.act.secrets` content is documented in `docs/ci/local-ci.md §Configuration` for local self-service creation
 5. **T006** — Write `scripts/run-local-ci.ts`
@@ -950,7 +950,7 @@ Simplified linear sequence:
 11. **T007** — Confirm orchestrator gate documentation complete
 
 > **Verification Gates (tasks.md only):** `tasks.md` adds 3 quality-gate micro-tasks not present
-> in this plan: T005 (`validate:scripts-infra` gate after T003), T008 (TypeScript type-check of
+> in this plan: T005 (`validate:scripts:broken` gate after T003), T008 (TypeScript type-check of
 > `run-local-ci.ts` after T007), T009 (verify `ci:local:list` and `ci:local:workflow ci.yml` after
 > T006). These gates improve correctness and are part of the authoritative implementation sequence.
 
@@ -958,15 +958,15 @@ Simplified linear sequence:
 
 ## 12. Risk Register
 
-| Risk                                               | Likelihood         | Severity | Mitigation                                             |
-| -------------------------------------------------- | ------------------ | -------- | ------------------------------------------------------ |
-| Docker not available on CI machine                 | Low                | High     | `run-local-ci.ts` fail-fast check; clear error message |
-| act version incompatibility                        | Low                | Medium   | No version pinning; document minimum requirement       |
-| E2E jobs fail locally (playwright)                 | Medium             | Low      | Document in troubleshooting; E2E runs on GitHub CI     |
-| `.act.secrets` accidentally committed              | Low                | High     | Explicit `.gitignore` entry; AC-12 git log check       |
-| `validate:scripts-infra` missing from package.json | Certain (pre-T003) | Medium   | T003 adds it explicitly                                |
-| `$GITHUB_STEP_SUMMARY` not working in act          | Certain            | Low      | Known limitation; documented; no blocker               |
-| Apple M1/M2 container arch mismatch                | Medium             | Medium   | Add `--container-architecture linux/amd64` to `.actrc` |
+| Risk                                                | Likelihood         | Severity | Mitigation                                             |
+| --------------------------------------------------- | ------------------ | -------- | ------------------------------------------------------ |
+| Docker not available on CI machine                  | Low                | High     | `run-local-ci.ts` fail-fast check; clear error message |
+| act version incompatibility                         | Low                | Medium   | No version pinning; document minimum requirement       |
+| E2E jobs fail locally (playwright)                  | Medium             | Low      | Document in troubleshooting; E2E runs on GitHub CI     |
+| `.act.secrets` accidentally committed               | Low                | High     | Explicit `.gitignore` entry; AC-12 git log check       |
+| `validate:scripts:broken` missing from package.json | Certain (pre-T003) | Medium   | T003 adds it explicitly                                |
+| `$GITHUB_STEP_SUMMARY` not working in act           | Certain            | Low      | Known limitation; documented; no blocker               |
+| Apple M1/M2 container arch mismatch                 | Medium             | Medium   | Add `--container-architecture linux/amd64` to `.actrc` |
 
 ---
 

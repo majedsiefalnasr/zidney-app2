@@ -49,7 +49,7 @@ with `[INFRA-001-LOGIC-XX]` references for follow-up tickets.
     PR and push to `main`, `develop`, `staging`.
   - `.eslintrc.json` `ban-ts-comment` upgraded to error-level with `descriptionFormat` requiring
     `[ref]` suffix.
-  - `scripts/check-tsconfig-strict.sh` audits 7 required strict flags + weakening overrides.
+  - `scripts/validate/check-tsconfig-strict.sh` audits 7 required strict flags + weakening overrides.
   - `package.json` `check:tsconfig` script registered.
 - **@ts-ignore compliance:** 152 comments across 30 files brought into
   `// @ts-ignore: <reason> [INFRA-001-LOGIC-XX]` format.

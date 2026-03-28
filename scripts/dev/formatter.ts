@@ -5,7 +5,9 @@
  * This module is imported by repo-doctor, repo-fix, repo-onboard, repo-status.
  *
  * Stage: INFRA-18 — T001
- */
+ 
+ * @library-module
+*/
 
 export type CheckStatus = 'ok' | 'warn' | 'error'
 

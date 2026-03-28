@@ -83,7 +83,7 @@
 - `scripts/deploy-staging.sh` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/ci/deploy-staging.sh (flagged for human review)
 - `scripts/ai-guard.ts` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/architecture/ai-guard.ts (flagged for human review)
 - `scripts/verify-test-env.sh` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/build/verify-test-env.sh (flagged for human review)
-- `scripts/check-tsconfig-strict.sh` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/build/check-tsconfig-strict.sh (flagged for human review)
+- `scripts/validate/check-tsconfig-strict.sh` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/build/check-tsconfig-strict.sh (flagged for human review)
 - `scripts/reset-test-redis.sh` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/build/reset-test-redis.sh (flagged for human review)
 - `scripts/deploy-production.sh` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/ci/deploy-production.sh (flagged for human review)
 - `scripts/seed-dashboard-test-data.ts` — DUPLICATE_ROOT_STUB — root-level file shares basename with scripts/dev/seed-dashboard-test-data.ts (flagged for human review)

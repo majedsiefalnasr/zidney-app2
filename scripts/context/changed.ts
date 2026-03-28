@@ -10,11 +10,18 @@
  *   changedFiles array rather than exiting non-zero.
  *
  * @usage bun run arch:context:changed
+ *
+ * Flags:
+ *   --ci      : CI / no-write mode — resolve changed files but do NOT write artifact
+ *   --dry-run : print the artifact JSON to stdout instead of writing
  */
 
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, renameSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import { exit, flushAi, log } from '../utils/logger'
+
+log.setScript('arch:context:changed')
 
 const OUTPUT_PATH = resolve('docs/ai/context/context-changed.json')
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
@@ -25,19 +32,21 @@ interface ContextChangedArtifact {
 }
 
 function fail(message: string): never {
-  console.error(`[context:changed] FAIL: ${message}`)
-  process.exit(1)
+  log.error(`[context:changed] FAIL: ${message}`)
+  log.result({ total: 1, passed: 0, failed: 1, message })
+  exit(1)
 }
 
 function isFresh(): { fresh: boolean; artifact?: ContextChangedArtifact } {
   if (!existsSync(OUTPUT_PATH)) return { fresh: false }
 
   try {
-    const raw = Bun.file(OUTPUT_PATH)
-    const ageMs = Date.now() - raw.mtimeMs
+    // Use fs.statSync to reliably obtain mtimeMs across runtimes
+    const stats = statSync(OUTPUT_PATH)
+    const ageMs = Date.now() - stats.mtimeMs
     if (ageMs >= CACHE_MAX_AGE_MS) return { fresh: false }
 
-    const text = require('node:fs').readFileSync(OUTPUT_PATH, 'utf8') as string
+    const text = readFileSync(OUTPUT_PATH, 'utf8') as string
     const artifact = JSON.parse(text) as ContextChangedArtifact
     return { fresh: true, artifact }
   } catch {
@@ -58,13 +67,20 @@ function writeArtifact(changedFiles: string[]): void {
 }
 
 function main(): void {
+  log.header('CONTEXT CHANGED', 'Resolves staged changed files and writes context-changed.json')
+  const args = process.argv.slice(2)
+  const ci = args.includes('--ci')
+  const dryRun = args.includes('--dry-run')
+
   const { fresh, artifact } = isFresh()
 
   if (fresh && artifact) {
     const n = artifact.changedFiles.length
     const ageS = Math.floor((Date.now() - new Date(artifact.generatedAt).getTime()) / 1000)
-    console.log(`[context:changed] OK cached (${n} staged files, age=${ageS}s)`)
-    process.exit(0)
+    log.info(`[context:changed] OK cached (${n} staged files, age=${ageS}s)`)
+    log.result({ total: n, passed: n, failed: 0, message: 'cached' })
+    flushAi()
+    exit(0)
   }
 
   let raw: string
@@ -83,6 +99,30 @@ function main(): void {
     .filter(Boolean)
     .sort()
 
+  // CI / no-write mode: resolve staged files but do not modify workspace artifacts
+  if (ci) {
+    log.info(
+      `[context:changed] CI mode: resolved ${changedFiles.length} staged file(s); skipping artifact write`
+    )
+    log.result({
+      total: changedFiles.length,
+      passed: changedFiles.length,
+      failed: 0,
+      message: 'ci-skip',
+    })
+    flushAi()
+    exit(0)
+  }
+
+  if (dryRun) {
+    const artifact: ContextChangedArtifact = {
+      generatedAt: new Date().toISOString(),
+      changedFiles,
+    }
+    process.stdout.write(`${JSON.stringify(artifact, null, 2)}\n`)
+    exit(0)
+  }
+
   try {
     writeArtifact(changedFiles)
   } catch (err) {
@@ -90,8 +130,10 @@ function main(): void {
     fail(`atomic write failed — ${message}`)
   }
 
-  console.log(`[context:changed] OK ${changedFiles.length} staged files resolved and cached`)
-  process.exit(0)
+  log.success(`[context:changed] OK ${changedFiles.length} staged files resolved and cached`)
+  log.result({ total: changedFiles.length, passed: changedFiles.length, failed: 0 })
+  flushAi()
+  exit(0)
 }
 
 main()

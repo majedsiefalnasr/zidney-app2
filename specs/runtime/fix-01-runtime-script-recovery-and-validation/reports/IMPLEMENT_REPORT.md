@@ -120,7 +120,7 @@ registered in `package.json`, one `validate-scripts` Vitest project was added, a
 | T041    | Update `SCRIPT_REGISTRY.md` to post-fix state         | Docs                | ✅     |
 | T042    | Execute validation run of all 10 new scripts          | Validation          | ✅     |
 | T043    | Write `audits/runtime-script-validation.md`           | Docs                | ✅     |
-| T044    | `bun run validate:runtime:scripts` → EXIT 0           | CI Gate             | ✅     |
+| T044    | `bun run validate:scripts:runtime` → EXIT 0           | CI Gate             | ✅     |
 | T045    | `bun run typecheck` → EXIT 0                          | CI Gate             | ✅     |
 | T046    | `bun run lint` → EXIT 0                               | CI Gate             | ✅     |
 

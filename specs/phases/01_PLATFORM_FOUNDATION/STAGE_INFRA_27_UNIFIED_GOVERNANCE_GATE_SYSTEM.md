@@ -45,8 +45,8 @@ Constitutional Compliance:
 - All 9 unit tests: PASS (56.63s)
 - lint (biome): PASS
 - typecheck: PASS
-- validate:script:infrastructure: PASS
-- validate:script:usage: PASS
+- validate:scripts:infrastructure: PASS
+- validate:scripts:usage: PASS
 - governance:gate (6 guards): ALL PASS
 
 Notes:
@@ -133,7 +133,7 @@ This stage consolidates prior infra work (INFRA-16, 21, 22, 26) into a **single,
 governance:gate
 ├── arch:guard
 ├── validate:types (type-safety-guard)
-├── validate:runtime-scripts
+├── validate:scripts:runtime
 ├── script:usage-scan
 ├── security:scan:ci
 └── ai-context:validate
@@ -176,7 +176,7 @@ import { $ } from "bun";
 
 await $`bun run arch:guard`;
 await $`bun run validate:types`;
-await $`bun run validate:runtime-scripts`;
+await $`bun run validate:scripts:runtime`;
 await $`bun run script:usage-scan`;
 await $`bun run security:scan:ci`;
 await $`bun run ai-context:validate`;
@@ -200,7 +200,7 @@ await $`bun run governance:gate`;
   "scripts": {
     "governance:gate": "bun run scripts/governance/gate.ts",
     "governance:gate:ci": "bun run scripts/governance/gate-ci.ts",
-    "governance:gate:changed": "bun run arch:guard:changed && bun run validate:runtime-scripts",
+    "governance:gate:changed": "bun run arch:guard:changed && bun run validate:scripts:runtime",
     "governance:report": "bun run arch:health && bun run ai-context:validate"
   }
 }

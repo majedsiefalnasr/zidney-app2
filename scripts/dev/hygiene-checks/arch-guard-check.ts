@@ -4,6 +4,7 @@
  * architectural violation baseline. Any violations are pre-existing (this stage
  * introduces no source code changes) and are reported as FLAG (informational), not FAIL.
  * NOTE-02: 120s timeout per subprocess
+ * @library-module
  */
 
 import type { TaskFinding, TaskResult } from './types.ts'

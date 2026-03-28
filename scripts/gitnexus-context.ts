@@ -19,6 +19,9 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import { exit, flushAi, log } from './utils/logger'
+
+log.setScript('arch:gitnexus:context')
 
 // ---------------------------------------------------------------------------
 // Type interfaces
@@ -80,10 +83,10 @@ const SCHEMA_VERSION = '1.0.0'
 
 function sanitizeRef(ref: string): string {
   if (!/^[a-zA-Z0-9._\-/^~]+$/.test(ref)) {
-    console.error(
+    log.error(
       `[gitnexus-context] Invalid --base-ref value: "${ref}". Only alphanumeric, '.', '_', '-', '/', '^', '~' characters are allowed.`
     )
-    process.exit(1)
+    exit(1)
   }
   return ref
 }
@@ -92,10 +95,10 @@ function sanitizeOutputPath(outputPath: string): string {
   const resolved = resolve(process.cwd(), outputPath)
   const cwd = resolve(process.cwd())
   if (!resolved.startsWith(cwd)) {
-    console.error(
+    log.error(
       `[gitnexus-context] --output path must be within the workspace directory. Received: "${outputPath}"`
     )
-    process.exit(1)
+    exit(1)
   }
   return resolved
 }
@@ -132,8 +135,8 @@ export function detectChangedFiles(options: { baseRef: string; all: boolean }): 
         .map((line) => line.slice(3))
         .join('\n')
     } catch (statusErr) {
-      console.error('[gitnexus-context] git is unavailable:', statusErr)
-      process.exit(1)
+      log.error(`[gitnexus-context] git is unavailable: ${statusErr}`)
+      exit(1)
     }
   }
 
@@ -211,7 +214,7 @@ export function extractGitHistory(): RecentCommit[] {
       stdio: ['ignore', 'pipe', 'pipe'],
     }).trim()
   } catch (err) {
-    console.error('[gitnexus-context] Failed to read git log:', err)
+    log.error(`[gitnexus-context] Failed to read git log: ${err}`)
     return []
   }
 
@@ -291,24 +294,24 @@ export function checkGitNexusHealth(): { healthy: boolean; status: string } {
  */
 function loadBrain(): ArchitectureBrain {
   if (!existsSync(BRAIN_PATH)) {
-    console.error('[gitnexus-context] ai-architecture-brain.json not found.')
-    console.error('[gitnexus-context] Run: bun run arch:audit')
-    process.exit(1)
+    log.error('[gitnexus-context] ai-architecture-brain.json not found.')
+    log.error('[gitnexus-context] Run: bun run arch:audit')
+    exit(1)
   }
 
   let raw: string
   try {
     raw = readFileSync(BRAIN_PATH, 'utf-8')
   } catch (err) {
-    console.error('[gitnexus-context] Failed to read ai-architecture-brain.json:', err)
-    process.exit(1)
+    log.error(`[gitnexus-context] Failed to read ai-architecture-brain.json: ${err}`)
+    exit(1)
   }
 
   try {
     return JSON.parse(raw) as ArchitectureBrain
   } catch (err) {
-    console.error('[gitnexus-context] Failed to parse ai-architecture-brain.json:', err)
-    process.exit(1)
+    log.error(`[gitnexus-context] Failed to parse ai-architecture-brain.json: ${err}`)
+    exit(1)
   }
 }
 
@@ -348,6 +351,7 @@ export function assembleContext(options: AssembleOptions): GitNexusContext {
 // ---------------------------------------------------------------------------
 
 export function main(): void {
+  log.header('GITNEXUS CONTEXT', 'Generates structured GitNexus context JSON artifact')
   const args = process.argv.slice(2)
 
   const changedFilesOnly = args.includes('--changed-files-only')
@@ -384,26 +388,35 @@ export function main(): void {
     try {
       mkdirSync(outputDir, { recursive: true })
     } catch (err) {
-      console.error(`[gitnexus-context] Failed to create output directory "${outputDir}":`, err)
-      process.exit(1)
+      log.error(`[gitnexus-context] Failed to create output directory "${outputDir}": ${err}`)
+      flushAi()
+      exit(1)
     }
   }
 
   try {
     writeFileSync(outputPath, JSON.stringify(context))
   } catch (err) {
-    console.error(`[gitnexus-context] Failed to write output to "${outputPath}":`, err)
-    process.exit(1)
+    log.error(`[gitnexus-context] Failed to write output to "${outputPath}": ${err}`)
+    flushAi()
+    exit(1)
   }
 
   const health = checkGitNexusHealth()
   if (!health.healthy) {
-    console.error('[gitnexus-context] Warning: gitnexus CLI health check failed:', health.status)
+    log.warn(`[gitnexus-context] Warning: gitnexus CLI health check failed: ${health.status}`)
   }
 
-  process.stdout.write(
-    `[gitnexus-context] Context written to ${outputPath} (${context.impactedModules.length} impacted modules, ${context.changedFiles.length} changed files)\n`
+  log.success(
+    `Context written to ${outputPath} (${context.impactedModules.length} impacted modules, ${context.changedFiles.length} changed files)`
   )
+  log.result({
+    total: context.impactedModules.length,
+    passed: context.impactedModules.length,
+    failed: 0,
+    message: `${context.changedFiles.length} changed files`,
+  })
+  flushAi()
 }
 
 if (import.meta.main) {

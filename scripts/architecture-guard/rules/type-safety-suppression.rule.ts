@@ -1,3 +1,4 @@
+/** @library-module */
 import { existsSync, readFileSync } from 'node:fs'
 import type { GuardRule, RuleContext, RuleResult, ViolationRecord } from '../types'
 import { moduleFromPath } from '../utils/changed-files'

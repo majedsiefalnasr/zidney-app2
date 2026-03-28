@@ -11,6 +11,9 @@
 
 import { mkdir, writeFile } from 'node:fs/promises'
 import { $ } from 'bun'
+import { exit, log } from '../utils/logger'
+
+log.setScript('governance:report')
 
 interface GuardResult {
   name: string
@@ -63,22 +66,22 @@ _None_
 }
 
 async function main(): Promise<void> {
+  log.header('GOVERNANCE REPORT', 'Generates a consolidated governance health report')
   const timestamp = new Date().toISOString()
-
-  console.log('╔══════════════════════════════════════════════╗')
-  console.log('║         Governance Report Generator          ║')
-  console.log('╚══════════════════════════════════════════════╝')
-  console.log('')
 
   const results: GuardResult[] = []
 
   for (const guard of REPORT_GUARDS) {
-    console.log(`▶ Running: ${guard.name} (${guard.script})`)
+    log.step(`Running: ${guard.name} (${guard.script})`)
     const proc = await $`bun run ${guard.script}`.nothrow()
     const exitCode = proc.exitCode ?? 1
     const passed = exitCode === 0
     results.push({ name: guard.name, script: guard.script, exitCode, passed })
-    console.log(passed ? `  ✔ ${guard.name} — PASS` : `  ✖ ${guard.name} — FAIL (exit ${exitCode})`)
+    if (passed) {
+      log.success(`${guard.name} — PASS`)
+    } else {
+      log.error(`${guard.name} — FAIL (exit ${exitCode})`)
+    }
   }
 
   const report = buildReport(timestamp, results)
@@ -86,11 +89,17 @@ async function main(): Promise<void> {
   await mkdir('docs/governance', { recursive: true })
   await writeFile('docs/governance/governance-report.md', report, 'utf8')
 
-  console.log('')
-  console.log('✔ Report written to docs/governance/governance-report.md')
+  log.success('Report written to docs/governance/governance-report.md')
 
+  const failed = results.filter((r) => !r.passed).length
+  log.result({
+    total: results.length,
+    passed: results.length - failed,
+    failed,
+    message: 'Governance report generated.',
+  })
   // report.ts always exits 0 — informational only, not a gate
-  process.exit(0)
+  exit(0)
 }
 
 main()

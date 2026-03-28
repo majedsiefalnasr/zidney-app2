@@ -20,21 +20,21 @@ This PR introduces comprehensive script governance infrastructure for the Zidney
 
 ## What's Included
 
-### 1. Script Naming Validator (validate:script:naming)
+### 1. Script Naming Validator (validate:scripts:naming)
 
 - Enforces `domain:action[:scope]` convention
 - 9 canonical domains: `db`, `arch`, `validate`, `ai`, `ci`, `repo`, `dev`, `infra`, `test`
 - Exempts lifecycle scripts (`migrate`, `start`, `stop`, `test`, `build`, `dev`, `lint`, `format`)
 - Exit code 0 when all scripts comply
 
-### 2. Script Usage Validator (validate:script:usage)
+### 2. Script Usage Validator (validate:scripts:usage)
 
 - Scans entire repository for `bun run` references
 - Validates each reference against known package.json scripts
 - Filters false positives: flags (--silent), paths (src/index.ts)
 - Safe for CI integration
 
-### 3. Script Infrastructure Validator (validate:script:infrastructure)
+### 3. Script Infrastructure Validator (validate:scripts:infrastructure)
 
 - Validates 5-field metadata headers on tracked scripts: @script, @domain, @category, @description, @usage
 - Checks SCRIPT_REGISTRY.md freshness (must be ≤24h old)
@@ -85,7 +85,7 @@ This PR introduces comprehensive script governance infrastructure for the Zidney
 
 ### Modified (12 files)
 
-- `package.json` — 5 new script entries: `validate:script:naming`, `validate:script:usage`, `validate:script:infrastructure`, `validate:diff:registry`, `validate:scan:packages`, `ai:validate:prompts`
+- `package.json` — 5 new script entries: `validate:scripts:naming`, `validate:scripts:usage`, `validate:scripts:infrastructure`, `validate:scripts:registry`, `validate:scan:packages`, `ai:validate:prompts`
 - `docs/scripts/SCRIPT_REGISTRY.md` — regenerated with 27 scripts
 - `.github/workflows/architecture-governance.yml` — integrated validators
 - `scripts/dev/refactor-scripts.ts` — updated script engine
@@ -138,9 +138,9 @@ This PR introduces comprehensive script governance infrastructure for the Zidney
 ### Validator Test Results
 
 ```
-✅ validate:script:naming — 0 violations
-✅ validate:script:usage — 0 violations
-✅ validate:script:infrastructure — 0 violations (1 expected stale registry note, now regenerated)
+✅ validate:scripts:naming — 0 violations
+✅ validate:scripts:usage — 0 violations
+✅ validate:scripts:infrastructure — 0 violations (1 expected stale registry note, now regenerated)
 ✅ dev:generate:script-docs — 27 scripts registered
 ```
 

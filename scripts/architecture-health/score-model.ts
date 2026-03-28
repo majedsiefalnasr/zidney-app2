@@ -1,3 +1,4 @@
+/** @library-module */
 import type { HealthSignalResult, HealthState, HealthThresholdPolicy, HealthVerdict } from './types'
 import { SIGNAL_ORDER } from './types'
 

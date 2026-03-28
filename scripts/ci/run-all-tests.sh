@@ -1,8 +1,14 @@
 #!/bin/bash
+# START: Script execution
 # T041 (moved from scripts/): Run All Tests for STAGE_TEST_01_PLATFORM_FOUNDATION
 # Executes all test suites in dependency order
 
 set -e
+
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/../utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/ci/run-all-tests.sh"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
@@ -75,8 +81,12 @@ echo "Phase Groups Failed: $TESTS_FAILED/4"
 
 if [ $TESTS_FAILED -eq 0 ]; then
   echo -e "${GREEN}✅ All tests passed!${NC}"
+  echo ""
+  echo "RESULT: All tests passed"
   exit 0
 else
   echo -e "${RED}❌ Some tests failed!${NC}"
+  echo ""
+  echo "RESULT: Some tests failed"
   exit 1
 fi

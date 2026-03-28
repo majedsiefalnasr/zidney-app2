@@ -12,10 +12,14 @@ import { randomUUID } from 'node:crypto'
 import { existsSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { createLogger } from '../core/logger-factory'
+import { exit, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('maintenance:cache-clean')
 logger.setContext({ correlationId })
+
+log.setScript('infra:cache:clean')
+log.header('Cache Clean', 'Remove build caches and temporary output directories to free disk space')
 
 const REPO_ROOT = process.cwd()
 
@@ -79,7 +83,13 @@ function main(): void {
   }
 
   logger.info('Cache clean complete', { removed, skipped, total: CACHE_DIRS.length })
-  process.exit(0)
+  log.result({
+    total: CACHE_DIRS.length,
+    passed: removed,
+    failed: skipped,
+    message: 'Cache clean complete',
+  })
+  exit(0)
 }
 
 main()
