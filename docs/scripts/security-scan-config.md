@@ -30,7 +30,7 @@ local gate.
 
 ## Prerequisites
 
-- Trivy `v0.59.1` or a CLI-compatible version available on `PATH`
+- Trivy `v0.69.3` or a CLI-compatible version available on `PATH`
 - Tracked infrastructure files in the working tree
 
 ## Output

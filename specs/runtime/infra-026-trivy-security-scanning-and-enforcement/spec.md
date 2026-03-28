@@ -276,7 +276,7 @@ An infrastructure engineer consulting the repository documentation can find a de
 ---
 
 **Q: Which specific Trivy version should be pinned for this stage — a hardcoded stage-local version or a floating range?**
-**A:** Pin to `v0.59.1` for this stage. The CI install step, local install docs, and validation tasks all use this exact version so behavior stays deterministic across environments.
+**A:** Pin to `v0.69.3` for this stage. The CI install step, local install docs, and validation tasks all use this exact version so behavior stays deterministic across environments.
 **Impact:** SEC-001, SC-001, NFR-006, Risk Assessment row "Trivy version changes break scan behavior between environments".
 
 ---

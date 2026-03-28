@@ -15,7 +15,7 @@ Scope Delivered:
 
 - ✅ `infra:security[:scope]` script surface and shared Trivy helper under `scripts/security/`
 - ✅ Repo-wide scans constrained to tracked working-tree content; staged secret enforcement constrained to git index state
-- ✅ Checksum-verified, pinned `v0.59.1` Trivy acquisition path for CI
+- ✅ Checksum-verified, pinned `v0.69.3` Trivy acquisition path for CI
 - ✅ Pre-commit dependency and staged-secret enforcement with bounded runtime (12s budget)
 - ✅ CI `security` job with downstream gating and sanitized artifact retention (65s budget)
 - ✅ Orchestrator Step 5/6.5 sanitized JSON contract with fail-closed parsing semantics

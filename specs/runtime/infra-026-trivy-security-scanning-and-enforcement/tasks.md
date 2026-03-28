@@ -42,7 +42,8 @@
 
 ### Phase 3 — CI Integration
 
-- [x] T013 Add `TRIVY_VERSION: "v0.59.1"` to `env:` block at top of `.github/workflows/ci.yml` (SEC-001)
+[x] T013 Add `TRIVY_VERSION: "v0.69.3"` to `env:` block at top of `.github/workflows/ci.yml` (SEC-001)
+
 - [x] T014 Add `security` job scaffold to `.github/workflows/ci.yml` with checkout, Bun setup, dependency install, version-pinned Trivy release download, checksum verification, and binary installation (FR-014, FR-015, SEC-001)
 - [x] T015 Add Trivy DB cache restore/persist, `infra:security:ci` execution, and sanitized artifact upload to the `security` job while preserving the NFR-001 budget target (FR-015, FR-017, NFR-001, SC-002, SEC-004)
 - [x] T016 Update downstream build/test jobs in `.github/workflows/ci.yml` so they depend on the `security` job and therefore execute after the security gate (FR-016)
@@ -101,8 +102,8 @@
 
 | Task ID   | Package              | Version Note                                                                      |
 | --------- | -------------------- | --------------------------------------------------------------------------------- |
-| T001–T006 | trivy (CLI binary)   | Pinned to `v0.59.1`; shared helper centralizes invocation behavior                |
-| T014–T015 | trivy release assets | Download pinned `v0.59.1` release assets and verify checksums before installation |
+| T001–T006 | trivy (CLI binary)   | Pinned to `v0.69.3`; shared helper centralizes invocation behavior                |
+| T014–T015 | trivy release assets | Download pinned `v0.69.3` release assets and verify checksums before installation |
 
 ---
 

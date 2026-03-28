@@ -30,7 +30,7 @@ the secret value itself.
 
 ## Prerequisites
 
-- Trivy `v0.59.1` or a CLI-compatible version available on `PATH`
+- Trivy `v0.69.3` or a CLI-compatible version available on `PATH`
 - A git repository when using `--staged`
 
 ## Output

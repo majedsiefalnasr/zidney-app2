@@ -46,7 +46,7 @@ interface TrivyReport {
   Results?: TrivyResultEntry[]
 }
 
-export const TRIVY_VERSION = 'v0.59.1'
+export const TRIVY_VERSION = 'v0.69.3'
 export const REPORT_PATH = 'tmp/trivy-report.json'
 export const DEFAULT_TIMEOUT = '3m'
 export const IGNORE_FILE = '.trivyignore'

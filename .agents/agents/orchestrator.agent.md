@@ -39,89 +39,6 @@ agents:
     'Security Auditor',
     'Technical Writer',
   ]
-handoffs:
-  # ── Workflow step advancement ──────────────────────────────────────────────
-  - label: '▶️ Run Specify'
-    agent: Orchestrator
-    prompt: 'Execute Step 1 — Specify for the current stage.'
-    send: false
-
-  - label: '▶️ Run Clarify'
-    agent: Orchestrator
-    prompt: 'Execute Step 2 — Clarify for the current stage.'
-    send: false
-
-  - label: '▶️ Run Plan'
-    agent: Orchestrator
-    prompt: 'Execute Step 3 — Plan for the current stage.'
-    send: false
-
-  - label: '▶️ Run Tasks'
-    agent: Orchestrator
-    prompt: 'Execute Step 4 — Tasks for the current stage.'
-    send: false
-
-  - label: '▶️ Run Analyze'
-    agent: Orchestrator
-    prompt: 'Execute Step 5 — Analyze for the current stage.'
-    send: false
-
-  - label: '▶️ Run Implement'
-    agent: Orchestrator
-    prompt: 'Execute Step 6 — Implement for the current stage.'
-    send: false
-
-  - label: '✅ Proceed to Closure'
-    agent: Orchestrator
-    prompt: 'Pre-closure review is approved. Execute Step 7 — Closure.'
-    send: false
-
-  # ── Specialist guardian handoffs ───────────────────────────────────────────
-  - label: '🏛️ Architecture Review'
-    agent: 'Architecture Guardian'
-    prompt: 'Review the current plan.md for architectural compliance. Return VERDICT: PASS or VERDICT: BLOCKED with a list of violations by severity.'
-    send: false
-
-  - label: '🔐 Security Audit'
-    agent: 'Security Auditor'
-    prompt: 'Review the current implementation for security issues. Return VERDICT: PASS or VERDICT: BLOCKED with findings grouped by severity: 🚨 Critical | ⚠️ High | ⚡ Medium | ℹ️ Low.'
-    send: false
-
-  - label: '👁️ Code Review'
-    agent: 'Code Reviewer'
-    prompt: 'Review the current implementation for code quality. Return VERDICT: PASS or VERDICT: BLOCKED with findings grouped by severity.'
-    send: false
-
-  - label: '🧪 QA Review'
-    agent: 'QA Engineer'
-    prompt: 'Review the current implementation for test coverage and quality. Return VERDICT: PASS or VERDICT: BLOCKED with findings grouped by severity.'
-    send: false
-
-  - label: '⚡ Performance Review'
-    agent: 'Performance Optimizer'
-    prompt: 'Review the current implementation for performance issues. Return VERDICT: PASS or VERDICT: BLOCKED with findings grouped by severity.'
-    send: false
-
-  - label: '🗄️ Database Review'
-    agent: 'Database Engineer'
-    prompt: 'Review the current data-model.md and migration plan for correctness and safety. Return VERDICT: PASS or VERDICT: BLOCKED with findings.'
-    send: false
-
-  - label: '🚀 DevOps Review'
-    agent: 'DevOps Engineer'
-    prompt: 'Review the current implementation for CI/CD, deployment, and Docker readiness. Return VERDICT: PASS or VERDICT: BLOCKED with findings.'
-    send: false
-
-  # ── Rollback and recovery ──────────────────────────────────────────────────
-  - label: '⏪ Rollback Implementation'
-    agent: Orchestrator
-    prompt: 'Trigger the Rollback Protocol. Revert implementation commits and re-enter the workflow at the appropriate step.'
-    send: false
-
-  - label: '♻️ Resume Stage'
-    agent: Orchestrator
-    prompt: 'Resume the current interrupted stage. Detect workflow state and continue from the last completed step.'
-    send: false
 version: 2.0.0
 ---
 
@@ -1125,8 +1042,6 @@ To start the actual workflow, re-invoke with "🆕 Start new stage".
 
 ## Resume Protocol
 
-> 💡 **Copilot Handoff:** Use the **♻️ Resume Stage** handoff button to jump directly into this protocol if you're returning to an interrupted session.
-
 If the user selects `resume`:
 
 1. List all resumable stages found.
@@ -1806,8 +1721,6 @@ Load `specs/templates/commits/commit-pre-step.md`. Fill all `{{PLACEHOLDER}}` to
 
 Apply the automatic continuation rule before proceeding to Step 1.
 
-> 💡 **Copilot Handoff:** Use the **▶️ Run Specify** handoff button to advance to Step 1.
-
 ---
 
 # Step 1 — Specify
@@ -1918,8 +1831,6 @@ git diff --name-only --cached
 Load `specs/templates/commits/commit-specify.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
 
 Apply the automatic continuation rule before proceeding to Step 2.
-
-> 💡 **Copilot Handoff:** Use the **▶️ Run Clarify** handoff button to advance to Step 2.
 
 ---
 
@@ -2053,8 +1964,6 @@ Load `specs/templates/commits/commit-clarify.md`. Fill all `{{PLACEHOLDER}}` tok
 
 Apply the automatic continuation rule before proceeding to Step 3.
 
-> 💡 **Copilot Handoff:** Use the **▶️ Run Plan** handoff button to advance to Step 3.
-
 ---
 
 # Step 3 — Plan
@@ -2110,8 +2019,6 @@ If plan modifies architecture:
 → STOP. Apply ADR Creation Protocol before proceeding.
 
 ## 3.1A — Guardian Plan Validation
-
-> 💡 **Copilot Handoff:** You can run specialist guardians independently using the **🏛️ Architecture Review** and **🗄️ Database Review** handoff buttons before or instead of the subagent calls below.
 
 Run in parallel:
 
@@ -2209,8 +2116,6 @@ git diff --name-only --cached
 Load `specs/templates/commits/commit-plan.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
 
 Apply the automatic continuation rule before proceeding to Step 4.
-
-> 💡 **Copilot Handoff:** Use the **▶️ Run Tasks** handoff button to advance to Step 4.
 
 ---
 
@@ -2383,8 +2288,6 @@ Load `specs/templates/commits/commit-tasks.md`. Fill all `{{PLACEHOLDER}}` token
 
 Apply the automatic continuation rule before proceeding to Step 5.
 
-> 💡 **Copilot Handoff:** Use the **▶️ Run Analyze** handoff button to advance to Step 5.
-
 ---
 
 # Step 5 — Analyze (Drift Detector)
@@ -2414,8 +2317,6 @@ Audit for: isolation violations, license middleware bypass, snapshot integrity b
 **Strict Pass Rule:** `drift_passed = true` ONLY IF ALL criteria pass. A single FAILED criterion = BLOCKED. 8/9 = BLOCKED. 9/9 = APPROVED. Partial passage is never acceptable.
 
 ## 5.1A — Composite Guardian Audit (Parallel)
-
-> 💡 **Copilot Handoff:** You can run any guardian independently using the **🔐 Security Audit**, **⚡ Performance Review**, **🧪 QA Review**, or **👁️ Code Review** handoff buttons if you want to inspect a specific domain before the full parallel audit.
 
 /handoff to=Security Auditor  
 /handoff to=Performance Optimizer  
@@ -2585,8 +2486,6 @@ git diff --name-only --cached
 Load `specs/templates/commits/commit-analyze.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
 
 Do NOT proceed to Step 6 if `drift_passed = false`.
-
-> 💡 **Copilot Handoff:** If analyze PASSED, use the **▶️ Run Implement** handoff button to advance to Step 6.
 
 ---
 
@@ -2844,8 +2743,6 @@ Fill with actual command output, pass/fail status per check, and failure details
 Write to: `specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md`
 
 ## 6.6 — Pre-Closure Guardian Validation (Parallel)
-
-> 💡 **Copilot Handoff:** You can run any pre-closure guardian independently using the **🔐 Security Audit**, **👁️ Code Review**, or **🚀 DevOps Review** handoff buttons for targeted review before the full parallel audit.
 
 /handoff to=DevOps Engineer  
 /handoff to=DevOps Engineer  
@@ -3107,8 +3004,6 @@ Then address the reported issues, regenerate affected report(s), update stage st
 
 If `approve` → proceed immediately to Step 7.
 Do NOT proceed to Step 7 until explicit approval is received.
-
-> 💡 **Copilot Handoff:** Once you approve above, use the **✅ Proceed to Closure** handoff button to start Step 7 — or click Approve in the widget and the orchestrator will auto-advance.
 
 ---
 
@@ -3555,8 +3450,6 @@ Rollback is triggered when:
 - Guardian agent (Architecture Checker, Security Auditor, QA Engineer) issues a REJECT verdict
 - User explicitly requests rollback via `/rollback` command
 - Pre-commit diagnostics detect unresolvable violations
-
-> 💡 **Copilot Handoff:** You can also trigger rollback at any time using the **⏪ Rollback Implementation** handoff button.
 
 ## Rollback Procedure
 

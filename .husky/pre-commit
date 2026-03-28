@@ -107,7 +107,7 @@ fi
 # ── Trivy security enforcement ─────────────────────────────────────────────
 if ! command -v trivy >/dev/null 2>&1; then
   echo "❌ Trivy is required for pre-commit security enforcement."
-  echo "   Install Trivy v0.59.1 before committing."
+  echo "   Install Trivy v0.69.3 before committing."
   echo "   Run: brew install trivy"
   exit 1
 fi

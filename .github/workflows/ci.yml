@@ -280,14 +280,8 @@ jobs:
         run: |
           set -euo pipefail
           VERSION_NO_V="${TRIVY_VERSION#v}"
-          ASSET="trivy_${VERSION_NO_V}_Linux-64bit.tar.gz"
-          CHECKSUMS="trivy_${VERSION_NO_V}_checksums.txt"
-
-          curl -fsSLO "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/${ASSET}"
-          curl -fsSLO "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/${CHECKSUMS}"
-          grep " ${ASSET}$" "${CHECKSUMS}" | shasum -a 256 -c -
-          tar -xzf "${ASSET}" trivy
-          sudo install -m 0755 trivy /usr/local/bin/trivy
+          curl -fsSL "https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh" | sudo sh -s -- -b /usr/local/bin "${VERSION_NO_V}"
+          trivy --version
 
       - name: Run Trivy Security Scan
         run: bun run infra:security:ci
