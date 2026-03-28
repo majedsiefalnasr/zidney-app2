@@ -257,16 +257,20 @@ function outputMarkdown(violations: Violation[]): void {
 
 // Main entry point
 async function main(): Promise<void> {
-  log.header('TYPE SAFETY GUARD', 'Validates TypeScript code for type safety violations')
+  const args = parseArgs()
+
+  if (args.output !== 'json') {
+    log.header('TYPE SAFETY GUARD', 'Validates TypeScript code for type safety violations')
+  }
 
   if (process.argv.includes('--unified-runner')) {
     const code = await runUnifiedArchitectureGuard(process.argv.slice(2))
-    log.result({ total: 1, passed: code === 0 ? 1 : 0, failed: code === 0 ? 0 : 1 })
+    if (args.output !== 'json') {
+      log.result({ total: 1, passed: code === 0 ? 1 : 0, failed: code === 0 ? 0 : 1 })
+    }
     flushAi()
     exit(code)
   }
-
-  const args = parseArgs()
   const files = await collectTypeScriptFiles()
   const violations = await scanForViolations(files)
   const allowedExceptions = await loadAllowedExceptions()
@@ -285,12 +289,15 @@ async function main(): Promise<void> {
       outputText(unapprovedViolations)
   }
 
-  log.result({
-    total: violations.length,
-    passed: violations.length - unapprovedViolations.length,
-    failed: unapprovedViolations.length,
-    message: unapprovedViolations.length > 0 ? 'Type safety violations found' : 'All checks passed',
-  })
+  if (args.output !== 'json') {
+    log.result({
+      total: violations.length,
+      passed: violations.length - unapprovedViolations.length,
+      failed: unapprovedViolations.length,
+      message:
+        unapprovedViolations.length > 0 ? 'Type safety violations found' : 'All checks passed',
+    })
+  }
   flushAi()
 
   if (unapprovedViolations.length > 0 && !args.noExitError) {

@@ -93,10 +93,13 @@ function downgradeToWarnings(violations: ViolationRecord[]): ViolationRecord[] {
 }
 
 export async function runUnifiedArchitectureGuard(args = process.argv.slice(2)): Promise<number> {
-  log.header('UNIFIED ARCHITECTURE GUARD', 'Validates architecture rules and import boundaries')
+  const mode = resolveMode(args)
+  if (!mode.outputJson) {
+    log.header('UNIFIED ARCHITECTURE GUARD', 'Validates architecture rules and import boundaries')
+  }
   const start = Date.now()
   const repoRoot = process.cwd()
-  const mode = resolveMode(args)
+
   const allModules = loadAllModules(repoRoot)
 
   const scope = buildTargetFiles(repoRoot, mode, allModules)
@@ -190,12 +193,14 @@ export async function runUnifiedArchitectureGuard(args = process.argv.slice(2)):
   }
 
   const exitCode = report.verdict === 'BLOCKED' ? 1 : 0
-  log.result({
-    total: report.violations.length,
-    passed: report.violations.filter((v) => v.severity !== 'error').length,
-    failed: report.violations.filter((v) => v.severity === 'error').length,
-    message: `verdict=${report.verdict}`,
-  })
+  if (!mode.outputJson) {
+    log.result({
+      total: report.violations.length,
+      passed: report.violations.filter((v) => v.severity !== 'error').length,
+      failed: report.violations.filter((v) => v.severity === 'error').length,
+      message: `verdict=${report.verdict}`,
+    })
+  }
   flushAi()
   return exitCode
 }
