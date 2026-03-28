@@ -180,8 +180,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          VERSION_NO_V="${TRIVY_VERSION#v}"
-          curl -fsSL "https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh" | sudo sh -s -- -b /usr/local/bin "${VERSION_NO_V}"
+          curl -fsSL "https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh" | sudo sh -s -- -b /usr/local/bin "${TRIVY_VERSION}"
           trivy --version
 
       # ── 18. Unified Governance Gate ─────────────────────────────────────
