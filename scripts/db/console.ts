@@ -1,63 +1,105 @@
+#!/usr/bin/env bun
+
 /**
  * @script db:console
  * @domain db
  * @category runtime
- * @description Launch an interactive psql session connected to DATABASE_URL
- * @mode manual
+ * @description Launch an interactive psql session connected to DATABASE_URL.
  * @usage bun run db:console
- * @dependencies psql,node:crypto,node:child_process
- *
- * Note: Connects directly to DATABASE_URL — no --workspace= arg required.
- * Caller must set DATABASE_URL in the environment.
- * Requires psql to be available on PATH.
- 
- * @library-module
-*/
+ */
 
 import { spawnSync } from 'node:child_process'
+import { exit, log } from '../utils/logger'
 
-const _correlationId = randomUUID()
-const logger = createLogger('db:console')
-logger.setContext({ correlationId })
+log.setScript('db:console')
 
-const DATABASE_URL = process.env.DATABASE_URL
-
-function _main(): void {
-  logger.info('Launching database console')
-
-  if (!DATABASE_URL) {
-    logger.warn('Infrastructure dependency unavailable: DATABASE_URL not set', {
-      service: 'db:console',
-    })
-    process.exit(0)
-  }
-
-  // Check psql is available
-  const which = spawnSync('which', ['psql'], { encoding: 'utf-8' })
-  if (which.status !== 0 || !which.stdout.trim()) {
-    logger.error('psql not found on PATH', {
-      hint: 'Install postgresql-client (brew install postgresql or apt-get install postgresql-client)',
-    })
-    process.exit(0)
-  }
-
-  logger.info('Connecting to database via psql', {
-    psqlPath: which.stdout.trim(),
-  })
-
-  const result = spawnSync('psql', [DATABASE_URL as string], {
-    stdio: 'inherit',
-    env: { ...process.env },
-  })
-
-  if (result.error) {
-    logger.error('Failed to launch psql', {
-      error: result.error.message,
-    })
-    process.exit(0)
-  }
-
-  process.exit(result.status ?? 0)
+function hasHelpFlag(argv: string[]): boolean {
+  return argv.includes('--help') || argv.includes('-h')
 }
 
-main()
+function printHelp(): void {
+  log.header('DB CONSOLE', 'Launches psql against DATABASE_URL for manual inspection')
+  log.info('Usage: bun run db:console')
+  log.info('Environment: DATABASE_URL=postgres://user:pass@host:5432/master_db')
+  log.info('Requirement: psql must be available on PATH')
+  log.result({ total: 1, passed: 1, failed: 0, message: 'Help displayed' })
+}
+
+async function main(): Promise<void> {
+  if (hasHelpFlag(process.argv)) {
+    printHelp()
+    exit(0)
+  }
+
+  log.header('DB CONSOLE', 'Opens an interactive psql session using DATABASE_URL')
+
+  const databaseUrl = process.env.DATABASE_URL
+  if (!databaseUrl) {
+    log.warn('DATABASE_URL not set; skipping psql launch')
+    log.result({
+      total: 1,
+      passed: 1,
+      failed: 0,
+      warnings: 1,
+      status: 'warning',
+      message: 'Database console skipped',
+      details: {
+        infraDependent: true,
+      },
+    })
+    exit(0)
+  }
+
+  const psqlCheck = spawnSync('which', ['psql'], { encoding: 'utf8' })
+  if (psqlCheck.status !== 0) {
+    log.error('psql not found on PATH')
+    log.info('Install PostgreSQL client tools, then rerun this command')
+    log.result({
+      total: 1,
+      passed: 1,
+      failed: 0,
+      warnings: 1,
+      status: 'warning',
+      message: 'Database console skipped because psql is unavailable',
+      details: {
+        infraDependent: true,
+      },
+    })
+    exit(0)
+  }
+
+  log.step('Launching psql session...')
+  const result = spawnSync('psql', [databaseUrl], { stdio: 'inherit' })
+
+  if (result.error) {
+    log.error(`psql failed to launch: ${result.error.message}`)
+    log.result({
+      total: 1,
+      passed: 0,
+      failed: 1,
+      message: 'Database console failed to start',
+    })
+    exit(1)
+  }
+
+  const status = result.status ?? 0
+  if (status === 0) {
+    log.result({
+      total: 1,
+      passed: 1,
+      failed: 0,
+      message: 'Database console session closed cleanly',
+    })
+    exit(0)
+  }
+
+  log.result({
+    total: 1,
+    passed: 0,
+    failed: 1,
+    message: `Database console exited with status ${status}`,
+  })
+  exit(status)
+}
+
+void main()

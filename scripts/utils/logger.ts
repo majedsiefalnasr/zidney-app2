@@ -22,9 +22,26 @@ import stringWidth from 'string-width'
 
 type LogLevel = 'info' | 'success' | 'warn' | 'error' | 'step'
 
-type AiStatus = 'success' | 'error' | 'warning' | 'info'
+export type ResultStatus = 'success' | 'error' | 'warning' | 'info'
+
+type AiStatus = ResultStatus
 
 type Align = 'start' | 'center' | 'end'
+
+export type ResultMetricValue = string | number | boolean | null
+
+type ResultDetails = Record<string, ResultMetricValue | undefined>
+
+export interface ResultSummary {
+  passed?: number
+  failed?: number
+  total?: number
+  warnings?: number
+  message?: string
+  status?: ResultStatus
+  details?: ResultDetails
+  [key: string]: ResultMetricValue | ResultDetails | undefined
+}
 
 interface AiLogPayload {
   status: AiStatus
@@ -62,18 +79,8 @@ const isCI = process.env.CI === 'true' || process.env.CI === '1'
 const isSilent = process.argv.includes('--silent')
 const isJson = process.argv.includes('--json')
 const isPretty = process.argv.includes('--pretty')
+const isCompact = process.argv.includes('--compact')
 const STRICT_UX = process.env.STRICT_UX === 'true'
-
-const LOG_LEVEL = (process.env.LOG_LEVEL || 'info') as StructuredLogLevel
-
-const levelPriority: Record<StructuredLogLevel, number> = {
-  debug: 0,
-  info: 1,
-  warn: 2,
-  error: 3,
-}
-
-const LOG_SAMPLE_RATE = Number(process.env.LOG_SAMPLE_RATE || '1')
 
 const NODE_ENV = process.env.NODE_ENV || 'development'
 
@@ -95,9 +102,30 @@ function applyEnvDefaults() {
 
 applyEnvDefaults()
 
+const LOG_LEVEL = (process.env.LOG_LEVEL || 'info') as StructuredLogLevel
+
+const levelPriority: Record<StructuredLogLevel, number> = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+}
+
+const LOG_SAMPLE_RATE = Number(process.env.LOG_SAMPLE_RATE || '1')
+
 // Global minimum display width (used by boxes, tables, and progress bars).
 // Can be overridden with `LOG_MIN_WIDTH` or (legacy) `LOG_MIN_BOX_WIDTH` env var.
 const LOG_MIN_WIDTH = Number(process.env.LOG_MIN_WIDTH || process.env.LOG_MIN_BOX_WIDTH || '50')
+
+const RESERVED_RESULT_KEYS = new Set([
+  'passed',
+  'failed',
+  'total',
+  'warnings',
+  'message',
+  'status',
+  'details',
+])
 
 // ANSI/fullwidth-aware padding helpers using `string-width` for visible widths.
 function padRightVisible(s: string, width: number): string {
@@ -106,7 +134,7 @@ function padRightVisible(s: string, width: number): string {
   return str + ' '.repeat(Math.max(0, width - w))
 }
 
-function _padLeftVisible(s: string, width: number): string {
+function padLeftVisible(s: string, width: number): string {
   const str = String(s)
   const w = stringWidth(str)
   return ' '.repeat(Math.max(0, width - w)) + str
@@ -147,6 +175,74 @@ function shouldSample(): boolean {
  */
 function shouldLog(level: StructuredLogLevel): boolean {
   return levelPriority[level] >= levelPriority[LOG_LEVEL] && shouldSample()
+}
+
+function isResultMetricValue(value: unknown): value is ResultMetricValue {
+  return value === null || ['string', 'number', 'boolean'].includes(typeof value)
+}
+
+function formatMetricLabel(key: string): string {
+  return key
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+function formatResultMetricValue(value: ResultMetricValue): string {
+  if (typeof value === 'number') {
+    return `${colors.cyan}${value}${colors.reset}`
+  }
+
+  if (typeof value === 'boolean') {
+    const tone = value ? colors.green : colors.red
+    return `${tone}${value ? 'Yes' : 'No'}${colors.reset}`
+  }
+
+  if (value === null) {
+    return `${colors.dim}n/a${colors.reset}`
+  }
+
+  return String(value)
+}
+
+function collectResultDetails(summary: ResultSummary): ResultDetails {
+  const details: ResultDetails = {}
+
+  for (const [key, value] of Object.entries(summary)) {
+    if (RESERVED_RESULT_KEYS.has(key) || !isResultMetricValue(value)) {
+      continue
+    }
+
+    details[key] = value
+  }
+
+  for (const [key, value] of Object.entries(summary.details ?? {})) {
+    if (!isResultMetricValue(value)) {
+      continue
+    }
+
+    details[key] = value
+  }
+
+  return details
+}
+
+function resolveResultStatus(summary: ResultSummary): ResultStatus {
+  if (summary.status) {
+    return summary.status
+  }
+
+  if ((summary.failed ?? 0) > 0) {
+    return 'error'
+  }
+
+  if ((summary.warnings ?? 0) > 0) {
+    return 'warning'
+  }
+
+  return 'success'
 }
 
 const symbols: Record<LogLevel, string> = {
@@ -207,8 +303,6 @@ function colorize(level: LogLevel, text: string): string {
       return `${colors.blue}${text}${colors.reset}`
     case 'step':
       return `${colors.cyan}${text}${colors.reset}`
-    default:
-      return text
   }
 }
 
@@ -243,29 +337,45 @@ function pushAi(payload: AiLogPayload) {
  * It aggregates collected AI payloads and writes a deterministic JSON
  * summary suitable for machine consumption.
  *
+ * Even when the buffer is empty a minimal `{"status":"success"}` envelope
+ * is emitted so CI consumers always receive parseable JSON in `--ai` mode.
+ *
  * Example output shape:
  * {
- *   status: 'success'|'error',
- *   summary: { total, errors, success, duration_ms },
+ *   status: 'success'|'error'|'warning',
+ *   summary: { total, errors, warnings, success, duration_ms },
  *   errors: [...],
+ *   warnings: [...],
  *   successes: [...]
  * }
  */
 export function flushAi(): void {
-  if (!isAiMode || aiBuffer.length === 0) return
+  if (!isAiMode) return
+
+  // Emit minimal envelope even when no payloads were buffered so consumers
+  // always receive parseable JSON in --ai mode.
+  if (aiBuffer.length === 0) {
+    process.stdout.write(`${JSON.stringify({ status: 'success' })}\n`)
+    return
+  }
 
   const errors = aiBuffer.filter((p) => p.status === 'error')
+  const warnings = aiBuffer.filter((p) => p.status === 'warning')
   const successes = aiBuffer.filter((p) => p.status === 'success')
 
+  const overallStatus = errors.length > 0 ? 'error' : warnings.length > 0 ? 'warning' : 'success'
+
   const output = {
-    status: errors.length > 0 ? 'error' : 'success',
+    status: overallStatus,
     summary: {
       total: aiBuffer.length,
       errors: errors.length,
+      warnings: warnings.length,
       success: successes.length,
       duration_ms: aiBuffer.reduce((acc, p) => acc + (p.duration_ms || 0), 0),
     },
     errors,
+    warnings,
     successes,
   }
 
@@ -318,7 +428,7 @@ class Spinner {
     if (isAiMode || isCI || isSilent) return
     if (this.timer) clearInterval(this.timer)
     process.stdout.write('\r\x1b[K')
-    if (finalText) console.log(finalText)
+    if (finalText) process.stdout.write(`${finalText}\n`)
   }
 }
 
@@ -345,7 +455,7 @@ class ProgressBar {
 
   tick(step = 1) {
     if (isAiMode || isCI || isSilent) return
-    this.current += step
+    this.current = Math.min(this.current + step, this.total)
     this.render()
   }
 
@@ -413,14 +523,12 @@ class Logger {
 
     if (isAiMode || isSilent) return
 
-    const compact = process.argv.includes('--compact')
-
     const content = description ? `${title.toUpperCase()}\n${description}` : title.toUpperCase()
 
     const lines = content.split('\n')
     const width = Math.max(...lines.map((l) => stringWidth(l))) + 4
 
-    if (compact) {
+    if (isCompact) {
       console.log(`\n${colors.bold}${title.toUpperCase()}${colors.reset}`)
       if (description) console.log(description)
       console.log('')
@@ -472,27 +580,22 @@ class Logger {
 
   /**
    * Print a structured result summary including counts and an optional
-   * message. When running in `--ai` mode the result is pushed to the AI
-   * buffer as a structured payload instead of printing text.
+   * message. Supports extra summary metrics through `details` and also
+   * tolerates legacy top-level scalar metrics for backwards compatibility.
+   * When running in `--ai` mode the result is pushed to the AI buffer as a
+   * structured payload instead of printing text.
    *
-   * @param summary - Object with optional `passed`, `failed`, `total`, and `message` fields
+   * @param summary - Object with optional `passed`, `failed`, `total`, `warnings`, `status`, `details`, and `message` fields
    */
-  result(
-    summary: {
-      passed?: number
-      failed?: number
-      total?: number
-      warnings?: number
-      message?: string
-    },
-    options?: { align?: Align }
-  ) {
+  result(summary: ResultSummary, options?: { align?: Align }) {
     const duration = this.startTime ? Date.now() - this.startTime : undefined
+    const status = resolveResultStatus(summary)
+    const detailMetrics = collectResultDetails(summary)
 
     if (isAiMode || isSilent) {
       if (isAiMode) {
         pushAi({
-          status: summary.failed && summary.failed > 0 ? 'error' : 'success',
+          status,
           script: this.scriptName,
           message: summary.message,
           duration_ms: duration,
@@ -501,6 +604,7 @@ class Logger {
             failed: summary.failed,
             warnings: summary.warnings,
             total: summary.total,
+            details: Object.keys(detailMetrics).length > 0 ? detailMetrics : undefined,
           },
         })
       }
@@ -543,17 +647,23 @@ class Logger {
       ])
     }
 
+    for (const [key, value] of Object.entries(detailMetrics)) {
+      if (value === undefined) continue
+      rows.push([formatMetricLabel(key), formatResultMetricValue(value)])
+    }
+
     if (duration) {
       rows.push(['Duration', `${colors.cyan}${duration}ms${colors.reset}`])
     }
 
-    const compact = process.argv.includes('--compact')
-
-    const status: 'success' | 'error' | 'warning' =
-      summary.failed && summary.failed > 0 ? 'error' : summary.failed === 0 ? 'success' : 'warning'
-
     const badgeBg =
-      status === 'error' ? colors.bgRed : status === 'success' ? colors.bgGreen : colors.bgYellow
+      status === 'error'
+        ? colors.bgRed
+        : status === 'success'
+          ? colors.bgGreen
+          : status === 'warning'
+            ? colors.bgYellow
+            : colors.bgBlue
 
     const badgeText = status.toUpperCase()
 
@@ -581,7 +691,7 @@ class Logger {
     // Ensure the box obeys the configured global minimum width
     boxWidth = Math.max(boxWidth, LOG_MIN_WIDTH)
 
-    if (compact) {
+    if (isCompact) {
       console.log(`\n${status.toUpperCase()}`)
       for (const [k, v] of rows) console.log(`${k}: ${v}`)
       if (summary.message) console.log(summary.message)
@@ -628,16 +738,7 @@ class Logger {
     // spacer
     console.log(`│${' '.repeat(innerWidth)}│`)
 
-    // Prepare visible-width-aware padding helpers
-    const padRightVisible = (s: string, width: number) => {
-      const w = stringWidth(s)
-      return s + ' '.repeat(Math.max(0, width - w))
-    }
-    const padLeftVisible = (s: string, width: number) => {
-      const w = stringWidth(s)
-      return ' '.repeat(Math.max(0, width - w)) + s
-    }
-
+    // Prepare visible-width-aware padding helpers (module-level versions)
     const paddingLeft = 1
     const paddingRight = 1
     const availableInner = Math.max(0, innerWidth - paddingLeft - paddingRight)
@@ -655,13 +756,28 @@ class Logger {
       console.log(`│${line}│`)
     }
 
-    // message (word-wrapped to fit inside box)
+    // message (word-wrapped to fit inside box, with hard-break fallback)
     if (summary.message) {
       console.log(`│${' '.repeat(innerWidth)}│`)
       const wrapWidth = Math.max(0, innerWidth - 2)
       const words = String(summary.message).split(/\s+/)
       let line = ''
       for (const w of words) {
+        // Hard-break: if a single word exceeds wrapWidth, slice it
+        if (stringWidth(w) > wrapWidth) {
+          if (line) {
+            console.log(`│ ${line}${' '.repeat(Math.max(0, wrapWidth - stringWidth(line)))} │`)
+            line = ''
+          }
+          let remaining = w
+          while (stringWidth(remaining) > wrapWidth) {
+            const slice = remaining.slice(0, wrapWidth)
+            console.log(`│ ${slice}${' '.repeat(Math.max(0, wrapWidth - stringWidth(slice)))} │`)
+            remaining = remaining.slice(wrapWidth)
+          }
+          line = remaining
+          continue
+        }
         const candidate = line ? `${line} ${w}` : w
         if (stringWidth(candidate) <= wrapWidth) {
           line = candidate
@@ -1087,17 +1203,25 @@ class Logger {
   }
 
   /**
-   * Render a box with a title and content
-   * @param title
-   * @param content
-   * @returns
+   * Render a box with a title and content.
+   *
+   * `content` may include `\n` to produce multiple content lines — the box
+   * is auto-sized to fit the widest line. Long single lines are word-wrapped
+   * to fit within the terminal width.
+   *
+   * @param title   - Bold title displayed in the first row of the box
+   * @param content - Content string (supports `\n` for multi-line)
+   * @param options - Optional alignment for the title
    */
   box(title: string, content: string, options?: { align?: Align }) {
     if (isAiMode || isSilent) return
-    // Use visible-width-aware sizing and global minimum width
+
     const termCols =
       process.stdout && typeof process.stdout.columns === 'number' ? process.stdout.columns : 80
-    const desiredOuter = Math.max(stringWidth(title) + 4, stringWidth(content) + 4, LOG_MIN_WIDTH)
+
+    const contentLines = content.split('\n')
+    const maxContentWidth = Math.max(...contentLines.map((l) => stringWidth(l)))
+    const desiredOuter = Math.max(stringWidth(title) + 4, maxContentWidth + 4, LOG_MIN_WIDTH)
     const outerWidth = Math.min(desiredOuter, Math.max(10, termCols - 2))
     const innerWidth = outerWidth - 2
 
@@ -1108,15 +1232,41 @@ class Logger {
     const envAlign = (process.env.LOG_BOX_ALIGN || '').toLowerCase()
     const align = (options?.align ||
       (envAlign === 'center' ? 'center' : envAlign === 'end' ? 'end' : 'start')) as Align
+
     const contentInner = Math.max(0, innerWidth - 2)
     const titleAligned = alignText(title, contentInner, align)
-    const contentAligned = alignText(content, contentInner, 'start')
     const titleLine = `│ ${colors.bold}${titleAligned}${colors.reset} │`
-    const contentLine = `│ ${contentAligned} │`
 
     console.log(`\n${top}`)
     console.log(titleLine)
-    console.log(contentLine)
+
+    // Render each content line, word-wrapping lines that exceed innerWidth
+    const wrapWidth = contentInner
+    for (const rawLine of contentLines) {
+      if (stringWidth(rawLine) <= wrapWidth) {
+        const aligned = alignText(rawLine, contentInner, 'start')
+        console.log(`│ ${aligned} │`)
+      } else {
+        // word-wrap long lines
+        const words = rawLine.split(/\s+/)
+        let line = ''
+        for (const w of words) {
+          const candidate = line ? `${line} ${w}` : w
+          if (stringWidth(candidate) <= wrapWidth) {
+            line = candidate
+          } else {
+            const aligned = alignText(line, contentInner, 'start')
+            console.log(`│ ${aligned} │`)
+            line = w
+          }
+        }
+        if (line) {
+          const aligned = alignText(line, contentInner, 'start')
+          console.log(`│ ${aligned} │`)
+        }
+      }
+    }
+
     console.log(`${bottom}\n`)
   }
 
@@ -1406,6 +1556,9 @@ class Logger {
 
   /**
    * Emit a debug-level message routed through AI buffer in `--ai` mode.
+   *
+   * In human mode, debug messages are rendered dim to avoid polluting the
+   * main UX flow. They are NOT shown unless `LOG_LEVEL=debug` is set.
    */
   debug(message: string, data?: LogData) {
     if (isAiMode || isSilent) {
@@ -1414,7 +1567,8 @@ class Logger {
       }
       return
     }
-    console.log(format('info', `[DEBUG] ${message}`))
+    if (!shouldLog('debug')) return
+    console.log(`${colors.dim}[debug] ${message}${colors.reset}`)
   }
 }
 
@@ -1429,13 +1583,18 @@ export const log = new Logger()
 /**
  * Assert that a given source string does not contain raw `console.*` usage.
  *
+ * Catches all `console` methods (log, error, warn, info, debug, trace, dir,
+ * table, count, group, groupEnd, time, timeEnd, assert) so nothing slips
+ * through validation.
+ *
  * Throws an error when a prohibited `console` call is detected so scripts
  * remain consistent with the shared logger API.
  *
  * @param source - Source code to inspect
  */
 export function assertNoConsoleUsage(source: string) {
-  if (/console\.(log|error|warn|info)\(/.test(source)) {
+  // Match any console.<method>( call — covers all standard Console methods
+  if (/console\.\w+\s*\(/.test(source)) {
     throw new Error('Raw console usage detected. Use shared logger instead.')
   }
 }

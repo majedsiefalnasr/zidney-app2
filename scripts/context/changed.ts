@@ -19,7 +19,9 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { flushAi, log } from '../utils/logger'
+import { exit, flushAi, log } from '../utils/logger'
+
+log.setScript('arch:context:changed')
 
 const OUTPUT_PATH = resolve('docs/ai/context/context-changed.json')
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
@@ -32,8 +34,7 @@ interface ContextChangedArtifact {
 function fail(message: string): never {
   log.error(`[context:changed] FAIL: ${message}`)
   log.result({ total: 1, passed: 0, failed: 1, message })
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 function isFresh(): { fresh: boolean; artifact?: ContextChangedArtifact } {
@@ -79,7 +80,7 @@ function main(): void {
     log.info(`[context:changed] OK cached (${n} staged files, age=${ageS}s)`)
     log.result({ total: n, passed: n, failed: 0, message: 'cached' })
     flushAi()
-    process.exit(0)
+    exit(0)
   }
 
   let raw: string
@@ -110,7 +111,7 @@ function main(): void {
       message: 'ci-skip',
     })
     flushAi()
-    process.exit(0)
+    exit(0)
   }
 
   if (dryRun) {
@@ -119,7 +120,7 @@ function main(): void {
       changedFiles,
     }
     process.stdout.write(`${JSON.stringify(artifact, null, 2)}\n`)
-    process.exit(0)
+    exit(0)
   }
 
   try {
@@ -132,7 +133,7 @@ function main(): void {
   log.success(`[context:changed] OK ${changedFiles.length} staged files resolved and cached`)
   log.result({ total: changedFiles.length, passed: changedFiles.length, failed: 0 })
   flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 main()

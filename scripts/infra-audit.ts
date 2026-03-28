@@ -30,7 +30,9 @@ import { execSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, join, relative } from 'node:path'
 import type { AIDependencyGraph } from '../packages/types/src/ai-context'
-import { flushAi, log } from './utils/logger'
+import { exit, flushAi, log } from './utils/logger'
+
+log.setScript('arch:audit')
 
 const ROOT = process.cwd()
 const QUICK_MODE = process.argv.includes('--quick')
@@ -1199,7 +1201,7 @@ export function generateDependencyGraph(): void {
   const archMap = loadArchitectureMap()
   if (!archMap || !archMap.modules) {
     log.error('[GEN-GRAPH] ARCHITECTURE_MAP.json not found or invalid — aborting')
-    process.exit(1)
+    exit(1)
   }
 
   const moduleKeys: string[] = Object.keys(archMap.modules)
@@ -1461,7 +1463,7 @@ const ARCH_SCORE_THRESHOLD = 85
 if ((import.meta as { main?: boolean }).main) {
   if (GENERATE_GRAPH_MODE) {
     generateDependencyGraph()
-    process.exit(0)
+    exit(0)
   }
   runMain()
 }
@@ -2262,7 +2264,7 @@ new vis.Network(container, data, options)
       log.error('[INFRA AUDIT][CI] Failing build due to governance violations.')
       log.result({ total: failures.length, passed: 0, failed: failures.length })
       flushAi()
-      process.exit(1)
+      exit(1)
     } else {
       log.success('[INFRA AUDIT][CI] Governance checks passed.')
       log.result({ total: 7, passed: 7, failed: 0, message: 'All governance checks passed' })

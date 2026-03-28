@@ -10,7 +10,9 @@
  */
 
 import { spawnSync } from 'node:child_process'
-import { flushAi, log } from './utils/logger'
+import { exit, flushAi, log } from './utils/logger'
+
+log.setScript('ci:run-local')
 
 interface StepResult {
   step: number
@@ -82,7 +84,7 @@ function main(): void {
     log.error('Start Docker Desktop and retry.')
     log.result({ total: 1, passed: 0, failed: 1 })
     flushAi()
-    process.exit(1)
+    exit(1)
   }
   log.success(`Docker available: ${docker.message}`)
 
@@ -105,14 +107,14 @@ function main(): void {
     log.info(`${color}${status}${RESET} ${YELLOW}(${durationMs}ms)${RESET}`)
 
     if (!success && output) {
-      log.info()
+      log.info('')
       log.info(`  ${BOLD}Output from failed step [${stepNum}/${STEPS.length}] ${name}:${RESET}`)
       const indented = output
         .split('\n')
         .map((line) => `  ${line}`)
         .join('\n')
       log.info(indented)
-      log.info()
+      log.info('')
     }
 
     results.push({
@@ -126,7 +128,7 @@ function main(): void {
   }
 
   // ── Final summary table ───────────────────────────────────────────────
-  log.info()
+  log.info('')
   printSeparator()
   log.info(`${BOLD}  Step Summary${RESET}`)
   printSeparator()
@@ -158,26 +160,24 @@ function main(): void {
   const allPassed = failedSteps.length === 0
 
   if (allPassed) {
-    log.info()
+    log.info('')
     log.success(`All 7 steps passed. Local CI simulation complete.`)
-    log.info()
+    log.info('')
     log.result({ total: STEPS.length, passed: STEPS.length, failed: 0 })
-    flushAi()
-    process.exit(0)
+    exit(0)
   } else {
-    log.info()
+    log.info('')
     log.error(`${failedSteps.length} step(s) failed:`)
     for (const r of failedSteps) {
       log.error(`  • [Step ${r.step}/7] ${r.name}  →  ${r.command}`)
     }
-    log.info()
+    log.info('')
     log.result({
       total: STEPS.length,
       passed: results.filter((r) => r.status === 'PASS').length,
       failed: failedSteps.length,
     })
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
 }
 

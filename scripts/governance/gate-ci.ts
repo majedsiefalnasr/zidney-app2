@@ -10,7 +10,9 @@
  */
 
 import { $ } from 'bun'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
+
+log.setScript('governance:gate:ci')
 
 async function main(): Promise<void> {
   log.header('GOVERNANCE GATE CI', 'CI variant of the governance gate with GHA annotations')
@@ -29,8 +31,7 @@ async function main(): Promise<void> {
     log.result({ passed: 1, failed: 0, message: 'Governance gate CI passed.' })
   }
 
-  flushAi()
-  process.exit(exitCode)
+  exit(exitCode)
 }
 
 main()

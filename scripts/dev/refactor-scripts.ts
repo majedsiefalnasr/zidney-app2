@@ -16,7 +16,7 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 import type { MigrationEntry } from '../validate/types'
 
 const correlationId = randomUUID()
@@ -258,7 +258,7 @@ function main(): void {
   if (!existsSync(MIGRATION_MAP_PATH)) {
     logger.error('Migration map not found', { path: MIGRATION_MAP_PATH })
     process.stderr.write(`\n❌ Migration map not found: ${MIGRATION_MAP_PATH}\n`)
-    process.exit(1)
+    exit(1)
   }
 
   const mapContent = readFileSync(MIGRATION_MAP_PATH, 'utf-8')
@@ -290,13 +290,12 @@ function main(): void {
   if (remnants.length > 0) {
     logger.error('Unresolved references remain', { count: remnants.length })
     log.result({ total: migrations.length, passed: summaries.length, failed: remnants.length })
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
 
   logger.info('Refactor complete', { changed: summaries.length, dryRun: DRY_RUN })
   log.result({ total: migrations.length, passed: summaries.length, failed: 0 })
-  flushAi()
+  exit(0)
 }
 
 if (import.meta.main) {

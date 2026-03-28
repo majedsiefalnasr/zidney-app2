@@ -21,7 +21,9 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import type { GitNexusContext, RiskIndicator } from '../gitnexus-context.ts'
-import { flushAi, log } from '../utils/logger'
+import { exit, flushAi, log } from '../utils/logger'
+
+log.setScript('arch:context:impact')
 
 const ARTIFACT_PATH = resolve('docs/ai/context/gitnexus-context.json')
 const CHANGED_PATH = resolve('docs/ai/context/context-changed.json')
@@ -40,8 +42,7 @@ interface ContextImpactArtifact {
 function fail(message: string): never {
   log.error(`[context:impact] FAIL: ${message}`)
   log.result({ total: 0, passed: 0, failed: 1, message })
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 function readJson<T>(filePath: string): T {
@@ -110,7 +111,7 @@ function main(): void {
   log.success(`[context:impact] OK ${matched.length} risk indicators resolved`)
   log.result({ total: matched.length, passed: matched.length, failed: 0 })
   flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 main()

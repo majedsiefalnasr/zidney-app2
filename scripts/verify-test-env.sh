@@ -4,6 +4,11 @@
 
 set -e
 
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/verify-test-env.sh"
+
 echo "🔍 Verifying Zidney test environment..."
 
 # Check PostgreSQL

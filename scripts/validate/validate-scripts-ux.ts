@@ -28,8 +28,11 @@ const CONSOLE_EXEMPT_FILES = [
   'scripts/policy-engine/reporters/console.ts',
 ]
 
-// Marker comment in a file that opts out of header/result requirements (library modules)
-const LIBRARY_MODULE_MARKER = '@library-module'
+const EXIT_EXEMPT_FILES = [
+  'scripts/utils/logger.ts',
+  'scripts/utils/logger.js',
+  'scripts/validate/validate-scripts-ux.ts',
+]
 
 function isScriptFile(file: string) {
   return TARGET_EXTENSIONS.includes(path.extname(file))
@@ -127,6 +130,53 @@ function hasFlatLogs(content: string): boolean {
   return /console\.(log|info)\(/.test(content)
 }
 
+function hasDirectProcessExit(content: string): boolean {
+  return /\bprocess\.exit\s*\(/.test(content)
+}
+
+function hasExitUsage(content: string): boolean {
+  return /\bexit\s*\(/.test(content)
+}
+
+function hasManagedAiScriptIdentity(content: string): boolean {
+  return (
+    content.includes('log.setScript(') ||
+    content.includes('createLogger(') ||
+    content.includes('getGlobalLogger(')
+  )
+}
+
+function hasShellAiSummarySupport(content: string): boolean {
+  const hasAiFlag =
+    content.includes('--ai') ||
+    content.includes('AI_MODE') ||
+    content.includes('is_ai_mode') ||
+    /\bshell_ai_parse_args\b/.test(content) ||
+    content.includes('shell-ai.sh')
+  const hasStructuredSummary =
+    /\bshell_ai_init\b/.test(content) ||
+    /\bshell_ai_finish\b/.test(content) ||
+    content.includes('ai_output(')
+
+  return hasAiFlag && hasStructuredSummary
+}
+
+function isExecutableScript(filePath: string, content: string, isShell: boolean): boolean {
+  const normalizedPath = filePath.replace(/\\/g, '/')
+  const isTestFile =
+    normalizedPath.includes('/__tests__/') || /\.(test|spec)\.[^.]+$/.test(normalizedPath)
+
+  if (isTestFile) {
+    return false
+  }
+
+  if (content.includes('@library-module')) {
+    return false
+  }
+
+  return isShell || content.includes('@script ')
+}
+
 interface ValidationResult {
   filePath: string
   valid: boolean
@@ -147,11 +197,12 @@ function validateFile(filePath: string) {
   const issues: string[] = []
 
   const relativePath = filePath.replace(process.cwd() + path.sep, '').replace(/\\/g, '/')
-  const isLibrary = content.includes(LIBRARY_MODULE_MARKER)
   const isShell = isShellScript(filePath)
+  const isExecutable = isExecutableScript(filePath, content, isShell)
 
-  // Header/result checks — skip for library modules
-  if (!isLibrary) {
+  // Header/result checks apply to executable scripts even if they also carry
+  // a library marker, since those files still act as CLI entrypoints.
+  if (isExecutable) {
     if (!hasHeader(content)) issues.push('Missing header (START block)')
     if (!hasResultBlock(content)) issues.push('Missing result/summary block')
   }
@@ -169,6 +220,26 @@ function validateFile(filePath: string) {
       const msg = err instanceof Error ? err.message : String(err)
       issues.push(msg)
     }
+  }
+
+  const isExitExempt = EXIT_EXEMPT_FILES.some((exempt) => relativePath.endsWith(exempt))
+
+  if (isExecutable && !isShell && !isExitExempt) {
+    if (hasDirectProcessExit(content)) {
+      issues.push('Direct process.exit() detected; use shared exit() wrapper')
+    }
+
+    if (!hasExitUsage(content)) {
+      issues.push('Missing shared exit() usage for executable script')
+    }
+
+    if (!hasManagedAiScriptIdentity(content)) {
+      issues.push('Missing AI script identity (use log.setScript() or createLogger())')
+    }
+  }
+
+  if (isShell && isExecutable && !hasShellAiSummarySupport(content)) {
+    issues.push('Missing structured shell AI summary support')
   }
 
   if (issues.length === 0) {
@@ -211,7 +282,12 @@ function main() {
       total: scriptFiles.length,
       passed: scriptFiles.length,
       failed: 0,
-      message: `All scripts valid${fixed.length ? ` (${fixed.length} fixed)` : ''}${dry.length ? ` (${dry.length} dry-run)` : ''}`,
+      message: 'All scripts valid',
+      details: {
+        fixedFiles: fixed.length || undefined,
+        dryRunFiles: dry.length || undefined,
+        mode: isStagedMode ? 'staged' : 'full',
+      },
     })
     exit(0)
   }
@@ -241,6 +317,11 @@ function main() {
     passed: scriptFiles.length - failed.length,
     failed: failed.length,
     message: 'Fix issues before commit',
+    details: {
+      fixedFiles: fixed.length || undefined,
+      dryRunFiles: dry.length || undefined,
+      mode: isStagedMode ? 'staged' : 'full',
+    },
   })
   exit(1)
 }

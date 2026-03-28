@@ -10,7 +10,9 @@
  */
 
 import { $ } from 'bun'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
+
+log.setScript('governance:gate')
 
 interface GuardResult {
   name: string
@@ -61,8 +63,7 @@ async function main(): Promise<void> {
       failed: failures.length,
       message: 'Governance gate failed.',
     })
-    flushAi()
-    process.exit(1)
+    exit(1)
   } else {
     log.success(`Governance gate PASSED — all ${results.length} guards passed.`)
     log.result({
@@ -71,8 +72,7 @@ async function main(): Promise<void> {
       failed: 0,
       message: 'Governance gate passed.',
     })
-    flushAi()
-    process.exit(0)
+    exit(0)
   }
 }
 

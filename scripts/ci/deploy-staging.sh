@@ -19,6 +19,11 @@
 
 set -euo pipefail
 
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/../utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/ci/deploy-staging.sh"
+
 # ────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
 # ────────────────────────────────────────────────────────────────────────
@@ -158,6 +163,8 @@ read -p "Approve deployment? (yes/no): " CONFIRM
 
 if [ "${CONFIRM}" != "yes" ]; then
   log_warn "Deployment cancelled by user"
+  shell_ai_set_status warning
+  shell_ai_set_message "Deployment cancelled by user"
   exit 0
 fi
 

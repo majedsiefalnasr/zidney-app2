@@ -11,7 +11,9 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { runUnifiedArchitectureGuard } from './architecture-guard/runner'
-import { flushAi, log } from './utils/logger'
+import { exit, flushAi, log } from './utils/logger'
+
+log.setScript('arch:type-safety-guard')
 
 // Types
 interface AllowedException {
@@ -261,7 +263,7 @@ async function main(): Promise<void> {
     const code = await runUnifiedArchitectureGuard(process.argv.slice(2))
     log.result({ total: 1, passed: code === 0 ? 1 : 0, failed: code === 0 ? 0 : 1 })
     flushAi()
-    process.exit(code)
+    exit(code)
   }
 
   const args = parseArgs()
@@ -292,12 +294,12 @@ async function main(): Promise<void> {
   flushAi()
 
   if (unapprovedViolations.length > 0 && !args.noExitError) {
-    process.exit(1)
+    exit(1)
   }
 }
 
 main().catch((error) => {
   log.error(`Guard script error: ${error}`)
   flushAi()
-  process.exit(1)
+  exit(1)
 })

@@ -155,6 +155,25 @@ async function main(): Promise<void> {
   log.result(sampleSummary, { align: 'center' })
   log.result(sampleSummary, { align: 'end' })
 
+  log.section('Demo 10C: Result Details')
+  log.result(
+    {
+      total: 12,
+      passed: 9,
+      failed: 1,
+      warnings: 2,
+      status: 'warning',
+      message: 'Extended summary metrics render inside the result block',
+      details: {
+        scannedFiles: 12,
+        autoFixed: 3,
+        dryRun: true,
+        mode: 'staged',
+      },
+    },
+    { align: 'center' }
+  )
+
   // Demo 10B: Title-only Result (Simple)
   log.section('Demo 10B: Title-only Result (Simple)')
   log.line([
@@ -261,6 +280,10 @@ async function main(): Promise<void> {
     passed: 85,
     failed: 5,
     message: '85 tests passed, 5 failed, 10 skipped',
+    details: {
+      skipped: 10,
+      flaky: 2,
+    },
   })
 
   log.section('Demo 15A: Trend Comparison')
@@ -287,7 +310,13 @@ async function main(): Promise<void> {
     total: 50,
     passed: 45,
     failed: 2,
+    warnings: 3,
+    status: 'warning',
     message: '45 items valid, 2 errors, 3 warnings',
+    details: {
+      retried: 4,
+      mode: 'ci',
+    },
   })
 
   log.section('Demo 16A: CI Annotations')
@@ -548,6 +577,9 @@ async function main(): Promise<void> {
       passed: 2,
       failed: 0,
       message: 'JSON export working',
+      details: {
+        format: 'json',
+      },
     })
   } else if (process.argv.includes('--pretty')) {
     log.success('Pretty JSON mode active')
@@ -556,6 +588,9 @@ async function main(): Promise<void> {
       passed: 2,
       failed: 0,
       message: 'Pretty export working',
+      details: {
+        format: 'pretty-json',
+      },
     })
   } else {
     log.empty('Run with --json or --pretty to see structured output')

@@ -16,6 +16,11 @@
 
 set -euo pipefail
 
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/../utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/ci/setup-act-local.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 SECRETS_FILE="$SCRIPT_DIR/.secrets"
 SECRETS_EXAMPLE="$SCRIPT_DIR/.secrets.example"

@@ -18,7 +18,9 @@
 import { join } from 'node:path'
 import { generateAllArtifacts } from './ai-context/artifact-generator'
 import { detectChanges, updateChangeCache } from './ai-context/change-detector'
-import { flushAi, log } from './utils/logger'
+import { exit, log } from './utils/logger'
+
+log.setScript('ai:context:generate')
 
 const REPO_ROOT = process.cwd()
 const OUTPUT_DIR = join(REPO_ROOT, 'docs/ai/context')
@@ -69,8 +71,7 @@ async function main() {
       if (!changes.should_regenerate) {
         log.info('Artifacts are up-to-date (use --force to regenerate)')
         log.result({ total: 1, passed: 1, failed: 0, message: 'up-to-date' })
-        flushAi()
-        process.exit(0)
+        exit(0)
       }
 
       if (opts.verbose) {
@@ -117,8 +118,7 @@ async function main() {
         failed: result.errors.length,
         message: 'Generation failed',
       })
-      flushAi()
-      process.exit(1)
+      exit(1)
     }
 
     log.result({
@@ -127,13 +127,11 @@ async function main() {
       failed: 0,
       message: result.success ? 'Generation succeeded' : 'Generation failed',
     })
-    flushAi()
-    process.exit(result.success ? 0 : 1)
+    exit(result.success ? 0 : 1)
   } catch (err) {
     log.error(`Fatal error: ${err}`)
     log.result({ total: 0, passed: 0, failed: 1, message: 'Fatal error' })
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
 }
 

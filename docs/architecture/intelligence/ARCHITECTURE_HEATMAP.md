@@ -1,6 +1,6 @@
 # Zidney Architecture Risk Heatmap
 
-Generated: 2026-03-27T20:41:03.363Z
+Generated: 2026-03-28T11:22:03.998Z
 
 ## Module Risk Classification
 

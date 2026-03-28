@@ -10,7 +10,9 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { flushAi, log } from './utils/logger'
+import { exit, log } from './utils/logger'
+
+log.setScript('ai:validate:prompts')
 
 const ROOT = join(import.meta.dir, '..')
 const AGENTS_DIR = join(ROOT, '.agents', 'agents')
@@ -202,8 +204,7 @@ checkOrphanedSkillDirs()
 // --- Report ---
 if (violations.length === 0) {
   log.result({ total: 0, passed: 0, failed: 0, message: 'All checks passed — 0 violations' })
-  flushAi()
-  process.exit(0)
+  exit(0)
 } else {
   log.error(`${violations.length} violation(s) found:`)
   for (const v of violations) {
@@ -216,6 +217,5 @@ if (violations.length === 0) {
     failed: violations.length,
     message: 'Fix violations before merging.',
   })
-  flushAi()
-  process.exit(1)
+  exit(1)
 }

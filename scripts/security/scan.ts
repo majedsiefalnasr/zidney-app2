@@ -6,8 +6,10 @@
  * @usage bun run infra:security
  */
 
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 import { materializeTrackedFiles, printReport, runTrivyFs } from './trivy-config'
+
+log.setScript('infra:security')
 
 async function main(): Promise<void> {
   log.header('SECURITY SCAN', 'Full Trivy filesystem scan across repo')
@@ -21,7 +23,6 @@ async function main(): Promise<void> {
 
     printReport(report)
     log.result({ total: 1, passed: 1, failed: 0 })
-    flushAi()
   } finally {
     tracked.cleanup()
   }
@@ -29,6 +30,5 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
   log.error(error instanceof Error ? error.message : String(error))
-  flushAi()
-  process.exit(1)
+  exit(1)
 })

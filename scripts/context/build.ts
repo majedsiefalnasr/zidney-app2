@@ -13,9 +13,11 @@
 
 import { existsSync, renameSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { assembleContext } from '../gitnexus-context'
 import type { AssembleOptions } from '../gitnexus-context.ts'
-import { assembleContext } from '../gitnexus-context.ts'
-import { flushAi, log } from '../utils/logger'
+import { exit, flushAi, log } from '../utils/logger'
+
+log.setScript('arch:context:build')
 
 const OUTPUT_PATH = resolve('docs/ai/context/gitnexus-context.json')
 const TMP_PATH = `${OUTPUT_PATH}.tmp`
@@ -24,8 +26,7 @@ const MAX_AGE_HOURS = 24
 function fail(message: string): never {
   log.error(`[context:build] FAIL: ${message}`)
   log.result({ total: 1, passed: 0, failed: 1, message })
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 function isStale(): boolean {
@@ -47,7 +48,7 @@ function main(): void {
     log.info('[context:build] OK artifact is fresh — skipping rebuild (use --force to override)')
     log.result({ total: 1, passed: 1, failed: 0, message: 'artifact is fresh' })
     flushAi()
-    process.exit(0)
+    exit(0)
   }
 
   const options: AssembleOptions = {
@@ -70,7 +71,7 @@ function main(): void {
 
   if (dryRun) {
     process.stdout.write(`${json}\n`)
-    process.exit(0)
+    exit(0)
   }
 
   try {
@@ -84,7 +85,7 @@ function main(): void {
   log.success(`[context:build] OK Written: ${OUTPUT_PATH}`)
   log.result({ total: 1, passed: 1, failed: 0 })
   flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 main()

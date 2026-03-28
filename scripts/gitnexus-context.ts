@@ -19,7 +19,9 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { flushAi, log } from './utils/logger'
+import { exit, flushAi, log } from './utils/logger'
+
+log.setScript('arch:gitnexus:context')
 
 // ---------------------------------------------------------------------------
 // Type interfaces
@@ -84,7 +86,7 @@ function sanitizeRef(ref: string): string {
     log.error(
       `[gitnexus-context] Invalid --base-ref value: "${ref}". Only alphanumeric, '.', '_', '-', '/', '^', '~' characters are allowed.`
     )
-    process.exit(1)
+    exit(1)
   }
   return ref
 }
@@ -96,7 +98,7 @@ function sanitizeOutputPath(outputPath: string): string {
     log.error(
       `[gitnexus-context] --output path must be within the workspace directory. Received: "${outputPath}"`
     )
-    process.exit(1)
+    exit(1)
   }
   return resolved
 }
@@ -134,7 +136,7 @@ export function detectChangedFiles(options: { baseRef: string; all: boolean }): 
         .join('\n')
     } catch (statusErr) {
       log.error(`[gitnexus-context] git is unavailable: ${statusErr}`)
-      process.exit(1)
+      exit(1)
     }
   }
 
@@ -294,7 +296,7 @@ function loadBrain(): ArchitectureBrain {
   if (!existsSync(BRAIN_PATH)) {
     log.error('[gitnexus-context] ai-architecture-brain.json not found.')
     log.error('[gitnexus-context] Run: bun run arch:audit')
-    process.exit(1)
+    exit(1)
   }
 
   let raw: string
@@ -302,14 +304,14 @@ function loadBrain(): ArchitectureBrain {
     raw = readFileSync(BRAIN_PATH, 'utf-8')
   } catch (err) {
     log.error(`[gitnexus-context] Failed to read ai-architecture-brain.json: ${err}`)
-    process.exit(1)
+    exit(1)
   }
 
   try {
     return JSON.parse(raw) as ArchitectureBrain
   } catch (err) {
     log.error(`[gitnexus-context] Failed to parse ai-architecture-brain.json: ${err}`)
-    process.exit(1)
+    exit(1)
   }
 }
 
@@ -388,7 +390,7 @@ export function main(): void {
     } catch (err) {
       log.error(`[gitnexus-context] Failed to create output directory "${outputDir}": ${err}`)
       flushAi()
-      process.exit(1)
+      exit(1)
     }
   }
 
@@ -397,7 +399,7 @@ export function main(): void {
   } catch (err) {
     log.error(`[gitnexus-context] Failed to write output to "${outputPath}": ${err}`)
     flushAi()
-    process.exit(1)
+    exit(1)
   }
 
   const health = checkGitNexusHealth()

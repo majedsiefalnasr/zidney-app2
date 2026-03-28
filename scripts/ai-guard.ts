@@ -27,7 +27,9 @@ import { execSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import type { AIDependencyGraph } from '../packages/types/src/ai-context'
 import { runUnifiedArchitectureGuard } from './architecture-guard/runner'
-import { flushAi, log } from './utils/logger'
+import { exit, flushAi, log } from './utils/logger'
+
+log.setScript('ai:guard')
 
 // When invoked from hooks/CI set this flag to avoid regenerating large
 // AI-context artifacts that would modify the working tree.
@@ -204,12 +206,12 @@ export function loadModuleBoundaries(): ModuleBoundaries | null {
       log.error(
         '[ai-guard] ERROR: module-boundaries.json is structurally invalid — missing required fields (layers, allowed_dependencies, forbidden_dependencies)'
       )
-      process.exit(1)
+      exit(1)
     }
     return parsed
   } catch {
     log.error('[ai-guard] ERROR: module-boundaries.json is malformed — cannot validate boundaries')
-    process.exit(1)
+    exit(1)
   }
 }
 
@@ -651,7 +653,7 @@ function validateBranchNaming(changedFiles: string[]): void {
         log.error(`Expected branch to include: spec/${expectedStage}`)
         log.error('Example: spec/STAGE_21_ROLE_PERMISSION_SYSTEM')
 
-        process.exit(1)
+        exit(1)
       }
     }
   }
@@ -868,7 +870,7 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
     log.info('AI Guard (incremental): no staged files — skipping.')
     log.result({ total: 0, passed: 0, failed: 0, message: 'no staged files' })
     flushAi()
-    process.exit(0)
+    exit(0)
   }
 
   const archMap = loadArchitectureMap()
@@ -1044,7 +1046,7 @@ function finalizeResult(result: ValidationResult, config: GuardConfig): void {
     log.error('Commit rejected by Zidney AI Guard. Fix architecture violations.')
     log.result({ total: result.modules_validated, passed: 0, failed: result.violations.length })
     flushAi()
-    process.exit(1)
+    exit(1)
   }
 
   if (config.outputJson) {
@@ -1095,7 +1097,7 @@ function runGuard() {
     log.info('AI Guard: no changed files detected.')
     log.result({ total: 0, passed: 0, failed: 0, message: 'no changed files' })
     flushAi()
-    process.exit(0)
+    exit(0)
   }
 
   const violations: string[] = []
@@ -1180,7 +1182,7 @@ function runGuard() {
     log.error('Commit rejected by Zidney AI Guard. Fix architecture violations.')
     log.result({ total: changedFiles.length, passed: 0, failed: violations.length })
     flushAi()
-    process.exit(1)
+    exit(1)
   }
 
   log.success('AI Guard: architecture validation passed.')
@@ -1191,7 +1193,7 @@ function runGuard() {
 // Only execute when run directly (not when imported for unit testing)
 if ((import.meta as { main?: boolean }).main) {
   if (process.argv.includes('--unified-runner')) {
-    runUnifiedArchitectureGuard(process.argv.slice(2)).then((code) => process.exit(code))
+    runUnifiedArchitectureGuard(process.argv.slice(2)).then((code) => exit(code))
   } else {
     const config = parseArgs()
     if (config.mode === 'incremental') {

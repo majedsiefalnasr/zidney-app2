@@ -5,6 +5,11 @@
 
 set -e
 
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/../utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/ci/run-all-tests.sh"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 

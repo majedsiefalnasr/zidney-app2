@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('detect-broken-scripts')
@@ -70,7 +70,10 @@ function checkFile(relPath: string): ScriptStatus {
 }
 
 function main(): void {
-  log.start('Detect broken scripts')
+  log.header(
+    'Detect broken scripts',
+    'Detect missing or broken TypeScript script files referenced in root package.json'
+  )
   const pkgPath = join(REPO_ROOT, 'package.json')
 
   let pkg: { scripts?: Record<string, string> }
@@ -80,7 +83,7 @@ function main(): void {
     logger.error('Failed to load package.json', {
       error: err instanceof Error ? err.message : String(err),
     })
-    process.exit(1)
+    exit(1)
   }
 
   const scripts = pkg.scripts ?? {}
@@ -143,23 +146,35 @@ function main(): void {
   if (missing > 0 || broken > 0) {
     log.badge('VALIDATION FAILED', 'error')
     log.result({
+      passed: valid,
       failed: missing + broken,
       total: results.length,
       message: 'Broken scripts detected',
+      details: {
+        missing,
+        broken,
+        shell,
+        command,
+      },
     })
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
 
   logger.info('All TypeScript script files are VALID')
   log.badge('VALIDATION PASSED', 'success')
   log.result({
-    passed: results.length,
+    passed: valid,
+    failed: 0,
     total: results.length,
     message: 'All TypeScript scripts validated',
+    details: {
+      missing,
+      broken,
+      shell,
+      command,
+    },
   })
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 main()

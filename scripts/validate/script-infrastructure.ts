@@ -13,7 +13,7 @@ import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { generateRegistry, parseMetaHeader, walkTsFiles } from '../generate/script-docs'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 import type { ViolationRecord } from './types'
 
 const correlationId = randomUUID()
@@ -141,7 +141,10 @@ export function validateRegistryFreshness(
 }
 
 function main(): void {
-  log.start('Validate script infrastructure')
+  log.header(
+    'Validate script infrastructure',
+    'Validate script metadata headers and registry freshness'
+  )
   logger.info('Starting script infrastructure validation', { repoRoot: REPO_ROOT })
 
   const violations: ViolationRecord[] = []
@@ -160,8 +163,7 @@ function main(): void {
     logger.info('Script infrastructure is valid')
     log.badge('INFRASTRUCTURE VALID', 'success')
     log.progressResult({ success: 1 }, { title: 'Infrastructure Checks', showPercentage: true })
-    flushAi()
-    process.exit(0)
+    exit(0)
   }
 
   logger.error('Script infrastructure violations found', { count: violations.length })
@@ -175,8 +177,7 @@ function main(): void {
     { error: violations.length },
     { title: 'Infrastructure Violations', showPercentage: false }
   )
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 if (import.meta.main) {

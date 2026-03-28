@@ -6,7 +6,7 @@
  * @usage bun run infra:security:secrets [--staged]
  */
 
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 import {
   hasBlockingFindings,
   materializeStagedFiles,
@@ -16,6 +16,8 @@ import {
 } from './trivy-config'
 
 const stagedOnly = process.argv.includes('--staged')
+
+log.setScript('infra:security:secrets')
 
 async function main(): Promise<void> {
   log.header('SECURITY SCAN SECRETS', 'Trivy secret scan across repo or staged files')
@@ -30,8 +32,7 @@ async function main(): Promise<void> {
       printReport(report)
       const blockedStaged = hasBlockingFindings(report, 'secrets')
       log.result({ total: 1, passed: blockedStaged ? 0 : 1, failed: blockedStaged ? 1 : 0 })
-      flushAi()
-      process.exit(blockedStaged ? 1 : 0)
+      exit(blockedStaged ? 1 : 0)
     } finally {
       staged.cleanup()
     }
@@ -46,8 +47,7 @@ async function main(): Promise<void> {
       printReport(report)
       const blocked = hasBlockingFindings(report, 'secrets')
       log.result({ total: 1, passed: blocked ? 0 : 1, failed: blocked ? 1 : 0 })
-      flushAi()
-      process.exit(blocked ? 1 : 0)
+      exit(blocked ? 1 : 0)
     } finally {
       tracked.cleanup()
     }
@@ -56,6 +56,5 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
   log.error(error instanceof Error ? error.message : String(error))
-  flushAi()
-  process.exit(1)
+  exit(1)
 })

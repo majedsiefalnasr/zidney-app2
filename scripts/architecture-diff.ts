@@ -20,7 +20,9 @@
 
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
-import { flushAi, log } from './utils/logger'
+import { exit, flushAi, log } from './utils/logger'
+
+log.setScript('arch:diff')
 
 type ArchitectureContract = {
   dependencyRules?: {
@@ -140,7 +142,7 @@ function runArchitectureDiff() {
     log.info('Architecture Diff: no changed files detected.')
     log.result({ total: 0, passed: 0, failed: 0, message: 'No changed files to validate.' })
     flushAi()
-    process.exit(0)
+    exit(0)
   }
 
   const violations: string[] = []
@@ -172,7 +174,7 @@ function runArchitectureDiff() {
       message: 'PR rejected due to architecture rule violations.',
     })
     flushAi()
-    process.exit(1)
+    exit(1)
   }
 
   log.success('Architecture Diff: no violations detected.')

@@ -11,7 +11,9 @@
 
 import { mkdir, writeFile } from 'node:fs/promises'
 import { $ } from 'bun'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
+
+log.setScript('governance:report')
 
 interface GuardResult {
   name: string
@@ -96,9 +98,8 @@ async function main(): Promise<void> {
     failed,
     message: 'Governance report generated.',
   })
-  flushAi()
   // report.ts always exits 0 — informational only, not a gate
-  process.exit(0)
+  exit(0)
 }
 
 main()

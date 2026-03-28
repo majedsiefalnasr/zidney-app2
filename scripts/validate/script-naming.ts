@@ -12,7 +12,7 @@
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 import type { ScriptEntry, ViolationRecord } from './types'
 
 const correlationId = randomUUID()
@@ -158,7 +158,10 @@ export function validateNaming(entries: ScriptEntry[]): ViolationRecord[] {
 }
 
 function main(): void {
-  log.start('Validate script naming')
+  log.header(
+    'Validate script naming',
+    'Validates package.json script keys conform to the naming convention'
+  )
   logger.info('Starting script naming validation', { repoRoot: REPO_ROOT })
 
   const pkgFiles = collectPackageJsonFiles(REPO_ROOT)
@@ -179,8 +182,7 @@ function main(): void {
       { success: allEntries.length },
       { title: 'Script Naming Validation', showPercentage: true }
     )
-    flushAi()
-    process.exit(0)
+    exit(0)
   }
 
   logger.error('Script naming violations found', { count: violations.length })
@@ -194,8 +196,7 @@ function main(): void {
     { success: allEntries.length - violations.length, error: violations.length },
     { title: 'Naming Convention Check', showPercentage: true }
   )
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 if (import.meta.main) {

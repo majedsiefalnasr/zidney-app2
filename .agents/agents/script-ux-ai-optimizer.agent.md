@@ -216,9 +216,29 @@ Must output:
 ```json
 {
   "status": "success",
-  "script": "example",
-  "duration_ms": 1200,
-  "result": {}
+  "summary": {
+    "total": 1,
+    "errors": 0,
+    "warnings": 0,
+    "success": 1,
+    "duration_ms": 1200
+  },
+  "successes": [
+    {
+      "status": "success",
+      "script": "example",
+      "message": "Script completed",
+      "duration_ms": 1200,
+      "data": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0,
+        "details": {
+          "fixedFiles": 2
+        }
+      }
+    }
+  ]
 }
 ```
 
@@ -252,7 +272,7 @@ Required methods:
 - `log.step(message)` — Single step indicator
 - `log.success(message)` — Positive result
 - `log.error(message)` — Error message
-- `log.result(summary, options?)` — Final summary block with counts
+- `log.result(summary, options?)` — Final summary block with counts, optional `status`, and optional `details` metrics
 - `log.box(title, content, options?)` — Boxed message display
 
 Optional (advanced UX):
@@ -497,11 +517,37 @@ log.result({
   total: 5,
   passed: 5,
   failed: 0,
-  message: 'All migrations applied successfully'
+  message: 'All migrations applied successfully',
+  details: {
+    tenantPool: 'primary',
+    retried: 0
+  }
 })
 
 exit(0)
-```
+  "summary": {
+    "total": 1,
+    "errors": 0,
+    "warnings": 0,
+    "success": 1,
+    "duration_ms": 2400
+  },
+  "successes": [
+    {
+      "status": "success",
+      "message": "All migrations applied successfully",
+      "duration_ms": 2400,
+      "data": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0,
+        "details": {
+          "tenantPool": "primary",
+          "retried": 0
+        }
+      }
+    }
+  ]
 
 ### Using Alignment Options
 

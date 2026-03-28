@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { writeFileSync } from 'fs'
 /**
  * Script: CI Performance Benchmarking
  * Purpose: Measure and analyze GitHub Actions CI pipeline duration
@@ -14,6 +15,7 @@
  * 4. Validates all checks still run without skipping
  * 5. Generates performance report
  */
+import { flushAi, log } from '../utils/logger'
 
 interface CIRunMetrics {
   duration: number // seconds

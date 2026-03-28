@@ -1,5 +1,4 @@
 /**
- * @script infra:security:internal
  * @library-module
  * @domain infra
  * @category analysis

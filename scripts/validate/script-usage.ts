@@ -12,7 +12,7 @@
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 import { collectPackageJsonFiles, parseScriptEntries } from './script-naming'
 import type { ViolationRecord } from './types'
 
@@ -143,7 +143,10 @@ export function validateUsages(
 }
 
 function main(): void {
-  log.start('Validate script usage')
+  log.header(
+    'Validate script usage',
+    'Scan files for bun run references and validate known scripts'
+  )
   logger.info('Starting script usage validation', { repoRoot: REPO_ROOT })
 
   const knownScripts = collectKnownScripts(REPO_ROOT)
@@ -161,8 +164,7 @@ function main(): void {
       { success: scanFiles.length },
       { title: 'Script Reference Validation', showPercentage: true }
     )
-    flushAi()
-    process.exit(0)
+    exit(0)
   }
 
   logger.error('Script usage violations found', { count: violations.length })
@@ -175,8 +177,7 @@ function main(): void {
     { error: violations.length },
     { title: 'Invalid Script References', showPercentage: false }
   )
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 if (import.meta.main) {

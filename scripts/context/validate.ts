@@ -19,7 +19,9 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { flushAi, log } from '../utils/logger'
+import { exit, flushAi, log } from '../utils/logger'
+
+log.setScript('arch:context:validate')
 
 const DEFAULT_ARTIFACT_PATH = resolve('docs/ai/context/gitnexus-context.json')
 const DEFAULT_SCHEMA_PATH = resolve('docs/ai/gitnexus-context.schema.json')
@@ -115,12 +117,12 @@ function main(): void {
     log.success(msg)
     log.result({ total: 1, passed: 1, failed: 0 })
     flushAi()
-    process.exit(0)
+    exit(0)
   } catch (err) {
     log.error(`[context:validate] FAIL: ${err instanceof Error ? err.message : String(err)}`)
     log.result({ total: 1, passed: 0, failed: 1 })
     flushAi()
-    process.exit(1)
+    exit(1)
   }
 }
 

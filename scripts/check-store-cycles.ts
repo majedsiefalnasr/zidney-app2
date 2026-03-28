@@ -23,7 +23,9 @@ import { resolve } from 'node:path'
  * Refs: SC-007, QA-H003, FR-033
  */
 import madge from 'madge'
-import { flushAi, log } from './utils/logger'
+import { exit, log } from './utils/logger'
+
+log.setScript('arch:check:store-cycles')
 
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
@@ -65,8 +67,7 @@ async function checkCycles(): Promise<void> {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
       log.error(`[check-store-cycles] ERROR: Failed to analyze ${app} — ${msg}`)
-      flushAi()
-      process.exit(2)
+      exit(2)
     }
 
     const circular = res.circular()
@@ -90,8 +91,7 @@ async function checkCycles(): Promise<void> {
       failed: results.filter((r) => r.cycles.length > 0).length,
       message: `${totalCycles} cycle(s) detected. Fix circular imports before merging. See SC-007, FR-033.`,
     })
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
 
   log.result({
@@ -100,8 +100,7 @@ async function checkCycles(): Promise<void> {
     failed: 0,
     message: 'Zero circular dependencies in all store directories.',
   })
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 checkCycles()

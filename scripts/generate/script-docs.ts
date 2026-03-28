@@ -12,7 +12,7 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const logger = createLogger('dev:generate:script-docs')
@@ -187,8 +187,7 @@ function main(): void {
       process.stderr.write(`${v}\n\n`)
     }
     log.result({ total: metas.length, passed: 0, failed: violations.length })
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
 
   const registry = generateRegistry(metas)
@@ -199,7 +198,7 @@ function main(): void {
     `\n✓ Registry written to docs/scripts/SCRIPT_REGISTRY.md (${metas.length} scripts)\n`
   )
   log.result({ total: metas.length, passed: metas.length, failed: 0 })
-  flushAi()
+  exit(0)
 }
 
 if (import.meta.main) {

@@ -6,6 +6,11 @@
 
 set -e
 
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/init-test-db.sh"
+
 DB_HOST="${DB_HOST:-localhost}"
 # Default to CI postgres service port and CI credentials when not overridden
 DB_PORT="${DB_PORT:-5432}"

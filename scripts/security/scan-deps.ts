@@ -6,13 +6,15 @@
  * @usage bun run infra:security:deps
  */
 
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 import {
   hasBlockingFindings,
   materializeTrackedFiles,
   printReport,
   runTrivyFs,
 } from './trivy-config'
+
+log.setScript('infra:security:deps')
 
 async function main(): Promise<void> {
   log.header('SECURITY SCAN DEPS', 'Trivy dependency vulnerability scan')
@@ -27,8 +29,7 @@ async function main(): Promise<void> {
     printReport(report)
     const blocked = hasBlockingFindings(report, 'deps')
     log.result({ total: 1, passed: blocked ? 0 : 1, failed: blocked ? 1 : 0 })
-    flushAi()
-    process.exit(blocked ? 1 : 0)
+    exit(blocked ? 1 : 0)
   } finally {
     tracked.cleanup()
   }
@@ -36,6 +37,5 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
   log.error(error instanceof Error ? error.message : String(error))
-  flushAi()
-  process.exit(1)
+  exit(1)
 })
