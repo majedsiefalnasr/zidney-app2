@@ -7,19 +7,19 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-03-30T00:02:00Z
+Last Updated: 2026-03-30T00:03:00Z
 
-Scope Defined:
+Scope Planned:
 
-- 5 normalized tables (mcq_questions, options, categories, tags, baskets)
-- 4 question types with type-specific validation
-- 13+ API endpoints (CRUD, workflow, classification)
-- Academic boundary enforcement
-- Deletion guards (soft/hard delete strategy)
-- Optimistic concurrency control
-- Rich text sanitization
+- Migration: 1 file (20260330_012_mcq_questions.ts) — 5 tables, 7 indexes, 6 FKs
+- Drizzle schemas: 5 files in apps/api/src/db/tenant/schemas/
+- Domain-core: 8 files in packages/domain-core/src/mcq-questions/
+- Zod validation: 11 schemas in packages/validation/src/backoffice/
+- API routes: 14 handlers in apps/api/src/routes/backoffice/mcq-questions/
+- Tests: 3 unit + 8 integration test files
+- New dependency: sanitize-html (version-pinned)
 
 Deferred Scope:
 
@@ -27,10 +27,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Architecture Guardian: PASS (6 non-blocking advisories)
+- API Designer: PASS (all 9 design aspects validated)
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
