@@ -45,7 +45,7 @@ export async function runArchitectureGuard(context: PolicyContext): Promise<Poli
 
   let proc: ReturnType<typeof Bun.spawn>
   try {
-    proc = Bun.spawn(['bun', 'run', command, '--json'], {
+    proc = Bun.spawn(['bun', 'run', command, '--check-only', '--json'], {
       signal: context.abortSignal,
       stdout: 'pipe',
       stderr: 'pipe',

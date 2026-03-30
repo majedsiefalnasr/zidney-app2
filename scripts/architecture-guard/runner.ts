@@ -136,7 +136,7 @@ export async function runUnifiedArchitectureGuard(args = process.argv.slice(2)):
     }
   }
 
-  if (mode.mode !== 'development') {
+  if (mode.mode !== 'development' && !mode.checkOnly) {
     try {
       runContextGenerationHook()
       runBrainValidationHook()

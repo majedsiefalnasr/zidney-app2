@@ -4,12 +4,14 @@ import type { ValidationMode } from './types'
 export interface ModeResolution {
   mode: ValidationMode
   outputJson: boolean
+  checkOnly: boolean
   modules?: string[]
 }
 
 export function resolveMode(argv: string[]): ModeResolution {
   const hasCi = argv.includes('--ci')
   const hasChanged = argv.includes('--changed')
+  const checkOnly = argv.includes('--check-only')
 
   let mode: ValidationMode = 'development'
   if (hasCi) {
@@ -31,6 +33,7 @@ export function resolveMode(argv: string[]): ModeResolution {
   return {
     mode,
     outputJson,
+    checkOnly,
     modules,
   }
 }
