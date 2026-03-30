@@ -7,20 +7,28 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-30T00:00:00Z
+Last Updated: 2026-03-30T00:01:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- 5 normalized tables (mcq_questions, options, categories, tags, baskets)
+- 4 question types with type-specific validation
+- 13 API endpoints (CRUD, workflow, classification)
+- Academic boundary enforcement
+- Deletion guards
+
+Deferred Scope:
+
+- None
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
