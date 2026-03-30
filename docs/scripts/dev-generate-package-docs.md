@@ -6,12 +6,6 @@
 bun run dev:generate:package-docs
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/generate/package-docs.ts
-```
-
 ## Purpose
 
 Refresh root package.md from package.json, repo invocation scans, and optional detached-worktree audit evidence.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run dev:generate:package-docs`
 - Implementation: scripts/generate/package-docs.ts
 - Metadata-backed script file: `scripts/generate/package-docs.ts`
 

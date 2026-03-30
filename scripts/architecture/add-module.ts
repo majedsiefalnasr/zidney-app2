@@ -1,6 +1,15 @@
+#!/usr/bin/env bun
+/**
+ * @script arch:add-module
+ * @domain arch
+ * @category dev
+ * @description Register a new module path in ARCHITECTURE_MAP.json with the
+ *   default architecture metadata scaffold.
+ * @usage bun run arch:add-module <module-path>
+ */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { flushAi, hasCiFlag, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 
 const ROOT = process.cwd()
 
@@ -15,25 +24,24 @@ log.start('Add architecture module')
 
 if (isCi) {
   log.error('arch:add-module is a local mutation helper and cannot run with --ci')
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 if (!moduleName) {
-  log.error('Usage: bun arch:add-module <module-path>')
-  process.exit(1)
+  log.error('Usage: bun run arch:add-module <module-path>')
+  exit(1)
 }
 
 if (!existsSync(mapPath)) {
   log.error('ARCHITECTURE_MAP.json not found')
-  process.exit(1)
+  exit(1)
 }
 
 const json = JSON.parse(readFileSync(mapPath, 'utf-8'))
 
 if (json.modules[moduleName]) {
   log.error(`Module already exists: ${moduleName}`)
-  process.exit(1)
+  exit(1)
 }
 
 json.modules[moduleName] = {
@@ -49,4 +57,4 @@ writeFileSync(mapPath, JSON.stringify(json, null, 2))
 log.success(`Module added to ARCHITECTURE_MAP.json: ${moduleName}`)
 log.badge('MODULE ADDED', 'success')
 log.progressResult({ success: 1 }, { title: `Module Added: ${moduleName}`, showPercentage: false })
-flushAi()
+exit(0)

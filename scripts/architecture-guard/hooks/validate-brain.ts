@@ -39,7 +39,7 @@ function normalizeBrainShape(brainPath: string): void {
 
 export function runBrainValidationHook(): void {
   normalizeBrainShape(`${process.cwd()}/docs/ai/context/ai-architecture-brain.json`)
-  execSync('bun scripts/governance/validate-architecture-brain.ts', {
+  execSync('bun run arch:validate:brain', {
     stdio: 'pipe',
     encoding: 'utf-8',
   })

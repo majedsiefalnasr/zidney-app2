@@ -6,12 +6,6 @@
 bun run arch:guard:ci
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/architecture-guard/architecture-guard.ts --ci
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run arch:guard:ci`
 - Implementation: scripts/architecture-guard/architecture-guard.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/architecture-guard/architecture-guard.ts`
 
 ## CI Behavior
 

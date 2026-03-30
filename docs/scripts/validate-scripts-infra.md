@@ -1,33 +1,28 @@
-# validate:scripts:broken
+# validate:scripts:all
 
 ## Command
 
 ```sh
-bun run validate:scripts:broken
-```
-
-Registered package.json runner:
-
-```sh
-bun run scripts/validate/detect-broken-scripts.ts
+bun run validate:scripts:all
 ```
 
 ## Purpose
 
-Detect missing or broken TypeScript script files referenced in root package.json
+Orchestrator that runs all script-system validators sequentially. Composes: runtime-scripts, detect-broken-scripts, spec-sync, docs-drift. Also enforces the Script Evolution Guard: if package.json scripts changed in the current git diff, the migration-map must have been updated too. Exits non-zero on the first failure. Prints a timing summary.
 
 ## Why It Exists
 
-This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/validate/detect-broken-scripts.ts and is exposed through the root package.json interface.
+Its implementation lives in scripts/validate/index.ts and is exposed through the root package.json interface.
 
 ## Source
 
-- Implementation: scripts/validate/detect-broken-scripts.ts
-- Metadata-backed script file: `scripts/validate/detect-broken-scripts.ts`
+- Package runner: `bun run validate:scripts:all`
+- Implementation: scripts/validate/index.ts
+- Metadata-backed script file: `scripts/validate/index.ts`
 
 ## CI Behavior
 
-Supported explicitly in the implementation.
+No explicit root-level `--ci` contract was detected for this runner.
 
 ## When to Run
 
@@ -40,4 +35,4 @@ Supported explicitly in the implementation.
 
 ## Audit Notes
 
-- Observed in isolated worktree run: no tracked file changes.
+- No isolated execution audit note is currently recorded.

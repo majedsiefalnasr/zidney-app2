@@ -79,7 +79,7 @@ All API responses: `{ success: boolean, data: object | null, error: { code, mess
 AI must assume this validation pipeline runs locally and in CI:
 
 ```
-bun scripts/ai-guard.ts && bun scripts/infra-audit.ts && bun run lint && bun run typecheck && bun run test
+bun run ai:guard && bun run arch:audit && bun run lint && bun run typecheck && bun run test
 ```
 
 If a change would break the audit, AI must refuse to generate it.
@@ -112,7 +112,7 @@ If AI detects ambiguous spec, conflicting ADR, migration risk, or tenant isolati
 When `ai-guard.ts` or `infra-audit.ts` detects violations, AI must: stop → diagnose → propose compliant fix → regenerate code.
 Detail: `.agents/skills/architecture-self-healing/SKILL.md`
 
-Architecture intelligence artifacts in `docs/ai/context/` are authoritative for module discovery. Regenerate with `bun scripts/infra-audit.ts`.
+Architecture intelligence artifacts in `docs/ai/context/` are authoritative for module discovery. Regenerate with `bun run arch:audit`.
 
 ---
 

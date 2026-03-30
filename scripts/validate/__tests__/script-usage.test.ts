@@ -3,7 +3,13 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { extractUsages, USAGE_RE, validateUsages } from '../script-usage'
+import {
+  collectRegisteredCommands,
+  extractDirectCommandRefs,
+  extractUsages,
+  USAGE_RE,
+  validateUsages,
+} from '../script-usage'
 
 let tmpDir: string
 
@@ -62,6 +68,56 @@ describe('extractUsages', () => {
   })
 })
 
+describe('extractDirectCommandRefs', () => {
+  it('finds direct script path usage when a root alias exists', () => {
+    const refs = extractDirectCommandRefs(
+      join(tmpDir, 'guide.md'),
+      'Run `bun scripts/context/changed.ts` now.',
+      new Map([['scripts/context/changed.ts', 'arch:context:changed']])
+    )
+
+    expect(refs).toEqual([
+      {
+        command: 'scripts/context/changed.ts',
+        scriptName: 'arch:context:changed',
+        line: 1,
+      },
+    ])
+  })
+
+  it('ignores package.json command declarations', () => {
+    const refs = extractDirectCommandRefs(
+      join(tmpDir, 'package.json'),
+      '{"scripts":{"arch:context:changed":"bun scripts/context/changed.ts"}}',
+      new Map([['scripts/context/changed.ts', 'arch:context:changed']])
+    )
+
+    expect(refs).toHaveLength(0)
+  })
+})
+
+describe('collectRegisteredCommands', () => {
+  it('maps direct implementation commands back to root script names', () => {
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify(
+        {
+          name: 'tmp',
+          scripts: {
+            'arch:context:changed': 'bun scripts/context/changed.ts',
+          },
+        },
+        null,
+        2
+      ),
+      'utf-8'
+    )
+
+    const commands = collectRegisteredCommands(tmpDir)
+    expect(commands.get('scripts/context/changed.ts')).toBe('arch:context:changed')
+  })
+})
+
 describe('validateUsages', () => {
   it('returns no violations when all references are known', () => {
     const knownScripts = new Set(['db:migrate', 'validate:scripts:naming'])
@@ -98,5 +154,36 @@ describe('validateUsages', () => {
   it('handles unreadable files gracefully', () => {
     const violations = validateUsages([join(tmpDir, 'nonexistent.ts')], new Set(), tmpDir)
     expect(violations).toHaveLength(0)
+  })
+
+  it('reports direct script-path references when a canonical bun run alias exists', () => {
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify(
+        {
+          name: 'tmp',
+          scripts: {
+            'arch:context:changed': 'bun scripts/context/changed.ts',
+          },
+        },
+        null,
+        2
+      ),
+      'utf-8'
+    )
+
+    const filePath = join(tmpDir, 'guide.md')
+    writeFileSync(filePath, 'Use `bun scripts/context/changed.ts` in the docs.', 'utf-8')
+
+    const violations = validateUsages(
+      [filePath],
+      new Set(['arch:context:changed']),
+      tmpDir,
+      collectRegisteredCommands(tmpDir)
+    )
+
+    expect(violations).toHaveLength(1)
+    expect(violations[0].rule).toBe('script-usage-direct-command')
+    expect(violations[0].message).toContain('bun run arch:context:changed')
   })
 })

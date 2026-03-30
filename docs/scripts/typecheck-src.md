@@ -6,22 +6,17 @@
 bun run typecheck:src
 ```
 
-Registered package.json runner:
-
-```sh
-tsc --noEmit
-```
-
 ## Purpose
 
 Run the TypeScript compiler in type-check-only mode.
 
 ## Why It Exists
 
-This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml, .github/workflows/ci-type-safety.yml. It provides a stable root package.json interface over underlying tools or chained child runners.
+This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: typecheck, typecheck:tests. It provides a stable root package.json interface over underlying tools or chained child runners.
 
 ## Source
 
+- Package runner: `bun run typecheck:src`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

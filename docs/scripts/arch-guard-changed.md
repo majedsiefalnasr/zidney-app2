@@ -6,12 +6,6 @@
 bun run arch:guard:changed
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/architecture-guard/architecture-guard.ts --changed
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 
 ## Source
 
+- Package runner: `bun run arch:guard:changed`
 - Implementation: scripts/architecture-guard/architecture-guard.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/architecture-guard/architecture-guard.ts`
 
 ## CI Behavior
 

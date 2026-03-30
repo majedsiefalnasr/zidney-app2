@@ -390,7 +390,7 @@ bun run test -- tests/validation/ai-context-*.test.ts --watch
 
 5. **Run governance audit:**
    ```bash
-   bun run arch:audit:check -- --scope ai-context
+   bun run arch:governance -- --scope ai-context
    ```
    **Expected:** ✅ Architecture score: 100/100
 

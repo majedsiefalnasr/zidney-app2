@@ -6,22 +6,17 @@
 bun run test
 ```
 
-Registered package.json runner:
-
-```sh
-vitest run
-```
-
 ## Purpose
 
 Run Vitest for the configured scope.
 
 ## Why It Exists
 
-This runner is currently classified as critical. Treat as protected. It is a primary quality, build, test, or governance entrypoint. It provides a stable root package.json interface over underlying tools or chained child runners.
+This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: test:e2e. It provides a stable root package.json interface over underlying tools or chained child runners.
 
 ## Source
 
+- Package runner: `bun run test`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

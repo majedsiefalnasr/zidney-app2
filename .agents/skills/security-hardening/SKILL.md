@@ -124,7 +124,7 @@ Before adding a dependency:
 4. Minimize dependency tree depth
 
 ```bash
-bun audit    # Check for known vulnerabilities
+bun run infra:security:deps    # Check for known vulnerabilities
 ```
 
 ---

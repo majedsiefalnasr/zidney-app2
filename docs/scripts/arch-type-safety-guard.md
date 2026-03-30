@@ -6,12 +6,6 @@
 bun run arch:type-safety-guard
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/type-safety-guard.ts
-```
-
 ## Purpose
 
 Unified architecture guard — runs type safety checks and validates import boundaries using the architecture contract.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 
 ## Source
 
+- Package runner: `bun run arch:type-safety-guard`
 - Implementation: scripts/type-safety-guard.ts
 - Metadata-backed script file: `scripts/type-safety-guard.ts`
 

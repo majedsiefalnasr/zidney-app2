@@ -259,7 +259,7 @@ This prevents Vitest from reporting "No test suite found" error (which it does w
 ### Auto-Format Before Commit
 
 ```bash
-bun run format
+bun run format:write
 ```
 
 Runs Prettier on all staged files. ESLint now knows not to conflict with Prettier.

@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script validate:scripts:infrastructure
  * @domain validate
@@ -14,6 +16,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { generateRegistry, parseMetaHeader, walkTsFiles } from '../generate/script-docs'
 import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
+import { parseScriptEntries } from './script-naming'
 import type { ViolationRecord } from './types'
 
 const correlationId = randomUUID()
@@ -27,12 +30,13 @@ const SCRIPTS_DIR = join(REPO_ROOT, 'scripts')
 const REGISTRY_PATH = join(REPO_ROOT, 'docs/scripts/SCRIPT_REGISTRY.md')
 
 const REQUIRED_TAGS = ['@script', '@domain', '@category', '@description', '@usage'] as const
+const DEPRECATED_TAGS = ['@mode', '@dependencies'] as const
 
-export function validateMetadataHeaders(scriptsDir: string, repoRoot: string): ViolationRecord[] {
-  const violations: ViolationRecord[] = []
-  const tsFiles = walkTsFiles(scriptsDir)
+function collectGovernedScriptFiles(scriptsDir: string, repoRoot: string): Map<string, string> {
+  const governed = new Map<string, string>()
+  const packageJsonPath = join(repoRoot, 'package.json')
 
-  for (const filePath of tsFiles) {
+  for (const filePath of walkTsFiles(scriptsDir)) {
     let content: string
     try {
       content = readFileSync(filePath, 'utf-8')
@@ -40,14 +44,68 @@ export function validateMetadataHeaders(scriptsDir: string, repoRoot: string): V
       continue
     }
 
-    // A file without ANY @script tag is simply not a governed script — skip it
-    if (!content.includes('@script')) continue
+    if (content.includes('@script')) {
+      governed.set(filePath, 'metadata-header')
+    }
+  }
+
+  if (!existsSync(packageJsonPath)) {
+    return governed
+  }
+
+  for (const entry of parseScriptEntries(packageJsonPath)) {
+    const match = entry.command.match(/(?:^|\s)(scripts\/[^\s'"`]+\.ts)(?=\s|$)/)
+    if (!match) {
+      continue
+    }
+
+    const filePath = join(repoRoot, match[1])
+    if (!governed.has(filePath)) {
+      governed.set(filePath, `package.json:${entry.name}`)
+    }
+  }
+
+  return governed
+}
+
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])script-infrastructure\.ts$/.test(entry)
+}
+
+function extractMetadataHeader(content: string): string {
+  const match = content.match(/^(?:#![^\n]*\n\s*)?(\/\*\*[\s\S]*?\*\/)/)
+  return match?.[1] ?? ''
+}
+
+export function validateMetadataHeaders(scriptsDir: string, repoRoot: string): ViolationRecord[] {
+  const violations: ViolationRecord[] = []
+  const governedFiles = collectGovernedScriptFiles(scriptsDir, repoRoot)
+
+  Array.from(governedFiles.entries()).forEach(([filePath, source]) => {
+    let content: string
+    try {
+      content = readFileSync(filePath, 'utf-8')
+    } catch {
+      return
+    }
+
+    const header = extractMetadataHeader(content)
 
     const relPath = filePath.replace(`${repoRoot}/`, '')
+    if (!content.startsWith('#!/usr/bin/env bun')) {
+      violations.push({
+        rule: 'script-missing-shebang',
+        file: relPath,
+        message: `Governed script entrypoint is missing a bun shebang (${source})`,
+        hint: 'Add #!/usr/bin/env bun at the top of the file',
+      })
+    }
+
     const missing: string[] = []
     for (const tag of REQUIRED_TAGS) {
       const re = new RegExp(`${tag}\\s+\\S`)
-      if (!re.test(content)) {
+      if (!re.test(header)) {
         missing.push(tag)
       }
     }
@@ -60,7 +118,17 @@ export function validateMetadataHeaders(scriptsDir: string, repoRoot: string): V
         hint: `Add ${missing.join(', ')} to the JSDoc header block`,
       })
     }
-  }
+
+    const deprecated = DEPRECATED_TAGS.filter((tag) => header.includes(tag))
+    if (deprecated.length > 0) {
+      violations.push({
+        rule: 'script-deprecated-metadata',
+        file: relPath,
+        message: `Deprecated metadata tags present: ${deprecated.join(', ')}`,
+        hint: 'Remove legacy metadata tags and keep only @script, @domain, @category, @description, and @usage',
+      })
+    }
+  })
 
   return violations
 }
@@ -182,6 +250,6 @@ function main(): void {
   exit(1)
 }
 
-if (import.meta.main) {
+if (isDirectExecution()) {
   main()
 }

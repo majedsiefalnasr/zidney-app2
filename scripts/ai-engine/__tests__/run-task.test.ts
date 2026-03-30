@@ -194,7 +194,7 @@ describe('run-task.ts entry point', () => {
     vi.mocked(checkBrainStatus).mockReturnValue({
       status: 'stale',
       brainPath: 'docs/ai/context/ai-architecture-brain.json',
-      detail: 'Source files newer by 5000ms. Run: bun arch:audit',
+      detail: 'Source files newer by 5000ms. Run: bun run arch:audit',
     })
 
     const brainResult = vi.mocked(checkBrainStatus)()
@@ -242,7 +242,7 @@ describe('run-task.ts entry point', () => {
   it('exit 3 when loadAiContextMini throws — direct process.exit(3) inside inline try', async () => {
     vi.mocked(loadAiContextMini).mockImplementation(() => {
       throw new Error(
-        'AI context artifact not found: docs/ai/context/ai-context-mini.json. Run: bun ai-context:generate'
+        'AI context artifact not found: docs/ai/context/ai-context-mini.json. Run: bun run ai:context:generate'
       )
     })
 

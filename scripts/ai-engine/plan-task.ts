@@ -1,7 +1,17 @@
-/** @library-module */
+#!/usr/bin/env bun
+
+/**
+ * @script ai:plan
+ * @domain ai
+ * @category dev
+ * @description Build a deterministic execution plan for an AI task and write
+ *   the plan artifact alongside an execution log.
+ * @usage bun run ai:plan --task "<task-description>"
+ */
+
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
-import { createLogger } from '@zidney/logger'
+import { createLogger, exit, log } from '../utils/logger'
 import { loadAiContextMini } from './context-loader'
 import { deriveTaskId, generateExecutionId } from './execution-id'
 import { writeExecutionLog } from './log-writer'
@@ -10,6 +20,7 @@ import { selectSkills } from './skill-selector'
 import type { ExecutionLog, ExecutionPlan, PlanStep } from './types'
 
 const logger = createLogger('ai-engine:plan-task')
+log.setScript('ai:plan')
 
 const DEFAULT_PLAN_DIR = 'docs/architecture/health/ai-plans'
 
@@ -116,7 +127,7 @@ function composePlan(
     {
       step: 3,
       description: 'Validate Architecture',
-      action: 'Run bun arch:guard --ci to verify no pre-existing violations',
+      action: 'Run bun run arch:guard --ci to verify no pre-existing violations',
       validation: 'arch:guard exits 0',
       risk: riskLevel,
     },
@@ -130,7 +141,7 @@ function composePlan(
     {
       step: 5,
       description: 'Post-Execution Validation',
-      action: 'Run bun ai:validate to confirm architecture compliance after changes',
+      action: 'Run bun run ai:validate to confirm architecture compliance after changes',
       validation: 'ai:validate exits 0 with validation_result: pass',
       risk: 'low',
     },
@@ -205,12 +216,11 @@ function renderPlanMarkdown(plan: ExecutionPlan): string {
 async function main(): Promise<void> {
   const start = Date.now()
   const { taskDescription, taskId: overrideTaskId, outputPath: overrideOutputPath } = parseArgs()
+  log.header('AI PLAN', 'Build a deterministic execution plan for an AI task')
 
   if (!taskDescription) {
-    process.stderr.write(
-      `${JSON.stringify({ error: 'MISSING_TASK', message: '--task argument is required' })}\n`
-    )
-    process.exit(1)
+    log.error('--task argument is required')
+    exit(1)
   }
 
   assertMonorepoRoot()
@@ -240,7 +250,7 @@ async function main(): Promise<void> {
       execution_duration_ms: duration,
       error: 'CONTEXT_ABSENT',
     })
-    process.exit(3)
+    exit(3)
   }
 
   skillsRequired = selectSkills(taskDescription)
@@ -253,7 +263,7 @@ async function main(): Promise<void> {
   await writeFile(outputPath, markdown, 'utf8')
 
   const duration = Date.now() - start
-  const log: ExecutionLog = {
+  const executionLog: ExecutionLog = {
     execution_id: executionId,
     task_id: taskId,
     timestamp: new Date(Date.now()).toISOString(),
@@ -266,8 +276,9 @@ async function main(): Promise<void> {
     error: null,
   }
 
-  await writeExecutionLog(log)
-  process.exit(0)
+  await writeExecutionLog(executionLog)
+  log.result({ total: 1, passed: 1, failed: 0, message: `Plan written to ${outputPath}` })
+  exit(0)
 }
 
 let isTimeout = false
@@ -290,5 +301,6 @@ withTimeout(main, 120_000, 'ai:plan').catch(async (err: Error) => {
   } catch {
     // log write failed — still exit with correct code
   }
-  process.exit(isTimeout ? 2 : 1)
+  log.error(err.message)
+  exit(isTimeout ? 2 : 1)
 })

@@ -1,6 +1,14 @@
 #!/usr/bin/env bun
 
 /**
+ * @script arch:validate:brain
+ * @domain arch
+ * @category governance
+ * @description Validate the architecture brain artifact structure and dependency paths before it is committed or consumed.
+ * @usage bun run arch:validate:brain
+ */
+
+/**
  * Architecture Brain Validator — Refactored Entry Point
  *
  * Validates that ai-architecture-brain.json has correct structure and valid dependency paths.
@@ -23,7 +31,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { validateArtifactContent } from '../core/artifact-validator'
 import { Timer } from '../core/performance-profiler'
-import { createLogger, flushAi, hasCiFlag, log } from '../utils/logger'
+import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 
 const logger = createLogger('validate-architecture-brain')
 logger.setContext({ ci: hasCiFlag(process.argv.slice(2)) })
@@ -135,7 +143,7 @@ function validateBrain(): ValidationResult {
     }
 
     // Validate schema using artifact validator
-    const schemaValid = validateArtifactContent(brainObj, 'architecture-brain', BRAIN_PATH)
+    const schemaValid = validateArtifactContent(brainObj, 'ai-architecture-brain')
     if (!schemaValid) {
       result.errors.push('Brain failed schema validation (see artifact validator)')
       result.valid = false
@@ -252,7 +260,7 @@ function validateBrain(): ValidationResult {
     }
 
     // Check for suspiciously high edge counts (possible corruption)
-    for (const [module, count] of seenFromEdges.entries()) {
+    for (const [module, count] of Array.from(seenFromEdges.entries())) {
       if (count > 50) {
         result.warnings.push(
           `Module "${module}" has ${count} outgoing dependencies (unusually high, may indicate corruption)`
@@ -362,8 +370,7 @@ if (!result.valid) {
     failed: result.errors.length,
     message: 'Brain validation failed.',
   })
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 if (result.warnings.length > 0) {
@@ -374,8 +381,7 @@ if (result.warnings.length > 0) {
     failed: 0,
     message: `Passed with ${result.warnings.length} warning(s).`,
   })
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 log.success('[VALIDATE BRAIN] VALIDATION PASSED')
@@ -385,8 +391,7 @@ log.result({
   failed: 0,
   message: 'Brain validation passed.',
 })
-flushAi()
-process.exit(0)
+exit(0)
 
 // Exports for testing
 export { validateBrain }

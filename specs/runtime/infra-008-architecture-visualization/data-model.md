@@ -41,7 +41,7 @@ interface DependencyGraph {
 ```typescript
 /**
  * Shape of docs/architecture/intelligence/ARCHITECTURE_MAP.json
- * Produced by: bun run arch:generate or bun run arch:fix
+ * Produced by: bun run arch:generate or bun run arch:governance:fix
  */
 interface ArchitectureMapModule {
   layer: string; // "domain" | "infrastructure" | "runtime" | "ui"

@@ -1,7 +1,7 @@
 /**
  * Script Governance Adapter
  *
- * Wraps `bun run validate:runtime:scripts --json` and maps violation types
+ * Wraps `bun run validate:scripts:all --json` and maps violation types
  * to the appropriate SCRIPTS-* ruleIds.
  *
  * Never throws. All errors are returned as error-severity PolicyResult entries.
@@ -50,20 +50,20 @@ function makeErrorResult(message: string): PolicyResult {
 /**
  * Run script governance validation and parse violations into PolicyResult[].
  *
- * Spawns: `bun run validate:runtime:scripts --json`
+ * Spawns: `bun run validate:scripts:all --json`
  */
 export async function runScriptGovernance(context: PolicyContext): Promise<PolicyResult[]> {
-  logger.debug('Spawning validate:runtime:scripts --json')
+  logger.debug('Spawning validate:scripts:all --json')
 
   let proc: ReturnType<typeof Bun.spawn>
   try {
-    proc = Bun.spawn(['bun', 'run', 'validate:runtime:scripts', '--json'], {
+    proc = Bun.spawn(['bun', 'run', 'validate:scripts:all', '--json'], {
       signal: context.abortSignal,
       stdout: 'pipe',
       stderr: 'pipe',
     })
   } catch (err) {
-    return [makeErrorResult(`validate:runtime:scripts failed to spawn: ${String(err)}`)]
+    return [makeErrorResult(`validate:scripts:all failed to spawn: ${String(err)}`)]
   }
 
   try {
@@ -77,7 +77,7 @@ export async function runScriptGovernance(context: PolicyContext): Promise<Polic
     const stderr = new TextDecoder().decode(stderrBuf).trim()
 
     if (exitCode !== 0 && !stdout) {
-      const message = `validate:runtime:scripts exited with code ${exitCode}: ${stderr.slice(0, 300)}`
+      const message = `validate:scripts:all exited with code ${exitCode}: ${stderr.slice(0, 300)}`
       logger.warn(message, { exitCode })
       return [makeErrorResult(message)]
     }
@@ -91,7 +91,7 @@ export async function runScriptGovernance(context: PolicyContext): Promise<Polic
       const parsed = JSON.parse(stdout)
       violations = Array.isArray(parsed) ? parsed : []
     } catch {
-      logger.warn('validate:runtime:scripts output is not parseable JSON', {
+      logger.warn('validate:scripts:all output is not parseable JSON', {
         stdout: stdout.slice(0, 200),
       })
       return []
@@ -112,7 +112,7 @@ export async function runScriptGovernance(context: PolicyContext): Promise<Polic
     })
   } catch (err) {
     if (err instanceof Error && (err.name === 'AbortError' || err.message.includes('abort'))) {
-      return [makeErrorResult('validate:runtime:scripts was cancelled (engine timeout)')]
+      return [makeErrorResult('validate:scripts:all was cancelled (engine timeout)')]
     }
     const message = `script-governance adapter failed: ${String(err)}`
     logger.error(message)

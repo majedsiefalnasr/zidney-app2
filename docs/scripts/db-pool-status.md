@@ -6,12 +6,6 @@
 bun run db:status:pool
 ```
 
-Registered package.json runner:
-
-```sh
-bun run scripts/db/pool-status.ts
-```
-
 ## Purpose
 
 Check PostgreSQL connection pool health and report status.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run db:status:pool`
 - Implementation: scripts/db/pool-status.ts
 - Metadata-backed script file: `scripts/db/pool-status.ts`
 

@@ -6,12 +6,6 @@
 bun run test:integration
 ```
 
-Registered package.json runner:
-
-```sh
-vitest run --dir tests/integration --fileParallelism=false
-```
-
 ## Purpose
 
 Run Vitest for the configured scope.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run test:integration`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

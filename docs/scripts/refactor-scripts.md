@@ -1,0 +1,38 @@
+# refactor-scripts
+
+## Command
+
+```sh
+bun run refactor-scripts
+```
+
+## Purpose
+
+Applies the migration map to rename all "bun run <old>" references across the repository. Supports both JSON format (docs/scripts/migration-map.json, preferred) and Markdown format (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain. Writes reports to both reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
+
+## Why It Exists
+
+Its implementation lives in scripts/dev/refactor-scripts.ts and is exposed through the root package.json interface.
+
+## Source
+
+- Package runner: `bun run refactor-scripts`
+- Implementation: scripts/dev/refactor-scripts.ts
+- Metadata-backed script file: `scripts/dev/refactor-scripts.ts`
+
+## CI Behavior
+
+No explicit root-level `--ci` contract was detected for this runner.
+
+## When to Run
+
+- When the corresponding repository workflow requires this root runner.
+
+## Related Scripts
+
+- Depends on: None
+- Used by other root scripts: None found
+
+## Audit Notes
+
+- No isolated execution audit note is currently recorded.

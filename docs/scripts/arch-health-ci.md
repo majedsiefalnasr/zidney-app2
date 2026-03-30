@@ -6,12 +6,6 @@
 bun run arch:health:ci
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/architecture-health/architecture-health.ts --ci
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run arch:health:ci`
 - Implementation: scripts/architecture-health/architecture-health.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/architecture-health/architecture-health.ts`
 
 ## CI Behavior
 

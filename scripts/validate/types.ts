@@ -8,7 +8,7 @@
 export interface ScriptEntry {
   /** The key name, e.g. "validate:scripts:naming" */
   name: string
-  /** The command value, e.g. "bun scripts/validate/script-naming.ts" */
+  /** The command value, e.g. "bun run validate:scripts:naming" */
   command: string
   /** Absolute path to the package.json file this entry came from */
   packageFile: string
@@ -39,7 +39,7 @@ export interface MigrationEntry {
 export interface ScriptEntry {
   /** The key name, e.g. "validate:scripts:naming" */
   name: string
-  /** The command value, e.g. "bun scripts/validate/script-naming.ts" */
+  /** The command value, e.g. "bun run validate:scripts:naming" */
   command: string
   /** Absolute path to the package.json file this entry came from */
   packageFile: string

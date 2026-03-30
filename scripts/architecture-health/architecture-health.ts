@@ -1,4 +1,13 @@
 #!/usr/bin/env bun
+
+/**
+ * @script arch:health
+ * @domain arch
+ * @category governance
+ * @description Run the architecture health assessment pipeline and write the health report artifacts.
+ * @usage bun run arch:health
+ */
+
 /** @library-module */
 
 import { createHash } from 'node:crypto'

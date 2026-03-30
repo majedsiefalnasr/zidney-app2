@@ -1,7 +1,15 @@
 {
-  "updated_at": "2026-03-14T22:15:52.792Z",
-  "total_archived": 0,
-  "entries": [],
+  "updated_at": "2026-03-29T11:46:54.764Z",
+  "total_archived": 1,
+  "entries": [
+    {
+      "filename": "INDEX.json",
+      "path": "docs/ai/context/archive/INDEX.json",
+      "timestamp": 1773572476000,
+      "size_bytes": 167,
+      "created_at": "2026-03-15T11:01:16.000Z"
+    }
+  ],
   "retention_policy": {
     "keep_live": 2,
     "archive_threshold_days": 7

@@ -6,24 +6,19 @@
 bun run ai:validate
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/ai-engine/validate-execution.ts
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
 
 ## Why It Exists
 
-This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/ai-engine/validate-execution.ts and is exposed through the root package.json interface.
+This runner is currently classified as medium. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml. Its implementation lives in scripts/ai-engine/validate-execution.ts and is exposed through the root package.json interface.
 
 ## Source
 
+- Package runner: `bun run ai:validate`
 - Implementation: scripts/ai-engine/validate-execution.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/ai-engine/validate-execution.ts`
 
 ## CI Behavior
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 /**
  * @script ai:guard
  * @domain ai
@@ -910,7 +911,7 @@ export async function runIncremental(config: GuardConfig): Promise<ValidationRes
 
       log.info('AI Guard (incremental): graph missing — regenerating...')
       try {
-        execSync('bun scripts/infra-audit.ts --generate-graph', { stdio: 'inherit' })
+        execSync('bun run arch:audit --generate-graph', { stdio: 'inherit' })
       } catch {
         log.warn('AI Guard (incremental): graph regeneration failed — falling back to full scan.')
         const result = runFullScanWithReason('graph_missing', stagedFiles)

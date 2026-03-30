@@ -6,12 +6,6 @@
 bun run arch:add-module
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/architecture/add-module.ts
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run arch:add-module`
 - Implementation: scripts/architecture/add-module.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/architecture/add-module.ts`
 
 ## CI Behavior
 

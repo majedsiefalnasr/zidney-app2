@@ -81,7 +81,7 @@ Verifies all 5 required policy domains have registered rules:
 Enforces that no direct calls to legacy governance tools exist outside adapters:
 
 - Grep search for `bun run arch:guard` outside `architecture-guard.adapter.ts` → no matches
-- Grep search for `bun run validate:scripts:runtime` outside `script-governance.adapter.ts` → no matches
+- Grep search for `bun run validate:scripts:all` outside `script-governance.adapter.ts` → no matches
 - Grep search for `bun typecheck` direct invocation outside `type-safety.adapter.ts` → no matches
 - Grep search for `trivy fs` outside `trivy.adapter.ts` → no matches
 

@@ -204,7 +204,7 @@ Once this PR merges to develop, the following become active:
 1. **CI/CD**: All PRs + pushes to develop trigger 5-job CI (`lint` → `typecheck` → `test` →
    `integration` → `e2e`)
 2. **Testing**: Teams can now `bun run test` and get 14-project orchestrated execution
-3. **Formatting**: `bun run format` enforces consistency across codebase
+3. **Formatting**: `bun run format:write` enforces consistency across codebase
 4. **E2E Framework**: Teams can add Playwright tests; skeleton already in place
 
 **No changes needed in downstream code; this PR is purely additive infrastructure.**

@@ -6,12 +6,6 @@
 bun run db:migrate
 ```
 
-Registered package.json runner:
-
-```sh
-bun run scripts/db/migrate.ts
-```
-
 ## Purpose
 
 Validate migration inputs and delegate master migration execution guidance.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run db:migrate`
 - Implementation: scripts/db/migrate.ts
 - Metadata-backed script file: `scripts/db/migrate.ts`
 

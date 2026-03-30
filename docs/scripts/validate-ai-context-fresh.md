@@ -6,12 +6,6 @@
 bun run validate:ai-context-fresh
 ```
 
-Registered package.json runner:
-
-```sh
-bun run scripts/validate/ai-context-fresh.ts
-```
-
 ## Purpose
 
 Check that the AI context mini artifact exists and is not older than 24 hours
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 
 ## Source
 
+- Package runner: `bun run validate:ai-context-fresh`
 - Implementation: scripts/validate/ai-context-fresh.ts
 - Metadata-backed script file: `scripts/validate/ai-context-fresh.ts`
 

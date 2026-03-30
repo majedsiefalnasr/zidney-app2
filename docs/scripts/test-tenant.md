@@ -6,12 +6,6 @@
 bun run test:tenant
 ```
 
-Registered package.json runner:
-
-```sh
-vitest run --dir tests/tenant || true
-```
-
 ## Purpose
 
 Run Vitest for the configured scope.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run test:tenant`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

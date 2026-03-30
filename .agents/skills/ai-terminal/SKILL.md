@@ -274,7 +274,7 @@ This caching strategy reduces unnecessary terminal operations and improves respo
 
 ## 4. Environment (Bun/Hono)
 
-- **Tool:** `bun x`
+- **Tool:** `bun run x`
   - _Usage:_ Run one-off TS scripts without compiling.
 - **Tool:** `wrangler` (if applicable)
   - _Usage:_ For checking Hono deployment logs/configs.
@@ -357,11 +357,11 @@ git log --grep "keyword"
 
 To inspect module dependencies:
 
-bun scripts/infra-audit.ts
+bun run arch:audit
 
 To analyze architecture violations:
 
-bun scripts/ai-guard.ts
+bun run ai:guard
 
 ---
 
@@ -385,11 +385,11 @@ jq '.modules["packages/domain-core"]' ARCHITECTURE_MAP.json
 
 Run architecture validation:
 
-bun scripts/ai-guard.ts
+bun run ai:guard
 
 Generate repository intelligence data:
 
-bun scripts/infra-audit.ts
+bun run arch:audit
 
 ---
 

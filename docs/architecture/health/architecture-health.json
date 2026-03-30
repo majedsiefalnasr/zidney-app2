@@ -186,7 +186,7 @@
   "source_runs": [
     {
       "tool": "arch_guard_ci",
-      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/architecture-guard/architecture-guard.ts --ci --output json",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun run arch:guard --ci --output json",
       "timeout_ms": 30000,
       "duration_ms": 785,
       "timed_out": false,
@@ -197,7 +197,7 @@
     },
     {
       "tool": "infra_audit_quick",
-      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/infra-audit.ts --quick",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun run arch:audit --quick",
       "timeout_ms": 60000,
       "duration_ms": 471,
       "timed_out": false,
@@ -208,7 +208,7 @@
     },
     {
       "tool": "type_safety_guard_json",
-      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/type-safety-guard.ts --json --no-exit-error",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun run arch:type-safety-guard --json --no-exit-error",
       "timeout_ms": 30000,
       "duration_ms": 117,
       "timed_out": false,
@@ -219,7 +219,7 @@
     },
     {
       "tool": "arch_validate_brain",
-      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/governance/validate-architecture-brain.ts",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun run arch:validate:brain",
       "timeout_ms": 30000,
       "duration_ms": 18,
       "timed_out": false,

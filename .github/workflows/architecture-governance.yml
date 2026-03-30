@@ -52,21 +52,25 @@ jobs:
 
       # ── 6. Run Zidney AI Guard ─────────────────────────────────────────
       - name: Run Zidney AI Guard
-        run: bun scripts/ai-guard.ts
+        run: bun run ai:guard
 
       # ── 7. Run Infrastructure Audit ────────────────────────────────────
       - name: Run Infrastructure Audit (full repo architecture audit)
-        run: bun scripts/infra-audit.ts --ci
+        run: bun run arch:audit --ci
 
       # ── 8. Run Architecture Diff ───────────────────────────────────────
       - name: Run Architecture Diff (PR-specific architecture drift check)
-        run: bun scripts/architecture-diff.ts
+        run: bun run arch:diff
 
       # ── 9. Run Architecture Health ─────────────────────────────────────
       - name: Run Architecture Health
         run: bun run arch:health:ci
 
-      # ── 10. Upload Architecture Health Artifacts ───────────────────────
+      # ── 10. Run Script Validation ──────────────────────────────────────────
+      - name: Run Script Validation (naming, broken refs, registry)
+        run: bun run validate:scripts:all
+
+      # ── 11. Upload Architecture Health Artifacts ───────────────────────
       - name: Upload Architecture Health Artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -78,7 +82,7 @@ jobs:
             docs/architecture/health/architecture-drift-report.md
             docs/architecture/health/history/
 
-      # ── 10. Publish Architecture Summary ───────────────────────────────
+      # ── 12. Publish Architecture Summary ───────────────────────────────
       - name: Publish Architecture Summary
         if: always()
         run: |
@@ -119,7 +123,7 @@ jobs:
 
       # ── 11. Run AI Execution Validation ───────────────────────────────
       - name: Run AI Execution Validation
-        run: bun ai:validate --ci
+        run: bun run ai:validate --ci
 
       # ── 12. Upload AI Execution Artifact ──────────────────────────────
       - name: Upload AI Execution Validation Artifact

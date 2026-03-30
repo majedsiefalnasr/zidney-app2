@@ -6,22 +6,17 @@
 bun run test:e2e:backoffice
 ```
 
-Registered package.json runner:
-
-```sh
-bunx playwright test --config apps/backoffice/playwright.config.ts
-```
-
 ## Purpose
 
 Run Playwright end-to-end tests for the configured app.
 
 ## Why It Exists
 
-This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml. It provides a stable root package.json interface over underlying tools or chained child runners.
+This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: test:e2e. It provides a stable root package.json interface over underlying tools or chained child runners.
 
 ## Source
 
+- Package runner: `bun run test:e2e:backoffice`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

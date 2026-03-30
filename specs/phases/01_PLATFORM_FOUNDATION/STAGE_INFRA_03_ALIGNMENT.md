@@ -389,7 +389,7 @@ Actions:
 Add formatting scripts:
 
 ```
-bun run format
+bun run format:write
 bun run format:check
 ```
 

@@ -6,12 +6,6 @@
 bun run dev:infra
 ```
 
-Registered package.json runner:
-
-```sh
-docker compose up -d
-```
-
 ## Purpose
 
 Start the local infrastructure stack in detached mode.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run dev:infra`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

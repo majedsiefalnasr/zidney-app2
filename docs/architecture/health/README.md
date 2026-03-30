@@ -6,8 +6,8 @@ This directory contains the generated outputs and operator guidance for the arch
 
 - `bun run arch:health`: Runs the repository-scoped scanner, validates the report schema, and writes the current JSON and Markdown artifacts.
 - `bun run arch:health:ci`: Runs the same scanner in CI mode with the immutable governance threshold policy.
-- `bun scripts/architecture-health/architecture-health.ts --output json|markdown|text`: Emits the requested representation to stdout without persisting artifacts.
-- `bun scripts/architecture-health/benchmark.ts --runs 20 [--ci]`: Executes the benchmark harness used to verify p95 performance budgets.
+- `bun run arch:health --output json|markdown|text`: Emits the requested representation to stdout without persisting artifacts.
+- `bun run arch:health:benchmark --runs 20 [--ci]`: Executes the benchmark harness used to verify p95 performance budgets.
 
 ## Governance Rules
 

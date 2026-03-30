@@ -6,22 +6,17 @@
 bun run dev:worker
 ```
 
-Registered package.json runner:
-
-```sh
-bun --cwd apps/worker dev
-```
-
 ## Purpose
 
 Start a specific workspace development process.
 
 ## Why It Exists
 
-This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. It provides a stable root package.json interface over underlying tools or chained child runners.
+This runner is currently classified as medium. Not safe to remove directly. Other root scripts depend on it: dev:all. It provides a stable root package.json interface over underlying tools or chained child runners.
 
 ## Source
 
+- Package runner: `bun run dev:worker`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

@@ -328,7 +328,7 @@ exit 1
 
 Example CI integration:
 
-bun run validate:scripts:runtime
+bun run validate:scripts:all
 
 CI must fail when a referenced runtime script does not exist.
 
@@ -507,7 +507,7 @@ bun run validate-script-infrastructure
 Example CI pipeline step:
 
 ```
-bun run validate:scripts:runtime
+bun run validate:scripts:all
 bun run validate-script-infrastructure
 bun run dev:generate:script-docs
 ```

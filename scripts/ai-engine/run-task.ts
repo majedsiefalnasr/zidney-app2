@@ -1,7 +1,15 @@
-/** @library-module */
+#!/usr/bin/env bun
+/**
+ * @script ai:run
+ * @domain ai
+ * @category dev
+ * @description Execute AI task orchestration with governance validation,
+ *   execution logging, and deterministic exit codes.
+ * @usage bun run ai:run --task "<task-description>"
+ */
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger } from '@zidney/logger'
+import { createLogger, exit, log } from '../utils/logger'
 import { loadAiContextMini } from './context-loader'
 import { deriveTaskId, generateExecutionId } from './execution-id'
 import { writeExecutionLog } from './log-writer'
@@ -12,6 +20,7 @@ import { checkBrainStatus } from './stale-check'
 import type { ExecutionLog } from './types'
 
 const logger = createLogger('ai-engine:run-task')
+log.setScript('ai:run')
 
 /** Private timeout helper — rejects with TIMEOUT_EXCEEDED error and sets isTimeout flag. */
 function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number, label: string): Promise<T> {
@@ -62,12 +71,11 @@ function parseArgs(): { taskDescription: string; taskId: string | null; dryRun: 
 async function main(): Promise<void> {
   const start = Date.now()
   const { taskDescription, taskId: overrideTaskId, dryRun } = parseArgs()
+  log.header('AI RUN', 'Execute the AI task orchestration flow')
 
   if (!taskDescription) {
-    process.stderr.write(
-      `${JSON.stringify({ error: 'MISSING_TASK', message: '--task argument is required' })}\n`
-    )
-    process.exit(1)
+    log.error('--task argument is required')
+    exit(1)
   }
 
   assertMonorepoRoot()
@@ -96,7 +104,7 @@ async function main(): Promise<void> {
       execution_duration_ms: duration,
       error: 'CONTEXT_ABSENT',
     })
-    process.exit(3)
+    exit(3)
   }
 
   skillsActivated = selectSkills(taskDescription)
@@ -118,7 +126,7 @@ async function main(): Promise<void> {
       execution_duration_ms: duration,
       error: `SKILL_DIR_ABSENT: ${missingSKills.join(', ')}`,
     })
-    process.exit(3)
+    exit(3)
   }
 
   // Check brain status — direct exits inside try block (NOT thrown)
@@ -137,7 +145,7 @@ async function main(): Promise<void> {
       execution_duration_ms: duration,
       error: 'BRAIN_ABSENT',
     })
-    process.exit(3)
+    exit(3)
   }
   if (brainCheck.status === 'stale') {
     const duration = Date.now() - start
@@ -153,7 +161,7 @@ async function main(): Promise<void> {
       execution_duration_ms: duration,
       error: 'BRAIN_STALE',
     })
-    process.exit(4)
+    exit(4)
   }
 
   // Dry run — skip execution, write pass log
@@ -171,7 +179,8 @@ async function main(): Promise<void> {
       execution_duration_ms: duration,
       error: null,
     })
-    process.exit(0)
+    log.result({ total: 1, passed: 1, failed: 0, message: 'Dry run complete' })
+    exit(0)
   }
 
   // Run governance validation
@@ -197,7 +206,7 @@ async function main(): Promise<void> {
       : 'fail'
 
   const duration = Date.now() - start
-  const log: ExecutionLog = {
+  const executionLog: ExecutionLog = {
     execution_id: executionId,
     task_id: taskId,
     timestamp: new Date(Date.now()).toISOString(),
@@ -211,8 +220,14 @@ async function main(): Promise<void> {
       validationResult === 'fail' ? `arch:guard exited with code ${archGuard.exit_code}` : null,
   }
 
-  await writeExecutionLog(log)
-  process.exit(validationResult === 'pass' ? 0 : 1)
+  await writeExecutionLog(executionLog)
+  log.result({
+    total: 1,
+    passed: validationResult === 'pass' ? 1 : 0,
+    failed: validationResult === 'pass' ? 0 : 1,
+    message: validationResult === 'pass' ? 'AI run validation passed' : 'AI run validation failed',
+  })
+  exit(validationResult === 'pass' ? 0 : 1)
 }
 
 let isTimeout = false
@@ -235,5 +250,6 @@ withTimeout(main, 300_000, 'ai:run').catch(async (err: Error) => {
   } catch {
     // log write failed — still exit with correct code
   }
-  process.exit(isTimeout ? 2 : 1)
+  log.error(err.message)
+  exit(isTimeout ? 2 : 1)
 })

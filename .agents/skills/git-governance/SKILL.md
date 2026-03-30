@@ -173,13 +173,13 @@ git diff --staged
 4. Ensure architecture guard passes
 
 ```
-bun scripts/ai-guard.ts
+bun run ai:guard
 ```
 
 5. Ensure infrastructure audit passes if architecture files changed
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 ---

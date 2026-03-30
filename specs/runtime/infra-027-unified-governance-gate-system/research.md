@@ -116,7 +116,7 @@ There is no overlap — `gate.ts` MUST NOT import from `governance-validator.ts`
 - `ai-context:validate` — alias chaining `validate:ai-context-fresh && validate:ai-context-schemas`
 - `governance:gate` — `bun scripts/governance/gate.ts`
 - `governance:gate:ci` — `bun scripts/governance/gate-ci.ts`
-- `governance:gate:changed` — single-line shell: `bun run arch:guard:changed && bun run validate:scripts:runtime`
+- `governance:gate:changed` — single-line shell: `bun run arch:guard:changed && bun run validate:scripts:all`
 - `governance:report` — `bun scripts/governance/report.ts`
 
 ---

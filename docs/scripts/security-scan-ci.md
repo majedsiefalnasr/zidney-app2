@@ -6,12 +6,6 @@
 bun run infra:security:ci
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/security/scan-ci.ts
-```
-
 ## Purpose
 
 Run the CI-equivalent Trivy scan, write a sanitized report, and block on CI-grade findings.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run infra:security:ci`
 - Implementation: scripts/security/scan-ci.ts
 - Metadata-backed script file: `scripts/security/scan-ci.ts`
 

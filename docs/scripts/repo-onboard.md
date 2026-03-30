@@ -6,12 +6,6 @@
 bun run repo:onboard
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/dev/repo-onboard.ts
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run repo:onboard`
 - Implementation: scripts/dev/repo-onboard.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/dev/repo-onboard.ts`
 
 ## CI Behavior
 

@@ -6,12 +6,6 @@
 bun run test:unit
 ```
 
-Registered package.json runner:
-
-```sh
-vitest run --project mmc --project backoffice --project frontoffice --project api-client --project domain-core --project logger --project config --project redis-utils --project types --project ui-system --project validation
-```
-
 ## Purpose
 
 Run Vitest for the configured scope.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run test:unit`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

@@ -144,9 +144,7 @@ Exceptions in protected packages require:
 
 Every month, check for expiring exceptions:
 
-```bash
-bun scripts/check-expiring-exceptions.ts
-```
+Run the repository's current monthly exception review workflow.
 
 Reports:
 
@@ -158,9 +156,7 @@ Reports:
 
 Q1, Q2, Q3, Q4: Review and close resolved exceptions
 
-```bash
-bun scripts/cleanup-expired-exceptions.ts
-```
+Use the current quarterly exception cleanup workflow for the repository.
 
 Actions:
 
@@ -246,19 +242,19 @@ No exception entry needed when using `unknown` + validation!
 ### View all exceptions
 
 ```bash
-bun type-safety-guard --list-exceptions
+bun run arch:type-safety-guard --list-exceptions
 ```
 
 ### Export exception report
 
 ```bash
-bun type-safety-guard --export-exceptions > exceptions-report.json
+bun run arch:type-safety-guard --export-exceptions > exceptions-report.json
 ```
 
 ### Check exception status
 
 ```bash
-bun type-safety-guard --validate-exceptions
+bun run arch:type-safety-guard --validate-exceptions
 ```
 
 Shows:

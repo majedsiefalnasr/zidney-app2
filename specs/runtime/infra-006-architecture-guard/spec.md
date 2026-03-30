@@ -84,7 +84,7 @@ Phase: 01_PLATFORM_FOUNDATION — Infrastructure stage.
 - `scripts/ai-guard.ts` implementation logic — it already works correctly
 - `.husky/pre-commit` hook — already configured correctly
 - `ARCHITECTURE_CONTRACT.json` — generated file, not manually edited
-- `ARCHITECTURE_MAP.json` — updated via `bun run arch:fix`, not directly
+- `ARCHITECTURE_MAP.json` — updated via `bun run arch:governance:fix`, not directly
 - Any ADR files — ADRs already exist as complete decisions
 - Any apps/ or packages/ source code
 - Database schemas, migrations, or tenant logic

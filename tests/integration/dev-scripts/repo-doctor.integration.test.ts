@@ -3,7 +3,7 @@
  *
  * Stage: INFRA-18 — T013
  *
- * Smoke tests that run `bun scripts/dev/repo-doctor.ts` against the
+ * Smoke tests that run `bun run repo:doctor` against the
  * actual repository environment. Validates observable CLI behaviors:
  *
  *  - repo:doctor runs without crashing (exit 0 or exit 1 depending on env)
@@ -18,6 +18,7 @@
  *    (arch:guard, bun install, etc.) since CI environments vary
  */
 
+import { spawnSync } from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
@@ -25,24 +26,22 @@ import { beforeAll, describe, expect, it } from 'vitest'
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const REPO_ROOT = process.cwd()
-const DOCTOR_SCRIPT = path.join(REPO_ROOT, 'scripts', 'dev', 'repo-doctor.ts')
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function runDoctor(
   env: Record<string, string> = {},
   cwd = REPO_ROOT
 ): { exitCode: number; stdout: string; stderr: string } {
-  const result = Bun.spawnSync(['bun', DOCTOR_SCRIPT], {
+  const result = spawnSync('bun', ['run', 'repo:doctor'], {
     cwd,
     env: { ...process.env, ...env },
-    stdout: 'pipe',
-    stderr: 'pipe',
+    encoding: 'utf-8',
+    stdio: ['ignore', 'pipe', 'pipe'],
   })
   return {
-    exitCode: result.exitCode ?? 1,
-    stdout: result.stdout ? result.stdout.toString() : '',
-    stderr: result.stderr ? result.stderr.toString() : '',
+    exitCode: result.status ?? 1,
+    stdout: result.stdout ?? '',
+    stderr: result.stderr ?? '',
   }
 }
 
@@ -73,8 +72,8 @@ describe('repo:doctor smoke test', () => {
 
   it('produces a summary line showing N/7 format', () => {
     const { stdout } = runDoctor()
-    // Summary line looks like "✔ 7/7 checks passed" or "✗ N/7 checks passed"
-    expect(stdout).toMatch(/[✔✗]\s+\d+\/7\s+checks/)
+    // Summary line looks like "✔ 7/7 — all checks passed" or a failure equivalent.
+    expect(stdout).toMatch(/[✔✗]\s+\d+\/7\s+[—-]/)
   })
 })
 

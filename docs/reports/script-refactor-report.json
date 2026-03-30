@@ -1,0 +1,236 @@
+{
+  "generated": "2026-03-30T08:18:24.590Z",
+  "mode": "live",
+  "migrationCount": 12,
+  "filesChanged": 11,
+  "totalReplacements": 230,
+  "changes": [
+    {
+      "file": "specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json",
+      "replacements": [
+        {
+          "oldRef": "bun run format:biome",
+          "newRef": "bun run format:write",
+          "count": 1
+        },
+        {
+          "oldRef": "bun run format:prettier",
+          "newRef": "bun run format:write",
+          "count": 1
+        },
+        {
+          "oldRef": "bun run format:check:biome",
+          "newRef": "bun run format:check",
+          "count": 1
+        },
+        {
+          "oldRef": "bun run format:check:prettier",
+          "newRef": "bun run format:check",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "specs/runtime/fix-01-runtime-script-recovery-and-validation/research.md",
+      "replacements": [
+        {
+          "oldRef": "bun run format:biome",
+          "newRef": "bun run format:write",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "specs/runtime/fix-01-runtime-script-recovery-and-validation/reports/SCRIPTS_RUNS.md",
+      "replacements": [
+        {
+          "oldRef": "bun run format:biome",
+          "newRef": "bun run format:write",
+          "count": 1
+        },
+        {
+          "oldRef": "bun run format:check:biome",
+          "newRef": "bun run format:check",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "docs/scripts/format-check-prettier.md",
+      "replacements": [
+        {
+          "oldRef": "bun run format:check:prettier",
+          "newRef": "bun run format:check",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "file": "docs/scripts/format-prettier.md",
+      "replacements": [
+        {
+          "oldRef": "bun run format:prettier",
+          "newRef": "bun run format:write",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "file": "docs/scripts/format-biome.md",
+      "replacements": [
+        {
+          "oldRef": "bun run format:biome",
+          "newRef": "bun run format:write",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "file": "docs/scripts/format-check-biome.md",
+      "replacements": [
+        {
+          "oldRef": "bun run format:check:biome",
+          "newRef": "bun run format:check",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "file": "docs/reports/script-refactor-report.json",
+      "replacements": [
+        {
+          "oldRef": "bun run format",
+          "newRef": "bun run format:write",
+          "count": 31
+        },
+        {
+          "oldRef": "bun run arch:refresh",
+          "newRef": "bun run arch:governance",
+          "count": 6
+        },
+        {
+          "oldRef": "bun run arch:audit:check",
+          "newRef": "bun run arch:governance",
+          "count": 5
+        },
+        {
+          "oldRef": "bun run arch:fix",
+          "newRef": "bun run arch:governance:fix",
+          "count": 8
+        },
+        {
+          "oldRef": "bun arch:fix",
+          "newRef": "bun arch:governance:fix",
+          "count": 1
+        },
+        {
+          "oldRef": "bun run validate:scripts:runtime",
+          "newRef": "bun run validate:scripts:all",
+          "count": 29
+        },
+        {
+          "oldRef": "bun run validate:scripts:broken",
+          "newRef": "bun run validate:scripts:all",
+          "count": 5
+        },
+        {
+          "oldRef": "bun run validate:scripts:registry",
+          "newRef": "bun run validate:scripts:all",
+          "count": 2
+        },
+        {
+          "oldRef": "bun run validate:runtime:scripts",
+          "newRef": "bun run validate:scripts:all",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "file": "scripts/dev/refactor-scripts.ts",
+      "replacements": [
+        {
+          "oldRef": "bun run format",
+          "newRef": "bun run format:write",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "package.md",
+      "replacements": [
+        {
+          "oldRef": "bun run format:biome",
+          "newRef": "bun run format:write",
+          "count": 1
+        },
+        {
+          "oldRef": "bun run format:prettier",
+          "newRef": "bun run format:write",
+          "count": 1
+        },
+        {
+          "oldRef": "bun run format:check:biome",
+          "newRef": "bun run format:check",
+          "count": 2
+        },
+        {
+          "oldRef": "bun run format:check:prettier",
+          "newRef": "bun run format:check",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "reports/SCRIPT_REFACTOR_REPORT.md",
+      "replacements": [
+        {
+          "oldRef": "bun run format",
+          "newRef": "bun run format:write",
+          "count": 62
+        },
+        {
+          "oldRef": "bun run arch:refresh",
+          "newRef": "bun run arch:governance",
+          "count": 6
+        },
+        {
+          "oldRef": "bun run arch:audit:check",
+          "newRef": "bun run arch:governance",
+          "count": 5
+        },
+        {
+          "oldRef": "bun run arch:fix",
+          "newRef": "bun run arch:governance:fix",
+          "count": 8
+        },
+        {
+          "oldRef": "bun arch:fix",
+          "newRef": "bun arch:governance:fix",
+          "count": 1
+        },
+        {
+          "oldRef": "bun run validate:scripts:runtime",
+          "newRef": "bun run validate:scripts:all",
+          "count": 29
+        },
+        {
+          "oldRef": "bun run validate:scripts:broken",
+          "newRef": "bun run validate:scripts:all",
+          "count": 5
+        },
+        {
+          "oldRef": "bun run validate:scripts:registry",
+          "newRef": "bun run validate:scripts:all",
+          "count": 2
+        },
+        {
+          "oldRef": "bun run validate:runtime:scripts",
+          "newRef": "bun run validate:scripts:all",
+          "count": 2
+        }
+      ]
+    }
+  ],
+  "unresolvedReferences": [],
+  "status": "clean"
+}

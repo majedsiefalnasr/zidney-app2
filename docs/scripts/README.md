@@ -6,7 +6,7 @@ This directory contains one page per root `package.json` script runner, plus the
 
 ## Scope
 
-- Root package.json runners documented: 121
+- Root package.json runners documented: 122
 - Metadata-backed script implementations are also listed in `SCRIPT_REGISTRY.md`.
 
 ## ai
@@ -25,23 +25,23 @@ This directory contains one page per root `package.json` script runner, plus the
 
 - [arch:add-module](arch-add-module.md) — Run the registered repository task for this area.
 - [arch:audit](arch-audit.md) — Monorepo governance scanner — audits Vitest, ESLint, Playwright, import boundaries, and outputs infra-audit-report.json.
-- [arch:audit:check](arch-audit-check.md) — Run the registered repository task for this area.
 - [arch:check:store-cycles](arch-check-store-cycles.md) — Runs madge on each app's src/core/state/ to assert zero circular dependencies. Exits with non-zero code on any detected cycle.
 - [arch:context:build](context-build.md) — Generates docs/ai/context/gitnexus-context.json via assembleContext(). Uses atomic write (write to .tmp then renameSync) to prevent partial artifact state. Supports --dry-run (print to stdout only), --all (full workspace), --force (skip freshness check and always regenerate).
 - [arch:context:changed](context-changed.md) — Resolves staged changed files via `git diff --cached` and writes the result to docs/ai/context/context-changed.json with a 5-minute freshness cache. Subsequent reads within the cache window skip the git invocation. A clean staging area (no changed files) is a valid state — the artifact is written with an empty changedFiles array rather than exiting non-zero.
 - [arch:context:impact](context-impact.md) — Synthesizes risk indicators from docs/ai/context/gitnexus-context.json, filtered by the staged changed files recorded in context-changed.json. A risk indicator is included when its `affectedBy` set intersects the staged changed files. Writes the result to docs/ai/context/context-impact.json. If context-changed.json does not exist, falls back to the `changedFiles` array embedded in the main context artifact. Output mode: (default) one `indicator.module` per line, sorted alphabetically --json full riskIndicators array as JSON on stdout
 - [arch:context:validate](arch-context-validate.md) — Validates docs/ai/context/gitnexus-context.json against docs/ai/gitnexus-context.schema.json. No external schema library (NFR-005). Validation order (stops at first failure): 1. Artifact file exists 2. Valid JSON 3. Schema file exists and is readable 4. All required fields present 5. schemaVersion matches schema.version 6. generatedAt is < maxAgeHours old (default: 24h)
 - [arch:diff](arch-diff.md) — Detect architecture violations in the current change set (PR/staged diff) by comparing changed imports against ARCHITECTURE_CONTRACT.json rules.
-- [arch:fix](arch-fix.md) — Run the registered repository task for this area.
 - [arch:generate](arch-generate.md) — Run the registered repository task for this area.
 - [arch:gitnexus:context](gitnexus-context.md) — Generates a structured GitNexus context JSON artifact from git state and ai-architecture-brain.json for AI orchestrators and CI gates.
 - [arch:gitnexus:validate](gitnexus-validate.md) — Validates the gitnexus-context.json artifact for file presence, structure, semantics, and freshness.
+- [arch:governance](arch-refresh.md) — Execute the registered repository runner for this workflow.
+- [arch:governance:fix](arch-fix.md) — Execute the registered repository runner for this workflow.
 - [arch:guard](arch-guard.md) — Run the registered repository task for this area.
 - [arch:guard:changed](arch-guard-changed.md) — Run the registered repository task for this area.
 - [arch:guard:ci](arch-guard-ci.md) — Run the registered repository task for this area.
 - [arch:health](arch-health.md) — Run the registered repository task for this area.
+- [arch:health:benchmark](arch-health-benchmark.md) — Run the registered repository task for this area.
 - [arch:health:ci](arch-health-ci.md) — Run the registered repository task for this area.
-- [arch:refresh](arch-refresh.md) — Run the registered repository task for this area.
 - [arch:type-safety-guard](arch-type-safety-guard.md) — Unified architecture guard — runs type safety checks and validates import boundaries using the architecture contract.
 - [arch:validate:brain](arch-validate-brain.md) — Run the registered repository task for this area.
 - [arch:visualize](arch-visualize.md) — Run the registered repository task for this area.
@@ -72,29 +72,33 @@ This directory contains one page per root `package.json` script runner, plus the
 
 ## dev
 
+- [dev:ai:archive-snapshots](dev-ai-archive-snapshots.md) — Maintain a rolling archive of historical AI context snapshots, keeping the latest artifacts live and archiving older ones with indexes.
+- [dev:ai:context-artifacts](dev-ai-context-artifacts.md) — Analyze AI context artifacts for size, compression, and redundancy to identify Phase 3 optimization opportunities.
 - [dev:all](dev-all.md) — Start multiple long-running development services in parallel.
+- [dev:analyze:directory-sizes](dev-analyze-directory-sizes.md) — Measure key repository directory sizes and highlight the largest contributors to repository bloat.
+- [dev:analyze:file-sizes](dev-analyze-file-sizes.md) — Analyze repository files by size and line count to identify oversized files that need optimization.
 - [dev:api](dev-api.md) — Start a specific workspace development process.
 - [dev:backoffice](dev-backoffice.md) — Start a specific workspace development process.
-- [dev:demo-logger-features](dev-demo-logger-features.md) — Demonstrates all available logger customization options and features
+- [dev:benchmark:ci](dev-benchmark-ci.md) — Benchmark CI pipeline duration assumptions, generate markdown performance reports, and write a dashboard snapshot.
 - [dev:demo:logger](dev-demo-logger.md) — Demonstrates all available logger customization options and features
+- [dev:deps:verify](dev-deps-verify.md) — Scan the codebase for dependency usage patterns and produce a conservative unused-dependency candidate report.
 - [dev:frontoffice](dev-frontoffice.md) — Start a specific workspace development process.
 - [dev:generate:package-docs](dev-generate-package-docs.md) — Refresh root package.md from package.json, repo invocation scans, and optional detached-worktree audit evidence.
 - [dev:generate:script-docs](generate-script-docs.md) — Walk scripts/\*_\/_.ts, parse @script metadata headers, generate docs/scripts/SCRIPT_REGISTRY.md. Exits 1 on missing required metadata fields.
 - [dev:hygiene:report](dev-hygiene-report.md) — Run the registered repository task for this area.
 - [dev:infra](dev-infra.md) — Start the local infrastructure stack in detached mode.
 - [dev:mmc](dev-mmc.md) — Start a specific workspace development process.
+- [dev:profile:scripts](dev-profile-scripts.md) — Profile governance script execution times across repeated runs to establish a performance baseline.
 - [dev:refactor:scripts](dev-refactor-scripts.md) — Applies the SCRIPT_MIGRATION_MAP to rename all "bun run <old>" references across the repository. Reads docs/scripts/SCRIPT_MIGRATION_MAP.md, builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain after the run. Writes a summary report to reports/SCRIPT_REFACTOR_REPORT.md.
+- [dev:report:baseline](dev-report-baseline.md) — Generate a consolidated baseline diagnostics report for Phase 1 analysis and write it to docs/audit-reports.
 - [dev:seed:dashboard-test-data](seed-dashboard-test-data.md) — Seed realistic MMC dashboard test data into master_db for dashboard testing
-- [dev:stale-test](dev-stale-test.md) — Placeholder alias retained for compatibility or future implementation.
+- [dev:validate:script-duplication](dev-validate-script-duplication.md) — Measure cross-file duplication within the scripts directory and validate that modularization stays within the target threshold.
 - [dev:worker](dev-worker.md) — Start a specific workspace development process.
 
 ## format
 
-- [format:biome](format-biome.md) — Format files with Biome.
-- [format:check](format-check.md) — Run both Biome and Prettier checks without writing changes.
-- [format:check:biome](format-check-biome.md) — Run the registered repository task for this area.
-- [format:check:prettier](format-check-prettier.md) — Check Markdown and YAML-family files against Prettier formatting.
-- [format:prettier](format-prettier.md) — Format Markdown and YAML-family files with Prettier.
+- [format:check](format-check-biome.md) — Run both Biome and Prettier checks without writing changes.
+- [format:write](format.md) — Execute the registered repository runner for this workflow.
 
 ## governance
 
@@ -119,6 +123,7 @@ This directory contains one page per root `package.json` script runner, plus the
 ## misc
 
 - [dev](dev.md) — Run the registered repository task for this area.
+- [refactor-scripts](refactor-scripts.md) — Applies the migration map to rename all "bun run <old>" references across the repository. Supports both JSON format (docs/scripts/migration-map.json, preferred) and Markdown format (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain. Writes reports to both reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
 - [test](test.md) — Run Vitest for the configured scope.
 
 ## policy
@@ -129,7 +134,6 @@ This directory contains one page per root `package.json` script runner, plus the
 ## quality
 
 - [build](build.md) — Run workspace build scripts across all workspaces.
-- [format](format.md) — Run both Biome and Prettier formatting passes.
 - [lint](lint.md) — Run Biome checks across the repository.
 - [prepare](prepare.md) — Run the registered repository task for this area.
 - [typecheck](typecheck.md) — Run both source and test TypeScript checks.
@@ -139,8 +143,6 @@ This directory contains one page per root `package.json` script runner, plus the
 - [repo:doctor](repo-doctor.md) — Run the registered repository task for this area.
 - [repo:fix](repo-fix.md) — Run the registered repository task for this area.
 - [repo:onboard](repo-onboard.md) — Run the registered repository task for this area.
-- [repo:references](repo-references.md) — Placeholder alias retained for compatibility or future implementation.
-- [repo:script](repo-script.md) — Placeholder alias retained for compatibility or future implementation.
 - [repo:status](repo-status.md) — Run the registered repository task for this area.
 
 ## test
@@ -157,7 +159,6 @@ This directory contains one page per root `package.json` script runner, plus the
 - [test:tenant](test-tenant.md) — Run Vitest for the configured scope.
 - [test:unit](test-unit.md) — Run Vitest for the configured scope.
 - [test:unit:boundaries](test-unit-boundaries.md) — Run Vitest for the configured scope.
-- [test:unit:debug](test-unit-debug.md) — Run Vitest for the configured scope.
 
 ## typecheck
 
@@ -168,13 +169,13 @@ This directory contains one page per root `package.json` script runner, plus the
 
 - [validate:ai-context-fresh](validate-ai-context-fresh.md) — Check that the AI context mini artifact exists and is not older than 24 hours
 - [validate:ai-context-schemas](validate-ai-context-schemas.md) — Validate that all required AI context JSON artifacts exist and are valid JSON
-- [validate:runtime:scripts](validate-runtime-scripts.md) — CI guard: hard-blocks (exit 1) when any bun run <script> reference in the project (outside specs, .gitnexus, and reports) is absent from root package.json. References inside those dirs generate warnings but exit 0. Exits 0 when no critical issues found.
 - [validate:scan:packages](validate-scan-packages.md) — Walk all runtime spec docs and extract unique script references
-- [validate:scripts:broken](validate-scripts-infra.md) — Detect missing or broken TypeScript script files referenced in root package.json
+- [validate:scripts:all](validate-scripts-infra.md) — Orchestrator that runs all script-system validators sequentially. Composes: runtime-scripts, detect-broken-scripts, spec-sync, docs-drift. Also enforces the Script Evolution Guard: if package.json scripts changed in the current git diff, the migration-map must have been updated too. Exits non-zero on the first failure. Prints a timing summary.
+- [validate:scripts:docs-drift](validate-scripts-docs-drift.md) — Detects scripts in root package.json that have no corresponding documentation file in docs/scripts/. Reports missing docs and exits non-zero when undocumented scripts are found.
+- [validate:scripts:fast](validate-scripts-fast.md) — CI guard: hard-blocks (exit 1) when any bun run <script> reference in the project (outside specs, .gitnexus, and reports) is absent from root package.json. References inside those dirs generate warnings but exit 0. Exits 0 when no critical issues found.
 - [validate:scripts:infrastructure](validate-scripts-infrastructure.md) — Validates that all scripts/\*.ts files have the mandatory 5-field metadata header (@script, @domain, @category, @description, @usage) and that the SCRIPT_REGISTRY.md is up-to-date (no drift vs. what the generator would produce). Reports all violations before exiting non-zero.
 - [validate:scripts:naming](validate-scripts-naming.md) — Validates all package.json script keys conform to the <domain>:<action>[:<scope>] naming convention. Allowed domains: db, arch, validate, ai, ci, repo, dev, infra, test, governance, policy. Lifecycle-exempt names are skipped. Reports ALL violations before exiting non-zero.
-- [validate:scripts:registry](validate-scripts-registry.md) — Compare scanned runtime spec script references against root package.json, produce diff report
-- [validate:scripts:runtime](validate-runtime-scripts.md) — CI guard: hard-blocks (exit 1) when any bun run <script> reference in the project (outside specs, .gitnexus, and reports) is absent from root package.json. References inside those dirs generate warnings but exit 0. Exits 0 when no critical issues found.
+- [validate:scripts:spec-sync](validate-scripts-spec-sync.md) — Reverse validation: scans all spec files (specs/, docs/) for `bun run <script>` references and verifies each exists in root package.json. Exits non-zero if any referenced script is missing.
 - [validate:scripts:usage](validate-scripts-usage.md) — Scans all .ts, .json, .yml, .yaml, .md, and .sh files for "bun run <name>" references and validates that every referenced name exists in a package.json scripts block. Reports all broken/orphan references before exiting non-zero.
 - [validate:scripts:ux](validate-scripts-ux.md) — Validates scripts for consistent UX, logging, and exit usage.
 - [validate:tsconfig](validate-tsconfig.md) — Run the registered repository task for this area.

@@ -6,12 +6,6 @@
 bun run test:unit:boundaries
 ```
 
-Registered package.json runner:
-
-```sh
-vitest run tests/static/module-boundaries.test.ts tests/unit/infra-audit/infra-audit-boundaries.test.ts tests/unit/ai-guard/ai-guard-boundaries.test.ts
-```
-
 ## Purpose
 
 Run Vitest for the configured scope.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run test:unit:boundaries`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

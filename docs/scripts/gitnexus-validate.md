@@ -6,12 +6,6 @@
 bun run arch:gitnexus:validate
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/validate/validate-gitnexus.ts
-```
-
 ## Purpose
 
 Validates the gitnexus-context.json artifact for file presence, structure, semantics, and freshness.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run arch:gitnexus:validate`
 - Implementation: scripts/validate/validate-gitnexus.ts
 - Metadata-backed script file: `scripts/validate/validate-gitnexus.ts`
 

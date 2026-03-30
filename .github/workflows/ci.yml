@@ -192,7 +192,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run repo:doctor
-        run: bun repo:doctor
+        run: bun run repo:doctor
 
   # ── Job 5. Script UX Validator (CI Preview Mode) ───────────────────────
   script-ux-validator:

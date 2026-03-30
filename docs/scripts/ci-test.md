@@ -6,12 +6,6 @@
 bun run ci:test
 ```
 
-Registered package.json runner:
-
-```sh
-vitest run --reporter=verbose
-```
-
 ## Purpose
 
 Run Vitest for the configured scope.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run ci:test`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

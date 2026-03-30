@@ -103,7 +103,7 @@ gitignored. T004 scope: add `.act.secrets` to `.gitignore` only. Do **not** modi
 
 The orchestrator script `scripts/run-local-ci.ts` must be registered in `package.json` as
 `"ci:run-local": "bun scripts/run-local-ci.ts"`. T003 adds this key alongside the 5 `ci:local*`
-scripts. Running `bun run validate:scripts:runtime` then confirms the key exists and the script
+scripts. Running `bun run validate:scripts:all` then confirms the key exists and the script
 file parses. **Correction:** `ci:local` maps to `act --pull=false`, NOT to `run-local-ci.ts` —
 these are separate commands. `ci:run-local` is the key that invokes the orchestrator script.
 
@@ -305,8 +305,8 @@ The script must execute the following steps in order, stopping to collect status
 | Step | Command                            | Purpose                                       |
 | ---- | ---------------------------------- | --------------------------------------------- |
 | 0    | `docker info`                      | Fail-fast: verify Docker is running           |
-| 1    | `bun run validate:scripts:runtime` | Verify all script files in package.json exist |
-| 2    | `bun run validate:scripts:broken`  | Verify no broken script references            |
+| 1    | `bun run validate:scripts:all`     | Verify all script files in package.json exist |
+| 2    | `bun run validate:scripts:all`     | Verify no broken script references            |
 | 3    | `bun run dev:generate:script-docs` | Regenerate script documentation               |
 | 4    | `bun run arch:guard`               | Architecture boundary enforcement             |
 | 5    | `bun run arch:type-safety-guard`   | TypeScript type safety validation             |
@@ -873,7 +873,7 @@ This stage introduces no business logic. Testing is validating that the delivera
 | Workflow parity    | All workflows listed by `bun run ci:local:list`    | AC-08        |
 | Secrets audit      | `git log --diff-filter=A -- .act.secrets` is empty | AC-12        |
 | Gitignore check    | `git check-ignore -v .act.secrets` returns match   | AC-02        |
-| Script governance  | `bun run validate:scripts:runtime` passes          | AC-06        |
+| Script governance  | `bun run validate:scripts:all` passes              | AC-06        |
 | AGENTS.md rule     | grep for "bun run ci:local" in AGENTS.md           | AC-10        |
 | .actrc presence    | `test -f .actrc && cat .actrc`                     | AC-01        |
 

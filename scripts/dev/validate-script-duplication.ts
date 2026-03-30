@@ -1,26 +1,21 @@
 #!/usr/bin/env bun
 
 /**
- * T050: Validate Script Duplication
- *
- * Analyzes the scripts/ directory to measure code duplication
- * across refactored and reorganized scripts. Validates that
- * refactoring achieved <5% duplication (up from ~30% baseline).
- *
- * Purpose: Measure modularization effectiveness
- *
- * Created during: Phase 2 — Script Modularization
- * Uses: file-analyzer utility from scripts/core/
- *
- * Output: Duplication report with metrics
+ * @script dev:validate:script-duplication
+ * @domain dev
+ * @category dev
+ * @description Measure cross-file duplication within the scripts directory and
+ *   validate that modularization stays within the target threshold.
+ * @usage bun run dev:validate:script-duplication
  */
 
 import { createHash } from 'node:crypto'
 import { readdir, readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 
 const logger = createLogger('validate-script-duplication')
+log.setScript('dev:validate:script-duplication')
 
 interface FileHash {
   path: string
@@ -87,7 +82,7 @@ function getCodeChunks(content: string): Map<string, string[]> {
 }
 
 async function validateScriptDuplication(): Promise<void> {
-  const scriptsDir = join(import.meta.dir, '..')
+  const scriptsDir = join(process.cwd(), 'scripts')
   const duplicationTarget = 0.05 // 5%
 
   logger.info('Starting script duplication analysis', { target: `<${duplicationTarget * 100}%` })
@@ -140,7 +135,7 @@ async function validateScriptDuplication(): Promise<void> {
     const chunks = getCodeChunks(content)
     fileChunks.set(file.path, chunks)
 
-    for (const [chunkHash, _ranges] of chunks) {
+    for (const [chunkHash, _ranges] of Array.from(chunks.entries())) {
       if (!chunkMap.has(chunkHash)) {
         chunkMap.set(chunkHash, [])
       }
@@ -154,14 +149,14 @@ async function validateScriptDuplication(): Promise<void> {
   const duplicateBlocks: DuplicationMetrics['duplicateBlocks'] = []
   let duplicatedLines = 0
 
-  for (const [chunkHash, files] of chunkMap) {
-    const uniqueFiles = new Set(files)
+  for (const [chunkHash, files] of Array.from(chunkMap.entries())) {
+    const uniqueFiles = Array.from(new Set<string>(files))
 
     // Count only cross-file duplicates (duplicates in multiple files)
-    if (uniqueFiles.size > 1) {
+    if (uniqueFiles.length > 1) {
       duplicateBlocks.push({
         hash: chunkHash.substring(0, 8),
-        files: Array.from(uniqueFiles),
+        files: uniqueFiles,
         lines: 10,
         occurrences: files.length,
       })
@@ -215,22 +210,19 @@ async function validateScriptDuplication(): Promise<void> {
       `PASS: Script duplication at ${(metrics.duplicationPercentage * 100).toFixed(2)}% (target: <${duplicationTarget * 100}%)`
     )
     log.result({ total: metrics.totalFiles, passed: metrics.totalFiles, failed: 0 })
-    flushAi()
-    process.exit(0)
+    exit(0)
   } else if (metrics.health === 'WARN') {
     log.warn(
       `WARN: Script duplication at ${(metrics.duplicationPercentage * 100).toFixed(2)}% (target: <${duplicationTarget * 100}%)`
     )
     log.result({ total: metrics.totalFiles, passed: metrics.totalFiles, failed: 0 })
-    flushAi()
-    process.exit(0)
+    exit(0)
   } else {
     log.error(
       `FAIL: Script duplication at ${(metrics.duplicationPercentage * 100).toFixed(2)}% exceeds target (<${duplicationTarget * 100}%)`
     )
     log.result({ total: metrics.totalFiles, passed: 0, failed: metrics.totalFiles })
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
 }
 

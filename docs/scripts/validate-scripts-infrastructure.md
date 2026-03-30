@@ -6,12 +6,6 @@
 bun run validate:scripts:infrastructure
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/validate/script-infrastructure.ts
-```
-
 ## Purpose
 
 Validates that all scripts/\*.ts files have the mandatory 5-field metadata header (@script, @domain, @category, @description, @usage) and that the SCRIPT_REGISTRY.md is up-to-date (no drift vs. what the generator would produce). Reports all violations before exiting non-zero.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run validate:scripts:infrastructure`
 - Implementation: scripts/validate/script-infrastructure.ts
 - Metadata-backed script file: `scripts/validate/script-infrastructure.ts`
 

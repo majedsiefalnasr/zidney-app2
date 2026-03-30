@@ -1,20 +1,17 @@
 #!/usr/bin/env bun
 
 /**
- * T104: Create dependency usage verification script
- *
- * Searches codebase for usage of each dependency via grep:
- * - Checks imports in .ts, .tsx, .js, .jsx, .vue files
- * - Counts occurrences per dependency
- * - Identifies potentially unused dependencies
- * - Conservative approach: only mark as unused if 0 grep results
- *
- * Success criteria: Usage map for all dependencies (T105 analysis)
+ * @script dev:deps:verify
+ * @domain dev
+ * @category dev
+ * @description Scan the codebase for dependency usage patterns and produce a
+ *   conservative unused-dependency candidate report.
+ * @usage bun run dev:deps:verify
  */
 
 import { readFileSync } from 'node:fs'
 import { $ } from 'bun'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 
 interface DependencyUsage {
   name: string
@@ -25,6 +22,8 @@ interface DependencyUsage {
   usagePatterns: string[]
   status: 'USED' | 'UNUSED' | 'INDIRECT'
 }
+
+log.setScript('dev:deps:verify')
 
 async function verifyDependencyUsage(): Promise<void> {
   log.header('VERIFY DEPENDENCY USAGE', 'Checks codebase usage of all declared dependencies')
@@ -112,8 +111,7 @@ async function verifyDependencyUsage(): Promise<void> {
   await Bun.write('.dependency-usage-report.json', JSON.stringify(report, null, 2))
   log.success(`Usage report saved to: .dependency-usage-report.json`)
   log.result({ total: sorted.length, passed: used.length, failed: unused.length })
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 async function analyzeDependency(

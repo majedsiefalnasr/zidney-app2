@@ -6,12 +6,6 @@
 bun run validate:scan:packages
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/validate/scan-package-scripts.ts
-```
-
 ## Purpose
 
 Walk all runtime spec docs and extract unique script references
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run validate:scan:packages`
 - Implementation: scripts/validate/scan-package-scripts.ts
 - Metadata-backed script file: `scripts/validate/scan-package-scripts.ts`
 

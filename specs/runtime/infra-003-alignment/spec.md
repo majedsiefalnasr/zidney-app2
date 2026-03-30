@@ -92,7 +92,7 @@ that the app loads and the login page renders without errors.
 
 ### User Story 3 — Engineer Formats Code Without ESLint/Prettier Conflicts (Priority: P2)
 
-A developer runs `bun run format` and `bun run lint` without receiving conflicting rule errors
+A developer runs `bun run format:write` and `bun run lint` without receiving conflicting rule errors
 between ESLint and Prettier.
 
 **Why this priority**: Prevents CI from failing on formatting inconsistencies. Required before
@@ -103,7 +103,7 @@ the codebase and confirming zero conflicting errors.
 
 **Acceptance Scenarios**:
 
-1. **Given** Prettier is installed at the repo root, **When** `bun run format` is executed, **Then**
+1. **Given** Prettier is installed at the repo root, **When** `bun run format:write` is executed, **Then**
    all files are formatted consistently and no errors are thrown.
 2. **Given** `eslint-config-prettier` is installed, **When** `bun run lint` is executed, **Then**
    ESLint does not report formatting errors that duplicate Prettier's responsibility.
@@ -224,7 +224,7 @@ stable test baseline.
   (`eslint.config.mjs`).
 - **FR-018**: The ESLint flat config MUST disable all rules that duplicate Prettier's formatting
   responsibility.
-- **FR-019**: A `bun run format` script MUST be added to the root `package.json` that runs Prettier
+- **FR-019**: A `bun run format:write` script MUST be added to the root `package.json` that runs Prettier
   over the full codebase.
 - **FR-020**: A `bun run format:check` script MUST be added to the root `package.json` that verifies
   formatting without mutation.
@@ -320,7 +320,7 @@ stable test baseline.
 - Initial Playwright smoke tests for MMC, Backoffice, and Frontoffice
 - Prettier installation and root configuration
 - `eslint-config-prettier` installation and ESLint flat config update
-- `bun run format` and `bun run format:check` scripts in root `package.json`
+- `bun run format:write` and `bun run format:check` scripts in root `package.json`
 - Flaky test investigation and stabilization (or quarantine)
 - Skipped test review and documentation
 - README creation for all apps and packages

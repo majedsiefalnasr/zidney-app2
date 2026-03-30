@@ -6,12 +6,6 @@
 bun run build:packages
 ```
 
-Registered package.json runner:
-
-```sh
-bash -lc 'for d in packages/*; do if [ -f "$d/package.json" ]; then (cd "$d" && echo "Building $d" && bun run build); fi; done'
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run build:packages`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

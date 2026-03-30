@@ -6,12 +6,6 @@
 bun run dev:all
 ```
 
-Registered package.json runner:
-
-```sh
-concurrently "bun run dev:api" "bun run dev:worker" "bun run dev:mmc" "bun run dev:backoffice" "bun run dev:frontoffice"
-```
-
 ## Purpose
 
 Start multiple long-running development services in parallel.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 
 ## Source
 
+- Package runner: `bun run dev:all`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

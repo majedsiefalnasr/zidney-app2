@@ -6,12 +6,6 @@
 bun run ci:run-local
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/run-local-ci.ts
-```
-
 ## Purpose
 
 Local CI governance orchestrator — runs the 7-step pre-closure validation sequence including all governance checks and the full act CI simulation. Step 0 is a Docker fail-fast check; Steps 1–7 are governance checks that run to completion regardless of individual failures (fail-forward).
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run ci:run-local`
 - Implementation: scripts/run-local-ci.ts
 - Metadata-backed script file: `scripts/run-local-ci.ts`
 

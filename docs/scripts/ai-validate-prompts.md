@@ -6,12 +6,6 @@
 bun run ai:validate:prompts
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/prompt-qa.ts
-```
-
 ## Purpose
 
 Validates AI agent and prompt file structural integrity
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run ai:validate:prompts`
 - Implementation: scripts/prompt-qa.ts
 - Metadata-backed script file: `scripts/prompt-qa.ts`
 
@@ -40,4 +35,4 @@ Supported explicitly in the implementation.
 
 ## Audit Notes
 
-- Audit attempt failed in isolated worktree: bun scripts/prompt-qa.ts --ci exited non-zero before tracked file changes were observed.
+- Audit attempt failed in isolated worktree: bun run ai:validate:prompts --ci exited non-zero before tracked file changes were observed.

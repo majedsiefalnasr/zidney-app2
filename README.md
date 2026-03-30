@@ -41,7 +41,7 @@ bun run dev
 5. Verify architecture integrity
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 If the audit passes, your environment is correctly configured.
@@ -52,12 +52,12 @@ If the audit passes, your environment is correctly configured.
 
 ### Developer Quick Commands
 
-| Command            | Purpose                                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------------------------- |
-| `bun repo:onboard` | First-time setup: checks Bun version, installs dependencies, activates Husky hooks, verifies services |
-| `bun repo:doctor`  | Diagnose repository health: dependencies, workspace links, architecture, TypeScript                   |
-| `bun repo:fix`     | Auto-repair common issues: re-install, regenerate architecture artifacts, prune unused packages       |
-| `bun repo:status`  | Print a quick health summary (CI status, architecture, AI context, type safety)                       |
+| Command                | Purpose                                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| `bun run repo:onboard` | First-time setup: checks Bun version, installs dependencies, activates Husky hooks, verifies services |
+| `bun run repo:doctor`  | Diagnose repository health: dependencies, workspace links, architecture, TypeScript                   |
+| `bun run repo:fix`     | Auto-repair common issues: re-install, regenerate architecture artifacts, prune unused packages       |
+| `bun run repo:status`  | Print a quick health summary (CI status, architecture, AI context, type safety)                       |
 
 ---
 
@@ -346,7 +346,7 @@ If architecture rules are broken, commits or CI checks will fail.
 ### 5. Always Run the Architecture Audit Before Pushing
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 This ensures your changes respect the platform architecture.
@@ -376,7 +376,7 @@ bun run test
 Run architecture audit:
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 Regenerate architecture map:
@@ -423,7 +423,7 @@ bun run format:check
 Apply formatting:
 
 ```
-bun run format
+bun run format:write
 ```
 
 ### Configuration
@@ -455,7 +455,7 @@ git checkout -b feature/<feature-name>
 bun run lint
 bun run typecheck
 bun run test
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 4. Commit changes
@@ -491,7 +491,7 @@ bun run arch:add-module packages/my-new-module
 3. Verify architecture integrity
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 ---
@@ -504,12 +504,10 @@ Always run the full validation pipeline locally:
 bun run lint
 bun run typecheck
 bun run test
-bun scripts/infra-audit.ts --ci
+bun run arch:audit --ci
 ```
 
 This ensures CI will pass and prevents architecture violations.
-
----
 
 ---
 

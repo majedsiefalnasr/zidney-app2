@@ -479,7 +479,7 @@ The CI gate `bun run arch:gitnexus:validate` must be documented. Reference from 
 
 ### 6.3 — `validate-runtime-scripts` Compliance
 
-After adding new script keys, `bun run validate:scripts:runtime` must pass. The scripts follow `<domain>:<action>` naming:
+After adding new script keys, `bun run validate:scripts:all` must pass. The scripts follow `<domain>:<action>` naming:
 
 - `gitnexus:context` ✅
 - `gitnexus:validate` ✅ (follows `<domain>:<action>` format per script governance rules)

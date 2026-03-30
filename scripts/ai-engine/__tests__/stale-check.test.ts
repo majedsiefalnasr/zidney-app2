@@ -88,7 +88,7 @@ describe('checkBrainStatus', () => {
     const { checkBrainStatus } = await import('../stale-check')
     const result = checkBrainStatus()
     expect(result.status).toBe('stale')
-    expect(result.detail).toContain('Run: bun arch:audit')
+    expect(result.detail).toContain('Run: bun run arch:audit')
   })
 
   it('returns present_fresh when brain is newer than all source files', async () => {
@@ -166,6 +166,6 @@ describe('checkBrainStatus', () => {
     const { checkBrainStatus } = await import('../stale-check')
     const result = checkBrainStatus()
     expect(result.status).toBe('stale')
-    expect(result.detail).toContain('Run: bun arch:audit')
+    expect(result.detail).toContain('Run: bun run arch:audit')
   })
 })

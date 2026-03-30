@@ -1,0 +1,109 @@
+{
+  "version": "2.0",
+  "date": "2026-03-30",
+  "description": "Script system full refactor — consolidation, naming convention enforcement, and duplicate elimination",
+  "migrations": {
+    "format": {
+      "newName": "format:write",
+      "type": "rename",
+      "reason": "Format layer unification — 'format' renamed to 'format:write' for clarity"
+    },
+    "format:biome": {
+      "newName": "format:write",
+      "type": "merge",
+      "reason": "Format layer unification — merged into format:write (biome + prettier in one pass)"
+    },
+    "format:prettier": {
+      "newName": "format:write",
+      "type": "merge",
+      "reason": "Format layer unification — merged into format:write (biome + prettier in one pass)"
+    },
+    "format:check:biome": {
+      "newName": "format:check",
+      "type": "merge",
+      "reason": "Format layer unification — merged into format:check"
+    },
+    "format:check:prettier": {
+      "newName": "format:check",
+      "type": "merge",
+      "reason": "Format layer unification — merged into format:check"
+    },
+    "arch:refresh": {
+      "newName": "arch:governance",
+      "type": "rename",
+      "reason": "Architecture layer simplification — governance is the canonical audit + refresh entrypoint"
+    },
+    "arch:audit:check": {
+      "newName": "arch:governance",
+      "type": "merge",
+      "reason": "Architecture layer simplification — check-only mode merged into arch:governance"
+    },
+    "arch:fix": {
+      "newName": "arch:governance:fix",
+      "type": "rename",
+      "reason": "Architecture layer simplification — fix mode under governance namespace"
+    },
+    "validate:scripts:runtime": {
+      "newName": "validate:scripts:all",
+      "type": "merge",
+      "reason": "Validation layer consolidation — runtime check merged into validate:scripts:all"
+    },
+    "validate:scripts:broken": {
+      "newName": "validate:scripts:all",
+      "type": "merge",
+      "reason": "Validation layer consolidation — broken detection merged into validate:scripts:all"
+    },
+    "validate:scripts:registry": {
+      "newName": "validate:scripts:all",
+      "type": "merge",
+      "reason": "Validation layer consolidation — registry diff merged into validate:scripts:all"
+    },
+    "validate:runtime:scripts": {
+      "newName": "validate:scripts:all",
+      "type": "remove-duplicate",
+      "reason": "Duplicate of validate:scripts:runtime — consolidated into validate:scripts:all"
+    },
+    "test:unit:debug": {
+      "newName": null,
+      "type": "remove",
+      "reason": "Redundant — use 'bun run test:unit -- --reporter verbose' instead"
+    }
+  },
+  "newScripts": {
+    "format:write": {
+      "command": "biome format --write . && prettier --write '**/*.{md,yaml,yml}'",
+      "reason": "Unified format write — replaces format, format:biome, format:prettier"
+    },
+    "format:check": {
+      "command": "biome format . && prettier --check '**/*.{md,yaml,yml}'",
+      "reason": "Unified format check — replaces format:check, format:check:biome, format:check:prettier"
+    },
+    "arch:governance": {
+      "command": "bun run arch:audit && bun run arch:gitnexus:context",
+      "reason": "Unified architecture governance — replaces arch:refresh, arch:audit:check"
+    },
+    "arch:governance:fix": {
+      "command": "bun run arch:audit --fix-map",
+      "reason": "Architecture governance fix mode — replaces arch:fix"
+    },
+    "validate:scripts:all": {
+      "command": "bun scripts/validate/runtime-scripts.ts && bun scripts/validate/detect-broken-scripts.ts && bun scripts/validate/diff-script-registry.ts",
+      "reason": "Unified script validation — replaces validate:scripts:runtime + broken + registry"
+    },
+    "validate:scripts:fast": {
+      "command": "bun scripts/validate/runtime-scripts.ts",
+      "reason": "Fast script validation for pre-commit paths — quick runtime check only"
+    }
+  },
+  "summary": {
+    "removed": 13,
+    "added": 6,
+    "netChange": -7,
+    "categories": {
+      "formatLayer": { "before": 6, "after": 2 },
+      "architectureLayer": { "before": 3, "after": 2 },
+      "validationLayer": { "before": 4, "after": 2 },
+      "testLayer": { "before": 1, "after": 0 }
+    }
+  }
+}

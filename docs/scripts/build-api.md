@@ -6,12 +6,6 @@
 bun run build:api
 ```
 
-Registered package.json runner:
-
-```sh
-bun --cwd apps/api build
-```
-
 ## Purpose
 
 Build a specific workspace.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run build:api`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

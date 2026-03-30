@@ -6,12 +6,6 @@
 bun run dev:seed:dashboard-test-data
 ```
 
-Registered package.json runner:
-
-```sh
-bun run scripts/seed/dashboard-test-data.ts
-```
-
 ## Purpose
 
 Seed realistic MMC dashboard test data into master_db for dashboard testing
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run dev:seed:dashboard-test-data`
 - Implementation: scripts/seed/dashboard-test-data.ts
 - Metadata-backed script file: `scripts/seed/dashboard-test-data.ts`
 

@@ -419,7 +419,7 @@ Any CLI arguments passed to `context:*` scripts MUST be validated against an all
 | ----- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | AC-01 | `scripts/context/` directory exists with all four `.ts` files                                         | `ls scripts/context/`                                  |
 | AC-02 | All four `context:*` scripts are registered in root `package.json`                                    | `grep context: package.json`                           |
-| AC-03 | All four scripts include 5-field metadata headers                                                     | `bun run validate:scripts:runtime` passes              |
+| AC-03 | All four scripts include 5-field metadata headers                                                     | `bun run validate:scripts:all` passes                  |
 | AC-04 | `bun run arch:context:build` exits `0` and writes `docs/ai/context/gitnexus-context.json`             | Manual run + file check                                |
 | AC-05 | `bun run arch:context:changed` exits `0` and outputs file list                                        | Manual run on a dirty tree                             |
 | AC-06 | `bun run arch:context:impact` exits `0` and lists affected modules                                    | Manual run after a shared-package change               |

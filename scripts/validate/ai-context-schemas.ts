@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script validate:ai-context-schemas
  * @domain validate

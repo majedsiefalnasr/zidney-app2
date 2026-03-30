@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script validate:scripts:ux
  * @domain validate

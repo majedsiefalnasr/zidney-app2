@@ -6,12 +6,6 @@
 bun run test:e2e
 ```
 
-Registered package.json runner:
-
-```sh
-bun run test:e2e:mmc && bun run test:e2e:backoffice && bun run test:e2e:frontoffice
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run test:e2e`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

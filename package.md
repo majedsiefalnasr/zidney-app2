@@ -17,10 +17,10 @@ Refresh this file with `bun run dev:generate:package-docs`.
 
 ## Summary
 
-- Total root runners: 121
-- Critical: 40
-- Medium: 76
-- Low: 5
+- Total root runners: 122
+- Critical: 41
+- Medium: 81
+- Low: 0
 
 ## Workflow-Bound Runners
 
@@ -28,13 +28,16 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - `typecheck:src`: .github/workflows/ci-type-safety.yml:38, .github/workflows/ci.yml:112
 - `typecheck:tests`: .github/workflows/ci-type-safety.yml:41, .github/workflows/ci.yml:115
 - `lint`: .github/workflows/ci-type-safety.yml:87, .github/workflows/ci.yml:78
-- `validate:scripts:naming`: .github/workflows/architecture-governance.yml:157
-- `validate:scripts:usage`: .github/workflows/architecture-governance.yml:161
-- `validate:scripts:infrastructure`: .github/workflows/architecture-governance.yml:165
+- `validate:scripts:all`: .github/workflows/architecture-governance.yml:71
+- `validate:scripts:naming`: .github/workflows/architecture-governance.yml:161
+- `validate:scripts:usage`: .github/workflows/architecture-governance.yml:165
+- `validate:scripts:infrastructure`: .github/workflows/architecture-governance.yml:169
 - `validate:scripts:ux`: .github/workflows/ci.yml:226
+- `arch:audit`: .github/workflows/architecture-governance.yml:59
 - `arch:context:build`: .github/workflows/architecture-governance.yml:43
 - `arch:context:validate`: .github/workflows/architecture-governance.yml:43
 - `arch:guard`: .github/workflows/ci.yml:152
+- `arch:diff`: .github/workflows/architecture-governance.yml:63
 - `arch:health:ci`: .github/workflows/architecture-governance.yml:67
 - `test:unit`: .github/workflows/ci.yml:346, .github/workflows/ci.yml:541
 - `test:unit:boundaries`: .github/workflows/ci.yml:349
@@ -47,15 +50,16 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - `dev:mmc`: .github/workflows/ci.yml:587
 - `dev:backoffice`: .github/workflows/ci.yml:637
 - `dev:frontoffice`: .github/workflows/ci.yml:687
-- `dev:generate:script-docs`: .github/workflows/architecture-governance.yml:169
+- `dev:generate:script-docs`: .github/workflows/architecture-governance.yml:173
 - `ai:runtime:status`: .github/workflows/ci.yml:159
-- `ai:validate`: .github/workflows/architecture-governance.yml:122
+- `ai:validate`: .github/workflows/architecture-governance.yml:126
 - `ai:context:generate`: .github/workflows/ai-context-validation.yml:53, .github/workflows/ai-context-validation.yml:83
 - `ai:context:refresh`: .github/workflows/ai-context-validation.yml:63, .github/workflows/ci.yml:156
 - `ai:context:validate`: .github/workflows/ai-context-validation.yml:73
+- `ai:guard`: .github/workflows/architecture-governance.yml:55
 - `repo:doctor`: .github/workflows/ci.yml:195
 - `infra:security:ci`: .github/workflows/ci.yml:286
-- `governance:gate:ci`: .github/workflows/architecture-governance.yml:188
+- `governance:gate:ci`: .github/workflows/architecture-governance.yml:192
 - `policy:check`: .github/workflows/policy-check.yml:31
 
 ## Script Inventory
@@ -63,7 +67,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### typecheck
 
 - Group: Quality
-- Command: `bun typecheck:src && bun typecheck:tests`
+- Command: `bun run typecheck`
 - Power: critical
 - Purpose: Run both source and test TypeScript checks.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -75,14 +79,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `typecheck:tests`, `validate:types`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:21, scripts/dev/repo-doctor.ts:228, scripts/policy-engine/adapters/type-safety.adapter.ts:160, scripts/policy-engine/adapters/type-safety.adapter.ts:4, scripts/policy-engine/adapters/type-safety.adapter.ts:49, scripts/policy-engine/adapters/type-safety.adapter.ts:84, scripts/policy-engine/adapters/type-safety.adapter.ts:90, scripts/policy-engine/adapters/type-safety.adapter.ts:92, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:761
+  - Other files: package.json:17, scripts/dev/repo-doctor.ts:232, scripts/policy-engine/adapters/type-safety.adapter.ts:160, scripts/policy-engine/adapters/type-safety.adapter.ts:4, scripts/policy-engine/adapters/type-safety.adapter.ts:49, scripts/policy-engine/adapters/type-safety.adapter.ts:84, scripts/policy-engine/adapters/type-safety.adapter.ts:90, scripts/policy-engine/adapters/type-safety.adapter.ts:92, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:761
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: validate:types.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: typecheck:tests, validate:types.
 
 ### typecheck:src
 
 - Group: Quality
-- Command: `tsc --noEmit`
+- Command: `bun run typecheck:src`
 - Power: critical
 - Purpose: Run the TypeScript compiler in type-check-only mode.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -96,12 +100,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Workflows: .github/workflows/ci-type-safety.yml:38, .github/workflows/ci.yml:112
   - Other files: package.json:11, package.json:9, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:685, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:702
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml, .github/workflows/ci-type-safety.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: typecheck, typecheck:tests.
 
 ### typecheck:tests
 
 - Group: Quality
-- Command: `bun typecheck:src -p tsconfig.test.json`
+- Command: `bun run typecheck:tests`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -115,12 +119,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Workflows: .github/workflows/ci-type-safety.yml:41, .github/workflows/ci.yml:115
   - Other files: package.json:9, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:685
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml, .github/workflows/ci-type-safety.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: typecheck.
 
 ### lint
 
 - Group: Quality
-- Command: `biome check .`
+- Command: `bun run lint`
 - Power: critical
 - Purpose: Run Biome checks across the repository.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -132,14 +136,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ci-type-safety.yml:87, .github/workflows/ci.yml:78
-  - Other files: None found
+  - Other files: lint-staged.config.mjs:4
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml, .github/workflows/ci-type-safety.yml.
+- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci-type-safety.yml, .github/workflows/ci.yml.
 
 ### lint:fix
 
 - Group: Quality
-- Command: `biome check --write .`
+- Command: `bun run lint:fix`
 - Power: medium
 - Purpose: Run Biome checks and write fixable changes.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -155,29 +159,10 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
-### format
+### format:write
 
 - Group: Quality
-- Command: `bun run format:biome && bun run format:prettier`
-- Power: medium
-- Purpose: Run both Biome and Prettier formatting passes.
-- Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: Wrapper-only alias; any CI behavior depends on the underlying CLI rather than a root-level `--ci` flag.
-- Usage:
-  - Primary purpose: Run both Biome and Prettier formatting passes.
-  - Flags: none baked into this runner. You can append more args with `bun run format -- <args>` only if the underlying tool supports them.
-- Depends on: `format:prettier`, `format:biome`
-- Used by other root scripts: `format:check`
-- Used in:
-  - Workflows: None found
-  - Other files: None found
-- Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
-
-### format:biome
-
-- Group: Quality
-- Command: `biome format --write .`
+- Command: `bun run format:write`
 - Power: medium
 - Purpose: Format files with Biome.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -185,94 +170,38 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Format files with Biome.
   - Flag `--write .`: Runner-level option passed directly to the underlying tool. Value: ..
-- Depends on: None
-- Used by other root scripts: `format`
-- Used in:
-  - Workflows: None found
-  - Other files: package.json:14, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:416
-- Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: format.
-
-### format:prettier
-
-- Group: Quality
-- Command: `prettier --write '**/*.{md,yaml,yml}'`
-- Power: medium
-- Purpose: Format Markdown and YAML-family files with Prettier.
-- Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: Wrapper-only alias; any CI behavior depends on the underlying CLI rather than a root-level `--ci` flag.
-- Usage:
-  - Primary purpose: Format Markdown and YAML-family files with Prettier.
   - Flag `--write **/*.{md,yaml,yml}`: Runner-level option passed directly to the underlying tool. Value: \*_/_.{md,yaml,yml}.
 - Depends on: None
-- Used by other root scripts: `format`
+- Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: package.json:14, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:416
-- Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: format.
+  - Other files: docs/reports/script-refactor-report.json:103, docs/reports/script-refactor-report.json:13, docs/reports/script-refactor-report.json:153, docs/reports/script-refactor-report.json:163, docs/reports/script-refactor-report.json:168, docs/reports/script-refactor-report.json:18, docs/reports/script-refactor-report.json:188, docs/reports/script-refactor-report.json:38, docs/reports/script-refactor-report.json:48, docs/reports/script-refactor-report.json:73, docs/reports/script-refactor-report.json:83, lint-staged.config.mjs:4, +2 more
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### format:check
 
 - Group: Quality
-- Command: `bun run format:check:biome && bun run format:check:prettier`
+- Command: `bun run format:check`
 - Power: medium
 - Purpose: Run both Biome and Prettier checks without writing changes.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
 - CI flag: Wrapper-only alias; any CI behavior depends on the underlying CLI rather than a root-level `--ci` flag.
 - Usage:
   - Primary purpose: Run both Biome and Prettier checks without writing changes.
-  - Flags: none baked into this runner. You can append more args with `bun run format:check -- <args>` only if the underlying tool supports them.
-- Depends on: `format:check:prettier`, `format:check:biome`, `format`
+  - Flag `--check **/*.{md,yaml,yml}`: Check-only mode; fail if drift exists. Value: \*_/_.{md,yaml,yml}.
+- Depends on: None
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: None found
+  - Other files: docs/reports/script-refactor-report.json:173, docs/reports/script-refactor-report.json:178, docs/reports/script-refactor-report.json:23, docs/reports/script-refactor-report.json:28, docs/reports/script-refactor-report.json:53, docs/reports/script-refactor-report.json:63, docs/reports/script-refactor-report.json:93, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:428
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
-
-### format:check:biome
-
-- Group: Quality
-- Command: `biome format .`
-- Power: medium
-- Purpose: Run the registered repository task for this area.
-- Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: Wrapper-only alias; any CI behavior depends on the underlying CLI rather than a root-level `--ci` flag.
-- Usage:
-  - Primary purpose: Run the registered repository task for this area.
-  - Flags: none baked into this runner. You can append more args with `bun run format:check:biome -- <args>` only if the underlying tool supports them.
-- Depends on: None
-- Used by other root scripts: `format:check`
-- Used in:
-  - Workflows: None found
-  - Other files: package.json:17, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:428
-- Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: format:check.
-
-### format:check:prettier
-
-- Group: Quality
-- Command: `prettier --check '**/*.{md,yaml,yml}'`
-- Power: medium
-- Purpose: Check Markdown and YAML-family files against Prettier formatting.
-- Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: Wrapper-only alias; any CI behavior depends on the underlying CLI rather than a root-level `--ci` flag.
-- Usage:
-  - Primary purpose: Check Markdown and YAML-family files against Prettier formatting.
-  - Flag `--check **/*.{md,yaml,yml}`: Check-only mode; fail if drift exists. Value: \*_/_.{md,yaml,yml}.
-- Depends on: None
-- Used by other root scripts: `format:check`
-- Used in:
-  - Workflows: None found
-  - Other files: package.json:17, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:428
-- Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: format:check.
 
 ### validate:workflows
 
 - Group: Validation
-- Command: `find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \) | xargs actionlint`
+- Command: `bun run validate:workflows`
 - Power: critical
 - Purpose: Validate GitHub Actions workflow files.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -294,7 +223,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### validate:types
 
 - Group: Validation
-- Command: `bun typecheck && bun arch:type-safety-guard --json`
+- Command: `bun run validate:types`
 - Power: critical
 - Purpose: Run TypeScript checks plus the architecture type-safety guard.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -313,7 +242,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### validate:tsconfig
 
 - Group: Validation
-- Command: `bash scripts/validate/check-tsconfig-strict.sh`
+- Command: `bun run validate:tsconfig`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -332,7 +261,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### validate:ai-context-fresh
 
 - Group: Validation
-- Command: `bun run scripts/validate/ai-context-fresh.ts`
+- Command: `bun run validate:ai-context-fresh`
 - Power: medium
 - Purpose: Check that the AI context mini artifact exists and is not older than 24 hours
 - Source: `scripts/validate/ai-context-fresh.ts`
@@ -345,14 +274,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `ai:context:validate`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:91, scripts/generate/**tests**/package-docs.test.ts:39, scripts/validate/**tests**/runtime-scripts.test.ts:28, scripts/validate/ai-context-fresh.ts:6, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:38
+  - Other files: package.json:96, scripts/generate/**tests**/package-docs.test.ts:39, scripts/validate/**tests**/runtime-scripts.test.ts:28, scripts/validate/ai-context-fresh.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:38
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: ai:context:validate.
 
 ### validate:ai-context-schemas
 
 - Group: Validation
-- Command: `bun run scripts/validate/ai-context-schemas.ts`
+- Command: `bun run validate:ai-context-schemas`
 - Power: medium
 - Purpose: Validate that all required AI context JSON artifacts exist and are valid JSON
 - Source: `scripts/validate/ai-context-schemas.ts`
@@ -365,54 +294,54 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `ai:context:validate`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:91, scripts/generate/**tests**/package-docs.test.ts:39, scripts/validate/ai-context-schemas.ts:6, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:38
+  - Other files: package.json:96, scripts/generate/**tests**/package-docs.test.ts:39, scripts/validate/ai-context-schemas.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:38
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: ai:context:validate.
 
-### validate:scripts:runtime
+### validate:scripts:all
 
 - Group: Validation
-- Command: `bun run scripts/validate/runtime-scripts.ts`
+- Command: `bun run validate:scripts:all`
+- Power: critical
+- Purpose: Orchestrator that runs all script-system validators sequentially. Composes: runtime-scripts, detect-broken-scripts, spec-sync, docs-drift. Also enforces the Script Evolution Guard: if package.json scripts changed in the current git diff, the migration-map must have been updated too. Exits non-zero on the first failure. Prints a timing summary.
+- Source: `scripts/validate/index.ts`
+- CI flag: Supported explicitly in the implementation.
+- Registered usage: `bun run validate:scripts:all`
+- Usage:
+  - Primary purpose: Orchestrator that runs all script-system validators sequentially. Composes: runtime-scripts, detect-broken-scripts, spec-sync, docs-drift. Also enforces the Script Evolution Guard: if package.json scripts changed in the current git diff, the migration-map must have been updated too. Exits non-zero on the first failure. Prints a timing summary.
+  - Flags: none baked into this runner. You can append more args with `bun run validate:scripts:all -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: .github/workflows/architecture-governance.yml:71
+  - Other files: docs/reports/script-refactor-report.json:128, docs/reports/script-refactor-report.json:133, docs/reports/script-refactor-report.json:138, docs/reports/script-refactor-report.json:143, docs/reports/script-refactor-report.json:213, docs/reports/script-refactor-report.json:218, docs/reports/script-refactor-report.json:223, docs/reports/script-refactor-report.json:228, scripts/policy-engine/adapters/script-governance.adapter.ts:4, scripts/policy-engine/adapters/script-governance.adapter.ts:53, scripts/validate/detect-broken-scripts.ts:8, scripts/validate/index.ts:12, +1 more
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
+
+### validate:scripts:fast
+
+- Group: Validation
+- Command: `bun run validate:scripts:fast`
 - Power: medium
 - Purpose: CI guard: hard-blocks (exit 1) when any bun run <script> reference in the project (outside specs, .gitnexus, and reports) is absent from root package.json. References inside those dirs generate warnings but exit 0. Exits 0 when no critical issues found.
 - Source: `scripts/validate/runtime-scripts.ts`
 - CI flag: Supported explicitly in the implementation.
-- Registered usage: `bun run validate:scripts:runtime`
+- Registered usage: `bun run validate:scripts:all`
 - Usage:
   - Primary purpose: CI guard: hard-blocks (exit 1) when any bun run <script> reference in the project (outside specs, .gitnexus, and reports) is absent from root package.json. References inside those dirs generate warnings but exit 0. Exits 0 when no critical issues found.
-  - Flags: none baked into this runner. You can append more args with `bun run validate:scripts:runtime -- <args>` only if the underlying tool supports them.
+  - Flags: none baked into this runner. You can append more args with `bun run validate:scripts:fast -- <args>` only if the underlying tool supports them.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/validate/runtime-scripts.ts:9
-- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
-
-### validate:scripts:broken
-
-- Group: Validation
-- Command: `bun run scripts/validate/detect-broken-scripts.ts`
-- Power: medium
-- Purpose: Detect missing or broken TypeScript script files referenced in root package.json
-- Source: `scripts/validate/detect-broken-scripts.ts`
-- CI flag: Supported explicitly in the implementation.
-- Registered usage: `bun run validate:scripts:broken`
-- Usage:
-  - Primary purpose: Detect missing or broken TypeScript script files referenced in root package.json
-  - Flags: none baked into this runner. You can append more args with `bun run validate:scripts:broken -- <args>` only if the underlying tool supports them.
-- Depends on: None
-- Used by other root scripts: None found
-- Used in:
-  - Workflows: None found
-  - Other files: scripts/validate/detect-broken-scripts.ts:6
-- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
+  - Other files: None found
+- Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### validate:scripts:naming
 
 - Group: Validation
-- Command: `bun scripts/validate/script-naming.ts`
+- Command: `bun run validate:scripts:naming`
 - Power: critical
 - Purpose: Validates all package.json script keys conform to the <domain>:<action>[:<scope>] naming convention. Allowed domains: db, arch, validate, ai, ci, repo, dev, infra, test, governance, policy. Lifecycle-exempt names are skipped. Reports ALL violations before exiting non-zero.
 - Source: `scripts/validate/script-naming.ts`
@@ -424,15 +353,15 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
-  - Workflows: .github/workflows/architecture-governance.yml:157
-  - Other files: scripts/validate/**tests**/script-usage.test.ts:45, scripts/validate/**tests**/script-usage.test.ts:68, scripts/validate/script-naming.ts:9
+  - Workflows: .github/workflows/architecture-governance.yml:161
+  - Other files: scripts/validate/**tests**/script-usage.test.ts:124, scripts/validate/**tests**/script-usage.test.ts:51, scripts/validate/script-naming.ts:11, scripts/validate/types.ts:11, scripts/validate/types.ts:42
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### validate:scripts:usage
 
 - Group: Validation
-- Command: `bun scripts/validate/script-usage.ts`
+- Command: `bun run validate:scripts:usage`
 - Power: critical
 - Purpose: Scans all .ts, .json, .yml, .yaml, .md, and .sh files for "bun run <name>" references and validates that every referenced name exists in a package.json scripts block. Reports all broken/orphan references before exiting non-zero.
 - Source: `scripts/validate/script-usage.ts`
@@ -444,15 +373,15 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
-  - Workflows: .github/workflows/architecture-governance.yml:161
-  - Other files: scripts/validate/script-usage.ts:9
+  - Workflows: .github/workflows/architecture-governance.yml:165
+  - Other files: scripts/validate/script-usage.ts:11
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### validate:scripts:infrastructure
 
 - Group: Validation
-- Command: `bun scripts/validate/script-infrastructure.ts`
+- Command: `bun run validate:scripts:infrastructure`
 - Power: critical
 - Purpose: Validates that all scripts/\*.ts files have the mandatory 5-field metadata header (@script, @domain, @category, @description, @usage) and that the SCRIPT_REGISTRY.md is up-to-date (no drift vs. what the generator would produce). Reports all violations before exiting non-zero.
 - Source: `scripts/validate/script-infrastructure.ts`
@@ -464,35 +393,55 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
-  - Workflows: .github/workflows/architecture-governance.yml:165
-  - Other files: scripts/validate/script-infrastructure.ts:9
+  - Workflows: .github/workflows/architecture-governance.yml:169
+  - Other files: scripts/validate/script-infrastructure.ts:11
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
-### validate:scripts:registry
+### validate:scripts:spec-sync
 
 - Group: Validation
-- Command: `bun scripts/validate/diff-script-registry.ts`
+- Command: `bun run validate:scripts:spec-sync`
 - Power: medium
-- Purpose: Compare scanned runtime spec script references against root package.json, produce diff report
-- Source: `scripts/validate/diff-script-registry.ts`
+- Purpose: Reverse validation: scans all spec files (specs/, docs/) for `bun run <script>` references and verifies each exists in root package.json. Exits non-zero if any referenced script is missing.
+- Source: `scripts/validate/spec-sync.ts`
 - CI flag: Supported explicitly in the implementation.
-- Registered usage: `bun run validate:scripts:registry`
+- Registered usage: `bun run validate:scripts:spec-sync`
 - Usage:
-  - Primary purpose: Compare scanned runtime spec script references against root package.json, produce diff report
-  - Flags: none baked into this runner. You can append more args with `bun run validate:scripts:registry -- <args>` only if the underlying tool supports them.
+  - Primary purpose: Reverse validation: scans all spec files (specs/, docs/) for `bun run <script>` references and verifies each exists in root package.json. Exits non-zero if any referenced script is missing.
+  - Flags: none baked into this runner. You can append more args with `bun run validate:scripts:spec-sync -- <args>` only if the underlying tool supports them.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/validate/diff-script-registry.ts:6
-- Updated or generated files: Observed in isolated worktree run: specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json.
+  - Other files: scripts/validate/spec-sync.ts:10
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### validate:scripts:docs-drift
+
+- Group: Validation
+- Command: `bun run validate:scripts:docs-drift`
+- Power: medium
+- Purpose: Detects scripts in root package.json that have no corresponding documentation file in docs/scripts/. Reports missing docs and exits non-zero when undocumented scripts are found.
+- Source: `scripts/validate/docs-drift.ts`
+- CI flag: Supported explicitly in the implementation.
+- Registered usage: `bun run validate:scripts:docs-drift`
+- Usage:
+  - Primary purpose: Detects scripts in root package.json that have no corresponding documentation file in docs/scripts/. Reports missing docs and exits non-zero when undocumented scripts are found.
+  - Flags: none baked into this runner. You can append more args with `bun run validate:scripts:docs-drift -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/validate/docs-drift.ts:10
+- Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### validate:scripts:ux
 
 - Group: Validation
-- Command: `bun scripts/validate/validate-scripts-ux.ts`
+- Command: `bun run validate:scripts:ux`
 - Power: critical
 - Purpose: Validates scripts for consistent UX, logging, and exit usage.
 - Source: `scripts/validate/validate-scripts-ux.ts`
@@ -505,14 +454,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ci.yml:226
-  - Other files: scripts/validate/validate-scripts-ux.ts:6
+  - Other files: scripts/validate/validate-scripts-ux.ts:8
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
 
 ### validate:scan:packages
 
 - Group: Validation
-- Command: `bun scripts/validate/scan-package-scripts.ts`
+- Command: `bun run validate:scan:packages`
 - Power: medium
 - Purpose: Walk all runtime spec docs and extract unique script references
 - Source: `scripts/validate/scan-package-scripts.ts`
@@ -525,14 +474,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/validate/scan-package-scripts.ts:6
+  - Other files: scripts/validate/scan-package-scripts.ts:8
 - Updated or generated files: Observed in isolated worktree run: specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/runtime-script-scan.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:check:store-cycles
 
 - Group: Architecture
-- Command: `bun scripts/check-store-cycles.ts`
+- Command: `bun run arch:check:store-cycles`
 - Power: medium
 - Purpose: Runs madge on each app's src/core/state/ to assert zero circular dependencies. Exits with non-zero code on any detected cycle.
 - Source: `scripts/check-store-cycles.ts`
@@ -545,19 +494,19 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/check-store-cycles.ts:8
+  - Other files: scripts/check-store-cycles.ts:16, scripts/check-store-cycles.ts:19, scripts/check-store-cycles.ts:8
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:add-module
 
 - Group: Architecture
-- Command: `bun scripts/architecture/add-module.ts`
+- Command: `bun run arch:add-module`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/architecture/add-module.ts`
 - CI flag: Explicitly rejected in the implementation; this is a local mutation helper and must not run with `--ci`.
-- Registered usage: `bun run arch:add-module`
+- Registered usage: `bun run arch:add-module <module-path>`
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run arch:add-module -- <args>` only if the underlying tool supports them.
@@ -565,14 +514,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/architecture/add-module.ts:23, scripts/infra-audit.ts:2175
+  - Other files: scripts/architecture/add-module.ts:31, scripts/architecture/add-module.ts:8, scripts/infra-audit.ts:2177
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:generate
 
 - Group: Architecture
-- Command: `bun scripts/architecture/generate-architecture-map.ts`
+- Command: `bun run arch:generate`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/architecture/generate-architecture-map.ts`
@@ -585,14 +534,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/ai-runtime/runtime-status.ts:241, scripts/architecture/visualize.ts:289
+  - Other files: scripts/ai-runtime/runtime-status.ts:241, scripts/architecture/generate-architecture-map.ts:8, scripts/architecture/visualize.ts:299
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:audit
 
 - Group: Architecture
-- Command: `bun scripts/infra-audit.ts`
+- Command: `bun run arch:audit`
 - Power: critical
 - Purpose: Monorepo governance scanner — audits Vitest, ESLint, Playwright, import boundaries, and outputs infra-audit-report.json.
 - Source: `scripts/infra-audit.ts`
@@ -602,17 +551,17 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Primary purpose: Monorepo governance scanner — audits Vitest, ESLint, Playwright, import boundaries, and outputs infra-audit-report.json.
   - Flags: none baked into this runner. You can append more args with `bun run arch:audit -- <args>` only if the underlying tool supports them.
 - Depends on: None
-- Used by other root scripts: `arch:refresh`, `arch:fix`, `arch:audit:check`
+- Used by other root scripts: `arch:governance`, `arch:governance:fix`
 - Used in:
-  - Workflows: None found
-  - Other files: package.json:39, package.json:44, package.json:54, scripts/ai-engine/**tests**/run-task.test.ts:197, scripts/ai-engine/**tests**/stale-check.test.ts:169, scripts/ai-engine/**tests**/stale-check.test.ts:91, scripts/ai-engine/**tests**/validate-execution.test.ts:152, scripts/ai-engine/stale-check.ts:44, scripts/ai-engine/stale-check.ts:54, scripts/architecture/visualize.ts:246, scripts/architecture/visualize.ts:288, scripts/architecture/visualize.ts:322, +5 more
+  - Workflows: .github/workflows/architecture-governance.yml:59
+  - Other files: docs/architecture/health/architecture-health.json:200, docs/scripts/migration-map.json:82, docs/scripts/migration-map.json:86, package.json:36, package.json:41, scripts/ai-engine/**tests**/run-task.test.ts:197, scripts/ai-engine/**tests**/stale-check.test.ts:169, scripts/ai-engine/**tests**/stale-check.test.ts:91, scripts/ai-engine/**tests**/validate-execution.test.ts:152, scripts/ai-engine/stale-check.ts:44, scripts/ai-engine/stale-check.ts:54, scripts/ai-guard.ts:914, +11 more
 - Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json, docs/architecture/audits/history/audit-1774722803158.json.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: arch:refresh, arch:fix, arch:audit:check.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: arch:governance, arch:governance:fix.
 
 ### arch:gitnexus:context
 
 - Group: Architecture
-- Command: `bun scripts/gitnexus-context.ts`
+- Command: `bun run arch:gitnexus:context`
 - Power: medium
 - Purpose: Generates a structured GitNexus context JSON artifact from git state and ai-architecture-brain.json for AI orchestrators and CI gates.
 - Source: `scripts/gitnexus-context.ts`
@@ -622,17 +571,17 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Primary purpose: Generates a structured GitNexus context JSON artifact from git state and ai-architecture-brain.json for AI orchestrators and CI gates.
   - Flags: none baked into this runner. You can append more args with `bun run arch:gitnexus:context -- <args>` only if the underlying tool supports them.
 - Depends on: None
-- Used by other root scripts: `arch:refresh`
+- Used by other root scripts: `arch:governance`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:39, scripts/gitnexus-context.ts:13, scripts/gitnexus-context.ts:14, scripts/gitnexus-context.ts:15, scripts/gitnexus-context.ts:16, scripts/gitnexus-context.ts:7, scripts/policy-engine/context/loader.ts:108, scripts/policy-engine/context/loader.ts:140, scripts/policy-engine/context/loader.ts:94, scripts/policy-engine/rules/ai/AI-001.rule.ts:56, scripts/validate/validate-gitnexus.ts:217, scripts/validate/validate-gitnexus.ts:43, +1 more
+  - Other files: docs/scripts/migration-map.json:82, package.json:36, scripts/gitnexus-context.ts:15, scripts/gitnexus-context.ts:16, scripts/gitnexus-context.ts:17, scripts/gitnexus-context.ts:18, scripts/gitnexus-context.ts:9, scripts/policy-engine/context/loader.ts:108, scripts/policy-engine/context/loader.ts:140, scripts/policy-engine/context/loader.ts:94, scripts/policy-engine/rules/ai/AI-001.rule.ts:56, scripts/validate/validate-gitnexus.ts:217, +2 more
 - Updated or generated files: Observed in isolated worktree run: docs/ai/context/gitnexus-context.json.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: arch:refresh.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: arch:governance.
 
 ### arch:gitnexus:validate
 
 - Group: Architecture
-- Command: `bun scripts/validate/validate-gitnexus.ts`
+- Command: `bun run arch:gitnexus:validate`
 - Power: medium
 - Purpose: Validates the gitnexus-context.json artifact for file presence, structure, semantics, and freshness.
 - Source: `scripts/validate/validate-gitnexus.ts`
@@ -649,29 +598,29 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
-### arch:refresh
+### arch:governance
 
 - Group: Architecture
-- Command: `bun arch:audit && bun arch:gitnexus:context`
+- Command: `bun run arch:governance`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: Indirect wrapper; CI behavior depends on child runner(s): arch:audit, arch:gitnexus:context.
+- CI flag: Indirect wrapper; CI behavior depends on child runner(s): arch:gitnexus:context, arch:audit.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
-  - Flags: none baked into this runner. You can append more args with `bun run arch:refresh -- <args>` only if the underlying tool supports them.
+  - Flags: none baked into this runner. You can append more args with `bun run arch:governance -- <args>` only if the underlying tool supports them.
 - Depends on: `arch:gitnexus:context`, `arch:audit`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: None found
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: docs/reports/script-refactor-report.json:108, docs/reports/script-refactor-report.json:113, docs/reports/script-refactor-report.json:193, docs/reports/script-refactor-report.json:198
+- Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:context:build
 
 - Group: Architecture
-- Command: `bun scripts/context/build.ts`
+- Command: `bun run arch:context:build`
 - Power: critical
 - Purpose: Generates docs/ai/context/gitnexus-context.json via assembleContext(). Uses atomic write (write to .tmp then renameSync) to prevent partial artifact state. Supports --dry-run (print to stdout only), --all (full workspace), --force (skip freshness check and always regenerate).
 - Source: `scripts/context/build.ts`
@@ -691,7 +640,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### arch:context:changed
 
 - Group: Architecture
-- Command: `bun scripts/context/changed.ts`
+- Command: `bun run arch:context:changed`
 - Power: medium
 - Purpose: Resolves staged changed files via `git diff --cached` and writes the result to docs/ai/context/context-changed.json with a 5-minute freshness cache. Subsequent reads within the cache window skip the git invocation. A clean staging area (no changed files) is a valid state — the artifact is written with an empty changedFiles array rather than exiting non-zero.
 - Source: `scripts/context/changed.ts`
@@ -704,14 +653,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `governance:gate:changed`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:109, scripts/context/changed.ts:12, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:461
+  - Other files: package.json:114, scripts/context/changed.ts:12, scripts/validate/**tests**/script-usage.test.ts:187, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:461
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: governance:gate:changed.
 
 ### arch:context:impact
 
 - Group: Architecture
-- Command: `bun scripts/context/impact.ts`
+- Command: `bun run arch:context:impact`
 - Power: medium
 - Purpose: Synthesizes risk indicators from docs/ai/context/gitnexus-context.json, filtered by the staged changed files recorded in context-changed.json. A risk indicator is included when its `affectedBy` set intersects the staged changed files. Writes the result to docs/ai/context/context-impact.json. If context-changed.json does not exist, falls back to the `changedFiles` array embedded in the main context artifact. Output mode: (default) one `indicator.module` per line, sorted alphabetically --json full riskIndicators array as JSON on stdout
 - Source: `scripts/context/impact.ts`
@@ -731,7 +680,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### arch:context:validate
 
 - Group: Architecture
-- Command: `bun scripts/context/validate.ts`
+- Command: `bun run arch:context:validate`
 - Power: critical
 - Purpose: Validates docs/ai/context/gitnexus-context.json against docs/ai/gitnexus-context.schema.json. No external schema library (NFR-005). Validation order (stops at first failure): 1. Artifact file exists 2. Valid JSON 3. Schema file exists and is readable 4. All required fields present 5. schemaVersion matches schema.version 6. generatedAt is < maxAgeHours old (default: 24h)
 - Source: `scripts/context/validate.ts`
@@ -748,10 +697,10 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
-### arch:fix
+### arch:governance:fix
 
 - Group: Architecture
-- Command: `bun arch:audit --fix-map`
+- Command: `bun run arch:governance:fix`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -763,14 +712,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/repo-doctor.ts:121
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: docs/reports/script-refactor-report.json:118, docs/reports/script-refactor-report.json:123, docs/reports/script-refactor-report.json:203, docs/reports/script-refactor-report.json:208, scripts/dev/repo-doctor.ts:125
+- Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:guard
 
 - Group: Architecture
-- Command: `bun scripts/architecture-guard/architecture-guard.ts`
+- Command: `bun run arch:guard`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/architecture-guard/architecture-guard.ts`
@@ -783,19 +732,19 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `governance:gate:changed`
 - Used in:
   - Workflows: .github/workflows/ci.yml:152
-  - Other files: reports/package-script-audit.json:15, scripts/ai-engine/plan-task.ts:119, scripts/dev/hygiene-checks/arch-guard-check.ts:3, scripts/generate/**tests**/script-docs.test.ts:88, scripts/policy-engine/adapters/architecture-guard.adapter.ts:39, scripts/policy-engine/adapters/architecture-guard.adapter.ts:4, tests/unit/policy-engine/adapters/architecture-guard.adapter.test.ts:36
+  - Other files: docs/architecture/health/architecture-health.json:189, reports/package-script-audit.json:15, scripts/ai-engine/plan-task.ts:130, scripts/architecture-guard/architecture-guard.ts:8, scripts/dev/hygiene-checks/arch-guard-check.ts:3, scripts/generate/**tests**/script-docs.test.ts:107, scripts/generate/**tests**/script-docs.test.ts:112, scripts/policy-engine/adapters/architecture-guard.adapter.ts:39, scripts/policy-engine/adapters/architecture-guard.adapter.ts:4, tests/unit/policy-engine/adapters/architecture-guard.adapter.test.ts:36
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: governance:gate:changed.
 
 ### arch:guard:ci
 
 - Group: Architecture
-- Command: `bun scripts/architecture-guard/architecture-guard.ts --ci`
+- Command: `bun run arch:guard:ci`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/architecture-guard/architecture-guard.ts`
 - CI flag: Dedicated CI runner by name; this entrypoint is already the CI-specific variant.
-- Registered usage: `bun run arch:guard:ci`
+- Registered usage: `bun run arch:guard`
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flag `--ci`: Enable CI-oriented behavior and reporting.
@@ -810,12 +759,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### arch:guard:changed
 
 - Group: Architecture
-- Command: `bun scripts/architecture-guard/architecture-guard.ts --changed`
+- Command: `bun run arch:guard:changed`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/architecture-guard/architecture-guard.ts`
 - CI flag: No explicit CI handling detected in the implementation.
-- Registered usage: `bun run arch:guard:changed`
+- Registered usage: `bun run arch:guard`
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flag `--changed`: Restrict processing to changed files.
@@ -823,14 +772,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `governance:gate:changed`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:109, scripts/policy-engine/adapters/architecture-guard.adapter.ts:38, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:461
+  - Other files: package.json:114, scripts/policy-engine/adapters/architecture-guard.adapter.ts:38, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:461
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: governance:gate:changed.
 
 ### arch:diff
 
 - Group: Architecture
-- Command: `bun scripts/architecture-diff.ts`
+- Command: `bun run arch:diff`
 - Power: medium
 - Purpose: Detect architecture violations in the current change set (PR/staged diff) by comparing changed imports against ARCHITECTURE_CONTRACT.json rules.
 - Source: `scripts/architecture-diff.ts`
@@ -842,15 +791,15 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
-  - Workflows: None found
-  - Other files: scripts/architecture-diff.ts:6
+  - Workflows: .github/workflows/architecture-governance.yml:63
+  - Other files: scripts/architecture-diff.ts:8
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### arch:health
 
 - Group: Architecture
-- Command: `bun scripts/architecture-health/architecture-health.ts`
+- Command: `bun run arch:health`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/architecture-health/architecture-health.ts`
@@ -863,19 +812,19 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/hygiene-checks/arch-guard-check.ts:3, scripts/dev/repo-status.ts:85
+  - Other files: scripts/architecture-health/architecture-health.ts:8, scripts/dev/hygiene-checks/arch-guard-check.ts:3, scripts/dev/repo-status.ts:89
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:health:ci
 
 - Group: Architecture
-- Command: `bun scripts/architecture-health/architecture-health.ts --ci`
+- Command: `bun run arch:health:ci`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/architecture-health/architecture-health.ts`
 - CI flag: Dedicated CI runner by name; this entrypoint is already the CI-specific variant.
-- Registered usage: `bun run arch:health:ci`
+- Registered usage: `bun run arch:health`
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flag `--ci`: Enable CI-oriented behavior and reporting.
@@ -887,10 +836,30 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/health/architecture-drift-report.md, docs/architecture/health/architecture-health-summary.md, docs/architecture/health/architecture-health.json, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json, docs/architecture/audits/history/audit-1774722807886.json.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
+### arch:health:benchmark
+
+- Group: Architecture
+- Command: `bun run arch:health:benchmark`
+- Power: medium
+- Purpose: Run the registered repository task for this area.
+- Source: `scripts/architecture-health/benchmark.ts`
+- CI flag: Supported explicitly in the implementation.
+- Registered usage: `bun run arch:health:benchmark`
+- Usage:
+  - Primary purpose: Run the registered repository task for this area.
+  - Flags: none baked into this runner. You can append more args with `bun run arch:health:benchmark -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/architecture-health/benchmark.ts:8
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
 ### arch:validate:brain
 
 - Group: Architecture
-- Command: `bun scripts/governance/validate-architecture-brain.ts`
+- Command: `bun run arch:validate:brain`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/governance/validate-architecture-brain.ts`
@@ -903,14 +872,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: docs/architecture/health/architecture-health.json:180, docs/architecture/health/history/health-2026-03-12T22-54-01-012Z.json:131, docs/architecture/health/history/health-2026-03-15T23-26-58-848Z.json:180, docs/architecture/health/history/health-2026-03-20T21-25-38-263Z.json:418, docs/architecture/health/history/health-2026-03-20T21-25-56-943Z.json:180, docs/architecture/health/history/health-2026-03-25T11-56-09-458Z.json:418, docs/architecture/health/history/health-2026-03-25T11-56-10-315Z.json:180, scripts/architecture-health/collectors/validation-governance.ts:52, scripts/architecture-health/intelligence-snapshot.ts:25
+  - Other files: docs/architecture/health/architecture-health.json:180, docs/architecture/health/architecture-health.json:222, docs/architecture/health/history/health-2026-03-12T22-54-01-012Z.json:131, docs/architecture/health/history/health-2026-03-15T23-26-58-848Z.json:180, docs/architecture/health/history/health-2026-03-20T21-25-38-263Z.json:418, docs/architecture/health/history/health-2026-03-20T21-25-56-943Z.json:180, docs/architecture/health/history/health-2026-03-25T11-56-09-458Z.json:418, docs/architecture/health/history/health-2026-03-25T11-56-10-315Z.json:180, scripts/ai-runtime/runtime-status.ts:232, scripts/ai-runtime/runtime-status.ts:250, scripts/architecture-guard/hooks/validate-brain.ts:42, scripts/architecture-health/collectors/validation-governance.ts:52, +2 more
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:visualize
 
 - Group: Architecture
-- Command: `bun scripts/architecture/visualize.ts`
+- Command: `bun run arch:visualize`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/architecture/visualize.ts`
@@ -923,14 +892,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/architecture/visualize.ts:246, tests/static/06-architecture-visualization.test.ts:31, tests/static/06-architecture-visualization.test.ts:41, tests/static/06-architecture-visualization.test.ts:46, tests/static/06-architecture-visualization.test.ts:5, tests/static/06-architecture-visualization.test.ts:51, tests/static/06-architecture-visualization.test.ts:54, tests/static/06-architecture-visualization.test.ts:9
+  - Other files: scripts/architecture/visualize.ts:256, scripts/architecture/visualize.ts:8, tests/static/06-architecture-visualization.test.ts:31, tests/static/06-architecture-visualization.test.ts:41, tests/static/06-architecture-visualization.test.ts:46, tests/static/06-architecture-visualization.test.ts:5, tests/static/06-architecture-visualization.test.ts:51, tests/static/06-architecture-visualization.test.ts:54, tests/static/06-architecture-visualization.test.ts:9
 - Updated or generated files: Observed in isolated worktree run: docs/architecture/visualization/README.md.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:type-safety-guard
 
 - Group: Architecture
-- Command: `bun scripts/type-safety-guard.ts`
+- Command: `bun run arch:type-safety-guard`
 - Power: medium
 - Purpose: Unified architecture guard — runs type safety checks and validates import boundaries using the architecture contract.
 - Source: `scripts/type-safety-guard.ts`
@@ -943,33 +912,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `validate:types`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:21, scripts/policy-engine/adapters/type-safety.adapter.ts:105, scripts/policy-engine/adapters/type-safety.adapter.ts:122, scripts/policy-engine/adapters/type-safety.adapter.ts:153, scripts/policy-engine/adapters/type-safety.adapter.ts:160, scripts/policy-engine/adapters/type-safety.adapter.ts:4, scripts/type-safety-guard.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:761
+  - Other files: docs/architecture/health/architecture-health.json:211, package.json:17, scripts/policy-engine/adapters/type-safety.adapter.ts:105, scripts/policy-engine/adapters/type-safety.adapter.ts:122, scripts/policy-engine/adapters/type-safety.adapter.ts:153, scripts/policy-engine/adapters/type-safety.adapter.ts:160, scripts/policy-engine/adapters/type-safety.adapter.ts:4, scripts/type-safety-guard.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:761
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: validate:types.
-
-### arch:audit:check
-
-- Group: Architecture
-- Command: `bun run arch:audit --check`
-- Power: medium
-- Purpose: Run the registered repository task for this area.
-- Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: Indirect wrapper; CI behavior depends on child runner(s): arch:audit.
-- Usage:
-  - Primary purpose: Run the registered repository task for this area.
-  - Flag `--check`: Check-only mode; fail if drift exists.
-- Depends on: `arch:audit`
-- Used by other root scripts: None found
-- Used in:
-  - Workflows: None found
-  - Other files: None found
-- Updated or generated files: Not audited automatically in the isolated execution pass.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### test
 
 - Group: Testing
-- Command: `vitest run`
+- Command: `bun run test`
 - Power: critical
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -983,12 +933,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Workflows: None found
   - Other files: None found
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Treat as protected. It is a primary quality, build, test, or governance entrypoint.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: test:e2e.
 
 ### test:unit
 
 - Group: Testing
-- Command: `vitest run --project mmc --project backoffice --project frontoffice --project api-client --project domain-core --project logger --project config --project redis-utils --project types --project ui-system --project validation`
+- Command: `bun run test:unit`
 - Power: critical
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1010,44 +960,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ci.yml:346, .github/workflows/ci.yml:541
-  - Other files: specs/runtime/infra-007-module-boundaries/.workflow-state.json:74, vitest.config.ts:45
+  - Other files: docs/scripts/migration-map.json:69, specs/runtime/infra-007-module-boundaries/.workflow-state.json:74, vitest.config.ts:45
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
-
-### test:unit:debug
-
-- Group: Testing
-- Command: `vitest run --reporter verbose --project mmc --project backoffice --project frontoffice --project api-client --project domain-core --project logger --project config --project redis-utils --project types --project ui-system --project validation`
-- Power: low
-- Purpose: Run Vitest for the configured scope.
-- Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: Wrapper-only alias; any CI behavior depends on the underlying CLI rather than a root-level `--ci` flag.
-- Usage:
-  - Primary purpose: Run Vitest for the configured scope.
-  - Flag `--reporter verbose`: Select reporter output format. Value: verbose.
-  - Flag `--project mmc`: Run only the specified Vitest project. Value: mmc.
-  - Flag `--project backoffice`: Run only the specified Vitest project. Value: backoffice.
-  - Flag `--project frontoffice`: Run only the specified Vitest project. Value: frontoffice.
-  - Flag `--project api-client`: Run only the specified Vitest project. Value: api-client.
-  - Flag `--project domain-core`: Run only the specified Vitest project. Value: domain-core.
-  - Flag `--project logger`: Run only the specified Vitest project. Value: logger.
-  - Flag `--project config`: Run only the specified Vitest project. Value: config.
-  - Flag `--project redis-utils`: Run only the specified Vitest project. Value: redis-utils.
-  - Flag `--project types`: Run only the specified Vitest project. Value: types.
-  - Flag `--project ui-system`: Run only the specified Vitest project. Value: ui-system.
-  - Flag `--project validation`: Run only the specified Vitest project. Value: validation.
-- Depends on: None
-- Used by other root scripts: None found
-- Used in:
-  - Workflows: None found
-  - Other files: None found
-- Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Usually removable if the team no longer uses the demo or debug workflow.
 
 ### test:unit:boundaries
 
 - Group: Testing
-- Command: `vitest run tests/static/module-boundaries.test.ts tests/unit/infra-audit/infra-audit-boundaries.test.ts tests/unit/ai-guard/ai-guard-boundaries.test.ts`
+- Command: `bun run test:unit:boundaries`
 - Power: critical
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1066,7 +986,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### test:integration
 
 - Group: Testing
-- Command: `vitest run --dir tests/integration --fileParallelism=false`
+- Command: `bun run test:integration`
 - Power: critical
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1086,7 +1006,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### test:performance
 
 - Group: Testing
-- Command: `vitest run --dir tests/performance`
+- Command: `bun run test:performance`
 - Power: medium
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1105,7 +1025,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### test:static
 
 - Group: Testing
-- Command: `vitest run --dir tests/static`
+- Command: `bun run test:static`
 - Power: medium
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1124,7 +1044,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### test:coverage
 
 - Group: Testing
-- Command: `vitest run --coverage`
+- Command: `bun run test:coverage`
 - Power: medium
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1143,7 +1063,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### test:e2e:mmc
 
 - Group: Testing
-- Command: `bunx playwright test --config apps/mmc/playwright.config.ts`
+- Command: `bun run test:e2e:mmc`
 - Power: critical
 - Purpose: Run Playwright end-to-end tests for the configured app.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1155,14 +1075,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `test:e2e`
 - Used in:
   - Workflows: .github/workflows/ci.yml:595
-  - Other files: apps/mmc/tests/e2e/smoke.spec.ts:10, package.json:66, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:615, tests/e2e/app-load.spec.ts:13
+  - Other files: apps/mmc/tests/e2e/smoke.spec.ts:10, package.json:62, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:615, tests/e2e/app-load.spec.ts:13
 - Updated or generated files: Not audited automatically: browser/end-to-end workflow.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: test:e2e.
 
 ### test:e2e:backoffice
 
 - Group: Testing
-- Command: `bunx playwright test --config apps/backoffice/playwright.config.ts`
+- Command: `bun run test:e2e:backoffice`
 - Power: critical
 - Purpose: Run Playwright end-to-end tests for the configured app.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1174,14 +1094,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `test:e2e`
 - Used in:
   - Workflows: .github/workflows/ci.yml:645
-  - Other files: apps/backoffice/tests/e2e/smoke.spec.ts:10, package.json:66, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:615, tests/e2e/app-load.spec.ts:14
+  - Other files: apps/backoffice/tests/e2e/smoke.spec.ts:10, package.json:62, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:615, tests/e2e/app-load.spec.ts:14
 - Updated or generated files: Not audited automatically: browser/end-to-end workflow.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: test:e2e.
 
 ### test:e2e:frontoffice
 
 - Group: Testing
-- Command: `bunx playwright test --config apps/frontoffice/playwright.config.ts`
+- Command: `bun run test:e2e:frontoffice`
 - Power: critical
 - Purpose: Run Playwright end-to-end tests for the configured app.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1193,14 +1113,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `test:e2e`
 - Used in:
   - Workflows: .github/workflows/ci.yml:695
-  - Other files: apps/frontoffice/tests/e2e/smoke.spec.ts:10, package.json:66, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:615, tests/e2e/app-load.spec.ts:15
+  - Other files: apps/frontoffice/tests/e2e/smoke.spec.ts:10, package.json:62, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:615, tests/e2e/app-load.spec.ts:15
 - Updated or generated files: Not audited automatically: browser/end-to-end workflow.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: test:e2e.
 
 ### test:e2e
 
 - Group: Testing
-- Command: `bun run test:e2e:mmc && bun run test:e2e:backoffice && bun run test:e2e:frontoffice`
+- Command: `bun run test:e2e`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1219,7 +1139,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### build
 
 - Group: Build
-- Command: `bun run --workspaces build`
+- Command: `bun run build`
 - Power: critical
 - Purpose: Run workspace build scripts across all workspaces.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1231,14 +1151,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `build:packages`
 - Used in:
   - Workflows: .github/workflows/ci.yml:744
-  - Other files: apps/api/package.json:8, apps/worker/package.json:8, package.json:69, packages/api-client/package.json:12, packages/domain-core/package.json:37, packages/logger/package.json:23, packages/redis-utils/package.json:14, packages/types/package.json:8, packages/validation/package.json:8, scripts/validate/detect-broken-scripts.ts:44, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:232, tests/unit/policy-engine/determinism.test.ts:20, +8 more
+  - Other files: apps/api/package.json:8, apps/worker/package.json:8, package.json:65, packages/api-client/package.json:12, packages/domain-core/package.json:37, packages/logger/package.json:23, packages/redis-utils/package.json:14, packages/types/package.json:8, packages/validation/package.json:8, scripts/validate/detect-broken-scripts.ts:46, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:232, tests/unit/policy-engine/determinism.test.ts:20, +8 more
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: build:packages.
 
 ### build:api
 
 - Group: Build
-- Command: `bun --cwd apps/api build`
+- Command: `bun run build:api`
 - Power: medium
 - Purpose: Build a specific workspace.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1257,7 +1177,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### build:packages
 
 - Group: Build
-- Command: `bash -lc 'for d in packages/*; do if [ -f "$d/package.json" ]; then (cd "$d" && echo "Building $d" && bun run build); fi; done'`
+- Command: `bun run build:packages`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1276,7 +1196,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### dev
 
 - Group: Development
-- Command: `bun run dev:all`
+- Command: `bun run dev`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1285,17 +1205,17 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run dev -- <args>` only if the underlying tool supports them.
 - Depends on: `dev:all`
-- Used by other root scripts: `dev:all`, `dev:demo-logger-features`
+- Used by other root scripts: `dev:all`
 - Used in:
   - Workflows: None found
   - Other files: tests/unit/policy-engine/rules/SCRIPTS-001.test.ts:48
 - Updated or generated files: Not audited automatically in the isolated execution pass.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: dev:all.
 
 ### dev:infra
 
 - Group: Development
-- Command: `docker compose up -d`
+- Command: `bun run dev:infra`
 - Power: medium
 - Purpose: Start the local infrastructure stack in detached mode.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1314,7 +1234,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### dev:api
 
 - Group: Development
-- Command: `bun --cwd apps/api dev`
+- Command: `bun run dev:api`
 - Power: medium
 - Purpose: Start a specific workspace development process.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1326,14 +1246,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `dev:all`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:77, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
+  - Other files: package.json:73, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
 - Updated or generated files: Not audited automatically: long-running service launcher.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: dev:all.
 
 ### dev:worker
 
 - Group: Development
-- Command: `bun --cwd apps/worker dev`
+- Command: `bun run dev:worker`
 - Power: medium
 - Purpose: Start a specific workspace development process.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1345,14 +1265,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `dev:all`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:77, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
+  - Other files: package.json:73, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
 - Updated or generated files: Not audited automatically: long-running service launcher.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: dev:all.
 
 ### dev:mmc
 
 - Group: Development
-- Command: `bun --cwd apps/mmc dev`
+- Command: `bun run dev:mmc`
 - Power: critical
 - Purpose: Start a specific workspace development process.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1364,14 +1284,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `dev:all`
 - Used in:
   - Workflows: .github/workflows/ci.yml:587
-  - Other files: apps/mmc/playwright.config.ts:9, apps/mmc/tests/e2e/smoke.spec.ts:9, package.json:77, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
+  - Other files: apps/mmc/playwright.config.ts:9, apps/mmc/tests/e2e/smoke.spec.ts:9, package.json:73, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
 - Updated or generated files: Not audited automatically: long-running service launcher.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: dev:all.
 
 ### dev:backoffice
 
 - Group: Development
-- Command: `bun --cwd apps/backoffice dev`
+- Command: `bun run dev:backoffice`
 - Power: critical
 - Purpose: Start a specific workspace development process.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1383,14 +1303,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `dev:all`
 - Used in:
   - Workflows: .github/workflows/ci.yml:637
-  - Other files: apps/backoffice/playwright.config.ts:9, apps/backoffice/tests/e2e/smoke.spec.ts:9, package.json:77, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
+  - Other files: apps/backoffice/playwright.config.ts:9, apps/backoffice/tests/e2e/smoke.spec.ts:9, package.json:73, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
 - Updated or generated files: Not audited automatically: long-running service launcher.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: dev:all.
 
 ### dev:frontoffice
 
 - Group: Development
-- Command: `bun --cwd apps/frontoffice dev`
+- Command: `bun run dev:frontoffice`
 - Power: critical
 - Purpose: Start a specific workspace development process.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1402,14 +1322,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `dev:all`
 - Used in:
   - Workflows: .github/workflows/ci.yml:687
-  - Other files: apps/frontoffice/playwright.config.ts:9, apps/frontoffice/tests/e2e/smoke.spec.ts:9, package.json:77, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
+  - Other files: apps/frontoffice/playwright.config.ts:9, apps/frontoffice/tests/e2e/smoke.spec.ts:9, package.json:73, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:340
 - Updated or generated files: Not audited automatically: long-running service launcher.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: dev:all.
 
 ### dev:all
 
 - Group: Development
-- Command: `concurrently "bun run dev:api" "bun run dev:worker" "bun run dev:mmc" "bun run dev:backoffice" "bun run dev:frontoffice"`
+- Command: `bun run dev:all`
 - Power: medium
 - Purpose: Start multiple long-running development services in parallel.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1421,34 +1341,34 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `dev`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:70, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:334
+  - Other files: package.json:66, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:334
 - Updated or generated files: Not audited automatically: long-running service launcher.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: dev.
 
 ### dev:demo:logger
 
 - Group: Development
-- Command: `bun scripts/dev/demo-logger-features.ts`
+- Command: `bun run dev:demo:logger`
 - Power: medium
 - Purpose: Demonstrates all available logger customization options and features
 - Source: `scripts/dev/demo-logger-features.ts`
 - CI flag: Supported explicitly in the implementation.
-- Registered usage: `bun run dev:demo-logger-features`
+- Registered usage: `bun run dev:demo:logger`
 - Usage:
   - Primary purpose: Demonstrates all available logger customization options and features
   - Flags: none baked into this runner. You can append more args with `bun run dev:demo:logger -- <args>` only if the underlying tool supports them.
 - Depends on: None
-- Used by other root scripts: `dev:demo-logger-features`
+- Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: package.json:124
+  - Other files: scripts/dev/demo-logger-features.ts:8
 - Updated or generated files: Not audited automatically in the isolated execution pass.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: dev:demo-logger-features.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:hygiene:report
 
 - Group: Development
-- Command: `bun scripts/dev/hygiene-report-generator.ts`
+- Command: `bun run dev:hygiene:report`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/dev/hygiene-report-generator.ts`
@@ -1461,14 +1381,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: None found
+  - Other files: scripts/dev/hygiene-report-generator.ts:8
 - Updated or generated files: Isolated worktree run failed before any tracked file changes were observed.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:generate:script-docs
 
 - Group: Development
-- Command: `bun scripts/generate/script-docs.ts`
+- Command: `bun run dev:generate:script-docs`
 - Power: critical
 - Purpose: Walk scripts/\*_\/_.ts, parse @script metadata headers, generate docs/scripts/SCRIPT_REGISTRY.md. Exits 1 on missing required metadata fields.
 - Source: `scripts/generate/script-docs.ts`
@@ -1480,15 +1400,15 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
-  - Workflows: .github/workflows/architecture-governance.yml:169
-  - Other files: scripts/generate/**tests**/script-docs.test.ts:19, scripts/generate/script-docs.ts:491, scripts/generate/script-docs.ts:532, scripts/generate/script-docs.ts:8, scripts/validate/script-infrastructure.ts:137, scripts/validate/script-infrastructure.ts:79
+  - Workflows: .github/workflows/architecture-governance.yml:173
+  - Other files: scripts/generate/**tests**/script-docs.test.ts:20, scripts/generate/script-docs.ts:10, scripts/generate/script-docs.ts:518, scripts/generate/script-docs.ts:559, scripts/validate/docs-drift.ts:140, scripts/validate/script-infrastructure.ts:147, scripts/validate/script-infrastructure.ts:205
 - Updated or generated files: Observed in isolated worktree run: docs/scripts/SCRIPT_REGISTRY.md.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### dev:generate:package-docs
 
 - Group: Development
-- Command: `bun scripts/generate/package-docs.ts`
+- Command: `bun run dev:generate:package-docs`
 - Power: medium
 - Purpose: Refresh root package.md from package.json, repo invocation scans, and optional detached-worktree audit evidence.
 - Source: `scripts/generate/package-docs.ts`
@@ -1501,14 +1421,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/generate/package-docs.ts:6, scripts/generate/package-docs.ts:915
+  - Other files: scripts/generate/package-docs.ts:8, scripts/generate/package-docs.ts:917
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:seed:dashboard-test-data
 
 - Group: Development
-- Command: `bun run scripts/seed/dashboard-test-data.ts`
+- Command: `bun run dev:seed:dashboard-test-data`
 - Power: medium
 - Purpose: Seed realistic MMC dashboard test data into master_db for dashboard testing
 - Source: `scripts/seed/dashboard-test-data.ts`
@@ -1521,19 +1441,19 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/seed/dashboard-test-data.ts:155, scripts/seed/dashboard-test-data.ts:34, scripts/seed/dashboard-test-data.ts:7
+  - Other files: scripts/seed/dashboard-test-data.ts:155, scripts/seed/dashboard-test-data.ts:34, scripts/seed/dashboard-test-data.ts:8
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:refactor:scripts
 
 - Group: Development
-- Command: `bun scripts/dev/refactor-scripts.ts`
+- Command: `bun run dev:refactor:scripts`
 - Power: medium
 - Purpose: Applies the SCRIPT_MIGRATION_MAP to rename all "bun run <old>" references across the repository. Reads docs/scripts/SCRIPT_MIGRATION_MAP.md, builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain after the run. Writes a summary report to reports/SCRIPT_REFACTOR_REPORT.md.
 - Source: `scripts/dev/refactor-scripts.ts`
 - CI flag: Explicitly rejected in the implementation; this runner rewrites repository files and must not run with `--ci`.
-- Registered usage: `bun run dev:refactor:scripts`
+- Registered usage: `bun run refactor-scripts [--dry-run]`
 - Usage:
   - Primary purpose: Applies the SCRIPT_MIGRATION_MAP to rename all "bun run <old>" references across the repository. Reads docs/scripts/SCRIPT_MIGRATION_MAP.md, builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain after the run. Writes a summary report to reports/SCRIPT_REFACTOR_REPORT.md.
   - Flags: none baked into this runner. You can append more args with `bun run dev:refactor:scripts -- <args>` only if the underlying tool supports them.
@@ -1541,14 +1461,194 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/refactor-scripts.ts:11
+  - Other files: scripts/validate/index.ts:119, scripts/validate/index.ts:122, scripts/validate/index.ts:91
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### dev:ai:context-artifacts
+
+- Group: Development
+- Command: `bun run dev:ai:context-artifacts`
+- Power: medium
+- Purpose: Analyze AI context artifacts for size, compression, and redundancy to identify Phase 3 optimization opportunities.
+- Source: `scripts/dev/analyze-ai-context-artifacts.ts`
+- CI flag: No explicit `--ci` handling detected in the implementation.
+- Registered usage: `bun run dev:ai:context-artifacts`
+- Usage:
+  - Primary purpose: Analyze AI context artifacts for size, compression, and redundancy to identify Phase 3 optimization opportunities.
+  - Flags: none baked into this runner. You can append more args with `bun run dev:ai:context-artifacts -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/analyze-ai-context-artifacts.ts:9
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### dev:ai:archive-snapshots
+
+- Group: Development
+- Command: `bun run dev:ai:archive-snapshots`
+- Power: medium
+- Purpose: Maintain a rolling archive of historical AI context snapshots, keeping the latest artifacts live and archiving older ones with indexes.
+- Source: `scripts/dev/archive-snapshot-strategy.ts`
+- CI flag: No explicit `--ci` handling detected in the implementation.
+- Registered usage: `bun run dev:ai:archive-snapshots`
+- Usage:
+  - Primary purpose: Maintain a rolling archive of historical AI context snapshots, keeping the latest artifacts live and archiving older ones with indexes.
+  - Flags: none baked into this runner. You can append more args with `bun run dev:ai:archive-snapshots -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/archive-snapshot-strategy.ts:8
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### dev:analyze:directory-sizes
+
+- Group: Development
+- Command: `bun run dev:analyze:directory-sizes`
+- Power: medium
+- Purpose: Measure key repository directory sizes and highlight the largest contributors to repository bloat.
+- Source: `scripts/dev/analyze-directory-sizes.ts`
+- CI flag: No explicit `--ci` handling detected in the implementation.
+- Registered usage: `bun run dev:analyze:directory-sizes`
+- Usage:
+  - Primary purpose: Measure key repository directory sizes and highlight the largest contributors to repository bloat.
+  - Flags: none baked into this runner. You can append more args with `bun run dev:analyze:directory-sizes -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/analyze-directory-sizes.ts:9
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### dev:analyze:file-sizes
+
+- Group: Development
+- Command: `bun run dev:analyze:file-sizes`
+- Power: medium
+- Purpose: Analyze repository files by size and line count to identify oversized files that need optimization.
+- Source: `scripts/dev/analyze-file-sizes.ts`
+- CI flag: No explicit `--ci` handling detected in the implementation.
+- Registered usage: `bun run dev:analyze:file-sizes`
+- Usage:
+  - Primary purpose: Analyze repository files by size and line count to identify oversized files that need optimization.
+  - Flags: none baked into this runner. You can append more args with `bun run dev:analyze:file-sizes -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/analyze-file-sizes.ts:9
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### dev:deps:verify
+
+- Group: Development
+- Command: `bun run dev:deps:verify`
+- Power: medium
+- Purpose: Scan the codebase for dependency usage patterns and produce a conservative unused-dependency candidate report.
+- Source: `scripts/dev/verify-dependency-usage.ts`
+- CI flag: No explicit `--ci` handling detected in the implementation.
+- Registered usage: `bun run dev:deps:verify`
+- Usage:
+  - Primary purpose: Scan the codebase for dependency usage patterns and produce a conservative unused-dependency candidate report.
+  - Flags: none baked into this runner. You can append more args with `bun run dev:deps:verify -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/verify-dependency-usage.ts:9
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### dev:validate:script-duplication
+
+- Group: Development
+- Command: `bun run dev:validate:script-duplication`
+- Power: medium
+- Purpose: Measure cross-file duplication within the scripts directory and validate that modularization stays within the target threshold.
+- Source: `scripts/dev/validate-script-duplication.ts`
+- CI flag: No explicit `--ci` handling detected in the implementation.
+- Registered usage: `bun run dev:validate:script-duplication`
+- Usage:
+  - Primary purpose: Measure cross-file duplication within the scripts directory and validate that modularization stays within the target threshold.
+  - Flags: none baked into this runner. You can append more args with `bun run dev:validate:script-duplication -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/validate-script-duplication.ts:9
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### dev:profile:scripts
+
+- Group: Development
+- Command: `bun run dev:profile:scripts`
+- Power: medium
+- Purpose: Profile governance script execution times across repeated runs to establish a performance baseline.
+- Source: `scripts/dev/profile-script-performance.ts`
+- CI flag: No explicit `--ci` handling detected in the implementation.
+- Registered usage: `bun run dev:profile:scripts [runs=10]`
+- Usage:
+  - Primary purpose: Profile governance script execution times across repeated runs to establish a performance baseline.
+  - Flags: none baked into this runner. You can append more args with `bun run dev:profile:scripts -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/profile-script-performance.ts:9
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### dev:benchmark:ci
+
+- Group: Development
+- Command: `bun run dev:benchmark:ci`
+- Power: medium
+- Purpose: Benchmark CI pipeline duration assumptions, generate markdown performance reports, and write a dashboard snapshot.
+- Source: `scripts/dev/benchmark-ci-duration.ts`
+- CI flag: Dedicated CI runner by name; this entrypoint is already the CI-specific variant.
+- Registered usage: `bun run dev:benchmark:ci`
+- Usage:
+  - Primary purpose: Benchmark CI pipeline duration assumptions, generate markdown performance reports, and write a dashboard snapshot.
+  - Flags: none baked into this runner. You can append more args with `bun run dev:benchmark:ci -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/benchmark-ci-duration.ts:8
+- Updated or generated files: Not audited automatically in the isolated execution pass.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
+### dev:report:baseline
+
+- Group: Development
+- Command: `bun run dev:report:baseline`
+- Power: medium
+- Purpose: Generate a consolidated baseline diagnostics report for Phase 1 analysis and write it to docs/audit-reports.
+- Source: `scripts/dev/generate-baseline-report.ts`
+- CI flag: No explicit `--ci` handling detected in the implementation.
+- Registered usage: `bun run dev:report:baseline`
+- Usage:
+  - Primary purpose: Generate a consolidated baseline diagnostics report for Phase 1 analysis and write it to docs/audit-reports.
+  - Flags: none baked into this runner. You can append more args with `bun run dev:report:baseline -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/generate-baseline-report.ts:9
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### ai:runtime:status
 
 - Group: AI
-- Command: `bun scripts/ai-runtime/runtime-status.ts`
+- Command: `bun run ai:runtime:status`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/ai-runtime/runtime-status.ts`
@@ -1561,19 +1661,19 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ci.yml:159
-  - Other files: None found
+  - Other files: scripts/ai-runtime/runtime-status.ts:8
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
 
 ### ai:run
 
 - Group: AI
-- Command: `bun scripts/ai-engine/run-task.ts`
+- Command: `bun run ai:run`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/ai-engine/run-task.ts`
 - CI flag: Supported explicitly in the implementation.
-- Registered usage: `bun run ai:run`
+- Registered usage: `bun run ai:run --task "<task-description>"`
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run ai:run -- <args>` only if the underlying tool supports them.
@@ -1581,19 +1681,19 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: None found
+  - Other files: scripts/ai-engine/run-task.ts:8
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### ai:plan
 
 - Group: AI
-- Command: `bun scripts/ai-engine/plan-task.ts`
+- Command: `bun run ai:plan`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/ai-engine/plan-task.ts`
 - CI flag: Supported explicitly in the implementation.
-- Registered usage: `bun run ai:plan`
+- Registered usage: `bun run ai:plan --task "<task-description>"`
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run ai:plan -- <args>` only if the underlying tool supports them.
@@ -1601,14 +1701,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: None found
+  - Other files: scripts/ai-engine/plan-task.ts:9
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### ai:validate
 
 - Group: AI
-- Command: `bun scripts/ai-engine/validate-execution.ts`
+- Command: `bun run ai:validate`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/ai-engine/validate-execution.ts`
@@ -1620,15 +1720,15 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
-  - Workflows: .github/workflows/architecture-governance.yml:122
-  - Other files: reports/package-script-audit.json:6, scripts/ai-engine/plan-task.ts:133, scripts/generate/**tests**/package-docs.test.ts:22, scripts/generate/**tests**/package-docs.test.ts:29, scripts/generate/**tests**/package-docs.test.ts:55, tests/integration/ai-engine/validate-execution.integration.test.ts:4, tests/integration/ai-engine/validate-execution.integration.test.ts:48
+  - Workflows: .github/workflows/architecture-governance.yml:126
+  - Other files: reports/package-script-audit.json:6, scripts/ai-engine/plan-task.ts:144, scripts/ai-engine/validate-execution.ts:8, scripts/generate/**tests**/package-docs.test.ts:22, scripts/generate/**tests**/package-docs.test.ts:29, scripts/generate/**tests**/package-docs.test.ts:55, tests/integration/ai-engine/validate-execution.integration.test.ts:4, tests/integration/ai-engine/validate-execution.integration.test.ts:48
 - Updated or generated files: Audit attempt failed in isolated worktree: `bun run ai:validate -- --ci` exited non-zero before tracked file changes were observed. Output note: error: script "ai:validate" exited with code 4
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### ai:validate:prompts
 
 - Group: AI
-- Command: `bun scripts/prompt-qa.ts`
+- Command: `bun run ai:validate:prompts`
 - Power: medium
 - Purpose: Validates AI agent and prompt file structural integrity
 - Source: `scripts/prompt-qa.ts`
@@ -1641,14 +1741,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/prompt-qa.ts:7
-- Updated or generated files: Audit attempt failed in isolated worktree: `bun scripts/prompt-qa.ts --ci` exited non-zero before tracked file changes were observed.
+  - Other files: scripts/prompt-qa.ts:8
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run ai:validate:prompts --ci` exited non-zero before tracked file changes were observed.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### ai:context:generate
 
 - Group: AI
-- Command: `bun scripts/generate-ai-context.ts`
+- Command: `bun run ai:context:generate`
 - Power: critical
 - Purpose: Generate AI context artifacts (architecture brain, module map, dependency graph). Supports incremental (default), forced, and validate-after-generation modes.
 - Source: `scripts/generate-ai-context.ts`
@@ -1661,14 +1761,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ai-context-validation.yml:53, .github/workflows/ai-context-validation.yml:83
-  - Other files: scripts/dev/generate-ai-context.ts:7, scripts/dev/generate-ai-context.ts:8, scripts/dev/generate-ai-context.ts:9, scripts/generate-ai-context.ts:13, scripts/generate-ai-context.ts:14, scripts/generate-ai-context.ts:15, scripts/generate-ai-context.ts:6, scripts/validate/ai-context-fresh.ts:38, scripts/validate/ai-context-schemas.ts:80
+  - Other files: scripts/ai-engine/**tests**/context-loader.test.ts:39, scripts/ai-engine/**tests**/context-loader.test.ts:43, scripts/ai-engine/**tests**/plan-task.test.ts:237, scripts/ai-engine/**tests**/run-task.test.ts:245, scripts/ai-engine/context-loader.ts:25, scripts/dev/benchmark-ai-context-warm.ts:74, scripts/dev/generate-ai-context.ts:7, scripts/dev/generate-ai-context.ts:8, scripts/dev/generate-ai-context.ts:9, scripts/generate-ai-context.ts:14, scripts/generate-ai-context.ts:15, scripts/generate-ai-context.ts:16, +3 more
 - Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ai-context-validation.yml.
 
 ### ai:context:refresh
 
 - Group: AI
-- Command: `bun scripts/generate-ai-context.ts --force`
+- Command: `bun run ai:context:refresh`
 - Power: critical
 - Purpose: Generate AI context artifacts (architecture brain, module map, dependency graph). Supports incremental (default), forced, and validate-after-generation modes.
 - Source: `scripts/generate-ai-context.ts`
@@ -1681,14 +1781,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ai-context-validation.yml:63, .github/workflows/ci.yml:156
-  - Other files: scripts/validate/ai-context-fresh.ts:64
+  - Other files: docs/ci-cd-integration/CACHE_WORKFLOW_EXAMPLE.yml:28, scripts/ai-runtime/runtime-status.ts:112, scripts/ai-runtime/runtime-status.ts:84, scripts/ai-runtime/runtime-status.ts:98, scripts/architecture-guard/hooks/generate-context.ts:10, scripts/dev/benchmark-ai-context-cold.ts:57, scripts/dev/benchmark-ai-context-warm.ts:55, scripts/validate/ai-context-fresh.ts:66
 - Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml, .github/workflows/ai-context-validation.yml.
+- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ai-context-validation.yml, .github/workflows/ci.yml.
 
 ### ai:context:validate
 
 - Group: AI
-- Command: `bun run validate:ai-context-fresh && bun run validate:ai-context-schemas`
+- Command: `bun run ai:context:validate`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -1707,7 +1807,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### ai:guard
 
 - Group: AI
-- Command: `bun run scripts/ai-guard.ts`
+- Command: `bun run ai:guard`
 - Power: critical
 - Purpose: Enforces architecture rules (import boundaries, contract compliance) before AI-generated commits and in CI.
 - Source: `scripts/ai-guard.ts`
@@ -1719,15 +1819,15 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
-  - Workflows: None found
-  - Other files: scripts/ai-guard.ts:6, scripts/dev/**tests**/refactor-scripts.test.ts:107, scripts/dev/**tests**/refactor-scripts.test.ts:122, scripts/dev/**tests**/refactor-scripts.test.ts:149
+  - Workflows: .github/workflows/architecture-governance.yml:55
+  - Other files: scripts/ai-guard.ts:7, scripts/dev/**tests**/refactor-scripts.test.ts:107, scripts/dev/**tests**/refactor-scripts.test.ts:122, scripts/dev/**tests**/refactor-scripts.test.ts:149
 - Updated or generated files: Not audited automatically in the isolated execution pass.
-- Removal assessment: Treat as protected. It is a primary quality, build, test, or governance entrypoint.
+- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### repo:doctor
 
 - Group: Repository
-- Command: `bun scripts/dev/repo-doctor.ts`
+- Command: `bun run repo:doctor`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/dev/repo-doctor.ts`
@@ -1740,14 +1840,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ci.yml:195
-  - Other files: None found
+  - Other files: scripts/dev/repo-doctor.ts:8, tests/integration/dev-scripts/repo-doctor.integration.test.ts:6
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
 
 ### repo:fix
 
 - Group: Repository
-- Command: `bun scripts/dev/repo-fix.ts`
+- Command: `bun run repo:fix`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/dev/repo-fix.ts`
@@ -1760,14 +1860,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: None found
+  - Other files: scripts/dev/repo-fix.ts:8
 - Updated or generated files: Not audited automatically: mutates repository state.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### repo:onboard
 
 - Group: Repository
-- Command: `bun scripts/dev/repo-onboard.ts`
+- Command: `bun run repo:onboard`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/dev/repo-onboard.ts`
@@ -1780,14 +1880,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: None found
+  - Other files: scripts/dev/repo-onboard.ts:8
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### repo:status
 
 - Group: Repository
-- Command: `bun scripts/dev/repo-status.ts`
+- Command: `bun run repo:status`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/dev/repo-status.ts`
@@ -1800,14 +1900,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: None found
+  - Other files: scripts/dev/demo-logger-features.ts:65, scripts/dev/demo-logger-features.ts:66, scripts/dev/repo-status.ts:8
 - Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/health/architecture-drift-report.md, docs/architecture/health/architecture-health-summary.md, docs/architecture/health/architecture-health.json, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### db:console
 
 - Group: Database
-- Command: `bun run scripts/db/console.ts`
+- Command: `bun run db:console`
 - Power: medium
 - Purpose: Launch an interactive psql session connected to DATABASE_URL.
 - Source: `scripts/db/console.ts`
@@ -1827,7 +1927,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### db:migrate
 
 - Group: Database
-- Command: `bun run scripts/db/migrate.ts`
+- Command: `bun run db:migrate`
 - Power: medium
 - Purpose: Validate migration inputs and delegate master migration execution guidance.
 - Source: `scripts/db/migrate.ts`
@@ -1847,7 +1947,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### db:status:pool
 
 - Group: Database
-- Command: `bun run scripts/db/pool-status.ts`
+- Command: `bun run db:status:pool`
 - Power: medium
 - Purpose: Check PostgreSQL connection pool health and report status.
 - Source: `scripts/db/pool-status.ts`
@@ -1867,7 +1967,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### db:validate:licenses
 
 - Group: Database
-- Command: `bun run scripts/db/validate-licenses.ts`
+- Command: `bun run db:validate:licenses`
 - Power: medium
 - Purpose: Validate license distribution in master_db and report counts by status.
 - Source: `scripts/db/validate-licenses.ts`
@@ -1887,7 +1987,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### infra:cache:clean
 
 - Group: Infrastructure
-- Command: `bun run scripts/maintenance/cache-clean.ts`
+- Command: `bun run infra:cache:clean`
 - Power: medium
 - Purpose: Remove build caches and temporary output directories to free disk space
 - Source: `scripts/maintenance/cache-clean.ts`
@@ -1900,14 +2000,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/maintenance/cache-clean.ts:7
+  - Other files: scripts/maintenance/cache-clean.ts:8
 - Updated or generated files: Not audited automatically: destructive maintenance command.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### infra:security
 
 - Group: Infrastructure
-- Command: `bun scripts/security/scan.ts`
+- Command: `bun run infra:security`
 - Power: medium
 - Purpose: Run a full Trivy filesystem scan and print visible findings without blocking on non-clean results.
 - Source: `scripts/security/scan.ts`
@@ -1920,14 +2020,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/security/scan.ts:6
+  - Other files: scripts/security/scan.ts:8
 - Updated or generated files: Not audited automatically: external scanner dependency or long-running security scan.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### infra:security:deps
 
 - Group: Infrastructure
-- Command: `bun scripts/security/scan-deps.ts`
+- Command: `bun run infra:security:deps`
 - Power: medium
 - Purpose: Run a dependency-only Trivy scan, warning on MEDIUM findings and blocking on HIGH/CRITICAL vulnerabilities.
 - Source: `scripts/security/scan-deps.ts`
@@ -1940,14 +2040,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/security/scan-deps.ts:6
+  - Other files: scripts/security/scan-deps.ts:8
 - Updated or generated files: Not audited automatically: external scanner dependency or long-running security scan.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### infra:security:secrets
 
 - Group: Infrastructure
-- Command: `bun scripts/security/scan-secrets.ts`
+- Command: `bun run infra:security:secrets`
 - Power: medium
 - Purpose: Run a Trivy secret scan across the repo or staged files only and block on any detected secret.
 - Source: `scripts/security/scan-secrets.ts`
@@ -1960,14 +2060,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/security/scan-secrets.ts:6
+  - Other files: scripts/security/scan-secrets.ts:8
 - Updated or generated files: Not audited automatically: external scanner dependency or long-running security scan.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### infra:security:config
 
 - Group: Infrastructure
-- Command: `bun scripts/security/scan-config.ts`
+- Command: `bun run infra:security:config`
 - Power: medium
 - Purpose: Run a Trivy misconfiguration scan and print visible findings without blocking on non-clean results.
 - Source: `scripts/security/scan-config.ts`
@@ -1980,14 +2080,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/security/scan-config.ts:6
+  - Other files: scripts/security/scan-config.ts:8
 - Updated or generated files: Not audited automatically: external scanner dependency or long-running security scan.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### infra:security:ci
 
 - Group: Infrastructure
-- Command: `bun scripts/security/scan-ci.ts`
+- Command: `bun run infra:security:ci`
 - Power: critical
 - Purpose: Run the CI-equivalent Trivy scan, write a sanitized report, and block on CI-grade findings.
 - Source: `scripts/security/scan-ci.ts`
@@ -2000,14 +2100,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ci.yml:286
-  - Other files: scripts/security/scan-ci.ts:6
+  - Other files: scripts/security/scan-ci.ts:8
 - Updated or generated files: Not audited automatically: external scanner dependency or long-running security scan.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
 
 ### governance:gate
 
 - Group: Governance
-- Command: `bun scripts/governance/gate.ts`
+- Command: `bun run governance:gate`
 - Power: critical
 - Purpose: Unified governance gate — composes all guards in sequence (report-all mode)
 - Source: `scripts/governance/gate.ts`
@@ -2027,7 +2127,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### governance:gate:ci
 
 - Group: Governance
-- Command: `bun scripts/governance/gate-ci.ts`
+- Command: `bun run governance:gate:ci`
 - Power: critical
 - Purpose: CI variant of the governance gate — runs gate.ts with GitHub Actions annotations
 - Source: `scripts/governance/gate-ci.ts`
@@ -2039,7 +2139,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Depends on: None
 - Used by other root scripts: None found
 - Used in:
-  - Workflows: .github/workflows/architecture-governance.yml:188
+  - Workflows: .github/workflows/architecture-governance.yml:192
   - Other files: reports/package-script-audit.json:48, scripts/generate/**tests**/package-docs.test.ts:69, scripts/governance/gate-ci.ts:9
 - Updated or generated files: Audit attempt failed in isolated worktree: `bun run governance:gate:ci` exited non-zero before tracked file changes were observed. Output note: ✖ ::error::Governance gate failed — see output above error: script "governance:gate:ci" exited with code 1
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
@@ -2047,7 +2147,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### governance:gate:changed
 
 - Group: Governance
-- Command: `bun run arch:context:changed && bun run arch:guard:changed`
+- Command: `bun run governance:gate:changed`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2066,7 +2166,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### governance:report
 
 - Group: Governance
-- Command: `bun scripts/governance/report.ts`
+- Command: `bun run governance:report`
 - Power: medium
 - Purpose: Generates a consolidated governance health report at docs/governance/governance-report.md
 - Source: `scripts/governance/report.ts`
@@ -2086,7 +2186,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### ci:smoke:staging
 
 - Group: CI
-- Command: `bash scripts/ci/run-staging-smoke-tests.sh`
+- Command: `bun run ci:smoke:staging`
 - Power: medium
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2105,7 +2205,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### ci:local
 
 - Group: CI
-- Command: `act --pull=false`
+- Command: `bun run ci:local`
 - Power: medium
 - Purpose: Run or inspect GitHub Actions workflows locally with act.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2124,7 +2224,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### ci:local:full
 
 - Group: CI
-- Command: `act --pull --reuse=false`
+- Command: `bun run ci:local:full`
 - Power: medium
 - Purpose: Run or inspect GitHub Actions workflows locally with act.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2144,7 +2244,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### ci:local:workflow
 
 - Group: CI
-- Command: `act -W .github/workflows`
+- Command: `bun run ci:local:workflow`
 - Power: medium
 - Purpose: Run or inspect GitHub Actions workflows locally with act.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2163,7 +2263,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### ci:local:job
 
 - Group: CI
-- Command: `act -j`
+- Command: `bun run ci:local:job`
 - Power: medium
 - Purpose: Run or inspect GitHub Actions workflows locally with act.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2182,7 +2282,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### ci:local:list
 
 - Group: CI
-- Command: `act -l`
+- Command: `bun run ci:local:list`
 - Power: medium
 - Purpose: Run or inspect GitHub Actions workflows locally with act.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2201,7 +2301,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### ci:local:dry
 
 - Group: CI
-- Command: `actionlint .github/workflows/*.yml`
+- Command: `bun run ci:local:dry`
 - Power: medium
 - Purpose: Validate GitHub Actions workflow files.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2220,7 +2320,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### ci:run-local
 
 - Group: CI
-- Command: `bun scripts/run-local-ci.ts`
+- Command: `bun run ci:run-local`
 - Power: medium
 - Purpose: Local CI governance orchestrator — runs the 7-step pre-closure validation sequence including all governance checks and the full act CI simulation. Step 0 is a Docker fail-fast check; Steps 1–7 are governance checks that run to completion regardless of individual failures (fail-forward).
 - Source: `scripts/run-local-ci.ts`
@@ -2233,14 +2333,14 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/run-local-ci.ts:9
+  - Other files: scripts/run-local-ci.ts:11
 - Updated or generated files: Not audited automatically in the isolated execution pass.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### ci:test
 
 - Group: CI
-- Command: `vitest run --reporter=verbose`
+- Command: `bun run ci:test`
 - Power: medium
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2259,7 +2359,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### test:tenant
 
 - Group: Testing
-- Command: `vitest run --dir tests/tenant || true`
+- Command: `bun run test:tenant`
 - Power: medium
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2278,7 +2378,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 ### test:migrations
 
 - Group: Testing
-- Command: `vitest run --dir tests/migrations || true`
+- Command: `bun run test:migrations`
 - Power: medium
 - Purpose: Run Vitest for the configured scope.
 - Source: Wrapper only; no single `scripts/*.ts` source file.
@@ -2294,107 +2394,10 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
-### dev:stale-test
-
-- Group: Development
-- Command: `echo 'dev:stale-test placeholder'`
-- Power: low
-- Purpose: Placeholder alias retained for compatibility or future implementation.
-- Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: No dedicated `--ci` flag is exposed at this alias level.
-- Usage:
-  - Primary purpose: Placeholder alias retained for compatibility or future implementation.
-  - Flags: none baked into this runner. You can append more args with `bun run dev:stale-test -- <args>` only if the underlying tool supports them.
-- Depends on: None
-- Used by other root scripts: None found
-- Used in:
-  - Workflows: None found
-  - Other files: scripts/validate/**tests**/script-infrastructure.test.ts:107
-- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
-- Removal assessment: Low-risk cleanup candidate, but verify no undocumented manual workflow still calls it.
-
-### validate:runtime:scripts
-
-- Group: Validation
-- Command: `bun run scripts/validate/runtime-scripts.ts`
-- Power: medium
-- Purpose: CI guard: hard-blocks (exit 1) when any bun run <script> reference in the project (outside specs, .gitnexus, and reports) is absent from root package.json. References inside those dirs generate warnings but exit 0. Exits 0 when no critical issues found.
-- Source: `scripts/validate/runtime-scripts.ts`
-- CI flag: Supported explicitly in the implementation.
-- Registered usage: `bun run validate:scripts:runtime`
-- Usage:
-  - Primary purpose: CI guard: hard-blocks (exit 1) when any bun run <script> reference in the project (outside specs, .gitnexus, and reports) is absent from root package.json. References inside those dirs generate warnings but exit 0. Exits 0 when no critical issues found.
-  - Flags: none baked into this runner. You can append more args with `bun run validate:runtime:scripts -- <args>` only if the underlying tool supports them.
-- Depends on: None
-- Used by other root scripts: None found
-- Used in:
-  - Workflows: None found
-  - Other files: scripts/policy-engine/adapters/script-governance.adapter.ts:4, scripts/policy-engine/adapters/script-governance.adapter.ts:53
-- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
-
-### dev:demo-logger-features
-
-- Group: Development
-- Command: `bun run dev:demo:logger`
-- Power: low
-- Purpose: Demonstrates all available logger customization options and features
-- Source: `scripts/dev/demo-logger-features.ts`
-- CI flag: Supported explicitly in the implementation.
-- Registered usage: `bun run dev:demo-logger-features`
-- Usage:
-  - Primary purpose: Demonstrates all available logger customization options and features
-  - Flags: none baked into this runner. You can append more args with `bun run dev:demo-logger-features -- <args>` only if the underlying tool supports them.
-- Depends on: `dev:demo:logger`, `dev`
-- Used by other root scripts: None found
-- Used in:
-  - Workflows: None found
-  - Other files: scripts/dev/demo-logger-features.ts:8
-- Updated or generated files: Not audited automatically in the isolated execution pass.
-- Removal assessment: Usually removable if the team no longer uses the demo or debug workflow.
-
-### repo:references
-
-- Group: Repository
-- Command: `echo 'references placeholder'`
-- Power: low
-- Purpose: Placeholder alias retained for compatibility or future implementation.
-- Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: No dedicated `--ci` flag is exposed at this alias level.
-- Usage:
-  - Primary purpose: Placeholder alias retained for compatibility or future implementation.
-  - Flags: none baked into this runner. You can append more args with `bun run repo:references -- <args>` only if the underlying tool supports them.
-- Depends on: None
-- Used by other root scripts: None found
-- Used in:
-  - Workflows: None found
-  - Other files: scripts/dev/refactor-scripts.ts:261, scripts/validate/script-usage.ts:150
-- Updated or generated files: Not audited automatically in the isolated execution pass.
-- Removal assessment: Low-risk cleanup candidate, but verify no undocumented manual workflow still calls it.
-
-### repo:script
-
-- Group: Repository
-- Command: `echo 'script placeholder'`
-- Power: low
-- Purpose: Placeholder alias retained for compatibility or future implementation.
-- Source: Wrapper only; no single `scripts/*.ts` source file.
-- CI flag: No dedicated `--ci` flag is exposed at this alias level.
-- Usage:
-  - Primary purpose: Placeholder alias retained for compatibility or future implementation.
-  - Flags: none baked into this runner. You can append more args with `bun run repo:script -- <args>` only if the underlying tool supports them.
-- Depends on: None
-- Used by other root scripts: None found
-- Used in:
-  - Workflows: None found
-  - Other files: scripts/dev/demo-logger-features.ts:63, scripts/dev/demo-logger-features.ts:64
-- Updated or generated files: Not audited automatically in the isolated execution pass.
-- Removal assessment: Low-risk cleanup candidate, but verify no undocumented manual workflow still calls it.
-
 ### policy:check
 
 - Group: Policy
-- Command: `bun scripts/policy-engine/cli.ts`
+- Command: `bun run policy:check`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/policy-engine/cli.ts`
@@ -2407,19 +2410,19 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/policy-check.yml:31
-  - Other files: scripts/policy-engine/cli.ts:10, scripts/policy-engine/cli.ts:11, scripts/policy-engine/cli.ts:12, scripts/policy-engine/cli.ts:4, scripts/policy-engine/cli.ts:8, scripts/policy-engine/cli.ts:9
+  - Other files: scripts/policy-engine/cli.ts:8
 - Updated or generated files: Isolated worktree run failed; files touched before failure: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json, docs/architecture/audits/history/audit-1774722812109.json.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/policy-check.yml.
 
 ### policy:check:full
 
 - Group: Policy
-- Command: `bun scripts/policy-engine/cli.ts --full`
+- Command: `bun run policy:check:full`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: `scripts/policy-engine/cli.ts`
 - CI flag: Supported explicitly in the implementation.
-- Registered usage: `bun run policy:check:full`
+- Registered usage: `bun run policy:check`
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flag `--full`: Runner-level option passed directly to the underlying tool.
@@ -2431,10 +2434,30 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Updated or generated files: Isolated worktree run failed before any tracked file changes were observed.
 - Removal assessment: Treat as protected. It is a primary quality, build, test, or governance entrypoint.
 
+### refactor-scripts
+
+- Group: Misc
+- Command: `bun run refactor-scripts`
+- Power: medium
+- Purpose: Applies the migration map to rename all "bun run <old>" references across the repository. Supports both JSON format (docs/scripts/migration-map.json, preferred) and Markdown format (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain. Writes reports to both reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
+- Source: `scripts/dev/refactor-scripts.ts`
+- CI flag: Explicitly rejected in the implementation.
+- Registered usage: `bun run refactor-scripts [--dry-run]`
+- Usage:
+  - Primary purpose: Applies the migration map to rename all "bun run <old>" references across the repository. Supports both JSON format (docs/scripts/migration-map.json, preferred) and Markdown format (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain. Writes reports to both reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
+  - Flags: none baked into this runner. You can append more args with `bun run refactor-scripts -- <args>` only if the underlying tool supports them.
+- Depends on: None
+- Used by other root scripts: None found
+- Used in:
+  - Workflows: None found
+  - Other files: scripts/dev/refactor-scripts.ts:15
+- Updated or generated files: Not audited automatically: mutates repository state.
+- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+
 ### prepare
 
 - Group: Lifecycle
-- Command: `husky`
+- Command: `bun run prepare`
 - Power: critical
 - Purpose: Run the registered repository task for this area.
 - Source: Wrapper only; no single `scripts/*.ts` source file.

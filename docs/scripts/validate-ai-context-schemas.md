@@ -6,12 +6,6 @@
 bun run validate:ai-context-schemas
 ```
 
-Registered package.json runner:
-
-```sh
-bun run scripts/validate/ai-context-schemas.ts
-```
-
 ## Purpose
 
 Validate that all required AI context JSON artifacts exist and are valid JSON
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 
 ## Source
 
+- Package runner: `bun run validate:ai-context-schemas`
 - Implementation: scripts/validate/ai-context-schemas.ts
 - Metadata-backed script file: `scripts/validate/ai-context-schemas.ts`
 

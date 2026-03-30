@@ -6,12 +6,6 @@
 bun run governance:gate:ci
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/governance/gate-ci.ts
-```
-
 ## Purpose
 
 CI variant of the governance gate — runs gate.ts with GitHub Actions annotations
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run governance:gate:ci`
 - Implementation: scripts/governance/gate-ci.ts
 - Metadata-backed script file: `scripts/governance/gate-ci.ts`
 

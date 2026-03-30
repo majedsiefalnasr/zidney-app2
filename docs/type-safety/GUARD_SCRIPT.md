@@ -7,7 +7,7 @@ The Type Safety Guard Script (`scripts/type-safety-guard.ts`) detects unsafe Typ
 ### Run the guard script locally
 
 ```bash
-bun type-safety-guard
+bun run arch:type-safety-guard
 ```
 
 Output shows all violations with file:line:column information.
@@ -15,7 +15,7 @@ Output shows all violations with file:line:column information.
 ### Get JSON output
 
 ```bash
-bun type-safety-guard --json
+bun run arch:type-safety-guard --json
 ```
 
 Output: structured JSON suitable for CI integration
@@ -23,7 +23,7 @@ Output: structured JSON suitable for CI integration
 ### Get markdown report
 
 ```bash
-bun type-safety-guard --markdown
+bun run arch:type-safety-guard --markdown
 ```
 
 Output: formatted markdown report grouped by violation type
@@ -120,8 +120,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: oven-sh/setup-bun@v1
       - run: bun install
-      - run: bun typecheck
-      - run: bun type-safety-guard --json
+      - run: bun run typecheck
+      - run: bun run arch:type-safety-guard --json
 ```
 
 If violations detected: CI job fails → PR merge blocked
@@ -131,25 +131,25 @@ If violations detected: CI job fails → PR merge blocked
 ### Find all any in a package
 
 ```bash
-bun type-safety-guard -- packages/domain-core
+bun run arch:type-safety-guard -- packages/domain-core
 ```
 
 ### Check specific files
 
 ```bash
-bun type-safety-guard -- apps/api/src/routes/*.ts
+bun run arch:type-safety-guard -- apps/api/src/routes/*.ts
 ```
 
 ### Get summary only
 
 ```bash
-bun type-safety-guard --summary
+bun run arch:type-safety-guard --summary
 ```
 
 ### Validate an exception
 
 ```bash
-bun type-safety-guard --validate-exceptions
+bun run arch:type-safety-guard --validate-exceptions
 ```
 
 ## Troubleshooting
@@ -158,7 +158,7 @@ bun type-safety-guard --validate-exceptions
 
 ```bash
 chmod +x scripts/type-safety-guard.ts
-bun type-safety-guard
+bun run arch:type-safety-guard
 ```
 
 ### Script found no violations (but you know they exist)
@@ -172,7 +172,7 @@ The script uses glob patterns. Check that:
 Try explicitly:
 
 ```bash
-bun type-safety-guard -- apps/api/src/file.ts
+bun run arch:type-safety-guard -- apps/api/src/file.ts
 ```
 
 ### Exception not being recognized
@@ -188,13 +188,13 @@ Check that:
 ### Generate exception template
 
 ```bash
-bun type-safety-guard --generate-exception-template > /tmp/exception.json
+bun run arch:type-safety-guard --generate-exception-template > /tmp/exception.json
 ```
 
 ### Batch add exceptions
 
 ```bash
-bun type-safety-guard --json | bun run scripts/bulk-add-exceptions.ts
+bun run arch:type-safety-guard --json | bun run scripts/bulk-add-exceptions.ts
 ```
 
 ### Pre-commit hook integration
@@ -203,7 +203,7 @@ Add to `.husky/pre-commit`:
 
 ```bash
 #!/bin/sh
-bun type-safety-guard --no-exit-error || echo "⚠️  Type safety warnings (non-blocking)"
+bun run arch:type-safety-guard --no-exit-error || echo "⚠️  Type safety warnings (non-blocking)"
 ```
 
 ---

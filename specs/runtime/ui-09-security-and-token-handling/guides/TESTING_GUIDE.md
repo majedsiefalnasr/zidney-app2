@@ -203,7 +203,7 @@ bun run lint
 bun run typecheck
 
 # Format check (should exit 0)
-bun run format
+bun run format:write
 ```
 
 ### Test Coverage Report

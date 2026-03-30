@@ -6,12 +6,6 @@
 bun run validate:tsconfig
 ```
 
-Registered package.json runner:
-
-```sh
-bash scripts/validate/check-tsconfig-strict.sh
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Treat as protected. It is a pri
 
 ## Source
 
+- Package runner: `bun run validate:tsconfig`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

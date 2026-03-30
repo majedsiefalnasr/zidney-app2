@@ -6,12 +6,6 @@
 bun run arch:generate
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/architecture/generate-architecture-map.ts
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run arch:generate`
 - Implementation: scripts/architecture/generate-architecture-map.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/architecture/generate-architecture-map.ts`
 
 ## CI Behavior
 

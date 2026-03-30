@@ -170,7 +170,7 @@ reaches error level.
 
 - Spawn: `bun arch:guard`
 - Exit code 0 → `ok`. Non-zero → `error`.
-- Actionable message: `"Run: bun arch:fix or review architecture violations"`.
+- Actionable message: `"Run: bun arch:governance:fix or review architecture violations"`.
 
 **Check 4 — Architecture brain validation** (`checkArchitectureBrain`)
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script arch:diff
  * @domain arch
@@ -20,7 +22,7 @@
 
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
-import { exit, flushAi, hasCiFlag, log } from './utils/logger'
+import { exit, hasCiFlag, log } from './utils/logger'
 
 log.setScript('arch:diff')
 const isCi = hasCiFlag()
@@ -145,7 +147,6 @@ function runArchitectureDiff() {
   if (changedFiles.length === 0) {
     log.info('Architecture Diff: no changed files detected.')
     log.result({ total: 0, passed: 0, failed: 0, message: 'No changed files to validate.' })
-    flushAi()
     exit(0)
   }
 
@@ -177,7 +178,6 @@ function runArchitectureDiff() {
       failed: violations.length,
       message: 'PR rejected due to architecture rule violations.',
     })
-    flushAi()
     exit(1)
   }
 
@@ -191,7 +191,7 @@ function runArchitectureDiff() {
     failed: 0,
     message: 'No violations detected.',
   })
-  flushAi()
+  exit(0)
 }
 
 runArchitectureDiff()

@@ -1,9 +1,19 @@
+#!/usr/bin/env bun
+/**
+ * @script arch:generate
+ * @domain arch
+ * @category dev
+ * @description Regenerate ARCHITECTURE_MAP.json by scanning top-level apps and
+ *   packages modules and their dependencies.
+ * @usage bun run arch:generate
+ */
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { flushAi, hasCiFlag, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 
 const ROOT = process.cwd()
 const isCi = hasCiFlag()
+log.setScript('arch:generate')
 
 const ARCH_PATH = join(ROOT, 'docs', 'architecture', 'intelligence', 'ARCHITECTURE_MAP.json')
 
@@ -53,7 +63,7 @@ function scanDependencies(moduleRoot: string) {
   for (const f of files) {
     const content = readFileSync(f, 'utf-8')
 
-    const matches = content.matchAll(/from\s+['"]([^'"]+)['"]/g)
+    const matches = Array.from(content.matchAll(/from\s+['"]([^'"]+)['"]/g))
 
     for (const m of matches) {
       const imp = m[1]
@@ -140,7 +150,7 @@ function generateMap() {
     { success: Object.keys(newModules).length },
     { title: 'Architecture Map Regenerated', showPercentage: true }
   )
-  flushAi()
+  exit(0)
 }
 
 generateMap()

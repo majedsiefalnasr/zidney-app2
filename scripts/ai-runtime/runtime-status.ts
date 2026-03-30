@@ -1,17 +1,16 @@
+#!/usr/bin/env bun
 /**
- * AI Agent Runtime Status Check
- *
- * Checks all 5 layers of the AI Agent Runtime Environment and reports
- * their health status. Used by `bun ai-runtime:status` and CI.
- *
- * Allowed imports: node:fs and node:path ONLY.
- * Output: process.stdout.write exclusively — no console.log.
- *
- * Stage: STAGE_INFRA_19_AI_AGENT_RUNTIME_ENVIRONMENT
+ * @script ai:runtime:status
+ * @domain ai
+ * @category dev
+ * @description Check the AI runtime environment layers, report health status,
+ *   and exit non-zero when runtime prerequisites are broken.
+ * @usage bun run ai:runtime:status
  */
 
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { exit, log } from '../utils/logger'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -54,6 +53,7 @@ const GOVERNANCE_SCRIPTS = [
 ]
 
 const MCP_MATRIX_PATH = 'docs/ai/MCP_ACTIVATION_MATRIX.md'
+log.setScript('ai:runtime:status')
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -81,7 +81,7 @@ export function checkContextLoader(root: string): CheckResult {
         label: 'Context Loader',
         status: 'error',
         message: `Missing artifacts: ${missing.join(', ')}`,
-        suggestion: 'bun ai-runtime:refresh',
+        suggestion: 'bun run ai:context:refresh',
       }
     }
 
@@ -95,7 +95,7 @@ export function checkContextLoader(root: string): CheckResult {
         label: 'Context Loader',
         status: 'warning',
         message: 'AI context artifacts are stale',
-        suggestion: 'bun ai-runtime:refresh',
+        suggestion: 'bun run ai:context:refresh',
       }
     }
 
@@ -109,7 +109,7 @@ export function checkContextLoader(root: string): CheckResult {
       label: 'Context Loader',
       status: 'error',
       message: 'Check failed with exception',
-      suggestion: 'bun ai-runtime:refresh',
+      suggestion: 'bun run ai:context:refresh',
     }
   }
 }
@@ -229,7 +229,7 @@ export function checkArchitectureIntelligence(root: string): CheckResult {
       label: 'Architecture Intelligence',
       status: 'error',
       message: brainError,
-      suggestion: 'bun arch:validate-brain',
+      suggestion: 'bun run arch:validate:brain',
     }
   }
 
@@ -238,7 +238,7 @@ export function checkArchitectureIntelligence(root: string): CheckResult {
       label: 'Architecture Intelligence',
       status: 'error',
       message: mapError,
-      suggestion: 'bun arch:generate',
+      suggestion: 'bun run arch:generate',
     }
   }
 
@@ -247,7 +247,7 @@ export function checkArchitectureIntelligence(root: string): CheckResult {
       label: 'Architecture Intelligence',
       status: 'warning',
       message: edgeWarning,
-      suggestion: 'bun arch:validate-brain',
+      suggestion: 'bun run arch:validate:brain',
     }
   }
 
@@ -360,9 +360,15 @@ export function printResults(results: CheckResult[]): void {
   process.stdout.write(`\nAI runtime environment: ${summaryLabel}${summaryDetail}\n`)
 }
 
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])runtime-status\.ts$/.test(entry)
+}
+
 // ─── Entry Point ─────────────────────────────────────────────────────────────
 
 export async function main(): Promise<void> {
+  log.header('AI RUNTIME STATUS', 'Checks the health of the AI agent runtime environment')
   process.stdout.write('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
   process.stdout.write('AI RUNTIME STATUS CHECK\n')
   process.stdout.write('Checks all 5 layers of the AI Agent Runtime Environment\n')
@@ -394,9 +400,9 @@ export async function main(): Promise<void> {
     `\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\\n`
   )
 
-  process.exit(results.some((r) => r.status === 'error') ? 1 : 0)
+  exit(results.some((r) => r.status === 'error') ? 1 : 0)
 }
 
-if (import.meta.main) {
+if (isDirectExecution()) {
   main()
 }

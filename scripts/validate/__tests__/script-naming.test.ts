@@ -62,9 +62,21 @@ describe('NAMING_RE', () => {
 })
 
 describe('ALLOWED_DOMAINS', () => {
-  it('contains exactly the 9 canonical domains', () => {
+  it('contains exactly the canonical domains', () => {
     expect([...ALLOWED_DOMAINS].sort()).toEqual(
-      ['ai', 'arch', 'ci', 'db', 'dev', 'infra', 'repo', 'test', 'validate'].sort()
+      [
+        'ai',
+        'arch',
+        'ci',
+        'db',
+        'dev',
+        'governance',
+        'infra',
+        'policy',
+        'repo',
+        'test',
+        'validate',
+      ].sort()
     )
   })
 })

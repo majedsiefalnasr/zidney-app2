@@ -240,7 +240,7 @@ scripts/ai-guard.ts
 CI validation:
 
 ```
-bun typecheck
+bun run typecheck
 ```
 
 AI governance:

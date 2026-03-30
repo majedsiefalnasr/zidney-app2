@@ -167,8 +167,6 @@ The `run-local-ci.ts` script runs the complete 7-step governance sequence before
 simulation and produces a summary table:
 
 ```bash
-bun scripts/run-local-ci.ts
-# or via the registered package.json key:
 bun run ci:run-local
 ```
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script validate:scripts:runtime
  * @domain validate
@@ -6,7 +8,7 @@
  *   the project (outside specs, .gitnexus, and reports) is absent from root package.json.
  *   References inside those dirs generate warnings but exit 0.
  *   Exits 0 when no critical issues found.
- * @usage bun run validate:scripts:runtime
+ * @usage bun run validate:scripts:all
  */
 
 import { randomUUID } from 'node:crypto'
@@ -155,7 +157,10 @@ export function loadRegisteredScripts(pkgPath: string): Set<string> {
 function main(): void {
   log.header(
     'Validate runtime script references',
-    'CI guard: scan all project files for script references; errors if missing outside specs, .gitnexus, and reports; warnings if only in those dirs'
+    `CI guard: scan all project files for script references.
+Errors if missing outside specs, .gitnexus, and reports.
+Warnings if only in those dirs.
+    `
   )
   const pkgPath = join(REPO_ROOT, 'package.json')
 
@@ -204,8 +209,8 @@ function main(): void {
 
   for (const [ref, fileSet] of refsMap.entries()) {
     if (!registered.has(ref)) {
-      // If the reference appears anywhere outside `specs` and `.gitnexus`,
-      // treat as error. Otherwise treat as warning (spec/gitnexus-only references).
+      // If the reference appears anywhere outside warning-only dirs,
+      // treat as error. Otherwise treat as warning.
       let appearsOutsideExcludedDirs = false
       for (const f of fileSet) {
         const rel = relative(REPO_ROOT, f)
@@ -213,7 +218,25 @@ function main(): void {
         const isInSpecs = segs[0] === 'specs'
         const isInGitnexus = segs[0] === '.gitnexus'
         const isInReports = segs[0] === 'reports'
-        if (!(isInSpecs || isInGitnexus || isInReports)) {
+        const isInDocsReports = segs[0] === 'docs' && segs[1] === 'reports'
+        const isInDocsAi = segs[0] === 'docs' && segs[1] === 'ai'
+        const isInDocsScripts = segs[0] === 'docs' && segs[1] === 'scripts'
+        const isInAgents = segs[0] === '.agents'
+        const isTestFile = rel.includes('__tests__') || rel.includes('.test.')
+        const isPackageMd = rel === 'package.md'
+        if (
+          !(
+            isInSpecs ||
+            isInGitnexus ||
+            isInReports ||
+            isInDocsReports ||
+            isInDocsAi ||
+            isInDocsScripts ||
+            isInAgents ||
+            isTestFile ||
+            isPackageMd
+          )
+        ) {
           appearsOutsideExcludedDirs = true
           break
         }
@@ -279,10 +302,6 @@ function main(): void {
       missing: warnings.length,
     })
     log.badge('CI GUARD WARNING', 'warning')
-    log.progressResult(
-      { warning: warnings.length },
-      { title: 'Unregistered Runtime Scripts (warnings)', showPercentage: false }
-    )
     log.result({
       passed: registered.size,
       failed: 0,

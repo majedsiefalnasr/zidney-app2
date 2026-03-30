@@ -1,11 +1,11 @@
+#!/usr/bin/env bun
+
 /**
  * @script dev:seed:dashboard-test-data
  * @domain dev
  * @category runtime
  * @description Seed realistic MMC dashboard test data into master_db for dashboard testing
- * @mode manual
  * @usage bun run dev:seed:dashboard-test-data
- * @dependencies pg,packages/config,node:crypto
  *
  * Merge Header: Canonical content absorbed from:
  *   - scripts/seed-dashboard-test-data.ts (root-level duplicate, Task T005)

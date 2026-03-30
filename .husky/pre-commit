@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+# ── Timing gate — measure total pre-commit duration ────────────────────────
+PRECOMMIT_START=$(date +%s)
+PRECOMMIT_WARN_THRESHOLD=5  # seconds — warn if pre-commit exceeds this
+
 # ── Detect staged files once (shared across all steps) ──────────────────────
 # FIX #4 — removed the no-op `tr '\n' '\n'`
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
@@ -22,6 +26,14 @@ fi
 echo "Running lint-staged (Biome check --write on staged files)…"
 bunx lint-staged
 
+# ── Script System Fast Validation ────────────────────────────────────────
+echo "Running fast script validation…"
+bun run validate:scripts:fast || {
+  echo "❌ Script validation failed — commit blocked."
+  echo "   Run: bun run validate:scripts:all to see full diagnostics."
+  exit 1
+}
+
 # ── Script UX Validator (staged + autofix) ───────────────────────────────
 echo "Running Script UX validator (--staged --fix)…"
 bun run validate:scripts:ux --staged --fix || {
@@ -41,7 +53,7 @@ if [ -n "$TS_FILES" ]; then
   # Using --skipLibCheck to stay fast; full tsc runs in pre-push and CI.
   bunx tsc --noEmit --skipLibCheck || {
     echo "❌ TypeScript validation failed — commit blocked."
-    echo "   Run: bun typecheck to see all errors."
+    echo "   Run: bun run typecheck to see all errors."
     exit 1
   }
 fi
@@ -87,7 +99,7 @@ BRAIN_FILES=$(echo "$STAGED_FILES" | grep -E 'docs/ai/context/ai-architecture-br
 if [ -n "$BRAIN_FILES" ]; then
   echo "Validating architecture brain integrity…"
   set +e  # Temporarily disable exit-on-error to capture exit code
-  bun arch:validate:brain
+  bun run arch:validate:brain
   BRAIN_EXIT=$?
   set -e  # Re-enable exit-on-error
 
@@ -95,7 +107,7 @@ if [ -n "$BRAIN_FILES" ]; then
     echo "❌ Architecture brain validation failed"
     echo "   The ai-architecture-brain.json has invalid or malformed dependency paths."
     echo "   This prevents AI Guard from validating correctly."
-    echo "   Run: bun arch:audit to regenerate a valid brain."
+    echo "   Run: bun run arch:audit to regenerate a valid brain."
     exit 1
   elif [ "$BRAIN_EXIT" -eq 2 ]; then
     echo "⚠️  Architecture brain has warnings but is valid"
@@ -132,8 +144,15 @@ bun run policy:check --changed || {
   exit 1
 }
 
-# ── Final Summary ────────────────────────────────────────────────────────────
+# ── Final Summary + Timing Gate ──────────────────────────────────────────────
+PRECOMMIT_END=$(date +%s)
+PRECOMMIT_DURATION=$((PRECOMMIT_END - PRECOMMIT_START))
+
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Pre-commit checks passed"
+echo "  Pre-commit checks passed (${PRECOMMIT_DURATION}s)"
+if [ "$PRECOMMIT_DURATION" -gt "$PRECOMMIT_WARN_THRESHOLD" ]; then
+  echo "  ⚠️  Exceeded ${PRECOMMIT_WARN_THRESHOLD}s threshold — consider profiling"
+  echo "     Run: bun run dev:profile:scripts"
+fi
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

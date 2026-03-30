@@ -1,16 +1,16 @@
 #!/usr/bin/env bun
 
 /**
- * profile-script-performance.ts
- *
- * Profiles governance script execution times across multiple runs.
- * Establishes baseline performance metrics for Phase 2 optimization.
- *
- * Usage: bun scripts/dev/profile-script-performance.ts [runs=10]
+ * @script dev:profile:scripts
+ * @domain dev
+ * @category dev
+ * @description Profile governance script execution times across repeated runs
+ *   to establish a performance baseline.
+ * @usage bun run dev:profile:scripts [runs=10]
  */
 
 import { ScriptPerformanceProfiler } from '../../tests/audit-helpers'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 
 const scriptsToProfile = [
   'scripts/ai-guard.ts',
@@ -21,6 +21,7 @@ const scriptsToProfile = [
 ]
 
 const runs = parseInt(process.argv[2] || '10', 10)
+log.setScript('dev:profile:scripts')
 
 log.header(
   'PROFILE SCRIPT PERFORMANCE',
@@ -147,4 +148,4 @@ for (const result of results) {
 }
 
 log.result({ total: results.length, passed: passing.length, failed: failing.length })
-flushAi()
+exit(0)

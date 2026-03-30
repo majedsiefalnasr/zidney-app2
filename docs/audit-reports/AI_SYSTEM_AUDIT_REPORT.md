@@ -1158,7 +1158,7 @@ Only `gitnexus-context.json` has a freshness check. Other artifacts in `docs/ai/
 
 - **A)** Add a unified freshness gate at Pre-Step that validates ALL architecture artifacts are ≤24h old ← **RECOMMENDED** (consistent governance)
 - **B)** Add freshness checks only before Steps 5 (Analyze) and 6 (Implement)
-- **C)** Run `bun scripts/infra-audit.ts` at Pre-Step to regenerate everything
+- **C)** Run `bun run arch:audit` at Pre-Step to regenerate everything
 - **D)** No change — rely on manual regeneration when issues arise
 
 ---

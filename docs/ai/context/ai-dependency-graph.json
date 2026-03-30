@@ -1,8 +1,8 @@
 {
   "schema_version": "2",
-  "generated_at": "2026-03-28T11:22:04.034Z",
+  "generated_at": "2026-03-30T12:12:15.944Z",
   "source_metadata": {
-    "infra_audit_timestamp": "2026-03-28T11:22:03.998Z"
+    "infra_audit_timestamp": "2026-03-30T12:12:15.883Z"
   },
   "modules": {
     "apps/mmc": {

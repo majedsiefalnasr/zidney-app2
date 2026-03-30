@@ -45,7 +45,7 @@ Comprehensive guide to Zidney's 8-layer Type Safety Governance system.
 - ✅ Function type compatibility
 - ✅ Missing property initialization
 
-**When It Runs**: `bun typecheck` (compile-time)
+**When It Runs**: `bun run typecheck` (compile-time)
 
 **Example Error**:
 
@@ -75,7 +75,7 @@ const first = items[0].id; // Error: items[0] could be undefined
 - ✅ Type assertions (`as type`) without justification
 - ✅ Unused variables
 
-**When It Runs**: `bun lint` (lint-time, pre-commit, CI)
+**When It Runs**: `bun run lint` (lint-time, pre-commit, CI)
 
 **Example Error**:
 
@@ -108,7 +108,7 @@ const value = something;
 **Example**:
 
 ```bash
-bun type-safety-guard
+bun run arch:type-safety-guard
 # Output:
 # 🔍 Type Safety Violations Found: 3
 # 📄 src/api/users.ts
@@ -177,9 +177,9 @@ const user = UserSchema.parse(jsonData);
 
 **Pipeline**:
 
-1. TypeScript compile check (`bun typecheck`)
-2. Type safety guard scan (`bun type-safety-guard`)
-3. Biome lint validation (`bun lint`)
+1. TypeScript compile check (`bun run typecheck`)
+2. Type safety guard scan (`bun run arch:type-safety-guard`)
+3. Biome lint validation (`bun run lint`)
 
 **When It Runs**: Every PR to develop/main
 
@@ -256,7 +256,7 @@ export function getUserById(id: string) {}
 - ✅ Generic constraints specified
 - ✅ No implicit `any` on exports
 
-**When It's Checked**: Compile-time (`bun typecheck`)
+**When It's Checked**: Compile-time (`bun run typecheck`)
 
 **How to Comply**: Always write explicit return types on public functions.
 
@@ -348,21 +348,21 @@ const user = await createUser(request);
 
 ### Layer 1: TypeScript Strict Mode
 
-✅ `bun typecheck` runs without errors  
+✅ `bun run typecheck` runs without errors  
 ✅ All implicit `any` caught  
 ✅ No module compiles without types  
 ✅ Index access safety enforced
 
 ### Layer 2: Biome Linting
 
-✅ `bun lint` passes  
+✅ `bun run lint` passes  
 ✅ No explicit `any` without comments  
 ✅ Comment format validated  
 ✅ Unused variables caught
 
 ### Layer 3: Guard Script
 
-✅ `bun type-safety-guard` reports 0 violations  
+✅ `bun run arch:type-safety-guard` reports 0 violations  
 ✅ Patterns detected in <30 seconds  
 ✅ Exceptions properly tracked  
 ✅ Sunset dates enforced
@@ -410,22 +410,22 @@ const user = await createUser(request);
 
 ```bash
 # Check types locally
-bun typecheck
+bun run typecheck
 
 # Run full validation
-bun validate:types
+bun run validate:types
 
 # Scan for unsafe patterns
-bun type-safety-guard
+bun run arch:type-safety-guard
 
 # Fix formatting
-bun lint:fix
+bun run lint:fix
 
 # Run tests
-bun test
+bun run test
 
 # Recommended pre-commit workflow
-bun typecheck && bun validate:types && bun test
+bun run typecheck && bun run validate:types && bun run test
 ```
 
 ### Key Files

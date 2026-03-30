@@ -6,12 +6,6 @@
 bun run arch:context:changed
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/context/changed.ts
-```
-
 ## Purpose
 
 Resolves staged changed files via `git diff --cached` and writes the result to docs/ai/context/context-changed.json with a 5-minute freshness cache. Subsequent reads within the cache window skip the git invocation. A clean staging area (no changed files) is a valid state — the artifact is written with an empty changedFiles array rather than exiting non-zero.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 
 ## Source
 
+- Package runner: `bun run arch:context:changed`
 - Implementation: scripts/context/changed.ts
 - Metadata-backed script file: `scripts/context/changed.ts`
 

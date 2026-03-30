@@ -6,22 +6,17 @@
 bun run typecheck
 ```
 
-Registered package.json runner:
-
-```sh
-bun typecheck:src && bun typecheck:tests
-```
-
 ## Purpose
 
 Run both source and test TypeScript checks.
 
 ## Why It Exists
 
-This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: validate:types. It provides a stable root package.json interface over underlying tools or chained child runners.
+This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: typecheck:tests, validate:types. It provides a stable root package.json interface over underlying tools or chained child runners.
 
 ## Source
 
+- Package runner: `bun run typecheck`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

@@ -52,7 +52,7 @@ async function main() {
   }
 
   try {
-    execSync('bun scripts/generate-ai-context.ts --force --validate', {
+    execSync('bun run ai:context:refresh --validate', {
       stdio: 'pipe',
       cwd: process.cwd(),
     })
@@ -71,7 +71,7 @@ async function main() {
     const startTime = performance.now()
 
     try {
-      execSync('bun scripts/generate-ai-context.ts --validate', {
+      execSync('bun run ai:context:generate --validate', {
         stdio: 'pipe',
         cwd: process.cwd(),
       })

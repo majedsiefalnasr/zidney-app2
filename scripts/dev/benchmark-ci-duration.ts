@@ -1,21 +1,14 @@
 #!/usr/bin/env bun
-import { writeFileSync } from 'node:fs'
 /**
- * Script: CI Performance Benchmarking
- * Purpose: Measure and analyze GitHub Actions CI pipeline duration
- * Tasks: T091, T092, T093, T094, T095
- *
- * Usage:
- *   bun scripts/dev/benchmark-ci-duration.ts
- *
- * This script:
- * 1. Reads CI run history from GitHub API
- * 2. Calculates baseline (before) and optimized (after) metrics
- * 3. Identifies critical path and parallelization efficiency
- * 4. Validates all checks still run without skipping
- * 5. Generates performance report
+ * @script dev:benchmark:ci
+ * @domain dev
+ * @category dev
+ * @description Benchmark CI pipeline duration assumptions, generate markdown
+ *   performance reports, and write a dashboard snapshot.
+ * @usage bun run dev:benchmark:ci
  */
-import { flushAi, log } from '../utils/logger'
+import { writeFileSync } from 'node:fs'
+import { exit, log } from '../utils/logger'
 
 interface CIRunMetrics {
   duration: number // seconds
@@ -28,6 +21,8 @@ interface CIRunMetrics {
     parallelGroup?: number
   }[]
 }
+
+log.setScript('dev:benchmark:ci')
 
 interface PerformanceReport {
   baseline: CIRunMetrics
@@ -463,11 +458,10 @@ Generated: ${new Date().toISOString()}
     passed: report.jobStatus.filter((j) => j.status === '✓').length,
     failed: 0,
   })
-  flushAi()
+  exit(0)
 }
 
 generateCIPerformanceReport().catch((err) => {
   log.error(`CI benchmark failed: ${String(err)}`)
-  flushAi()
-  process.exit(1)
+  exit(1)
 })

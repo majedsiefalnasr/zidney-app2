@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script validate:scan:packages
  * @domain validate

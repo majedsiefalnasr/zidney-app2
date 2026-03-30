@@ -6,12 +6,6 @@
 bun run arch:context:validate
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/context/validate.ts
-```
-
 ## Purpose
 
 Validates docs/ai/context/gitnexus-context.json against docs/ai/gitnexus-context.schema.json. No external schema library (NFR-005). Validation order (stops at first failure): 1. Artifact file exists 2. Valid JSON 3. Schema file exists and is readable 4. All required fields present 5. schemaVersion matches schema.version 6. generatedAt is < maxAgeHours old (default: 24h)
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run arch:context:validate`
 - Implementation: scripts/context/validate.ts
 - Metadata-backed script file: `scripts/context/validate.ts`
 

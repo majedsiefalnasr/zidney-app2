@@ -6,12 +6,6 @@
 bun run dev:hygiene:report
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/dev/hygiene-report-generator.ts
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run dev:hygiene:report`
 - Implementation: scripts/dev/hygiene-report-generator.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/dev/hygiene-report-generator.ts`
 
 ## CI Behavior
 

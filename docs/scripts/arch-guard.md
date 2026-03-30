@@ -6,24 +6,19 @@
 bun run arch:guard
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/architecture-guard/architecture-guard.ts
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
 
 ## Why It Exists
 
-This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml. Its implementation lives in scripts/architecture-guard/architecture-guard.ts and is exposed through the root package.json interface.
+This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: governance:gate:changed. Its implementation lives in scripts/architecture-guard/architecture-guard.ts and is exposed through the root package.json interface.
 
 ## Source
 
+- Package runner: `bun run arch:guard`
 - Implementation: scripts/architecture-guard/architecture-guard.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/architecture-guard/architecture-guard.ts`
 
 ## CI Behavior
 

@@ -1,12 +1,55 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-03-28T16:53:15.880Z",
+  "generatedAt": "2026-03-30T12:08:56.531Z",
+  "analyzedAt": "2026-03-30T12:08:56.531Z",
   "analysisMode": "changed-only",
   "changedFiles": [],
   "impactedModules": [],
   "dependencyGraph": {},
   "architectureLayerMap": {},
   "recentCommits": [
+    {
+      "hash": "fe19b03fcf57f828c4f629c3dc875fbfb9fe379a",
+      "message": "feat(scripts): generate root script docs",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-28T22:54:29+02:00"
+    },
+    {
+      "hash": "7a75d52ff4864dcb36ca3e355161160906deb51c",
+      "message": "chore(scripts): checkpoint package docs automation",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-28T22:38:25+02:00"
+    },
+    {
+      "hash": "31d0d6238c949630444d0aa528775842674164ce",
+      "message": "Merge pull request #78 from majedsiefalnasr/spec/infra-029-policy-engine-and-governance-rules-layer",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-28T20:18:07+02:00"
+    },
+    {
+      "hash": "66910179f9a3bee57946616bd67ad150578fc511",
+      "message": "fix(ci): pass TRIVY_VERSION (with 'v') to Trivy installer to match GitHub tag",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-28T20:13:24+02:00"
+    },
+    {
+      "hash": "d5de01b357982c893ee1c9c48ce55ef2494f14c3",
+      "message": "chore(security): pin Trivy to v0.69.3; update CI workflows, pre-commit hook, helper, and docs",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-28T19:40:39+02:00"
+    },
+    {
+      "hash": "954cc61bcef73932451c18438f17f97d6cacc70b",
+      "message": "feat(trivy): add Trivy installation and caching to architecture governance workflow",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-28T19:21:31+02:00"
+    },
+    {
+      "hash": "87d844007f91cdffcacb06eccb50e78432127e52",
+      "message": "feat: update script references to use 'bun run repo:' format",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-28T18:53:22+02:00"
+    },
     {
       "hash": "693ec8b8056da2f61eb696b1bbc32814876daffb",
       "message": "feat(validate): add 'policy' to allowed domains for script naming validation",
@@ -24,48 +67,6 @@
       "message": "chore(infra-29): close policy engine and governance rules layer stage",
       "author": "Majed Sief Alnasr",
       "date": "2026-03-28T13:59:28+02:00"
-    },
-    {
-      "hash": "bc3de2d13d240dbbb079f6c56629dc3abf769846",
-      "message": "fix(scripts): import flushAi and avoid passing undefined metrics to logger",
-      "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T13:23:39+02:00"
-    },
-    {
-      "hash": "59043bbcc6650454ced88bc693c470d27701c5c1",
-      "message": "chore(validate): improve UX for validate:ai-context-schemas (header, sections, exit wrapper)",
-      "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T00:09:47+02:00"
-    },
-    {
-      "hash": "8bf2bcdd4e8a8f3ead3437897785a8f350c030b1",
-      "message": "chore(logger): add resultSimple API; use in ai-context-fresh; update validator & demo",
-      "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T00:05:51+02:00"
-    },
-    {
-      "hash": "ea84432de8b335c9a5e0e5cf8cc612bcfd535eb8",
-      "message": "chore(hooks): run ai-guard with --ci to avoid regenerating AI-context artifacts during hooks",
-      "author": "Majed Sief Alnasr",
-      "date": "2026-03-27T23:36:09+02:00"
-    },
-    {
-      "hash": "0226ff07a121ff42fd7bbfa7912658d7c88d4991",
-      "message": "chore(hooks): add --ci/--dry-run to arch:context:changed and use --ci in hooks",
-      "author": "Majed Sief Alnasr",
-      "date": "2026-03-27T23:27:47+02:00"
-    },
-    {
-      "hash": "7f6a1c06a590f2559ca98bcfa9b562a874869abf",
-      "message": "fix: update context-changed.json generation to reflect recent changes and improve file timestamp handling",
-      "author": "Majed Sief Alnasr",
-      "date": "2026-03-27T23:10:29+02:00"
-    },
-    {
-      "hash": "0dd3fac509e9b8d6b86e4459dd78ff67d97ebe02",
-      "message": "fix(scripts): satisfy validate:scripts:ux — add headers, library markers, and use shared logger",
-      "author": "Majed Sief Alnasr",
-      "date": "2026-03-27T22:55:16+02:00"
     }
   ],
   "riskIndicators": []

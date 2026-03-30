@@ -6,12 +6,6 @@
 bun run arch:check:store-cycles
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/check-store-cycles.ts
-```
-
 ## Purpose
 
 Runs madge on each app's src/core/state/ to assert zero circular dependencies. Exits with non-zero code on any detected cycle.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run arch:check:store-cycles`
 - Implementation: scripts/check-store-cycles.ts
 - Metadata-backed script file: `scripts/check-store-cycles.ts`
 

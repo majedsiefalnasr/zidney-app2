@@ -26,7 +26,8 @@ describe('validateMetadataHeaders', () => {
   it('returns no violations when all 5 tags are present', () => {
     writeScript(
       'valid.ts',
-      `/**
+      `#!/usr/bin/env bun
+/**
  * @script db:migrate
  * @domain db
  * @category runtime
@@ -43,7 +44,8 @@ export function run() {}
   it('returns violation when @category is missing', () => {
     writeScript(
       'missing-category.ts',
-      `/**
+      `#!/usr/bin/env bun
+/**
  * @script db:migrate
  * @domain db
  * @description Runs pending DB migrations.
@@ -69,10 +71,76 @@ export function helper() {}
     expect(v).toBeUndefined()
   })
 
+  it('treats package.json script targets as governed entrypoints', () => {
+    const scriptsDir = join(tmpDir, 'scripts')
+    mkdirSync(scriptsDir, { recursive: true })
+    writeFileSync(
+      join(scriptsDir, 'package-target.ts'),
+      `#!/usr/bin/env bun
+export function run() {}
+`,
+      'utf-8'
+    )
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify(
+        {
+          name: 'tmp',
+          scripts: {
+            'dev:package:target': 'bun scripts/package-target.ts',
+          },
+        },
+        null,
+        2
+      ),
+      'utf-8'
+    )
+
+    const violations = validateMetadataHeaders(scriptsDir, tmpDir)
+    const violation = violations.find((x) => x.file.includes('scripts/package-target.ts'))
+    expect(violation?.message).toContain('@script')
+  })
+
+  it('requires a bun shebang for governed script entrypoints', () => {
+    const scriptsDir = join(tmpDir, 'scripts')
+    mkdirSync(scriptsDir, { recursive: true })
+    writeFileSync(
+      join(scriptsDir, 'missing-shebang.ts'),
+      `/**
+ * @script dev:missing:shebang
+ * @domain dev
+ * @category dev
+ * @description Example governed script.
+ * @usage bun run dev:missing:shebang
+ */
+export function run() {}
+`,
+      'utf-8'
+    )
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify(
+        {
+          name: 'tmp',
+          scripts: {
+            'dev:missing:shebang': 'bun scripts/missing-shebang.ts',
+          },
+        },
+        null,
+        2
+      ),
+      'utf-8'
+    )
+
+    const violations = validateMetadataHeaders(scriptsDir, tmpDir)
+    expect(violations.find((x) => x.rule === 'script-missing-shebang')).toBeDefined()
+  })
+
   it('returns violation when multiple tags are missing', () => {
     writeScript(
       'sparse.ts',
-      `/**
+      `#!/usr/bin/env bun
+/**
  * @script validate:something
  */
 export function run() {}
@@ -85,6 +153,29 @@ export function run() {}
     expect(v?.message).toContain('@category')
     expect(v?.message).toContain('@description')
     expect(v?.message).toContain('@usage')
+  })
+
+  it('returns violation when deprecated metadata tags are present', () => {
+    writeScript(
+      'deprecated-metadata.ts',
+      `#!/usr/bin/env bun
+/**
+ * @script dev:deprecated:metadata
+ * @domain dev
+ * @category dev
+ * @description Example governed script.
+ * @usage bun run dev:deprecated:metadata
+ * @mode manual
+ * @dependencies node:fs
+ */
+export function run() {}
+`
+    )
+
+    const violations = validateMetadataHeaders(tmpDir, tmpDir)
+    const violation = violations.find((x) => x.rule === 'script-deprecated-metadata')
+    expect(violation?.message).toContain('@mode')
+    expect(violation?.message).toContain('@dependencies')
   })
 })
 
@@ -99,7 +190,8 @@ describe('validateRegistryFreshness', () => {
   it('returns violation when registry is stale', () => {
     writeScript(
       'stale-reg-script.ts',
-      `/**
+      `#!/usr/bin/env bun
+/**
  * @script dev:stale-test
  * @domain dev
  * @category dev

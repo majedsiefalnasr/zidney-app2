@@ -6,22 +6,17 @@
 bun run ai:context:refresh
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/generate-ai-context.ts --force
-```
-
 ## Purpose
 
 Generate AI context artifacts (architecture brain, module map, dependency graph). Supports incremental (default), forced, and validate-after-generation modes.
 
 ## Why It Exists
 
-This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml, .github/workflows/ai-context-validation.yml. Its implementation lives in scripts/generate-ai-context.ts and is exposed through the root package.json interface.
+This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ai-context-validation.yml, .github/workflows/ci.yml. Its implementation lives in scripts/generate-ai-context.ts and is exposed through the root package.json interface.
 
 ## Source
 
+- Package runner: `bun run ai:context:refresh`
 - Implementation: scripts/generate-ai-context.ts
 - Metadata-backed script file: `scripts/generate-ai-context.ts`
 

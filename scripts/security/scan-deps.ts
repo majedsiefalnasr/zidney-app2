@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script infra:security:deps
  * @domain infra

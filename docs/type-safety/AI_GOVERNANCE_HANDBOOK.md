@@ -265,19 +265,19 @@ Before committing code, verify:
 - [ ] **TypeScript passes**
 
   ```bash
-  bun typecheck  # No errors
+  bun run typecheck  # No errors
   ```
 
 - [ ] **Full validation passes**
 
   ```bash
-  bun validate:types  # typecheck + guard + biome
+  bun run validate:types  # typecheck + guard + biome
   ```
 
 - [ ] **Tests pass**
 
   ```bash
-  bun test
+  bun run test
   ```
 
 - [ ] **No secrets exposed**
@@ -321,8 +321,8 @@ Your code will be reviewed by humans who will verify:
 2. ✅ All external data validated
 3. ✅ Generics preferred over `any`
 4. ✅ `@ts-ignore` comments justified
-5. ✅ `bun typecheck` passes
-6. ✅ `bun validate:types` passes (full suite)
+5. ✅ `bun run typecheck` passes
+6. ✅ `bun run validate:types` passes (full suite)
 7. ✅ Tests comprehensive
 8. ✅ No security issues
 

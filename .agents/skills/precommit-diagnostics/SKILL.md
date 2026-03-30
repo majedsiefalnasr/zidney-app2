@@ -77,7 +77,7 @@ biome check failed
 Typical fix:
 
 ```
-bun biome format .
+bun run format:write
 ```
 
 or fix the reported lint issues.
@@ -120,7 +120,7 @@ Typical causes:
 Recommended diagnostic steps:
 
 ```
-bun scripts/ai-guard.ts
+bun run ai:guard
 ```
 
 Then review the reported module or import path.
@@ -143,7 +143,7 @@ Typical causes:
 Recommended steps:
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 Then update:
@@ -178,19 +178,19 @@ Examples:
 Format staged files:
 
 ```
-bun biome format .
+bun run format:write
 ```
 
 Re-run architecture validation:
 
 ```
-bun scripts/ai-guard.ts
+bun run ai:guard
 ```
 
 Regenerate architecture intelligence:
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 ---

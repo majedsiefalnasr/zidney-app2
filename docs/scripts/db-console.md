@@ -6,12 +6,6 @@
 bun run db:console
 ```
 
-Registered package.json runner:
-
-```sh
-bun run scripts/db/console.ts
-```
-
 ## Purpose
 
 Launch an interactive psql session connected to DATABASE_URL.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run db:console`
 - Implementation: scripts/db/console.ts
 - Metadata-backed script file: `scripts/db/console.ts`
 

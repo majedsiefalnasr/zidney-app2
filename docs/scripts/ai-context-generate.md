@@ -6,12 +6,6 @@
 bun run ai:context:generate
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/generate-ai-context.ts
-```
-
 ## Purpose
 
 Generate AI context artifacts (architecture brain, module map, dependency graph). Supports incremental (default), forced, and validate-after-generation modes.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run ai:context:generate`
 - Implementation: scripts/generate-ai-context.ts
 - Metadata-backed script file: `scripts/generate-ai-context.ts`
 

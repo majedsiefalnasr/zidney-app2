@@ -6,12 +6,6 @@
 bun run infra:security
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/security/scan.ts
-```
-
 ## Purpose
 
 Run a full Trivy filesystem scan and print visible findings without blocking on non-clean results.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run infra:security`
 - Implementation: scripts/security/scan.ts
 - Metadata-backed script file: `scripts/security/scan.ts`
 

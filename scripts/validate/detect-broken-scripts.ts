@@ -1,9 +1,11 @@
+#!/usr/bin/env bun
+
 /**
  * @script validate:scripts:broken
  * @domain validate
  * @category governance
  * @description Detect missing or broken TypeScript script files referenced in root package.json
- * @usage bun run validate:scripts:broken
+ * @usage bun run validate:scripts:all
  */
 
 import { spawnSync } from 'node:child_process'

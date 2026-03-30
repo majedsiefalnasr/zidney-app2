@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 /**
  * @script ai:context:generate
  * @domain ai

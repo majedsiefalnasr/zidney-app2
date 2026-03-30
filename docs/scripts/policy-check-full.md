@@ -6,12 +6,6 @@
 bun run policy:check:full
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/policy-engine/cli.ts --full
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as critical. Treat as protected. It is a pri
 
 ## Source
 
+- Package runner: `bun run policy:check:full`
 - Implementation: scripts/policy-engine/cli.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/policy-engine/cli.ts`
 
 ## CI Behavior
 

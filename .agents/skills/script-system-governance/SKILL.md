@@ -48,7 +48,7 @@ Format:
 |--------------|---------------------------------------------|---------------------------------------|
 | `db`         | Database operations                         | `db:migrate`, `db:status:pool`        |
 | `arch`       | Architecture / governance checks            | `arch:audit`, `arch:diff`             |
-| `validate`   | Validation guards                           | `validate:tsconfig`, `validate:scripts:runtime` |
+| `validate`   | Validation guards                           | `validate:tsconfig`, `validate:scripts:all` |
 | `ai`         | AI context and execution tools              | `ai:guard`, `ai:context:generate`     |
 | `ci`         | CI / pipeline scripts                       | `ci:run-local`, `ci:smoke:staging`    |
 | `repo`       | Repo doctor / onboarding tools              | `repo:doctor`, `repo:status`          |

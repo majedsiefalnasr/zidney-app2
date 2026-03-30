@@ -1,16 +1,18 @@
+#!/usr/bin/env bun
+
 /**
  * @script dev:refactor:scripts
  * @domain dev
  * @category dev
- * @description Applies the SCRIPT_MIGRATION_MAP to rename all "bun run <old>"
- *   references across the repository. Reads docs/scripts/SCRIPT_MIGRATION_MAP.md,
- *   builds the old→new rename index, then rewrites all matching files in-place.
- *   Supports --dry-run to preview changes without writing. Exits 1 if any
- *   unresolved references remain after the run. Writes a summary report to
- *   reports/SCRIPT_REFACTOR_REPORT.md.
- * @usage bun run dev:refactor:scripts
- * @mode manual
- * @dependencies node:fs,node:path,node:crypto
+ * @description Applies the migration map to rename all "bun run <old>"
+ *   references across the repository. Supports both JSON format
+ *   (docs/scripts/migration-map.json, preferred) and Markdown format
+ *   (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new
+ *   rename index, then rewrites all matching files in-place. Supports
+ *   --dry-run to preview changes without writing. Exits 1 if any
+ *   unresolved references remain. Writes reports to both
+ *   reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
+ * @usage bun run refactor-scripts [--dry-run]
  */
 
 import { randomUUID } from 'node:crypto'
@@ -26,8 +28,10 @@ const logger = createLogger('dev:refactor:scripts')
 logger.setContext({ correlationId, ci: isCi })
 
 const REPO_ROOT = process.cwd()
-const MIGRATION_MAP_PATH = join(REPO_ROOT, 'docs/scripts/SCRIPT_MIGRATION_MAP.md')
-const REPORT_PATH = join(REPO_ROOT, 'reports/SCRIPT_REFACTOR_REPORT.md')
+const MIGRATION_MAP_MD_PATH = join(REPO_ROOT, 'docs/scripts/SCRIPT_MIGRATION_MAP.md')
+const MIGRATION_MAP_JSON_PATH = join(REPO_ROOT, 'docs/scripts/migration-map.json')
+const REPORT_MD_PATH = join(REPO_ROOT, 'reports/SCRIPT_REFACTOR_REPORT.md')
+const REPORT_JSON_PATH = join(REPO_ROOT, 'docs/reports/script-refactor-report.json')
 
 const DRY_RUN = args.includes('--dry-run')
 
@@ -36,8 +40,14 @@ const SCAN_EXTENSIONS = new Set(['.json', '.ts', '.yml', '.yaml', '.md', '.sh'])
 
 const EXCLUDE_DIRS = new Set(['node_modules', 'coverage', 'dist', '.git', '.turbo', '.cache'])
 
+/** Files to exclude from scanning (they document old→new changes and naturally contain old names) */
+const EXCLUDE_FILES = new Set([
+  join(REPO_ROOT, 'reports/SCRIPT_REFACTOR_REPORT.md'),
+  join(REPO_ROOT, 'docs/reports/script-refactor-report.json'),
+])
+
 // ---------------------------------------------------------------------------
-// Parsing the migration map
+// Parsing the migration map (Markdown format — legacy)
 // ---------------------------------------------------------------------------
 
 export function parseMigrationMap(content: string): MigrationEntry[] {
@@ -81,6 +91,34 @@ export function parseMigrationMap(content: string): MigrationEntry[] {
 }
 
 // ---------------------------------------------------------------------------
+// Parsing the migration map (JSON format — v2.0)
+// ---------------------------------------------------------------------------
+
+interface JsonMigrationMap {
+  version: string
+  migrations: Record<string, { newName: string | null; type: string; reason: string }>
+}
+
+export function parseJsonMigrationMap(content: string): MigrationEntry[] {
+  const map: JsonMigrationMap = JSON.parse(content)
+  const entries: MigrationEntry[] = []
+
+  for (const [oldName, entry] of Object.entries(map.migrations)) {
+    // Skip removals (newName === null) — nothing to rename
+    if (!entry.newName) continue
+
+    entries.push({
+      oldName,
+      type: 'D', // JSON map does not carry legacy type codes; default to D (legacy)
+      violation: entry.reason,
+      newName: entry.newName,
+    })
+  }
+
+  return entries
+}
+
+// ---------------------------------------------------------------------------
 // File collection
 // ---------------------------------------------------------------------------
 
@@ -105,7 +143,7 @@ export function buildFileList(dir: string): string[] {
       results.push(...buildFileList(full))
     } else {
       const ext = entry.includes('.') ? `.${entry.split('.').pop()}` : ''
-      if (SCAN_EXTENSIONS.has(ext)) {
+      if (SCAN_EXTENSIONS.has(ext) && !EXCLUDE_FILES.has(full)) {
         results.push(full)
       }
     }
@@ -148,8 +186,15 @@ export function replaceInFile(
         continue
       }
 
-      const count = updated.split(pattern.oldRef).length - 1
-      updated = updated.split(pattern.oldRef).join(pattern.newRef)
+      // Use a regex with a word-boundary lookahead to avoid prefix matching.
+      // Matches "bun run format:write" only when NOT followed by ":" or a word char.
+      const escaped = pattern.oldRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const re = new RegExp(`${escaped}(?![:\\w])`, 'g')
+      const matches = updated.match(re)
+      if (!matches || matches.length === 0) continue
+
+      const count = matches.length
+      updated = updated.replace(re, pattern.newRef)
       replacements.push({ oldRef: pattern.oldRef, newRef: pattern.newRef, count })
     }
   }
@@ -182,7 +227,10 @@ export function validateNoRemnants(
     }
     const found: string[] = []
     for (const { oldName } of migrations) {
-      if (content.includes(`bun run ${oldName}`) || content.includes(`bun ${oldName}`)) {
+      // Word-boundary check: match "bun run <old>" only when NOT followed by ":" or word char
+      const escaped = oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const re = new RegExp(`bun (run )?${escaped}(?![:\\w])`)
+      if (re.test(content)) {
         found.push(oldName)
       }
     }
@@ -243,9 +291,33 @@ export function writeReport(
     }
   }
 
+  // Write Markdown report
   mkdirSync(join(REPO_ROOT, 'reports'), { recursive: true })
   if (!dryRun) {
-    writeFileSync(REPORT_PATH, lines.join('\n'), 'utf-8')
+    writeFileSync(REPORT_MD_PATH, lines.join('\n'), 'utf-8')
+  }
+
+  // Write JSON report
+  const jsonReport = {
+    generated: iso,
+    mode: dryRun ? 'dry-run' : 'live',
+    migrationCount,
+    filesChanged: summaries.length,
+    totalReplacements: summaries.reduce(
+      (acc, s) => acc + s.replacements.reduce((a, r) => a + r.count, 0),
+      0
+    ),
+    changes: summaries.map((s) => ({
+      file: s.filePath,
+      replacements: s.replacements,
+    })),
+    unresolvedReferences: remnants,
+    status: remnants.length === 0 ? 'clean' : 'has-remnants',
+  }
+
+  mkdirSync(join(REPO_ROOT, 'docs/reports'), { recursive: true })
+  if (!dryRun) {
+    writeFileSync(REPORT_JSON_PATH, JSON.stringify(jsonReport, null, 2), 'utf-8')
   }
 
   process.stdout.write(lines.join('\n'))
@@ -258,7 +330,7 @@ export function writeReport(
 function main(): void {
   log.header(
     'REFACTOR SCRIPTS',
-    'Applies SCRIPT_MIGRATION_MAP to rename bun run repo:references across the repository'
+    'Applies migration map to rename script runners across the repository'
   )
   if (isCi) {
     logger.error('dev:refactor:scripts mutates repository files and cannot run with --ci')
@@ -268,14 +340,31 @@ function main(): void {
     logger.info('Running in DRY RUN mode — no files will be written')
   }
 
-  if (!existsSync(MIGRATION_MAP_PATH)) {
-    logger.error('Migration map not found', { path: MIGRATION_MAP_PATH })
-    process.stderr.write(`\n❌ Migration map not found: ${MIGRATION_MAP_PATH}\n`)
+  // Prefer JSON migration map; fall back to Markdown
+  let migrations: MigrationEntry[]
+  if (existsSync(MIGRATION_MAP_JSON_PATH)) {
+    const mapContent = readFileSync(MIGRATION_MAP_JSON_PATH, 'utf-8')
+    migrations = parseJsonMigrationMap(mapContent)
+    logger.info('JSON migration map loaded', {
+      path: 'docs/scripts/migration-map.json',
+      count: migrations.length,
+    })
+  } else if (existsSync(MIGRATION_MAP_MD_PATH)) {
+    const mapContent = readFileSync(MIGRATION_MAP_MD_PATH, 'utf-8')
+    migrations = parseMigrationMap(mapContent)
+    logger.info('Markdown migration map loaded', {
+      path: 'docs/scripts/SCRIPT_MIGRATION_MAP.md',
+      count: migrations.length,
+    })
+  } else {
+    logger.error('No migration map found', {
+      tried: [MIGRATION_MAP_JSON_PATH, MIGRATION_MAP_MD_PATH],
+    })
+    process.stderr.write(
+      `\n❌ No migration map found. Expected:\n  - ${MIGRATION_MAP_JSON_PATH}\n  - ${MIGRATION_MAP_MD_PATH}\n`
+    )
     exit(1)
   }
-
-  const mapContent = readFileSync(MIGRATION_MAP_PATH, 'utf-8')
-  const migrations = parseMigrationMap(mapContent)
   logger.info('Migration entries loaded', { count: migrations.length })
 
   const files = buildFileList(REPO_ROOT)

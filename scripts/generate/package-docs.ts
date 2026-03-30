@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script dev:generate:package-docs
  * @domain dev
@@ -517,10 +519,6 @@ function inferCiFlag(entry: ScriptDocEntry): string {
 }
 
 function inferRemovalAssessment(entry: ScriptDocEntry, power: string): string {
-  if (entry.existing?.removalAssessment) {
-    return entry.existing.removalAssessment
-  }
-
   if (entry.usedBy.length > 0) {
     return `Not safe to remove directly. Other root scripts depend on it: ${entry.usedBy.join(', ')}.`
   }
@@ -834,13 +832,17 @@ function renderScriptEntry(entry: ScriptDocEntry): string[] {
     entry.auditRecord,
     entry.existing?.updatedGeneratedFiles ?? classifyUnauditedFallback(entry)
   )
+    .split(entry.command)
+    .join(`bun run ${entry.name}`)
+    .split(`\`${entry.command}\``)
+    .join(`\`bun run ${entry.name}\``)
   const removalAssessment = inferRemovalAssessment(entry, power)
 
   const lines = [
     `### ${entry.name}`,
     '',
     `- Group: ${group}`,
-    `- Command: \`${entry.command}\``,
+    `- Command: \`bun run ${entry.name}\``,
     `- Power: ${power}`,
     `- Purpose: ${purpose}`,
     `- Source: ${source}`,

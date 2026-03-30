@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script dev:generate:script-docs
  * @domain dev
@@ -9,7 +11,15 @@
  */
 
 import { randomUUID } from 'node:crypto'
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
 import { join } from 'node:path'
 import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 
@@ -409,10 +419,15 @@ function inferCiBehavior(entry: RootScriptDocEntry): string {
 }
 
 function inferAuditNote(entry: RootScriptDocEntry): string {
-  return (
+  const note =
     stripWrapping(entry.reference?.updatedGeneratedFiles) ??
     'No isolated execution audit note is currently recorded.'
-  )
+  const implementationCommand = stripWrapping(entry.command)
+  if (!implementationCommand) {
+    return note
+  }
+
+  return note.split(implementationCommand).join(`bun run ${entry.script}`)
 }
 
 function renderRelationships(entry: RootScriptDocEntry): string[] {
@@ -430,6 +445,7 @@ export function generateScriptDoc(entry: RootScriptDocEntry): string {
   const source =
     stripWrapping(entry.reference?.source) ??
     (entry.sourcePath ? entry.sourcePath : 'Wrapper only; no single scripts/*.ts source file.')
+  const packageUsage = `bun run ${entry.script}`
 
   const lines = [
     `# ${entry.script}`,
@@ -437,13 +453,7 @@ export function generateScriptDoc(entry: RootScriptDocEntry): string {
     '## Command',
     '',
     '```sh',
-    `bun run ${entry.script}`,
-    '```',
-    '',
-    'Registered package.json runner:',
-    '',
-    '```sh',
-    entry.command,
+    packageUsage,
     '```',
     '',
     '## Purpose',
@@ -456,6 +466,7 @@ export function generateScriptDoc(entry: RootScriptDocEntry): string {
     '',
     '## Source',
     '',
+    `- Package runner: \`${packageUsage}\``,
     `- Implementation: ${source}`,
     `- Metadata-backed script file: ${entry.meta?.filePath ? `\`${entry.meta.filePath}\`` : 'No metadata-backed implementation file detected.'}`,
     '',
@@ -576,6 +587,12 @@ function loadPackageReferenceSections(): Map<string, PackageReferenceSection> {
   return parsePackageReferenceSections(readFileSync(PACKAGE_REFERENCE_PATH, 'utf-8'))
 }
 
+export function findStaleDocFiles(existingFiles: string[], expectedFiles: string[]): string[] {
+  const expected = new Set([...expectedFiles, ...Array.from(RESERVED_DOC_FILES)])
+
+  return existingFiles.filter((fileName) => fileName.endsWith('.md') && !expected.has(fileName))
+}
+
 function main(): void {
   log.header(
     'SCRIPT REGISTRY GENERATOR',
@@ -640,13 +657,26 @@ function main(): void {
     loadPackageReferenceSections(),
     loadExistingDocNameMap()
   )
+  const staleDocFiles = findStaleDocFiles(
+    readdirSync(DOCS_DIR),
+    rootScriptDocs.map((entry) => entry.filePath)
+  )
+
+  for (const fileName of staleDocFiles) {
+    rmSync(join(DOCS_DIR, fileName), { force: true })
+  }
+
   writeFileSync(REGISTRY_PATH, registry, 'utf-8')
   for (const entry of rootScriptDocs) {
     writeFileSync(join(DOCS_DIR, entry.filePath), generateScriptDoc(entry), 'utf-8')
   }
   writeFileSync(DOCS_INDEX_PATH, generateDocsIndex(rootScriptDocs), 'utf-8')
 
-  logger.info('Registry written', { path: REGISTRY_PATH, scripts: metas.length })
+  logger.info('Registry written', {
+    path: REGISTRY_PATH,
+    scripts: metas.length,
+    removedDocs: staleDocFiles.length,
+  })
   process.stdout.write(
     `\n✓ Script docs written to docs/scripts/ (${rootScriptDocs.length} root runners)\n`
   )

@@ -149,7 +149,7 @@ describe('validate-execution.ts logic', () => {
     vi.mocked(checkBrainStatus).mockReturnValue({
       status: 'stale',
       brainPath: 'brain.json',
-      detail: 'Source files newer. Run: bun arch:audit',
+      detail: 'Source files newer. Run: bun run arch:audit',
     })
 
     const brainResult = vi.mocked(checkBrainStatus)()

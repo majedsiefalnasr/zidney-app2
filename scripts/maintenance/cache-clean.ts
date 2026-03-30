@@ -1,11 +1,11 @@
+#!/usr/bin/env bun
+
 /**
  * @script infra:cache:clean
  * @domain infra
  * @category maintenance
  * @description Remove build caches and temporary output directories to free disk space
- * @mode manual
  * @usage bun run infra:cache:clean
- * @dependencies node:fs,node:path,node:crypto
  */
 
 import { randomUUID } from 'node:crypto'
@@ -14,7 +14,7 @@ import { join } from 'node:path'
 import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 
 const correlationId = randomUUID()
-const logger = createLogger('maintenance:cache-clean')
+const logger = createLogger('infra:cache:clean')
 const isCi = hasCiFlag(process.argv.slice(2))
 logger.setContext({ correlationId, ci: isCi })
 

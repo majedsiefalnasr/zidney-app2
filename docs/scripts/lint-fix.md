@@ -6,12 +6,6 @@
 bun run lint:fix
 ```
 
-Registered package.json runner:
-
-```sh
-biome check --write .
-```
-
 ## Purpose
 
 Run Biome checks and write fixable changes.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run lint:fix`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

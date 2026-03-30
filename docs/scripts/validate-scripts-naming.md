@@ -6,12 +6,6 @@
 bun run validate:scripts:naming
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/validate/script-naming.ts
-```
-
 ## Purpose
 
 Validates all package.json script keys conform to the <domain>:<action>[:<scope>] naming convention. Allowed domains: db, arch, validate, ai, ci, repo, dev, infra, test, governance, policy. Lifecycle-exempt names are skipped. Reports ALL violations before exiting non-zero.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run validate:scripts:naming`
 - Implementation: scripts/validate/script-naming.ts
 - Metadata-backed script file: `scripts/validate/script-naming.ts`
 

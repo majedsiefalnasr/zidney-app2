@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script validate:scripts:usage
  * @domain validate
@@ -11,7 +13,7 @@
 
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 import { collectPackageJsonFiles, parseScriptEntries } from './script-naming'
 import type { ViolationRecord } from './types'
@@ -42,8 +44,13 @@ const EXCLUDE_DIRS = new Set([
   'phases', // specs/phases — stage specification documents (may reference past/future scripts)
 ])
 
+const EXCLUDE_PATH_PREFIXES = ['docs/ai/context/', 'docs/architecture/health/history/']
+
 /** Matches: bun run [--flags] <script-name> */
 export const USAGE_RE = /bun run (?:--?\S+ )*([\w:.-]+)/g
+
+/** Matches direct implementation invocations such as: bun scripts/foo/bar.ts --flag */
+export const DIRECT_COMMAND_RE = /\bbun (scripts\/[^\s'"`]+\.(?:ts|js|sh)(?:\s+--?[^\n`]+)*)/g
 
 export function walkScanFiles(dir: string, rootDir: string = dir): string[] {
   const results: string[] = []
@@ -54,8 +61,10 @@ export function walkScanFiles(dir: string, rootDir: string = dir): string[] {
     return results
   }
   for (const entry of entries) {
-    if (EXCLUDE_DIRS.has(entry)) continue
     const full = join(dir, entry)
+    const rel = full.replace(`${rootDir}/`, '')
+    if (EXCLUDE_DIRS.has(entry)) continue
+    if (EXCLUDE_PATH_PREFIXES.some((prefix) => rel.startsWith(prefix))) continue
     let stat: ReturnType<typeof statSync>
     try {
       stat = statSync(full)
@@ -100,6 +109,48 @@ export function extractUsages(
   return usages
 }
 
+export function collectRegisteredCommands(repoRoot: string): Map<string, string> {
+  const commands = new Map<string, string>()
+  const pkgFiles = collectPackageJsonFiles(repoRoot)
+
+  for (const pkgFile of pkgFiles) {
+    for (const entry of parseScriptEntries(pkgFile)) {
+      commands.set(entry.command.replace(/^bun\s+/, '').trim(), entry.name)
+    }
+  }
+
+  return commands
+}
+
+export function extractDirectCommandRefs(
+  filePath: string,
+  content: string,
+  registeredCommands: Map<string, string>
+): Array<{ command: string; scriptName: string; line: number }> {
+  const refs: Array<{ command: string; scriptName: string; line: number }> = []
+  if (basename(filePath) === 'package.json') {
+    return refs
+  }
+
+  const lines = content.split('\n')
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]
+    DIRECT_COMMAND_RE.lastIndex = 0
+    let match: RegExpExecArray | null = DIRECT_COMMAND_RE.exec(line)
+
+    while (match !== null) {
+      const command = match[1].trim()
+      const scriptName = registeredCommands.get(command)
+      if (scriptName) {
+        refs.push({ command, scriptName, line: index + 1 })
+      }
+      match = DIRECT_COMMAND_RE.exec(line)
+    }
+  }
+
+  return refs
+}
+
 export function collectKnownScripts(repoRoot: string): Set<string> {
   const known = new Set<string>()
   const pkgFiles = collectPackageJsonFiles(repoRoot)
@@ -114,7 +165,8 @@ export function collectKnownScripts(repoRoot: string): Set<string> {
 export function validateUsages(
   scanFiles: string[],
   knownScripts: Set<string>,
-  repoRoot: string
+  repoRoot: string,
+  registeredCommands: Map<string, string> = collectRegisteredCommands(repoRoot)
 ): ViolationRecord[] {
   const violations: ViolationRecord[] = []
 
@@ -139,25 +191,43 @@ export function validateUsages(
         })
       }
     }
+
+    const directRefs = extractDirectCommandRefs(filePath, content, registeredCommands)
+    for (const ref of directRefs) {
+      violations.push({
+        rule: 'script-usage-direct-command',
+        file: filePath.replace(`${repoRoot}/`, ''),
+        line: ref.line,
+        scriptName: ref.scriptName,
+        message: `Use "bun run ${ref.scriptName}" instead of "bun ${ref.command}"`,
+        hint: `Replace the direct script path with "bun run ${ref.scriptName}"`,
+      })
+    }
   }
 
   return violations
 }
 
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])script-usage\.ts$/.test(entry)
+}
+
 function main(): void {
   log.header(
     'Validate script usage',
-    'Scan files for bun run repo:references and validate known scripts'
+    'Scan files for repository script references and validate known scripts'
   )
   logger.info('Starting script usage validation', { repoRoot: REPO_ROOT })
 
   const knownScripts = collectKnownScripts(REPO_ROOT)
+  const registeredCommands = collectRegisteredCommands(REPO_ROOT)
   logger.info('Known scripts loaded', { count: knownScripts.size })
 
   const scanFiles = walkScanFiles(REPO_ROOT)
   logger.info('Files to scan', { count: scanFiles.length })
 
-  const violations = validateUsages(scanFiles, knownScripts, REPO_ROOT)
+  const violations = validateUsages(scanFiles, knownScripts, REPO_ROOT, registeredCommands)
 
   if (violations.length === 0) {
     logger.info('All script references are valid')
@@ -182,6 +252,6 @@ function main(): void {
   exit(1)
 }
 
-if (import.meta.main) {
+if (isDirectExecution()) {
   main()
 }

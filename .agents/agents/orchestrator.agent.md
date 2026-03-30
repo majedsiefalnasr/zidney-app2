@@ -582,7 +582,7 @@ Required behavior:
 - Suggested automatic checks:
 
   ```bash
-  bun run validate:scripts:runtime
+  bun run validate:scripts:all
   bun run validate:scripts:usage
   ```
 
@@ -1671,7 +1671,7 @@ If any artifact is stale or missing:
 ```
 ⚠️ Architecture intelligence artifacts are stale (>24h) or missing.
    Regenerate before proceeding:
-   bun scripts/infra-audit.ts
+   bun run arch:audit
    Stale/missing: <list>
 ```
 
@@ -2520,7 +2520,7 @@ bun run governance:gate:changed
 
 If exit code is `1` → **STOP.** Surface the full gate output. Blocked until all violations are resolved and the gate exits `0`.
 
-This gate runs `arch:guard:changed` + `validate:scripts:runtime` scoped to changed files. It is a hard blocking gate — implementation cannot proceed with unresolved violations.
+This gate runs `arch:guard:changed` + `validate:scripts:all` scoped to changed files. It is a hard blocking gate — implementation cannot proceed with unresolved violations.
 
 ## 6.2 — Check SpecKit Checklists Before Implementation
 
@@ -2800,7 +2800,7 @@ Validation:
 - Run global validation:
 
 ```bash
-bun run validate:scripts:runtime
+bun run validate:scripts:all
 ```
 
 Failure Handling:

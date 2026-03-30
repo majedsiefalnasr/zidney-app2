@@ -1,19 +1,20 @@
 #!/usr/bin/env bun
 
 /**
- * analyze-file-sizes.ts
- *
- * Analyzes repository files for size and line count.
- * Identifies oversized files (>2000 lines, >1MB) for optimization.
- *
- * Usage: bun scripts/dev/analyze-file-sizes.ts
+ * @script dev:analyze:file-sizes
+ * @domain dev
+ * @category dev
+ * @description Analyze repository files by size and line count to identify
+ *   oversized files that need optimization.
+ * @usage bun run dev:analyze:file-sizes
  */
 
 import * as path from 'node:path'
 import { FileSizeAnalyzer } from '../../tests/audit-helpers'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 
 const rootDir = process.cwd()
+log.setScript('dev:analyze:file-sizes')
 
 log.header('ANALYZE FILE SIZES', 'Identifies oversized files in the repository')
 
@@ -22,8 +23,7 @@ const results = FileSizeAnalyzer.findOversizedFiles(rootDir, 2000, 1_000_000)
 if (results.length === 0) {
   log.success('No oversized files found!')
   log.result({ total: 0, passed: 0, failed: 0 })
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 // Sort by size descending
@@ -75,4 +75,4 @@ log.info(`  Files >1MB: ${large.length} (target: 0)`)
 log.info(`  Combined size: ${Math.round(totalSize / 1024 / 1024)}MB (target: reduce by 30-40%)`)
 
 log.result({ total: results.length, passed: 0, failed: results.length })
-flushAi()
+exit(results.length > 0 ? 1 : 0)

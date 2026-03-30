@@ -1,6 +1,6 @@
 # Zidney Architecture Summary
 
-Generated: 2026-03-28T11:22:04.034Z
+Generated: 2026-03-30T12:12:15.944Z
 Schema Version: 1.0.0
 
 ## System Layers Overview

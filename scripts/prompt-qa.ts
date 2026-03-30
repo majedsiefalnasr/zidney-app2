@@ -1,11 +1,11 @@
+#!/usr/bin/env bun
+
 /**
  * @script ai:validate:prompts
  * @domain ai
  * @category validation
  * @description Validates AI agent and prompt file structural integrity
- * @mode validation
  * @usage bun run ai:validate:prompts
- * @dependencies fs, path, yaml (built-in Bun)
  */
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'

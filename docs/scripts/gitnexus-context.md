@@ -6,12 +6,6 @@
 bun run arch:gitnexus:context
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/gitnexus-context.ts
-```
-
 ## Purpose
 
 Generates a structured GitNexus context JSON artifact from git state and ai-architecture-brain.json for AI orchestrators and CI gates.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 
 ## Source
 
+- Package runner: `bun run arch:gitnexus:context`
 - Implementation: scripts/gitnexus-context.ts
 - Metadata-backed script file: `scripts/gitnexus-context.ts`
 

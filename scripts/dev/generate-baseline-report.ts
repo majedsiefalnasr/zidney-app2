@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
 
 /**
- * generate-baseline-report.ts
- *
- * Generates comprehensive baseline report consolidating all Phase 1 diagnostics.
- * Creates BASELINE_REPORT.md in docs/audit-reports/ for Phase 1 completion.
- *
- * Usage: bun scripts/dev/generate-baseline-report.ts
+ * @script dev:report:baseline
+ * @domain dev
+ * @category dev
+ * @description Generate a consolidated baseline diagnostics report for Phase 1
+ *   analysis and write it to docs/audit-reports.
+ * @usage bun run dev:report:baseline
  */
 
 import * as fs from 'node:fs'
@@ -17,11 +17,12 @@ import {
   FileSizeAnalyzer,
   ScriptPerformanceProfiler,
 } from '../../tests/audit-helpers'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 
 const rootDir = process.cwd()
 const reportDir = path.join(rootDir, 'docs/audit-reports')
 const contextDir = path.join(rootDir, 'docs/ai/context')
+log.setScript('dev:report:baseline')
 
 log.header('GENERATE BASELINE REPORT', 'Generates Phase 1 baseline diagnostic report')
 
@@ -243,4 +244,4 @@ log.result({
   failed: 0,
   message: 'Baseline captured',
 })
-flushAi()
+exit(0)

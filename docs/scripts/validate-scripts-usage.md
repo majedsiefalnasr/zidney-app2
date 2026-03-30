@@ -6,12 +6,6 @@
 bun run validate:scripts:usage
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/validate/script-usage.ts
-```
-
 ## Purpose
 
 Scans all .ts, .json, .yml, .yaml, .md, and .sh files for "bun run <name>" references and validates that every referenced name exists in a package.json scripts block. Reports all broken/orphan references before exiting non-zero.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run validate:scripts:usage`
 - Implementation: scripts/validate/script-usage.ts
 - Metadata-backed script file: `scripts/validate/script-usage.ts`
 

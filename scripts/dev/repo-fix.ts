@@ -1,21 +1,20 @@
+#!/usr/bin/env bun
 /**
- * repo-fix.ts — Automated repository repair runner.
- *
- * Runs 5 repair steps in sequence. Continues past step failures (continue-on-error).
- * Exits non-zero if any step fails.
- *
- * Output: process.stdout.write only — console.log is banned.
- * Imports: node:fs, node:path only (+ formatter sibling module).
- *
- * Stage: INFRA-18 — T003
+ * @script repo:fix
+ * @domain repo
+ * @category dev
+ * @description Run automated repository repair steps, continue through failures,
+ *   and report the overall repair result.
+ * @usage bun run repo:fix
  */
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { flushAi, hasCiFlag, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 import { line, section, summary } from './formatter'
 
 const isCi = hasCiFlag()
+log.setScript('repo:fix')
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,6 +51,11 @@ export function spawnStep(cmd: string[]): ProcessResult {
   const exitCode = result.exitCode ?? 1
   const stderrText = result.stderr ? result.stderr.toString() : ''
   return { exitCode, errorMessage: sanitizeDetail(stderrText) }
+}
+
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])repo-fix\.ts$/.test(entry)
 }
 
 /**
@@ -138,12 +142,11 @@ export function cleanBuildArtifacts(): boolean {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-if (import.meta.main) {
+if (isDirectExecution()) {
   log.header('REPOSITORY FIX', 'Automated repository repair runner — 5 sequential steps')
   if (isCi) {
     log.error('repo:fix is a local repair command and cannot run with --ci')
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
   section('Repository Fix')
 
@@ -169,6 +172,5 @@ if (import.meta.main) {
   const passed = hasError ? 0 : total // approximate — cleanup always passes
   summary(passed, total)
   log.result({ total, passed, failed: total - passed })
-  flushAi()
-  process.exit(hasError ? 1 : 0)
+  exit(hasError ? 1 : 0)
 }

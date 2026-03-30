@@ -119,7 +119,7 @@ scripts/
 | `dev:frontoffice`             | ✅ EXISTS         | `bun --cwd apps/frontoffice dev`                             | VALID               |
 | `dev:mmc`                     | ✅ EXISTS         | `bun --cwd apps/mmc dev`                                     | VALID               |
 | `dev:worker`                  | ✅ EXISTS         | `bun --cwd apps/worker dev`                                  | VALID               |
-| `format`                      | ✅ EXISTS         | `bun run format:biome && bun run format:md`                  | VALID               |
+| `format`                      | ✅ EXISTS         | `bun run format:write && bun run format:md`                  | VALID               |
 | `format:check`                | ✅ EXISTS         | Chained format checks                                        | VALID               |
 | `format:check:md`             | ✅ EXISTS         | prettier check                                               | VALID               |
 | `generate-script-docs`        | ❌ MISSING        | No implementation                                            | MISSING             |

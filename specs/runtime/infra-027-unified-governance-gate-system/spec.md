@@ -72,7 +72,7 @@ A `governance:gate` script MUST be registered in root `package.json`. When invok
 
 1. `bun run arch:guard`
 2. `bun run validate:types`
-3. `bun run validate:scripts:runtime` _(canonical name — formerly listed as `validate:scripts:runtime`)_
+3. `bun run validate:scripts:all` _(canonical name — formerly listed as `validate:scripts:runtime`)_
 4. `bun run validate:scripts:usage` _(canonical name — formerly listed as `script:usage-scan`)_
 5. `bun run infra:security:ci` _(canonical name — formerly listed as `security:scan:ci`)_
 6. `bun run ai-context:validate` _(alias must be created: chains `validate:ai-context-fresh && validate:ai-context-schemas`)_
@@ -88,7 +88,7 @@ A `governance:gate:ci` script MUST be registered in root `package.json`. It MUST
 A `governance:gate:changed` script MUST be registered in root `package.json`. It MUST run a scoped subset of guards over changed files only:
 
 1. `bun run arch:guard:changed`
-2. `bun run validate:scripts:runtime`
+2. `bun run validate:scripts:all`
 
 This command MUST complete in under 10 seconds on a standard developer machine for a typical pull request diff (≤ 50 changed files). Exit code semantics: `0` = all ran guards passed, `1` = one or more failed.
 

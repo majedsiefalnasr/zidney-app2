@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 
 /**
- * @script dev:demo-logger-features
+ * @script dev:demo:logger
  * @domain dev
- * @category development
+ * @category dev
  * @description Demonstrates all available logger customization options and features
- * @usage bun run dev:demo-logger-features
+ * @usage bun run dev:demo:logger
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -30,7 +30,9 @@ function saveCurrent(data: unknown) {
   } catch {}
 }
 
-const logger = createLogger('demo-logger-features')
+const logger = createLogger('dev:demo:logger')
+
+log.setScript('dev:demo:logger')
 
 async function main(): Promise<void> {
   const isBenchmark = process.argv.includes('--benchmark')
@@ -60,8 +62,8 @@ async function main(): Promise<void> {
   ])
 
   log.section('Export Modes Example')
-  log.line([{ content: 'bun run repo:script --json', color: 'cyan' }])
-  log.line([{ content: 'bun run repo:script --json --pretty', color: 'cyan' }])
+  log.line([{ content: 'bun run repo:status --json', color: 'cyan' }])
+  log.line([{ content: 'bun run repo:status --json --pretty', color: 'cyan' }])
 
   // Demo 1: Single badges (basic)
   log.section('Demo 1: Single Badges (All Color Types)')

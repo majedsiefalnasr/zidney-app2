@@ -25,7 +25,7 @@
 
 # Next step: Generate AI Context (will use cached artifacts if available)
 - name: Generate AI Context Artifacts
-  run: bun scripts/generate-ai-context.ts --force --validate
+  run: bun run ai:context:refresh --validate
 
 # Validation Step - Verify cache effectiveness
 - name: Validate Cache Effectiveness

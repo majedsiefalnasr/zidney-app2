@@ -6,12 +6,6 @@
 bun run dev:generate:script-docs
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/generate/script-docs.ts
-```
-
 ## Purpose
 
 Walk scripts/\*_\/_.ts, parse @script metadata headers, generate docs/scripts/SCRIPT_REGISTRY.md. Exits 1 on missing required metadata fields.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run dev:generate:script-docs`
 - Implementation: scripts/generate/script-docs.ts
 - Metadata-backed script file: `scripts/generate/script-docs.ts`
 

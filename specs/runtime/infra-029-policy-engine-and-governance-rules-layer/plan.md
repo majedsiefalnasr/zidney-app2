@@ -81,7 +81,7 @@ scripts/
     ├── adapters/
     │   ├── architecture-guard.adapter.ts   # Wraps: bun run arch:guard
     │   ├── type-safety.adapter.ts          # Wraps: bun typecheck + arch:type-safety-guard
-    │   ├── script-governance.adapter.ts    # Wraps: bun run validate:scripts:runtime
+    │   ├── script-governance.adapter.ts    # Wraps: bun run validate:scripts:all
     │   └── trivy.adapter.ts                # Reads: tmp/trivy-report.json
     │
     ├── rules/
@@ -313,7 +313,7 @@ export async function runTypeSafety(context: PolicyContext): Promise<PolicyResul
 
 ### `adapters/script-governance.adapter.ts`
 
-**Purpose**: Wraps `bun run validate:scripts:runtime` and maps output to `PolicyResult[]`.  
+**Purpose**: Wraps `bun run validate:scripts:all` and maps output to `PolicyResult[]`.  
 **Exports**:
 
 ```typescript
@@ -635,11 +635,11 @@ Location: `tests/unit/policy-engine/parity/`
 
 For each adapter, run both the legacy tool and the adapter on the same repo state and assert identical violation sets:
 
-| Parity Test                        | Legacy Tool                        | Adapter                  |
-| ---------------------------------- | ---------------------------------- | ------------------------ |
-| `arch-guard-parity.test.ts`        | `bun run arch:guard`               | `runArchitectureGuard()` |
-| `type-safety-parity.test.ts`       | `bun run validate:types`           | `runTypeSafety()`        |
-| `script-governance-parity.test.ts` | `bun run validate:scripts:runtime` | `runScriptGovernance()`  |
+| Parity Test                        | Legacy Tool                    | Adapter                  |
+| ---------------------------------- | ------------------------------ | ------------------------ |
+| `arch-guard-parity.test.ts`        | `bun run arch:guard`           | `runArchitectureGuard()` |
+| `type-safety-parity.test.ts`       | `bun run validate:types`       | `runTypeSafety()`        |
+| `script-governance-parity.test.ts` | `bun run validate:scripts:all` | `runScriptGovernance()`  |
 
 Trivy parity test not applicable (adapter reads the same file the legacy tool would read).
 

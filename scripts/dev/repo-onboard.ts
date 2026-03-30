@@ -1,21 +1,19 @@
+#!/usr/bin/env bun
 /**
- * repo-onboard.ts — New developer onboarding runner.
- *
- * Prepares a complete local development environment in a single command.
- * Step 1 (Bun version) is a hard abort gate.
- * Steps 4-5 (service TCP checks) are warn-only.
- *
- * Output: process.stdout.write only — console.log is banned.
- * Imports: node:net, node:child_process (+ formatter sibling module).
- *
- * Stage: INFRA-18 — T004
+ * @script repo:onboard
+ * @domain repo
+ * @category dev
+ * @description Prepare a complete local development environment in one command,
+ *   including dependency install, hooks, and core service checks.
+ * @usage bun run repo:onboard
  */
 
 import * as net from 'node:net'
-import { flushAi, hasCiFlag, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 import { line, section, summary } from './formatter'
 
 const isCi = hasCiFlag()
+log.setScript('repo:onboard')
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,6 +37,11 @@ function spawnStep(cmd: string[]): ProcessResult {
   const exitCode = result.exitCode ?? 1
   const stderrText = result.stderr ? result.stderr.toString() : ''
   return { exitCode, errorMessage: sanitizeDetail(stderrText) }
+}
+
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])repo-onboard\.ts$/.test(entry)
 }
 
 /**
@@ -195,8 +198,7 @@ async function main(): Promise<void> {
   )
   if (isCi) {
     log.error('repo:onboard is a local bootstrap command and cannot run with --ci')
-    flushAi()
-    process.exit(1)
+    exit(1)
   }
   section('Repository Onboard')
 
@@ -206,7 +208,7 @@ async function main(): Promise<void> {
   // Step 1 — Hard abort gate
   const bunCheck = checkBunVersion()
   if (bunCheck.abort) {
-    process.exit(1)
+    exit(1)
   }
   if (!bunCheck.ok) hasError = true
 
@@ -224,13 +226,12 @@ async function main(): Promise<void> {
 
   summary(hasError ? 0 : totalChecks, totalChecks)
   log.result({ total: totalChecks, passed: hasError ? 0 : totalChecks, failed: hasError ? 1 : 0 })
-  flushAi()
-  process.exit(hasError ? 1 : 0)
+  exit(hasError ? 1 : 0)
 }
 
-if (import.meta.main) {
+if (isDirectExecution()) {
   main().catch((e: unknown) => {
     process.stderr.write(`Unexpected error: ${String(e)}\n`)
-    process.exit(1)
+    exit(1)
   })
 }

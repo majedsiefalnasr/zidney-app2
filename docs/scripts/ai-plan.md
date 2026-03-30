@@ -6,12 +6,6 @@
 bun run ai:plan
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/ai-engine/plan-task.ts
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run ai:plan`
 - Implementation: scripts/ai-engine/plan-task.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/ai-engine/plan-task.ts`
 
 ## CI Behavior
 

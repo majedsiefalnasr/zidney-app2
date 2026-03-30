@@ -1,14 +1,24 @@
+#!/usr/bin/env bun
+/**
+ * @script arch:visualize
+ * @domain arch
+ * @category dev
+ * @description Generate Mermaid architecture diagrams and documentation from
+ *   the dependency graph and architecture map artifacts.
+ * @usage bun run arch:visualize
+ */
 // CLI utility — exempt from service-layer logging standards.
 import { execSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { flushAi, hasCiFlag, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 
 const ROOT = process.cwd()
 const DEPENDENCY_GRAPH_PATH = join(ROOT, 'docs/architecture/graphs/dependency-graph.json')
 const ARCHITECTURE_MAP_PATH = join(ROOT, 'docs/architecture/intelligence/ARCHITECTURE_MAP.json')
 const OUTPUT_DIR = join(ROOT, 'docs/architecture/visualization')
 const isCi = hasCiFlag()
+log.setScript('arch:visualize')
 
 // ─── Type Definitions ────────────────────────────────────────────────────────
 
@@ -320,7 +330,7 @@ function groupNodesByLayer(
 function loadDependencyGraph(filePath: string): DependencyGraph {
   if (!existsSync(filePath)) {
     log.error(`[VISUALIZE] ERROR: dependency-graph.json not found. Run 'bun run arch:audit' first.`)
-    process.exit(1)
+    exit(1)
   }
 
   let graph: unknown
@@ -330,7 +340,7 @@ function loadDependencyGraph(filePath: string): DependencyGraph {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     log.error(`[VISUALIZE] ERROR: Failed to parse dependency-graph.json — ${message}`)
-    process.exit(1)
+    exit(1)
   }
 
   const g = graph as Record<string, unknown>
@@ -338,7 +348,7 @@ function loadDependencyGraph(filePath: string): DependencyGraph {
     log.error(
       `[VISUALIZE] ERROR: dependency-graph.json is missing required 'nodes' or 'edges' arrays.`
     )
-    process.exit(1)
+    exit(1)
   }
 
   return graph as DependencyGraph
@@ -426,7 +436,7 @@ function main(): void {
     { success: 4 },
     { title: '3 Diagrams + README Generated', showPercentage: false }
   )
-  flushAi()
+  exit(0)
 }
 
 main()

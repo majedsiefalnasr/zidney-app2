@@ -1,18 +1,19 @@
 #!/usr/bin/env bun
 
 /**
- * analyze-directory-sizes.ts
- *
- * Measures directory sizes using system `du` command.
- * Identifies largest directories contributing to repository bloat.
- *
- * Usage: bun scripts/dev/analyze-directory-sizes.ts
+ * @script dev:analyze:directory-sizes
+ * @domain dev
+ * @category dev
+ * @description Measure key repository directory sizes and highlight the largest
+ *   contributors to repository bloat.
+ * @usage bun run dev:analyze:directory-sizes
  */
 
 import { DirectorySizeAnalyzer } from '../../tests/audit-helpers'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 
 const rootDir = process.cwd()
+log.setScript('dev:analyze:directory-sizes')
 
 log.header('ANALYZE DIRECTORY SIZES', 'Measures directory sizes and identifies repository bloat')
 
@@ -22,8 +23,7 @@ const results = DirectorySizeAnalyzer.analyzeKeyDirectories(rootDir)
 if (results.length === 0) {
   log.error('No directories found')
   log.result({ total: 0, passed: 0, failed: 1 })
-  flushAi()
-  process.exit(1)
+  exit(1)
 }
 
 // Sort by size descending
@@ -78,4 +78,4 @@ log.info(
   `  Compressed estimate: ~${Math.round((totalSize - (nodeModules?.sizeBytes || 0)) / 1024 / 1024 / 2)}MB (50% est.)`
 )
 log.result({ total: results.length, passed: results.length, failed: 0 })
-flushAi()
+exit(0)

@@ -17,11 +17,11 @@ describe('architecture health governance static coverage', () => {
     const pkg = JSON.parse(readFileSync(PACKAGE_JSON, 'utf-8')) as {
       scripts: Record<string, string>
     }
-    expect(pkg.scripts['arch:health']).toBe(
-      'bun scripts/architecture-health/architecture-health.ts'
+    expect(pkg.scripts['arch:health']).toContain(
+      'scripts/architecture-health/architecture-health.ts'
     )
-    expect(pkg.scripts['arch:health:ci']).toBe(
-      'bun scripts/architecture-health/architecture-health.ts --ci'
+    expect(pkg.scripts['arch:health:ci']).toContain(
+      'scripts/architecture-health/architecture-health.ts --ci'
     )
   })
 

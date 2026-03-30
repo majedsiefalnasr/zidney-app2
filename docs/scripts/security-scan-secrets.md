@@ -6,12 +6,6 @@
 bun run infra:security:secrets
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/security/scan-secrets.ts
-```
-
 ## Purpose
 
 Run a Trivy secret scan across the repo or staged files only and block on any detected secret.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run infra:security:secrets`
 - Implementation: scripts/security/scan-secrets.ts
 - Metadata-backed script file: `scripts/security/scan-secrets.ts`
 

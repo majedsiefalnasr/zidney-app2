@@ -6,12 +6,6 @@
 bun run governance:gate
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/governance/gate.ts
-```
-
 ## Purpose
 
 Unified governance gate — composes all guards in sequence (report-all mode)
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Treat as protected. It is a pri
 
 ## Source
 
+- Package runner: `bun run governance:gate`
 - Implementation: scripts/governance/gate.ts
 - Metadata-backed script file: `scripts/governance/gate.ts`
 

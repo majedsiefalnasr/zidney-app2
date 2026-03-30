@@ -127,7 +127,7 @@ Before committing any migration:
 2. Verify sequential numbering
 3. Verify `schema_version` increment
 4. Verify no modification of existing migration files
-5. Run `bun scripts/infra-audit.ts` to validate architecture compliance
+5. Run `bun run arch:audit` to validate architecture compliance
 
 ---
 

@@ -1,21 +1,20 @@
+#!/usr/bin/env bun
 /**
- * repo-status.ts — Read-only repository health summary reporter.
- *
- * Renders a concise table of current repository health indicators.
- * Never modifies any file. Always exits 0.
- *
- * Output: process.stdout.write only — console.log is banned.
- * Imports: node:fs, node:path (+ formatter sibling module).
- *
- * Stage: INFRA-18 — T005
+ * @script repo:status
+ * @domain repo
+ * @category dev
+ * @description Render a read-only summary of repository health indicators
+ *   without modifying any workspace files.
+ * @usage bun run repo:status
  */
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { flushAi, hasCiFlag, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 import { section } from './formatter'
 
 const isCi = hasCiFlag()
+log.setScript('repo:status')
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -56,6 +55,11 @@ function spawnCheck(cmd: string[]): { exitCode: number; stdout: string } {
   const exitCode = result.exitCode ?? 1
   const stdoutText = result.stdout ? result.stdout.toString().trim() : ''
   return { exitCode, stdout: stdoutText }
+}
+
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])repo-status\.ts$/.test(entry)
 }
 
 function statusSymbol(ok: boolean): string {
@@ -124,10 +128,9 @@ function main(): void {
     passed: [archOk, aiOk, tsOk].filter(Boolean).length + 1,
     failed: [archOk, aiOk, tsOk].filter((x) => !x).length,
   })
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
-if (import.meta.main) {
+if (isDirectExecution()) {
   main()
 }

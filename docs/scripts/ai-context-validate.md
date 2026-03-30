@@ -6,12 +6,6 @@
 bun run ai:context:validate
 ```
 
-Registered package.json runner:
-
-```sh
-bun run validate:ai-context-fresh && bun run validate:ai-context-schemas
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run ai:context:validate`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

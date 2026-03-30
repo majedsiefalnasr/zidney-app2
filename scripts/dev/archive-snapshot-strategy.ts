@@ -1,20 +1,19 @@
 #!/usr/bin/env bun
 /**
- * Archive Strategy for Historical Snapshots (T065)
- *
- * Maintains a rolling archive of historical AI context snapshots
- * - Keeps latest 2 snapshots in docs/ai/context/
- * - Archives older snapshots to docs/ai/context/archive/
- * - Generates archive index for discovery
- *
- * Usage: bun scripts/dev/archive-snapshot-strategy.ts  [--prune] [--verbose]
+ * @script dev:ai:archive-snapshots
+ * @domain dev
+ * @category dev
+ * @description Maintain a rolling archive of historical AI context snapshots,
+ *   keeping the latest artifacts live and archiving older ones with indexes.
+ * @usage bun run dev:ai:archive-snapshots
  */
 
 import { existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, flushAi, log } from '../utils/logger'
+import { createLogger, exit, log } from '../utils/logger'
 
 const logger = createLogger('archive-strategy')
+log.setScript('dev:ai:archive-snapshots')
 
 interface SnapshotEntry {
   filename: string
@@ -186,11 +185,10 @@ async function main() {
   log.info(`Archived Snapshots: ${archiveFiles.length}`)
   log.info(`Archive Index: ${mdPath}`)
   log.result({ total: filesByTime.length, passed: KEEP_LIVE, failed: 0 })
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 main().catch((err) => {
   logger.error('Archive strategy failed', { error: String(err) })
-  process.exit(1)
+  exit(1)
 })

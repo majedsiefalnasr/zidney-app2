@@ -6,12 +6,6 @@
 bun run arch:audit
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/infra-audit.ts
-```
-
 ## Purpose
 
 Monorepo governance scanner — audits Vitest, ESLint, Playwright, import boundaries, and outputs infra-audit-report.json.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Not safe to remove directly. Ot
 
 ## Source
 
+- Package runner: `bun run arch:audit`
 - Implementation: scripts/infra-audit.ts
 - Metadata-backed script file: `scripts/infra-audit.ts`
 

@@ -6,12 +6,6 @@
 bun run infra:security:deps
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/security/scan-deps.ts
-```
-
 ## Purpose
 
 Run a dependency-only Trivy scan, warning on MEDIUM findings and blocking on HIGH/CRITICAL vulnerabilities.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run infra:security:deps`
 - Implementation: scripts/security/scan-deps.ts
 - Metadata-backed script file: `scripts/security/scan-deps.ts`
 

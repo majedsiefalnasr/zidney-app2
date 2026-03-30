@@ -53,7 +53,7 @@ function getName(user: { name: string } | null) {
 const data: any = something;
 
 # Run linter
-bun lint src/file.ts
+bun run lint src/file.ts
 
 # Expected: Lint error
 # Actual: ✅ Linter warning: Function parameter should have explicit types
@@ -67,7 +67,7 @@ bun lint src/file.ts
 const value = someValue;
 
 # Run linter
-bun lint
+bun run lint
 
 # Expected: Lint error (missing comment)
 # Actual: ✅ Linter warning: Missing justification
@@ -87,7 +87,7 @@ apps/api/src/test.ts:
   - const z: Stream<any> = ...;
 
 # Run guard script
-bun type-safety-guard
+bun run arch:type-safety-guard
 
 # Expected: 3 violations detected
 # Actual: ✅ Detects all 3 patterns
@@ -104,7 +104,7 @@ ALLOWED_ANY_EXCEPTIONS.json:
     sunsetDate: 2026-06-30
 
 # Run guard script
-bun type-safety-guard
+bun run arch:type-safety-guard
 
 # Expected: Exception suppressed
 # Actual: ✅ No violation reported for legacy.ts
@@ -119,7 +119,7 @@ ALLOWED_ANY_EXCEPTIONS.json:
     sunsetDate: 2026-01-01  # Past!
 
 # Run guard script
-bun type-safety-guard
+bun run arch:type-safety-guard
 
 # Expected: Expired exception flagged
 # Actual: ✅ Reports: "EXPIRED: apps/api/src/old.ts"
@@ -211,7 +211,7 @@ packages/domain-core/src/user.ts:
   function getUser(): any { } // Not allowed!
 
 # Run guard script
-bun type-safety-guard
+bun run arch:type-safety-guard
 
 # Expected: Error (domain layer)
 # Actual: ✅ Reports violation with HIGH severity
@@ -231,7 +231,7 @@ bun type-safety-guard
 }
 
 # Run guard script
-bun type-safety-guard
+bun run arch:type-safety-guard
 
 # Expected: Exception suppressed
 # Actual: ✅ No violation reported
@@ -257,7 +257,7 @@ export function getUserIds() { // Implicit return type!
 }
 
 # Run typecheck
-bun typecheck
+bun run typecheck
 
 # Expected: Error on implicit export type
 # Actual: ✅ Error TS7006: Return type implicitly inferred
@@ -333,9 +333,9 @@ router.post("/exams", async (c) => {
 ### Step 2: Local validation
 
 ```bash
-bun typecheck       # Layer 1: ✅ 0 errors
-bun lint            # Layer 2: ✅ 0 violations
-bun type-safety-guard # Layer 3: ✅ 0 violations
+bun run typecheck       # Layer 1: ✅ 0 errors
+bun run lint            # Layer 2: ✅ 0 violations
+bun run arch:type-safety-guard # Layer 3: ✅ 0 violations
 ```
 
 ### Step 3: Push to PR
@@ -394,13 +394,13 @@ Layer 4 Runtime: Validate with schema
 
 ```bash
 # Full test suite
-bun test
+bun run test
 
 # Just type safety tests
-bun test tests/type-safety
+bun run test tests/type-safety
 
 # Specific test file
-bun test tests/unit/routes/exams.test.ts
+bun run test tests/unit/routes/exams.test.ts
 ```
 
 ### Coverage Goals
@@ -419,16 +419,16 @@ bun test tests/unit/routes/exams.test.ts
 
 ### Layer-By-Layer Acceptance
 
-| Layer | Acceptance Criteria                  | Status |
-| ----- | ------------------------------------ | ------ |
-| 1     | `bun typecheck` passes               | ✅     |
-| 2     | `bun lint` passes                    | ✅     |
-| 3     | `bun type-safety-guard` reports 0    | ✅     |
-| 4     | All API inputs validated             | ✅     |
-| 5     | CI job <2min, blocks merges          | ✅     |
-| 6     | Protected packages: 0% unallowed any | ✅     |
-| 7     | All exports explicitly typed         | ✅     |
-| 8     | AI code passes same gates            | ✅     |
+| Layer | Acceptance Criteria                        | Status |
+| ----- | ------------------------------------------ | ------ |
+| 1     | `bun run typecheck` passes                 | ✅     |
+| 2     | `bun run lint` passes                      | ✅     |
+| 3     | `bun run arch:type-safety-guard` reports 0 | ✅     |
+| 4     | All API inputs validated                   | ✅     |
+| 5     | CI job <2min, blocks merges                | ✅     |
+| 6     | Protected packages: 0% unallowed any       | ✅     |
+| 7     | All exports explicitly typed               | ✅     |
+| 8     | AI code passes same gates                  | ✅     |
 
 ### MVP Success Criteria
 

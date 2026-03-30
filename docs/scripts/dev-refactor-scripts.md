@@ -6,12 +6,6 @@
 bun run dev:refactor:scripts
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/dev/refactor-scripts.ts
-```
-
 ## Purpose
 
 Applies the SCRIPT_MIGRATION_MAP to rename all "bun run <old>" references across the repository. Reads docs/scripts/SCRIPT_MIGRATION_MAP.md, builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain after the run. Writes a summary report to reports/SCRIPT_REFACTOR_REPORT.md.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run dev:refactor:scripts`
 - Implementation: scripts/dev/refactor-scripts.ts
 - Metadata-backed script file: `scripts/dev/refactor-scripts.ts`
 

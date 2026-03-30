@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { resolve } from 'node:path'
+
 /**
  * @script arch:check:store-cycles
  * @domain arch
@@ -13,15 +13,17 @@ import { resolve } from 'node:path'
  * dependencies. Exits with non-zero code on any detected cycle.
  *
  * Usage:
- *   bun scripts/check-store-cycles.ts
+ *   bun run arch:check:store-cycles
  *
  * CI integration:
- *   Add to package.json scripts: "check:store-cycles": "bun scripts/check-store-cycles.ts"
+ *   Add to package.json scripts: "check:store-cycles": "bun run arch:check:store-cycles"
  *   Call from CI lint/check step before tests.
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  * Refs: SC-007, QA-H003, FR-033
  */
+
+import { resolve } from 'node:path'
 import madge from 'madge'
 import { exit, hasCiFlag, log } from './utils/logger'
 

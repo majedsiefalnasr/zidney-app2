@@ -475,7 +475,7 @@ SC-08 and FR-08/FR-10 acceptance criteria.
 
 - [x] T043 Update root `README.md` (or `docs/` developer setup guide if it exists) to document the
       new toolchain: add a "Linting & Formatting" section with commands `bun run lint` (check),
-      `bun run format` (auto-fix), `bun run format:check` (CI check), and recommend the
+      `bun run format:write` (auto-fix), `bun run format:check` (CI check), and recommend the
       `biomejs.biome` VSCode extension (already configured in `.vscode/extensions.json`)
 
 ---

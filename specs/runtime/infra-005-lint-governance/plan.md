@@ -610,11 +610,11 @@ bun run arch:audit
 cat docs/ai/context/ai-architecture-summary.md
 
 # Step 3: If new modules are detected but unmapped
-bun run arch:fix
+bun run arch:governance:fix
 # → Runs infra-audit.ts --fix-map to auto-register detected modules
 
 # Step 4: If architecture brain is stale (AI-Guard running in fallback mode)
-bun run arch:refresh
+bun run arch:governance
 # → Runs infra-audit.ts AND gitnexus-context.ts for full refresh
 
 # Step 5: Verify AI-Guard now runs in enriched mode
@@ -784,7 +784,7 @@ Create `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` covering:
 4. **How to fix a blocked commit** (auto-fix with `bun run lint:fix`, then resolve `ai-guard`
    violations)
 5. **Critical package list** with protection policy
-6. **How to recover from architecture drift** (`bun run arch:audit` → `bun run arch:fix`)
+6. **How to recover from architecture drift** (`bun run arch:audit` → `bun run arch:governance:fix`)
 7. **Emergency override procedure** (when and how to use `--no-verify`)
 
 ---

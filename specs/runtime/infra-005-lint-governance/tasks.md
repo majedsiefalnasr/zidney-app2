@@ -136,7 +136,7 @@ COMPLETE for this stage to begin.
      (a) CI will still catch the violation, (b) merge is blocked if CI fails, (c) `--no-verify` must
      never be used to bypass architectural violations permanently
   7. **Drift Recovery Playbook** — step-by-step: `bun run arch:audit` (identify drift) →
-     `bun run arch:fix` (auto-register unmapped modules) → `bun run arch:refresh` (full refresh) →
+     `bun run arch:governance:fix` (auto-register unmapped modules) → `bun run arch:governance` (full refresh) →
      `bun scripts/ai-guard.ts` (verify enriched mode) → commit refreshed artifacts
   8. **CI Gate Sequence** — ordered table: lint (`bun run lint`) → typecheck (`bun run typecheck`) →
      arch-guard (`bun scripts/ai-guard.ts`) → unit-tests (`bun run test:unit`) → integration-tests;

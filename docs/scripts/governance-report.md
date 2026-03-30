@@ -6,12 +6,6 @@
 bun run governance:report
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/governance/report.ts
-```
-
 ## Purpose
 
 Generates a consolidated governance health report at docs/governance/governance-report.md
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run governance:report`
 - Implementation: scripts/governance/report.ts
 - Metadata-backed script file: `scripts/governance/report.ts`
 

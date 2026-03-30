@@ -6,12 +6,6 @@
 bun run validate:workflows
 ```
 
-Registered package.json runner:
-
-```sh
-find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \) | xargs actionlint
-```
-
 ## Purpose
 
 Validate GitHub Actions workflow files.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Treat as protected. It is a pri
 
 ## Source
 
+- Package runner: `bun run validate:workflows`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

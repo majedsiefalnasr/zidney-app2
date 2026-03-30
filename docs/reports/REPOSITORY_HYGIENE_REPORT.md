@@ -216,7 +216,7 @@ Potentially Dead: 0
    Modules: 14
    Violations: 0
 
-$ bun scripts/generate-ai-context.ts --validate
+$ bun run ai:context:generate --validate
 ```
 
 </details>

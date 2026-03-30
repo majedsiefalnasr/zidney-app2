@@ -92,3 +92,52 @@ scope files are replaced with `bun run <newName>`.
 in scope files are replaced with `bun run <canonicalTarget>`.
 
 **Idempotency:** Running the engine twice on an already-migrated codebase produces zero replacements.
+
+---
+
+## v2.0 — Script System Full Refactor (2026-03-30)
+
+> Applied by `bun run refactor-scripts`. Source of truth: `docs/scripts/migration-map.json`
+
+### Format Layer Consolidation (5 entries)
+
+| Old Name                | Type   | Violation                             | New Name       |
+| ----------------------- | ------ | ------------------------------------- | -------------- |
+| `format`                | rename | Renamed to `format:write` for clarity | `format:write` |
+| `format:biome`          | merge  | Merged into unified `format:write`    | `format:write` |
+| `format:prettier`       | merge  | Merged into unified `format:write`    | `format:write` |
+| `format:check:biome`    | merge  | Merged into unified `format:check`    | `format:check` |
+| `format:check:prettier` | merge  | Merged into unified `format:check`    | `format:check` |
+
+### Architecture Layer Simplification (3 entries)
+
+| Old Name           | Type   | Violation                                         | New Name              |
+| ------------------ | ------ | ------------------------------------------------- | --------------------- |
+| `arch:refresh`     | rename | Governance is the canonical audit + refresh entry | `arch:governance`     |
+| `arch:audit:check` | merge  | Check-only mode merged into arch:governance       | `arch:governance`     |
+| `arch:fix`         | rename | Fix mode under governance namespace               | `arch:governance:fix` |
+
+### Validation Layer Consolidation (4 entries)
+
+| Old Name                    | Type             | Violation                             | New Name               |
+| --------------------------- | ---------------- | ------------------------------------- | ---------------------- |
+| `validate:scripts:runtime`  | merge            | Merged into validate:scripts:all      | `validate:scripts:all` |
+| `validate:scripts:broken`   | merge            | Merged into validate:scripts:all      | `validate:scripts:all` |
+| `validate:scripts:registry` | merge            | Merged into validate:scripts:all      | `validate:scripts:all` |
+| `validate:runtime:scripts`  | remove-duplicate | Duplicate of validate:scripts:runtime | `validate:scripts:all` |
+
+### Removals (1 entry)
+
+| Old Name          | Type   | Violation                                                 | New Name    |
+| ----------------- | ------ | --------------------------------------------------------- | ----------- |
+| `test:unit:debug` | remove | Redundant — use `bun run test:unit -- --reporter verbose` | _(removed)_ |
+
+### v2.0 Summary
+
+| Category             | Before | After | Net    |
+| -------------------- | ------ | ----- | ------ |
+| Format layer         | 6      | 2     | −4     |
+| Architecture layer   | 3      | 2     | −1     |
+| Validation layer     | 4      | 2     | −2     |
+| Test (debug removal) | 1      | 0     | −1     |
+| **Total**            | **14** | **6** | **−7** |

@@ -1,19 +1,20 @@
 #!/usr/bin/env bun
 
 /**
- * analyze-ai-context-artifacts.ts
- *
- * Analyzes AI context artifacts for size, compression, and redundancy.
- * Identifies optimization opportunities in Phase 3.
- *
- * Usage: bun scripts/dev/analyze-ai-context-artifacts.ts
+ * @script dev:ai:context-artifacts
+ * @domain dev
+ * @category dev
+ * @description Analyze AI context artifacts for size, compression, and redundancy
+ *   to identify Phase 3 optimization opportunities.
+ * @usage bun run dev:ai:context-artifacts
  */
 
 import * as path from 'node:path'
 import { AIContextAnalyzer } from '../../tests/audit-helpers'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 
 const contextDir = path.join(process.cwd(), 'docs/ai/context')
+log.setScript('dev:ai:context-artifacts')
 
 log.header(
   'ANALYZE AI CONTEXT ARTIFACTS',
@@ -25,8 +26,7 @@ const results = AIContextAnalyzer.analyzeArtifactDirectory(contextDir)
 if (results.length === 0) {
   log.warn('No AI context artifacts found')
   log.result({ total: 0, passed: 0, failed: 0 })
-  flushAi()
-  process.exit(0)
+  exit(0)
 }
 
 // Sort by size descending
@@ -107,4 +107,4 @@ for (const result of results) {
 }
 
 log.result({ total: results.length, passed: results.length, failed: 0 })
-flushAi()
+exit(0)

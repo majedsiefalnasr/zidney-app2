@@ -6,12 +6,6 @@
 bun run ci:local:full
 ```
 
-Registered package.json runner:
-
-```sh
-act --pull --reuse=false
-```
-
 ## Purpose
 
 Run or inspect GitHub Actions workflows locally with act.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run ci:local:full`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

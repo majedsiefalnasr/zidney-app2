@@ -6,12 +6,6 @@
 bun run ci:local:dry
 ```
 
-Registered package.json runner:
-
-```sh
-actionlint .github/workflows/*.yml
-```
-
 ## Purpose
 
 Validate GitHub Actions workflow files.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run ci:local:dry`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

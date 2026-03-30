@@ -27,12 +27,12 @@ commit or CI pipeline until resolved or explicitly suppressed with documented ra
 The lint governance pipeline operates in four ordered layers. Each layer has a distinct role and
 trigger context.
 
-| Layer | Name            | Role                                                                   | Primary Trigger                                            |
-| ----- | --------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------- |
-| **1** | **Biome**       | Syntax, formatting, lint rules, import ordering                        | `lint-staged` on commit / `bun run lint` in CI             |
-| **2** | **AI-Guard**    | Architecture boundary enforcement, forbidden imports, layer violations | Pre-commit hook / `arch-guard` CI job                      |
-| **3** | **Infra Audit** | Module registration, dependency graph integrity, undeclared modules    | Pre-commit hook (`--quick`) / `bun scripts/infra-audit.ts` |
-| **4** | **Tests**       | Behavioral correctness, regression detection                           | CI: `unit-tests` → `integration-tests`                     |
+| Layer | Name            | Role                                                                   | Primary Trigger                                    |
+| ----- | --------------- | ---------------------------------------------------------------------- | -------------------------------------------------- |
+| **1** | **Biome**       | Syntax, formatting, lint rules, import ordering                        | `lint-staged` on commit / `bun run lint` in CI     |
+| **2** | **AI-Guard**    | Architecture boundary enforcement, forbidden imports, layer violations | Pre-commit hook / `arch-guard` CI job              |
+| **3** | **Infra Audit** | Module registration, dependency graph integrity, undeclared modules    | Pre-commit hook (`--quick`) / `bun run arch:audit` |
+| **4** | **Tests**       | Behavioral correctness, regression detection                           | CI: `unit-tests` → `integration-tests`             |
 
 **Dependency order:** Each layer is a prerequisite for the next. The CI gate sequence enforces this
 order:
@@ -178,16 +178,16 @@ The complete local governance pipeline fires automatically on every `git commit`
 3. **`git commit -m "..."`** — triggers Husky pre-commit hook
 4. **`lint-staged` fires** — Biome `--write` runs on staged files only; formatting and safe lint
    fixes applied automatically; commit blocked if errors remain after auto-fix
-5. **AI-Guard fires** — `bun scripts/ai-guard.ts` validates architecture boundaries; commit blocked
+5. **AI-Guard fires** — `bun run ai:guard` validates architecture boundaries; commit blocked
    if violations detected
-6. **Infra Audit fires** — `bun scripts/infra-audit.ts --quick` checks module registration and
+6. **Infra Audit fires** — `bun run arch:audit --quick` checks module registration and
    structural integrity; commit blocked if violations detected
 7. **Commit recorded** — all hooks passed; commit object created
 8. **`git push`** — triggers CI pipeline
 9. **CI gates execute in sequence:**
    - `lint` — `bun run lint` (full monorepo)
    - `typecheck` — `bun run typecheck`
-   - `arch-guard` — `bun scripts/ai-guard.ts`
+   - `arch-guard` — `bun run arch:guard`
    - `unit-tests` — `bun run test:unit`
    - `integration-tests` — `bun run test:integration`
 10. **Merge allowed** — only after all CI gates pass
@@ -228,17 +228,17 @@ All CI gates are **blocking**. A job cannot start until all its `needs` dependen
 | ----- | ------------------- | -------------------------- | --------------------------------- | ------------------------------------------ |
 | 1     | `lint`              | `bun run lint`             | —                                 | `arch-guard`                               |
 | 2     | `typecheck`         | `bun run typecheck`        | —                                 | `arch-guard`                               |
-| 3     | `arch-guard`        | `bun scripts/ai-guard.ts`  | `lint`, `typecheck`               | `unit-tests`, `integration-tests`          |
+| 3     | `arch-guard`        | `bun run ai:guard`         | `lint`, `typecheck`               | `unit-tests`, `integration-tests`          |
 | 4     | `unit-tests`        | `bun run test:unit`        | `lint`, `typecheck`, `arch-guard` | `integration-tests`, `coverage-validation` |
 | 5     | `integration-tests` | `bun run test:integration` | `unit-tests`, `arch-guard`        | E2E jobs                                   |
 
 **Drift Recovery Playbook** — if architecture drift is detected (AI-Guard or Infra Audit fails):
 
 1. **Identify drift:** `bun run arch:audit` — lists unmapped modules and layer violations
-2. **Auto-register new modules:** `bun run arch:fix` — registers any newly detected modules in
+2. **Auto-register new modules:** `bun run arch:governance:fix` — registers any newly detected modules in
    `ARCHITECTURE_MAP.json`
-3. **Full refresh:** `bun run arch:refresh` — regenerates the full architecture intelligence layer
-4. **Verify AI-Guard:** `bun scripts/ai-guard.ts` — confirm enriched mode runs without errors
+3. **Full refresh:** `bun run arch:governance` — regenerates the full architecture intelligence layer
+4. **Verify AI-Guard:** `bun run ai:guard` — confirm enriched mode runs without errors
 5. **Commit refreshed artifacts:**
    `git add docs/architecture/intelligence/ && git commit -m "chore: refresh architecture intelligence layer"`
 6. **Push and confirm CI passes:** Verify `arch-guard` job succeeds in CI

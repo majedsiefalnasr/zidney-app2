@@ -1,7 +1,15 @@
 #!/usr/bin/env bun
 
+/**
+ * @script arch:health:benchmark
+ * @domain arch
+ * @category dev
+ * @description Benchmark the architecture health runner across repeated executions and report the p95 budget result.
+ * @usage bun run arch:health:benchmark
+ */
+
 import { spawnSync } from 'node:child_process'
-import { flushAi, log } from '../utils/logger'
+import { exit, log } from '../utils/logger'
 
 interface BenchmarkOptions {
   runs: number
@@ -75,6 +83,7 @@ export function runBenchmark(options: BenchmarkOptions): BenchmarkResult {
 }
 
 function main(): void {
+  log.setScript('arch:health:benchmark')
   log.header('ARCHITECTURE BENCHMARK', 'Measures architecture-health P95 duration against budget')
   const options = parseBenchmarkArgs()
   const result = runBenchmark(options)
@@ -85,10 +94,14 @@ function main(): void {
     failed: result.within_budget ? 0 : result.runs,
     message: result.within_budget ? 'within budget' : 'over budget',
   })
-  flushAi()
-  process.exitCode = result.within_budget ? 0 : 1
+  exit(result.within_budget ? 0 : 1)
 }
 
-if ((import.meta as { main?: boolean }).main) {
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])benchmark\.ts$/.test(entry)
+}
+
+if (isDirectExecution()) {
   main()
 }

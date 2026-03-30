@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script validate:scripts:naming
  * @domain validate
@@ -202,5 +204,11 @@ function main(): void {
   exit(1)
 }
 
-// Run as standalone script - called directly via bun scripts/validate/script-naming.ts
-main()
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])script-naming\.ts$/.test(entry)
+}
+
+if (isDirectExecution()) {
+  main()
+}

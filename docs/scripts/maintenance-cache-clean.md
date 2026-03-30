@@ -6,12 +6,6 @@
 bun run infra:cache:clean
 ```
 
-Registered package.json runner:
-
-```sh
-bun run scripts/maintenance/cache-clean.ts
-```
-
 ## Purpose
 
 Remove build caches and temporary output directories to free disk space
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run infra:cache:clean`
 - Implementation: scripts/maintenance/cache-clean.ts
 - Metadata-backed script file: `scripts/maintenance/cache-clean.ts`
 

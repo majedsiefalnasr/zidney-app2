@@ -51,7 +51,7 @@ export function checkBrainStatus(): { status: BrainStatus; brainPath: string; de
     return {
       status: 'stale',
       brainPath: BRAIN_PATH,
-      detail: `Source files newer than brain artifact by ${delta}ms. Run: bun arch:audit`,
+      detail: `Source files newer than brain artifact by ${delta}ms. Run: bun run arch:audit`,
     }
   }
   return { status: 'present_fresh', brainPath: BRAIN_PATH }

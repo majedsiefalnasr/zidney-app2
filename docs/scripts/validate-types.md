@@ -6,12 +6,6 @@
 bun run validate:types
 ```
 
-Registered package.json runner:
-
-```sh
-bun typecheck && bun arch:type-safety-guard --json
-```
-
 ## Purpose
 
 Run TypeScript checks plus the architecture type-safety guard.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Treat as protected. It is a pri
 
 ## Source
 
+- Package runner: `bun run validate:types`
 - Implementation: Wrapper only; no single scripts/\*.ts source file.
 - Metadata-backed script file: No metadata-backed implementation file detected.
 

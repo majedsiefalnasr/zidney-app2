@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script arch:gitnexus:context
  * @domain arch
@@ -44,6 +46,7 @@ export interface RiskIndicator {
 export interface GitNexusContext {
   schemaVersion: string
   generatedAt: string
+  analyzedAt: string
   analysisMode: 'changed-only' | 'full'
   changedFiles: string[]
   impactedModules: string[]
@@ -333,9 +336,12 @@ export function assembleContext(options: AssembleOptions): GitNexusContext {
   const recentCommits = extractGitHistory()
   const riskIndicators = computeRiskIndicators(impactedModules, brain, changedFiles)
 
+  const now = new Date().toISOString()
+
   return {
     schemaVersion: SCHEMA_VERSION,
-    generatedAt: new Date().toISOString(),
+    generatedAt: now,
+    analyzedAt: now,
     analysisMode,
     changedFiles,
     impactedModules,

@@ -6,22 +6,17 @@
 bun run dev:demo:logger
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/dev/demo-logger-features.ts
-```
-
 ## Purpose
 
 Demonstrates all available logger customization options and features
 
 ## Why It Exists
 
-This runner is currently classified as medium. Not safe to remove directly. Other root scripts depend on it: dev:demo-logger-features. Its implementation lives in scripts/dev/demo-logger-features.ts and is exposed through the root package.json interface.
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/dev/demo-logger-features.ts and is exposed through the root package.json interface.
 
 ## Source
 
+- Package runner: `bun run dev:demo:logger`
 - Implementation: scripts/dev/demo-logger-features.ts
 - Metadata-backed script file: `scripts/dev/demo-logger-features.ts`
 
@@ -36,7 +31,7 @@ Supported explicitly in the implementation.
 ## Related Scripts
 
 - Depends on: None
-- Used by other root scripts: `dev:demo-logger-features`
+- Used by other root scripts: None found
 
 ## Audit Notes
 

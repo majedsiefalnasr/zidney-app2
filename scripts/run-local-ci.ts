@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 /**
  * @script ci:run-local
  * @domain ci
@@ -49,8 +51,7 @@ function run(command: string, args: string[]): { success: boolean; output: strin
 
 function runBunScript(scriptKey: string): { success: boolean; output: string } {
   const ciEligible = new Set([
-    'validate:scripts:runtime',
-    'validate:scripts:broken',
+    'validate:scripts:all',
     'dev:generate:script-docs',
     'arch:guard',
     'arch:type-safety-guard',
@@ -71,8 +72,7 @@ function checkDocker(): { running: boolean; message: string } {
 }
 
 const STEPS: Array<{ name: string; scriptKey: string }> = [
-  { name: 'validate:scripts:runtime', scriptKey: 'validate:scripts:runtime' },
-  { name: 'validate:scripts:broken', scriptKey: 'validate:scripts:broken' },
+  { name: 'validate:scripts:all', scriptKey: 'validate:scripts:all' },
   { name: 'dev:generate:script-docs', scriptKey: 'dev:generate:script-docs' },
   { name: 'arch:guard', scriptKey: 'arch:guard' },
   { name: 'arch:type-safety-guard', scriptKey: 'arch:type-safety-guard' },

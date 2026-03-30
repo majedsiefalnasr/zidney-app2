@@ -36,11 +36,11 @@ describe('loadAiContextMini', () => {
     expect(() => loadAiContextMini()).toThrow('docs/ai/context/ai-context-mini.json')
   })
 
-  it('thrown error message contains bun ai-context:generate command', async () => {
+  it('thrown error message contains bun run ai:context:generate command', async () => {
     vi.mocked(existsSync).mockReturnValue(false)
     vi.resetModules()
     const { loadAiContextMini } = await import('../context-loader')
-    expect(() => loadAiContextMini()).toThrow('bun ai-context:generate')
+    expect(() => loadAiContextMini()).toThrow('bun run ai:context:generate')
   })
 
   it('thrown error message is actionable (contains full path)', async () => {

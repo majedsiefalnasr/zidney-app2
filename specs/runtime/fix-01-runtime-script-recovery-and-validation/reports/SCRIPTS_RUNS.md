@@ -7,11 +7,11 @@ bun run typecheck:tests
 bun run typecheck
 bun run lint
 bun run lint:fix
-bun run format
-bun run format:biome
+bun run format:write
+bun run format:write
 bun run format:md
 bun run format:check
-bun run format:check:biome
+bun run format:check
 bun run format:check:md
 bun run validate:yaml
 bun run validate:workflows
@@ -42,8 +42,8 @@ bun run arch:add-module
 bun run arch:generate
 bun run arch:audit
 bun run arch:context
-bun run arch:refresh
-bun run arch:fix
+bun run arch:governance
+bun run arch:governance:fix
 bun run arch:guard
 bun run arch:guard:ci
 bun run arch:guard:changed
@@ -74,7 +74,7 @@ bun run db:validate:licenses
 bun run infra:cache:clean
 bun run dev:generate:script-docs
 bun run dev:seed:dashboard-test-data
-bun run validate:scripts:runtime
+bun run validate:scripts:all
 bun run validate:ai-context-fresh
 bun run validate:ai-context-schemas
 bun run ai:guard
@@ -87,7 +87,7 @@ bun run ci:test
 bun run dev
 bun run ai:context:generate
 bun run arch:audit
-bun run arch:audit:check
+bun run arch:governance
 bun run db:migrate
 bun run test:ci
 bun run typecheck:src

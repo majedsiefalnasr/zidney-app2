@@ -234,7 +234,7 @@ describe('plan-task.ts logic', () => {
   it('exit 3 when loadAiContextMini throws — direct process.exit(3) inside inline try', async () => {
     vi.mocked(loadAiContextMini).mockImplementation(() => {
       throw new Error(
-        'AI context artifact not found: docs/ai/context/ai-context-mini.json. Run: bun ai-context:generate'
+        'AI context artifact not found: docs/ai/context/ai-context-mini.json. Run: bun run ai:context:generate'
       )
     })
 

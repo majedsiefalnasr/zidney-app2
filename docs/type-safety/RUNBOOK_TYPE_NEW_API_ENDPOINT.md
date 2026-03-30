@@ -7,7 +7,7 @@ Step-by-step guide to creating a new API endpoint with full type safety.
 - [ ] Define request/response schemas
 - [ ] Create route handler with validation
 - [ ] Add error handling
-- [ ] Run typecheck (`bun typecheck`)
+- [ ] Run typecheck (`bun run typecheck`)
 - [ ] Test with invalid data
 - [ ] Add unit tests
 - [ ] Document endpoint
@@ -185,14 +185,14 @@ app.use(async (c, next) => {
 ### Run locally
 
 ```bash
-bun typecheck
+bun run typecheck
 ```
 
 Should pass with no errors. If errors:
 
 ```bash
 # See detailed errors
-bun typecheck --listFiles
+bun run typecheck --listFiles
 
 # Fix errors following RUNBOOK_FIX_TYPE_ERRORS.md
 ```
@@ -200,7 +200,7 @@ bun typecheck --listFiles
 ### Run in CI
 
 ```bash
-bun validate:types
+bun run validate:types
 # Runs: typecheck + guard + biome lint
 ```
 
@@ -292,7 +292,7 @@ describe("GET /attempts/:id", () => {
 ### Run tests
 
 ```bash
-bun test tests/unit/routes/attempts.test.ts
+bun run test tests/unit/routes/attempts.test.ts
 ```
 
 ## Step 6: Documentation
@@ -378,8 +378,8 @@ Add to API documentation:
 
 Before committing:
 
-- [ ] `bun typecheck` passes
-- [ ] `bun validate:types` passes
+- [ ] `bun run typecheck` passes
+- [ ] `bun run validate:types` passes
 - [ ] Unit tests all pass
 - [ ] No `any` types used
 - [ ] All external data validated

@@ -176,7 +176,7 @@ import { $ } from "bun";
 
 await $`bun run arch:guard`;
 await $`bun run validate:types`;
-await $`bun run validate:scripts:runtime`;
+await $`bun run validate:scripts:all`;
 await $`bun run script:usage-scan`;
 await $`bun run security:scan:ci`;
 await $`bun run ai-context:validate`;
@@ -200,7 +200,7 @@ await $`bun run governance:gate`;
   "scripts": {
     "governance:gate": "bun run scripts/governance/gate.ts",
     "governance:gate:ci": "bun run scripts/governance/gate-ci.ts",
-    "governance:gate:changed": "bun run arch:guard:changed && bun run validate:scripts:runtime",
+    "governance:gate:changed": "bun run arch:guard:changed && bun run validate:scripts:all",
     "governance:report": "bun run arch:health && bun run ai-context:validate"
   }
 }

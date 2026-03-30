@@ -60,8 +60,8 @@ Each violation includes:
 
 Strict and changed flows execute architecture context hooks:
 
-1. bun scripts/generate-ai-context.ts --force
-2. bun scripts/governance/validate-architecture-brain.ts
+1. bun run ai:context:refresh
+2. bun run arch:validate:brain
 
 ## Scope Guard
 

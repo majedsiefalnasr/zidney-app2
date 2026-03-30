@@ -75,7 +75,7 @@ Responsibilities include:
 Typical command:
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 Generated artifacts may include:
@@ -106,7 +106,7 @@ Responsibilities include:
 Typical command:
 
 ```
-bun scripts/ai-guard.ts
+bun run ai:guard
 ```
 
 If violations are detected, the guard prevents commits or CI merges.
@@ -181,7 +181,7 @@ Typical workflow when adding a new module:
 2. run the architecture audit
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 3. review suggested ARCHITECTURE_MAP updates
@@ -189,7 +189,7 @@ bun scripts/infra-audit.ts
 4. run architecture validation
 
 ```
-bun scripts/ai-guard.ts
+bun run ai:guard
 ```
 
 5. commit changes once validation passes

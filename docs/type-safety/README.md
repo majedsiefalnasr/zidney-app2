@@ -59,7 +59,7 @@ Layer 1             TypeScript Compiler Rules
 
 **Mechanism**: Compiler errors prevent code from compiling
 
-**When**: `bun typecheck` (compile-time)
+**When**: `bun run typecheck` (compile-time)
 
 **Scope**: All TypeScript code
 
@@ -77,7 +77,7 @@ Layer 1             TypeScript Compiler Rules
 
 **Mechanism**: Lint errors fail CI and block merge
 
-**When**: `bun lint` (before commit, in CI)
+**When**: `bun run lint` (before commit, in CI)
 
 **Scope**: All TypeScript files
 
@@ -234,26 +234,26 @@ export function validateUser(input: unknown) {
 **Check for type errors locally**:
 
 ```bash
-bun typecheck
+bun run typecheck
 ```
 
 **Run full type safety validation**:
 
 ```bash
-bun validate:types
+bun run validate:types
 ```
 
 **Scan for unsafe patterns**:
 
 ```bash
-bun type-safety-guard
+bun run arch:type-safety-guard
 ```
 
 **Fix type errors in a module**:
 
 ```bash
 cd packages/domain-core
-bun typecheck
+bun run typecheck
 # Then fix errors...
 ```
 

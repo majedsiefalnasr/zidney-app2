@@ -28,7 +28,7 @@ monorepo.
 
 - **Pre-commit:** lint-staged invokes `bun biome check --apply` (safe fixes only)
 - **CI/CD:** `.github/workflows/ci.yml` lint job runs two Biome checks (lint + format)
-- **npm scripts:** `bun run lint`, `bun run format`, `bun run format:check`, `bun run lint:fix`
+- **npm scripts:** `bun run lint`, `bun run format:write`, `bun run format:check`, `bun run lint:fix`
 - **VS Code:** `.vscode/extensions.json` recommends `biomejs.biome`, `.vscode/settings.json` sets it
   as default formatter
 
@@ -205,7 +205,7 @@ Format Check:   ✅ bun run format:check exits 0
 
 ### After Deploying
 
-1. Confirm developers can run `bun run lint` and `bun run format` locally
+1. Confirm developers can run `bun run lint` and `bun run format:write` locally
 2. Monitor CI/CD lint job for first run (should be faster than ESLint + Prettier combined)
 3. Collect feedback on developer experience improvements
 

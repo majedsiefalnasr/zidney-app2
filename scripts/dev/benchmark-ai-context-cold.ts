@@ -54,7 +54,7 @@ async function main() {
 
     try {
       // Run generate-ai-context with force flag
-      execSync('bun scripts/generate-ai-context.ts --force --validate', {
+      execSync('bun run ai:context:refresh --validate', {
         stdio: 'pipe',
         cwd: process.cwd(),
       })

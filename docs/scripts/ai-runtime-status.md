@@ -6,12 +6,6 @@
 bun run ai:runtime:status
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/ai-runtime/runtime-status.ts
-```
-
 ## Purpose
 
 Run the registered repository task for this area.
@@ -22,8 +16,9 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run ai:runtime:status`
 - Implementation: scripts/ai-runtime/runtime-status.ts
-- Metadata-backed script file: No metadata-backed implementation file detected.
+- Metadata-backed script file: `scripts/ai-runtime/runtime-status.ts`
 
 ## CI Behavior
 

@@ -1,21 +1,20 @@
+#!/usr/bin/env bun
 /**
- * repo-doctor.ts — Repository health diagnostic runner.
- *
- * Runs 7 sequential checks and reports pass/warn/fail.
- * Exits non-zero if any check reaches error level.
- *
- * Output: process.stdout.write only — console.log is banned.
- * Imports: node:fs, node:path only (+ formatter sibling module).
- *
- * Stage: INFRA-18 — T002
+ * @script repo:doctor
+ * @domain repo
+ * @category dev
+ * @description Run seven repository health checks and report pass, warn, and
+ *   fail status for local diagnostics.
+ * @usage bun run repo:doctor
  */
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { flushAi, hasCiFlag, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 import { line, section, summary } from './formatter'
 
 const isCi = hasCiFlag()
+log.setScript('repo:doctor')
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,6 +47,11 @@ export function spawnCheck(cmd: string[]): ProcessResult {
   const exitCode = result.exitCode ?? 1
   const stderrText = result.stderr ? result.stderr.toString() : ''
   return { exitCode, errorMessage: sanitizeDetail(stderrText) }
+}
+
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])repo-doctor\.ts$/.test(entry)
 }
 
 // ─── Check Functions ──────────────────────────────────────────────────────────
@@ -118,7 +122,7 @@ export function checkArchitectureGuard(): boolean {
   const result = spawnCheck(['bun', 'arch:guard'])
   if (result.exitCode !== 0) {
     const detail = result.errorMessage || 'architecture violations found'
-    line('architecture guard', 'error', `${detail} — run: bun arch:fix`)
+    line('architecture guard', 'error', `${detail} — run: bun arch:governance:fix`)
     return true
   }
   line('architecture guard', 'ok')
@@ -133,7 +137,7 @@ export function checkArchitectureBrain(): boolean {
   const result = spawnCheck(['bun', 'arch:validate:brain'])
   if (result.exitCode !== 0) {
     const detail = result.errorMessage || 'brain validation failed'
-    line('architecture brain', 'error', `${detail} — run: bun scripts/infra-audit.ts`)
+    line('architecture brain', 'error', `${detail} — run: bun run arch:audit`)
     return true
   }
   line('architecture brain', 'ok')
@@ -199,7 +203,7 @@ export function checkEnvFile(): boolean {
   const envKeys = parseKeys(fs.readFileSync(envPath, 'utf-8'))
 
   const missing: string[] = []
-  for (const key of exampleKeys) {
+  for (const key of Array.from(exampleKeys)) {
     if (!envKeys.has(key)) missing.push(key)
   }
 
@@ -234,7 +238,7 @@ export function checkTypeScript(): boolean {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-if (import.meta.main) {
+if (isDirectExecution()) {
   log.header('REPOSITORY DOCTOR', 'Runs 7 sequential health checks and reports pass/warn/fail')
   if (isCi) {
     log.info('[repo:doctor] CI mode enabled')
@@ -258,6 +262,5 @@ if (import.meta.main) {
 
   summary(checks.length - errorCount, checks.length)
   log.result({ total: checks.length, passed: checks.length - errorCount, failed: errorCount })
-  flushAi()
-  process.exit(errorCount > 0 ? 1 : 0)
+  exit(errorCount > 0 ? 1 : 0)
 }

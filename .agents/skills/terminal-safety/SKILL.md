@@ -89,7 +89,7 @@ Terminal commands must respect the architecture governance layer.
 Before performing large refactors or file moves, the AI should ensure:
 
 ```
-bun scripts/ai-guard.ts
+bun run ai:guard
 ```
 
 passes successfully.
@@ -97,7 +97,7 @@ passes successfully.
 When new modules are introduced, the AI should regenerate architecture intelligence:
 
 ```
-bun scripts/infra-audit.ts
+bun run arch:audit
 ```
 
 This keeps architecture metadata synchronized with the repository.

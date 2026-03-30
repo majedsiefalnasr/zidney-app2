@@ -1,15 +1,9 @@
-# validate:runtime:scripts
+# validate:scripts:fast
 
 ## Command
 
 ```sh
-bun run validate:runtime:scripts
-```
-
-Registered package.json runner:
-
-```sh
-bun run scripts/validate/runtime-scripts.ts
+bun run validate:scripts:fast
 ```
 
 ## Purpose
@@ -18,16 +12,17 @@ CI guard: hard-blocks (exit 1) when any bun run <script> reference in the projec
 
 ## Why It Exists
 
-This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/validate/runtime-scripts.ts and is exposed through the root package.json interface.
+Its implementation lives in scripts/validate/runtime-scripts.ts and is exposed through the root package.json interface.
 
 ## Source
 
+- Package runner: `bun run validate:scripts:fast`
 - Implementation: scripts/validate/runtime-scripts.ts
 - Metadata-backed script file: `scripts/validate/runtime-scripts.ts`
 
 ## CI Behavior
 
-Supported explicitly in the implementation.
+No explicit root-level `--ci` contract was detected for this runner.
 
 ## When to Run
 
@@ -40,4 +35,4 @@ Supported explicitly in the implementation.
 
 ## Audit Notes
 
-- Observed in isolated worktree run: no tracked file changes.
+- No isolated execution audit note is currently recorded.

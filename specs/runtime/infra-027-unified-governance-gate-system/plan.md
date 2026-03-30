@@ -136,7 +136,7 @@ Add the following entries to the `"scripts"` section of root `package.json`. Ins
 ```json
 "governance:gate": "bun scripts/governance/gate.ts",
 "governance:gate:ci": "bun scripts/governance/gate-ci.ts",
-"governance:gate:changed": "bun run arch:guard:changed && bun run validate:scripts:runtime",
+"governance:gate:changed": "bun run arch:guard:changed && bun run validate:scripts:all",
 "governance:report": "bun scripts/governance/report.ts",
 ```
 

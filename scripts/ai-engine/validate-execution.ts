@@ -1,6 +1,14 @@
-/** @library-module */
+#!/usr/bin/env bun
+/**
+ * @script ai:validate
+ * @domain ai
+ * @category governance
+ * @description Validate AI execution prerequisites and post-change governance
+ *   checks, then write a deterministic execution log.
+ * @usage bun run ai:validate
+ */
 import { existsSync, readFileSync } from 'node:fs'
-import { createLogger } from '@zidney/logger'
+import { createLogger, exit, log } from '../utils/logger'
 import { deriveTaskId, generateExecutionId } from './execution-id'
 import { writeExecutionLog } from './log-writer'
 import { assertMonorepoRoot } from './monorepo-guard'
@@ -9,6 +17,7 @@ import { checkBrainStatus } from './stale-check'
 import type { ExecutionLog } from './types'
 
 const logger = createLogger('ai-engine:validate-execution')
+log.setScript('ai:validate')
 
 const ARCH_HEALTH_JSON = 'docs/architecture/health/architecture-health.json'
 
@@ -66,6 +75,7 @@ async function main(): Promise<void> {
   const start = Date.now()
   const { ci, taskDescription, executionIdOverride } = parseArgs()
   const timeoutMs = ci ? 120_000 : 90_000
+  log.header('AI VALIDATE', 'Validate AI execution governance and architecture state')
 
   assertMonorepoRoot()
 
@@ -90,7 +100,7 @@ async function main(): Promise<void> {
       execution_duration_ms: duration,
       error: 'BRAIN_ABSENT',
     })
-    process.exit(3)
+    exit(3)
   }
   if (brainCheck.status === 'stale') {
     const duration = Date.now() - start
@@ -106,7 +116,7 @@ async function main(): Promise<void> {
       execution_duration_ms: duration,
       error: 'BRAIN_STALE',
     })
-    process.exit(4)
+    exit(4)
   }
 
   // Run governance tools
@@ -171,7 +181,7 @@ async function main(): Promise<void> {
       errorMsg = `arch:health exited with code ${archHealth.exit_code}`
   }
 
-  const log: ExecutionLog = {
+  const executionLog: ExecutionLog = {
     execution_id: executionId,
     task_id: taskId,
     timestamp: new Date(Date.now()).toISOString(),
@@ -184,8 +194,14 @@ async function main(): Promise<void> {
     error: errorMsg,
   }
 
-  await writeExecutionLog(log)
-  process.exit(overall === 'pass' ? 0 : 1)
+  await writeExecutionLog(executionLog)
+  log.result({
+    total: 1,
+    passed: overall === 'pass' ? 1 : 0,
+    failed: overall === 'pass' ? 0 : 1,
+    message: overall === 'pass' ? 'AI validation passed' : 'AI validation failed',
+  })
+  exit(overall === 'pass' ? 0 : 1)
 }
 
 let isTimeout = false
@@ -209,6 +225,7 @@ withTimeout(main, process.argv.includes('--ci') ? 120_000 : 90_000, 'ai:validate
     } catch {
       // log write failed — still exit with correct code
     }
-    process.exit(isTimeout ? 2 : 1)
+    log.error(err.message)
+    exit(isTimeout ? 2 : 1)
   }
 )

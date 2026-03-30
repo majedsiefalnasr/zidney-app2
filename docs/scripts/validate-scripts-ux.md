@@ -6,12 +6,6 @@
 bun run validate:scripts:ux
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/validate/validate-scripts-ux.ts
-```
-
 ## Purpose
 
 Validates scripts for consistent UX, logging, and exit usage.
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run validate:scripts:ux`
 - Implementation: scripts/validate/validate-scripts-ux.ts
 - Metadata-backed script file: `scripts/validate/validate-scripts-ux.ts`
 

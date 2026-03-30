@@ -1,6 +1,6 @@
 # AI Context Artifact Archive Index
 
-**Last Updated:** 2026-03-14T22:15:52.793Z
+**Last Updated:** 2026-03-29T11:46:54.765Z
 
 ## Archive Policy
 
@@ -10,12 +10,13 @@
 
 ## Archived Snapshots
 
-| Filename | Size (KB) | Created | Age (days) |
-| -------- | --------- | ------- | ---------- |
+| Filename   | Size (KB) | Created    | Age (days) |
+| ---------- | --------- | ---------- | ---------- |
+| INDEX.json | 0.2       | 2026-03-15 | 14         |
 
 ## Live Snapshots
 
-| Filename                   | Size (KB) | Modified   |
-| -------------------------- | --------- | ---------- |
-| ai-layer-model.json        | 0.5       | 2026-03-14 |
-| ai-architecture-brain.json | 39.3      | 2026-03-14 |
+| Filename              | Size (KB) | Modified   |
+| --------------------- | --------- | ---------- |
+| gitnexus-context.json | 6.5       | 2026-03-29 |
+| ai-runtime-map.json   | 0.3       | 2026-03-28 |

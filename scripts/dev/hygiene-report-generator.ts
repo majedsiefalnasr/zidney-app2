@@ -1,16 +1,16 @@
+#!/usr/bin/env bun
 /**
- * Zidney Repository Hygiene Report Generator
- * Runs all hygiene checks and writes a structured Markdown report to
- * docs/reports/REPOSITORY_HYGIENE_REPORT.md
- *
- * NOTE-01: rawOutput is sanitized before inclusion — user paths and env vars stripped.
- * NOTE-05: Each check is wrapped in try/catch; exceptions produce INCONCLUSIVE result.
- *          Never exits with code > 0 — report health is communicated via report content.
+ * @script dev:hygiene:report
+ * @domain dev
+ * @category dev
+ * @description Run repository hygiene checks and write a structured Markdown
+ *   report without failing the process on report findings.
+ * @usage bun run dev:hygiene:report
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { flushAi, hasCiFlag, log } from '../utils/logger'
+import { exit, hasCiFlag, log } from '../utils/logger'
 import { runAiContextCheck } from './hygiene-checks/ai-context-check'
 import { runArchGuardCheck } from './hygiene-checks/arch-guard-check'
 import { runCiWorkflowCheck } from './hygiene-checks/ci-workflow-check'
@@ -25,6 +25,7 @@ import { runWorkspacePackageCheck } from './hygiene-checks/workspace-package-che
 const ROOT = process.cwd()
 const REPORT_PATH = join(ROOT, 'docs', 'reports', 'REPOSITORY_HYGIENE_REPORT.md')
 const isCi = hasCiFlag(process.argv.slice(2))
+log.setScript('dev:hygiene:report')
 
 // NOTE-01: Sanitize rawOutput — strip absolute user paths and env var assignments
 function sanitizeOutput(raw: string | undefined): string {
@@ -202,9 +203,8 @@ async function main(): Promise<void> {
     passed: results.filter((r) => r.status === 'PASS').length,
     failed: results.filter((r) => r.status === 'FLAG' || r.status === 'WARNING').length,
   })
-  flushAi()
   // NOTE-05: Always exit 0 — health communicated via report content
-  process.exit(0)
+  exit(0)
 }
 
 main()

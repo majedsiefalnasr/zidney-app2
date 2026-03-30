@@ -6,12 +6,6 @@
 bun run arch:context:build
 ```
 
-Registered package.json runner:
-
-```sh
-bun scripts/context/build.ts
-```
-
 ## Purpose
 
 Generates docs/ai/context/gitnexus-context.json via assembleContext(). Uses atomic write (write to .tmp then renameSync) to prevent partial artifact state. Supports --dry-run (print to stdout only), --all (full workspace), --force (skip freshness check and always regenerate).
@@ -22,6 +16,7 @@ This runner is currently classified as critical. Do not remove without updating 
 
 ## Source
 
+- Package runner: `bun run arch:context:build`
 - Implementation: scripts/context/build.ts
 - Metadata-backed script file: `scripts/context/build.ts`
 

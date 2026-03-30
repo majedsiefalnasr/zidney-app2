@@ -27,7 +27,7 @@ const GUARDS: Array<{ name: string; script: string }> = [
   { name: 'Context Validate', script: 'arch:context:validate' },
   { name: 'Architecture Guard', script: 'arch:guard' },
   { name: 'Type Safety', script: 'validate:types' },
-  { name: 'Runtime Scripts', script: 'validate:scripts:runtime' },
+  { name: 'Runtime Scripts', script: 'validate:scripts:all' },
   { name: 'Script Usage', script: 'validate:scripts:usage' },
   { name: 'Security CI', script: 'infra:security:ci' },
   { name: 'AI Context Validate', script: 'ai:context:validate' },

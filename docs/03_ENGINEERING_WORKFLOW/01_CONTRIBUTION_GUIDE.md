@@ -51,9 +51,9 @@ All development must pass local validation before PR.
 
 Before pushing:
 
-- `bun lint` passes
-- `bun typecheck` passes
-- `bun test` passes
+- `bun run lint` passes
+- `bun run typecheck` passes
+- `bun run test` passes
 - No TODO left in production code
 - No console.log in committed code
 - No edited historical migration files

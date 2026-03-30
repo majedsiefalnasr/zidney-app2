@@ -304,7 +304,7 @@ Ask yourself:
 ### Step 5: Test the Fix
 
 ```bash
-bun typecheck
+bun run typecheck
 # If no errors: ✅ Fixed
 # If still errors: Repeat steps 1-4
 ```

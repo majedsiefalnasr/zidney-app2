@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest'
 import {
+  findStaleDocFiles,
   generateScriptDoc,
   parseMetaHeader,
   parsePackageReferenceSections,
@@ -62,6 +63,24 @@ describe('resolveDocFileName', () => {
   })
 })
 
+describe('findStaleDocFiles', () => {
+  it('filters orphaned generated docs while preserving reserved files', () => {
+    expect(
+      findStaleDocFiles(
+        [
+          'README.md',
+          'SCRIPT_REGISTRY.md',
+          'SCRIPT_MIGRATION_MAP.md',
+          'repo-script.md',
+          'dev-demo-logger-features.md',
+          'repo-status.md',
+        ],
+        ['repo-status.md']
+      )
+    ).toEqual(['repo-script.md', 'dev-demo-logger-features.md'])
+  })
+})
+
 describe('generateScriptDoc', () => {
   it('renders a page for a root wrapper using package reference data', () => {
     const page = generateScriptDoc({
@@ -90,5 +109,7 @@ describe('generateScriptDoc', () => {
     expect(page).toContain('Dedicated CI runner by name.')
     expect(page).toContain('`arch:context:build`')
     expect(page).toContain('`governance:gate:changed`')
+    expect(page).toContain('- Package runner: `bun run arch:guard`')
+    expect(page).not.toContain('Registered package.json runner:')
   })
 })

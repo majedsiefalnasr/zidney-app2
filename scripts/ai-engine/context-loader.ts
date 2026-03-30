@@ -1,4 +1,5 @@
 /** @library-module */
+
 import { existsSync, readFileSync } from 'node:fs'
 import { createLogger } from '@zidney/logger'
 
@@ -20,7 +21,9 @@ export interface AiContextMini {
  */
 export function loadAiContextMini(): AiContextMini {
   if (!existsSync(CONTEXT_PATH)) {
-    throw new Error(`AI context artifact not found: ${CONTEXT_PATH}. Run: bun ai-context:generate`)
+    throw new Error(
+      `AI context artifact not found: ${CONTEXT_PATH}. Run: bun run ai:context:generate`
+    )
   }
   logger.debug('Loaded AI context mini artifact', { path: CONTEXT_PATH })
   return JSON.parse(readFileSync(CONTEXT_PATH, 'utf8')) as AiContextMini

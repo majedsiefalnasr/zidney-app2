@@ -6,12 +6,6 @@
 bun run db:validate:licenses
 ```
 
-Registered package.json runner:
-
-```sh
-bun run scripts/db/validate-licenses.ts
-```
-
 ## Purpose
 
 Validate license distribution in master_db and report counts by status.
@@ -22,6 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
+- Package runner: `bun run db:validate:licenses`
 - Implementation: scripts/db/validate-licenses.ts
 - Metadata-backed script file: `scripts/db/validate-licenses.ts`
 
