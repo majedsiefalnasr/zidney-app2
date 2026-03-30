@@ -157,7 +157,7 @@
 **Purpose**: Wire all handlers into the router and register in the backoffice app
 
 - [ ] T033 Create router factory with read/write/transition permission guards and all 14 route registrations in `apps/api/src/routes/backoffice/mcq-questions/index.ts`
-- [ ] T034 Register `mcqQuestionsRouter` in the backoffice app workspace route group (apps/api backoffice router file)
+- [ ] T034 Register `mcqQuestionsRouter` in the backoffice app workspace route group (`apps/api/src/routes/backoffice/index.ts`)
 
 **Checkpoint**: All 14 API endpoints accessible through the backoffice workspace routes
 
@@ -296,6 +296,6 @@ Phase 4 complete ───├─ Phase 7: US4 (T024)
 | **Phase 13 (Integration Tests)** | 8                                    |
 | **Phase 14 (Polish)**            | 3                                    |
 | **Parallel-safe tasks [P]**      | 28                                   |
-| **New files**                    | 34                                   |
-| **Modified files**               | 3                                    |
+| **New files**                    | 40                                   |
+| **Modified files**               | 4                                    |
 | **New dependency**               | sanitize-html + @types/sanitize-html |

@@ -90,7 +90,7 @@ isolation.
 - Q: How are concurrent question updates handled? → A: Optimistic concurrency control via `updated_at` timestamp. Client must send the last-known `updated_at`; API rejects with 409 Conflict if it doesn't match.
 - Q: How is rich text content sanitized? → A: All rich text fields (question content, option content, explanation) MUST be sanitized server-side before storage. Strip dangerous HTML/script tags using a whitelist approach for allowed HTML elements.
 - Q: What rate limiting applies to question endpoints? → A: Follow the platform-standard rate limits from STAGE_08 (Rate Limiting and Security). No question-specific overrides.
-- Q: What is the deletion strategy — soft delete or hard delete? → A: Status-based soft delete is the primary mechanism. Hard delete is only allowed for DRAFT questions with no exam references. The deletion guard checks exam references before any delete operation.
+- Q: What is the deletion strategy — soft delete or hard delete? → A: Timestamp-based soft delete via `deleted_at` column is the primary mechanism. List queries filter on `WHERE deleted_at IS NULL`. Hard delete is only allowed for DRAFT questions with no exam references. The deletion guard checks exam references before any delete operation.
 
 ---
 
@@ -163,6 +163,7 @@ No exceptions requiring a new ADR were detected for this stage.
 | `updated_at`        | TIMESTAMPTZ | NOT NULL, server-set                                                          |
 | `created_by`        | UUID        | Nullable, FK → `users.id`                                                     |
 | `updated_by`        | UUID        | Nullable, FK → `users.id`                                                     |
+| `deleted_at`        | TIMESTAMPTZ | Nullable — soft delete marker; NULL = active, NOT NULL = deleted              |
 | `status_updated_at` | TIMESTAMPTZ | Nullable — set by workflow engine on every status transition                  |
 | `status_updated_by` | UUID        | Nullable, FK → `users.id` — set by workflow engine on every status transition |
 
@@ -173,6 +174,7 @@ No exceptions requiring a new ADR were detected for this stage.
 - `idx_mcq_questions_lesson_id` — supports lesson-filtered queries
 - `idx_mcq_questions_question_type` — supports type-filtered queries
 - `idx_mcq_questions_status` — supports status-filtered queries
+- `idx_mcq_questions_deleted_at` — excludes soft-deleted rows from list queries
 
 **Academic boundary constraints:**
 
@@ -604,9 +606,9 @@ and type-specific validation — executes inside a single atomic database transa
 
 Delete a question. The deletion strategy depends on the question's status and references:
 
-- **Soft delete (primary mechanism):** Sets the question status to a terminal deleted state.
+- **Soft delete (primary mechanism):** Sets `deleted_at` to the current server timestamp.
   This is the default behavior for all questions regardless of status. Soft-deleted questions
-  are excluded from list queries and are not selectable for exam composition.
+  are excluded from list queries (`WHERE deleted_at IS NULL`) and are not selectable for exam composition.
 - **Hard delete (restricted):** Permanently removes the question and all associated data. Hard
   delete is ONLY allowed when BOTH conditions are met: (1) the question is in `DRAFT` status,
   AND (2) the question has zero exam references (not in any exam config, scheduled exam, or
@@ -1077,7 +1079,7 @@ check), then attempt deletion and verify rejection.
 1. **Given** a DRAFT question not referenced anywhere, **When** a delete request is sent, **Then**
    the question is hard-deleted and all its options/classifications are cascade-removed.
 2. **Given** an ENABLED question not in any active attempt, **When** a delete request is sent,
-   **Then** the question is soft-deleted (status set to terminal deleted state) and excluded from
+   **Then** the question is soft-deleted (`deleted_at` timestamp set) and excluded from
    list queries.
 3. **Given** a question referenced in an active attempt, **When** a delete request is sent,
    **Then** the API returns `409` with `QUESTION_REFERENCED_IN_ACTIVE_ATTEMPT`.
@@ -1132,9 +1134,10 @@ check), then attempt deletion and verify rejection.
 - **FR-010**: System MUST support listing questions with multi-dimensional filtering by subject,
   division, lesson, question type, status, category value, tag, basket, revision flag, and exam
   flag.
-- **FR-011**: System MUST use status-based soft delete as the primary deletion mechanism. Hard
-  delete is only allowed for DRAFT questions with no exam references. Deletion of any kind is
-  blocked for questions referenced in active attempts.
+- **FR-011**: System MUST use timestamp-based soft delete via a `deleted_at` column as the primary
+  deletion mechanism. List queries MUST filter on `WHERE deleted_at IS NULL`. Hard delete is only
+  allowed for DRAFT questions with no exam references. Deletion of any kind is blocked for
+  questions referenced in active attempts.
 - **FR-012**: System MUST cascade-delete options and classification links when a question is
   hard-deleted.
 - **FR-013**: System MUST enforce tenant isolation — all question data resides in the tenant

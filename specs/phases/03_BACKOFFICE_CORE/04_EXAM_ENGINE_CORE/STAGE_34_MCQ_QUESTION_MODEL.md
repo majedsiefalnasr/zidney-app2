@@ -6,28 +6,31 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: HIGH
-Last Updated: 2026-03-30T00:04:00Z
+Last Updated: 2026-03-30T22:30:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all criteria)
+Implementation: AUTHORIZED
 
-- Total: 48 atomic tasks across 14 phases
-- Setup: 1, Database: 7, Domain Core: 9, Validation: 2, Route Infra: 1
-- API Handlers: 12, Route Wiring: 2, Unit Tests: 3, Integration Tests: 8, Polish: 3
-- Parallel-safe: 28 tasks
+Scope Authorized:
 
-Deferred Scope:
-
-- None
+- 5 tenant DB tables (mcq_questions, options, categories, tags, baskets)
+- 14 backoffice API endpoints (CRUD + classification links + workflow transition)
+- Domain-core module with validators, sanitizer, dependency registry, repository, service
+- Zod validation schemas
+- 3 unit tests + 8 integration tests + isolation + concurrency tests
+- 48 tasks across 14 phases
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed — implementation authorized
+- 4/4 guardians PASS (Security, Performance, QA, Code Review)
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed after remediation of 2 CRITICAL findings (soft delete mechanism alignment).
+Implementation gate open.
 
 ---
 

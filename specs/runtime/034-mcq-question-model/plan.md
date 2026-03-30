@@ -80,7 +80,7 @@ No exceptions requiring an ADR were detected.
 
 **Tables created (in order)**:
 
-1. `mcq_questions` — 17 columns, 2 CHECK constraints, 6 indexes, 5 FK constraints
+1. `mcq_questions` — 18 columns, 2 CHECK constraints, 6 indexes, 5 FK constraints
 2. `mcq_question_options` — 6 columns, 1 UNIQUE constraint, 1 index, 1 FK
 3. `mcq_question_categories` — 3 columns, 1 UNIQUE constraint, 2 indexes, 2 FKs
 4. `mcq_question_tags` — 3 columns, 1 UNIQUE constraint, 2 indexes, 2 FKs
@@ -638,8 +638,11 @@ Install in `packages/domain-core` (where the sanitizer utility lives).
 | 39  | `tests/integration/mcq-questions/list-questions.test.ts`                       | CREATE |
 | 40  | `tests/integration/mcq-questions/isolation.test.ts`                            | CREATE |
 | 41  | `tests/integration/mcq-questions/concurrency.test.ts`                          | CREATE |
+| 42  | `packages/domain-core/src/index.ts`                                            | MODIFY |
+| 43  | `packages/validation/src/backoffice/index.ts`                                  | MODIFY |
+| 44  | `apps/api/src/routes/backoffice/index.ts`                                      | MODIFY |
 
-**Total**: 34 new files, 1 modified file
+**Total**: 40 new files, 4 modified files
 
 ---
 
