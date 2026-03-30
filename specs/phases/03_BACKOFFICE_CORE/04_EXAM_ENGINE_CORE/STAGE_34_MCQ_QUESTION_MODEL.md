@@ -7,19 +7,16 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-03-30T00:03:00Z
+Last Updated: 2026-03-30T00:04:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Migration: 1 file (20260330_012_mcq_questions.ts) — 5 tables, 7 indexes, 6 FKs
-- Drizzle schemas: 5 files in apps/api/src/db/tenant/schemas/
-- Domain-core: 8 files in packages/domain-core/src/mcq-questions/
-- Zod validation: 11 schemas in packages/validation/src/backoffice/
-- API routes: 14 handlers in apps/api/src/routes/backoffice/mcq-questions/
-- Tests: 3 unit + 8 integration test files
-- New dependency: sanitize-html (version-pinned)
+- Total: 48 atomic tasks across 14 phases
+- Setup: 1, Database: 7, Domain Core: 9, Validation: 2, Route Infra: 1
+- API Handlers: 12, Route Wiring: 2, Unit Tests: 3, Integration Tests: 8, Polish: 3
+- Parallel-safe: 28 tasks
 
 Deferred Scope:
 
@@ -27,12 +24,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Guardian: PASS (6 non-blocking advisories)
-- API Designer: PASS (all 9 design aspects validated)
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
