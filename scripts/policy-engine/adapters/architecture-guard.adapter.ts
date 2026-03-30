@@ -16,10 +16,20 @@ import type { PolicyContext, PolicyResult } from '../types'
 const logger = createLogger('policy-engine:adapter:arch-guard')
 
 interface ArchGuardViolation {
+  rule?: string
+  severity?: string
   message?: string
+  location?: { file?: string; line?: number }
+  // Legacy flat fields (kept for backwards compat)
   file?: string
   from?: string
   to?: string
+  [key: string]: unknown
+}
+
+interface ArchGuardReport {
+  violations?: ArchGuardViolation[]
+  verdict?: string
   [key: string]: unknown
 }
 
@@ -45,7 +55,7 @@ export async function runArchitectureGuard(context: PolicyContext): Promise<Poli
 
   let proc: ReturnType<typeof Bun.spawn>
   try {
-    proc = Bun.spawn(['bun', 'run', command, '--check-only', '--json'], {
+    proc = Bun.spawn(['bun', 'run', command, '--check-only', '--output', 'json'], {
       signal: context.abortSignal,
       stdout: 'pipe',
       stderr: 'pipe',
@@ -79,41 +89,32 @@ export async function runArchitectureGuard(context: PolicyContext): Promise<Poli
 
     let violations: ArchGuardViolation[]
     try {
-      violations = JSON.parse(stdout) as ArchGuardViolation[]
+      const parsed = JSON.parse(stdout) as ArchGuardReport | ArchGuardViolation[]
+      // arch:guard --output json emits a GuardRunReport object; extract violations array
+      if (Array.isArray(parsed)) {
+        violations = parsed
+      } else if (parsed && Array.isArray(parsed.violations)) {
+        violations = parsed.violations
+      } else {
+        logger.warn('arch:guard JSON output has unexpected shape', { stdout: stdout.slice(0, 200) })
+        return []
+      }
     } catch {
       // Non-JSON output with exit 0 = possibly no violations
       if (stdout.includes('No violations') || stdout.trim() === '[]') {
         return []
       }
-      // Try to extract a JSON array from the output
-      const match = stdout.match(/\[[\s\S]*\]/)
-      if (match) {
-        try {
-          violations = JSON.parse(match[0]) as ArchGuardViolation[]
-        } catch {
-          logger.warn('arch:guard output is not parseable JSON', { stdout: stdout.slice(0, 200) })
-          return []
-        }
-      } else {
-        logger.warn('arch:guard output is not parseable JSON', { stdout: stdout.slice(0, 200) })
-        return []
-      }
-    }
-
-    if (!Array.isArray(violations)) {
-      logger.warn('arch:guard JSON output is not an array', {
-        type: typeof violations,
-      })
+      logger.warn('arch:guard output is not parseable JSON', { stdout: stdout.slice(0, 200) })
       return []
     }
 
     return violations.map(
       (v): PolicyResult => ({
-        ruleId: 'ARCH-001',
+        ruleId: v.rule ?? 'ARCH-001',
         domain: 'ARCH',
         severity: 'error',
         message: v.message ?? `Import boundary violation: ${v.from ?? '?'} → ${v.to ?? '?'}`,
-        file: v.file,
+        file: v.location?.file ?? v.file,
       })
     )
   } catch (err) {
