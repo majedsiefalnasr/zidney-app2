@@ -7,17 +7,19 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-30T00:01:00Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-03-30T00:02:00Z
 
 Scope Defined:
 
 - 5 normalized tables (mcq_questions, options, categories, tags, baskets)
 - 4 question types with type-specific validation
-- 13 API endpoints (CRUD, workflow, classification)
+- 13+ API endpoints (CRUD, workflow, classification)
 - Academic boundary enforcement
-- Deletion guards
+- Deletion guards (soft/hard delete strategy)
+- Optimistic concurrency control
+- Rich text sanitization
 
 Deferred Scope:
 
@@ -25,10 +27,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

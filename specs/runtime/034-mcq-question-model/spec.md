@@ -82,25 +82,37 @@ isolation.
 
 ---
 
+## Clarifications
+
+### Session 2026-03-30
+
+- Q: What is the transaction scope for PATCH question updates (metadata + options)? → A: Single atomic transaction. Metadata update + full option replacement + validation all in one transaction; any failure rolls back everything.
+- Q: How are concurrent question updates handled? → A: Optimistic concurrency control via `updated_at` timestamp. Client must send the last-known `updated_at`; API rejects with 409 Conflict if it doesn't match.
+- Q: How is rich text content sanitized? → A: All rich text fields (question content, option content, explanation) MUST be sanitized server-side before storage. Strip dangerous HTML/script tags using a whitelist approach for allowed HTML elements.
+- Q: What rate limiting applies to question endpoints? → A: Follow the platform-standard rate limits from STAGE_08 (Rate Limiting and Security). No question-specific overrides.
+- Q: What is the deletion strategy — soft delete or hard delete? → A: Status-based soft delete is the primary mechanism. Hard delete is only allowed for DRAFT questions with no exam references. The deletion guard checks exam references before any delete operation.
+
+---
+
 ## Constitutional Compliance Declaration
 
 This specification is validated against **Zidney Constitution v1.2.0**.
 
-| Rule                                   | Compliance                                                                                        |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| No cross-tenant access                 | ✓ All MCQ tables reside exclusively in the tenant DB                                              |
-| No middleware bypass                   | ✓ Tenant resolver → license middleware are mandatory before any question route handler            |
-| No grading outside worker              | ✓ Feature does not touch attempt or grading logic                                                 |
-| No direct DB instantiation             | ✓ All DB access via tenant resolver context; no global singleton                                  |
-| No weakening of snapshot integrity     | ✓ Question data is snapshot-captured at attempt start; no live reads during exam                  |
-| No weakening of transaction boundaries | ✓ All writes execute inside an explicit transaction                                               |
-| No weakening of version enforcement    | ✓ Schema version incremented; migrations are forward-only                                         |
-| Server-authoritative time only         | ✓ All timestamps set server-side; no client-supplied timestamps accepted                          |
-| No console.log allowed                 | ✓ All logging via structured logger                                                               |
-| Division boundary preserved            | ✓ Division must belong to workspace scope; cross-division assignment is forbidden                 |
-| Idempotency enforced                   | ✓ Classification links enforce UNIQUE constraints; duplicate link returns 409, not 500            |
-| Rate limiting enforced                 | ✓ Platform rate-limiting middleware applied; write routes ≤ 30 req/min, read routes ≤ 120 req/min |
-| Normalized data model                  | ✓ No JSON answer storage. No denormalized option arrays. All relations use foreign keys.          |
+| Rule                                   | Compliance                                                                                                                                               |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No cross-tenant access                 | ✓ All MCQ tables reside exclusively in the tenant DB                                                                                                     |
+| No middleware bypass                   | ✓ Tenant resolver → license middleware are mandatory before any question route handler                                                                   |
+| No grading outside worker              | ✓ Feature does not touch attempt or grading logic                                                                                                        |
+| No direct DB instantiation             | ✓ All DB access via tenant resolver context; no global singleton                                                                                         |
+| No weakening of snapshot integrity     | ✓ Question data is snapshot-captured at attempt start; no live reads during exam                                                                         |
+| No weakening of transaction boundaries | ✓ All writes execute inside an explicit transaction                                                                                                      |
+| No weakening of version enforcement    | ✓ Schema version incremented; migrations are forward-only                                                                                                |
+| Server-authoritative time only         | ✓ All timestamps set server-side; no client-supplied timestamps accepted                                                                                 |
+| No console.log allowed                 | ✓ All logging via structured logger                                                                                                                      |
+| Division boundary preserved            | ✓ Division must belong to workspace scope; cross-division assignment is forbidden                                                                        |
+| Idempotency enforced                   | ✓ Classification links enforce UNIQUE constraints; duplicate link returns 409, not 500                                                                   |
+| Rate limiting enforced                 | ✓ Platform rate-limiting middleware applied per STAGE_08 defaults; write routes ≤ 30 req/min, read routes ≤ 120 req/min. No question-specific overrides. |
+| Normalized data model                  | ✓ No JSON answer storage. No denormalized option arrays. All relations use foreign keys.                                                                 |
 
 No exceptions requiring a new ADR were detected for this stage.
 
@@ -298,6 +310,15 @@ Error response shape for all endpoints:
   "error": { "code": "ERROR_CODE", "message": "Human-readable message" }
 }
 ```
+
+**Rich text content sanitization (applies to all write endpoints):**
+
+All rich text fields — `content` on questions, `content` on options, and `explanation` on
+questions — MUST be sanitized server-side before storage. Sanitization uses a **whitelist
+approach**: only explicitly allowed HTML elements and attributes are preserved. All `<script>`
+tags, event handler attributes (`onclick`, `onerror`, etc.), and dangerous HTML constructs are
+stripped. Sanitization occurs within the request validation layer before the data reaches the
+domain logic or database.
 
 ---
 
@@ -522,10 +543,20 @@ Update question metadata and/or options.
 `question_type` is NOT updatable after creation — changing the type would invalidate existing
 options.
 
+**Concurrency control:** Client MUST send the last-known `updatedAt` value. The API compares it
+against the current `updated_at` in the database. If they do not match, the API rejects the
+request with `409 Conflict` (`CONCURRENT_UPDATE_CONFLICT`). This prevents lost updates from
+concurrent editors.
+
+**Transaction scope:** The entire PATCH operation — metadata update, full option replacement,
+and type-specific validation — executes inside a single atomic database transaction. Any failure
+(validation error, constraint violation, concurrency conflict) rolls back the entire operation.
+
 **Request body (partial update):**
 
 ```json
 {
+  "updatedAt": "iso8601 (required — last-known updated_at for optimistic concurrency)",
   "subjectId": "uuid",
   "divisionId": "uuid | null",
   "lessonId": "uuid | null",
@@ -558,6 +589,7 @@ options.
 | Status | Error Code                     | Condition                                       |
 | ------ | ------------------------------ | ----------------------------------------------- |
 | 404    | `QUESTION_NOT_FOUND`           | Question does not exist                         |
+| 409    | `CONCURRENT_UPDATE_CONFLICT`   | `updatedAt` does not match current value        |
 | 422    | `VALIDATION_ERROR`             | Invalid field value                             |
 | 422    | `INVALID_OPTION_CONFIGURATION` | Options do not satisfy type-specific rules      |
 | 422    | `QUESTION_TYPE_IMMUTABLE`      | Attempt to change `questionType`                |
@@ -570,40 +602,54 @@ options.
 
 #### `DELETE /workspace/:slug/mcq-questions/:questionId`
 
-Delete a question permanently.
+Delete a question. The deletion strategy depends on the question's status and references:
+
+- **Soft delete (primary mechanism):** Sets the question status to a terminal deleted state.
+  This is the default behavior for all questions regardless of status. Soft-deleted questions
+  are excluded from list queries and are not selectable for exam composition.
+- **Hard delete (restricted):** Permanently removes the question and all associated data. Hard
+  delete is ONLY allowed when BOTH conditions are met: (1) the question is in `DRAFT` status,
+  AND (2) the question has zero exam references (not in any exam config, scheduled exam, or
+  active attempt). If either condition fails, the API falls back to soft delete or rejects
+  the operation.
 
 **Permission required:** `question_manage` OR `content_manage`
 
-**Preconditions (deletion guard):**
+**Preconditions (deletion guard — applies to both soft and hard delete):**
 
-1. Question MUST NOT be referenced in any MCQ exam configuration — regardless of that
-   configuration's lifecycle status.
-2. Question MUST NOT be referenced in any scheduled exam.
-3. Question MUST NOT be referenced in any active attempt.
-4. If any precondition fails, the deletion MUST be rejected.
+1. Question MUST NOT be referenced in any active attempt — deletion of any kind is blocked
+   during active attempts.
+2. For hard delete: question MUST be in `DRAFT` status AND MUST NOT be referenced in any
+   MCQ exam configuration or scheduled exam.
+3. If hard-delete preconditions fail but soft-delete is valid, the API performs a soft delete.
 
 **Success:** `200 OK`
 
 ```json
-{ "success": true, "data": { "deleted": true }, "error": null }
+{ "success": true, "data": { "deleted": true, "deleteType": "soft | hard" }, "error": null }
 ```
 
 **Error cases:**
 
-| Status | Error Code                              | Condition                                       |
-| ------ | --------------------------------------- | ----------------------------------------------- |
-| 404    | `QUESTION_NOT_FOUND`                    | Question does not exist                         |
-| 409    | `QUESTION_REFERENCED_IN_EXAM_CONFIG`    | Question is referenced in an exam configuration |
-| 409    | `QUESTION_REFERENCED_IN_SCHEDULED_EXAM` | Question is referenced in a scheduled exam      |
-| 409    | `QUESTION_REFERENCED_IN_ACTIVE_ATTEMPT` | Question is referenced in an active attempt     |
-| 403    | `FORBIDDEN`                             | Insufficient permission                         |
+| Status | Error Code                              | Condition                                                         |
+| ------ | --------------------------------------- | ----------------------------------------------------------------- |
+| 404    | `QUESTION_NOT_FOUND`                    | Question does not exist                                           |
+| 409    | `QUESTION_REFERENCED_IN_ACTIVE_ATTEMPT` | Question is referenced in an active attempt (blocks all deletion) |
+| 403    | `FORBIDDEN`                             | Insufficient permission                                           |
 
-**Cascade effects on deletion:**
+**Cascade effects on hard deletion:**
 
 - All `mcq_question_options` rows for this question are cascade-deleted.
 - All `mcq_question_categories` rows for this question are cascade-deleted.
 - All `mcq_question_tags` rows for this question are cascade-deleted.
 - All `mcq_question_baskets` rows for this question are cascade-deleted.
+
+**Soft deletion behavior:**
+
+- Question remains in the database with a terminal deleted status.
+- Soft-deleted questions are excluded from all list/filter queries.
+- Soft-deleted questions are not selectable for exam composition or auto-selection.
+- Options and classification links are preserved (not cascade-deleted) for audit trail.
 
 ---
 
@@ -927,13 +973,16 @@ set. Verify old options are removed and new options are persisted with correct v
 **Acceptance Scenarios:**
 
 1. **Given** an existing SINGLE question with 4 options, **When** a PATCH is sent with 3 new
-   options (1 correct), **Then** the old options are replaced and the new set is persisted.
+   options (1 correct) and the correct `updatedAt`, **Then** the old options are replaced and the
+   new set is persisted atomically.
 2. **Given** an existing question, **When** a PATCH attempts to change `questionType`, **Then**
    the API returns `422` with `QUESTION_TYPE_IMMUTABLE`.
 3. **Given** a PATCH with options violating type rules, **When** the request is sent, **Then**
    the API returns `422` with `INVALID_OPTION_CONFIGURATION`.
 4. **Given** a PATCH changing `lessonId` to a lesson from a different subject, **When** the
    request is sent, **Then** the API returns `422` with `LESSON_SUBJECT_MISMATCH`.
+5. **Given** an existing question updated by another user, **When** a PATCH is sent with a stale
+   `updatedAt` value, **Then** the API returns `409` with `CONCURRENT_UPDATE_CONFLICT`.
 
 ---
 
@@ -1025,12 +1074,15 @@ check), then attempt deletion and verify rejection.
 
 **Acceptance Scenarios:**
 
-1. **Given** a question not referenced anywhere, **When** a delete request is sent, **Then** the
-   question and all its options/classifications are deleted.
-2. **Given** a question referenced in an exam configuration, **When** a delete request is sent,
-   **Then** the API returns `409` with `QUESTION_REFERENCED_IN_EXAM_CONFIG`.
+1. **Given** a DRAFT question not referenced anywhere, **When** a delete request is sent, **Then**
+   the question is hard-deleted and all its options/classifications are cascade-removed.
+2. **Given** an ENABLED question not in any active attempt, **When** a delete request is sent,
+   **Then** the question is soft-deleted (status set to terminal deleted state) and excluded from
+   list queries.
 3. **Given** a question referenced in an active attempt, **When** a delete request is sent,
    **Then** the API returns `409` with `QUESTION_REFERENCED_IN_ACTIVE_ATTEMPT`.
+4. **Given** a DRAFT question referenced in an exam configuration, **When** a delete request is
+   sent, **Then** the question is soft-deleted (hard delete preconditions not met).
 
 ---
 
@@ -1069,8 +1121,9 @@ check), then attempt deletion and verify rejection.
   belong to the same subject; division must belong to the workspace scope.
 - **FR-004**: System MUST create questions in `DRAFT` status via the workflow engine.
 - **FR-005**: System MUST prevent ENABLED transition for questions with invalid or missing options.
-- **FR-006**: System MUST support full option replacement on question update (add, update, delete
-  options in a single PATCH).
+- **FR-006**: System MUST execute question updates (metadata + full option replacement +
+  validation) inside a single atomic database transaction; any failure rolls back the entire
+  operation.
 - **FR-007**: System MUST prevent `questionType` from being changed after creation.
 - **FR-008**: System MUST support linking questions to multiple category values, tags, and baskets
   via dedicated join tables.
@@ -1079,10 +1132,11 @@ check), then attempt deletion and verify rejection.
 - **FR-010**: System MUST support listing questions with multi-dimensional filtering by subject,
   division, lesson, question type, status, category value, tag, basket, revision flag, and exam
   flag.
-- **FR-011**: System MUST prevent deletion of questions referenced in exam configurations,
-  scheduled exams, or active attempts.
+- **FR-011**: System MUST use status-based soft delete as the primary deletion mechanism. Hard
+  delete is only allowed for DRAFT questions with no exam references. Deletion of any kind is
+  blocked for questions referenced in active attempts.
 - **FR-012**: System MUST cascade-delete options and classification links when a question is
-  deleted.
+  hard-deleted.
 - **FR-013**: System MUST enforce tenant isolation — all question data resides in the tenant
   database with no cross-tenant access.
 - **FR-014**: System MUST enforce license middleware on all question routes.
@@ -1092,6 +1146,10 @@ check), then attempt deletion and verify rejection.
 - **FR-017**: System MUST set all timestamps server-side — no client-supplied timestamps accepted.
 - **FR-018**: System MUST enforce `UNIQUE(question_id, order_index)` on options to prevent
   duplicate ordering.
+- **FR-019**: System MUST enforce optimistic concurrency control on question updates via
+  `updated_at` comparison; rejected mismatches return 409 Conflict.
+- **FR-020**: System MUST sanitize all rich text fields (question content, option content,
+  explanation) server-side before storage using an HTML element whitelist approach.
 
 ### Key Entities
 
