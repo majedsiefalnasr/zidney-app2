@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-03-30T12:12:15.883Z",
-  "gitSha": "fe19b03fcf57f828c4f629c3dc875fbfb9fe379a",
+  "generatedAt": "2026-03-30T15:10:49.070Z",
+  "gitSha": "8d4800d1fb2015e38dc4596c66254118d83a24f6",
   "architectureScore": 100,
   "modules": [
     "packages/job-queue",
@@ -42,7 +42,9 @@
   "rules": {
     "dependencyRules": {
       "forbidPackagesImportingApps": true,
-      "forbidAppsImportingOtherApps": true
+      "forbidAppsImportingOtherApps": true,
+      "forbidScriptsImportingServiceLogger": true,
+      "forbidAppsPackagesImportingScriptLogger": true
     },
     "layerRules": {
       "forbidUiImportingDomain": {

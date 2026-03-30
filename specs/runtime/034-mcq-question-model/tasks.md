@@ -20,7 +20,7 @@
 
 **Purpose**: Install new dependency required by the MCQ questions module
 
-- [ ] T001 Install `sanitize-html` and `@types/sanitize-html` in `packages/domain-core/` via `pnpm add sanitize-html` and `pnpm add -D @types/sanitize-html`
+- [x] T001 Install `sanitize-html` and `@types/sanitize-html` in `packages/domain-core/` via `pnpm add sanitize-html` and `pnpm add -D @types/sanitize-html`
 
 ---
 
@@ -30,13 +30,13 @@
 
 **⚠️ CRITICAL**: No domain logic or API work can begin until schemas exist
 
-- [ ] T002 Create tenant migration with 5 tables, 7 indexes, 6 FKs, 2 CHECK constraints, and schema_version bump in `apps/api/src/db/tenant/migrations/20260330_012_mcq_questions.ts`
-- [ ] T003 [P] Create Drizzle schema for `mcq_questions` table (17 columns, 2 checks, 6 indexes) in `apps/api/src/db/tenant/schemas/mcq-questions.schema.ts`
-- [ ] T004 [P] Create Drizzle schema for `mcq_question_options` table (6 columns, UNIQUE constraint, 1 index) in `apps/api/src/db/tenant/schemas/mcq-question-options.schema.ts`
-- [ ] T005 [P] Create Drizzle schema for `mcq_question_categories` join table in `apps/api/src/db/tenant/schemas/mcq-question-categories.schema.ts`
-- [ ] T006 [P] Create Drizzle schema for `mcq_question_tags` join table in `apps/api/src/db/tenant/schemas/mcq-question-tags.schema.ts`
-- [ ] T007 [P] Create Drizzle schema for `mcq_question_baskets` join table in `apps/api/src/db/tenant/schemas/mcq-question-baskets.schema.ts`
-- [ ] T008 Add 5 new schema re-exports (mcqQuestions, mcqQuestionOptions, mcqQuestionCategories, mcqQuestionTags, mcqQuestionBaskets) to `apps/api/src/db/tenant/schemas/index.ts`
+- [x] T002 Create tenant migration with 5 tables, 7 indexes, 6 FKs, 2 CHECK constraints, and schema_version bump in `apps/api/src/db/tenant/migrations/20260330_012_mcq_questions.ts`
+- [x] T003 [P] Create Drizzle schema for `mcq_questions` table (17 columns, 2 checks, 6 indexes) in `apps/api/src/db/tenant/schemas/mcq-questions.schema.ts`
+- [x] T004 [P] Create Drizzle schema for `mcq_question_options` table (6 columns, UNIQUE constraint, 1 index) in `apps/api/src/db/tenant/schemas/mcq-question-options.schema.ts`
+- [x] T005 [P] Create Drizzle schema for `mcq_question_categories` join table in `apps/api/src/db/tenant/schemas/mcq-question-categories.schema.ts`
+- [x] T006 [P] Create Drizzle schema for `mcq_question_tags` join table in `apps/api/src/db/tenant/schemas/mcq-question-tags.schema.ts`
+- [x] T007 [P] Create Drizzle schema for `mcq_question_baskets` join table in `apps/api/src/db/tenant/schemas/mcq-question-baskets.schema.ts`
+- [x] T008 Add 5 new schema re-exports (mcqQuestions, mcqQuestionOptions, mcqQuestionCategories, mcqQuestionTags, mcqQuestionBaskets) to `apps/api/src/db/tenant/schemas/index.ts`
 
 **Checkpoint**: All 5 tenant tables defined in migration + Drizzle schemas ready
 
@@ -48,15 +48,15 @@
 
 **⚠️ CRITICAL**: Repository and service files contain ALL business logic for ALL user stories. This phase MUST complete before any API handler work begins.
 
-- [ ] T009 Create domain types with QuestionType, QuestionStatus, DbClient, AuditContext, row types, and all input/output DTOs in `packages/domain-core/src/mcq-questions/mcq-questions.types.ts`
-- [ ] T010 [P] Create error class with 20 error codes (QUESTION_NOT_FOUND through QUESTION_REFERENCED_IN_ACTIVE_ATTEMPT) and HTTP status mapping in `packages/domain-core/src/mcq-questions/mcq-questions.errors.ts`
-- [ ] T011 [P] Create `validateOptionsForType()` pure function with rules for SINGLE, MULTIPLE, TRUE_FALSE, ARRANGEMENT types including orderIndex uniqueness and content non-empty checks in `packages/domain-core/src/mcq-questions/mcq-questions.validators.ts`
-- [ ] T012 [P] Create `sanitizeRichText()` utility with sanitize-html whitelist config (allowedTags, allowedAttributes, allowedSchemes per R-001) in `packages/domain-core/src/mcq-questions/mcq-questions.sanitize.ts`
-- [ ] T013 [P] Create pluggable deletion guard with `registerQuestionReferenceChecker()` and `checkQuestionReferences()` functions in `packages/domain-core/src/mcq-questions/mcq-questions.dependency-registry.ts`
-- [ ] T014 Create repository with raw SQL data access for all operations (createQuestion, getQuestion, listQuestions, updateQuestion, deleteQuestion, link/unlink category/tag/basket) in `packages/domain-core/src/mcq-questions/mcq-questions.repository.ts`
-- [ ] T015 Create service layer with business logic, transaction orchestration, sanitization, validation, academic boundary enforcement, and concurrency control for all 11 operations in `packages/domain-core/src/mcq-questions/mcq-questions.service.ts`
-- [ ] T016 Create barrel export re-exporting all public types, errors, service functions, validators, sanitizer, and dependency registry in `packages/domain-core/src/mcq-questions/index.ts`
-- [ ] T017 Register mcq-questions module export in `packages/domain-core/src/index.ts`
+- [x] T009 Create domain types with QuestionType, QuestionStatus, DbClient, AuditContext, row types, and all input/output DTOs in `packages/domain-core/src/mcq-questions/mcq-questions.types.ts`
+- [x] T010 [P] Create error class with 20 error codes (QUESTION_NOT_FOUND through QUESTION_REFERENCED_IN_ACTIVE_ATTEMPT) and HTTP status mapping in `packages/domain-core/src/mcq-questions/mcq-questions.errors.ts`
+- [x] T011 [P] Create `validateOptionsForType()` pure function with rules for SINGLE, MULTIPLE, TRUE_FALSE, ARRANGEMENT types including orderIndex uniqueness and content non-empty checks in `packages/domain-core/src/mcq-questions/mcq-questions.validators.ts`
+- [x] T012 [P] Create `sanitizeRichText()` utility with sanitize-html whitelist config (allowedTags, allowedAttributes, allowedSchemes per R-001) in `packages/domain-core/src/mcq-questions/mcq-questions.sanitize.ts`
+- [x] T013 [P] Create pluggable deletion guard with `registerQuestionReferenceChecker()` and `checkQuestionReferences()` functions in `packages/domain-core/src/mcq-questions/mcq-questions.dependency-registry.ts`
+- [x] T014 Create repository with raw SQL data access for all operations (createQuestion, getQuestion, listQuestions, updateQuestion, deleteQuestion, link/unlink category/tag/basket) in `packages/domain-core/src/mcq-questions/mcq-questions.repository.ts`
+- [x] T015 Create service layer with business logic, transaction orchestration, sanitization, validation, academic boundary enforcement, and concurrency control for all 11 operations in `packages/domain-core/src/mcq-questions/mcq-questions.service.ts`
+- [x] T016 Create barrel export re-exporting all public types, errors, service functions, validators, sanitizer, and dependency registry in `packages/domain-core/src/mcq-questions/index.ts`
+- [x] T017 Register mcq-questions module export in `packages/domain-core/src/index.ts`
 
 **Checkpoint**: Complete domain module ready — all business logic, validation, and data access encapsulated
 
@@ -66,9 +66,9 @@
 
 **Purpose**: Create Zod validation schemas and shared route helpers that all API handlers depend on
 
-- [ ] T018 [P] Create 11 Zod validation schemas (questionIdParam, createQuestionBody, updateQuestionBody, listQuestionsQuery, transitionQuestionBody, linkCategory/Tag/Basket body, questionCategory/Tag/Basket param) in `packages/validation/src/backoffice/mcq-questions.schemas.ts`
-- [ ] T019 [P] Add mcq-questions schema exports to validation package barrel in `packages/validation/src/backoffice/index.ts`
-- [ ] T020 [P] Create shared route helpers (getDb, buildAuditCtx, successResponse, errorResponse) in `apps/api/src/routes/backoffice/mcq-questions/helpers.ts`
+- [x] T018 [P] Create 11 Zod validation schemas (questionIdParam, createQuestionBody, updateQuestionBody, listQuestionsQuery, transitionQuestionBody, linkCategory/Tag/Basket body, questionCategory/Tag/Basket param) in `packages/validation/src/backoffice/mcq-questions.schemas.ts`
+- [x] T019 [P] Add mcq-questions schema exports to validation package barrel in `packages/validation/src/backoffice/index.ts`
+- [x] T020 [P] Create shared route helpers (getDb, buildAuditCtx, successResponse, errorResponse) in `apps/api/src/routes/backoffice/mcq-questions/helpers.ts`
 
 **Checkpoint**: Validation and route infrastructure ready — handler implementation can begin
 
@@ -80,8 +80,8 @@
 
 **Independent Test**: POST a valid create request with `questionType = SINGLE`, valid `subjectId`, content, and 4 options (1 correct). Verify 201 response with `status = DRAFT`. GET the created question and verify all fields + options returned.
 
-- [ ] T021 [P] [US1] Create POST handler with Zod validation, sanitization, academic boundary checks, and type-specific option validation in `apps/api/src/routes/backoffice/mcq-questions/create-question.ts`
-- [ ] T022 [P] [US1] Create GET detail handler returning question with options, categories, tags, and baskets in `apps/api/src/routes/backoffice/mcq-questions/get-question.ts`
+- [x] T021 [P] [US1] Create POST handler with Zod validation, sanitization, academic boundary checks, and type-specific option validation in `apps/api/src/routes/backoffice/mcq-questions/create-question.ts`
+- [x] T022 [P] [US1] Create GET detail handler returning question with options, categories, tags, and baskets in `apps/api/src/routes/backoffice/mcq-questions/get-question.ts`
 
 **Checkpoint**: Questions of all 4 types can be created and retrieved individually
 
@@ -93,7 +93,7 @@
 
 **Independent Test**: Create a SINGLE question, PATCH with new content + 3 new options (1 correct) + correct `updatedAt`. Verify old options replaced. Then PATCH with stale `updatedAt` and verify 409.
 
-- [ ] T023 [US3] Create PATCH handler with optimistic concurrency (updatedAt comparison), full option replacement in single transaction, type immutability guard, and re-validation in `apps/api/src/routes/backoffice/mcq-questions/update-question.ts`
+- [x] T023 [US3] Create PATCH handler with optimistic concurrency (updatedAt comparison), full option replacement in single transaction, type immutability guard, and re-validation in `apps/api/src/routes/backoffice/mcq-questions/update-question.ts`
 
 **Checkpoint**: Question editing with concurrency control works end-to-end
 
@@ -105,7 +105,7 @@
 
 **Independent Test**: Create a question with valid options, submit sequential transitions through DRAFT → ENABLED. Verify ENABLED rejects questions with invalid options (422).
 
-- [ ] T024 [US4] Create POST transition handler delegating to shared workflow engine with ENABLED transition guard validating option configuration in `apps/api/src/routes/backoffice/mcq-questions/transition-question.ts`
+- [x] T024 [US4] Create POST transition handler delegating to shared workflow engine with ENABLED transition guard validating option configuration in `apps/api/src/routes/backoffice/mcq-questions/transition-question.ts`
 
 **Checkpoint**: Full question lifecycle from DRAFT to ENABLED works with guard enforcement
 
@@ -117,12 +117,12 @@
 
 **Independent Test**: Create a question, link a category value + tag + basket. Verify all links appear in question detail. Attempt duplicate link → 409. Unlink → verify removal.
 
-- [ ] T025 [P] [US5] Create POST handler for category linking with existence check and UNIQUE constraint catch in `apps/api/src/routes/backoffice/mcq-questions/link-category.ts`
-- [ ] T026 [P] [US5] Create DELETE handler for category unlinking with existence check in `apps/api/src/routes/backoffice/mcq-questions/unlink-category.ts`
-- [ ] T027 [P] [US5] Create POST handler for tag linking with existence check and UNIQUE constraint catch in `apps/api/src/routes/backoffice/mcq-questions/link-tag.ts`
-- [ ] T028 [P] [US5] Create DELETE handler for tag unlinking with existence check in `apps/api/src/routes/backoffice/mcq-questions/unlink-tag.ts`
-- [ ] T029 [P] [US5] Create POST handler for basket linking with max_questions count check and UNIQUE constraint catch in `apps/api/src/routes/backoffice/mcq-questions/link-basket.ts`
-- [ ] T030 [P] [US5] Create DELETE handler for basket unlinking with existence check in `apps/api/src/routes/backoffice/mcq-questions/unlink-basket.ts`
+- [x] T025 [P] [US5] Create POST handler for category linking with existence check and UNIQUE constraint catch in `apps/api/src/routes/backoffice/mcq-questions/link-category.ts`
+- [x] T026 [P] [US5] Create DELETE handler for category unlinking with existence check in `apps/api/src/routes/backoffice/mcq-questions/unlink-category.ts`
+- [x] T027 [P] [US5] Create POST handler for tag linking with existence check and UNIQUE constraint catch in `apps/api/src/routes/backoffice/mcq-questions/link-tag.ts`
+- [x] T028 [P] [US5] Create DELETE handler for tag unlinking with existence check in `apps/api/src/routes/backoffice/mcq-questions/unlink-tag.ts`
+- [x] T029 [P] [US5] Create POST handler for basket linking with max_questions count check and UNIQUE constraint catch in `apps/api/src/routes/backoffice/mcq-questions/link-basket.ts`
+- [x] T030 [P] [US5] Create DELETE handler for basket unlinking with existence check in `apps/api/src/routes/backoffice/mcq-questions/unlink-basket.ts`
 
 **Checkpoint**: All classification link/unlink operations work with idempotent error handling
 
@@ -134,7 +134,7 @@
 
 **Independent Test**: Create questions with different subjects and types, link classifications. Verify each filter narrows results correctly. Verify pagination returns correct total count.
 
-- [ ] T031 [US6] Create GET list handler with all 12 query filters, EXISTS subqueries for classification filters, pagination, and `WHERE deleted_at IS NULL` in `apps/api/src/routes/backoffice/mcq-questions/list-questions.ts`
+- [x] T031 [US6] Create GET list handler with all 12 query filters, EXISTS subqueries for classification filters, pagination, and `WHERE deleted_at IS NULL` in `apps/api/src/routes/backoffice/mcq-questions/list-questions.ts`
 
 **Checkpoint**: Full question listing with all filter dimensions and pagination works
 
@@ -146,7 +146,7 @@
 
 **Independent Test**: Create a DRAFT question → DELETE → verify hard delete. Create an ENABLED question → DELETE → verify soft delete. Mock active attempt reference → verify 409.
 
-- [ ] T032 [US7] Create DELETE handler with dependency registry guard, hard delete for DRAFT (cascade), soft delete (set deleted_at) for others, and active attempt block in `apps/api/src/routes/backoffice/mcq-questions/delete-question.ts`
+- [x] T032 [US7] Create DELETE handler with dependency registry guard, hard delete for DRAFT (cascade), soft delete (set deleted_at) for others, and active attempt block in `apps/api/src/routes/backoffice/mcq-questions/delete-question.ts`
 
 **Checkpoint**: Deletion works with correct guard logic and status-aware strategy
 
@@ -156,8 +156,8 @@
 
 **Purpose**: Wire all handlers into the router and register in the backoffice app
 
-- [ ] T033 Create router factory with read/write/transition permission guards and all 14 route registrations in `apps/api/src/routes/backoffice/mcq-questions/index.ts`
-- [ ] T034 Register `mcqQuestionsRouter` in the backoffice app workspace route group (`apps/api/src/routes/backoffice/index.ts`)
+- [x] T033 Create router factory with read/write/transition permission guards and all 14 route registrations in `apps/api/src/routes/backoffice/mcq-questions/index.ts`
+- [x] T034 Register `mcqQuestionsRouter` in the backoffice app workspace route group (`apps/api/src/routes/backoffice/index.ts`)
 
 **Checkpoint**: All 14 API endpoints accessible through the backoffice workspace routes
 
@@ -167,9 +167,9 @@
 
 **Purpose**: Test pure domain logic in isolation — validators, sanitizer, dependency registry
 
-- [ ] T035 [P] Create unit tests for `validateOptionsForType()` covering all 4 question types × valid/invalid configurations (min 12 test cases) in `packages/domain-core/src/mcq-questions/__tests__/validators.test.ts`
-- [ ] T036 [P] Create unit tests for `sanitizeRichText()` covering XSS vector stripping, allowed tag preservation, RTL dir attribute, and edge cases in `packages/domain-core/src/mcq-questions/__tests__/sanitize.test.ts`
-- [ ] T037 [P] Create unit tests for dependency registry covering checker registration, result aggregation, active attempt priority, and empty registry default in `packages/domain-core/src/mcq-questions/__tests__/dependency-registry.test.ts`
+- [x] T035 [P] Create unit tests for `validateOptionsForType()` covering all 4 question types × valid/invalid configurations (min 12 test cases) in `packages/domain-core/src/mcq-questions/__tests__/validators.test.ts`
+- [x] T036 [P] Create unit tests for `sanitizeRichText()` covering XSS vector stripping, allowed tag preservation, RTL dir attribute, and edge cases in `packages/domain-core/src/mcq-questions/__tests__/sanitize.test.ts`
+- [x] T037 [P] Create unit tests for dependency registry covering checker registration, result aggregation, active attempt priority, and empty registry default in `packages/domain-core/src/mcq-questions/__tests__/dependency-registry.test.ts`
 
 **Checkpoint**: All pure domain functions have comprehensive unit test coverage
 
@@ -179,14 +179,14 @@
 
 **Purpose**: End-to-end API testing covering all user stories, tenant isolation, and concurrency
 
-- [ ] T038 [P] Create integration tests for question creation: all 4 types, option validation, academic boundary enforcement, sanitization, error cases in `tests/integration/mcq-questions/create-question.test.ts`
-- [ ] T039 [P] Create integration tests for question update: metadata + option replacement, optimistic concurrency, type immutability, transaction rollback in `tests/integration/mcq-questions/update-question.test.ts`
-- [ ] T040 [P] Create integration tests for question deletion: hard delete (DRAFT), soft delete (other status), deletion guard, cascade verification in `tests/integration/mcq-questions/delete-question.test.ts`
-- [ ] T041 [P] Create integration tests for workflow transitions: full lifecycle DRAFT→ENABLED, ENABLED guard, invalid transitions, permission checks in `tests/integration/mcq-questions/workflow-transition.test.ts`
-- [ ] T042 [P] Create integration tests for classification links: category/tag/basket link + unlink, duplicate handling (409), max_questions enforcement in `tests/integration/mcq-questions/classification-links.test.ts`
-- [ ] T043 [P] Create integration tests for question listing: all 12 filters, EXISTS subqueries, pagination, soft-deleted exclusion in `tests/integration/mcq-questions/list-questions.test.ts`
-- [ ] T044 [P] Create tenant isolation tests verifying zero cross-tenant data access across all question operations in `tests/integration/mcq-questions/isolation.test.ts`
-- [ ] T045 [P] Create concurrency tests: concurrent PATCH → one succeeds + one 409, concurrent classification links → UNIQUE constraint handling in `tests/integration/mcq-questions/concurrency.test.ts`
+- [x] T038 [P] Create integration tests for question creation: all 4 types, option validation, academic boundary enforcement, sanitization, error cases in `tests/integration/mcq-questions/create-question.test.ts`
+- [x] T039 [P] Create integration tests for question update: metadata + option replacement, optimistic concurrency, type immutability, transaction rollback in `tests/integration/mcq-questions/update-question.test.ts`
+- [x] T040 [P] Create integration tests for question deletion: hard delete (DRAFT), soft delete (other status), deletion guard, cascade verification in `tests/integration/mcq-questions/delete-question.test.ts`
+- [x] T041 [P] Create integration tests for workflow transitions: full lifecycle DRAFT→ENABLED, ENABLED guard, invalid transitions, permission checks in `tests/integration/mcq-questions/workflow-transition.test.ts`
+- [x] T042 [P] Create integration tests for classification links: category/tag/basket link + unlink, duplicate handling (409), max_questions enforcement in `tests/integration/mcq-questions/classification-links.test.ts`
+- [x] T043 [P] Create integration tests for question listing: all 12 filters, EXISTS subqueries, pagination, soft-deleted exclusion in `tests/integration/mcq-questions/list-questions.test.ts`
+- [x] T044 [P] Create tenant isolation tests verifying zero cross-tenant data access across all question operations in `tests/integration/mcq-questions/isolation.test.ts`
+- [x] T045 [P] Create concurrency tests: concurrent PATCH → one succeeds + one 409, concurrent classification links → UNIQUE constraint handling in `tests/integration/mcq-questions/concurrency.test.ts`
 
 **Checkpoint**: Full integration test coverage across all user stories and cross-cutting concerns
 
@@ -196,9 +196,9 @@
 
 **Purpose**: Final validation, migration verification, and governance checks
 
-- [ ] T046 Validate migration idempotency by running migration twice and confirming no errors (IF NOT EXISTS)
-- [ ] T047 Run full validation pipeline: `bun run lint && bun run typecheck && bun run test`
-- [ ] T048 Verify structured logging uses `@zidney/logger` with correct correlation fields (correlation_id, workspace_slug, workspace_id, question_id) — no console.log
+- [x] T046 Validate migration idempotency by running migration twice and confirming no errors (IF NOT EXISTS)
+- [x] T047 Run full validation pipeline: `bun run lint && bun run typecheck && bun run test`
+- [x] T048 Verify structured logging uses `@zidney/logger` with correct correlation fields (correlation_id, workspace_slug, workspace_id, question_id) — no console.log
 
 ---
 
