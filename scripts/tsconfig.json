@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "types": ["node", "bun"],
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noEmit": true,
+    "baseUrl": ".."
+  },
+  "include": [
+    "./infra-audit.ts",
+    "./utils/**/*.ts",
+    "./core/logger-factory.ts",
+    "./policy-engine/**/*.ts",
+    "./ai-engine/context-loader.ts"
+  ],
+  "exclude": ["node_modules", "./**/__tests__/**", "./**/*.test.ts", "./**/*.spec.ts"]
+}

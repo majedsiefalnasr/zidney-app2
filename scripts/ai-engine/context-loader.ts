@@ -1,7 +1,7 @@
 /** @library-module */
 
 import { existsSync, readFileSync } from 'node:fs'
-import { createLogger } from '@zidney/logger'
+import { createLogger } from '../utils/logger'
 
 const CONTEXT_PATH = 'docs/ai/context/ai-context-mini.json'
 

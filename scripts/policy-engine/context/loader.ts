@@ -18,7 +18,7 @@
 
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createLogger } from '@zidney/logger'
+import { createLogger } from '../../utils/logger'
 import type {
   ContextLoadResult,
   ContextWarning,

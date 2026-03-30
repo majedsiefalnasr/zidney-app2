@@ -17,6 +17,14 @@
     "./products": {
       "types": "./src/products.ts",
       "default": "./src/products.ts"
+    },
+    "./provisioning-logger": {
+      "types": "./src/provisioning-logger.ts",
+      "default": "./src/provisioning-logger.ts"
+    },
+    "./correlation-context": {
+      "types": "./src/correlation-context.ts",
+      "default": "./src/correlation-context.ts"
     }
   },
   "scripts": {

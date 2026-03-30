@@ -9,7 +9,7 @@
  * @library-module
 */
 
-import { createLogger } from '@zidney/logger'
+import { createLogger } from '../utils/logger'
 import { getRules } from './registry'
 import type { ContextWarning, PolicyContext, PolicyDomain, PolicyResult, PolicyRule } from './types'
 

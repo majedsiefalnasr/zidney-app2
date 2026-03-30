@@ -11,7 +11,7 @@
  * @library-module
 */
 
-import { createLogger } from '@zidney/logger'
+import { createLogger } from '../../utils/logger'
 import type { PolicyContext, PolicyResult } from '../types'
 
 const logger = createLogger('policy-engine:adapter:type-safety')

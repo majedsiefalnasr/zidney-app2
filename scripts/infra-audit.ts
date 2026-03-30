@@ -242,6 +242,8 @@ const REQUIRED_README_SECTIONS = [
 const DEP_RULES = {
   forbidPackagesImportingApps: true,
   forbidAppsImportingOtherApps: true,
+  forbidScriptsImportingServiceLogger: true,
+  forbidAppsPackagesImportingScriptLogger: true,
 }
 
 /* Zidney architectural layer rules */
@@ -807,6 +809,57 @@ function scanDependencyBoundaries(files: Map<string, string>) {
             if (existing && existing.examples.length < 3) {
               existing.examples.push(rel)
             }
+          }
+        }
+      }
+
+      // Scripts must use CLI logger (scripts/utils/logger), not the service logger (@zidney/logger)
+      if (
+        DEP_RULES.forbidScriptsImportingServiceLogger &&
+        rel.startsWith('scripts/') &&
+        (imp === '@zidney/logger' || imp.startsWith('@zidney/logger/'))
+      ) {
+        const key = `${rel}→@zidney/logger|scripts_must_not_import_service_logger`
+
+        if (!seen.has(key)) {
+          const violation = {
+            file: rel,
+            importPath: imp,
+            rule: 'scripts_must_not_import_service_logger',
+            examples: [rel],
+          }
+          seen.set(key, violation)
+          violations.push(violation)
+        } else {
+          const existing = seen.get(key)
+          if (existing && existing.examples.length < 3) {
+            existing.examples.push(rel)
+          }
+        }
+      }
+
+      // Apps/packages must use @zidney/logger, not the scripts CLI logger
+      if (
+        DEP_RULES.forbidAppsPackagesImportingScriptLogger &&
+        (rel.startsWith('apps/') || rel.startsWith('packages/')) &&
+        (imp.includes('scripts/utils/logger') || imp.includes('scripts/utils/structured-logger'))
+      ) {
+        const sourceModule = rel.split('/').slice(0, 2).join('/')
+        const key = `${sourceModule}→scripts/utils/logger|apps_packages_must_not_import_script_logger`
+
+        if (!seen.has(key)) {
+          const violation = {
+            file: rel,
+            importPath: imp,
+            rule: 'apps_packages_must_not_import_script_logger',
+            examples: [rel],
+          }
+          seen.set(key, violation)
+          violations.push(violation)
+        } else {
+          const existing = seen.get(key)
+          if (existing && existing.examples.length < 3) {
+            existing.examples.push(rel)
           }
         }
       }

@@ -13,7 +13,7 @@
 
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createLogger } from '@zidney/logger'
+import { createLogger } from '../../utils/logger'
 import type { PolicyContext, PolicyResult, TrivyVulnerability } from '../types'
 
 const logger = createLogger('policy-engine:adapter:trivy')
