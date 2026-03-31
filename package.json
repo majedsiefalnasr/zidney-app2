@@ -98,6 +98,7 @@
     "_ai": "AI: runtime, execution, context, guards",
     "ai:context:generate": "bun scripts/generate-ai-context.ts",
     "ai:context:refresh": "bun scripts/generate-ai-context.ts --force",
+    "ai:context:refresh-all": "bun run arch:generate && bun run ai:context:refresh && bun run arch:gitnexus:context && bun run ai:context:validate",
     "ai:context:validate": "bun run validate:ai-context-fresh && bun run validate:ai-context-schemas",
     "ai:guard": "bun scripts/ai-guard.ts",
     "ai:plan": "bun scripts/ai-engine/plan-task.ts",
