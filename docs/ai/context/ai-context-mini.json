@@ -19,15 +19,15 @@
   "hotspots": [
     {
       "module": "packages/logger",
-      "score": 364
+      "score": 374
     },
     {
       "module": "packages/domain-core",
-      "score": 213
+      "score": 225
     },
     {
       "module": "packages/validation",
-      "score": 114
+      "score": 124
     },
     {
       "module": "packages/types",

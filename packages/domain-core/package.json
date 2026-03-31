@@ -32,7 +32,8 @@
     "./category-values": "./src/category-values/index.ts",
     "./tags": "./src/tags/index.ts",
     "./baskets": "./src/baskets/index.ts",
-    "./mcq-questions": "./src/mcq-questions/index.ts"
+    "./mcq-questions": "./src/mcq-questions/index.ts",
+    "./traditional-questions": "./src/traditional-questions/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",
