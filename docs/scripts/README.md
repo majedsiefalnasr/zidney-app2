@@ -6,13 +6,14 @@ This directory contains one page per root `package.json` script runner, plus the
 
 ## Scope
 
-- Root package.json runners documented: 122
+- Root package.json runners documented: 123
 - Metadata-backed script implementations are also listed in `SCRIPT_REGISTRY.md`.
 
 ## ai
 
 - [ai:context:generate](ai-context-generate.md) — Generate AI context artifacts (architecture brain, module map, dependency graph). Supports incremental (default), forced, and validate-after-generation modes.
 - [ai:context:refresh](ai-context-refresh.md) — Generate AI context artifacts (architecture brain, module map, dependency graph). Supports incremental (default), forced, and validate-after-generation modes.
+- [ai:context:refresh-all](ai-context-refresh-all.md) — Execute the registered repository runner for this workflow.
 - [ai:context:validate](ai-context-validate.md) — Run the registered repository task for this area.
 - [ai:guard](ai-guard.md) — Enforces architecture rules (import boundaries, contract compliance) before AI-generated commits and in CI.
 - [ai:plan](ai-plan.md) — Run the registered repository task for this area.

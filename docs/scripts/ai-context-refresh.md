@@ -31,7 +31,7 @@ Supported explicitly in the implementation.
 ## Related Scripts
 
 - Depends on: None
-- Used by other root scripts: None found
+- Used by other root scripts: `ai:context:refresh-all`
 
 ## Audit Notes
 

@@ -31,7 +31,7 @@ Indirect wrapper; CI behavior depends on child runner(s): validate:ai-context-fr
 ## Related Scripts
 
 - Depends on: `validate:ai-context-schemas`, `validate:ai-context-fresh`
-- Used by other root scripts: None found
+- Used by other root scripts: `ai:context:refresh-all`
 
 ## Audit Notes
 
