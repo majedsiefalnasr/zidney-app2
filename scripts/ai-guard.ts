@@ -255,7 +255,7 @@ export function loadTsAliases(): TsAliasMap[] {
       const errorMessage = err instanceof Error ? err.message : String(err)
       log.warn(
         `[ai-guard] WARNING: failed to load aliases from ${configFile} — alias-based boundary checks may be incomplete.`,
-        errorMessage
+        { error: errorMessage }
       )
     }
   }
