@@ -6,7 +6,7 @@ This directory contains one page per root `package.json` script runner, plus the
 
 ## Scope
 
-- Root package.json runners documented: 122
+- Root package.json runners documented: 134
 - Metadata-backed script implementations are also listed in `SCRIPT_REGISTRY.md`.
 
 ## ai
@@ -34,8 +34,8 @@ This directory contains one page per root `package.json` script runner, plus the
 - [arch:generate](arch-generate.md) — Run the registered repository task for this area.
 - [arch:gitnexus:context](gitnexus-context.md) — Generates a structured GitNexus context JSON artifact from git state and ai-architecture-brain.json for AI orchestrators and CI gates.
 - [arch:gitnexus:validate](gitnexus-validate.md) — Validates the gitnexus-context.json artifact for file presence, structure, semantics, and freshness.
-- [arch:governance](arch-refresh.md) — Execute the registered repository runner for this workflow.
-- [arch:governance:fix](arch-fix.md) — Execute the registered repository runner for this workflow.
+- [arch:governance](arch-refresh.md) — Run the registered repository task for this area.
+- [arch:governance:fix](arch-fix.md) — Run the registered repository task for this area.
 - [arch:guard](arch-guard.md) — Run the registered repository task for this area.
 - [arch:guard:changed](arch-guard-changed.md) — Run the registered repository task for this area.
 - [arch:guard:ci](arch-guard-ci.md) — Run the registered repository task for this area.
@@ -98,7 +98,7 @@ This directory contains one page per root `package.json` script runner, plus the
 ## format
 
 - [format:check](format-check-biome.md) — Run both Biome and Prettier checks without writing changes.
-- [format:write](format.md) — Execute the registered repository runner for this workflow.
+- [format:write](format.md) — Format files with Biome.
 
 ## governance
 
@@ -122,6 +122,18 @@ This directory contains one page per root `package.json` script runner, plus the
 
 ## misc
 
+- [\_ai](_ai.md) — Execute the registered repository runner for this workflow.
+- [\_arch](_arch.md) — Execute the registered repository runner for this workflow.
+- [\_ci](_ci.md) — Execute the registered repository runner for this workflow.
+- [\_comments](_comments.md) — Execute the registered repository runner for this workflow.
+- [\_db](_db.md) — Execute the registered repository runner for this workflow.
+- [\_dev](_dev.md) — Execute the registered repository runner for this workflow.
+- [\_governance](_governance.md) — Execute the registered repository runner for this workflow.
+- [\_infra](_infra.md) — Execute the registered repository runner for this workflow.
+- [\_other](_other.md) — Execute the registered repository runner for this workflow.
+- [\_repo](_repo.md) — Execute the registered repository runner for this workflow.
+- [\_test](_test.md) — Execute the registered repository runner for this workflow.
+- [\_validate](_validate.md) — Execute the registered repository runner for this workflow.
 - [dev](dev.md) — Run the registered repository task for this area.
 - [refactor-scripts](refactor-scripts.md) — Applies the migration map to rename all "bun run <old>" references across the repository. Supports both JSON format (docs/scripts/migration-map.json, preferred) and Markdown format (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain. Writes reports to both reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
 - [test](test.md) — Run Vitest for the configured scope.

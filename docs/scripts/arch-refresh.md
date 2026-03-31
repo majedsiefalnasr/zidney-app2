@@ -8,11 +8,11 @@ bun run arch:governance
 
 ## Purpose
 
-Execute the registered repository runner for this workflow.
+Run the registered repository task for this area.
 
 ## Why It Exists
 
-It provides a stable root package.json interface over underlying tools or chained child runners.
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. It provides a stable root package.json interface over underlying tools or chained child runners.
 
 ## Source
 
@@ -22,10 +22,11 @@ It provides a stable root package.json interface over underlying tools or chaine
 
 ## CI Behavior
 
-No explicit root-level `--ci` contract was detected for this runner.
+Indirect wrapper; CI behavior depends on child runner(s): arch:gitnexus:context, arch:audit.
 
 ## When to Run
 
+- When reproducing CI behavior locally or validating CI-only output paths.
 - Before opening or updating a pull request that touches the related governance surface.
 
 ## Related Scripts
@@ -35,4 +36,4 @@ No explicit root-level `--ci` contract was detected for this runner.
 
 ## Audit Notes
 
-- No isolated execution audit note is currently recorded.
+- Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.

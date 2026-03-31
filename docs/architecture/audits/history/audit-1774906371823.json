@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-30T21:34:20.441Z",
+  "timestamp": "2026-03-30T21:32:51.685Z",
   "gitSha": "49081ccf1fb4aa006252d1c0f2f4e03c15c5c6e0",
   "vitestConfigs": [
     {
@@ -79,7 +79,11 @@
       "environment": null,
       "globals": null,
       "coverageEnabled": true,
-      "reporters": ["text", "json", "html"],
+      "reporters": [
+        "text",
+        "json",
+        "html"
+      ],
       "isWorkspace": false
     },
     {

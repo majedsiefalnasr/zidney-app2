@@ -31,7 +31,7 @@ Wrapper-only alias; any CI behavior depends on the underlying CLI rather than a 
 
 ## Related Scripts
 
-- Depends on: `format:check:prettier`, `format:check:biome`, `format`
+- Depends on: None
 - Used by other root scripts: None found
 
 ## Audit Notes
