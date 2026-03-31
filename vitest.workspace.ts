@@ -204,6 +204,7 @@ export default defineWorkspace([
   // Shared packages
   'packages/api-client/vitest.config.ts',
   'packages/domain-core/vitest.config.ts',
+  'packages/job-queue/vitest.config.ts',
   'packages/logger/vitest.config.ts',
   'packages/config/vitest.config.ts',
   'packages/redis-utils/vitest.config.ts',
