@@ -67,34 +67,33 @@ structure, same domain-core → API → validation architecture.
 
 **Table: `traditional_questions`**
 
-| Column            | Type         | Constraints                                               |
-| ----------------- | ------------ | --------------------------------------------------------- |
-| id                | UUID         | PK, DEFAULT gen_random_uuid()                             |
-| subject_id        | UUID         | NOT NULL, FK → subjects.id (RESTRICT)                     |
-| division_id       | UUID         | NULL, FK → divisions.id (RESTRICT) — migration-owned      |
-| subsection_id     | UUID         | NOT NULL, FK → subsections.id (RESTRICT)                  |
-| question_type     | VARCHAR(20)  | NOT NULL, CHECK IN (TRUE_FALSE, FILL_BLANK, SHORT_ANSWER) |
-| language          | VARCHAR(10)  | NOT NULL                                                  |
-| content           | TEXT         | NOT NULL                                                  |
-| correct_answer    | JSONB        | NOT NULL                                                  |
-| explanation       | TEXT         | NULL                                                      |
-| score             | NUMERIC(8,2) | NOT NULL, CHECK > 0                                       |
-| is_revision_only  | BOOLEAN      | NOT NULL, DEFAULT false                                   |
-| is_exam_only      | BOOLEAN      | NOT NULL, DEFAULT false                                   |
-| difficulty_level  | VARCHAR(20)  | NULL                                                      |
-| status            | VARCHAR(30)  | NOT NULL, DEFAULT 'DRAFT'                                 |
-| deleted_at        | TIMESTAMPTZ  | NULL (soft delete)                                        |
-| created_at        | TIMESTAMPTZ  | NOT NULL, DEFAULT NOW()                                   |
-| updated_at        | TIMESTAMPTZ  | NOT NULL, DEFAULT NOW()                                   |
-| created_by        | UUID         | NULL                                                      |
-| updated_by        | UUID         | NULL                                                      |
-| status_updated_at | TIMESTAMPTZ  | NULL                                                      |
-| status_updated_by | UUID         | NULL                                                      |
+| Column              | Type          | Constraints                                                          |
+| ------------------- | ------------- | -------------------------------------------------------------------- |
+| id                  | UUID          | PK, DEFAULT gen_random_uuid()                                        |
+| subject_id          | UUID          | NOT NULL, FK → subjects.id (RESTRICT)                                |
+| division_id         | UUID          | NULL, FK → divisions.id (RESTRICT) — migration-owned                 |
+| lesson_id           | UUID          | NULL, FK → lessons.id (RESTRICT) — migration-owned                   |
+| subsection_id       | UUID          | NOT NULL, FK → subsections.id (RESTRICT)                             |
+| question_type       | VARCHAR(20)   | NOT NULL, CHECK IN (TRUE_FALSE, FILL_BLANK, SHORT_ANSWER)            |
+| language            | VARCHAR(10)   | NOT NULL                                                             |
+| content             | TEXT          | NOT NULL                                                             |
+| correct_answer      | JSONB         | NULL — required for TRUE_FALSE/FILL_BLANK, optional for SHORT_ANSWER |
+| correction_criteria | JSONB         | NULL — self-correction guidance for SHORT_ANSWER                     |
+| score               | NUMERIC(10,2) | NOT NULL, CHECK > 0                                                  |
+| status              | VARCHAR(30)   | NOT NULL, DEFAULT 'DRAFT'                                            |
+| deleted_at          | TIMESTAMPTZ   | NULL (soft delete)                                                   |
+| created_at          | TIMESTAMPTZ   | NOT NULL, DEFAULT NOW()                                              |
+| updated_at          | TIMESTAMPTZ   | NOT NULL, DEFAULT NOW()                                              |
+| created_by          | UUID          | NULL                                                                 |
+| updated_by          | UUID          | NULL                                                                 |
+| status_updated_at   | TIMESTAMPTZ   | NULL                                                                 |
+| status_updated_by   | UUID          | NULL                                                                 |
 
 **Indexes:**
 
 - `idx_traditional_questions_subject_id` — B-tree on subject_id
 - `idx_traditional_questions_division_id` — B-tree on division_id
+- `idx_traditional_questions_lesson_id` — B-tree on lesson_id
 - `idx_traditional_questions_subsection_id` — B-tree on subsection_id
 - `idx_traditional_questions_question_type` — B-tree on question_type
 - `idx_traditional_questions_status` — B-tree on status
@@ -193,12 +192,13 @@ Validation enforced at API layer via Zod discriminated union — no DB CHECK on 
 2. **correct_answer validation** — discriminated union based on `question_type`:
    - TRUE_FALSE → `{ value: boolean }` — must be a boolean
    - FILL_BLANK → `{ accepted_values: string[] }` — min 1, each trimmed, deduplicated
-   - SHORT_ANSWER → `{ model_answer: string }` — min 1 char
+   - SHORT_ANSWER → `{ model_answer: string }` — min 1 char (optional — correct_answer is nullable for SHORT_ANSWER)
 3. **Workflow integration** — use `executeTransition` from `@zidney/domain-core/workflow` with entity type `traditional_question` (already in ENTITY_TABLE_MAP)
-4. **Deletion guard** — same pattern as MCQ: pluggable `QuestionReferenceChecker` registry. In v1, checks only `traditional_exam_subsections` for question references (if linkage exists).
+4. **Deletion guard** — same pattern as MCQ: pluggable `QuestionReferenceChecker` registry. In v1, checks only `traditional_exam_subsections` for question references (if linkage exists). Delete logic supports dual soft/hard delete: hard delete ONLY when DRAFT status AND zero references, else soft delete.
 5. **Sanitization** — reuse the same `sanitizeRichText` function from MCQ module (or extract to shared utility)
 6. **Transaction boundaries** — all write operations (create, update, delete, transition, link/unlink) wrapped in BEGIN/COMMIT/ROLLBACK
 7. **Idempotency** — unique constraint on join tables prevents duplicate links. Create endpoint returns 409 on constraint violation.
+8. **Immutability guards** — `question_type`, `subject_id`, and `subsection_id` are immutable after creation. Service rejects updates to these fields.
 
 ---
 
@@ -208,17 +208,17 @@ Validation enforced at API layer via Zod discriminated union — no DB CHECK on 
 
 Following MCQ pattern with these adaptations:
 
-| Schema                         | Purpose                                                 |
-| ------------------------------ | ------------------------------------------------------- |
-| `questionIdParamSchema`        | Path param: questionId UUID                             |
-| `questionCategoryParamSchema`  | Path params: questionId + categoryValueId               |
-| `questionTagParamSchema`       | Path params: questionId + tagId                         |
-| `listQuestionsQuerySchema`     | Query: page, per_page, filters, search                  |
-| `createQuestionBodySchema`     | Body: all fields + correct_answer (discriminated union) |
-| `updateQuestionBodySchema`     | Body: partial update (no type/subject change)           |
-| `transitionQuestionBodySchema` | Body: { to: WorkflowState, reason?: string }            |
-| `linkCategoryBodySchema`       | Body: { categoryValueId: UUID }                         |
-| `linkTagBodySchema`            | Body: { tagId: UUID }                                   |
+| Schema                         | Purpose                                                                                                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `questionIdParamSchema`        | Path param: questionId UUID                                                                                                                             |
+| `questionCategoryParamSchema`  | Path params: questionId + categoryValueId                                                                                                               |
+| `questionTagParamSchema`       | Path params: questionId + tagId                                                                                                                         |
+| `listQuestionsQuerySchema`     | Query: page, per_page, subject_id, division_id, lesson_id, subsection_id, question_type, status, category_value_id, tag_id, search, sort_by, sort_order |
+| `createQuestionBodySchema`     | Body: all fields incl. lesson_id, correction_criteria + correct_answer (conditional on question_type)                                                   |
+| `updateQuestionBodySchema`     | Body: partial update (no type/subject/subsection change), requires updatedAt for optimistic concurrency                                                 |
+| `transitionQuestionBodySchema` | Body: { to: WorkflowState, reason?: string }                                                                                                            |
+| `linkCategoryBodySchema`       | Body: { categoryValueId: UUID }                                                                                                                         |
+| `linkTagBodySchema`            | Body: { tagId: UUID }                                                                                                                                   |
 
 **correct_answer validation** — Zod discriminated union:
 
@@ -295,16 +295,16 @@ These are used for Drizzle type inference only — FK constraints are migration-
 
 ## 9. Transaction Boundaries
 
-| Operation           | TX Strategy                                      |
-| ------------------- | ------------------------------------------------ |
-| Create question     | BEGIN → insert question → COMMIT                 |
-| Update question     | BEGIN → SELECT FOR UPDATE → update → COMMIT      |
-| Delete question     | BEGIN → guard check → soft delete → COMMIT       |
-| Workflow transition | Delegated to workflow engine (SELECT FOR UPDATE) |
-| Link category       | BEGIN → check exists → insert → COMMIT           |
-| Unlink category     | BEGIN → check exists → delete → COMMIT           |
-| Link tag            | BEGIN → check exists → insert → COMMIT           |
-| Unlink tag          | BEGIN → check exists → delete → COMMIT           |
+| Operation           | TX Strategy                                                                         |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| Create question     | BEGIN → insert question → COMMIT                                                    |
+| Update question     | BEGIN → SELECT FOR UPDATE → update → COMMIT                                         |
+| Delete question     | BEGIN → guard check → soft or hard delete → COMMIT (hard only when DRAFT + no refs) |
+| Workflow transition | Delegated to workflow engine (SELECT FOR UPDATE)                                    |
+| Link category       | BEGIN → check exists → insert → COMMIT                                              |
+| Unlink category     | BEGIN → check exists → delete → COMMIT                                              |
+| Link tag            | BEGIN → check exists → insert → COMMIT                                              |
+| Unlink tag          | BEGIN → check exists → delete → COMMIT                                              |
 
 All write operations use explicit BEGIN/COMMIT/ROLLBACK. Read operations (list, get) run without transactions.
 
@@ -326,27 +326,33 @@ All write operations use explicit BEGIN/COMMIT/ROLLBACK. Read operations (list, 
 
 Following MCQ pattern with `TRAD_QUESTION_` prefix:
 
-| Error Code                               | HTTP        | Description                      |
-| ---------------------------------------- | ----------- | -------------------------------- |
-| TRAD_QUESTION_NOT_FOUND                  | 404         | Question not found or deleted    |
-| TRAD_QUESTION_DELETED                    | 404         | Question is soft-deleted         |
-| TRAD_QUESTION_HAS_DEPENDENCIES           | 409         | Cannot delete — referenced       |
-| TRAD_QUESTION_INVALID_TYPE               | 400         | Unknown question type            |
-| TRAD_QUESTION_INVALID_CORRECT_ANSWER     | 400         | correct_answer validation failed |
-| TRAD_QUESTION_SUBJECT_NOT_FOUND          | 404         | Subject FK doesn't exist         |
-| TRAD_QUESTION_DIVISION_NOT_FOUND         | 404         | Division FK doesn't exist        |
-| TRAD_QUESTION_SUBSECTION_NOT_FOUND       | 404         | Subsection FK doesn't exist      |
-| TRAD_QUESTION_CATEGORY_NOT_FOUND         | 404         | Category value doesn't exist     |
-| TRAD_QUESTION_TAG_NOT_FOUND              | 404         | Tag doesn't exist                |
-| TRAD_QUESTION_CATEGORY_ALREADY_LINKED    | 409         | Duplicate link                   |
-| TRAD_QUESTION_TAG_ALREADY_LINKED         | 409         | Duplicate link                   |
-| TRAD_QUESTION_CATEGORY_NOT_LINKED        | 404         | Link doesn't exist               |
-| TRAD_QUESTION_TAG_NOT_LINKED             | 404         | Link doesn't exist               |
-| TRAD_QUESTION_WORKFLOW_TRANSITION_FAILED | 400/403/409 | Workflow engine rejection        |
-| TRAD_QUESTION_SCORE_INVALID              | 400         | Score ≤ 0                        |
-| TRAD_QUESTION_UPDATE_CONFLICT            | 409         | Concurrent update detected       |
-| TRAD_QUESTION_TYPE_IMMUTABLE             | 400         | Cannot change question_type      |
-| TRAD_QUESTION_SUBJECT_IMMUTABLE          | 400         | Cannot change subject_id         |
+| Error Code                                | HTTP        | Description                                   |
+| ----------------------------------------- | ----------- | --------------------------------------------- |
+| TRAD_QUESTION_NOT_FOUND                   | 404         | Question not found or deleted                 |
+| TRAD_QUESTION_DELETED                     | 404         | Question is soft-deleted                      |
+| TRAD_QUESTION_HAS_DEPENDENCIES            | 409         | Cannot delete — referenced                    |
+| TRAD_QUESTION_INVALID_TYPE                | 400         | Unknown question type                         |
+| TRAD_QUESTION_INVALID_CORRECT_ANSWER      | 400         | correct_answer validation failed              |
+| TRAD_QUESTION_SUBJECT_NOT_FOUND           | 404         | Subject FK doesn't exist                      |
+| TRAD_QUESTION_DIVISION_NOT_FOUND          | 404         | Division FK doesn't exist                     |
+| TRAD_QUESTION_SUBSECTION_NOT_FOUND        | 404         | Subsection FK doesn't exist                   |
+| TRAD_QUESTION_CATEGORY_NOT_FOUND          | 404         | Category value doesn't exist                  |
+| TRAD_QUESTION_TAG_NOT_FOUND               | 404         | Tag doesn't exist                             |
+| TRAD_QUESTION_CATEGORY_ALREADY_LINKED     | 409         | Duplicate link                                |
+| TRAD_QUESTION_TAG_ALREADY_LINKED          | 409         | Duplicate link                                |
+| TRAD_QUESTION_CATEGORY_NOT_LINKED         | 404         | Link doesn't exist                            |
+| TRAD_QUESTION_TAG_NOT_LINKED              | 404         | Link doesn't exist                            |
+| TRAD_QUESTION_WORKFLOW_TRANSITION_FAILED  | 400/403/409 | Workflow engine rejection                     |
+| TRAD_QUESTION_SCORE_INVALID               | 400         | Score ≤ 0                                     |
+| TRAD_QUESTION_UPDATE_CONFLICT             | 409         | Concurrent update detected                    |
+| TRAD_QUESTION_TYPE_IMMUTABLE              | 400         | Cannot change question_type                   |
+| TRAD_QUESTION_SUBJECT_IMMUTABLE           | 400         | Cannot change subject_id                      |
+| TRAD_QUESTION_SUBSECTION_IMMUTABLE        | 400         | Cannot change subsection_id                   |
+| TRAD_QUESTION_LESSON_NOT_FOUND            | 404         | Lesson FK doesn't exist                       |
+| TRAD_QUESTION_CORRECT_ANSWER_REQUIRED     | 422         | Missing required correct_answer               |
+| TRAD_QUESTION_SUBSECTION_SUBJECT_MISMATCH | 422         | Subsection template not bound to same subject |
+| TRAD_QUESTION_LESSON_SUBJECT_MISMATCH     | 422         | Lesson not in same subject                    |
+| TRAD_QUESTION_DIVISION_SCOPE_VIOLATION    | 422         | Division not in workspace scope               |
 
 ---
 

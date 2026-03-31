@@ -6,21 +6,21 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: MEDIUM
-Last Updated: 2026-03-31T14:30:00Z
+Last Updated: 2025-07-22T12:00:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all criteria — Attempt 2 after remediation)
+Implementation: AUTHORIZED
 
-- Total: 30 atomic tasks
-- Infrastructure: 7 (migration + Drizzle schemas)
-- Domain Core: 8 (types, errors, validators, sanitize, repo, service, dependency-registry, barrel)
-- Validation: 1 (Zod schemas)
-- API Routes: 10 (handlers + helpers + router)
-- App Wiring: 2 (route registration + barrel export)
-- Observability: 1 (structured logging)
-- Architecture: 1 (guard audit)
+Scope Authorized:
+
+- 30 atomic tasks across 8 phases
+- Traditional questions CRUD with 3 types (TRUE_FALSE, FILL_BLANK, SHORT_ANSWER)
+- Classification link/unlink (categories + tags)
+- Workflow state transitions (DRAFT → COMPLETED → UNDER_REVIEW → APPROVED → ENABLED)
+- lesson_id nullable FK, correction_criteria JSONB, dual soft/hard delete
 
 Deferred Scope:
 
@@ -33,10 +33,11 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed — implementation authorized
+- 9 violations detected and remediated before authorization
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed. Implementation gate open.
 
 ---
 
