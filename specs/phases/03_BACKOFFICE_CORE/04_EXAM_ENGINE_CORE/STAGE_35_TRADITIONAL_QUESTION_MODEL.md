@@ -7,17 +7,20 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-03-31T14:00:00Z
+Last Updated: 2026-03-31T14:30:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- 1 migration: 5 tables (2 stub + 1 core + 2 join), schema 1.18.0 → 1.19.0
-- Domain core module: 8 files (service, repo, types, errors, validators, sanitize, dependency-registry, barrel)
-- Validation schemas: 9 Zod schemas with type-discriminated correct_answer
-- API routes: 10 endpoints across 12 files
-- 25 new files + 3 modifications total
+- Total: 30 atomic tasks
+- Infrastructure: 7 (migration + Drizzle schemas)
+- Domain Core: 8 (types, errors, validators, sanitize, repo, service, dependency-registry, barrel)
+- Validation: 1 (Zod schemas)
+- API Routes: 10 (handlers + helpers + router)
+- App Wiring: 2 (route registration + barrel export)
+- Observability: 1 (structured logging)
+- Architecture: 1 (guard audit)
 
 Deferred Scope:
 
@@ -30,10 +33,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 

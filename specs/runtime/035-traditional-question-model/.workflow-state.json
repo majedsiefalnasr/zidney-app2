@@ -6,24 +6,25 @@
   "branch": "spec/035-traditional-question-model",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "plan",
+  "current_step": "tasks",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": true,
-  "tasks_total": null,
-  "tasks_completed": null,
+  "tasks_total": 30,
+  "tasks_completed": 0,
   "deferred_tasks": [],
   "guardian_verdicts": {},
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-03-31T23:37:00Z",
-  "last_updated": "2026-03-31T14:00:00Z",
+  "last_updated": "2026-03-31T14:30:00Z",
   "step_timings": {
     "specify": { "started_at": "2026-03-31T12:00:00Z", "completed_at": "2026-03-31T12:45:00Z" },
     "clarify": { "started_at": "2026-03-31T12:50:00Z", "completed_at": "2026-03-31T13:00:00Z" },
-    "plan": { "started_at": "2026-03-31T13:10:00Z", "completed_at": "2026-03-31T14:00:00Z" }
+    "plan": { "started_at": "2026-03-31T13:10:00Z", "completed_at": "2026-03-31T14:00:00Z" },
+    "tasks": { "started_at": "2026-03-31T14:05:00Z", "completed_at": "2026-03-31T14:30:00Z" }
   },
   "history": [
     {
@@ -42,6 +43,11 @@
     {
       "event": "plan_complete",
       "timestamp": "2026-03-31T14:00:00Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 30,
+      "timestamp": "2026-03-31T14:30:00Z"
     }
   ]
 }
