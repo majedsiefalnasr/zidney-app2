@@ -7,22 +7,17 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-03-31T13:00:00Z
+Last Updated: 2026-03-31T14:00:00Z
 
-Scope Defined:
+Scope Planned:
 
-- traditional_questions table with 3 question types (TRUE_FALSE, FILL_BLANK, SHORT_ANSWER)
-- traditional_question_categories and traditional_question_tags join tables
-- Stub migration for traditional_exam_sections + traditional_exam_subsections tables
-- Full CRUD API with 10 endpoints
-- Workflow integration (forward-only: DRAFT → COMPLETED → UNDER_REVIEW → APPROVED → ENABLED)
-- Academic boundary and structural hierarchy enforcement
-- Type-specific correct answer validation (JSONB)
-- Self-correction model v1 (data contract only)
-- Deletion guard with pluggable guard pattern (existing tables only)
-- ILIKE search on content column
+- 1 migration: 5 tables (2 stub + 1 core + 2 join), schema 1.18.0 → 1.19.0
+- Domain core module: 8 files (service, repo, types, errors, validators, sanitize, dependency-registry, barrel)
+- Validation schemas: 9 Zod schemas with type-discriminated correct_answer
+- API routes: 10 endpoints across 12 files
+- 25 new files + 3 modifications total
 
 Deferred Scope:
 
@@ -35,10 +30,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
