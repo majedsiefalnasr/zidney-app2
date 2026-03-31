@@ -87,11 +87,11 @@
       "reason": "Architecture governance fix mode — replaces arch:fix"
     },
     "validate:scripts:all": {
-      "command": "bun scripts/validate/runtime-scripts.ts && bun scripts/validate/detect-broken-scripts.ts && bun scripts/validate/diff-script-registry.ts",
+      "command": "bun run validate:scripts:all",
       "reason": "Unified script validation — replaces validate:scripts:runtime + broken + registry"
     },
     "validate:scripts:fast": {
-      "command": "bun scripts/validate/runtime-scripts.ts",
+      "command": "bun run validate:scripts:fast",
       "reason": "Fast script validation for pre-commit paths — quick runtime check only"
     }
   },
