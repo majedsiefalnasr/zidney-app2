@@ -7,20 +7,33 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-31T23:37:00Z
+Last Updated: 2026-03-31T12:45:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- traditional_questions table with 3 question types (TRUE_FALSE, FILL_BLANK, SHORT_ANSWER)
+- traditional_question_categories and traditional_question_tags join tables
+- Full CRUD API with 10 endpoints
+- Workflow integration (DRAFT → COMPLETED → UNDER_REVIEW → APPROVED → ENABLED)
+- Academic boundary and structural hierarchy enforcement
+- Type-specific correct answer validation (JSONB)
+- Self-correction model v1 (data contract only)
+- Deletion guard (soft delete primary, hard delete restricted)
+
+Deferred Scope:
+
+- Attempt engine runtime (future stage)
+- AI grading integration (future enhancement)
+- Bulk question import/export
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
