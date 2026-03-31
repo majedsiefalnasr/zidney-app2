@@ -68,7 +68,7 @@ async function main(): Promise<void> {
   log.setScript('policy:check')
   log.header('POLICY ENGINE', 'Unified governance policy checks')
 
-  const args = parseArgs(Bun.argv.slice(2))
+  const args = parseArgs(process.argv.slice(2))
   if (args.ci) {
     log.info('[policy:check] CI mode enabled')
   }

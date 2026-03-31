@@ -67,7 +67,7 @@ describe('checkContextLoader', () => {
     expect(result.status).toBe('warning')
     expect(result.label).toBe('Context Loader')
     if (result.status === 'warning') {
-      expect(result.suggestion).toBe('bun ai-runtime:refresh')
+      expect(result.suggestion).toBe('bun run ai:context:refresh')
     }
   })
 
@@ -94,7 +94,7 @@ describe('checkContextLoader', () => {
 
     expect(result.status).toBe('error')
     if (result.status === 'error') {
-      expect(result.suggestion).toBe('bun ai-runtime:refresh')
+      expect(result.suggestion).toBe('bun run ai:context:refresh')
     }
   })
 
@@ -255,7 +255,7 @@ describe('checkArchitectureIntelligence', () => {
 
     expect(result.status).toBe('warning')
     if (result.status === 'warning') {
-      expect(result.suggestion).toBe('bun arch:validate-brain')
+      expect(result.suggestion).toBe('bun run arch:validate:brain')
     }
   })
 

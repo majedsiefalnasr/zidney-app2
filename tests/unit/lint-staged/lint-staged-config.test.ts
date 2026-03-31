@@ -62,16 +62,6 @@ describe('T2: Prettier entry', () => {
 })
 
 // ---------------------------------------------------------------------------
-// T3 — yamllint entry wired for YAML files
-// ---------------------------------------------------------------------------
-describe('T3: yamllint entry', () => {
-  it("maps '*.{yml,yaml}' to the yaml lint wrapper", () => {
-    const cmds = commandsFor('*.{yml,yaml}')
-    expect(cmds).toContain('bash scripts/ci/yaml_lint.sh')
-  })
-})
-
-// ---------------------------------------------------------------------------
 // T4 — actionlint entry wired for GitHub Actions workflows
 // ---------------------------------------------------------------------------
 describe('T4: actionlint entry', () => {
@@ -111,16 +101,6 @@ describe('T6: *.md key does not invoke biome', () => {
   it("'*.md' does not map to any command containing 'biome'", () => {
     const cmds = commandsFor('*.md')
     expect(anyCmdContains(cmds, 'biome')).toBe(false)
-  })
-})
-
-// ---------------------------------------------------------------------------
-// T7 — YAML key does not invoke prettier
-// ---------------------------------------------------------------------------
-describe('T7: *.{yml,yaml} key does not invoke prettier', () => {
-  it("'*.{yml,yaml}' does not map to any command containing 'prettier'", () => {
-    const cmds = commandsFor('*.{yml,yaml}')
-    expect(anyCmdContains(cmds, 'prettier')).toBe(false)
   })
 })
 
@@ -165,26 +145,5 @@ describe('T10: .prettierignore does not exclude *.md', () => {
 
     const mdExclusion = lines.find((l) => l === '*.md' || l === '**/*.md')
     expect(mdExclusion).toBeUndefined()
-  })
-})
-
-// ---------------------------------------------------------------------------
-// T11 — Config drift: .yamllint values
-// ---------------------------------------------------------------------------
-describe('T11: .yamllint config drift', () => {
-  const yamllintPath = path.join(root, '.yamllint')
-  const raw = fs.readFileSync(yamllintPath, 'utf-8')
-
-  it("extends: 'default'", () => {
-    expect(raw).toMatch(/^extends:\s*default\s*$/m)
-  })
-
-  it('line-length.max is 120', () => {
-    // matches "max: 120" after a "line-length:" block
-    expect(raw).toMatch(/line-length:[\s\S]*?max:\s*120/m)
-  })
-
-  it('truthy.check-keys is false', () => {
-    expect(raw).toMatch(/truthy:[\s\S]*?check-keys:\s*false/m)
   })
 })

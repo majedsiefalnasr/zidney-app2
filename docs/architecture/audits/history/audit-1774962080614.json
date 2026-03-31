@@ -1,0 +1,7022 @@
+{
+  "timestamp": "2026-03-31T13:01:20.607Z",
+  "gitSha": "66a344e29c0c5faebe2c3abad3d113e1fe1e195f",
+  "vitestConfigs": [
+    {
+      "path": "vitest.workspace.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": true
+    },
+    {
+      "path": "packages/job-queue/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "packages/types/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "packages/logger/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "packages/config/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "packages/redis-utils/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "packages/ui-system/vitest.config.ts",
+      "environment": "jsdom",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "packages/api-client/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "packages/domain-core/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "packages/validation/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "vitest.config.ts",
+      "environment": null,
+      "globals": null,
+      "coverageEnabled": true,
+      "reporters": [
+        "text",
+        "json",
+        "html"
+      ],
+      "isWorkspace": false
+    },
+    {
+      "path": "apps/mmc/vitest.config.ts",
+      "environment": "jsdom",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "apps/frontoffice/vitest.config.ts",
+      "environment": "jsdom",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "apps/backoffice/vitest.config.ts",
+      "environment": "jsdom",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "apps/api/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    },
+    {
+      "path": "apps/worker/vitest.config.ts",
+      "environment": "node",
+      "globals": true,
+      "coverageEnabled": false,
+      "reporters": [],
+      "isWorkspace": false
+    }
+  ],
+  "eslintConfigs": [],
+  "playwrightConfigs": [
+    "apps/mmc/playwright.config.ts",
+    "apps/frontoffice/playwright.config.ts",
+    "apps/backoffice/playwright.config.ts"
+  ],
+  "testDistribution": {
+    "unit": 85,
+    "integration": 125,
+    "spec": 18,
+    "total": 228,
+    "perApp": {
+      "integration": {
+        "unit": 0,
+        "integration": 81,
+        "spec": 0
+      },
+      "mmc": {
+        "unit": 19,
+        "integration": 5,
+        "spec": 4
+      },
+      "frontoffice": {
+        "unit": 22,
+        "integration": 3,
+        "spec": 4
+      },
+      "backoffice": {
+        "unit": 24,
+        "integration": 3,
+        "spec": 5
+      },
+      "api": {
+        "unit": 17,
+        "integration": 32,
+        "spec": 0
+      },
+      "worker": {
+        "unit": 3,
+        "integration": 1,
+        "spec": 0
+      }
+    }
+  },
+  "readmeAudit": [
+    {
+      "directory": "apps/mmc",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT_EMPTY",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "apps/frontoffice",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT_EMPTY",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "apps/backoffice",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT_EMPTY",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "apps/api",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT_EMPTY",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "apps/worker",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT_EMPTY",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "packages/job-queue",
+      "hasReadme": false
+    },
+    {
+      "directory": "packages/types",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "packages/logger",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "packages/config",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "packages/redis-utils",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "packages/ui-system",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "packages/api-client",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "packages/domain-core",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    },
+    {
+      "directory": "packages/validation",
+      "hasReadme": true,
+      "sections": {
+        "Purpose": "PRESENT",
+        "Responsibilities": "PRESENT",
+        "Dependencies": "PRESENT",
+        "Public API": "PRESENT",
+        "How to Run Tests": "PRESENT",
+        "Environment Variables": "PRESENT",
+        "Known Boundaries": "PRESENT"
+      }
+    }
+  ],
+  "skippedTests": [],
+  "flakyTests": [],
+  "quarantinedTests": [
+    "tests/unit/license-rbac.test.ts",
+    "tests/security/licenses.security.test.ts",
+    "tests/integration/licenses.e2e.test.ts",
+    "tests/integration/provisioning-failure.test.ts",
+    "tests/integration/license-soft-lock.test.ts",
+    "packages/ui-system/tests/unit/DataTable.spec.ts",
+    "packages/ui-system/tests/unit/composables.spec.ts",
+    "packages/ui-system/tests/unit/utilities.spec.ts",
+    "packages/api-client/tests/client.test.ts",
+    "apps/api/tests/integration/tenant-resolver.test.ts",
+    "apps/worker/tests/unit/provisioning/provisioning.test.ts",
+    "apps/worker/tests/load-testing.test.ts"
+  ],
+  "dependencyViolations": [],
+  "circularDependencies": [],
+  "layerViolations": [],
+  "architectureMapViolations": [],
+  "dependencyGraph": {
+    "nodes": [
+      "packages/job-queue",
+      "packages/logger",
+      "packages/types",
+      "packages/config",
+      "packages/redis-utils",
+      "packages/ui-system",
+      "packages/api-client",
+      "packages/domain-core",
+      "packages/validation",
+      "apps/mmc",
+      "apps/frontoffice",
+      "apps/backoffice",
+      "apps/api",
+      "apps/worker"
+    ],
+    "edges": [
+      {
+        "from": "packages/job-queue",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/redis-utils",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/redis-utils",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/redis-utils",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/redis-utils",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/ui-system"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/redis-utils"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/redis-utils"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/job-queue"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/job-queue"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/redis-utils"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/job-queue"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/job-queue"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      }
+    ]
+  },
+  "architectureDrift": [],
+  "aiGraph": {
+    "nodes": [
+      {
+        "id": "packages/job-queue",
+        "type": "package"
+      },
+      {
+        "id": "packages/logger",
+        "type": "package"
+      },
+      {
+        "id": "packages/types",
+        "type": "package"
+      },
+      {
+        "id": "packages/config",
+        "type": "package"
+      },
+      {
+        "id": "packages/redis-utils",
+        "type": "package"
+      },
+      {
+        "id": "packages/ui-system",
+        "type": "package"
+      },
+      {
+        "id": "packages/api-client",
+        "type": "package"
+      },
+      {
+        "id": "packages/domain-core",
+        "type": "package"
+      },
+      {
+        "id": "packages/validation",
+        "type": "package"
+      },
+      {
+        "id": "apps/mmc",
+        "type": "app"
+      },
+      {
+        "id": "apps/frontoffice",
+        "type": "app"
+      },
+      {
+        "id": "apps/backoffice",
+        "type": "app"
+      },
+      {
+        "id": "apps/api",
+        "type": "app"
+      },
+      {
+        "id": "apps/worker",
+        "type": "app"
+      }
+    ],
+    "edges": [
+      {
+        "from": "packages/job-queue",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/redis-utils",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/redis-utils",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/redis-utils",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/redis-utils",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "packages/validation"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/logger"
+      },
+      {
+        "from": "packages/validation",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/mmc",
+        "to": "packages/ui-system"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/frontoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/api-client"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/backoffice",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/redis-utils"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/redis-utils"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/job-queue"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/job-queue"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/redis-utils"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/validation"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/job-queue"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/job-queue"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/worker",
+        "to": "packages/types"
+      }
+    ],
+    "centrality": {
+      "packages/job-queue": 4,
+      "packages/logger": 364,
+      "packages/types": 100,
+      "packages/config": 0,
+      "packages/redis-utils": 3,
+      "packages/ui-system": 1,
+      "packages/api-client": 17,
+      "packages/domain-core": 213,
+      "packages/validation": 114,
+      "apps/mmc": 0,
+      "apps/frontoffice": 0,
+      "apps/backoffice": 0,
+      "apps/api": 0,
+      "apps/worker": 0
+    }
+  },
+  "architectureScore": 100,
+  "moduleRisk": {
+    "packages/job-queue": "LOW",
+    "packages/logger": "HIGH",
+    "packages/types": "LOW",
+    "packages/config": "LOW",
+    "packages/redis-utils": "LOW",
+    "packages/ui-system": "LOW",
+    "packages/api-client": "LOW",
+    "packages/domain-core": "MEDIUM",
+    "packages/validation": "LOW",
+    "apps/mmc": "LOW",
+    "apps/frontoffice": "LOW",
+    "apps/backoffice": "LOW",
+    "apps/api": "LOW",
+    "apps/worker": "LOW"
+  },
+  "consolidationRisk": "LOW"
+}

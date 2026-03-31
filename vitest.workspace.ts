@@ -31,8 +31,15 @@ export default defineWorkspace([
     resolve: {
       alias: [
         {
-          find: 'hono',
+          find: /^hono$/,
           replacement: path.resolve(__dirname, 'apps/api/node_modules/hono/dist/index.js'),
+        },
+        {
+          find: 'hono/jwt',
+          replacement: path.resolve(
+            __dirname,
+            'apps/api/node_modules/hono/dist/middleware/jwt/index.js'
+          ),
         },
         {
           find: /^hono\/(.+)$/,
@@ -139,6 +146,12 @@ export default defineWorkspace([
           find: '@zidney/config',
           replacement: path.resolve(__dirname, 'packages/config/src/index.ts'),
         },
+        {
+          // @/ in root project resolves to apps/mmc/src/ (first match in root tsconfig)
+          // This ensures vi.mock('@/...') paths resolve consistently with actual imports
+          find: /^@\//,
+          replacement: path.resolve(__dirname, 'apps/mmc/src/'),
+        },
       ],
     },
     test: {
@@ -148,6 +161,9 @@ export default defineWorkspace([
       setupFiles: ['./tests/vitest.setup.ts'],
       include: ['./tests/**/*.test.ts'],
       exclude: ['**/node_modules/**', '**/dist/**', './tests/e2e/**', '**/tests/e2e/**'],
+      env: {
+        VITE_API_BASE_URL: 'http://localhost:3000',
+      },
     },
   }),
 

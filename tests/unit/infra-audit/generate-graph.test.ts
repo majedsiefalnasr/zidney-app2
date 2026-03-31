@@ -13,7 +13,7 @@
  * - reverse_dependencies contains no duplicates per key
  */
 
-import { existsSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { afterAll, describe, expect, it } from 'vitest'
 
 import type { AIDependencyGraph } from '../../../packages/types/src/ai-context'
@@ -21,11 +21,17 @@ import { generateDependencyGraph } from '../../../scripts/infra-audit'
 
 const GRAPH_PATH = 'docs/ai/context/ai-dependency-graph.json'
 
+// Backup original content so the production artifact is restored after this test suite
+const _originalGraphContent = existsSync(GRAPH_PATH) ? readFileSync(GRAPH_PATH, 'utf-8') : null
+
 describe('generateDependencyGraph() — T018', () => {
-  // Delete the generated file after all tests to keep the working tree clean.
-  // In CI this path is gitignored so deleting is safe.
+  // Restore original file after all tests so the full suite isn't affected.
   afterAll(() => {
-    if (existsSync(GRAPH_PATH)) rmSync(GRAPH_PATH)
+    if (_originalGraphContent !== null) {
+      writeFileSync(GRAPH_PATH, _originalGraphContent, 'utf-8')
+    } else if (existsSync(GRAPH_PATH)) {
+      rmSync(GRAPH_PATH)
+    }
   })
 
   let graph: AIDependencyGraph | null = null

@@ -66,8 +66,8 @@ export class DbManager {
     const dbName = `tenant_${workspaceSlug.replace(/-/g, '_')}`
 
     try {
-      // Create database
-      await masterDb.query(`CREATE DATABASE "${dbName}" OWNER zidney_test`)
+      // Create database (no OWNER clause — uses the connected role as owner)
+      await masterDb.query(`CREATE DATABASE "${dbName}"`)
       return { success: true, dbName }
     } catch (error: any) {
       // Handle concurrent create attempts idempotently.

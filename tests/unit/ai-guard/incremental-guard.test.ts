@@ -12,7 +12,7 @@
  * - T020: runIncremental() fallback triggers
  */
 
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { AIDependencyGraph } from '../../../packages/types/src/ai-context'
@@ -29,6 +29,15 @@ import {
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 const GRAPH_PATH = 'docs/ai/context/ai-dependency-graph.json'
+
+// Backup and restore the production artifact so the full test suite isn't affected
+const _originalGraphContent = existsSync(GRAPH_PATH) ? readFileSync(GRAPH_PATH, 'utf-8') : null
+
+afterAll(() => {
+  if (_originalGraphContent !== null) {
+    writeFileSync(GRAPH_PATH, _originalGraphContent, 'utf-8')
+  }
+})
 
 function makeGraph(overrides: Partial<AIDependencyGraph> = {}): AIDependencyGraph {
   const now = new Date().toISOString()
