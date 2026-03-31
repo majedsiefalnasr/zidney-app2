@@ -282,7 +282,7 @@ function loadExistingDocNameMap(): Map<string, string> {
   }
 
   for (const entry of readdirSync(DOCS_DIR)) {
-    if (!entry.endsWith('.md') || RESERVED_DOC_FILES.has(entry)) {
+    if (!entry.endsWith('.md') || RESERVED_DOC_FILES.has(entry) || entry.startsWith('_')) {
       continue
     }
 
@@ -304,7 +304,7 @@ function buildRootScriptDocs(
   references: Map<string, PackageReferenceSection>,
   existingDocNames: Map<string, string>
 ): RootScriptDocEntry[] {
-  const rootScripts = loadRootScripts()
+  const rootScripts = loadRootScripts().filter(([script]) => !script.startsWith('_'))
   const scriptNames = rootScripts.map(([script]) => script)
 
   const entries = rootScripts.map(([script, command]) => {

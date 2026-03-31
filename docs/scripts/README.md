@@ -6,7 +6,7 @@ This directory contains one page per root `package.json` script runner, plus the
 
 ## Scope
 
-- Root package.json runners documented: 134
+- Root package.json runners documented: 122
 - Metadata-backed script implementations are also listed in `SCRIPT_REGISTRY.md`.
 
 ## ai
@@ -122,18 +122,6 @@ This directory contains one page per root `package.json` script runner, plus the
 
 ## misc
 
-- [\_ai](_ai.md) — Execute the registered repository runner for this workflow.
-- [\_arch](_arch.md) — Execute the registered repository runner for this workflow.
-- [\_ci](_ci.md) — Execute the registered repository runner for this workflow.
-- [\_comments](_comments.md) — Execute the registered repository runner for this workflow.
-- [\_db](_db.md) — Execute the registered repository runner for this workflow.
-- [\_dev](_dev.md) — Execute the registered repository runner for this workflow.
-- [\_governance](_governance.md) — Execute the registered repository runner for this workflow.
-- [\_infra](_infra.md) — Execute the registered repository runner for this workflow.
-- [\_other](_other.md) — Execute the registered repository runner for this workflow.
-- [\_repo](_repo.md) — Execute the registered repository runner for this workflow.
-- [\_test](_test.md) — Execute the registered repository runner for this workflow.
-- [\_validate](_validate.md) — Execute the registered repository runner for this workflow.
 - [dev](dev.md) — Run the registered repository task for this area.
 - [refactor-scripts](refactor-scripts.md) — Applies the migration map to rename all "bun run <old>" references across the repository. Supports both JSON format (docs/scripts/migration-map.json, preferred) and Markdown format (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain. Writes reports to both reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
 - [test](test.md) — Run Vitest for the configured scope.
