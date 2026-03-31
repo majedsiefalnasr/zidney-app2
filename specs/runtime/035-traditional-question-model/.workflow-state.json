@@ -1,0 +1,31 @@
+{
+  "stage": "Traditional Question Model",
+  "phase": "03_BACKOFFICE_CORE/04_EXAM_ENGINE_CORE",
+  "stage_dir": "specs/runtime/035-traditional-question-model",
+  "stage_file": "specs/phases/03_BACKOFFICE_CORE/04_EXAM_ENGINE_CORE/STAGE_35_TRADITIONAL_QUESTION_MODEL.md",
+  "branch": "spec/035-traditional-question-model",
+  "base_branch": "develop",
+  "pkg_manager": "bun",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "deferred_tasks": [],
+  "guardian_verdicts": {},
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "2026-03-31T23:37:00Z",
+  "last_updated": "2026-03-31T23:37:00Z",
+  "step_timings": {},
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/035-traditional-question-model",
+      "timestamp": "2026-03-31T23:37:00Z"
+    }
+  ]
+}
