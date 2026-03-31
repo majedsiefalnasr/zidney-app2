@@ -11,7 +11,8 @@ export class DbManager {
   private schemaInitialized = false
 
   constructor(
-    private masterConnectionString: string = 'postgresql://zidney_test:test_password_secure_123@localhost:5433/master_db'
+    private masterConnectionString: string = process.env.TEST_DATABASE_URL ||
+      'postgresql://zidney_test:change-me-in-production@localhost:5433/zidney_master'
   ) {}
 
   /**

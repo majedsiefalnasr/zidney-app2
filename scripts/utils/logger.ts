@@ -1517,7 +1517,11 @@ class Logger {
       }
       return
     }
-    console.log(format('warn', message))
+    if (data) {
+      console.warn(format('warn', message), data)
+    } else {
+      console.warn(format('warn', message))
+    }
   }
 
   /**
