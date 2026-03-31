@@ -5,23 +5,23 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     },
     "./queue": {
-      "import": "./dist/job-queue.js",
-      "types": "./dist/job-queue.d.ts"
+      "types": "./src/job-queue.ts",
+      "default": "./src/job-queue.ts"
     },
     "./types": {
-      "import": "./dist/job-schema.js",
-      "types": "./dist/job-schema.d.ts"
+      "types": "./src/job-schema.ts",
+      "default": "./src/job-schema.ts"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "bun build src/index.ts src/job-queue.ts src/job-schema.ts --outdir dist --target=node",
     "test": "vitest"
   },
   "dependencies": {

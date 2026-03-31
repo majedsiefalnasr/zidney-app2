@@ -274,7 +274,7 @@ This caching strategy reduces unnecessary terminal operations and improves respo
 
 ## 4. Environment (Bun/Hono)
 
-- **Tool:** `bun run x`
+- **Tool:** `bun <script.ts>`
   - _Usage:_ Run one-off TS scripts without compiling.
 - **Tool:** `wrangler` (if applicable)
   - _Usage:_ For checking Hono deployment logs/configs.

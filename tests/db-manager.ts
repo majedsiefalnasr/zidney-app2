@@ -11,7 +11,8 @@ export class DbManager {
   private schemaInitialized = false
 
   constructor(
-    private masterConnectionString: string = 'postgresql://zidney_test:test_password_secure_123@localhost:5433/master_db'
+    private masterConnectionString: string = process.env.TEST_DATABASE_URL ||
+      'postgresql://zidney_test:change-me-in-production@localhost:5433/zidney_master'
   ) {}
 
   /**
@@ -21,6 +22,7 @@ export class DbManager {
     if (!this.masterDb) {
       this.masterDb = new Pool({
         connectionString: this.masterConnectionString,
+        connectionTimeoutMillis: 5000,
       })
       await this.masterDb.connect()
     }
@@ -44,6 +46,7 @@ export class DbManager {
 
     const pool = new Pool({
       connectionString,
+      connectionTimeoutMillis: 5000,
     })
 
     try {
@@ -63,8 +66,8 @@ export class DbManager {
     const dbName = `tenant_${workspaceSlug.replace(/-/g, '_')}`
 
     try {
-      // Create database
-      await masterDb.query(`CREATE DATABASE "${dbName}" OWNER zidney_test`)
+      // Create database (no OWNER clause — uses the connected role as owner)
+      await masterDb.query(`CREATE DATABASE "${dbName}"`)
       return { success: true, dbName }
     } catch (error: any) {
       // Handle concurrent create attempts idempotently.

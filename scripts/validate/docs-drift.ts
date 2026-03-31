@@ -40,6 +40,19 @@ const EXEMPT_SCRIPTS = new Set([
   'start',
   // Meta scripts that are aliases documented elsewhere
   'refactor-scripts',
+  // Underscore-prefixed comments (not actual scripts)
+  '_comments',
+  '_validate',
+  '_arch',
+  '_test',
+  '_dev',
+  '_ai',
+  '_db',
+  '_infra',
+  '_governance',
+  '_ci',
+  '_repo',
+  '_other',
 ])
 
 /**

@@ -6,7 +6,8 @@
  * @category governance
  * @description Validates all package.json script keys conform to the
  *   <domain>:<action>[:<scope>] naming convention. Allowed domains: db, arch,
- *   validate, ai, ci, repo, dev, infra, test, governance, policy. Lifecycle-exempt names are skipped.
+ *   validate, ai, ci, repo, dev, infra, test, governance, policy. Lifecycle-exempt names and
+ *   category comments (scripts starting with "_") are skipped.
  *   Reports ALL violations before exiting non-zero.
  * @usage bun run validate:scripts:naming
  */
@@ -63,6 +64,8 @@ export const LIFECYCLE_EXEMPT = new Set([
   'format',
   'dev',
   'type-check',
+  // Legacy/utility scripts
+  'refactor-scripts',
 ])
 
 /**
@@ -139,6 +142,9 @@ export function validateNaming(entries: ScriptEntry[]): ViolationRecord[] {
     if (entry.workspaceName !== null) continue
 
     if (LIFECYCLE_EXEMPT.has(entry.name)) continue
+
+    // Category comments (scripts starting with "_") are used for documentation — skip validation
+    if (entry.name.startsWith('_')) continue
 
     // Toolchain-prefixed scripts (typecheck:*, lint:*, format:*, build:*, preview:*) are exempt
     const firstSegment = entry.name.split(':')[0]

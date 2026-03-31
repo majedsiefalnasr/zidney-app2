@@ -8,11 +8,11 @@ bun run format:write
 
 ## Purpose
 
-Execute the registered repository runner for this workflow.
+Format files with Biome.
 
 ## Why It Exists
 
-It provides a stable root package.json interface over underlying tools or chained child runners.
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. It provides a stable root package.json interface over underlying tools or chained child runners.
 
 ## Source
 
@@ -22,10 +22,11 @@ It provides a stable root package.json interface over underlying tools or chaine
 
 ## CI Behavior
 
-No explicit root-level `--ci` contract was detected for this runner.
+Wrapper-only alias; any CI behavior depends on the underlying CLI rather than a root-level --ci flag.
 
 ## When to Run
 
+- When reproducing CI behavior locally or validating CI-only output paths.
 - When running repository quality checks before commit or push.
 
 ## Related Scripts
@@ -35,4 +36,4 @@ No explicit root-level `--ci` contract was detected for this runner.
 
 ## Audit Notes
 
-- No isolated execution audit note is currently recorded.
+- Not audited automatically in the isolated execution pass.

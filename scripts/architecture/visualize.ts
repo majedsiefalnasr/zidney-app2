@@ -439,4 +439,11 @@ function main(): void {
   exit(0)
 }
 
-main()
+function isDirectExecution(): boolean {
+  const entry = process.argv[1] ?? ''
+  return /(?:^|[\\/])visualize\.ts$/.test(entry)
+}
+
+if (isDirectExecution()) {
+  main()
+}

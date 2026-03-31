@@ -49,6 +49,7 @@ import { divisionsRouter } from './routes/backoffice/divisions/index'
 import { groupsRouter } from './routes/backoffice/groups/index'
 import { hierarchyRouter } from './routes/backoffice/hierarchy/index'
 import { lessonsRouter } from './routes/backoffice/lessons'
+import { mcqQuestionsRouter } from './routes/backoffice/mcq-questions'
 import { rolesRouter } from './routes/backoffice/roles'
 import { semestersRouter } from './routes/backoffice/semesters'
 import { workspaceSettingsRouter } from './routes/backoffice/settings'
@@ -190,6 +191,9 @@ app.route('/api/v1/backoffice/workspace', tagsRouter)
 
 // MCQ Baskets endpoints — Stage 033, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', basketsRouter)
+
+// MCQ Questions endpoints — Stage 034, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', mcqQuestionsRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade

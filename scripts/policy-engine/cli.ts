@@ -68,7 +68,7 @@ async function main(): Promise<void> {
   log.setScript('policy:check')
   log.header('POLICY ENGINE', 'Unified governance policy checks')
 
-  const args = parseArgs(Bun.argv.slice(2))
+  const args = parseArgs(process.argv.slice(2))
   if (args.ci) {
     log.info('[policy:check] CI mode enabled')
   }
@@ -94,7 +94,12 @@ async function main(): Promise<void> {
   exit(hasErrors ? 1 : 0)
 }
 
-main().catch((error) => {
-  log.error(`policy:check failed: ${error instanceof Error ? error.message : String(error)}`)
-  exit(1)
-})
+main()
+  .catch((error) => {
+    log.error(`policy:check failed: ${error instanceof Error ? error.message : String(error)}`)
+    exit(1)
+  })
+  .catch(() => {
+    // Suppress: only reachable when exit() throws (e.g. tests that mock process.exit to throw).
+    // In production the process terminates before this handler runs.
+  })

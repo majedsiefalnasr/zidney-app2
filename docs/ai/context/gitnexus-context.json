@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-03-30T12:08:56.531Z",
-  "analyzedAt": "2026-03-30T12:08:56.531Z",
+  "generatedAt": "2026-03-31T13:32:15.135Z",
+  "analyzedAt": "2026-03-31T13:32:15.135Z",
   "analysisMode": "changed-only",
   "changedFiles": [],
   "impactedModules": [],
@@ -9,64 +9,64 @@
   "architectureLayerMap": {},
   "recentCommits": [
     {
-      "hash": "fe19b03fcf57f828c4f629c3dc875fbfb9fe379a",
-      "message": "feat(scripts): generate root script docs",
+      "hash": "66a344e29c0c5faebe2c3abad3d113e1fe1e195f",
+      "message": "fix(ai-guard): log error as an object in loadTsAliases function",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T22:54:29+02:00"
+      "date": "2026-03-31T13:18:19+02:00"
     },
     {
-      "hash": "7a75d52ff4864dcb36ca3e355161160906deb51c",
-      "message": "chore(scripts): checkpoint package docs automation",
+      "hash": "84a83209bf7a2cc401d9f7d72e008056fb213b6e",
+      "message": "fix(tests): console.warn in logger and db connection config",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T22:38:25+02:00"
+      "date": "2026-03-31T13:04:51+02:00"
     },
     {
-      "hash": "31d0d6238c949630444d0aa528775842674164ce",
-      "message": "Merge pull request #78 from majedsiefalnasr/spec/infra-029-policy-engine-and-governance-rules-layer",
+      "hash": "27b53ee75fd03f999a901ff32e22e4ea89aebe87",
+      "message": "fix(dev:generate:script-docs): skip scripts starting with underscore",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T20:18:07+02:00"
+      "date": "2026-03-31T12:45:50+02:00"
     },
     {
-      "hash": "66910179f9a3bee57946616bd67ad150578fc511",
-      "message": "fix(ci): pass TRIVY_VERSION (with 'v') to Trivy installer to match GitHub tag",
+      "hash": "191b8433620e1d72304debb4777568ba06e65e3b",
+      "message": "chore(docs): regenerate script registry and docs",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T20:13:24+02:00"
+      "date": "2026-03-31T12:02:17+02:00"
     },
     {
-      "hash": "d5de01b357982c893ee1c9c48ce55ef2494f14c3",
-      "message": "chore(security): pin Trivy to v0.69.3; update CI workflows, pre-commit hook, helper, and docs",
+      "hash": "7ae546fe8afeaf6685574df7642b1aaff97332ce",
+      "message": "fix(ci): always run bun install via bun download cache",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T19:40:39+02:00"
+      "date": "2026-03-31T11:56:34+02:00"
     },
     {
-      "hash": "954cc61bcef73932451c18438f17f97d6cacc70b",
-      "message": "feat(trivy): add Trivy installation and caching to architecture governance workflow",
+      "hash": "32c295b0a4c3705a4de340f03970d836b34d5e19",
+      "message": "fix(validate): exclude generated arch-health dir from script-usage scan",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T19:21:31+02:00"
+      "date": "2026-03-31T11:51:54+02:00"
     },
     {
-      "hash": "87d844007f91cdffcacb06eccb50e78432127e52",
-      "message": "feat: update script references to use 'bun run repo:' format",
+      "hash": "2475c52f1fdec5f45b4da4a11e5a66642d2c8e38",
+      "message": "fix(test): prevent test:integration from running all workspace projects",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T18:53:22+02:00"
+      "date": "2026-03-31T11:12:43+02:00"
     },
     {
-      "hash": "693ec8b8056da2f61eb696b1bbc32814876daffb",
-      "message": "feat(validate): add 'policy' to allowed domains for script naming validation",
+      "hash": "a7edad68e8228909781dd98c2acb280aa81e3594",
+      "message": "fix(arch-guard): resolve false arch-drift violations in dependency graph check",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T14:41:20+02:00"
+      "date": "2026-03-31T10:53:00+02:00"
     },
     {
-      "hash": "af6be87e1084a710c1b8e0372d597204ffc0bb50",
-      "message": "fix(arch): suppress decorative logger output in JSON mode for guard scripts",
+      "hash": "60659c8dedf8fd2da9b8d6fdacee53f1a641537f",
+      "message": "fix(validate): resolve 3 script-usage violations",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T14:19:46+02:00"
+      "date": "2026-03-31T10:37:31+02:00"
     },
     {
-      "hash": "a951cbfd973ed0705619f2f1ca64096c48338b4f",
-      "message": "chore(infra-29): close policy engine and governance rules layer stage",
+      "hash": "0644ae3a9dd6d768f901a573b44df0c2c5a7d615",
+      "message": "docs(034): add missing VALIDATION_REPORT.md for stage_production_ready check",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-28T13:59:28+02:00"
+      "date": "2026-03-31T10:31:33+02:00"
     }
   ],
   "riskIndicators": []

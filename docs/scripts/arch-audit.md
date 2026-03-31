@@ -12,7 +12,7 @@ Monorepo governance scanner — audits Vitest, ESLint, Playwright, import bounda
 
 ## Why It Exists
 
-This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: arch:refresh, arch:fix, arch:audit:check. Its implementation lives in scripts/infra-audit.ts and is exposed through the root package.json interface.
+This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: arch:governance, arch:governance:fix. Its implementation lives in scripts/infra-audit.ts and is exposed through the root package.json interface.
 
 ## Source
 
@@ -31,7 +31,7 @@ Supported explicitly in the implementation.
 ## Related Scripts
 
 - Depends on: None
-- Used by other root scripts: `arch:refresh`, `arch:fix`, `arch:audit:check`
+- Used by other root scripts: `arch:governance`, `arch:governance:fix`
 
 ## Audit Notes
 

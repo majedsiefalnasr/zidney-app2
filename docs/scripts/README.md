@@ -34,8 +34,8 @@ This directory contains one page per root `package.json` script runner, plus the
 - [arch:generate](arch-generate.md) — Run the registered repository task for this area.
 - [arch:gitnexus:context](gitnexus-context.md) — Generates a structured GitNexus context JSON artifact from git state and ai-architecture-brain.json for AI orchestrators and CI gates.
 - [arch:gitnexus:validate](gitnexus-validate.md) — Validates the gitnexus-context.json artifact for file presence, structure, semantics, and freshness.
-- [arch:governance](arch-refresh.md) — Execute the registered repository runner for this workflow.
-- [arch:governance:fix](arch-fix.md) — Execute the registered repository runner for this workflow.
+- [arch:governance](arch-refresh.md) — Run the registered repository task for this area.
+- [arch:governance:fix](arch-fix.md) — Run the registered repository task for this area.
 - [arch:guard](arch-guard.md) — Run the registered repository task for this area.
 - [arch:guard:changed](arch-guard-changed.md) — Run the registered repository task for this area.
 - [arch:guard:ci](arch-guard-ci.md) — Run the registered repository task for this area.
@@ -98,7 +98,7 @@ This directory contains one page per root `package.json` script runner, plus the
 ## format
 
 - [format:check](format-check-biome.md) — Run both Biome and Prettier checks without writing changes.
-- [format:write](format.md) — Execute the registered repository runner for this workflow.
+- [format:write](format.md) — Format files with Biome.
 
 ## governance
 

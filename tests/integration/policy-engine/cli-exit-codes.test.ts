@@ -69,7 +69,8 @@ describe('CLI exit codes', () => {
     // We test via the exit spy — if it's called with 0 or not at all
     let exitCode: number | undefined
     processExitSpy.mockImplementation(((code?: number | string | null) => {
-      exitCode = Number(code)
+      // Only capture the first exit code: subsequent calls (from catch re-throwing) are not the intended exit
+      if (exitCode === undefined) exitCode = Number(code)
       throw new Error(`process.exit(${code})`)
     }) as any)
 

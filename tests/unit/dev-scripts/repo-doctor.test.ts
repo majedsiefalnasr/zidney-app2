@@ -219,14 +219,14 @@ describe('checkEnvFile', () => {
     expect(checkEnvFile()).toBe(false)
   })
 
-  it('returns true when .env is missing a key from .env.example', () => {
+  it('returns false when .env is missing a key from .env.example', () => {
     vi.mocked(existsSync).mockReturnValue(true)
     vi.mocked(readFileSync).mockImplementation((p: unknown) => {
       const s = String(p)
       if (s.includes('.env.example')) return 'DATABASE_URL=\nREDIS_URL=\n'
       return 'DATABASE_URL=postgres://localhost\n'
     })
-    expect(checkEnvFile()).toBe(true)
+    expect(checkEnvFile()).toBe(false)
   })
 
   it("strips 'export ' prefix when parsing keys (L-01 contract)", () => {
@@ -259,7 +259,7 @@ describe('checkEnvFile', () => {
     }
   })
 
-  it('returns true (error) when .env is absent', () => {
+  it('returns false (warn-only) when .env is absent', () => {
     vi.mocked(existsSync).mockImplementation((p: unknown) => {
       const s = String(p)
       if (s.endsWith('.env')) return false
@@ -267,8 +267,8 @@ describe('checkEnvFile', () => {
       return false
     })
     vi.mocked(readFileSync).mockReturnValue('KEY=\n')
-    // .env absent → error (not warn-only — devs must copy .env.example)
-    expect(checkEnvFile()).toBe(true)
+    // .env absent → warn only (do not fail repo-doctor in public repos)
+    expect(checkEnvFile()).toBe(false)
   })
 })
 

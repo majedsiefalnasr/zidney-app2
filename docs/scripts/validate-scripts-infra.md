@@ -12,7 +12,7 @@ Orchestrator that runs all script-system validators sequentially. Composes: runt
 
 ## Why It Exists
 
-Its implementation lives in scripts/validate/index.ts and is exposed through the root package.json interface.
+This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml. Its implementation lives in scripts/validate/index.ts and is exposed through the root package.json interface.
 
 ## Source
 
@@ -22,7 +22,7 @@ Its implementation lives in scripts/validate/index.ts and is exposed through the
 
 ## CI Behavior
 
-No explicit root-level `--ci` contract was detected for this runner.
+Supported explicitly in the implementation.
 
 ## When to Run
 
@@ -35,4 +35,4 @@ No explicit root-level `--ci` contract was detected for this runner.
 
 ## Audit Notes
 
-- No isolated execution audit note is currently recorded.
+- Not audited automatically in the isolated execution pass.

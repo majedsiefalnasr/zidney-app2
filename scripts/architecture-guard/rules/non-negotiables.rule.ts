@@ -155,11 +155,12 @@ function validateArchitectureDrift(repoRoot: string): ViolationRecord[] {
     ) as { modules?: Record<string, unknown> }
     const graph = JSON.parse(
       readFileSync(`${repoRoot}/docs/ai/context/ai-dependency-graph.json`, 'utf-8')
-    ) as { modules?: string[] | Record<string, unknown> }
+    ) as { nodes?: string[]; modules?: string[] | Record<string, unknown> }
 
     const mapModules = new Set(Object.keys(map.modules ?? {}))
+    const graphNodeList = graph.nodes ?? graph.modules
     const graphModules = new Set(
-      Array.isArray(graph.modules) ? graph.modules : Object.keys(graph.modules ?? {})
+      Array.isArray(graphNodeList) ? graphNodeList : Object.keys(graphNodeList ?? {})
     )
 
     const unresolved = [...mapModules].filter((module) => !graphModules.has(module))

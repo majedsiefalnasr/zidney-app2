@@ -51,16 +51,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Build packages (lightweight)
@@ -91,16 +89,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Build packages (lightweight)
@@ -128,16 +124,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Restore ai-context artifacts cache (T086)
@@ -179,16 +173,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Run repo:doctor
@@ -208,16 +200,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Run Script UX Validator (CI auto preview mode)
@@ -256,16 +246,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Restore Trivy cache
@@ -315,16 +303,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Assert all skip markers are annotated
@@ -409,16 +395,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Install postgres client (for `pg_isready`)
@@ -525,16 +509,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Run unit tests with coverage (enforces thresholds)
@@ -568,16 +550,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
@@ -618,16 +598,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
@@ -668,16 +646,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
@@ -728,16 +704,14 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Restore node_modules from cache
+      - name: Cache Bun install packages
         uses: actions/cache@v4
-        id: cache-nodemodules
         with:
-          path: node_modules
-          key: nodemodules-${{ hashFiles('bun.lock') }}
-          restore-keys: nodemodules-
+          path: ~/.bun/install/cache
+          key: bun-install-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-install-
 
       - name: Install dependencies
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Build all workspaces

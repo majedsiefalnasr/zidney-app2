@@ -31,7 +31,8 @@
     "./categories": "./src/categories/index.ts",
     "./category-values": "./src/category-values/index.ts",
     "./tags": "./src/tags/index.ts",
-    "./baskets": "./src/baskets/index.ts"
+    "./baskets": "./src/baskets/index.ts",
+    "./mcq-questions": "./src/mcq-questions/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",
@@ -42,6 +43,7 @@
     "bcrypt": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.18.0",
+    "sanitize-html": "^2.17.2",
     "uuid": "^13.0.0",
     "zod": "^3.22.4"
   },
@@ -49,6 +51,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/pg": "^8.16.0",
+    "@types/sanitize-html": "^2.16.1",
     "@types/uuid": "^11.0.0",
     "typescript": "latest",
     "vitest": "^1.0.0"

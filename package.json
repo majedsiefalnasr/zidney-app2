@@ -1,6 +1,7 @@
 {
   "name": "zidney",
   "private": true,
+  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -17,7 +18,7 @@
     "format:check": "biome format . && prettier --check '**/*.{md,yaml,yml}'",
     "build": "bun run --workspaces build",
     "build:api": "bun run --cwd apps/api build",
-    "build:packages": "bash -lc 'for d in packages/*; do if [ -f \"$d/package.json\" ]; then (cd \"$d\" && echo \"Building $d\" && bun run build); fi; done'",
+    "build:packages": "bash -lc 'for d in packages/*; do if [ -f \"$d/package.json\" ]; then (cd \"$d\" && echo \"Building $d\" && bun run build) || exit 1; fi; done'",
     "_validate": "Validation: CI guards and type safety",
     "validate:workflows": "find .github/workflows -type f \\( -name '*.yml' -o -name '*.yaml' \\) | xargs actionlint",
     "validate:types": "bun run typecheck && bun run arch:type-safety-guard --json",
@@ -63,7 +64,7 @@
     "test:e2e:backoffice": "bunx playwright test --config apps/backoffice/playwright.config.ts",
     "test:e2e:frontoffice": "bunx playwright test --config apps/frontoffice/playwright.config.ts",
     "test:e2e:mmc": "bunx playwright test --config apps/mmc/playwright.config.ts",
-    "test:integration": "vitest run --dir tests/integration --fileParallelism=false",
+    "test:integration": "vitest run --project root --dir tests/integration --fileParallelism=false",
     "test:migrations": "vitest run --dir tests/migrations || true",
     "test:performance": "vitest run --dir tests/performance",
     "test:static": "vitest run --dir tests/static",

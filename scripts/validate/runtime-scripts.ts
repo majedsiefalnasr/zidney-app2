@@ -73,6 +73,19 @@ export const EXCLUDED_NAMES = new Set<string>([
   'script',
   'something:unknown',
   'nonexistent:script',
+  // Category comments (scripts starting with "_") — documentation only
+  '_comments',
+  '_validate',
+  '_arch',
+  '_test',
+  '_dev',
+  '_ai',
+  '_db',
+  '_infra',
+  '_governance',
+  '_ci',
+  '_repo',
+  '_other',
 ])
 
 const REPO_ROOT = process.cwd()

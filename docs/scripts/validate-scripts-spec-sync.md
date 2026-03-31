@@ -12,7 +12,7 @@ Reverse validation: scans all spec files (specs/, docs/) for `bun run <script>` 
 
 ## Why It Exists
 
-Its implementation lives in scripts/validate/spec-sync.ts and is exposed through the root package.json interface.
+This runner is currently classified as medium. Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it. Its implementation lives in scripts/validate/spec-sync.ts and is exposed through the root package.json interface.
 
 ## Source
 
@@ -22,7 +22,7 @@ Its implementation lives in scripts/validate/spec-sync.ts and is exposed through
 
 ## CI Behavior
 
-No explicit root-level `--ci` contract was detected for this runner.
+Supported explicitly in the implementation.
 
 ## When to Run
 
@@ -35,4 +35,4 @@ No explicit root-level `--ci` contract was detected for this runner.
 
 ## Audit Notes
 
-- No isolated execution audit note is currently recorded.
+- Not audited automatically in the isolated execution pass.

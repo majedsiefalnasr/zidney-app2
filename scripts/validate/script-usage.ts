@@ -44,7 +44,7 @@ const EXCLUDE_DIRS = new Set([
   'phases', // specs/phases — stage specification documents (may reference past/future scripts)
 ])
 
-const EXCLUDE_PATH_PREFIXES = ['docs/ai/context/', 'docs/architecture/health/history/']
+const EXCLUDE_PATH_PREFIXES = ['docs/ai/context/', 'docs/architecture/health/']
 
 /** Matches: bun run [--flags] <script-name> */
 export const USAGE_RE = /bun run (?:--?\S+ )*([\w:.-]+)/g

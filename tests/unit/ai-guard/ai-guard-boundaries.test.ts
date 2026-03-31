@@ -427,7 +427,7 @@ describe('loadTsAliases — file parsing and merge behavior (l)', () => {
     expect(aliases.length).toBeGreaterThan(0)
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining('[ai-guard] WARNING: failed to load aliases from'),
-      expect.any(String)
+      expect.any(Object)
     )
     warnSpy.mockRestore()
   })

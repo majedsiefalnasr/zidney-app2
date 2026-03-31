@@ -252,8 +252,10 @@ export function loadTsAliases(): TsAliasMap[] {
         result.push({ alias: cleanKey, target: cleanTarget })
       }
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
       log.warn(
-        `[ai-guard] WARNING: failed to load aliases from ${configFile} — alias-based boundary checks may be incomplete. ${err instanceof Error ? err.message : String(err)}`
+        `[ai-guard] WARNING: failed to load aliases from ${configFile} — alias-based boundary checks may be incomplete.`,
+        { error: errorMessage }
       )
     }
   }
