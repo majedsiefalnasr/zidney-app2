@@ -66,16 +66,18 @@
 
 ---
 
-## Constitutional Compliance
+## Architecture Governance Compliance
 
-| Check                                  | Status  | Notes |
-| -------------------------------------- | ------- | ----- |
-| No cross-tenant logic introduced       | ✅ / ❌ | ...   |
-| All writes are transactional by design | ✅ / ❌ | ...   |
-| Server-authoritative time enforced     | ✅ / ❌ | ...   |
-| License middleware enforced            | ✅ / ❌ | ...   |
-| Version compatibility enforced         | ✅ / ❌ | ...   |
-| No architecture redesign without ADR   | ✅ / ❌ | ...   |
+| Check                                               | Status  | Notes |
+| --------------------------------------------------- | ------- | ----- |
+| No cross-tenant logic introduced (ADR-0001)         | ✅ / ❌ | ...   |
+| All writes are transactional by design              | ✅ / ❌ | ...   |
+| Server-authoritative time enforced (ADR-0006)       | ✅ / ❌ | ...   |
+| License middleware enforced                         | ✅ / ❌ | ...   |
+| Version compatibility enforced (ADR-0007, ADR-0008) | ✅ / ❌ | ...   |
+| No architecture redesign without ADR                | ✅ / ❌ | ...   |
+| Trust chain respected                               | ✅ / ❌ | ...   |
+| Import boundaries respected                         | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

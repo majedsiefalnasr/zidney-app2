@@ -14,7 +14,7 @@ Key decisions:
 - {{PLAN_DECISION_1}}
 - {{PLAN_DECISION_2}}
 
-Guardian validation: PASSED (Architecture + API)
+Guardian validation: PASSED (Architecture Governance + API)
 
 Artifacts:
 

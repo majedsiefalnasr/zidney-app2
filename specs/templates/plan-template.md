@@ -1,6 +1,10 @@
-Zidney Strict Plan Template (Implementation Enforcement)
+Zidney Strict Plan Template (Architecture Governance Enforced)
 
-Before generating any plan, validate against Zidney Constitution v1.2.0.
+Before generating any plan, validate against Zidney Architecture Governance:
+
+- `AGENTS.md` — platform rules and import boundaries
+- `docs/architecture/ADR/` — binding architectural decisions (ADR-0001 through ADR-0009)
+- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` — architecture contract
 
 If any architectural violation is detected, STOP and explain conflict.
 
@@ -23,15 +27,45 @@ Plan must not introduce architecture outside defined Stage scope.
 
 Explicitly confirm:
 
-- No cross-tenant data access
+- No cross-tenant data access (ADR-0001)
 - No middleware bypass
-- No direct DB instantiation
+- No direct DB instantiation (tenant resolver only)
 - No grading logic outside Worker
-- No weakening of snapshot integrity
-- No weakening of version enforcement
+- No weakening of snapshot integrity (ADR-0002)
+- No weakening of version enforcement (ADR-0007, ADR-0008)
+- No client-authoritative time (ADR-0006)
 - No layer boundary violation
 
 If any exception → ADR required before plan proceeds.
+
+---
+
+## Trust Chain Verification
+
+Confirm the plan respects the Zidney trust chain order:
+
+**Isolation → License → Authentication → Attempt → Runtime → Frontoffice**
+
+- [ ] Isolation: Database-per-tenant preserved, no cross-tenant access
+- [ ] License: License validation middleware enforced before workspace access
+- [ ] Authentication: JWT scope validated, RBAC enforced server-side
+- [ ] Attempt: Snapshot frozen at start, worker-only grading
+- [ ] Runtime: Server-authoritative time only
+- [ ] Frontoffice: No business logic, API consumption only
+
+---
+
+## Import Boundary Compliance
+
+Plan must not violate import boundaries:
+
+| Import Direction            | Allowed      |
+| --------------------------- | ------------ |
+| `apps/*` → `packages/*`     | ✅ Allowed   |
+| `packages/*` → `packages/*` | ✅ Allowed   |
+| `apps/*` → other `apps/*`   | ❌ Forbidden |
+| `packages/*` → `apps/*`     | ❌ Forbidden |
+| UI → DB schemas             | ❌ Forbidden |
 
 ---
 
@@ -149,6 +183,20 @@ Client time must never be used for authority.
 
 ---
 
+## Error Contract
+
+All API responses must follow:
+
+```json
+{
+  "success": boolean,
+  "data": object | null,
+  "error": { "code": string, "message": string } | null
+}
+```
+
+---
+
 ## Observability & Logging
 
 Plan must define:
@@ -231,6 +279,23 @@ Define:
 
 ---
 
+## Architecture Guard Validation
+
+Plan must pass governance validation before proceeding:
+
+```bash
+bun run ai:guard && bun run arch:audit && bun run lint && bun run typecheck && bun run test
+```
+
+Individual checks:
+
+```bash
+bun scripts/infra-audit.ts    # Infrastructure audit
+bun scripts/ai-guard.ts        # AI governance guard
+```
+
+---
+
 ## Non-Goals
 
 Explicitly list what is not included.
@@ -243,6 +308,6 @@ Prevents scope creep.
 
 The plan must end with:
 
-“Implementation plan compliant with Zidney Constitution v1.2.0 — No violations detected.”
+"Implementation plan compliant with Zidney Architecture Governance (AGENTS.md + ADRs) — No violations detected."
 
 If violation exists: Plan must stop and describe conflict.

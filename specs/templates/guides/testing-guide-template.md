@@ -187,6 +187,21 @@ bun run db:console --workspace <workspace_slug>
 
 ---
 
+## Architecture Governance Validation
+
+```bash
+# Architecture guard
+bun scripts/infra-audit.ts
+bun scripts/ai-guard.ts
+
+# Full governance pipeline
+bun run ai:guard && bun run arch:audit && bun run lint && bun run typecheck && bun run test
+```
+
+Expected outcome: all governance checks pass with no violations.
+
+---
+
 ## Sign-Off Checklist
 
 - [ ] All required automated tests pass
@@ -195,6 +210,9 @@ bun run db:console --workspace <workspace_slug>
 - [ ] Multi-tenant isolation confirmed
 - [ ] No `console.log` or stack traces exposed
 - [ ] Logs include `workspace_slug` and `correlation_id`
+- [ ] Trust chain respected: Isolation → License → Auth → Attempt → Runtime → Frontoffice
+- [ ] Import boundaries respected (apps→packages ✅, apps→apps ❌)
+- [ ] Architecture guard passed (ai-guard + infra-audit)
 
 ---
 

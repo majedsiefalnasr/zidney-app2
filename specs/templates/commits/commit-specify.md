@@ -10,9 +10,9 @@ What was specified:
 
 Constraints enforced:
 
-- Database-per-tenant preserved
+- Database-per-tenant preserved (ADR-0001)
 - License middleware declared
-- Constitutional compliance confirmed
+- Architecture governance compliance confirmed (AGENTS.md + ADRs)
 
 Artifacts:
 

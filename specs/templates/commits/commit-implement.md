@@ -18,6 +18,7 @@ Validations passed:
 - Lint: {{LINT_STATUS}}
 - Type check: {{TYPECHECK_STATUS}}
 - Migration: {{MIGRATION_STATUS}}
+- Architecture guard: {{ARCH_GUARD_STATUS}}
 
 Files changed: {{FILES_CHANGED_LIST}}
 

@@ -22,16 +22,18 @@
 
 ## Validation Matrix
 
-| Validation Check                                   | Required    | Command(s)  | Result            | Notes |
-| -------------------------------------------------- | ----------- | ----------- | ----------------- | ----- |
-| Unit tests (impacted business logic)               | Yes         | `<COMMAND>` | ✅ / ❌ / SKIPPED | ...   |
-| Integration tests (impacted API flows)             | Yes         | `<COMMAND>` | ✅ / ❌ / SKIPPED | ...   |
-| Snapshot tests (grading behavior, if applicable)   | Conditional | `<COMMAND>` | ✅ / ❌ / N/A     | ...   |
-| Lint                                               | Yes         | `<COMMAND>` | ✅ / ❌ / SKIPPED | ...   |
-| Type check                                         | Yes         | `<COMMAND>` | ✅ / ❌ / SKIPPED | ...   |
-| Migration validation (if schema changed)           | Conditional | `<COMMAND>` | ✅ / ❌ / N/A     | ...   |
-| Idempotency replay validation (critical endpoints) | Yes         | `<COMMAND>` | ✅ / ❌ / SKIPPED | ...   |
-| Concurrency validation (critical flows)            | Yes         | `<COMMAND>` | ✅ / ❌ / SKIPPED | ...   |
+| Validation Check                                   | Required    | Command(s)                   | Result            | Notes |
+| -------------------------------------------------- | ----------- | ---------------------------- | ----------------- | ----- |
+| Unit tests (impacted business logic)               | Yes         | `<COMMAND>`                  | ✅ / ❌ / SKIPPED | ...   |
+| Integration tests (impacted API flows)             | Yes         | `<COMMAND>`                  | ✅ / ❌ / SKIPPED | ...   |
+| Snapshot tests (grading behavior, if applicable)   | Conditional | `<COMMAND>`                  | ✅ / ❌ / N/A     | ...   |
+| Lint                                               | Yes         | `<COMMAND>`                  | ✅ / ❌ / SKIPPED | ...   |
+| Type check                                         | Yes         | `<COMMAND>`                  | ✅ / ❌ / SKIPPED | ...   |
+| Migration validation (if schema changed)           | Conditional | `<COMMAND>`                  | ✅ / ❌ / N/A     | ...   |
+| Idempotency replay validation (critical endpoints) | Yes         | `<COMMAND>`                  | ✅ / ❌ / SKIPPED | ...   |
+| Concurrency validation (critical flows)            | Yes         | `<COMMAND>`                  | ✅ / ❌ / SKIPPED | ...   |
+| Architecture guard (ai-guard.ts)                   | Yes         | `bun scripts/ai-guard.ts`    | ✅ / ❌ / SKIPPED | ...   |
+| Infrastructure audit (infra-audit.ts)              | Yes         | `bun scripts/infra-audit.ts` | ✅ / ❌ / SKIPPED | ...   |
 
 ---
 

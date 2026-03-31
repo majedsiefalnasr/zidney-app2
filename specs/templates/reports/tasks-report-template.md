@@ -48,7 +48,7 @@
 
 ---
 
-## Constitutional Compliance
+## Architecture Governance Compliance
 
 | Check                                        | Status  | Notes |
 | -------------------------------------------- | ------- | ----- |
@@ -57,6 +57,9 @@
 | Layer boundary rules are respected           | ✅ / ❌ | ...   |
 | No unrelated file modifications planned      | ✅ / ❌ | ...   |
 | Migration tasks included when required       | ✅ / ❌ | ...   |
+| Trust chain respected                        | ✅ / ❌ | ...   |
+| Import boundaries respected                  | ✅ / ❌ | ...   |
+| Architecture guard task included             | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

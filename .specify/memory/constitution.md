@@ -1,18 +1,26 @@
 <!--
 Sync Impact Report
-Version change: 1.1.0 → 1.2.0
-Modified principles: Centralized middleware enforcement, Schema enforcement rigor, Version compatibility enforcement, Concurrency guarantees
-Added sections: Middleware Authority, Concurrency Guarantees
+Version change: 1.2.0 → 2.0.0
+Modified principles: Aligned all principles with AGENTS.md and ADR references
+Added sections: Architecture Governance Authority, Trust Chain, Import Boundaries
 Removed sections: None
-Templates requiring updates: None
+Templates requiring updates: All templates updated to reference Architecture Governance
 Follow-up TODOs: None
 -->
 
-# Zidney Constitution
+# Zidney Architecture Governance Constitution
+
+> **Authority chain**: ADR (docs/architecture/ADR/) > Specs > AGENTS.md > This Constitution > Implementation
+>
+> This constitution is enforced by SpecKit and must be consistent with:
+> - `AGENTS.md` — platform rules and import boundaries
+> - `docs/architecture/ADR/` — binding architectural decisions (ADR-0001 through ADR-0009)
+> - `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` — architecture contract
+> - `docs/architecture/intelligence/ARCHITECTURE_MAP.json` — module map
 
 ## Core Principles
 
-### Database-Per-Tenant Isolation (Hard Rule)
+### Database-Per-Tenant Isolation (Hard Rule) — ADR-0001
 
 • Each workspace has its own physical database.
 • No row-based multi-tenancy.
@@ -56,7 +64,7 @@ AI must not bypass license middleware.
 
 ---
 
-### Snapshot-Based Attempt Integrity
+### Snapshot-Based Attempt Integrity — ADR-0002
 
 When an attempt starts:
 • Question list frozen
@@ -76,20 +84,21 @@ AI must refuse grading logic outside Worker.
 
 ---
 
-### Versioned Evolution
+### Versioned Evolution — ADR-0007, ADR-0008
 
 • Schema version enforced per tenant.
-• Product version compatibility enforced.
+• Product version compatibility enforced (ADR-0007).
 • Runtime must reject incompatible tenants (426 Upgrade Required).
 • No silent auto-migrations.
 • No execution under mismatched schema.
 • Upgrade must be explicit.
+• Semantic versioning policy applies (ADR-0008).
 
 Architecture changes require ADR before spec modification.
 
 ---
 
-### Runtime Authoritative Time
+### Runtime Authoritative Time — ADR-0006
 
 All timed operations must rely on server time.
 
@@ -140,9 +149,16 @@ No grading logic inside API.
 • Domain logic must not depend on framework layer.
 • No service instantiates DB directly outside resolver.
 
+Import boundaries (from AGENTS.md):
+• `apps/*` → `packages/*` ✅
+• `packages/*` → `packages/*` ✅
+• `apps/*` → other `apps/*` ❌
+• `packages/*` → `apps/*` ❌
+• UI → DB schemas ❌
+
 ---
 
-### Security Baseline
+### Security Baseline — ADR-0009 (Rate Limiting)
 
 Mandatory:
 • JWT with workspace scope
@@ -168,7 +184,10 @@ Mandatory:
 • Every log entry must include request_id.
 • Workspace-bound logs must include workspace_slug.
 • Attempt-bound logs must include attempt_id.
-• Unified API error format required.
+• Unified API error format required:
+  ```json
+  { "success": boolean, "data": object | null, "error": { "code": string, "message": string } | null }
+  ```
 
 ---
 
@@ -186,7 +205,17 @@ AI must:
 • Refuse weakening logging or correlation requirements
 • Refuse architectural drift without ADR
 
-If a request violates constitution, AI must stop and ask for clarification.
+If a request violates this governance framework, AI must stop and ask for clarification.
+
+---
+
+### Trust Chain
+
+The Zidney platform trust chain must be respected in this order:
+
+**Isolation → License → Authentication → Attempt → Runtime → Frontoffice**
+
+Breaking this chain is a platform failure.
 
 ---
 
@@ -194,9 +223,10 @@ If a request violates constitution, AI must stop and ask for clarification.
 
 Architecture evolution requires:
 
-1. ADR creation
+1. ADR creation (in `docs/architecture/ADR/`)
 2. Spec update
 3. Constitution consistency check
+4. Architecture audit: `bun run ai:guard && bun run arch:audit`
 
 No direct silent architectural changes allowed.
 
@@ -220,15 +250,20 @@ No skipping layers.
 
 ## Enforcement Level
 
-This constitution is binding.
+This constitution is binding and enforced by the Zidney Architecture Governance pipeline.
 
 SpecKit must:
 • Validate compliance before planning
 • Block implementation if violating
 • Surface conflicts early
 
+Governance validation command:
+```bash
+bun run ai:guard && bun run arch:audit && bun run lint && bun run typecheck && bun run test
+```
+
 ---
 
-**Version**: 1.2.0
+**Version**: 2.0.0
 **Ratified**: 2026-02-15
-**Last Amended**: 2026-02-15
+**Last Amended**: 2026-03-31

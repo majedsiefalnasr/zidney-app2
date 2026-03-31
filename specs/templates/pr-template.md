@@ -33,7 +33,7 @@
 - What problem this PR solves
 - Which architectural boundary it touches
 - Why the change is safe
-- Which constitutional guarantees remain intact
+- Which architectural guarantees remain intact
 
 ---
 
@@ -53,19 +53,22 @@ Stage Directory: specs/runtime/<STAGE_DIR_NAME>/
 
 ---
 
-## 5. Constitutional Compliance Checklist
+## 5. Architecture Governance Checklist
 
-Confirm compliance with Zidney Constitution v1.2.0:
+Confirm compliance with Zidney Architecture Governance (AGENTS.md + ADRs):
 
 - [ ] ADR-0001 — Database-per-tenant isolation preserved
 - [ ] ADR-0002 — Snapshot immutability enforced (if applicable)
 - [ ] ADR-0006 — Server-authoritative time only
 - [ ] ADR-0007 — Version compatibility enforced
 - [ ] ADR-0008 — Semantic versioning respected
+- [ ] ADR-0009 — Rate limiting applied (if applicable)
 - [ ] No cross-tenant access introduced
 - [ ] No middleware bypass created
 - [ ] No shared mutable global state introduced
 - [ ] ARCHITECTURE_MAP.json rules preserved
+- [ ] Trust chain preserved: Isolation → License → Auth → Attempt → Runtime → Frontoffice
+- [ ] Import boundaries respected (apps→packages ✅, apps→apps ❌, packages→apps ❌, UI→DB ❌)
 
 ---
 
@@ -124,23 +127,17 @@ bun test
 
 ---
 
-## 11. Drift Analysis
+## 11. Drift Analysis & Architecture Guard
 
 - [ ] speckit.analyze executed
 - [ ] No architectural violations
 - [ ] No cross-phase leakage
 - [ ] No unauthorized stage modification
 - [ ] ANALYZE_REPORT.md confirms APPROVED
-- [ ] ai-guard.ts executed
-
----
-
-## 11A. Architecture Guard
-
 - [ ] `ai-guard.ts` passed
 - [ ] `infra-audit.ts` passed
 - [ ] No architecture drift detected
-- [ ] Architecture diagrams regenerated
+- [ ] Architecture diagrams regenerated (if applicable)
 
 Architecture diagrams: docs/architecture/ARCHITECTURE_DIAGRAMS.md
 
@@ -149,6 +146,7 @@ Commands:
 ```bash
 bun scripts/infra-audit.ts
 bun scripts/ai-guard.ts
+bun run ai:guard && bun run arch:audit && bun run lint && bun run typecheck && bun run test
 ```
 
 ---
@@ -185,7 +183,7 @@ Explain why:
 
 ## 15. Final Statement
 
-This PR maintains Zidney architectural integrity and complies with Hard Mode governance.
+This PR maintains Zidney architectural integrity and complies with Architecture Governance (AGENTS.md + ADRs).
 
 All workflow steps completed. All reports generated. Stage lifecycle updated.
 

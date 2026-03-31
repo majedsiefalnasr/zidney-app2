@@ -41,7 +41,7 @@
 
 ---
 
-## Constitutional Compliance (Final)
+## Architecture Governance Compliance (Final)
 
 | Rule / ADR                                     | Status  | Notes |
 | ---------------------------------------------- | ------- | ----- |
@@ -50,10 +50,14 @@
 | ADR-0006 Server-authoritative time             | ✅ / ❌ | ...   |
 | ADR-0007 Version compatibility enforcement     | ✅ / ❌ | ...   |
 | ADR-0008 Semantic versioning alignment         | ✅ / ❌ | ...   |
+| ADR-0009 Rate limiting (if applicable)         | ✅ / ❌ | ...   |
 | No middleware bypass                           | ✅ / ❌ | ...   |
 | All writes transactional                       | ✅ / ❌ | ...   |
 | Idempotency enforced where required            | ✅ / ❌ | ...   |
 | Structured logging present                     | ✅ / ❌ | ...   |
+| Trust chain respected                          | ✅ / ❌ | ...   |
+| Import boundaries respected                    | ✅ / ❌ | ...   |
+| Architecture guard passed                      | ✅ / ❌ | ...   |
 
 **Final Verdict:** COMPLIANT / BLOCKED
 

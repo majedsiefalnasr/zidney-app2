@@ -1,13 +1,17 @@
-Zidney Strict Implementation Gate
+Zidney Strict Implementation Gate (Architecture Governance Enforced)
 
 This template prevents unsafe execution.
 
-Before generating code:
+Before generating code, validate against Zidney Architecture Governance:
+
+- `AGENTS.md` — platform rules and import boundaries
+- `docs/architecture/ADR/` — binding architectural decisions (ADR-0001 through ADR-0009)
+- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` — architecture contract
 
 Confirm:
 
 - Analyze step passed
-- No constitutional violations
+- No governance violations
 - No unresolved ambiguities
 
 If not → STOP.
@@ -24,6 +28,33 @@ State clearly:
 - Files forbidden to change:
 
 No file outside stage scope may be modified.
+
+---
+
+## Trust Chain Enforcement
+
+All implementation must respect the Zidney trust chain order:
+
+**Isolation → License → Authentication → Attempt → Runtime → Frontoffice**
+
+- Isolation: Tenant resolver required for all tenant DB access (ADR-0001)
+- License: License validation middleware on all workspace routes
+- Authentication: JWT scope validated, RBAC enforced server-side
+- Attempt: Snapshot frozen at start, worker-only grading (ADR-0002)
+- Runtime: Server-authoritative time only (ADR-0006)
+- Frontoffice: API consumption only, no business logic
+
+---
+
+## Import Boundary Enforcement
+
+| Import Direction            | Allowed      |
+| --------------------------- | ------------ |
+| `apps/*` → `packages/*`     | ✅ Allowed   |
+| `packages/*` → `packages/*` | ✅ Allowed   |
+| `apps/*` → other `apps/*`   | ❌ Forbidden |
+| `packages/*` → `apps/*`     | ❌ Forbidden |
+| UI → DB schemas             | ❌ Forbidden |
 
 ---
 
@@ -74,6 +105,20 @@ Implementation must guarantee:
 
 ---
 
+## Error Contract
+
+All API responses must follow:
+
+```json
+{
+  "success": boolean,
+  "data": object | null,
+  "error": { "code": string, "message": string } | null
+}
+```
+
+---
+
 ## Code Generation Rules
 
 Code must:
@@ -82,9 +127,40 @@ Code must:
 - Follow lint rules
 - Use validation package
 - Use shared types package
-- Respect layering boundaries
+- Respect layering boundaries (import boundary table above)
 - Use shadcn-vue + Tailwind v4 in UI
 - Never duplicate logic across layers
+
+---
+
+## Architecture Guard Validation
+
+Before completing implementation, run governance validation:
+
+```bash
+bun run ai:guard && bun run arch:audit && bun run lint && bun run typecheck && bun run test
+```
+
+Individual checks:
+
+```bash
+bun scripts/infra-audit.ts    # Infrastructure audit
+bun scripts/ai-guard.ts        # AI governance guard
+bun run lint                   # Lint check
+bun run typecheck              # Type check
+bun run test                   # Run tests
+```
+
+All checks must pass before implementation is considered complete.
+
+---
+
+## Git Governance
+
+- Branch naming: `<stage-dir-name>` (matches stage directory)
+- Commits: Conventional commit format (`feat(scope):`, `fix(scope):`, `chore(scope):`)
+- No `--no-verify` bypass
+- No force pushes without explicit approval
 
 ---
 
@@ -98,9 +174,16 @@ Confirm (per this stage's tasks.md):
 - All writes transactional (per plan.md)
 - Idempotency tests included (per plan.md)
 - Version checks active (if applicable to stage)
-- Structured logs present
+- Structured logs present (Pino format)
 - No console.log
 - No TODO left
+- Import boundaries respected
+- Trust chain preserved
+- Error contract followed
+- Architecture guard passed (`bun scripts/infra-audit.ts && bun scripts/ai-guard.ts`)
+- Lint passed (`bun run lint`)
+- Type check passed (`bun run typecheck`)
+- Tests passed (`bun run test`)
 
 ---
 
@@ -108,6 +191,6 @@ Confirm (per this stage's tasks.md):
 
 Must end with:
 
-“Implementation compliant with Zidney Constitution v1.2.0 — Safety guarantees preserved.”
+"Implementation compliant with Zidney Architecture Governance (AGENTS.md + ADRs) — Safety guarantees preserved."
 
 If unable to comply → STOP and explain.

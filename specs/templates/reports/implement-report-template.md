@@ -46,18 +46,21 @@
 
 ---
 
-## Constitutional Compliance
+## Architecture Governance Compliance
 
-| Check                                             | Status  | Notes |
-| ------------------------------------------------- | ------- | ----- |
-| Tenant resolver context used for tenant DB access | ✅ / ❌ | ...   |
-| All write operations are transactional            | ✅ / ❌ | ...   |
-| Idempotency is enforced where required            | ✅ / ❌ | ...   |
-| Structured logging is present                     | ✅ / ❌ | ...   |
-| `console.log` is absent                           | ✅ / ❌ | ...   |
-| No stack traces exposed to clients                | ✅ / ❌ | ...   |
-| UI layer has no business logic                    | ✅ / ❌ | ...   |
-| API error contract is preserved                   | ✅ / ❌ | ...   |
+| Check                                                        | Status  | Notes |
+| ------------------------------------------------------------ | ------- | ----- |
+| Tenant resolver context used for tenant DB access (ADR-0001) | ✅ / ❌ | ...   |
+| All write operations are transactional                       | ✅ / ❌ | ...   |
+| Idempotency is enforced where required                       | ✅ / ❌ | ...   |
+| Structured logging is present                                | ✅ / ❌ | ...   |
+| `console.log` is absent                                      | ✅ / ❌ | ...   |
+| No stack traces exposed to clients                           | ✅ / ❌ | ...   |
+| UI layer has no business logic                               | ✅ / ❌ | ...   |
+| API error contract is preserved                              | ✅ / ❌ | ...   |
+| Trust chain respected                                        | ✅ / ❌ | ...   |
+| Import boundaries respected                                  | ✅ / ❌ | ...   |
+| Architecture guard passed                                    | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

@@ -1,6 +1,12 @@
 Zidney Strict Analyze Template (Architecture Drift Detector)
 
-Before approving tasks for implementation, perform a full constitutional compliance audit.
+Before approving tasks for implementation, perform a full Architecture Governance compliance audit.
+
+Validate against:
+
+- `AGENTS.md` — platform rules and import boundaries
+- `docs/architecture/ADR/` — binding architectural decisions (ADR-0001 through ADR-0009)
+- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` — architecture contract
 
 If violations are detected → STOP and describe conflicts clearly.
 
@@ -15,7 +21,7 @@ feature creep
 
 ---
 
-## Isolation Audit
+## Isolation Audit — ADR-0001
 
 Check: • No cross-tenant joins • No shared student tables • No direct DB instantiation • No service
 bypassing tenant resolver • License middleware present on all workspace APIs
@@ -53,7 +59,7 @@ If missing → BLOCK.
 
 ---
 
-## Snapshot Integrity Audit
+## Snapshot Integrity Audit — ADR-0002
 
 If feature involves snapshot-based operations:
 
@@ -64,10 +70,10 @@ If violated → BLOCK.
 
 ---
 
-## Versioning & Migration Audit
+## Versioning & Migration Audit — ADR-0007, ADR-0008
 
-Verify: • Migration file defined • schema_version bump defined • Product version compatibility
-defined • Incompatible requests return 426
+Verify: • Migration file defined (forward-only, never modify existing) • schema_version bump defined • Product version compatibility
+defined (ADR-0007) • Semantic versioning alignment (ADR-0008) • Incompatible requests return 426
 
 ---
 
@@ -86,6 +92,53 @@ package • No frontend business logic
 
 ---
 
+## Trust Chain Audit
+
+Verify the implementation respects the Zidney trust chain order:
+
+**Isolation → License → Authentication → Attempt → Runtime → Frontoffice**
+
+• Isolation: Tenant boundary preserved (database-per-tenant)
+• License: Validation middleware enforced before workspace access
+• Authentication: JWT scope validated, RBAC enforced server-side
+• Attempt: Snapshot integrity preserved (if applicable)
+• Runtime: Server-authoritative time only (ADR-0006)
+• Frontoffice: No business logic, API consumption only
+
+---
+
+## Import Boundary Audit
+
+Verify no import boundary violations:
+
+| Import Direction            | Allowed      |
+| --------------------------- | ------------ |
+| `apps/*` → `packages/*`     | ✅ Allowed   |
+| `packages/*` → `packages/*` | ✅ Allowed   |
+| `apps/*` → other `apps/*`   | ❌ Forbidden |
+| `packages/*` → `apps/*`     | ❌ Forbidden |
+| UI → DB schemas             | ❌ Forbidden |
+
+If any cross-app imports found → BLOCK.
+
+---
+
+## Architecture Guard Evidence
+
+Run and document governance validation results:
+
+```bash
+bun scripts/infra-audit.ts    # Infrastructure audit
+bun scripts/ai-guard.ts        # AI governance guard
+bun run lint                   # Lint check
+bun run typecheck              # Type check
+bun run test                   # Run tests
+```
+
+All checks must pass for APPROVED verdict.
+
+---
+
 ## Architectural Drift Summary
 
 Output must contain: • Violations detected (if any) • Risk level: LOW / MEDIUM / HIGH / CRITICAL •
@@ -97,8 +150,8 @@ Approval status: APPROVED / BLOCKED
 
 Must conclude with:
 
-“Architecture compliant with Zidney Constitution v1.2.0”
+"Architecture compliant with Zidney Architecture Governance (AGENTS.md + ADRs)"
 
 OR
 
-“Implementation blocked due to constitutional violations”
+"Implementation blocked due to governance violations"

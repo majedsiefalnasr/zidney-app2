@@ -9,10 +9,10 @@ Tasks: {{TASKS_COMPLETED}}/{{TASKS_TOTAL}} completed Risk: {{RISK_LEVEL}}
 
 ─── Deferred ────────────────────────────────────────────── {{DEFERRED_SCOPE_SUMMARY}}
 
-─── Constitutional Compliance ───────────────────────────── ✅ ADR-0001 Database-per-tenant
+─── Architecture Governance Compliance ─────────────────── ✅ ADR-0001 Database-per-tenant
 isolation ✅ ADR-0002 Snapshot immutability (if applicable) ✅ ADR-0006 Server-authoritative time ✅
-ADR-0007 Version compatibility ✅ ADR-0008 Semantic versioning ✅ Drift analysis: PASSED (all
-criteria) ✅ All writes transactional ✅ Idempotency enforced ✅ Structured logging present
+ADR-0007 Version compatibility ✅ ADR-0008 Semantic versioning ✅ Trust chain: Isolation → License → Auth → Attempt → Runtime → Frontoffice ✅ Import boundaries respected ✅ Drift analysis: PASSED (all
+criteria) ✅ All writes transactional ✅ Idempotency enforced ✅ Structured logging present ✅ Architecture guard passed (ai-guard + infra-audit)
 
 ─── Artifacts ───────────────────────────────────────────── specs/runtime/{{STAGE_DIR_NAME}}/
 reports/SPECIFY_REPORT.md reports/CLARIFY_REPORT.md reports/PLAN_REPORT.md reports/TASKS_REPORT.md

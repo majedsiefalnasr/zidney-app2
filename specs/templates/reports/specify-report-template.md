@@ -41,16 +41,18 @@
 
 ---
 
-## Constitutional Compliance
+## Architecture Governance Compliance
 
-| Check                                   | Status  | Notes |
-| --------------------------------------- | ------- | ----- |
-| No cross-tenant access introduced       | ✅ / ❌ | ...   |
-| License middleware requirement captured | ✅ / ❌ | ...   |
-| Snapshot integrity requirement captured | ✅ / ❌ | ...   |
-| Idempotency strategy defined            | ✅ / ❌ | ...   |
-| Transaction boundaries identified       | ✅ / ❌ | ...   |
-| Server-authoritative time enforced      | ✅ / ❌ | ...   |
+| Check                                              | Status  | Notes |
+| -------------------------------------------------- | ------- | ----- |
+| No cross-tenant access introduced (ADR-0001)       | ✅ / ❌ | ...   |
+| License middleware requirement captured            | ✅ / ❌ | ...   |
+| Snapshot integrity requirement captured (ADR-0002) | ✅ / ❌ | ...   |
+| Idempotency strategy defined                       | ✅ / ❌ | ...   |
+| Transaction boundaries identified                  | ✅ / ❌ | ...   |
+| Server-authoritative time enforced (ADR-0006)      | ✅ / ❌ | ...   |
+| Trust chain respected                              | ✅ / ❌ | ...   |
+| Import boundaries respected                        | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

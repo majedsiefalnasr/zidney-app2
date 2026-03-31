@@ -1,8 +1,14 @@
-Zidney Strict Tasks Template (Execution Discipline)
+Zidney Strict Tasks Template (Architecture Governance Enforced)
 
-Before generating tasks, validate:
+Before generating tasks, validate against Zidney Architecture Governance:
 
-- Plan complied with Zidney Constitution v1.2.0
+- `AGENTS.md` — platform rules and import boundaries
+- `docs/architecture/ADR/` — binding architectural decisions (ADR-0001 through ADR-0009)
+- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` — architecture contract
+
+Confirm:
+
+- Plan complied with Zidney Architecture Governance
 - No architectural violations exist
 - Stage scope is respected
 
@@ -21,6 +27,44 @@ Specify:
 - Related ADR (if any):
 
 Tasks must not extend beyond this stage.
+
+---
+
+## Trust Chain Verification
+
+All tasks must respect the Zidney trust chain order:
+
+**Isolation → License → Authentication → Attempt → Runtime → Frontoffice**
+
+Tasks that break this chain are forbidden.
+
+---
+
+## Import Boundary Compliance
+
+Tasks must not introduce import boundary violations:
+
+| Import Direction            | Allowed      |
+| --------------------------- | ------------ |
+| `apps/*` → `packages/*`     | ✅ Allowed   |
+| `packages/*` → `packages/*` | ✅ Allowed   |
+| `apps/*` → other `apps/*`   | ❌ Forbidden |
+| `packages/*` → `apps/*`     | ❌ Forbidden |
+| UI → DB schemas             | ❌ Forbidden |
+
+---
+
+## Task Dependency Ordering (DAG)
+
+Tasks must be ordered by dependency. No task may start before its dependencies are complete.
+
+Format:
+
+```
+Task-N [depends on: Task-X, Task-Y]
+```
+
+Infrastructure tasks → API tasks → Worker tasks → Frontend tasks → Observability tasks → Testing tasks
 
 ---
 
@@ -135,9 +179,10 @@ If DB touched:
 
 Tasks must include:
 
-- Migration file creation
+- Migration file creation (forward-only, never modify existing migrations)
 - schema_version bump
-- product_version compatibility check
+- product_version compatibility check (ADR-0007)
+- Semantic versioning alignment (ADR-0008)
 - 426 response handling
 
 ---
@@ -177,6 +222,16 @@ Tasks must include:
 
 ---
 
+## Architecture Guard Tasks
+
+Every task set must include a governance validation task:
+
+- [ ] Run `bun run ai:guard && bun run arch:audit && bun run lint && bun run typecheck && bun run test`
+- [ ] Verify no architecture drift with `bun scripts/infra-audit.ts`
+- [ ] Verify AI governance with `bun scripts/ai-guard.ts`
+
+---
+
 ## Non-Goals Confirmation
 
 Tasks must not:
@@ -196,12 +251,14 @@ Before finishing tasks, verify:
 
 - All write paths transactional (per plan.md)
 - All operations marked idempotent in plan.md tested
-- Isolation preserved (per spec.md)
-- Version enforcement active (if stage touches DB)
+- Isolation preserved (per spec.md) — ADR-0001
+- Version enforcement active (if stage touches DB) — ADR-0007, ADR-0008
 - Logging structured
 - No business logic in restricted layers (per spec.md)
 - No direct DB instantiation (tenant resolver only)
-- Layer boundaries respected
+- Layer boundaries respected (import boundary table above)
+- Trust chain preserved
+- Architecture guard passed
 
 ---
 
@@ -209,6 +266,6 @@ Before finishing tasks, verify:
 
 Tasks must end with:
 
-“Task set compliant with Zidney Constitution v1.2.0 — No violations detected.”
+"Task set compliant with Zidney Architecture Governance (AGENTS.md + ADRs) — No violations detected."
 
 If violation exists: Tasks must stop and describe issue.

@@ -8,33 +8,83 @@
 
 <!--
   ============================================================================
-  IMPORTANT: The checklist items below are SAMPLE ITEMS for illustration only.
+  IMPORTANT: The checklist items below are ZIDNEY-SPECIFIC DEFAULT CATEGORIES.
 
-  The /speckit.checklist command MUST replace these with actual items based on:
+  The /speckit.checklist command MUST populate each category with actual items
+  based on:
   - User's specific checklist request
   - Feature requirements from spec.md
   - Technical context from plan.md
   - Implementation details from tasks.md
+  - Zidney Architecture Governance (AGENTS.md + ADRs)
 
-  DO NOT keep these sample items in the generated checklist file.
+  Keep the category structure. Replace sample items with feature-specific ones.
   ============================================================================
 -->
 
-## [Category 1]
+## Tenant Isolation (ADR-0001)
 
-- [ ] CHK001 First checklist item with clear action
-- [ ] CHK002 Second checklist item
-- [ ] CHK003 Third checklist item
+- [ ] CHK001 Database-per-tenant isolation preserved
+- [ ] CHK002 Tenant resolver used for all tenant DB access
+- [ ] CHK003 No cross-tenant joins or shared tenant tables
+- [ ] CHK004 No direct DB instantiation outside resolver
+- [ ] CHK005 Connection pool per tenant maintained
 
-## [Category 2]
+## License & Version Enforcement (ADR-0007, ADR-0008)
 
-- [ ] CHK004 Another category item
-- [ ] CHK005 Item with specific criteria
-- [ ] CHK006 Final item in this category
+- [ ] CHK006 License validation middleware on all workspace routes
+- [ ] CHK007 schema_version validated at request boundary
+- [ ] CHK008 product_version compatibility enforced
+- [ ] CHK009 426 Upgrade Required on mismatch
+- [ ] CHK010 Semantic versioning policy followed
+
+## Trust Chain
+
+- [ ] CHK011 Trust chain order preserved: Isolation → License → Auth → Attempt → Runtime → Frontoffice
+- [ ] CHK012 No trust chain bypass or reordering
+
+## Transaction & Idempotency Safety
+
+- [ ] CHK013 All write operations wrapped in transactions
+- [ ] CHK014 Idempotency enforced on critical endpoints
+- [ ] CHK015 Concurrency guards in place (if applicable)
+- [ ] CHK016 Rollback behavior defined and tested
+
+## Import Boundaries & Layering
+
+- [ ] CHK017 apps→packages only (no apps→apps, no packages→apps)
+- [ ] CHK018 No UI→DB schema imports
+- [ ] CHK019 No business logic in frontend layer
+- [ ] CHK020 Domain packages are framework-independent
+
+## Observability & Error Contract
+
+- [ ] CHK021 Structured logging (Pino format, no console.log)
+- [ ] CHK022 Correlation ID (request_id) propagated
+- [ ] CHK023 workspace_slug in tenant-bound logs
+- [ ] CHK024 Error contract: `{ success, data, error: { code, message } }`
+- [ ] CHK025 No stack traces exposed to clients
+
+## Security (ADR-0009)
+
+- [ ] CHK026 RBAC enforced server-side only
+- [ ] CHK027 JWT workspace scope validated
+- [ ] CHK028 Input validated via shared validation package
+- [ ] CHK029 No hardcoded secrets or env vars in UI
+- [ ] CHK030 Rate limiting applied (if applicable)
+
+## Architecture Guard
+
+- [ ] CHK031 `bun scripts/infra-audit.ts` passed
+- [ ] CHK032 `bun scripts/ai-guard.ts` passed
+- [ ] CHK033 `bun run lint` passed
+- [ ] CHK034 `bun run typecheck` passed
+- [ ] CHK035 `bun run test` passed
 
 ## Notes
 
 - Check items off as completed: `[x]`
 - Add comments or findings inline
-- Link to relevant resources or documentation
+- Link to relevant ADRs or governance docs
 - Items are numbered sequentially for easy reference
+- Add feature-specific items to each category as needed

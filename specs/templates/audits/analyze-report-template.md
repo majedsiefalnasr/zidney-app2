@@ -82,7 +82,7 @@ Use `None` when no violations are present.
 
 `PASS — Implementation authorized.`  
 OR  
-`BLOCKED — Constitutional or safety violations detected. Remediation required.`
+`BLOCKED — Architecture governance or safety violations detected. Remediation required.`
 
 ---
 

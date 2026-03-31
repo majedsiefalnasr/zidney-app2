@@ -38,15 +38,17 @@
 
 ---
 
-## Constitutional Compliance
+## Architecture Governance Compliance
 
-| Check                                     | Status  | Notes |
-| ----------------------------------------- | ------- | ----- |
-| All material ambiguities resolved         | ✅ / ❌ | ...   |
-| Transaction strategy confirmed            | ✅ / ❌ | ...   |
-| Idempotency strategy confirmed            | ✅ / ❌ | ...   |
-| Isolation boundaries confirmed            | ✅ / ❌ | ...   |
-| Version and license constraints confirmed | ✅ / ❌ | ...   |
+| Check                                                          | Status  | Notes |
+| -------------------------------------------------------------- | ------- | ----- |
+| All material ambiguities resolved                              | ✅ / ❌ | ...   |
+| Transaction strategy confirmed                                 | ✅ / ❌ | ...   |
+| Idempotency strategy confirmed                                 | ✅ / ❌ | ...   |
+| Isolation boundaries confirmed (ADR-0001)                      | ✅ / ❌ | ...   |
+| Version and license constraints confirmed (ADR-0007, ADR-0008) | ✅ / ❌ | ...   |
+| Trust chain respected                                          | ✅ / ❌ | ...   |
+| Import boundaries respected                                    | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

@@ -1,6 +1,10 @@
-Zidney Strict Spec Template (Constitution Enforced)
+Zidney Strict Spec Template (Architecture Governance Enforced)
 
-Before generating any output, the AI must validate against Zidney Constitution v1.2.0.
+Before generating any output, the AI must validate against Zidney Architecture Governance:
+
+- `AGENTS.md` — platform rules and import boundaries
+- `docs/architecture/ADR/` — binding architectural decisions (ADR-0001 through ADR-0009)
+- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` — architecture contract
 
 If any violation is detected, STOP and explain conflict.
 
@@ -25,19 +29,49 @@ Must reference existing Stage file.
 
 ---
 
-## Constitutional Compliance Declaration
+## Architecture Governance Declaration
 
 Explicitly confirm:
 
-- No cross-tenant access
+- No cross-tenant access (ADR-0001)
 - No middleware bypass
 - No grading outside worker
-- No direct DB instantiation
-- No weakening of snapshot integrity
+- No direct DB instantiation (tenant resolver only)
+- No weakening of snapshot integrity (ADR-0002)
 - No weakening of transaction boundaries
-- No weakening of version enforcement
+- No weakening of version enforcement (ADR-0007, ADR-0008)
+- No client-authoritative time (ADR-0006)
 
 If any exception is required → ADR mandatory.
+
+---
+
+## Trust Chain Verification
+
+Confirm the feature respects the Zidney trust chain order:
+
+**Isolation → License → Authentication → Attempt → Runtime → Frontoffice**
+
+- [ ] Tenant isolation is the first gate (slug-based, database-per-tenant)
+- [ ] License validation occurs before any workspace operation
+- [ ] Authentication is checked after tenant resolution
+- [ ] Attempt engine (if applicable) operates on frozen snapshots
+- [ ] Runtime enforces server-authoritative time
+- [ ] Frontoffice receives only presentation data — no business logic
+
+Breaking this chain is a platform failure.
+
+---
+
+## Import Boundary Compliance
+
+Confirm the feature respects import boundaries:
+
+- `apps/*` → `packages/*` ✅
+- `packages/*` → `packages/*` ✅
+- `apps/*` → other `apps/*` ❌ FORBIDDEN
+- `packages/*` → `apps/*` ❌ FORBIDDEN
+- UI → DB schemas ❌ FORBIDDEN
 
 ---
 
@@ -200,6 +234,16 @@ If runtime feature:
 
 ---
 
+## Error Contract
+
+All API responses must follow:
+
+```json
+{ "success": boolean, "data": object | null, "error": { "code": "ERROR_CODE", "message": "Human-readable message" } | null }
+```
+
+---
+
 ## Explicit Non-Goals
 
 List what this feature does NOT change.
@@ -208,10 +252,10 @@ Prevents scope creep.
 
 ---
 
-## Final Constitutional Compliance Statement
+## Final Architecture Governance Statement
 
 The AI must end with:
 
-“Compliant with Zidney Constitution v1.2.0 — No violations detected.”
+"Compliant with Zidney Architecture Governance (AGENTS.md + ADRs) — No violations detected."
 
 If not compliant: AI must stop and describe violation.

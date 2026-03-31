@@ -1,8 +1,12 @@
-Zidney Strict Clarify Template (Constitution Enforced)
+Zidney Strict Clarify Template (Architecture Governance Enforced)
 
-Before proceeding to Plan, the AI must validate against Zidney Constitution v1.2.0.
+Before proceeding to Plan, the AI must validate against Zidney Architecture Governance:
 
-If any ambiguity introduces constitutional risk, STOP and explain conflict.
+- `AGENTS.md` — platform rules and import boundaries
+- `docs/architecture/ADR/` — binding architectural decisions (ADR-0001 through ADR-0009)
+- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` — architecture contract
+
+If any ambiguity introduces governance risk, STOP and explain conflict.
 
 ---
 
@@ -26,17 +30,49 @@ Must reference existing Stage file.
 
 ---
 
-## Constitutional Compliance Pre‑Check
+## Trust Chain Verification
+
+Confirm the clarification respects the Zidney trust chain order:
+
+**Isolation → License → Authentication → Attempt → Runtime → Frontoffice**
+
+- [ ] Isolation: Tenant boundary preserved (database-per-tenant, no cross-tenant access)
+- [ ] License: License validation middleware enforced before workspace access
+- [ ] Authentication: JWT scope validated, RBAC enforced server-side
+- [ ] Attempt: Snapshot integrity preserved (if applicable)
+- [ ] Runtime: Server-authoritative time, worker-only grading
+- [ ] Frontoffice: No business logic, API consumption only
+
+Breaking this chain is a platform failure.
+
+---
+
+## Import Boundary Compliance
+
+Confirm clarification does not violate import boundaries:
+
+| Import Direction            | Allowed      |
+| --------------------------- | ------------ |
+| `apps/*` → `packages/*`     | ✅ Allowed   |
+| `packages/*` → `packages/*` | ✅ Allowed   |
+| `apps/*` → other `apps/*`   | ❌ Forbidden |
+| `packages/*` → `apps/*`     | ❌ Forbidden |
+| UI → DB schemas             | ❌ Forbidden |
+
+---
+
+## Architecture Governance Pre‑Check
 
 Explicitly confirm that proposed clarification decisions:
 
-- Do not introduce cross-tenant access
+- Do not introduce cross-tenant access (ADR-0001)
 - Do not weaken middleware enforcement
 - Do not bypass worker grading rules
-- Do not introduce direct DB instantiation
-- Do not weaken snapshot integrity
+- Do not introduce direct DB instantiation (tenant resolver only)
+- Do not weaken snapshot integrity (ADR-0002)
 - Do not weaken transaction guarantees
-- Do not weaken version enforcement
+- Do not weaken version enforcement (ADR-0007, ADR-0008)
+- Do not use client-authoritative time (ADR-0006)
 
 If any clarification conflicts → ADR mandatory.
 
@@ -160,7 +196,21 @@ Mandatory for retry-safe operations.
 
 ---
 
-## Observability & Error Contract Clarification
+## Error Contract Compliance
+
+All API responses must follow the standard error contract:
+
+```json
+{
+  "success": boolean,
+  "data": object | null,
+  "error": { "code": string, "message": string } | null
+}
+```
+
+---
+
+## Observability & Logging Clarification
 
 Clarify:
 
@@ -171,7 +221,7 @@ Clarify:
 - workspace_slug inclusion
 - Metrics or alerts affected
 
-Must maintain RFC-compliant error contract.
+Must maintain error contract compliance.
 
 ---
 
@@ -232,7 +282,7 @@ Prevents scope drift.
 ## Clarify Gate Outcome
 
 - [ ] All ambiguities resolved
-- [ ] No constitutional violations
+- [ ] No governance violations
 - [ ] API contracts stabilized
 - [ ] Safe to proceed to Plan step
 
@@ -240,10 +290,10 @@ If ANY checkbox is false → Plan step blocked.
 
 ---
 
-## Final Constitutional Compliance Statement
+## Final Architecture Governance Statement
 
 The AI must end with:
 
-“Compliant with Zidney Constitution v1.2.0 — Clarify gate passed.”
+"Compliant with Zidney Architecture Governance (AGENTS.md + ADRs) — Clarify gate passed."
 
 If not compliant: AI must stop and describe violation.
