@@ -38,6 +38,19 @@ agents:
     'QA Engineer',
     'Security Auditor',
     'Technical Writer',
+    'Context7-Expert',
+    'Debug Mode Instructions',
+    'Accessibility Expert',
+    'Expert Vue.js Frontend Engineer',
+    'Terraform Agent',
+    'GitHub Actions Expert',
+    'critic',
+    'code-simplifier',
+    'researcher',
+    'debugger',
+    'implementer',
+    'planner',
+    'ADR Generator',
   ]
 version: 2.0.0
 ---
@@ -957,6 +970,88 @@ age_hours=$(( (now - file_mtime) / 3600 ))
 
 ---
 
+# Quick Mode — Keyword Routing
+
+Before entering the standard SpecKit workflow, the orchestrator checks the user's first message for **magic keywords** that route to specialized agents or trigger session flow shortcuts, bypassing the intake form.
+
+## Session Flow Keywords
+
+| Keyword(s) | Action |
+|-------------|--------|
+| `continue`, `resume` | Resume the most recent interrupted stage (same as selecting "Resume" in session mode) |
+| `dry-run`, `dryrun` | Enter dry-run validation mode — no file writes, no commits |
+| `discuss`, `chat` | Enter Discuss Mode — open conversation without structured workflow |
+| `status` | Show active/interrupted stages from `specs/runtime/` and their current step |
+| `autopilot` | Auto-advance through all SpecKit steps without pause (except Pre-Closure Review Gate) |
+
+## Agent Route Keywords
+
+### Core Workflow Agents
+
+| Keyword(s) | Target Agent | Purpose |
+|-------------|--------------|---------|
+| `critique` | `critic` | Challenge assumptions, find edge cases, spot over-engineering |
+| `debug`, `diagnose` | `debugger` | Root-cause analysis, stack trace diagnosis, regression bisection |
+| `simplify`, `cleanup` | `code-simplifier` | Remove dead code, reduce complexity, consolidate duplicates |
+| `review` | `Code Reviewer` | Production-grade code review and refactoring |
+| `research`, `explore` | `researcher` | Codebase exploration, pattern discovery, dependency mapping |
+| `plan` | `planner` | DAG-based execution plans with task decomposition |
+| `implement`, `build` | `implementer` | TDD implementation, feature building, bug fixes |
+
+### Domain Specialist Agents
+
+| Keyword(s) | Target Agent | Purpose |
+|-------------|--------------|---------|
+| `api` | `API Designer` | API design, endpoint patterns, versioning |
+| `db`, `database` | `Database Engineer` | Migration governance, query performance, schema optimization |
+| `arch`, `architecture` | `Architecture Guardian` | DDD boundaries, ADR enforcement, C4 modeling |
+| `secure`, `security` | `Security Auditor` | OWASP, STRIDE, tenant isolation audit |
+| `optimize`, `perf` | `Performance Optimizer` | Indexing, concurrency, SLO compliance |
+| `test`, `qa` | `QA Engineer` | Test strategy, coverage, tenant isolation tests |
+| `devops`, `deploy` | `DevOps Engineer` | CI/CD, container hardening, zero-downtime deploys |
+
+### Frontend & Tooling Agents
+
+| Keyword(s) | Target Agent | Purpose |
+|-------------|--------------|---------|
+| `vue`, `frontend` | `Expert Vue.js Frontend Engineer` | Vue 3 Composition API, reactivity, state management |
+| `accessibility`, `a11y` | `Accessibility Expert` | WCAG 2.1/2.2 audit, inclusive UX |
+| `docs`, `document` | `Technical Writer` | API docs, READMEs, migration guides, ADR writing |
+| `adr` | `ADR Generator` | Architectural Decision Records |
+| `terraform`, `iac` | `Terraform Agent` | Infrastructure as Code, HCP Terraform workflows |
+| `ci`, `actions` | `GitHub Actions Expert` | CI/CD workflows, action pinning, OIDC auth |
+| `scripts` | `Script UX + AI Optimizer` | Repository script standardization, --ai flag |
+| `context7`, `library` | `Context7-Expert` | Up-to-date library docs, latest API patterns |
+
+## Composite Multi-Agent Sequences
+
+These keywords trigger a **sequential multi-agent pipeline**. Each agent passes its output to the next.
+
+| Keyword | Pipeline | Purpose |
+|---------|----------|---------|
+| `polish` | `code-simplifier` → `Technical Writer` → `Code Reviewer` | Clean up code, update docs, final review |
+| `harden` | `Security Auditor` → `Performance Optimizer` → `QA Engineer` | Security audit, performance pass, test coverage |
+| `full-review` | `critic` → `Architecture Guardian` → `Code Reviewer` → `Security Auditor` | Comprehensive multi-perspective review |
+
+**Sequence execution rules:**
+- Each agent in the pipeline receives the original user request PLUS the previous agent's output as context.
+- If any agent in the sequence reports a **critical** issue (severity > 0.8), pause and surface the issue before continuing.
+- The user can interrupt a sequence at any point by typing `stop` or `skip`.
+
+## Detection Rules
+
+- Check the **first word** (or first two hyphenated/compound words) of the user's message, **case-insensitive**.
+- Aliases map to the same action: `resume` = `continue`, `diagnose` = `debug`, `cleanup` = `simplify`, `a11y` = `accessibility`, `dryrun` = `dry-run`, `chat` = `discuss`, `perf` = `optimize`, `build` = `implement`.
+- If the keyword matches a **Session Flow** entry → execute the flow action directly.
+- If the keyword matches an **Agent Route** entry → hand off to the target agent immediately. Do NOT present the intake form.
+- If the keyword matches a **Composite Sequence** entry → execute the pipeline sequentially.
+- The routed agent operates independently. When it completes, the session ends — it does NOT return to SpecKit flow.
+- If `autopilot` is detected → proceed with normal SpecKit intake but set `auto_advance: true` in `.workflow-state.json`.
+- If `status` is detected → scan `specs/runtime/` for `.workflow-state.json` files, display stage name, current step, and last activity timestamp. Then prompt for action.
+- If no keyword matches → continue to Session Mode Detection below.
+
+---
+
 # Session Mode Detection
 
 Note:
@@ -993,7 +1088,28 @@ options:
     value: "resume"
   - label: "🔍 Dry-run — validate only, no writes"
     value: "dry_run"
+  - label: "💬 Discuss — open conversation, no structured workflow"
+    value: "discuss"
 ```
+
+## Discuss Mode
+
+If the user selects `discuss`:
+
+Discuss mode is an **open-ended conversation** without structured SpecKit workflow. Use it for:
+- Exploratory architecture discussions
+- Brainstorming feature approaches before committing to a stage
+- Asking questions about the codebase, governance, or platform design
+- Reviewing existing specs or ADRs informally
+
+**Discuss mode rules:**
+- No `.workflow-state.json` is created.
+- No git branches are created.
+- No artifacts are written to `specs/runtime/`.
+- The orchestrator still loads governance context and architecture intelligence for informed answers.
+- MCP tools (GitNexus, Context7, GitHub) remain available for research.
+- The user can transition to SpecKit workflow at any time by saying "start" or "new stage" — this triggers the normal intake form.
+- If the conversation reveals that an ADR is needed, suggest creating one but do NOT auto-create without explicit approval.
 
 ## Dry-Run Mode
 

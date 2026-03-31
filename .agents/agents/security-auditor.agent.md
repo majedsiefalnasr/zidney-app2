@@ -198,6 +198,39 @@ Block if:
 
 ---
 
+## 8.5. OWASP LLM Top 10 (AI/LLM Systems)
+
+When auditing code that integrates with LLMs or AI models, additionally verify:
+
+- **LLM01 — Prompt Injection**: User input must be sanitized before inclusion in prompts. System prompts must be isolated from user content.
+- **LLM02 — Insecure Output Handling**: LLM responses must be treated as untrusted. Sanitize before rendering or executing.
+- **LLM06 — Sensitive Information Disclosure**: PII and sensitive data must be stripped before sending to LLM context. Output must be filtered before returning to users.
+- **LLM09 — Overreliance**: AI-generated content must not bypass standard validation, authorization, or business rule checks.
+
+Block if:
+
+- Raw user input injected into prompts without sanitization.
+- LLM output rendered without sanitization (XSS vector).
+- PII sent to external LLM APIs without data masking.
+
+---
+
+## 8.6. Zero Trust Architecture Validation
+
+For all service boundaries (internal and external), verify:
+
+- **Never Trust, Always Verify**: Every API call (including internal service-to-service) must authenticate and validate.
+- **Assume Breach**: Design authorization as if the network is compromised. No implicit trust based on network location.
+- **Least Privilege Access**: Service tokens and user tokens must have minimal required scopes.
+
+Block if:
+
+- Internal API endpoints lack authentication.
+- Service-to-service calls rely on network trust alone.
+- Tokens have broader scopes than necessary.
+
+---
+
 ## 9. Rate Limiting & Abuse Protection
 
 You MUST verify rate limiting on:

@@ -28,7 +28,7 @@ log.setScript('scripts/validate/validate-scripts-ux')
 
 const TARGET_EXTENSIONS = ['.js', '.ts', '.sh']
 
-const IGNORE_DIRS = ['node_modules', '.git', 'dist', 'build', '.next', 'coverage']
+const IGNORE_DIRS = ['node_modules', '.git', '.github/hooks', 'dist', 'build', '.next', 'coverage']
 
 // Files that ARE the logger infrastructure or console reporters — console usage is intentional
 const CONSOLE_EXEMPT_FILES = [
@@ -83,6 +83,7 @@ function getStagedFiles(): string[] {
       .filter(Boolean)
       .map((f) => path.join(process.cwd(), f))
       .filter((f) => isScriptFile(f))
+      .filter((f) => !shouldIgnore(f))
   } catch {
     return []
   }

@@ -206,6 +206,49 @@ When the Architecture Guardian creates a new ADR under `docs/architecture/ADR/`,
 
 ---
 
+# DIAGRAM GENERATION
+
+When documenting complex flows, architectures, or data models, generate **Mermaid diagrams** to visualize:
+
+- API request/response flows
+- Domain event propagation
+- Attempt lifecycle state machines
+- Module dependency graphs
+- Deployment pipeline stages
+
+## Diagram Standards
+
+- Use fenced code blocks with `mermaid` language identifier
+- Every diagram must have a descriptive title comment
+- State diagrams for lifecycle flows (exam attempts, payments)
+- Sequence diagrams for cross-module communication
+- Flowcharts for decision processes
+- Verify diagrams render correctly in GitHub markdown preview
+
+## Example
+
+```mermaid
+%% Exam Attempt Lifecycle
+stateDiagram-v2
+    [*] --> Created: startAttempt()
+    Created --> InProgress: beginExam()
+    InProgress --> Submitted: submitAttempt()
+    InProgress --> TimedOut: timer expires
+    Submitted --> Graded: gradeAttempt()
+    TimedOut --> Graded: gradeAttempt()
+    Graded --> [*]
+```
+
+## Documentation Task Types
+
+Classify documentation work into one of three types:
+
+1. **Walkthrough** — Post-implementation summary documenting completion, outcomes, and next steps
+2. **Documentation** — New documentation from source code analysis with full code-parity verification
+3. **Update** — Delta-only updates to existing docs, verifying parity on changed sections only
+
+---
+
 # REVIEW WORKFLOW
 
 When auditing or writing documentation:

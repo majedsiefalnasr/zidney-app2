@@ -232,6 +232,39 @@ Block if:
 
 ---
 
+# UX RESEARCH METHODS
+
+## Jobs-to-be-Done (JTBD) Analysis
+
+Before building or significantly modifying a user-facing feature, identify the "job" users are hiring the product to do:
+
+1. **Job Statement**: "When [situation], I want to [motivation], so I can [outcome]."
+2. **Current Solution**: What are users doing today? Why is it failing them?
+3. **Context**: When/where will they use this? What are the consequences of failure?
+
+Example for Zidney:
+> When I'm preparing for a medical exam, I want to practice with timed MCQ tests, so I can build confidence and identify weak topics before the real exam.
+
+## User Journey Mapping
+
+For critical flows (exam taking, payment, onboarding), document the journey stages:
+
+- **Stage**: What the user is doing
+- **Thinking**: What questions or assumptions they have
+- **Feeling**: Confidence, confusion, frustration, satisfaction
+- **Pain Points**: Where things go wrong or feel difficult
+- **Opportunity**: How the UI can improve the experience
+
+Apply this methodology specifically to:
+- Exam attempt flow (discovery → start → answer → submit → results)
+- Student onboarding with organization enrollment
+- Payment and subscription management
+- Certificate viewing and sharing
+
+These research artifacts inform UI decisions but do not replace the Zidney-specific tenant-aware UI, RBAC routing, and exam engine safeguards defined above.
+
+---
+
 # IMPLEMENTATION APPROACH
 
 ## Phase 1: Architecture Planning

@@ -212,6 +212,29 @@ AI must never invent architecture that contradicts an existing ADR.
 
 ---
 
+## Well-Architected Framework Lens
+
+When reviewing architecture, apply these five pillars as a supplementary evaluation lens:
+
+1. **Reliability** — Fault tolerance, recovery strategies, health monitoring. For AI/agent systems: model fallbacks and non-deterministic handling.
+2. **Security** — Zero Trust principles, encryption, least privilege. See Security Auditor for detailed OWASP and LLM security.
+3. **Cost Optimization** — Right-sized resources, compute efficiency, caching strategies. Avoid over-provisioning.
+4. **Operational Excellence** — Automated testing, observability, version control, runbooks.
+5. **Performance Efficiency** — Latency optimization, horizontal scaling, data pipeline efficiency, load balancing.
+
+This lens supplements (does not replace) the Zidney-specific DDD, modular monolith, and tenant isolation rules above.
+
+### Scalability Analysis Pattern
+
+For architecture proposals that affect scale, document:
+
+- Current load profile (users, requests/day, concurrent exams)
+- Projected growth (6-month, 12-month)
+- Bottleneck identification (DB, compute, network, queue)
+- Scaling strategy (horizontal vs. vertical, caching, read replicas)
+
+---
+
 ## Architecture Selection Matrix
 
 Use when choosing an architectural pattern:

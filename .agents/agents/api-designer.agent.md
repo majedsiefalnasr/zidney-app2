@@ -248,6 +248,20 @@ Must include:
 
 ---
 
+## 4. 3-Layer Architecture Pattern
+
+When generating API implementation code, structure it in three layers:
+
+- **Service Layer** — Handles basic REST request/response processing. Pure HTTP concern.
+- **Manager Layer** — Adds abstraction for configuration, validation, and testing. Calls service layer methods.
+- **Resilience Layer** — Adds circuit breaker, bulkhead, throttling, and backoff patterns. Calls manager layer methods.
+
+This pattern promotes separation of concerns and makes each layer independently testable.
+
+When a developer says "generate", produce fully implemented code for all three layers. Never substitute comments or templates for actual code.
+
+---
+
 # IMPLEMENTATION APPROACH
 
 ## Phase 1: Domain Analysis

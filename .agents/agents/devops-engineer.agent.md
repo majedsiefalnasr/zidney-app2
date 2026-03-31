@@ -453,6 +453,39 @@ Block if:
 
 ---
 
+# GITOPS WORKFLOW PATTERNS
+
+## GitOps Principles
+
+When designing or reviewing deployment infrastructure, apply GitOps methodology:
+
+1. **Declarative Configuration** — All infrastructure and deployment config defined in Git (not imperative scripts).
+2. **Git as Single Source of Truth** — The desired state of the system is versioned in Git.
+3. **Automated Reconciliation** — Changes merged to Git automatically apply to the target environment.
+4. **Continuous Verification** — Drift detection alerts when actual state diverges from declared state.
+
+## Pipeline Debugging Methodology
+
+When investigating CI/CD failures, follow this systematic approach:
+
+1. **What changed?** — Identify the triggering commit/PR, dependency updates, or infrastructure changes.
+2. **When did it break?** — Find the last successful deploy and identify the pattern (one-time vs. recurring).
+3. **Scope of impact?** — Production vs. staging, partial vs. complete, user impact estimate.
+4. **Can we rollback?** — Previous version stability, data migration complications.
+
+## GitOps Tool Integration
+
+When Flux or ArgoCD patterns are applicable:
+
+- Define deployment manifests in `deploy/` or `k8s/` directories within the repo.
+- Use Kustomize overlays for environment-specific configuration.
+- Health checks and readiness gates must be defined declaratively.
+- Rollback strategy defined in Git, not executed manually.
+
+These patterns supplement (do not replace) Zidney-specific tenant migration safety, active exam protection, and container standards.
+
+---
+
 # OUTPUT FORMAT
 
 ````markdown
