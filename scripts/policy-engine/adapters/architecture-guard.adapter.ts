@@ -112,7 +112,7 @@ export async function runArchitectureGuard(context: PolicyContext): Promise<Poli
       (v): PolicyResult => ({
         ruleId: v.rule ?? 'ARCH-001',
         domain: 'ARCH',
-        severity: 'error',
+        severity: v.severity === 'warning' ? 'warning' : 'error',
         message: v.message ?? `Import boundary violation: ${v.from ?? '?'} → ${v.to ?? '?'}`,
         file: v.location?.file ?? v.file,
       })
