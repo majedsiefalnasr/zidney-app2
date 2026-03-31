@@ -1091,3 +1091,95 @@ check), then attempt deletion and verify rejection.
   tenant database.
 - **SC-010**: Score constraint enforced at both API and DB levels — zero questions with
   score ≤ 0 can exist in the database.
+
+---
+
+## Clarifications
+
+### Session 2026-03-31
+
+**Q1: How should the `subsection_id` FK dependency on Stage 37 (`traditional_exam_subsections` table) be handled?**
+
+**Decision: Create a stub migration in Stage 35.**
+
+Stage 35's migration will create the `traditional_exam_subsections` table with its minimal
+structure (`id`, `section_id`, `created_at`, `updated_at`) sufficient for the FK constraint
+to resolve. Stage 37 (Traditional Exam Config) will subsequently add the remaining columns
+(`template_subsection_id`, `header_content`, `order_index`, etc.) via an ALTER TABLE migration.
+
+This approach:
+
+- Unblocks Stage 35 without introducing nullable FKs or deferred constraints.
+- Keeps the schema forward-only — no need to retroactively modify Stage 35 migrations.
+- Stage 37 builds on top of the stub table rather than creating it from scratch.
+
+The stub migration will also create the `traditional_exam_sections` table with minimal columns
+(`id`, `exam_id`, `created_at`, `updated_at`) since `traditional_exam_subsections.section_id`
+references it.
+
+---
+
+**Q2: For `FILL_BLANK` accepted values, how should answer matching work?**
+
+**Decision: Case-insensitive matching, no diacritics normalization in v1.**
+
+- Answer comparison uses case-insensitive string matching (e.g., "Paris" matches "paris").
+- Arabic tashkeel/diacritics normalization is deferred to a future enhancement.
+- `accepted_values` are stored as-is in the JSONB field.
+- The matching logic is NOT implemented in Stage 35 (question model) — it will be implemented
+  in the attempt grading stage. Stage 35 only stores the accepted values.
+- When stored, values are trimmed of leading/trailing whitespace.
+
+---
+
+**Q3: Should the workflow support backward transitions?**
+
+**Decision: No backward transitions in v1.**
+
+The workflow is strictly forward-only:
+`DRAFT → COMPLETED → UNDER_REVIEW → APPROVED → ENABLED`
+
+To re-edit a question after approval, the content author must create a new question. This:
+
+- Preserves audit trail integrity — every status transition is immutable.
+- Simplifies the v1 workflow engine integration.
+- Aligns with the MCQ question model behavior (Stage 034).
+
+Backward transitions (e.g., `APPROVED → UNDER_REVIEW` for review rejection) may be added in a
+future enhancement stage if the workflow engine supports them.
+
+---
+
+**Q4: How should the `search` filter work for listing questions?**
+
+**Decision: PostgreSQL ILIKE with wildcard wrapping.**
+
+- Search uses `WHERE content ILIKE '%<search_term>%'` — simple pattern matching.
+- No full-text search (tsvector/tsquery) in v1.
+- No GIN index required — ILIKE is sufficient for the expected question pool sizes (< 50K per tenant).
+- This is consistent with how search works in other list endpoints across the platform.
+- Search is applied after all other filters (additive WHERE clause).
+- If performance becomes an issue at scale, full-text search can be added as a future index-only
+  enhancement without API contract changes.
+
+---
+
+**Q5: Which tables should the deletion guard check?**
+
+**Decision: Guard checks only existing tables; future stages add their own guard hooks.**
+
+Stage 35 deletion guard checks:
+
+1. `traditional_exam_subsections` references (via subsection → question linkage) — EXISTS since
+   the stub migration creates this table.
+2. Active attempts — if the attempt engine tables exist. If not, this check is a no-op.
+
+Future stages that create exam, exercise, or scheduled exam tables are responsible for adding
+their own deletion guard hooks to the traditional question deletion flow.
+
+This approach:
+
+- Avoids stub/no-op queries for tables that don't exist yet.
+- Each stage owns its own referential integrity constraints.
+- The deletion service uses a pluggable guard pattern where new reference checks can be added
+  without modifying the core deletion logic.
