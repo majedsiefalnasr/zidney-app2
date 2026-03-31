@@ -21,6 +21,7 @@ export class DbManager {
     if (!this.masterDb) {
       this.masterDb = new Pool({
         connectionString: this.masterConnectionString,
+        connectionTimeoutMillis: 5000,
       })
       await this.masterDb.connect()
     }
@@ -44,6 +45,7 @@ export class DbManager {
 
     const pool = new Pool({
       connectionString,
+      connectionTimeoutMillis: 5000,
     })
 
     try {
