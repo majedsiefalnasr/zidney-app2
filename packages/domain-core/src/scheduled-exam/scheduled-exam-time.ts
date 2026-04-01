@@ -9,44 +9,52 @@
 
 const CONNECTION_TIMEOUT_SECONDS = 30
 
-export function isWindowOpen(windowStart: Date, windowEnd: Date, now?: Date): boolean {
+// Note: tests call these helpers with `now` as the first argument for deterministic behavior.
+export function isWindowOpen(
+  now: Date,
+  windowStart: Date,
+  windowEnd: Date,
+  toleranceMinutes = 0
+): boolean {
   const t = now ?? new Date()
-  return t >= windowStart && t <= windowEnd
+  const toleranceMs = (toleranceMinutes ?? 0) * 60 * 1000
+  return t >= new Date(windowStart.getTime() - toleranceMs) && t <= windowEnd
 }
 
-export function isBeforeWindow(windowStart: Date, now?: Date): boolean {
+export function isBeforeWindow(now: Date, windowStart: Date, toleranceMinutes = 0): boolean {
   const t = now ?? new Date()
-  return t < windowStart
+  const toleranceMs = (toleranceMinutes ?? 0) * 60 * 1000
+  return t < new Date(windowStart.getTime() - toleranceMs)
 }
 
-export function isAfterWindow(windowEnd: Date, now?: Date): boolean {
+export function isAfterWindow(now: Date, windowEnd: Date): boolean {
   const t = now ?? new Date()
   return t > windowEnd
 }
 
 export function computeAttemptEndTime(
-  windowEnd: Date,
   startedAt: Date,
+  windowEnd: Date,
   durationMinutes?: number | null
 ): Date {
   if (!durationMinutes) return windowEnd
-  const durationEnd = new Date(startedAt.getTime() + durationMinutes * 60 * 1000)
+  const durationEnd = new Date(startedAt.getTime() + (durationMinutes ?? 0) * 60 * 1000)
   return durationEnd < windowEnd ? durationEnd : windowEnd
 }
 
-export function isAttemptExpired(scheduledEndTime: Date, now?: Date): boolean {
+export function isAttemptExpired(now: Date, scheduledEndTime: Date): boolean {
   const t = now ?? new Date()
   return t > scheduledEndTime
 }
 
-export function isConnectionTimedOut(lastHeartbeatAt: Date | null, now?: Date): boolean {
+export function isConnectionTimedOut(now: Date, lastHeartbeatAt: Date | null): boolean {
   if (!lastHeartbeatAt) return false
   const t = now ?? new Date()
   const diffSeconds = (t.getTime() - lastHeartbeatAt.getTime()) / 1000
   return diffSeconds > CONNECTION_TIMEOUT_SECONDS
 }
 
-export function computeRemainingSeconds(scheduledEndTime: Date, now?: Date): number {
+export function computeRemainingSeconds(now: Date, scheduledEndTime: Date): number {
   const t = now ?? new Date()
   const diff = Math.floor((scheduledEndTime.getTime() - t.getTime()) / 1000)
   return Math.max(0, diff)

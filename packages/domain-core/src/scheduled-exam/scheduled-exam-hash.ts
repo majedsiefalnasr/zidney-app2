@@ -9,24 +9,6 @@
 
 import { createHash } from 'node:crypto'
 
-export const MCQ_HASH_FIELDS = [
-  'title',
-  'instructions',
-  'totalMarks',
-  'passMark',
-  'durationMinutes',
-  'questionPoolId',
-] as const
-
-export const TRADITIONAL_HASH_FIELDS = [
-  'title',
-  'instructions',
-  'totalMarks',
-  'passMark',
-  'durationMinutes',
-  'questionPoolId',
-] as const
-
 export interface McqHashInput {
   title: string
   instructions?: string | null
@@ -37,18 +19,31 @@ export interface McqHashInput {
 }
 
 export type TraditionalHashInput = McqHashInput
-
-export function computeBaseExamHash(input: McqHashInput | TraditionalHashInput): string {
-  const normalized = {
-    title: input.title,
-    instructions: input.instructions ?? null,
-    totalMarks: input.totalMarks,
-    passMark: input.passMark,
-    durationMinutes: input.durationMinutes ?? null,
-    questionPoolId: input.questionPoolId ?? null,
+export function computeBaseExamHash(input: Record<string, unknown>): string {
+  // Normalize various input shapes into a canonical representation used for hashing.
+  // Tests expect exam_type and updated_at to affect the hash, and different field
+  // names (total_marks vs total_questions, duration_minutes vs durationMinutes) to be handled.
+  const inAny = input as Record<string, unknown>
+  const normalized: Record<string, unknown> = {
+    exam_type: inAny['exam_type'] ?? inAny['examType'] ?? null,
+    name: inAny['name'] ?? inAny['title'] ?? null,
+    description: inAny['description'] ?? inAny['instructions'] ?? null,
+    subject_id: inAny['subject_id'] ?? inAny['subjectId'] ?? null,
+    duration_minutes: inAny['duration_minutes'] ?? inAny['durationMinutes'] ?? null,
+    pass_percentage: inAny['pass_percentage'] ?? inAny['passPercentage'] ?? null,
+    // unify total marks/questions into `total_questions`
+    total_questions:
+      inAny['total_questions'] ??
+      inAny['totalQuestions'] ??
+      inAny['total_marks'] ??
+      inAny['totalMarks'] ??
+      null,
+    updated_at: inAny['updated_at'] ?? inAny['updatedAt'] ?? null,
   }
+
   const sorted = Object.fromEntries(
     Object.entries(normalized).sort(([a], [b]) => a.localeCompare(b))
   )
+
   return createHash('sha256').update(JSON.stringify(sorted)).digest('hex')
 }
