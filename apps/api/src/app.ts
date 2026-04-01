@@ -52,6 +52,7 @@ import { lessonsRouter } from './routes/backoffice/lessons'
 import { mcqExamsRouter } from './routes/backoffice/mcq-exams'
 import { mcqQuestionsRouter } from './routes/backoffice/mcq-questions'
 import { rolesRouter } from './routes/backoffice/roles'
+import { scheduledExamsRouter } from './routes/backoffice/scheduled-exams'
 import { semestersRouter } from './routes/backoffice/semesters'
 import { workspaceSettingsRouter } from './routes/backoffice/settings'
 import { subjectsRouter } from './routes/backoffice/subjects'
@@ -206,6 +207,9 @@ app.route('/api/v1/backoffice/workspace', traditionalQuestionsRouter)
 
 // Traditional Exams endpoints — Stage 037, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', traditionalExamsRouter)
+
+// Scheduled Exams endpoints — Stage 038, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', scheduledExamsRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade

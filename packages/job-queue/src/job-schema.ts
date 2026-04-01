@@ -196,3 +196,74 @@ export function createGradeAttemptJob(
     submission_data: submissionData,
   }
 }
+
+// ── Stage 38: Scheduled Exam Engine ─────────────────────────────────────────
+
+/**
+ * ForcedSubmissionReason — reason codes for auto-submission
+ */
+export type ForcedSubmissionReason =
+  | 'ATTEMPT_TIME_EXCEEDED'
+  | 'SCHEDULED_END_REACHED'
+  | 'CONNECTION_TIMEOUT'
+
+/**
+ * AutoSubmitScheduledAttemptJob — enqueued per attempt when force-submit is triggered
+ */
+export interface AutoSubmitScheduledAttemptJob extends BaseJob {
+  type: 'auto_submit_scheduled_attempt'
+  attempt_id: string
+  scheduled_exam_id: string
+  forced_submission_reason: ForcedSubmissionReason
+}
+
+/**
+ * ScheduledExamDispatcherJob — repeatable job that scans all tenants for expired attempts
+ */
+export interface ScheduledExamDispatcherJob extends BaseJob {
+  type: 'scheduled_exam_dispatcher'
+  dispatched_at: string
+}
+
+/**
+ * Type guard for AutoSubmitScheduledAttemptJob
+ */
+export function isAutoSubmitScheduledAttemptJob(
+  job: BaseJob
+): job is AutoSubmitScheduledAttemptJob {
+  return job.type === 'auto_submit_scheduled_attempt'
+}
+
+/**
+ * Type guard for ScheduledExamDispatcherJob
+ */
+export function isScheduledExamDispatcherJob(job: BaseJob): job is ScheduledExamDispatcherJob {
+  return job.type === 'scheduled_exam_dispatcher'
+}
+
+/**
+ * Factory: create an AutoSubmitScheduledAttemptJob
+ */
+export function createAutoSubmitScheduledAttemptJob(
+  workspaceId: string,
+  workspaceSlug: string,
+  attemptId: string,
+  scheduledExamId: string,
+  forcedSubmissionReason: ForcedSubmissionReason,
+  correlationId: string
+): AutoSubmitScheduledAttemptJob {
+  return {
+    job_id: `auto-submit-${attemptId}-${Date.now()}`,
+    type: 'auto_submit_scheduled_attempt',
+    workspace_id: workspaceId,
+    workspace_slug: workspaceSlug,
+    user_id: 'SYSTEM',
+    correlation_id: correlationId,
+    created_at: new Date().toISOString(),
+    retry_count: 0,
+    max_retries: 3,
+    attempt_id: attemptId,
+    scheduled_exam_id: scheduledExamId,
+    forced_submission_reason: forcedSubmissionReason,
+  }
+}

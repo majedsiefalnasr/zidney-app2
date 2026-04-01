@@ -1,8 +1,8 @@
 {
   "schema_version": "2",
-  "generated_at": "2026-04-01T16:46:15.856Z",
+  "generated_at": "2026-04-01T22:32:09.784Z",
   "source_metadata": {
-    "infra_audit_timestamp": "2026-04-01T16:46:15.798Z"
+    "infra_audit_timestamp": "2026-04-01T22:32:09.730Z"
   },
   "modules": {
     "apps/mmc": {
@@ -52,9 +52,9 @@
     "apps/worker": {
       "dependencies": [
         "packages/types",
+        "packages/job-queue",
         "packages/domain-core",
-        "packages/logger",
-        "packages/job-queue"
+        "packages/logger"
       ],
       "layer": "runtime",
       "type": "app",
@@ -196,6 +196,10 @@
     },
     {
       "from": "packages/redis-utils",
+      "to": "packages/logger"
+    },
+    {
+      "from": "packages/domain-core",
       "to": "packages/logger"
     },
     {
@@ -2248,6 +2252,102 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/logger"
     },
     {
@@ -3545,6 +3645,10 @@
     {
       "from": "apps/worker",
       "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/job-queue"
     },
     {
       "from": "apps/worker",
@@ -3681,6 +3785,22 @@
     {
       "from": "apps/worker",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/job-queue"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/job-queue"
     },
     {
       "from": "apps/worker",

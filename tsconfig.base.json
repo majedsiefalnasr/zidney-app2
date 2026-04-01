@@ -26,6 +26,7 @@
       "@zidney/ui/*": ["packages/ui-system/src/*"],
       "@zidney/domain-core": ["packages/domain-core/src/index.ts"],
       "@zidney/domain-core/*": ["packages/domain-core/src/*"],
+      "@zidney/domain-core/scheduled-exam": ["packages/domain-core/src/scheduled-exam/index.ts"],
       "@zidney/domain-core/mmc-dashboard": ["packages/domain-core/mmc-dashboard/index.ts"],
       "@zidney/domain-core/mmc-dashboard/*": ["packages/domain-core/mmc-dashboard/*"],
       "@zidney/logger": ["packages/logger/src/index.ts"],

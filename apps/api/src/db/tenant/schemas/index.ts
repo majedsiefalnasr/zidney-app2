@@ -7,6 +7,7 @@
  * Consumed by migrations, service layer, and route handlers.
  */
 
+export * from './attempts.schema'
 export * from './backoffice-role-module-permissions.schema'
 export * from './backoffice-roles.schema'
 export * from './backoffice-staff-users.schema'
@@ -31,6 +32,7 @@ export * from './mcq-question-options.schema'
 export * from './mcq-question-tags.schema'
 export * from './mcq-questions.schema'
 export * from './rbac-audit-logs.schema'
+export * from './scheduled-exams.schema'
 export * from './semesters.schema'
 export * from './staff-departments.schema'
 export * from './staff-divisions.schema'

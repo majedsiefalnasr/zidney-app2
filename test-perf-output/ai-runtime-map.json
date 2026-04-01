@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-04-01T22:29:14.181Z",
+  "services": {},
+  "infrastructure": {
+    "postgres": {
+      "type": "postgres",
+      "version": "15",
+      "port": 5432
+    },
+    "redis": {
+      "type": "redis",
+      "version": "7",
+      "port": 6379
+    }
+  }
+}

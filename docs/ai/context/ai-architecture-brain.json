@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-01T16:46:15.856Z",
+  "generated_at": "2026-04-01T22:32:09.784Z",
   "metadata": {
     "total_modules": 14,
     "total_violations": 0,
     "generation_time_ms": 0,
     "source_hash": "6493a7d6",
-    "source_timestamp": "2026-04-01T16:46:15.851Z",
+    "source_timestamp": "2026-04-01T22:32:09.778Z",
     "generator_version": "1.0.0"
   },
   "layers": [
@@ -92,9 +92,9 @@
     "apps/worker": {
       "imports": [
         "packages/types",
+        "packages/job-queue",
         "packages/domain-core",
-        "packages/logger",
-        "packages/job-queue"
+        "packages/logger"
       ],
       "imported_by": [],
       "violations": []
@@ -290,15 +290,15 @@
     },
     {
       "from": "apps/worker",
+      "to": "packages/job-queue"
+    },
+    {
+      "from": "apps/worker",
       "to": "packages/domain-core"
     },
     {
       "from": "apps/worker",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/job-queue"
     }
   ],
   "violations": [],
@@ -309,15 +309,15 @@
     "hotspots": [
       {
         "module": "packages/logger",
-        "violation_count": 390
+        "violation_count": 394
       },
       {
         "module": "packages/domain-core",
-        "violation_count": 258
+        "violation_count": 271
       },
       {
         "module": "packages/validation",
-        "violation_count": 153
+        "violation_count": 163
       },
       {
         "module": "packages/types",
@@ -329,7 +329,7 @@
       },
       {
         "module": "packages/job-queue",
-        "violation_count": 4
+        "violation_count": 7
       },
       {
         "module": "packages/redis-utils",

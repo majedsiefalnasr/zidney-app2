@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "assessment_id": "997da3f08073e1632a351ba746ddc7974dc09f15",
-  "generated_at": "2026-04-01T16:46:16.008Z",
+  "generated_at": "2026-04-01T22:32:09.939Z",
   "overall": {
     "score": 96,
     "health_state": "EXCELLENT",
@@ -144,7 +144,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-01T16:46:15.858Z"
+        "last_modified_at": "2026-04-01T22:32:09.786Z"
       },
       {
         "artifact_name": "ai-module-map.json",
@@ -152,7 +152,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-01T16:46:15.858Z"
+        "last_modified_at": "2026-04-01T22:32:09.785Z"
       },
       {
         "artifact_name": "ai-layer-model.json",
@@ -160,7 +160,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-01T16:46:15.858Z"
+        "last_modified_at": "2026-04-01T22:32:09.785Z"
       },
       {
         "artifact_name": "ai-runtime-map.json",
@@ -168,7 +168,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-01T16:46:15.858Z"
+        "last_modified_at": "2026-04-01T22:32:09.786Z"
       },
       {
         "artifact_name": "ai-architecture-brain.json",
@@ -176,7 +176,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-01T16:46:15.921Z",
+        "last_modified_at": "2026-04-01T22:32:09.848Z",
         "validator": "bun run arch:validate:brain"
       }
     ],
@@ -188,10 +188,10 @@
       "tool": "arch_guard_ci",
       "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/architecture-guard/architecture-guard.ts --ci --output json",
       "timeout_ms": 30000,
-      "duration_ms": 1501,
+      "duration_ms": 1675,
       "timed_out": false,
-      "started_at": "2026-04-01T16:46:14.428Z",
-      "finished_at": "2026-04-01T16:46:15.929Z",
+      "started_at": "2026-04-01T22:32:08.183Z",
+      "finished_at": "2026-04-01T22:32:09.858Z",
       "exit_code": 0,
       "output_format": "json"
     },
@@ -199,10 +199,10 @@
       "tool": "infra_audit_quick",
       "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/infra-audit.ts --quick",
       "timeout_ms": 60000,
-      "duration_ms": 910,
+      "duration_ms": 1074,
       "timed_out": false,
-      "started_at": "2026-04-01T16:46:14.431Z",
-      "finished_at": "2026-04-01T16:46:15.341Z",
+      "started_at": "2026-04-01T22:32:08.186Z",
+      "finished_at": "2026-04-01T22:32:09.260Z",
       "exit_code": 0,
       "output_format": "text"
     },
@@ -210,10 +210,10 @@
       "tool": "type_safety_guard_json",
       "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/type-safety-guard.ts --json --no-exit-error",
       "timeout_ms": 30000,
-      "duration_ms": 283,
+      "duration_ms": 328,
       "timed_out": false,
-      "started_at": "2026-04-01T16:46:14.432Z",
-      "finished_at": "2026-04-01T16:46:14.715Z",
+      "started_at": "2026-04-01T22:32:08.187Z",
+      "finished_at": "2026-04-01T22:32:08.515Z",
       "exit_code": 0,
       "output_format": "json"
     },
@@ -221,10 +221,10 @@
       "tool": "arch_validate_brain",
       "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/governance/validate-architecture-brain.ts",
       "timeout_ms": 30000,
-      "duration_ms": 63,
+      "duration_ms": 65,
       "timed_out": false,
-      "started_at": "2026-04-01T16:46:14.432Z",
-      "finished_at": "2026-04-01T16:46:14.495Z",
+      "started_at": "2026-04-01T22:32:08.187Z",
+      "finished_at": "2026-04-01T22:32:08.252Z",
       "exit_code": 0,
       "output_format": "text"
     },
@@ -233,10 +233,10 @@
       "command": "gitnexus query architecture health governance drift",
       "enrichment_mode": "gitnexus_query",
       "timeout_ms": 15000,
-      "duration_ms": 76,
+      "duration_ms": 77,
       "timed_out": false,
-      "started_at": "2026-04-01T16:46:15.932Z",
-      "finished_at": "2026-04-01T16:46:16.008Z",
+      "started_at": "2026-04-01T22:32:09.860Z",
+      "finished_at": "2026-04-01T22:32:09.937Z",
       "exit_code": 1,
       "output_format": "text"
     },
@@ -245,10 +245,10 @@
       "command": "gitnexus impact scripts/architecture-health/architecture-health.ts",
       "enrichment_mode": "gitnexus_impact",
       "timeout_ms": 15000,
-      "duration_ms": 76,
+      "duration_ms": 79,
       "timed_out": false,
-      "started_at": "2026-04-01T16:46:15.932Z",
-      "finished_at": "2026-04-01T16:46:16.008Z",
+      "started_at": "2026-04-01T22:32:09.860Z",
+      "finished_at": "2026-04-01T22:32:09.939Z",
       "exit_code": 1,
       "output_format": "text"
     }

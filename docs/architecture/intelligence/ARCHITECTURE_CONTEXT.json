@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-01T16:46:15.798Z",
-  "gitSha": "11a3d8ddb45ea1de7488163bc8c1b1ca6a808054",
+  "generatedAt": "2026-04-01T22:32:09.730Z",
+  "gitSha": "dcf771ad585c9ee732e5558766c632282e347e33",
   "architectureScore": 100,
   "moduleRisk": {
     "packages/job-queue": "LOW",
@@ -54,15 +54,15 @@
   "hotspots": [
     {
       "module": "packages/logger",
-      "score": 390
+      "score": 394
     },
     {
       "module": "packages/domain-core",
-      "score": 258
+      "score": 271
     },
     {
       "module": "packages/validation",
-      "score": 153
+      "score": 163
     },
     {
       "module": "packages/types",
@@ -74,7 +74,7 @@
     },
     {
       "module": "packages/job-queue",
-      "score": 4
+      "score": 7
     },
     {
       "module": "packages/redis-utils",
@@ -112,6 +112,10 @@
     },
     {
       "from": "packages/redis-utils",
+      "to": "packages/logger"
+    },
+    {
+      "from": "packages/domain-core",
       "to": "packages/logger"
     },
     {
@@ -2164,6 +2168,102 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/logger"
     },
     {
@@ -3461,6 +3561,10 @@
     {
       "from": "apps/worker",
       "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/job-queue"
     },
     {
       "from": "apps/worker",
@@ -3597,6 +3701,22 @@
     {
       "from": "apps/worker",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/job-queue"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/job-queue"
     },
     {
       "from": "apps/worker",

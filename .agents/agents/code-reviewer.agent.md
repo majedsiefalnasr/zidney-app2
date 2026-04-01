@@ -114,6 +114,29 @@ Block merge if:
 
 ---
 
+## 3b. SELECT FOR UPDATE & Timeout Re-validation (CRITICAL)
+
+**NEW RULE** — Prevents race conditions like auto-submit timeout bug.
+
+When reviewing code that uses SELECT FOR UPDATE (row-level locking) for update-critical operations:
+
+You MUST verify:
+
+- **Lock → Re-check Pattern**: After acquiring lock (SELECT FOR UPDATE), code re-validates all conditions that triggered the operation before mutating state.
+- **No Stale Assumptions**: Conditions checked BEFORE lock cannot be trusted; re-check them INSIDE lock or ROLLBACK.
+- **Timeout/Window Re-validation**: For time-sensitive operations (auto-submit on timeout), re-evaluate timestamps (last_heartbeat_at, scheduled_end_time) after lock acquisition against current time. Reject if no longer eligible.
+- **Idempotent Re-checks**: Re-check must be identical to initial check (or more conservative); must ROLLBACK if re-check fails.
+- **Clear ROLLBACK Path**: If re-check fails, code explicitly ROLLBACK and RETURN (log as idempotent skip, not error).
+
+Block merge if:
+
+- SELECT FOR UPDATE followed immediately by UPDATE without re-checking conditions.
+- Race condition window exists between lock acquisition and mutation.
+- Timeout logic assumes client clock or pre-lock timestamp; doesn't re-check server time.
+- No ROLLBACK path if re-check fails.
+
+---
+
 ## 4. Observability Compliance (CRITICAL)
 
 You MUST verify:
@@ -148,6 +171,48 @@ Block merge if:
 - Critical security vulnerability found.
 - Secrets committed.
 - Auth bypass possible.
+
+---
+
+## 5b. Numeric Type Safety (CRITICAL)
+
+**NEW RULE** — Prevents falsy check bugs with numeric types (0 treated as false).
+
+When reviewing code that handles numeric fields (duration, tolerance, count, etc.):
+
+You MUST verify:
+
+- **Explicit Null Checks**: Use `x == null` or `x === null || x === undefined`, never falsy checks (`!x`).
+- **Zero is Valid**: If a field can be zero with semantic meaning (e.g., duration_minutes = 0 for unbounded), falsy check is a bug.
+- **Type Precision**: Verify TypeScript types are non-nullable where appropriate. Use `number | null` or `number | undefined` explicitly.
+- **Test Coverage**: Zero-value tests exist for numeric fields used in conditionals.
+
+Block merge if:
+
+- Numeric field checked with `if (!duration)` or similar falsy check.
+- Zero-value test missing for numeric domains.
+- Falsy check breaks zero-minute or zero-tolerance scenarios.
+
+---
+
+## 5c. SQL Query Predicate Best Practices (MEDIUM)
+
+**NEW RULE** — Improves index utilization and query correctness.
+
+When reviewing SQL queries with WHERE clauses:
+
+You MUST verify:
+
+- **Positive Predicates Preferred**: Use `status = 'IN_PROGRESS'` instead of `status != 'SUBMITTED'`.
+- **Index Alignment**: WHERE clause predicates must align with partial index definitions.
+- **Avoid NOT/!=**: These prevent partial index usage, slow down queries.
+- **Explicit Allowlist**: For state machines, query for valid states explicitly.
+
+Suggestion if:
+
+- Query permissively checks negated states (x != y).
+- WHERE predicates don't align with defined indexes.
+- An explicit allowlist would be more readable.
 
 ---
 

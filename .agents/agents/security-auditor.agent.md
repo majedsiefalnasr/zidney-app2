@@ -282,6 +282,145 @@ Block if:
 
 ---
 
+## 12. Database Operation Tensor Scoping (Multi-Tenant Safety)
+
+**NEW RULE** — Prevents cross-tenant data mutations like setBaseExamModified bug.
+
+When reviewing UPDATE/DELETE/INSERT queries on shared tenant tables:
+
+You MUST verify:
+
+- **Mandatory WHERE Clause**: Every mutation includes workspace_id/organization_id filter.
+- **No Bulk Operations Without Scope**: Batch updates must filter by organization_id.
+- **Function Signature Includes Scoping**: Repository methods that update shared data accept workspace_id/org_id parameter.
+- **Caller Passes Scoping Context**: Service layer explicitly passes workspace_id to repository methods, never omits it.
+- **No Cross-Workspace Updates**: Validate that UPDATE WHERE base_exam_id = $1 (without org_id) never affects multiple workspaces.
+
+Block if:
+
+- UPDATE/DELETE lacks workspace_id filter.
+- Repository method mutates data without org_id parameter.
+- Service assumes implicit scoping.
+- Query could affect multiple tenants unintentionally.
+
+---
+
+## 13. Worker Service Initialization & Cleanup
+
+**NEW RULE** — Prevents resource leaks and null pointer exceptions in background workers.
+
+When reviewing worker startup and shutdown:
+
+You MUST verify:
+
+- **Resource Initialization**: All external resources (Redis, DB pools, message clients) created and assigned to worker state during startup.
+- **No Null References in Cycles**: Periodic jobs (intervals, scheduled tasks) never receive null client references.
+- **Graceful Cleanup**: Shutdown handler closes all resources (connection.quit(), pool.end(), client.disconnect()).
+- **Error Handling in Cleanup**: Cleanup catches and logs errors per resource (not swallowing completely but ensuring all resources attempt closure).
+- **Idempotent Shutdown**: Multiple shutdown calls safe; state flags prevent double-close.
+
+Block if:
+
+- Resource passed to periodic job is null/uninitialized.
+- Resource cleanup missing (connection leak possible).
+- Shutdown doesn't handle cleanup errors gracefully.
+
+---
+
+## 14. Type-Safe Enum Validation Against Database Constraints
+
+**NEW RULE** — Prevents enum/CHECK constraint mismatches like ForcedSubmissionReason.
+
+When reviewing enum types mapped to database CHECK constraints:
+
+You MUST verify:
+
+- **Type Alias Matches CHECK**: TypeScript union type (e.g., `type ForcedSubmissionReason = 'X' | 'Y'`) exactly matches SQL CHECK constraint values.
+- **No Legacy Aliases**: Remove deprecated enum values from type; archive in migration comments only.
+- **Bidirectional Search**: Search codebase for where enum value is SET and where it's READ. Both must use current values.
+- **Tests Validate Constraint**: Integration tests attempt INSERT with each enum value; DB should accept and reject appropriately.
+- **Migration Documents Mapping**: If renaming enum values, migration includes comment: `-- Renamed: OLD_VALUE → NEW_VALUE`.
+
+Block if:
+
+- TypeScript enum does not match SQL CHECK.
+- Code sets enum value not in type union.
+- Tests missing for edge cases.
+
+---
+
+## 15. Distributed Lock Ownership Verification (CRITICAL)
+
+**NEW RULE** — Prevents lock hijacking by another worker after TTL expiry.
+
+When reviewing Redis-based advisory locks for critical operations:
+
+You MUST verify:
+
+- **Owner Token in Lock Value**: Lock SET operation stores unique owner token: `redis.set(lockKey, ownerToken, {NX, PX: duration})` where `ownerToken = '${resource_id}:${random()}'`.
+- **Compare-and-Delete on Release**: Lock release NEVER uses bare `del(lockKey)`. Must use Lua script: `if redis.call('GET', key) == token then redis.call('DEL', key) else return 0 end`.
+- **Owner Validation Before Mutation**: After acquiring lock, code verifies owner before performing protected operation; if owner mismatch, ROLLBACK instead of proceeding.
+- **TTL Prevents Stale Lock**: Lock includes PX/EX expiry; recommend 60-120 seconds for background jobs.
+
+Block if:
+
+- Lock released with bare `del(lockKey)` without owner verification.
+- No owner token stored in lock value.
+- Multiple attempts to lock with same ID could collide without unique owner.
+- Stale lock can block all workers indefinitely (missing TTL).
+
+---
+
+## 16. Atomic Deduplication Pattern (HIGH)
+
+**NEW RULE** — Prevents duplicate job processing like the dedup race condition.
+
+When reviewing deduplication logic for queues or batch operations:
+
+You MUST verify:
+
+- **Claim Before Side Effect**: Dedup claim acquired ATOMICALLY (SET NX with EX) BEFORE any queue operation or database mutation.
+- **Rollback on Failure**: If side effect fails after claim succeeds, dedup key ROLLED BACK (deleted) to allow retry.
+- **Explicit Try/Catch**: Dedup acquisition success checked explicitly; job enqueueing wrapped in try/catch with explicit rollback in catch: `catch { await redis.del(dedupKey) }`.
+- **Idempotent Claim Check**: Multiple calls to check dedup status must return same result; should not re-acquire.
+
+Block if:
+
+- Check-then-act pattern used (exists → lpush → set): opens race window.
+- No rollback on enqueue failure.
+- Two workers can enqueue same job due to missing atomicity.
+
+---
+
+## 17. Exception Handling Completeness (HIGH)
+
+**NEW RULE** — Prevents silent errors and incomplete error contracts.
+
+When reviewing error handling in request handlers:
+
+You MUST verify:
+
+- **Comprehensive Catch**: Error handler catches ALL relevant error types, not just domain errors. Include:
+  - Domain errors (ScheduledExamError, etc.)
+  - Validation errors (ZodError)
+  - Parse errors (SyntaxError for JSON.parse)
+  - Infrastructure errors (DbError if applicable)
+  - Generic Error fallback
+- **No Silent Catches**: Every catch block either:
+  - Returns error response to client, OR
+  - Re-throws after logging
+- **Correct HTTP Status**: Each error type mapped to correct HTTP status (400, 422, 500, etc.) via error contract.
+- **Consistent Response Format**: All errors return same shape: `{ success: false, data: null, error: { code, message } }`.
+
+Block if:
+
+- Try block contains JSON parsing without SyntaxError handler.
+- Catch block catches only domain errors; other errors escape.
+- Silent catch blocks exist (catch `{}` or `catch (e) {}`).
+- Error response format inconsistent across endpoints.
+
+---
+
 # THREAT MODELING (STRIDE)
 
 For new features or significant changes, document the threat model:
