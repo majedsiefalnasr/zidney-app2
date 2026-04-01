@@ -1,7 +1,7 @@
 # Session Memory
 
-Stage: Policy Engine and Governance Rules Layer
-Phase: 01_PLATFORM_FOUNDATION
-Started: 2026-03-25T00:00:00Z
+Stage: Auto Selection Engine
+Phase: 03_BACKOFFICE_CORE/04_EXAM_ENGINE_CORE
+Started: 2026-04-02T00:00:00Z
 
 ---
