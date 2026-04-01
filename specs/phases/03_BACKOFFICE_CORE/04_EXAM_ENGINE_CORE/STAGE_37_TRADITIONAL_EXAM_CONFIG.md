@@ -9,20 +9,32 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-04-01T00:00:00Z
+Last Updated: 2026-04-01T00:01:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Traditional exam CRUD with division scoping
+- Delivery settings (relax/chrono mode, review flags, certificates)
+- Section/subsection/question content structure
+- Workflow status transitions with structural validation
+- Score snapshot on question assignment
+
+Deferred Scope:
+
+- Template CRUD (separate stage)
+- Attempt/delivery engine
+- Student-facing views
+- Certificate generation
+- Bulk question assignment
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 

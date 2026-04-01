@@ -6,7 +6,7 @@
   "branch": "spec/037-traditional-exam-config",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "auto_advance": true,
   "clarifications_resolved": false,
@@ -20,13 +20,22 @@
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-04-01T00:00:00Z",
-  "last_updated": "2026-04-01T00:00:00Z",
-  "step_timings": {},
+  "last_updated": "2026-04-01T00:01:00Z",
+  "step_timings": {
+    "specify": {
+      "started_at": "2026-04-01T00:00:30Z",
+      "completed_at": "2026-04-01T00:01:00Z"
+    }
+  },
   "history": [
     {
       "event": "branch_created",
       "branch": "spec/037-traditional-exam-config",
       "timestamp": "2026-04-01T00:00:00Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-04-01T00:01:00Z"
     }
   ]
 }
