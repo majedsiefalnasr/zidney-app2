@@ -1,23 +1,16 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-01T22:32:09.783Z",
+  "generated_at": "2026-04-01T22:29:14.223Z",
   "source_metadata": {
     "module_boundaries_hash": "6493a7d6",
-    "audit_timestamp": "2026-04-01T22:32:09.778Z"
+    "audit_timestamp": "2026-04-01T22:29:14.195Z"
   },
   "modules": {
-    "apps/mmc": {
+    "apps/api": {
       "layer": "runtime",
       "type": "application",
-      "description": "Module: mmc",
-      "path": "apps/mmc",
-      "dependencies": []
-    },
-    "apps/frontoffice": {
-      "layer": "runtime",
-      "type": "application",
-      "description": "Module: frontoffice",
-      "path": "apps/frontoffice",
+      "description": "Module: api",
+      "path": "apps/api",
       "dependencies": []
     },
     "apps/backoffice": {
@@ -27,11 +20,18 @@
       "path": "apps/backoffice",
       "dependencies": []
     },
-    "apps/api": {
+    "apps/frontoffice": {
       "layer": "runtime",
       "type": "application",
-      "description": "Module: api",
-      "path": "apps/api",
+      "description": "Module: frontoffice",
+      "path": "apps/frontoffice",
+      "dependencies": []
+    },
+    "apps/mmc": {
+      "layer": "runtime",
+      "type": "application",
+      "description": "Module: mmc",
+      "path": "apps/mmc",
       "dependencies": []
     },
     "apps/worker": {
@@ -41,25 +41,11 @@
       "path": "apps/worker",
       "dependencies": []
     },
-    "packages/job-queue": {
+    "packages/api-client": {
       "layer": "runtime",
       "type": "package",
-      "description": "Module: job-queue",
-      "path": "packages/job-queue",
-      "dependencies": []
-    },
-    "packages/types": {
-      "layer": "runtime",
-      "type": "package",
-      "description": "Module: types",
-      "path": "packages/types",
-      "dependencies": []
-    },
-    "packages/logger": {
-      "layer": "infrastructure",
-      "type": "package",
-      "description": "Module: logger",
-      "path": "packages/logger",
+      "description": "Module: api-client",
+      "path": "packages/api-client",
       "dependencies": []
     },
     "packages/config": {
@@ -69,6 +55,27 @@
       "path": "packages/config",
       "dependencies": []
     },
+    "packages/domain-core": {
+      "layer": "domain",
+      "type": "package",
+      "description": "Module: domain-core",
+      "path": "packages/domain-core",
+      "dependencies": []
+    },
+    "packages/job-queue": {
+      "layer": "runtime",
+      "type": "package",
+      "description": "Module: job-queue",
+      "path": "packages/job-queue",
+      "dependencies": []
+    },
+    "packages/logger": {
+      "layer": "infrastructure",
+      "type": "package",
+      "description": "Module: logger",
+      "path": "packages/logger",
+      "dependencies": []
+    },
     "packages/redis-utils": {
       "layer": "infrastructure",
       "type": "package",
@@ -76,25 +83,18 @@
       "path": "packages/redis-utils",
       "dependencies": []
     },
+    "packages/types": {
+      "layer": "runtime",
+      "type": "package",
+      "description": "Module: types",
+      "path": "packages/types",
+      "dependencies": []
+    },
     "packages/ui-system": {
       "layer": "ui",
       "type": "package",
       "description": "Module: ui-system",
       "path": "packages/ui-system",
-      "dependencies": []
-    },
-    "packages/api-client": {
-      "layer": "runtime",
-      "type": "package",
-      "description": "Module: api-client",
-      "path": "packages/api-client",
-      "dependencies": []
-    },
-    "packages/domain-core": {
-      "layer": "domain",
-      "type": "package",
-      "description": "Module: domain-core",
-      "path": "packages/domain-core",
       "dependencies": []
     },
     "packages/validation": {

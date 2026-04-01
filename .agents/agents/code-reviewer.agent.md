@@ -174,6 +174,48 @@ Block merge if:
 
 ---
 
+## 5b. Numeric Type Safety (CRITICAL)
+
+**NEW RULE** — Prevents falsy check bugs with numeric types (0 treated as false).
+
+When reviewing code that handles numeric fields (duration, tolerance, count, etc.):
+
+You MUST verify:
+
+- **Explicit Null Checks**: Use `x == null` or `x === null || x === undefined`, never falsy checks (`!x`).
+- **Zero is Valid**: If a field can be zero with semantic meaning (e.g., duration_minutes = 0 for unbounded), falsy check is a bug.
+- **Type Precision**: Verify TypeScript types are non-nullable where appropriate. Use `number | null` or `number | undefined` explicitly.
+- **Test Coverage**: Zero-value tests exist for numeric fields used in conditionals.
+
+Block merge if:
+
+- Numeric field checked with `if (!duration)` or similar falsy check.
+- Zero-value test missing for numeric domains.
+- Falsy check breaks zero-minute or zero-tolerance scenarios.
+
+---
+
+## 5c. SQL Query Predicate Best Practices (MEDIUM)
+
+**NEW RULE** — Improves index utilization and query correctness.
+
+When reviewing SQL queries with WHERE clauses:
+
+You MUST verify:
+
+- **Positive Predicates Preferred**: Use `status = 'IN_PROGRESS'` instead of `status != 'SUBMITTED'`.
+- **Index Alignment**: WHERE clause predicates must align with partial index definitions.
+- **Avoid NOT/!=**: These prevent partial index usage, slow down queries.
+- **Explicit Allowlist**: For state machines, query for valid states explicitly.
+
+Suggestion if:
+
+- Query permissively checks negated states (x != y).
+- WHERE predicates don't align with defined indexes.
+- An explicit allowlist would be more readable.
+
+---
+
 ## 6. Modular Monolith Discipline
 
 You MUST verify:

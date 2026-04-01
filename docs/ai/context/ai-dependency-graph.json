@@ -1,20 +1,182 @@
 {
-  "nodes": [
-    "packages/job-queue",
-    "packages/logger",
-    "packages/types",
-    "packages/config",
-    "packages/redis-utils",
-    "packages/ui-system",
-    "packages/api-client",
-    "packages/domain-core",
-    "packages/validation",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/api",
-    "apps/worker"
-  ],
+  "schema_version": "2",
+  "generated_at": "2026-04-01T22:32:09.784Z",
+  "source_metadata": {
+    "infra_audit_timestamp": "2026-04-01T22:32:09.730Z"
+  },
+  "modules": {
+    "apps/mmc": {
+      "dependencies": [
+        "packages/types",
+        "packages/logger",
+        "packages/api-client",
+        "packages/ui-system"
+      ],
+      "layer": "runtime",
+      "type": "app",
+      "external_dependencies": []
+    },
+    "apps/frontoffice": {
+      "dependencies": [
+        "packages/types",
+        "packages/logger",
+        "packages/api-client"
+      ],
+      "layer": "runtime",
+      "type": "app",
+      "external_dependencies": []
+    },
+    "apps/backoffice": {
+      "dependencies": [
+        "packages/api-client",
+        "packages/types",
+        "packages/logger"
+      ],
+      "layer": "runtime",
+      "type": "app",
+      "external_dependencies": []
+    },
+    "apps/api": {
+      "dependencies": [
+        "packages/types",
+        "packages/validation",
+        "packages/logger",
+        "packages/domain-core",
+        "packages/redis-utils",
+        "packages/job-queue"
+      ],
+      "layer": "runtime",
+      "type": "app",
+      "external_dependencies": []
+    },
+    "apps/worker": {
+      "dependencies": [
+        "packages/types",
+        "packages/job-queue",
+        "packages/domain-core",
+        "packages/logger"
+      ],
+      "layer": "runtime",
+      "type": "app",
+      "external_dependencies": []
+    },
+    "packages/job-queue": {
+      "dependencies": [
+        "packages/logger"
+      ],
+      "layer": "runtime",
+      "type": "package",
+      "external_dependencies": []
+    },
+    "packages/types": {
+      "dependencies": [],
+      "layer": "runtime",
+      "type": "package",
+      "external_dependencies": []
+    },
+    "packages/logger": {
+      "dependencies": [],
+      "layer": "infrastructure",
+      "type": "package",
+      "external_dependencies": []
+    },
+    "packages/config": {
+      "dependencies": [],
+      "layer": "infrastructure",
+      "type": "package",
+      "external_dependencies": []
+    },
+    "packages/redis-utils": {
+      "dependencies": [
+        "packages/logger"
+      ],
+      "layer": "infrastructure",
+      "type": "package",
+      "external_dependencies": []
+    },
+    "packages/ui-system": {
+      "dependencies": [],
+      "layer": "ui",
+      "type": "package",
+      "external_dependencies": []
+    },
+    "packages/api-client": {
+      "dependencies": [],
+      "layer": "runtime",
+      "type": "package",
+      "external_dependencies": []
+    },
+    "packages/domain-core": {
+      "dependencies": [
+        "packages/logger",
+        "packages/types",
+        "packages/validation"
+      ],
+      "layer": "domain",
+      "type": "package",
+      "external_dependencies": []
+    },
+    "packages/validation": {
+      "dependencies": [
+        "packages/types",
+        "packages/logger"
+      ],
+      "layer": "runtime",
+      "type": "package",
+      "external_dependencies": []
+    }
+  },
+  "reverse_dependencies": {
+    "apps/mmc": [],
+    "apps/frontoffice": [],
+    "apps/backoffice": [],
+    "apps/api": [],
+    "apps/worker": [],
+    "packages/job-queue": [
+      "apps/api",
+      "apps/worker"
+    ],
+    "packages/types": [
+      "packages/domain-core",
+      "packages/validation",
+      "apps/mmc",
+      "apps/frontoffice",
+      "apps/backoffice",
+      "apps/api",
+      "apps/worker"
+    ],
+    "packages/logger": [
+      "packages/job-queue",
+      "packages/redis-utils",
+      "packages/domain-core",
+      "packages/validation",
+      "apps/mmc",
+      "apps/frontoffice",
+      "apps/backoffice",
+      "apps/api",
+      "apps/worker"
+    ],
+    "packages/config": [],
+    "packages/redis-utils": [
+      "apps/api"
+    ],
+    "packages/ui-system": [
+      "apps/mmc"
+    ],
+    "packages/api-client": [
+      "apps/mmc",
+      "apps/frontoffice",
+      "apps/backoffice"
+    ],
+    "packages/domain-core": [
+      "apps/api",
+      "apps/worker"
+    ],
+    "packages/validation": [
+      "packages/domain-core",
+      "apps/api"
+    ]
+  },
   "edges": [
     {
       "from": "packages/job-queue",
@@ -3840,5 +4002,6 @@
       "from": "apps/worker",
       "to": "packages/types"
     }
-  ]
+  ],
+  "violations": []
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-01T22:32:09.784Z",
+  "generated_at": "2026-04-01T22:29:14.181Z",
   "layers": [
     {
       "name": "infrastructure",
@@ -25,27 +25,19 @@
   ],
   "modules_by_layer": {
     "runtime": [
-      "apps/mmc",
-      "apps/frontoffice",
-      "apps/backoffice",
       "apps/api",
+      "apps/backoffice",
+      "apps/frontoffice",
+      "apps/mmc",
       "apps/worker",
+      "packages/api-client",
       "packages/job-queue",
       "packages/types",
-      "packages/api-client",
       "packages/validation"
     ],
-    "infrastructure": [
-      "packages/logger",
-      "packages/config",
-      "packages/redis-utils"
-    ],
-    "ui": [
-      "packages/ui-system"
-    ],
-    "domain": [
-      "packages/domain-core"
-    ]
+    "infrastructure": ["packages/config", "packages/logger", "packages/redis-utils"],
+    "domain": ["packages/domain-core"],
+    "ui": ["packages/ui-system"]
   },
   "rules": {},
   "critical_violations": [],

@@ -349,6 +349,78 @@ Block if:
 
 ---
 
+## 15. Distributed Lock Ownership Verification (CRITICAL)
+
+**NEW RULE** — Prevents lock hijacking by another worker after TTL expiry.
+
+When reviewing Redis-based advisory locks for critical operations:
+
+You MUST verify:
+
+- **Owner Token in Lock Value**: Lock SET operation stores unique owner token: `redis.set(lockKey, ownerToken, {NX, PX: duration})` where `ownerToken = '${resource_id}:${random()}'`.
+- **Compare-and-Delete on Release**: Lock release NEVER uses bare `del(lockKey)`. Must use Lua script: `if redis.call('GET', key) == token then redis.call('DEL', key) else return 0 end`.
+- **Owner Validation Before Mutation**: After acquiring lock, code verifies owner before performing protected operation; if owner mismatch, ROLLBACK instead of proceeding.
+- **TTL Prevents Stale Lock**: Lock includes PX/EX expiry; recommend 60-120 seconds for background jobs.
+
+Block if:
+
+- Lock released with bare `del(lockKey)` without owner verification.
+- No owner token stored in lock value.
+- Multiple attempts to lock with same ID could collide without unique owner.
+- Stale lock can block all workers indefinitely (missing TTL).
+
+---
+
+## 16. Atomic Deduplication Pattern (HIGH)
+
+**NEW RULE** — Prevents duplicate job processing like the dedup race condition.
+
+When reviewing deduplication logic for queues or batch operations:
+
+You MUST verify:
+
+- **Claim Before Side Effect**: Dedup claim acquired ATOMICALLY (SET NX with EX) BEFORE any queue operation or database mutation.
+- **Rollback on Failure**: If side effect fails after claim succeeds, dedup key ROLLED BACK (deleted) to allow retry.
+- **Explicit Try/Catch**: Dedup acquisition success checked explicitly; job enqueueing wrapped in try/catch with explicit rollback in catch: `catch { await redis.del(dedupKey) }`.
+- **Idempotent Claim Check**: Multiple calls to check dedup status must return same result; should not re-acquire.
+
+Block if:
+
+- Check-then-act pattern used (exists → lpush → set): opens race window.
+- No rollback on enqueue failure.
+- Two workers can enqueue same job due to missing atomicity.
+
+---
+
+## 17. Exception Handling Completeness (HIGH)
+
+**NEW RULE** — Prevents silent errors and incomplete error contracts.
+
+When reviewing error handling in request handlers:
+
+You MUST verify:
+
+- **Comprehensive Catch**: Error handler catches ALL relevant error types, not just domain errors. Include:
+  - Domain errors (ScheduledExamError, etc.)
+  - Validation errors (ZodError)
+  - Parse errors (SyntaxError for JSON.parse)
+  - Infrastructure errors (DbError if applicable)
+  - Generic Error fallback
+- **No Silent Catches**: Every catch block either:
+  - Returns error response to client, OR
+  - Re-throws after logging
+- **Correct HTTP Status**: Each error type mapped to correct HTTP status (400, 422, 500, etc.) via error contract.
+- **Consistent Response Format**: All errors return same shape: `{ success: false, data: null, error: { code, message } }`.
+
+Block if:
+
+- Try block contains JSON parsing without SyntaxError handler.
+- Catch block catches only domain errors; other errors escape.
+- Silent catch blocks exist (catch `{}` or `catch (e) {}`).
+- Error response format inconsistent across endpoints.
+
+---
+
 # THREAT MODELING (STRIDE)
 
 For new features or significant changes, document the threat model:

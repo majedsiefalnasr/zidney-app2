@@ -1,6 +1,6 @@
 # Zidney Architecture Summary
 
-Generated: 2026-04-01T22:32:09.784Z
+Generated: 2026-04-01T22:29:14.237Z
 Schema Version: 1.0.0
 
 ## System Layers Overview
@@ -35,14 +35,9 @@ Schema Version: 1.0.0
 
 ## Applications Overview
 
-### mmc
+### api
 
-- Path: apps/mmc
-- Type: Application
-
-### frontoffice
-
-- Path: apps/frontoffice
+- Path: apps/api
 - Type: Application
 
 ### backoffice
@@ -50,9 +45,14 @@ Schema Version: 1.0.0
 - Path: apps/backoffice
 - Type: Application
 
-### api
+### frontoffice
 
-- Path: apps/api
+- Path: apps/frontoffice
+- Type: Application
+
+### mmc
+
+- Path: apps/mmc
 - Type: Application
 
 ### worker
@@ -62,19 +62,9 @@ Schema Version: 1.0.0
 
 ## Packages Overview
 
-### job-queue
+### api-client
 
-- Path: packages/job-queue
-- Type: Package
-
-### types
-
-- Path: packages/types
-- Type: Package
-
-### logger
-
-- Path: packages/logger
+- Path: packages/api-client
 - Type: Package
 
 ### config
@@ -82,24 +72,34 @@ Schema Version: 1.0.0
 - Path: packages/config
 - Type: Package
 
+### domain-core
+
+- Path: packages/domain-core
+- Type: Package
+
+### job-queue
+
+- Path: packages/job-queue
+- Type: Package
+
+### logger
+
+- Path: packages/logger
+- Type: Package
+
 ### redis-utils
 
 - Path: packages/redis-utils
 - Type: Package
 
+### types
+
+- Path: packages/types
+- Type: Package
+
 ### ui-system
 
 - Path: packages/ui-system
-- Type: Package
-
-### api-client
-
-- Path: packages/api-client
-- Type: Package
-
-### domain-core
-
-- Path: packages/domain-core
 - Type: Package
 
 ### validation
