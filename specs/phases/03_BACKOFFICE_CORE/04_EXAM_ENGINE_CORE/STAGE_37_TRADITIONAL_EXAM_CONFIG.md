@@ -9,18 +9,19 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-04-01T00:02:00Z
+Last Updated: 2026-04-02T00:30:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Traditional exam CRUD with division scoping
-- Delivery settings (relax/chrono mode, review flags, certificates)
-- Section/subsection/question content structure from template
-- Workflow status transitions with structural validation
-- Score snapshot on question assignment
-- Template validation on creation (query template tables)
+- Migration 015: 3 new tables (traditional_exams, traditional_exam_settings, traditional_exam_questions) + 2 ALTER TABLE on stubs (sections, subsections)
+- Domain-core module: service, repository, types, errors, validators, dependency-registry, barrel index (7 files)
+- Validation schemas: 13 Zod schemas for all endpoints
+- Route handlers: 17 handlers + router factory + helpers (19 files)
+- Custom status transitions (DRAFT → UNDER_REVIEW → APPROVED → ENABLED → DISABLED)
+- Template initialization on creation (atomic TX)
+- Division-scoped access filtering at SQL layer
 
 Deferred Scope:
 
@@ -32,10 +33,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
