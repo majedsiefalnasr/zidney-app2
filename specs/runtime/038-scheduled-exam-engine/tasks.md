@@ -2,7 +2,7 @@
 
 **Stage:** STAGE_38 — Scheduled Exam Engine
 **Phase:** 03_BACKOFFICE_CORE / 04_EXAM_ENGINE_CORE
-**Total Tasks:** 39
+**Total Tasks:** 40
 **Generated:** 2026-04-01
 **Spec:** `specs/runtime/038-scheduled-exam-engine/spec.md`
 **Plan:** `specs/runtime/038-scheduled-exam-engine/plan.md`
@@ -80,6 +80,7 @@ T031–T036 ──────────────┴──► T037–T039 (
 - [ ] T024 [P] [US4] POST/attempts/:attemptId/heartbeat handler (studentGuard) — validate ownership + not submitted, update last_heartbeat_at=NOW(), enqueue BullMQ dedup job on time expiry (Clarification Q2), return 200 with remaining_seconds — `apps/api/src/routes/backoffice/scheduled-exams/heartbeat.ts`
 - [ ] T025 [P] [US3] POST/attempts/:attemptId/submit handler (studentGuard) — idempotent submit, late-submission returns HTTP 200 with auto_submitted=true (Clarification Q4), return 200 — `apps/api/src/routes/backoffice/scheduled-exams/submit-attempt.ts`
 - [ ] T026 Create router factory (createScheduledExamsRouter — 10 routes in static-before-parameterised order, readGuard + writeGuard + studentGuard applied per route) — `apps/api/src/routes/backoffice/scheduled-exams/index.ts`
+- [ ] T040 Register scheduled-exams router in app.ts under `/api/v1/backoffice/workspace` mount point to ensure tenant → licenseEnforcementMiddleware → auth chain is applied to all 10 routes (drift analysis remediation C2/A1) — `apps/api/src/app.ts`
 
 ---
 
@@ -109,7 +110,7 @@ T031–T036 ──────────────┴──► T037–T039 (
 - [ ] T031 [P] Unit tests — hash function stability: known input → known SHA-256 output, MCQ vs TRADITIONAL field list divergence, updated_at change → different hash, missing field → deterministic behaviour — `packages/domain-core/src/scheduled-exam/__tests__/scheduled-exam-hash.test.ts`
 - [ ] T032 [P] Unit tests — time gate functions: isBeforeWindow/isAfterWindow at boundaries, computeAttemptEndTime MIN logic (with duration, without duration, duration past window), isConnectionTimedOut 25s→false/35s→true, computeRemainingSeconds negative→0 — `packages/domain-core/src/scheduled-exam/__tests__/scheduled-exam-time.test.ts`
 - [ ] T033 [P] Unit tests — workflow rules: canTransitionToEnabled all blocked paths (not ENABLED, archived, base_exam_modified), getImmutableFields per status×attempt-count matrix — `packages/domain-core/src/scheduled-exam/__tests__/scheduled-exam-workflow.test.ts`
-- [ ] T034 Integration tests — 30+ API scenarios: create (201/422 BASE_EXAM_NOT_ENABLED/409 CODE_CONFLICT/422 INVALID_TIME_WINDOW), update (200/409 FIELD_IMMUTABLE/409 HAS_ATTEMPTS), delete (200/409), workflow (200/422), re-approve (200/422), start-attempt (201 with remaining_seconds/403 NOT_STARTED/403 CLOSED/403 ALREADY_ATTEMPTED), heartbeat (200/410), submit (200 always including late path), tenant isolation (cross-tenant attempt → 404) — `apps/api/src/routes/backoffice/scheduled-exams/__tests__/scheduled-exams.integration.test.ts`
+- [ ] T034 Integration tests — 30+ API scenarios: create (201/422 BASE_EXAM_NOT_ENABLED/409 CODE_CONFLICT/422 INVALID_TIME_WINDOW), update (200/409 FIELD_IMMUTABLE/409 HAS_ATTEMPTS), delete (204/409), workflow (200/422), re-approve (200/422), start-attempt (201 with remaining_seconds/403 NOT_STARTED/403 CLOSED/403 ALREADY_ATTEMPTED), heartbeat (200/410), submit (200 always including late path with auto_submitted:true), tenant isolation (cross-tenant attempt → 404) — `apps/api/src/modules/backoffice/scheduled-exams/__tests__/scheduled-exams.integration.test.ts`
 - [ ] T035 [P] Worker tests — auto-submit: expired attempt → submitted with correct reason, already-submitted → idempotent skip, lock acquisition failure → skip, concurrent workers → single commit, ROLLBACK on failure → attempt remains active for next cycle — `apps/worker/src/jobs/__tests__/auto-submit-scheduled-attempt.test.ts`
 - [ ] T036 [P] Migration tests — migration 016 up: scheduled_exams created + unique code index enforced; migration 017 up: 6 new attempts columns + 3 partial indexes; re-run both migrations → idempotent (IF NOT EXISTS) — `apps/api/src/db/tenant/migrations/__tests__/scheduled-exam-migrations.test.ts`
 
@@ -160,17 +161,18 @@ T031–T036 ──────────────┴──► T037–T039 (
 | 1             | plan.md P0 = 3 tasks; this file = 5 tasks for P0                                                   | plan.md P0-3 (Drizzle schema updates) touches 3 files (new schema, update attempts schema, update index). Split into T003/T004/T005 per atomic-task rule ("one file per task where possible").                                                    |
 | 2             | Validation schemas added as standalone T014                                                        | plan.md describes `packages/validation/src/backoffice/scheduled-exams.schemas.ts` in the P2 narrative but does not assign it a P2-N task number. Adding as T014 satisfies the atomic-task rule and ensures the schema file has an explicit owner. |
 | 3             | plan.md groups P3 (worker) before P4 (job-queue); this file swaps order to P3=job-queue, P4=worker | Worker imports job type interfaces from `packages/job-queue`. Correct dependency ordering requires job-queue types (T027) before worker handlers (T028–T030). No functional change — only ordering in this file.                                  |
-| **Net delta** | **+3 tasks (36 → 39)**                                                                             | All additions are atomic decompositions of existing plan tasks; no new features introduced.                                                                                                                                                       |
+| 4             | T040 added: `app.ts` route registration                                                            | Drift analysis (C2/A1) identified that no task covered mounting the router in `app.ts` under `/api/v1/backoffice/workspace`. Without this, all 10 routes are unreachable. T040 added as required remediation.                                     |
+| **Net delta** | **+4 tasks (36 → 40)**                                                                             | All additions are atomic decompositions or gap-fills of existing plan tasks; no new features introduced.                                                                                                                                          |
 
 ---
 
 ## Risk Overview
 
-| Risk Level | Count | Task IDs                                                                                             |
-| ---------- | ----- | ---------------------------------------------------------------------------------------------------- |
-| HIGH       | 7     | T001, T002, T011, T012, T023, T028, T029                                                             |
-| MEDIUM     | 15    | T003, T004, T005, T010, T014, T016–T022, T025, T030, T034                                            |
-| LOW        | 17    | T006, T007, T008, T009, T013, T015, T024, T026, T027, T031, T032, T033, T035, T036, T037, T038, T039 |
+| Risk Level | Count | Task IDs                                                                                                   |
+| ---------- | ----- | ---------------------------------------------------------------------------------------------------------- |
+| HIGH       | 7     | T001, T002, T011, T012, T023, T028, T029                                                                   |
+| MEDIUM     | 15    | T003, T004, T005, T010, T014, T016–T022, T025, T030, T034                                                  |
+| LOW        | 18    | T006, T007, T008, T009, T013, T015, T024, T026, T027, T031, T032, T033, T035, T036, T037, T038, T039, T040 |
 
 **HIGH risk rationale:**
 
