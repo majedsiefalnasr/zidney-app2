@@ -7,18 +7,17 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-04-01T00:02:00Z
+Last Updated: 2026-04-01T00:03:00Z
 
-Scope Defined:
+Scope Planned:
 
-- 4 tenant-scoped tables (mcq_exams, mcq_exam_settings, mcq_exam_questions, mcq_exam_auto_criteria)
-- 14 REST API endpoints for exam CRUD, settings, questions, criteria, workflow
-- Manual and automatic question selection modes
-- Workflow integration via shared engine (entity type: mcq_exam)
-- Delivery mode configuration (Relax/Chrono/Rush)
-- Deletion guards and immutability constraints
+- 29 new files + 5 modified files across migration, schema, domain, validation, routes
+- Migration 014: 4 tables, FK constraints, indexes, CHECK constraints (schema 1.19.0 → 1.20.0)
+- Domain-core module: types, errors, repository, service, validators, dependency-registry
+- 14 Hono route handlers with Zod validation
+- Workflow engine integration (mcq_exam entity type)
 
 Deferred Scope:
 
@@ -28,10 +27,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
