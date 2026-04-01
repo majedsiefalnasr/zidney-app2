@@ -198,7 +198,7 @@ export async function countQuestions(
     `SELECT COUNT(*)::text AS count FROM traditional_questions q ${where}`,
     params
   )
-  return parseInt(result.rows[0]?.count ?? '0', 10)
+  return Number.parseInt(result.rows[0]?.count ?? '0', 10)
 }
 
 /** Build WHERE clause for list/count queries. */
@@ -375,7 +375,7 @@ export async function softDeleteQuestionRow(
   actorId: string | null
 ): Promise<void> {
   await db.query(
-    `UPDATE traditional_questions SET deleted_at = NOW(), updated_at = NOW(), updated_by = $2 WHERE id = $1`,
+    'UPDATE traditional_questions SET deleted_at = NOW(), updated_at = NOW(), updated_by = $2 WHERE id = $1',
     [questionId, actorId]
   )
 }
