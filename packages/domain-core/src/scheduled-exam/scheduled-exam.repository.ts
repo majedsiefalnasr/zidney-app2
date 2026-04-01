@@ -211,10 +211,14 @@ export async function updateWorkflowStatus(
   return res.rows[0] ?? null
 }
 
-export async function setBaseExamModified(db: DbClient, baseExamId: string): Promise<number> {
+export async function setBaseExamModified(
+  db: DbClient,
+  baseExamId: string,
+  workspaceId: string
+): Promise<number> {
   const res = await db.query(
-    "UPDATE scheduled_exams SET base_exam_modified = true, updated_at = NOW() WHERE base_exam_id = $1 AND status IN ('DRAFT','UNDER_REVIEW','APPROVED') AND deleted_at IS NULL",
-    [baseExamId]
+    "UPDATE scheduled_exams SET base_exam_modified = true, updated_at = NOW() WHERE base_exam_id = $1 AND workspace_id = $2 AND status IN ('DRAFT','UNDER_REVIEW','APPROVED') AND deleted_at IS NULL",
+    [baseExamId, workspaceId]
   )
   return res.rowCount ?? 0
 }

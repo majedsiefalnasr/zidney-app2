@@ -373,11 +373,13 @@ export async function submitAttempt(
 export async function notifyBaseExamModified(
   db: DbClient,
   baseExamId: string,
+  workspaceId: string,
   audit: AuditContext
 ): Promise<void> {
-  const count = await repo.setBaseExamModified(db, baseExamId)
+  const count = await repo.setBaseExamModified(db, baseExamId, workspaceId)
   logger.info('base_exam_modified_flag_set', {
     base_exam_id: baseExamId,
+    workspace_id: workspaceId,
     affected_exams: count,
     correlation_id: audit.correlation_id,
   })

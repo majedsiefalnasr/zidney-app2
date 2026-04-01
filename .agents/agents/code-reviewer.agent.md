@@ -114,6 +114,29 @@ Block merge if:
 
 ---
 
+## 3b. SELECT FOR UPDATE & Timeout Re-validation (CRITICAL)
+
+**NEW RULE** — Prevents race conditions like auto-submit timeout bug.
+
+When reviewing code that uses SELECT FOR UPDATE (row-level locking) for update-critical operations:
+
+You MUST verify:
+
+- **Lock → Re-check Pattern**: After acquiring lock (SELECT FOR UPDATE), code re-validates all conditions that triggered the operation before mutating state.
+- **No Stale Assumptions**: Conditions checked BEFORE lock cannot be trusted; re-check them INSIDE lock or ROLLBACK.
+- **Timeout/Window Re-validation**: For time-sensitive operations (auto-submit on timeout), re-evaluate timestamps (last_heartbeat_at, scheduled_end_time) after lock acquisition against current time. Reject if no longer eligible.
+- **Idempotent Re-checks**: Re-check must be identical to initial check (or more conservative); must ROLLBACK if re-check fails.
+- **Clear ROLLBACK Path**: If re-check fails, code explicitly ROLLBACK and RETURN (log as idempotent skip, not error).
+
+Block merge if:
+
+- SELECT FOR UPDATE followed immediately by UPDATE without re-checking conditions.
+- Race condition window exists between lock acquisition and mutation.
+- Timeout logic assumes client clock or pre-lock timestamp; doesn't re-check server time.
+- No ROLLBACK path if re-check fails.
+
+---
+
 ## 4. Observability Compliance (CRITICAL)
 
 You MUST verify:

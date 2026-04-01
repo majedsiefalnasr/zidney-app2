@@ -22,6 +22,7 @@
 import { logger } from '@zidney/logger'
 import { Pool } from 'pg'
 import type { RedisClientType } from 'redis'
+import { createClient } from 'redis'
 import { runScheduledExamDispatcherCycle } from '../jobs/scheduled-exam-dispatcher'
 import { startDLQConsumer, stopDLQConsumer } from './dlq-consumer'
 import { startGradeJobsConsumer, stopGradeJobsConsumer } from './job-consumer'
@@ -94,6 +95,29 @@ export async function initializeWorker(): Promise<void> {
         action: 'master_db_connected',
       },
       'Master database pool created'
+    )
+
+    // 2b. Initialize Redis client for dispatcher cycle
+    const redisUrl = process.env.REDIS_URL
+    if (!redisUrl) {
+      throw new Error('REDIS_URL environment variable not set')
+    }
+
+    workerState.redisClient = createClient({
+      url: redisUrl,
+      socket: {
+        reconnectStrategy: (retries) => Math.min(retries * 50, 500),
+      },
+    })
+
+    await workerState.redisClient.connect()
+
+    logger.info(
+      {
+        service: 'worker',
+        action: 'redis_connected',
+      },
+      'Redis client connected'
     )
 
     // 3. Set up signal handlers BEFORE starting consumers
@@ -314,6 +338,29 @@ export async function shutdownWorker(exitCode: number = 0): Promise<void> {
             error: err instanceof Error ? err.message : String(err),
           },
           'Error closing tenant database pool'
+        )
+      }
+    }
+
+    // 4. Close Redis client connection
+    if (workerState.redisClient) {
+      try {
+        await workerState.redisClient.quit()
+        logger.debug(
+          {
+            service: 'worker',
+            action: 'redis_client_closed',
+          },
+          'Redis client closed'
+        )
+      } catch (err) {
+        logger.warn(
+          {
+            service: 'worker',
+            action: 'redis_client_close_error',
+            error: err instanceof Error ? err.message : String(err),
+          },
+          'Error closing Redis client'
         )
       }
     }

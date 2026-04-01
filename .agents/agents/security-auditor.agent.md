@@ -282,6 +282,73 @@ Block if:
 
 ---
 
+## 12. Database Operation Tensor Scoping (Multi-Tenant Safety)
+
+**NEW RULE** — Prevents cross-tenant data mutations like setBaseExamModified bug.
+
+When reviewing UPDATE/DELETE/INSERT queries on shared tenant tables:
+
+You MUST verify:
+
+- **Mandatory WHERE Clause**: Every mutation includes workspace_id/organization_id filter.
+- **No Bulk Operations Without Scope**: Batch updates must filter by organization_id.
+- **Function Signature Includes Scoping**: Repository methods that update shared data accept workspace_id/org_id parameter.
+- **Caller Passes Scoping Context**: Service layer explicitly passes workspace_id to repository methods, never omits it.
+- **No Cross-Workspace Updates**: Validate that UPDATE WHERE base_exam_id = $1 (without org_id) never affects multiple workspaces.
+
+Block if:
+
+- UPDATE/DELETE lacks workspace_id filter.
+- Repository method mutates data without org_id parameter.
+- Service assumes implicit scoping.
+- Query could affect multiple tenants unintentionally.
+
+---
+
+## 13. Worker Service Initialization & Cleanup
+
+**NEW RULE** — Prevents resource leaks and null pointer exceptions in background workers.
+
+When reviewing worker startup and shutdown:
+
+You MUST verify:
+
+- **Resource Initialization**: All external resources (Redis, DB pools, message clients) created and assigned to worker state during startup.
+- **No Null References in Cycles**: Periodic jobs (intervals, scheduled tasks) never receive null client references.
+- **Graceful Cleanup**: Shutdown handler closes all resources (connection.quit(), pool.end(), client.disconnect()).
+- **Error Handling in Cleanup**: Cleanup catches and logs errors per resource (not swallowing completely but ensuring all resources attempt closure).
+- **Idempotent Shutdown**: Multiple shutdown calls safe; state flags prevent double-close.
+
+Block if:
+
+- Resource passed to periodic job is null/uninitialized.
+- Resource cleanup missing (connection leak possible).
+- Shutdown doesn't handle cleanup errors gracefully.
+
+---
+
+## 14. Type-Safe Enum Validation Against Database Constraints
+
+**NEW RULE** — Prevents enum/CHECK constraint mismatches like ForcedSubmissionReason.
+
+When reviewing enum types mapped to database CHECK constraints:
+
+You MUST verify:
+
+- **Type Alias Matches CHECK**: TypeScript union type (e.g., `type ForcedSubmissionReason = 'X' | 'Y'`) exactly matches SQL CHECK constraint values.
+- **No Legacy Aliases**: Remove deprecated enum values from type; archive in migration comments only.
+- **Bidirectional Search**: Search codebase for where enum value is SET and where it's READ. Both must use current values.
+- **Tests Validate Constraint**: Integration tests attempt INSERT with each enum value; DB should accept and reject appropriately.
+- **Migration Documents Mapping**: If renaming enum values, migration includes comment: `-- Renamed: OLD_VALUE → NEW_VALUE`.
+
+Block if:
+
+- TypeScript enum does not match SQL CHECK.
+- Code sets enum value not in type union.
+- Tests missing for edge cases.
+
+---
+
 # THREAT MODELING (STRIDE)
 
 For new features or significant changes, document the threat model:

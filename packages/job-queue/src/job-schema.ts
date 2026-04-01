@@ -202,7 +202,10 @@ export function createGradeAttemptJob(
 /**
  * ForcedSubmissionReason — reason codes for auto-submission
  */
-export type ForcedSubmissionReason = 'WINDOW_EXPIRED' | 'DURATION_EXPIRED' | 'CONNECTION_TIMEOUT'
+export type ForcedSubmissionReason =
+  | 'ATTEMPT_TIME_EXCEEDED'
+  | 'SCHEDULED_END_REACHED'
+  | 'CONNECTION_TIMEOUT'
 
 /**
  * AutoSubmitScheduledAttemptJob — enqueued per attempt when force-submit is triggered

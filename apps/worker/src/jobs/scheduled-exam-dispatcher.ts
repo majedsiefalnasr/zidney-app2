@@ -63,9 +63,9 @@ function determineForcedReason(attempt: ExpiredAttemptRow, now: Date): ForcedSub
     return 'CONNECTION_TIMEOUT'
   }
   if (attempt.attempt_end_time && now <= new Date(attempt.attempt_end_time)) {
-    return 'WINDOW_EXPIRED'
+    return 'SCHEDULED_END_REACHED'
   }
-  return 'DURATION_EXPIRED'
+  return 'ATTEMPT_TIME_EXCEEDED'
 }
 
 /**
@@ -171,7 +171,7 @@ export async function runScheduledExamDispatcherCycle(
         }
 
         const queueKey = `queue:auto_submit_scheduled_attempt`
-        await redis.lpush(queueKey, JSON.stringify(jobPayload))
+        await redis.lPush(queueKey, JSON.stringify(jobPayload))
 
         // Mark as enqueued for 120s to prevent re-enqueue in next cycle
         await redis.set(dedupKey, '1', { EX: 120 })

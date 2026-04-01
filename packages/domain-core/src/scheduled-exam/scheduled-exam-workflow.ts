@@ -81,32 +81,19 @@ export function canTransitionToEnabled(
 
 export const IMMUTABLE_WHEN_ENABLED = [
   'base_exam_id',
-  // canonical name expected by callers/tests
   'exam_type',
-  // legacy/alternate names preserved
-  'base_exam_type',
-  'code',
-  'total_marks',
-  'pass_mark',
-  'duration_minutes',
-  'question_pool_id',
+  'start_datetime',
+  'end_datetime',
+  'late_tolerance_minutes',
 ] as const
 
 export const IMMUTABLE_WITH_ATTEMPTS = [
   'base_exam_id',
   'exam_type',
-  'base_exam_type',
-  'code',
-  'total_marks',
-  'pass_mark',
-  'duration_minutes',
-  'question_pool_id',
-  // include both canonical and legacy window field names
-  'window_start',
-  'window_end',
   'start_datetime',
   'end_datetime',
-  // attempt control
+  'late_tolerance_minutes',
+  'code',
   'allow_single_attempt',
 ] as const
 

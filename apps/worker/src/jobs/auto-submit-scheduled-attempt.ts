@@ -105,6 +105,38 @@ export async function handleAutoSubmitScheduledAttempt(
       return
     }
 
+    // 4b. Re-evaluate timeout eligibility after lock acquisition
+    const now = new Date()
+    const connectionTimeoutMs = 30_000
+    let stillExpired = false
+
+    if (attempt.last_heartbeat_at) {
+      const timeSinceHeartbeat = now.getTime() - new Date(attempt.last_heartbeat_at).getTime()
+      if (timeSinceHeartbeat > connectionTimeoutMs) {
+        stillExpired = true
+      }
+    }
+
+    if (attempt.scheduled_end_time && now <= new Date(attempt.scheduled_end_time)) {
+      stillExpired = true
+    }
+
+    if (!stillExpired) {
+      await client.query('ROLLBACK')
+      logger.info(
+        'Auto-submit skipped — attempt no longer eligible (heartbeat recent or window open)',
+        {
+          correlation_id,
+          workspace_id,
+          attempt_id,
+          scheduled_exam_id,
+          last_heartbeat_at: attempt.last_heartbeat_at,
+          scheduled_end_time: attempt.scheduled_end_time,
+        }
+      )
+      return
+    }
+
     // 5. Determine forced_submission_reason (job-provided reason is authoritative)
     const reason = forced_submission_reason
 
