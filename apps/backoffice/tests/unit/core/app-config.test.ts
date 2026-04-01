@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import type { AppConfig } from '../../../src/core/config/app-config'
+import {
+  type AppConfig,
+  appConfig,
+  featureFlags,
+  getApiBase,
+  isDev,
+  isProd,
+  isStaging,
+} from '../../../src/core/config/app-config'
 import { createEnvConfig } from '../../../src/core/config/env'
 import { createFeatureFlags } from '../../../src/core/config/feature-flags'
 
@@ -33,6 +41,11 @@ describe('appConfig aggregate (Backoffice)', () => {
   it('appConfig.flags is frozen', () => {
     const config = buildTestAppConfig()
     expect(Object.isFrozen(config.flags)).toBe(true)
+  })
+
+  it('runtime appConfig exports share the same frozen flag reference', () => {
+    expect(Object.isFrozen(appConfig)).toBe(true)
+    expect(appConfig.flags).toBe(featureFlags)
   })
 })
 
@@ -70,5 +83,12 @@ describe('mode helpers (Backoffice)', () => {
     const config = buildTestAppConfig({ appEnv: 'staging' })
     expect(config.env.appEnv === 'staging').toBe(true)
     expect(config.env.appEnv === 'development').toBe(false)
+  })
+
+  it('runtime helper exports reflect the current env config', () => {
+    expect(isDev()).toBe(appConfig.env.appEnv === 'development')
+    expect(isProd()).toBe(appConfig.env.appEnv === 'production')
+    expect(isStaging()).toBe(appConfig.env.appEnv === 'staging')
+    expect(getApiBase()).toBe(appConfig.env.apiBaseUrl)
   })
 })

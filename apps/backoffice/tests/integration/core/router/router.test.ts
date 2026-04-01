@@ -12,7 +12,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { registerGuards } from '../../../../src/core/guards'
 import { createAuthGuard } from '../../../../src/core/guards/auth.guard'
 import { createWorkspaceGuard } from '../../../../src/core/guards/workspace.guard'
-import { createAppRouter } from '../../../../src/core/router'
+import { createAppRouter, routes } from '../../../../src/core/router'
 
 // ─── Stub component for test router ──────────────────────────────────────────
 const StubComponent = defineComponent({ template: '<div/>' })
@@ -106,6 +106,14 @@ describe('createAppRouter (Backoffice)', () => {
     const router = createAppRouter(createMemoryHistory())
     const resolved = router.resolve('/select-workspace')
     expect(resolved.name).toBe('bo-workspace-selector')
+  })
+
+  it('loads every lazy route component', async () => {
+    for (const route of routes) {
+      expect(typeof route.component).toBe('function')
+      const componentModule = await (route.component as () => Promise<{ default: unknown }>)()
+      expect(componentModule.default).toBeDefined()
+    }
   })
 })
 
