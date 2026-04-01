@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-03-31T13:26:26.175Z",
+  "generated_at": "2026-04-01T08:35:15.824Z",
   "metadata": {
     "total_modules": 14,
     "total_violations": 0,
     "generation_time_ms": 0,
     "source_hash": "6493a7d6",
-    "source_timestamp": "2026-03-31T13:26:26.169Z",
+    "source_timestamp": "2026-04-01T08:35:15.809Z",
     "generator_version": "1.0.0"
   },
   "layers": [
@@ -309,15 +309,15 @@
     "hotspots": [
       {
         "module": "packages/logger",
-        "violation_count": 364
+        "violation_count": 374
       },
       {
         "module": "packages/domain-core",
-        "violation_count": 213
+        "violation_count": 225
       },
       {
         "module": "packages/validation",
-        "violation_count": 114
+        "violation_count": 124
       },
       {
         "module": "packages/types",

@@ -11,7 +11,7 @@ import { defineComponent } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { registerGuards } from '../../../../src/core/guards'
 import { createAuthGuard } from '../../../../src/core/guards/auth.guard'
-import { createAppRouter } from '../../../../src/core/router'
+import { createAppRouter, routes } from '../../../../src/core/router'
 
 // ─── Stub component for test router ──────────────────────────────────────────
 const StubComponent = defineComponent({ template: '<div/>' })
@@ -93,6 +93,14 @@ describe('createAppRouter (Frontoffice)', () => {
     const resolved = router.resolve('/error')
     expect(resolved.name).toBe('fo-error')
     expect(resolved.meta.public).toBe(true)
+  })
+
+  it('loads every lazy route component', async () => {
+    for (const route of routes) {
+      expect(typeof route.component).toBe('function')
+      const componentModule = await (route.component as () => Promise<{ default: unknown }>)()
+      expect(componentModule.default).toBeDefined()
+    }
   })
 })
 

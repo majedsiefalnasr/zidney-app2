@@ -153,10 +153,21 @@ export function detectChangedFiles(options: { baseRef: string; all: boolean }): 
 /**
  * Map changed file paths to their parent module paths using prefix matching.
  */
-export function mapFilesToModules(files: string[], brainModules: string[]): string[] {
+export function mapFilesToModules(
+  files: string[],
+  brainModules?: string[] | Record<string, unknown>
+): string[] {
+  // Normalize brainModules into an array of module path strings.
+  const modules: string[] = Array.isArray(brainModules)
+    ? brainModules
+    : brainModules && typeof brainModules === 'object'
+      ? Object.keys(brainModules)
+      : []
+
   const moduleSet = new Set<string>()
   for (const file of files) {
-    for (const mod of brainModules) {
+    for (const mod of modules) {
+      if (!mod) continue
       if (file.startsWith(`${mod}/`) || file === mod) {
         moduleSet.add(mod)
         break

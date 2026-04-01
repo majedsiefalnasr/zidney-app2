@@ -47,7 +47,7 @@ function getLatestLogFile(): string | null {
 describe('validate-execution integration test', () => {
   it('bun ai:validate spawns and produces a valid execution log', () => {
     // Run the validate-execution script as subprocess
-    const result = spawnSync(process.execPath, ['run', 'ai:validate'], {
+    const result = spawnSync('bun', ['run', 'ai:validate'], {
       encoding: 'utf8',
       timeout: 150_000, // 150s — generous for CI
       cwd: process.cwd(),

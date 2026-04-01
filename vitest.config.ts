@@ -20,17 +20,20 @@ export default defineConfig({
     workspace: './vitest.workspace.ts',
     // Centralized coverage — no per-project coverage config
     coverage: {
+      // Vitest v1 enables coverage.all by default, which makes partial project
+      // runs count unrelated workspace files as 0% covered.
+      all: false,
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
         'dist/',
         'build/',
-        'tests/e2e/**',
-        'tests/**',
+        '**/tests/**',
         'scripts/**',
         '**/*.d.ts',
         '**/vitest.config.ts',
+        '**/vitest.workspace.ts',
         '**/playwright.config.ts',
         '**/*.config.{ts,mjs,js}',
       ],
@@ -39,11 +42,6 @@ export default defineConfig({
         functions: 85,
         statements: 85,
         branches: 80,
-        // failOnError: true is the default. Set to false until the pre-existing
-        // test failures (integration tests require DB/Redis) are resolved and a
-        // clean unit-only baseline is measured and confirmed. Re-enable once
-        // `bun run test:unit --coverage` passes all thresholds cleanly.
-        failOnError: false,
       },
     },
   },

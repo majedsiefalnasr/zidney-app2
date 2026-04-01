@@ -56,6 +56,7 @@ import { workspaceSettingsRouter } from './routes/backoffice/settings'
 import { subjectsRouter } from './routes/backoffice/subjects'
 import { tagsRouter } from './routes/backoffice/tags'
 import { teamsRouter } from './routes/backoffice/teams/index'
+import { traditionalQuestionsRouter } from './routes/backoffice/traditional-questions'
 import { translationRouter } from './routes/backoffice/translations/index'
 import { workflowRouter } from './routes/backoffice/workflow/index'
 import { createBackofficeWsRoute } from './routes/backoffice/ws'
@@ -194,6 +195,9 @@ app.route('/api/v1/backoffice/workspace', basketsRouter)
 
 // MCQ Questions endpoints — Stage 034, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', mcqQuestionsRouter)
+
+// Traditional Questions endpoints — Stage 035, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', traditionalQuestionsRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade
