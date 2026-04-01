@@ -9,19 +9,20 @@ Runtime: Backend + Redis + Worker
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-04-01T00:30:00Z
+Last Updated: 2026-04-01T00:45:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- 36 tasks across 7 phases (P0–P6)
-- 2 tenant DB migrations (016: scheduled_exams table, 017: attempts columns)
-- 10 API endpoints (admin CRUD + workflow + student attempt + heartbeat + submit)
-- Domain core module: scheduled-exam entity, hash, time gates, workflow rules, repository, service
-- Auto-submit BullMQ worker + per-tenant dispatcher
-- Job queue package extensions (2 new job types)
-- ~60 test scenarios (unit + integration + worker + migration)
+- Total: 39 atomic tasks across 7 phases (P0–P6)
+- P0: 2 migration tasks (migration 016 + 017)
+- P1: 10 domain layer tasks (schema, types, repo, service)
+- P2: 12 API tasks (helpers, 10 handlers, router)
+- P3: 3 worker tasks (processor, dispatcher, registration)
+- P4: 1 job-queue extension task
+- P5: 6 test tasks (unit + integration)
+- P6: 3 validation/governance tasks (typecheck, lint, arch:audit)
 
 Deferred Scope:
 
@@ -30,11 +31,12 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 - ADR alignment: ADR-0001, ADR-0002, ADR-0006 (no new ADR required)
+- Dependency order enforced: migrations → domain → API → worker → tests → governance
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
