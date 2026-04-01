@@ -9,33 +9,33 @@ Runtime: Backend + Redis + Worker
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-04-01T00:05:00Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-04-01T00:15:00Z
 
 Scope Defined:
 
-- Scheduled exam CRUD (create, list, get, update, soft-delete)
-- Workflow transition APPROVED → ENABLED
-- Server-side time gate enforcement with late tolerance
-- Attempt binding with `scheduled_end_time` enforcement
-- Single-attempt enforcement (transactional)
-- Heartbeat API for reconnection tracking
-- Auto-submit worker contract (force-submit on expiry/grace)
-- Immutability rules post-ENABLED and post-attempts
-- Workflow invalidation on base exam modification
-- Idempotent submission operations
+- Scheduled exam CRUD + workflow transitions
+- Server-side time gate + late tolerance enforcement
+- Attempt binding with scheduled_end_time
+- Single-attempt enforcement via `pg_try_advisory_xact_lock`
+- Heartbeat API with BullMQ dedup auto-submit trigger
+- Auto-submit worker (tenant dispatcher + per-attempt job)
+- Immutability post-ENABLED and post-attempts
+- Workflow invalidation on base exam change + re-approval
+- base_exam_snapshot_hash: SHA-256 exported constant in domain-core
 
 Deferred Scope:
 
 - Reminder dispatch job (schema captured, implementation deferred)
+- Per-exam enrollment (workspace auth sufficient for this stage)
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

@@ -1199,3 +1199,195 @@ Every log entry originating from a scheduled exam runtime event MUST include:
 | Worker Infrastructure  | Core Worker           | BullMQ/job-queue package                                    |
 | Redis                  | Infrastructure        | Distributed lock for auto-submit deduplication              |
 | License Middleware     | Core API              | Must exist before this stage ships                          |
+
+---
+
+## Clarifications
+
+### Session 2026-04-01
+
+#### Q1: base_exam_snapshot_hash — Field Set and Algorithm
+
+**Question:** FR-006 states that `base_exam_snapshot_hash` is recorded at ENABLED transition
+time as "a hash of key base exam fields," but does not specify which fields are included or
+what algorithm is used. FR-012 depends on this hash to detect post-scheduling modification.
+Without an explicit field list, divergent implementations could produce false positives or
+false negatives in modification detection.
+
+**Decision:** The snapshot hash MUST be computed as **SHA-256** of the deterministic JSON
+serialization (sorted keys, UTC ISO 8601 for all timestamps) of the following fields from the
+referenced base exam:
+
+- **MCQ** (`mcq_exams`): `id`, `workflow_status`, `title`, `duration_minutes`, `total_marks`,
+  `passing_marks`, `question_selection_mode`, `questions_count`, `updated_at`
+- **Traditional** (`traditional_exams`): `id`, `workflow_status`, `title`, `duration_minutes`,
+  `total_marks`, `passing_marks`, `topics` (serialized topic array with marks allocation),
+  `updated_at`
+
+The canonical field list MUST be maintained as a single exported constant in the domain package
+(e.g., `packages/domain-core/src/scheduled-exam/snapshot-hash-fields.ts`). FR-006 (ENABLED
+transition), FR-007 (re-approval snapshot refresh), and FR-012 (modification detection) MUST
+all reference this same constant — no inline field lists in route handlers.
+
+**Rationale:** A deterministic, documented field set prevents silent drift between hash
+computation sites. SHA-256 avoids MD5 weaknesses. Including `updated_at` ensures any
+modification (even non-structural) is captured. The domain constant enforces DRY and makes
+the contract auditable across stages.
+
+**Impact on spec:** Clarifies FR-006, FR-007, FR-012, and the `base_exam_snapshot_hash` column
+note in the Database Schema section. Adds a domain-package constant as a required deliverable.
+
+---
+
+#### Q2: Worker Multi-Tenant Iteration and Reactive-Trigger Mechanism
+
+**Question:** The Worker Contract section defines the candidate query assuming execution against
+a single tenant DB. In a database-per-tenant architecture the worker must iterate across all
+active tenant pools, but this is not specified. Additionally, the spec states the worker "MUST
+also be triggered reactively if a heartbeat endpoint detects `current_time > attempt_end_time`"
+without specifying the mechanism (inline call, job enqueue, Redis pub/sub), creating a risk of
+tight coupling or SLA violations on the heartbeat path.
+
+**Decision:**
+
+1. **Multi-tenant iteration:** The worker job MUST receive a `tenantSlug` parameter and operate
+   against a single tenant's DB pool per job invocation. A separate "tenant dispatcher" (running
+   at the same or lower frequency) enqueues one `scheduled-exam-auto-submit` BullMQ job per
+   active tenant that has scheduled exams with open windows. The dispatcher is lightweight and
+   stateless; it reads active tenant slugs from the master DB registry.
+
+2. **Reactive trigger from heartbeat:** When the heartbeat endpoint (FR-009) detects
+   `current_time > attempt_end_time`, it MUST enqueue a BullMQ `auto-submit` job with a
+   deduplication job ID of `auto_submit:{attempt_id}`. It MUST NOT call the worker function
+   inline. The heartbeat endpoint returns immediately after enqueueing — the submission is
+   processed asynchronously on the next available worker cycle. This preserves the p95 < 100ms
+   SLA on the heartbeat endpoint (NFR-006).
+
+**Rationale:** Inline worker execution from the HTTP request path would violate the heartbeat
+latency SLA when submission processing is slow. BullMQ job deduplication prevents
+double-enqueueing on rapid heartbeat retries; the idempotency re-check inside the worker
+prevents double-submission regardless. Per-tenant dispatching is the only safe completion
+model for database-per-tenant architecture.
+
+**Impact on spec:** Clarifies the Worker Contract trigger section, aligns with NFR-006
+(heartbeat latency) and NFR-004 (tenant isolation). Adds tenant dispatcher as a required
+worker deliverable.
+
+---
+
+#### Q3: Single-Attempt Race Condition — Lock Strategy Correction
+
+**Question:** BR-008 specifies `SELECT COUNT(*) FROM attempts WHERE user_id = ? AND scheduled_exam_id = ? WITH LOCK`
+for single-attempt enforcement, but `WITH LOCK` is not valid PostgreSQL syntax. More critically,
+`SELECT COUNT(*) FOR UPDATE` does not lock non-existent rows, meaning the phantom-read race
+condition (two concurrent `COUNT() = 0` reads before either INSERT commits) is not actually
+prevented by a row-level lock on existing rows.
+
+**Decision:** Single-attempt enforcement MUST use a **PostgreSQL advisory lock** strategy:
+
+1. At the start of the attempt-start transaction, acquire a transaction-scoped advisory lock:
+
+   ```sql
+   SELECT pg_try_advisory_xact_lock(hashtext(user_id::text || ':' || scheduled_exam_id::text));
+   ```
+
+   If the lock cannot be acquired (returns `false`), return 409 with a brief retry message —
+   a concurrent request for the same `(user_id, scheduled_exam_id)` is in-flight.
+
+2. With the advisory lock held, perform:
+
+   ```sql
+   SELECT COUNT(*) FROM attempts WHERE user_id = ? AND scheduled_exam_id = ?;
+   ```
+
+   No `FOR UPDATE` needed once the advisory lock serializes all concurrent requests for
+   this pair.
+
+3. If count > 0 → rollback and return 403 `SCHEDULED_EXAM.ALREADY_ATTEMPTED`.
+   Else → INSERT attempt within the same transaction.
+
+**Rationale:** PostgreSQL advisory locks are transaction-scoped and prevent phantom inserts
+for the same logical key without requiring a pre-existing row to lock (unlike `SELECT FOR UPDATE`).
+This is the canonical PostgreSQL serialization pattern for "insert-if-not-exists" without
+unique constraints spanning runtime conditions (since `allow_single_attempt` is a configurable
+policy, not a static DB constraint).
+
+**Impact on spec:** Corrects BR-008 (replaces invalid `WITH LOCK` syntax with advisory lock
+pattern), clarifies NFR-003 (transactional integrity for attempt creation).
+
+---
+
+#### Q4: FR-010 Submit — HTTP Response When `attempt_end_time` Exceeded
+
+**Question:** FR-010 states that if student-initiated submission arrives after `attempt_end_time`,
+the server records `auto_submitted=true` and `forced_submission_reason=ATTEMPT_TIME_EXCEEDED`.
+However, the HTTP status code and response body for this late-submission scenario are not
+specified. It is ambiguous whether the endpoint returns 200 OK (silent transform to auto-submit)
+or a 4xx error.
+
+**Decision:** When a student calls FR-010 and `current_time > attempt_end_time`, the server MUST:
+
+1. Process the submission: set `auto_submitted=true`, `forced_submission_reason=ATTEMPT_TIME_EXCEEDED`,
+   `status=SUBMITTED`, `submitted_at=NOW()`.
+2. Return **HTTP 200** with:
+   ```json
+   {
+     "success": true,
+     "data": {
+       "attempt_id": "uuid",
+       "status": "SUBMITTED",
+       "auto_submitted": true,
+       "forced_submission_reason": "ATTEMPT_TIME_EXCEEDED"
+     },
+     "error": null
+   }
+   ```
+3. This is treated as a successful (if late) submission — NOT an error response.
+
+**Rationale:** A 4xx response for a late-submitted attempt would break client retry logic and
+risk losing student work — the worst outcome on an exam platform. Returning 200 with
+`auto_submitted: true` signals the transformed state without blocking the submission pipeline.
+The grading worker handles scoring regardless of the submission path. This also satisfies
+NFR-002 (idempotency): a second call for an already-submitted attempt returns the existing
+result without error.
+
+**Impact on spec:** Adds explicit HTTP response contract to FR-010 for the time-exceeded path.
+Aligns the submit endpoint with the idempotency contract in NFR-002.
+
+---
+
+#### Q5: Student Authorization Boundary for Scheduled Exam Access
+
+**Question:** FR-008 (Start Scheduled Attempt) validates exam ENABLED status, time window, and
+single-attempt policy, but does not specify whether authorization requires only workspace
+authentication or also an explicit enrollment/permission check per scheduled exam. On a
+white-label multi-tenant platform, an unenrolled student authenticated to the same workspace
+could potentially start any ENABLED scheduled exam. Additionally, FR-008 does not explicitly
+prevent an Operator from starting an attempt.
+
+**Decision:**
+
+1. **Authorization boundary:** Workspace authentication is the authorization boundary for
+   student access to scheduled exams at this stage. Any user with `role = STUDENT` and a valid
+   JWT scoped to the correct workspace may attempt any ENABLED scheduled exam within that
+   workspace's tenant DB. No per-exam enrollment or access-list check is implemented in
+   Stage 38. Per-exam enrollment is explicitly deferred to a future stage.
+
+2. **Role guard on FR-008:** The attempt-start endpoint MUST enforce `role = STUDENT`. Operators
+   (`role = OPERATOR` or `role = ADMIN`) MUST NOT be permitted to start attempts via FR-008.
+   If an operator calls this endpoint, return 403 `AUTH.FORBIDDEN`.
+
+3. **FR-008 validation order (updated):**
+   1. JWT valid and scoped to workspace slug → 401 `AUTH.UNAUTHENTICATED` if missing
+   2. User `role = STUDENT` → 403 `AUTH.FORBIDDEN` if not
+   3. Scheduled exam exists and is in `ENABLED` status → 422 otherwise
+   4. Time window checks (NOT_STARTED / CLOSED)
+   5. Single-attempt check if `allow_single_attempt = true`
+
+**Rationale:** Introducing per-exam enrollment in Stage 38 would require a new
+`exam_enrollments` table, additional CRUD APIs, and significantly expands scope beyond the
+delivery engine. The database-per-tenant architecture already provides the primary isolation
+boundary. The explicit Operator-exclusion guard prevents role confusion in the attempt engine.
+
+**Impact on spec:** Clarifies NFR-007 (security — role check), adds Operator exclusion guard
+to FR-008 validation list, and explicitly defers per-exam enrollment to a future stage.
