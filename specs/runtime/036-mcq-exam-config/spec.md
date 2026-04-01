@@ -574,3 +574,56 @@ permitted. Tenant resolution is enforced by the slug-based middleware chain.
 - No direct DB Pool instantiation — injected DbClient only
 - Workflow transitions via shared engine — no custom state machine
 - Snapshot integrity: exam config must be deterministically readable at attempt start
+
+---
+
+## Clarifications
+
+### Session 2026-04-01
+
+**Q1: Workflow Engine Entity Registration — the existing `ENTITY_TABLE_MAP` has `exam: 'exams'`
+but this stage creates `mcq_exams`. Should we register a new entity type `mcq_exam: 'mcq_exams'`
+or reuse the generic `exam` mapping?**
+
+A1: Register a new entity type `mcq_exam` → `mcq_exams` in `ENTITY_TABLE_MAP`. The existing
+`exam: 'exams'` mapping is a forward declaration for a generic exam entity that does not yet
+exist. MCQ exams and traditional exams (future) will use separate entity type keys. The workflow
+transition API call must use `entity_type: 'mcq_exam'`.
+
+**Q2: Initial workflow status — the stage file specifies initial status as `COMPLETED`. MCQ
+questions also start at `COMPLETED`. Is this confirmed, or should MCQ exams start at `DRAFT`
+like MCQ Baskets?**
+
+A2: MCQ exams start at `COMPLETED` (consistent with subjects and MCQ questions). The `DRAFT`
+initial state for MCQ Baskets was a special case because baskets can be incrementally assembled.
+Exam configuration is created complete from the start.
+
+**Q3: The workflow engine `executeTransition()` takes `entity_type` and `entity_id`. Does
+pre-enable validation (manual count check, criteria sum check, delivery mode check) run inside
+the workflow engine or as a separate validation before calling `executeTransition()`?**
+
+A3: Pre-enable validation runs as a **pre-transition hook** in the MCQ exam service layer,
+before calling `executeTransition()`. The workflow engine handles generic state machine logic
+only. Domain-specific validation (question count, criteria sum, settings existence) is the
+responsibility of the MCQ exam service's `transitionStatus()` method. If pre-enable validation
+fails, the domain error is thrown before the workflow engine is invoked.
+
+**Q4: Deletion guard for attempts and scheduled exams — these tables don't exist yet. Should
+the deletion guard be implemented as a pluggable/extensible check or as a simple
+early-return guard that always allows deletion until those stages are built?**
+
+A4: Implement the deletion guard as a structured guard check pattern that currently checks
+`status !== ENABLED` (cannot delete enabled exams). Add a TODO comment for future attempt-count
+and scheduled-reference guards. Use the error code `MCQ_EXAM_DELETION_BLOCKED` for all deletion
+guard failures. When the attempt table exists in a future stage, the guard will be extended.
+
+**Q5: Auto criteria UUID array columns (`lesson_ids`, `category_value_ids`, `tag_ids`,
+`basket_ids`) — should these use Postgres native `uuid[]` arrays, or should they be
+normalized into separate join tables for referential integrity?**
+
+A5: Use Postgres native `uuid[]` arrays as specified in the stage file. This is the correct
+design for criteria-based filtering because: (a) criteria are replaced atomically (`PUT`), never
+partially updated; (b) referential integrity is enforced at the application layer during criteria
+validation; (c) join tables would add unnecessary complexity for a pattern that is always
+read/replaced as a whole unit. If runtime performance requires it, GIN indexes can be added in
+a future optimization stage.

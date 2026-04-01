@@ -7,16 +7,16 @@ Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-04-01T00:01:00Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-04-01T00:02:00Z
 
 Scope Defined:
 
 - 4 tenant-scoped tables (mcq_exams, mcq_exam_settings, mcq_exam_questions, mcq_exam_auto_criteria)
 - 14 REST API endpoints for exam CRUD, settings, questions, criteria, workflow
 - Manual and automatic question selection modes
-- Workflow integration via shared engine
+- Workflow integration via shared engine (entity type: mcq_exam)
 - Delivery mode configuration (Relax/Chrono/Rush)
 - Deletion guards and immutability constraints
 
@@ -28,10 +28,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
