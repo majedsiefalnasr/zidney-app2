@@ -82,6 +82,7 @@ export function canTransitionToEnabled(
 export const IMMUTABLE_WHEN_ENABLED = [
   'base_exam_id',
   'exam_type',
+  'code',
   'start_datetime',
   'end_datetime',
   'late_tolerance_minutes',
