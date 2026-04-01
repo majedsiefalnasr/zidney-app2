@@ -9,20 +9,33 @@ Runtime: Backend + Redis + Worker
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-04-01T00:00:00Z
+Last Updated: 2026-04-01T00:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Scheduled exam CRUD (create, list, get, update, soft-delete)
+- Workflow transition APPROVED → ENABLED
+- Server-side time gate enforcement with late tolerance
+- Attempt binding with `scheduled_end_time` enforcement
+- Single-attempt enforcement (transactional)
+- Heartbeat API for reconnection tracking
+- Auto-submit worker contract (force-submit on expiry/grace)
+- Immutability rules post-ENABLED and post-attempts
+- Workflow invalidation on base exam modification
+- Idempotent submission operations
+
+Deferred Scope:
+
+- Reminder dispatch job (schema captured, implementation deferred)
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
