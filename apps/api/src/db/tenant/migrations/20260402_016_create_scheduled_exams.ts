@@ -48,6 +48,10 @@ export async function up(client: PoolClient): Promise<void> {
         duration_minutes      INTEGER,
         window_start          TIMESTAMPTZ    NOT NULL,
         window_end            TIMESTAMPTZ    NOT NULL,
+        late_tolerance_minutes INTEGER        NOT NULL DEFAULT 5,
+        allow_single_attempt  BOOLEAN        NOT NULL DEFAULT false,
+        reminder_before_start BOOLEAN        NOT NULL DEFAULT false,
+        reminder_before_end   BOOLEAN        NOT NULL DEFAULT false,
         question_pool_id      UUID,
         base_exam_snapshot    JSONB,
         base_exam_hash        VARCHAR(64),
@@ -61,7 +65,8 @@ export async function up(client: PoolClient): Promise<void> {
         CONSTRAINT scheduled_exams_workspace_fk FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
         CONSTRAINT scheduled_exams_pass_mark_check CHECK (pass_mark > 0),
         CONSTRAINT scheduled_exams_total_marks_check CHECK (total_marks > 0),
-        CONSTRAINT scheduled_exams_window_check CHECK (window_end > window_start)
+        CONSTRAINT scheduled_exams_window_check CHECK (window_end > window_start),
+        CONSTRAINT scheduled_exams_late_tolerance_check CHECK (late_tolerance_minutes >= 0)
       )
     `)
 

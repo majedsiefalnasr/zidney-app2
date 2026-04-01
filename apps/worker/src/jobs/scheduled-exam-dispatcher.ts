@@ -131,7 +131,7 @@ export async function runScheduledExamDispatcherCycle(
            FROM attempts a
            JOIN scheduled_exams se ON se.id = a.scheduled_exam_id
            WHERE a.is_scheduled = TRUE
-             AND a.status != 'SUBMITTED'
+             AND a.status = 'IN_PROGRESS'
              AND a.auto_submitted = FALSE
              AND (
                se.end_datetime <= NOW()
@@ -151,8 +151,11 @@ export async function runScheduledExamDispatcherCycle(
       // 3. Enqueue auto-submit jobs with dedup key
       for (const attempt of expiredAttempts) {
         const dedupKey = `auto_submit_job_enqueued:${attempt.attempt_id}`
-        const alreadyEnqueued = await redis.exists(dedupKey)
-        if (alreadyEnqueued) continue
+
+        // Atomically claim the dedup slot with SET NX EX
+        // Only proceed if claim succeeds; if lpush fails, delete dedup key to rollback
+        const claimSuccess = await redis.set(dedupKey, '1', { NX: true, EX: 120 })
+        if (!claimSuccess) continue
 
         const reason = determineForcedReason(attempt, now)
         const jobPayload = {
@@ -170,11 +173,15 @@ export async function runScheduledExamDispatcherCycle(
           forced_submission_reason: reason,
         }
 
-        const queueKey = `queue:auto_submit_scheduled_attempt`
-        await redis.lPush(queueKey, JSON.stringify(jobPayload))
+        try {
+          const queueKey = `queue:auto_submit_scheduled_attempt`
+          await redis.lPush(queueKey, JSON.stringify(jobPayload))
+        } catch (enqueueErr) {
+          // Rollback dedup claim if enqueue fails
+          await redis.del(dedupKey).catch(() => {})
+          throw enqueueErr
+        }
 
-        // Mark as enqueued for 120s to prevent re-enqueue in next cycle
-        await redis.set(dedupKey, '1', { EX: 120 })
         totalEnqueued++
 
         logger.info('Auto-submit job enqueued', {

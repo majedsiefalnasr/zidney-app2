@@ -37,8 +37,8 @@ export function computeAttemptEndTime(
   windowEnd: Date,
   durationMinutes?: number | null
 ): Date {
-  if (!durationMinutes) return windowEnd
-  const durationEnd = new Date(startedAt.getTime() + (durationMinutes ?? 0) * 60 * 1000)
+  if (durationMinutes == null) return windowEnd
+  const durationEnd = new Date(startedAt.getTime() + durationMinutes * 60 * 1000)
   return durationEnd < windowEnd ? durationEnd : windowEnd
 }
 

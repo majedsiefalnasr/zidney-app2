@@ -6,7 +6,11 @@
  * Stage: STAGE_38_SCHEDULED_ENGINE
  */
 
-import { countAttempts, findById } from '@zidney/domain-core/scheduled-exam'
+import {
+  countAttempts,
+  findById,
+  SCHEDULED_EXAM_ERROR_CODES,
+} from '@zidney/domain-core/scheduled-exam'
 import { scheduledExamIdParamSchema } from '@zidney/validation/backoffice/scheduled-exams.schemas'
 import type { Context } from 'hono'
 
@@ -40,7 +44,10 @@ export async function getScheduledExamHandler(c: Context): Promise<Response> {
         {
           success: false,
           data: null,
-          error: { code: 'SCHEDULED_EXAM.NOT_FOUND', message: 'Scheduled exam not found' },
+          error: {
+            code: SCHEDULED_EXAM_ERROR_CODES.NOT_FOUND,
+            message: 'Scheduled exam not found',
+          },
         },
         404
       )

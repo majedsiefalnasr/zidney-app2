@@ -92,6 +92,10 @@ describe('Migration 016 — Create scheduled_exams', () => {
     expect(ddl.text).toContain('window_start')
     expect(ddl.text).toContain('window_end')
     expect(ddl.text).toContain('duration_minutes')
+    expect(ddl.text).toContain('late_tolerance_minutes')
+    expect(ddl.text).toContain('allow_single_attempt')
+    expect(ddl.text).toContain('reminder_before_start')
+    expect(ddl.text).toContain('reminder_before_end')
     expect(ddl.text).toContain('base_exam_snapshot')
     expect(ddl.text).toContain('base_exam_hash')
     expect(ddl.text).toContain('base_exam_modified')
@@ -146,7 +150,7 @@ describe('Migration 016 — Create scheduled_exams', () => {
 
   it('schema version is bumped', () => {
     const versionCall = calls.find(
-      (c) => c.text.includes('schema_migrations') && c.text.includes('1.22.0')
+      (c) => c.text.includes('_schema_versions') && c.text.includes('1.22.0')
     )
     expect(versionCall).toBeDefined()
   })
@@ -260,7 +264,7 @@ describe('Migration 017 — Add scheduled fields to attempts', () => {
 
   it('schema version is bumped to 1.23.0', () => {
     const versionCall = calls.find(
-      (c) => c.text.includes('schema_migrations') && c.text.includes('1.23.0')
+      (c) => c.text.includes('_schema_versions') && c.text.includes('1.23.0')
     )
     expect(versionCall).toBeDefined()
   })
@@ -270,6 +274,18 @@ describe('Migration 017 — Add scheduled fields to attempts', () => {
       (c) => c.text.includes('ALTER TABLE') && c.text.includes('ADD COLUMN')
     )
     expect(addCols.every((c) => c.text.includes('IF NOT EXISTS'))).toBe(true)
+  })
+
+  it('adds forced_submission_reason with CHECK constraint', () => {
+    const reasonCol = calls.find(
+      (c) => c.text.includes('ADD COLUMN') && c.text.includes('forced_submission_reason')
+    )
+    expect(reasonCol).toBeDefined()
+    expect(reasonCol!.text).toContain('CONSTRAINT')
+    expect(reasonCol!.text).toContain('attempts_forced_submission_reason_check')
+    expect(reasonCol!.text).toContain('ATTEMPT_TIME_EXCEEDED')
+    expect(reasonCol!.text).toContain('SCHEDULED_END_REACHED')
+    expect(reasonCol!.text).toContain('CONNECTION_TIMEOUT')
   })
 
   it('rolls back on failure', async () => {

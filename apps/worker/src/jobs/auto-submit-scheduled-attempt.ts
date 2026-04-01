@@ -23,6 +23,7 @@
 
 import type { AutoSubmitScheduledAttemptJob } from '@zidney/job-queue/types'
 import { createLogger } from '@zidney/logger'
+import { randomBytes } from 'crypto'
 import type { RedisClientType } from 'redis'
 
 const logger = createLogger('worker:auto-submit-scheduled-attempt')
@@ -56,9 +57,11 @@ export async function handleAutoSubmitScheduledAttempt(
 
   const lockKey = `auto_submit_lock:${attempt_id}`
   const lockTtlMs = 60_000
+  // Generate unique owner token to prevent lock theft after TTL expiry
+  const lockOwnerToken = `${attempt_id}:${randomBytes(8).toString('hex')}`
 
-  // 1. Acquire Redis distributed lock (NX = only set if not exists, PX = TTL in ms)
-  const lockAcquired = await redis.set(lockKey, '1', { NX: true, PX: lockTtlMs })
+  // 1. Acquire Redis distributed lock with owner token (NX = only set if not exists, PX = TTL in ms)
+  const lockAcquired = await redis.set(lockKey, lockOwnerToken, { NX: true, PX: lockTtlMs })
   if (!lockAcquired) {
     logger.warn('Auto-submit lock not acquired — skipping (another worker is processing)', {
       correlation_id,
@@ -175,7 +178,15 @@ export async function handleAutoSubmitScheduledAttempt(
     throw err
   } finally {
     client.release()
-    // Release distributed lock
-    await redis.del(lockKey).catch(() => {})
+    // Release distributed lock using Lua script for safe compare-and-delete
+    // This prevents lock theft if TTL expired and another worker acquired it
+    const luaScript = `
+      if redis.call('GET', KEYS[1]) == ARGV[1] then
+        return redis.call('DEL', KEYS[1])
+      else
+        return 0
+      end
+    `
+    await redis.eval(luaScript, { keys: [lockKey], arguments: [lockOwnerToken] }).catch(() => {})
   }
 }

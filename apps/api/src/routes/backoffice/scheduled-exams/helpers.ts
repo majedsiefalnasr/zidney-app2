@@ -65,11 +65,13 @@ export function successResponse<T>(data: T): SuccessResponse<T> {
 export function scheduledExamErrorResponse(c: Context, err: unknown): Response {
   const correlationId = c.get('correlation_id') as string | undefined
   const workspaceId = c.get('workspace_id') as string | undefined
+  const workspaceSlug = c.get('workspace_slug') as string | undefined
 
   if (err instanceof ScheduledExamError) {
     logger.warn('Scheduled exams domain error', {
       correlation_id: correlationId,
       workspace_id: workspaceId,
+      workspace_slug: workspaceSlug,
       error_code: err.code,
       error_message: err.message,
     })
@@ -105,6 +107,7 @@ export function scheduledExamErrorResponse(c: Context, err: unknown): Response {
   logger.error('Unhandled scheduled exams error', {
     correlation_id: correlationId,
     workspace_id: workspaceId,
+    workspace_slug: workspaceSlug,
     error: err instanceof Error ? err.message : String(err),
     stack: err instanceof Error ? err.stack : undefined,
   })

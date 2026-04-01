@@ -41,6 +41,8 @@ export async function up(client: PoolClient): Promise<void> {
 
     await client.query(`
       ALTER TABLE attempts ADD COLUMN IF NOT EXISTS forced_submission_reason VARCHAR(50)
+        CONSTRAINT attempts_forced_submission_reason_check
+        CHECK (forced_submission_reason IN ('ATTEMPT_TIME_EXCEEDED', 'SCHEDULED_END_REACHED', 'CONNECTION_TIMEOUT'))
     `)
 
     await client.query(`
