@@ -9,17 +9,18 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-04-01T00:01:00Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-04-01T00:02:00Z
 
 Scope Defined:
 
 - Traditional exam CRUD with division scoping
 - Delivery settings (relax/chrono mode, review flags, certificates)
-- Section/subsection/question content structure
+- Section/subsection/question content structure from template
 - Workflow status transitions with structural validation
 - Score snapshot on question assignment
+- Template validation on creation (query template tables)
 
 Deferred Scope:
 
@@ -31,10 +32,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

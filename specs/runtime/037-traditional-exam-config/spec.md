@@ -157,6 +157,27 @@ Guards:
 
 ---
 
+## Clarifications
+
+### Session 2026-04-01
+
+**Q1: How is template_id validated on exam creation?**
+Template tables are assumed to exist in the tenant DB (from prior stages). The create endpoint accepts `template_id`, queries the template's sections and subsections, and initializes corresponding exam sections/subsections. If the template does not exist or has no sections, the endpoint returns a 404/422 error. No blind insertion.
+
+**Q2: What about semester_id — is there a FK constraint?**
+`semester_id` is treated as an opaque UUID reference in this stage. No FK constraint is added. Validated as UUID format only. The semesters table reference will be formalized in a future stage if needed.
+
+**Q3: What is the scope of code uniqueness?**
+The `code` column has a simple unique index on the `traditional_exams` table. Since Zidney uses database-per-tenant, this automatically provides per-tenant uniqueness without needing a composite index.
+
+**Q4: What does "fallback to default division" mean when division_id is null?**
+When `division_id` is null on an exam, the exam is visible to all staff regardless of their division assignment. There is no "default division" lookup. Null division = globally visible within the tenant.
+
+**Q5: How do question reorder operations work?**
+The reorder PUT endpoint accepts an ordered array of question IDs. It updates `order_index` for all questions in the target subsection in a single transaction. The array must contain exactly the question IDs currently assigned to that subsection (no additions or removals).
+
+---
+
 ## 6. Dependencies
 
 | Dependency                          | Status                       | Notes                                                                            |
