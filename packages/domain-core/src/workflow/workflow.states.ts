@@ -134,4 +134,5 @@ export const WORKFLOW_ENTITY_TYPES = new Set<string>([
   'library_file',
   'template',
   'mcq_basket',
+  'mcq_exam',
 ])

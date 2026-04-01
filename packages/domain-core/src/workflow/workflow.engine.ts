@@ -67,6 +67,7 @@ const ENTITY_TABLE_MAP: Record<string, string> = {
   library_file: 'library_files',
   template: 'templates',
   mcq_basket: 'mcq_baskets',
+  mcq_exam: 'mcq_exams',
 }
 
 // -------------------------------------------------------------------------

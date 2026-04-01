@@ -145,8 +145,10 @@ export function validateArtifactContent(data: unknown, artifactType: ArtifactTyp
       )
     }
     case 'ai-architecture-brain': {
-      // Must have modules and edges
-      return Array.isArray(obj.modules) && Array.isArray(obj.edges)
+      // Must have modules (array or object) and edges (array)
+      const hasModules =
+        Array.isArray(obj.modules) || (typeof obj.modules === 'object' && obj.modules !== null)
+      return hasModules && Array.isArray(obj.edges)
     }
     default:
       // Basic object check

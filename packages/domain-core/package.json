@@ -32,6 +32,7 @@
     "./category-values": "./src/category-values/index.ts",
     "./tags": "./src/tags/index.ts",
     "./baskets": "./src/baskets/index.ts",
+    "./mcq-exams": "./src/mcq-exams/index.ts",
     "./mcq-questions": "./src/mcq-questions/index.ts",
     "./traditional-questions": "./src/traditional-questions/index.ts"
   },
