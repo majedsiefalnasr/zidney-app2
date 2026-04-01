@@ -27,36 +27,36 @@ Technical plan produced for Stage 37 — Traditional Exam Configuration. The pla
 
 ## Architecture Layers Touched
 
-| Layer | Planned Changes |
-|-------|-----------------|
-| API | 16 new route handlers + router factory + helpers + app.ts registration |
-| Worker | None — no async processing needed |
-| Frontend | None — out of scope |
-| DB Master | None |
-| DB Tenant | 1 migration: 3 new tables + 2 ALTER TABLE on stubs |
+| Layer     | Planned Changes                                                        |
+| --------- | ---------------------------------------------------------------------- |
+| API       | 16 new route handlers + router factory + helpers + app.ts registration |
+| Worker    | None — no async processing needed                                      |
+| Frontend  | None — out of scope                                                    |
+| DB Master | None                                                                   |
+| DB Tenant | 1 migration: 3 new tables + 2 ALTER TABLE on stubs                     |
 
 ---
 
 ## Key Technical Decisions
 
-| # | Decision | Rationale |
-|---|----------|-----------|
-| 1 | Custom status transitions instead of shared workflow engine | Shared engine requires COMPLETED step (traditional exams skip it) and lacks DISABLED state. Custom transition handler follows same SELECT FOR UPDATE pattern. |
-| 2 | Column named `status` not `workflow_status` | Follows MCQ exam convention; compatible with future workflow engine integration |
-| 3 | Template validation via application-level queries | Template tables are out of scope — service queries and returns 404/422 if missing |
-| 4 | Score snapshot on question assignment | `traditional_exam_questions.score` is copied at assignment time, not live-referenced |
-| 5 | No FK on template_id or semester_id | Per spec clarifications — both treated as opaque UUIDs in this stage |
-| 6 | Division filtering at SQL layer, not middleware | Consistent with MCQ exam pattern; query WHERE clause handles null division |
+| #   | Decision                                                    | Rationale                                                                                                                                                     |
+| --- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Custom status transitions instead of shared workflow engine | Shared engine requires COMPLETED step (traditional exams skip it) and lacks DISABLED state. Custom transition handler follows same SELECT FOR UPDATE pattern. |
+| 2   | Column named `status` not `workflow_status`                 | Follows MCQ exam convention; compatible with future workflow engine integration                                                                               |
+| 3   | Template validation via application-level queries           | Template tables are out of scope — service queries and returns 404/422 if missing                                                                             |
+| 4   | Score snapshot on question assignment                       | `traditional_exam_questions.score` is copied at assignment time, not live-referenced                                                                          |
+| 5   | No FK on template_id or semester_id                         | Per spec clarifications — both treated as opaque UUIDs in this stage                                                                                          |
+| 6   | Division filtering at SQL layer, not middleware             | Consistent with MCQ exam pattern; query WHERE clause handles null division                                                                                    |
 
 ---
 
 ## Migration Impact
 
-| Item | Value | Notes |
-|------|-------|-------|
-| Migration required | Yes | `20260402_015_traditional_exams.ts` |
-| `schema_version` bump | Yes | 1.20.0 → 1.21.0 |
-| Backward compatible | Yes | New tables + additive ALTER TABLE columns only |
+| Item                  | Value | Notes                                          |
+| --------------------- | ----- | ---------------------------------------------- |
+| Migration required    | Yes   | `20260402_015_traditional_exams.ts`            |
+| `schema_version` bump | Yes   | 1.20.0 → 1.21.0                                |
+| Backward compatible   | Yes   | New tables + additive ALTER TABLE columns only |
 
 ---
 
@@ -83,16 +83,16 @@ Technical plan produced for Stage 37 — Traditional Exam Configuration. The pla
 
 ## Architecture Governance Compliance
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| No cross-tenant logic introduced (ADR-0001) | ✅ | All DB access via tenant resolver pool |
-| All writes are transactional by design | ✅ | BEGIN/COMMIT/ROLLBACK for all mutations |
-| Server-authoritative time enforced (ADR-0006) | ✅ | NOW() in SQL for all timestamps |
-| License middleware enforced | ✅ | Workspace route prefix applies license middleware |
-| Version compatibility enforced (ADR-0007, ADR-0008) | ✅ | Schema version bumped in migration |
-| No architecture redesign without ADR | ✅ | Follows existing MCQ exam architecture exactly |
-| Trust chain respected | ✅ | Isolation → License → Auth → RBAC → Handler |
-| Import boundaries respected | ✅ | domain-core ↛ apps; routes import from packages |
+| Check                                               | Status | Notes                                             |
+| --------------------------------------------------- | ------ | ------------------------------------------------- |
+| No cross-tenant logic introduced (ADR-0001)         | ✅     | All DB access via tenant resolver pool            |
+| All writes are transactional by design              | ✅     | BEGIN/COMMIT/ROLLBACK for all mutations           |
+| Server-authoritative time enforced (ADR-0006)       | ✅     | NOW() in SQL for all timestamps                   |
+| License middleware enforced                         | ✅     | Workspace route prefix applies license middleware |
+| Version compatibility enforced (ADR-0007, ADR-0008) | ✅     | Schema version bumped in migration                |
+| No architecture redesign without ADR                | ✅     | Follows existing MCQ exam architecture exactly    |
+| Trust chain respected                               | ✅     | Isolation → License → Auth → RBAC → Handler       |
+| Import boundaries respected                         | ✅     | domain-core ↛ apps; routes import from packages   |
 
 **Overall:** COMPLIANT
 

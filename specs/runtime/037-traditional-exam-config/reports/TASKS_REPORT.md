@@ -22,16 +22,16 @@
 
 ## Task Breakdown
 
-| Category       | Count | Notes |
-| -------------- | ----- | ----- |
-| Infrastructure | 6     | Migration (T001), 3 new Drizzle schemas (T002–T003, T006), 2 stub updates (T004–T005) |
-| Domain Types   | 2     | Types + Error definitions (T007–T008) |
-| Domain Logic   | 12    | Validators (T009), dep-registry (T010), repository (T011–T014), service (T015–T022), barrel (T023) |
-| Validation     | 1     | 13 Zod schemas in 1 file (T024) |
-| Routes         | 18    | Helpers (T025), 16 handlers (T026–T040), router factory (T041) |
-| Registration   | 1     | app.ts mount (T042) |
-| Governance     | 3     | typecheck (T043), lint (T044), arch guard (T045) |
-| **Total**      | **45** | 32 new files, 3 modified files |
+| Category       | Count  | Notes                                                                                              |
+| -------------- | ------ | -------------------------------------------------------------------------------------------------- |
+| Infrastructure | 6      | Migration (T001), 3 new Drizzle schemas (T002–T003, T006), 2 stub updates (T004–T005)              |
+| Domain Types   | 2      | Types + Error definitions (T007–T008)                                                              |
+| Domain Logic   | 12     | Validators (T009), dep-registry (T010), repository (T011–T014), service (T015–T022), barrel (T023) |
+| Validation     | 1      | 13 Zod schemas in 1 file (T024)                                                                    |
+| Routes         | 18     | Helpers (T025), 16 handlers (T026–T040), router factory (T041)                                     |
+| Registration   | 1      | app.ts mount (T042)                                                                                |
+| Governance     | 3      | typecheck (T043), lint (T044), arch guard (T045)                                                   |
+| **Total**      | **45** | 32 new files, 3 modified files                                                                     |
 
 ---
 
@@ -56,20 +56,20 @@
 
 ## Risk-Ranked Task Summary
 
-| Task ID | Risk | Description |
-|---------|------|-------------|
+| Task ID | Risk      | Description                                                  |
+| ------- | --------- | ------------------------------------------------------------ |
 | T001    | 🔴 HIGH   | Migration: 3 new tables + 2 ALTER TABLE + CONCURRENT indexes |
-| T015    | 🔴 HIGH   | Service: createExam with template initialization TX |
-| T019    | 🔴 HIGH   | Service: transitionExam with structural validation |
-| T011    | 🟡 MEDIUM | Repository: core CRUD queries with SELECT FOR UPDATE |
-| T014    | 🟡 MEDIUM | Repository: question assignment with ON CONFLICT |
-| T022    | 🟡 MEDIUM | Service: question assignment + reorder with score snapshot |
-| T041    | 🟡 MEDIUM | Router factory: RBAC guard configuration |
-| T042    | 🟡 MEDIUM | App.ts registration |
-| T007    | 🟢 LOW    | Types and DTOs |
-| T008    | 🟢 LOW    | Error codes and class |
-| T024    | 🟢 LOW    | Zod validation schemas |
-| T043-45 | 🟢 LOW    | Governance validation |
+| T015    | 🔴 HIGH   | Service: createExam with template initialization TX          |
+| T019    | 🔴 HIGH   | Service: transitionExam with structural validation           |
+| T011    | 🟡 MEDIUM | Repository: core CRUD queries with SELECT FOR UPDATE         |
+| T014    | 🟡 MEDIUM | Repository: question assignment with ON CONFLICT             |
+| T022    | 🟡 MEDIUM | Service: question assignment + reorder with score snapshot   |
+| T041    | 🟡 MEDIUM | Router factory: RBAC guard configuration                     |
+| T042    | 🟡 MEDIUM | App.ts registration                                          |
+| T007    | 🟢 LOW    | Types and DTOs                                               |
+| T008    | 🟢 LOW    | Error codes and class                                        |
+| T024    | 🟢 LOW    | Zod validation schemas                                       |
+| T043-45 | 🟢 LOW    | Governance validation                                        |
 
 ---
 
@@ -81,25 +81,25 @@ None identified — all libraries (Hono, Drizzle, Zod) are already installed in 
 
 ## High-Downstream-Impact Tasks
 
-| Task ID | Module | Impact | Description |
-|---------|--------|--------|-------------|
-| T001    | apps/api/db/tenant/migrations | HIGH | Migration affects all tenant databases |
-| T042    | apps/api/src/app.ts | MEDIUM | Central router file — single import + mount line |
+| Task ID | Module                        | Impact | Description                                      |
+| ------- | ----------------------------- | ------ | ------------------------------------------------ |
+| T001    | apps/api/db/tenant/migrations | HIGH   | Migration affects all tenant databases           |
+| T042    | apps/api/src/app.ts           | MEDIUM | Central router file — single import + mount line |
 
 ---
 
 ## Architecture Governance Compliance
 
-| Check                                        | Status | Notes |
-| -------------------------------------------- | ------ | ----- |
-| All write paths include transaction tasks    | ✅     | T015, T017–T020, T022 all use TX |
+| Check                                        | Status | Notes                                                |
+| -------------------------------------------- | ------ | ---------------------------------------------------- |
+| All write paths include transaction tasks    | ✅     | T015, T017–T020, T022 all use TX                     |
 | Idempotency tasks are defined where required | ✅     | T012 (settings), T014 (questions), T019 (transition) |
-| Layer boundary rules are respected           | ✅     | domain-core ↛ apps; routes import from packages |
-| No unrelated file modifications planned      | ✅     | Only traditional-exam scoped files |
-| Migration tasks included when required       | ✅     | T001 covers full migration |
-| Trust chain respected                        | ✅     | Tenant → License → Auth → RBAC → Handler |
-| Import boundaries respected                  | ✅     | No cross-app imports |
-| Architecture guard task included             | ✅     | T045 |
+| Layer boundary rules are respected           | ✅     | domain-core ↛ apps; routes import from packages      |
+| No unrelated file modifications planned      | ✅     | Only traditional-exam scoped files                   |
+| Migration tasks included when required       | ✅     | T001 covers full migration                           |
+| Trust chain respected                        | ✅     | Tenant → License → Auth → RBAC → Handler             |
+| Import boundaries respected                  | ✅     | No cross-app imports                                 |
+| Architecture guard task included             | ✅     | T045                                                 |
 
 **Overall:** COMPLIANT
 

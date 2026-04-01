@@ -1,7 +1,7 @@
 # Zidney Architecture Dashboard
 
-**Generated:** 2026-04-01T08:35:15.727Z
-**Git SHA:** e04eb001facac6d9e473fc91c85552254f2e300a
+**Generated:** 2026-04-01T16:46:15.790Z
+**Git SHA:** 11a3d8ddb45ea1de7488163bc8c1b1ca6a808054
 
 ## Architecture Score
 
@@ -22,9 +22,9 @@
 
 ## Test Distribution
 
-Total Tests: 228
+Total Tests: 235
 
-- Unit: 85
+- Unit: 92
 - Integration: 125
 - E2E (spec): 18
 
@@ -32,13 +32,13 @@ Total Tests: 228
 
 Nodes: 14
 
-Edges: 848
+Edges: 926
 
 ## Top Architectural Hotspots
 
-- packages/logger (374)
-- packages/domain-core (225)
-- packages/validation (124)
+- packages/logger (390)
+- packages/domain-core (258)
+- packages/validation (153)
 - packages/types (100)
 - packages/api-client (17)
 - packages/job-queue (4)
