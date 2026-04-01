@@ -100,6 +100,10 @@
     },
     {
       "from": "packages/domain-core",
+      "to": "packages/logger"
+    },
+    {
+      "from": "packages/domain-core",
       "to": "packages/types"
     },
     {
@@ -2128,6 +2132,102 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/validation"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/logger"
     },
     {
@@ -3425,6 +3525,10 @@
     {
       "from": "apps/worker",
       "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/job-queue"
     },
     {
       "from": "apps/worker",
@@ -3561,6 +3665,22 @@
     {
       "from": "apps/worker",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/job-queue"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/job-queue"
     },
     {
       "from": "apps/worker",
@@ -3764,15 +3884,15 @@
     }
   ],
   "centrality": {
-    "packages/job-queue": 4,
-    "packages/logger": 390,
+    "packages/job-queue": 7,
+    "packages/logger": 394,
     "packages/types": 100,
     "packages/config": 0,
     "packages/redis-utils": 3,
     "packages/ui-system": 1,
     "packages/api-client": 17,
-    "packages/domain-core": 258,
-    "packages/validation": 153,
+    "packages/domain-core": 271,
+    "packages/validation": 163,
     "apps/mmc": 0,
     "apps/frontoffice": 0,
     "apps/backoffice": 0,

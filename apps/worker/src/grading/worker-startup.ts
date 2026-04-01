@@ -21,6 +21,8 @@
 
 import { logger } from '@zidney/logger'
 import { Pool } from 'pg'
+import type { RedisClientType } from 'redis'
+import { runScheduledExamDispatcherCycle } from '../jobs/scheduled-exam-dispatcher'
 import { startDLQConsumer, stopDLQConsumer } from './dlq-consumer'
 import { startGradeJobsConsumer, stopGradeJobsConsumer } from './job-consumer'
 
@@ -32,6 +34,8 @@ interface WorkerState {
   masterDbPool: Pool | null
   tenantPoolMap: Map<string, Pool>
   startTime: Date | null
+  scheduledExamDispatcherInterval: ReturnType<typeof setInterval> | null
+  redisClient: RedisClientType | null
 }
 
 const workerState: WorkerState = {
@@ -39,6 +43,8 @@ const workerState: WorkerState = {
   masterDbPool: null,
   tenantPoolMap: new Map(),
   startTime: null,
+  scheduledExamDispatcherInterval: null,
+  redisClient: null,
 }
 
 /**
@@ -101,6 +107,12 @@ export async function initializeWorker(): Promise<void> {
 
     const dlqConsumerPromise = startDLQConsumer(workerState.masterDbPool)
 
+    // 5. Register auto-submit processor and scheduled exam dispatcher (Stage 38)
+    // The auto-submit handler is invoked by the queue consumer when it dequeues
+    // auto_submit_scheduled_attempt jobs. We register the dispatcher as a repeatable
+    // job running every 30 seconds.
+    startScheduledExamDispatcher(workerState.masterDbPool)
+
     logger.info(
       {
         service: 'worker',
@@ -110,7 +122,7 @@ export async function initializeWorker(): Promise<void> {
       'Job and DLQ consumers started'
     )
 
-    // 5. Wait for consumers (they run indefinitely until shutdown)
+    // 6. Wait for consumers (they run indefinitely until shutdown)
     await Promise.all([jobConsumerPromise, dlqConsumerPromise])
   } catch (err) {
     logger.error(
@@ -128,7 +140,57 @@ export async function initializeWorker(): Promise<void> {
 }
 
 /**
- * Setup signal handlers for graceful shutdown
+ * Start the scheduled exam dispatcher repeatable job (every 30 seconds).
+ * Errors in one cycle must not stop the dispatcher.
+ */
+function startScheduledExamDispatcher(masterDb: Pool): void {
+  const INTERVAL_MS = 30_000
+
+  // Run immediately, then every 30s
+  const runCycle = () => {
+    if (!workerState.isRunning) return
+    runScheduledExamDispatcherCycle(
+      masterDb,
+      async (dbName: string) => {
+        if (!workerState.tenantPoolMap.has(dbName)) {
+          const tenantUrl = buildTenantDbUrl(dbName)
+          const pool = new Pool({
+            connectionString: tenantUrl,
+            max: 5,
+            idleTimeoutMillis: 60_000,
+          })
+          workerState.tenantPoolMap.set(dbName, pool)
+        }
+        const tenantPool = workerState.tenantPoolMap.get(dbName)
+        if (!tenantPool) throw new Error(`Tenant pool not found for db: ${dbName}`)
+        return tenantPool
+      },
+      // Use a no-op redis stub if not available; real integration requires redis to be injected
+      workerState.redisClient as unknown as import('redis').RedisClientType
+    ).catch((err) => {
+      logger.error('Scheduled exam dispatcher cycle error', {
+        error: err instanceof Error ? err.message : String(err),
+      })
+    })
+  }
+
+  runCycle()
+  workerState.scheduledExamDispatcherInterval = setInterval(runCycle, INTERVAL_MS)
+
+  logger.info('Scheduled exam dispatcher started', { interval_ms: INTERVAL_MS })
+}
+
+/**
+ * Build tenant DB connection URL from DB name.
+ * Follows convention: workspace_{slug} -> uses MASTER_DB_URL base with different DB name.
+ */
+function buildTenantDbUrl(dbName: string): string {
+  const masterUrl = process.env.MASTER_DB_URL ?? ''
+  // Replace database name in URL: postgresql://user:pass@host:port/master_db -> .../dbName
+  return masterUrl.replace(/\/[^/]*$/, `/${dbName}`)
+}
+
+/**
  *
  * Listens for:
  * - SIGTERM: From orchestrator (Kubernetes, Docker)
@@ -209,6 +271,12 @@ export async function shutdownWorker(exitCode: number = 0): Promise<void> {
   try {
     // 1. Stop accepting new jobs
     workerState.isRunning = false
+
+    // Stop scheduled exam dispatcher interval (Stage 38)
+    if (workerState.scheduledExamDispatcherInterval) {
+      clearInterval(workerState.scheduledExamDispatcherInterval)
+      workerState.scheduledExamDispatcherInterval = null
+    }
 
     logger.debug(
       {

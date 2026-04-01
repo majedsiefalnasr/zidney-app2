@@ -9,6 +9,7 @@ graph LR
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
+  packages_domain_core --> packages_logger
   packages_domain_core --> packages_types
   packages_domain_core --> packages_types
   packages_domain_core --> packages_validation
@@ -516,6 +517,30 @@ graph LR
   apps_api --> packages_logger
   apps_api --> packages_redis_utils
   apps_api --> packages_domain_core
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
+  apps_api --> packages_validation
+  apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_validation
   apps_api --> packages_domain_core
@@ -841,6 +866,7 @@ graph LR
   apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_worker --> packages_types
+  apps_worker --> packages_job_queue
   apps_worker --> packages_domain_core
   apps_worker --> packages_types
   apps_worker --> packages_types
@@ -875,6 +901,10 @@ graph LR
   apps_worker --> packages_logger
   apps_worker --> packages_types
   apps_worker --> packages_logger
+  apps_worker --> packages_logger
+  apps_worker --> packages_job_queue
+  apps_worker --> packages_logger
+  apps_worker --> packages_job_queue
   apps_worker --> packages_logger
   apps_worker --> packages_logger
   apps_worker --> packages_logger

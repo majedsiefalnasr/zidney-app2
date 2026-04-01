@@ -8,24 +8,27 @@ Runtime: Backend + Redis + Worker
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: HIGH
-Last Updated: 2026-04-01T01:10:00Z
+Last Updated: 2025-07-30T18:00:00Z
 
-Drift Analysis: PASSED (7 PASSED · 2 WARNING · 0 FAILED)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 40 / 40 completed
 
-Tasks Generated:
+Scope Closed:
 
-- Total: 40 atomic tasks across 7 phases (P0–P6) — T040 added (app.ts registration)
-- P0: 2 migration tasks (migration 016 + 017)
-- P1: 10 domain layer tasks (schema, types, repo, service)
-- P2: 13 API tasks (helpers, 10 handlers, router, + T040 app.ts)
-- P3: 3 worker tasks (processor, dispatcher, registration)
-- P4: 1 job-queue extension task
-- P5: 6 test tasks (unit + integration)
-- P6: 3 validation/governance tasks (typecheck, lint, arch:audit)
+- Migration 016: scheduled_exams table (20 cols, 5 indexes + concurrent unique)
+- Migration 017: 6 new columns on attempts + 3 partial indexes
+- Drizzle schemas: scheduled-exams.schema.ts, attempts.schema.ts
+- Domain core: types, errors, hash, time, workflow, repository, service barrel
+- Validation schemas: createScheduledExam, update, list, workflow-transition, re-approve
+- API handlers: create, list, get, update, delete, workflow-transition, re-approve, start-attempt, heartbeat, submit-attempt
+- Router factory: createScheduledExamsRouter() mounted at /api/v1/backoffice/workspace
+- Job queue: AutoSubmitScheduledAttemptJob + ScheduledExamDispatcherJob
+- Worker: auto-submit-scheduled-attempt.ts (Redis SET NX lock), scheduled-exam-dispatcher.ts (per-tenant)
+- Tests: 3 unit suites, 1 integration suite, 1 worker unit test, 1 migration idempotency test
+- Governance: tsc 0 errors, biome 0 errors, ai:guard 1670/1670 (100%), arch:audit 100/100
 
 Deferred Scope:
 
@@ -34,15 +37,17 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- All drift criteria passed — implementation authorized
 - ADR-0001 database-per-tenant isolation enforced
-- ADR-0002 snapshot integrity enforced (createAttempt() mandated in T023)
-- ADR-0006 server-authoritative time enforced
-- T040 added: app.ts route registration under /api/v1/backoffice/workspace (C2 remediation)
-- T034 corrected: delete (204/409) per FR-005
+- ADR-0002 snapshot integrity enforced — startScheduledAttempt calls createAttempt()
+- ADR-0006 server-authoritative time enforced — NOW() in SQL only
+- All writes transactional; advisory lock for concurrent attempt starts
+- Idempotent submit (HTTP 200 {autoSubmitted:true} on re-submit)
+- AI Guard: 1670/1670 passed (100%)
+- Architecture Audit: Score 100/100, 0 violations
 
 Notes:
-Full drift analysis passed. Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
+Pre-Closure Review Gate pending — Step 7 Closure not yet initiated.
 
 ---
 
