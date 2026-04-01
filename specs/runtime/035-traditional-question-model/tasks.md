@@ -29,7 +29,7 @@
 
 ## Phase 3 — Validation Schemas
 
-- [ ] T016 Create `packages/validation/src/backoffice/traditional-questions.schemas.ts` — Zod schemas: questionIdParamSchema, questionCategoryParamSchema, questionTagParamSchema, listQuestionsQuerySchema (page, per_page, subject_id, division_id, lesson_id, subsection_id, question_type, status, category_value_id, tag_id, search, sort_by, sort_order), createQuestionBodySchema (with superRefine for correct_answer vs question_type, includes lesson_id, correction_criteria), updateQuestionBodySchema (partial, no type/subject/subsection, requires updatedAt), transitionQuestionBodySchema, linkCategoryBodySchema, linkTagBodySchema
+- [x] T016 Create `packages/validation/src/backoffice/traditional-questions.schemas.ts` — Zod schemas: questionIdParamSchema, questionCategoryParamSchema, questionTagParamSchema, listQuestionsQuerySchema (page, per_page, subject_id, division_id, lesson_id, subsection_id, question_type, status, category_value_id, tag_id, search, sort_by, sort_order), createQuestionBodySchema (with superRefine for correct_answer vs question_type, includes lesson_id, correction_criteria), updateQuestionBodySchema (partial, no type/subject/subsection, requires updatedAt), transitionQuestionBodySchema, linkCategoryBodySchema, linkTagBodySchema
 
 ## Phase 4 — API Route Handlers
 
