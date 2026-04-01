@@ -86,9 +86,9 @@ describe('T030 — WORKFLOW_ENTITY_TYPES: unknown type rejected pre-DB', () => {
 })
 
 // -------------------------------------------------------------------------
-// T031 — US6: WORKFLOW_ENTITY_TYPES contains exactly 7 Phase 3 types
+// T031 — US6: WORKFLOW_ENTITY_TYPES contains exactly 9 Phase 3 types
 // -------------------------------------------------------------------------
-describe('T031 — WORKFLOW_ENTITY_TYPES: exactly 8 Phase 3 entity types', () => {
+describe('T031 — WORKFLOW_ENTITY_TYPES: exactly 9 Phase 3 entity types', () => {
   const EXPECTED_ENTITY_TYPES = [
     'subject',
     'mcq_question',
@@ -98,10 +98,11 @@ describe('T031 — WORKFLOW_ENTITY_TYPES: exactly 8 Phase 3 entity types', () =>
     'library_file',
     'template',
     'mcq_basket',
+    'mcq_exam',
   ] as const
 
-  it('has exactly 8 members', () => {
-    expect(WORKFLOW_ENTITY_TYPES.size).toBe(8)
+  it('has exactly 9 members', () => {
+    expect(WORKFLOW_ENTITY_TYPES.size).toBe(9)
   })
 
   it.each(EXPECTED_ENTITY_TYPES)('contains entity type "%s"', (entityType) => {
