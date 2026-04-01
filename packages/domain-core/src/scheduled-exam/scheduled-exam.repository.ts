@@ -195,11 +195,17 @@ export async function updateWorkflowStatus(
   extraFields: Record<string, unknown>,
   audit: AuditContext
 ): Promise<ScheduledExamRow | null> {
+  // Allowlist for columns that can be updated via extraFields (prevents SQL injection)
+  const ALLOWED_COLUMNS = new Set(['base_exam_snapshot', 'base_exam_hash', 'base_exam_modified'])
+
   const updates = ['status = $3', 'updated_at = NOW()', 'updated_by = $4']
   const values: unknown[] = [id, workspaceId, status, audit.user_id]
   let idx = 5
 
   for (const [col, val] of Object.entries(extraFields)) {
+    if (!ALLOWED_COLUMNS.has(col)) {
+      throw new Error(`Column '${col}' is not allowed in updateWorkflowStatus`)
+    }
     updates.push(`${col} = $${idx++}`)
     values.push(val)
   }
