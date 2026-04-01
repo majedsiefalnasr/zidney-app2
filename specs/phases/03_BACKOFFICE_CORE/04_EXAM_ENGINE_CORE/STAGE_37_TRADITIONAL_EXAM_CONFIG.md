@@ -9,19 +9,19 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-04-02T00:30:00Z
+Last Updated: 2026-04-02T00:35:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Migration 015: 3 new tables (traditional_exams, traditional_exam_settings, traditional_exam_questions) + 2 ALTER TABLE on stubs (sections, subsections)
-- Domain-core module: service, repository, types, errors, validators, dependency-registry, barrel index (7 files)
-- Validation schemas: 13 Zod schemas for all endpoints
-- Route handlers: 17 handlers + router factory + helpers (19 files)
-- Custom status transitions (DRAFT → UNDER_REVIEW → APPROVED → ENABLED → DISABLED)
-- Template initialization on creation (atomic TX)
-- Division-scoped access filtering at SQL layer
+- Total: 45 atomic tasks across 14 phases
+- Infrastructure: 6 (migration + schemas)
+- Domain-core: 14 (types, errors, validators, dep-registry, repository, service, barrel)
+- Validation: 1 (13 Zod schemas)
+- Routes: 18 (helpers + 16 handlers + router factory)
+- Registration: 1 (app.ts)
+- Governance: 3 (typecheck, lint, arch guard)
 
 Deferred Scope:
 
@@ -33,10 +33,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
