@@ -5,6 +5,12 @@
 **Status**: Draft  
 **Input**: User description: "Stage: Auto Selection Engine, Phase: 03_BACKOFFICE_CORE/04_EXAM_ENGINE_CORE, Step 1 Specify from STAGE_39_AUTO_SELECTION_ENGINE.md"
 
+## Clarifications
+
+### Session 2026-04-02
+
+- Q: What should happen when criteria overlap can make the unique final set undersized? -> A: Block publish when criteria overlap can make the unique final set undersized.
+
 ## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Start Fair Attempt with Auto Selection (Priority: P1)
@@ -35,7 +41,7 @@ As an exam manager, I need exam selection rules validated before learners start 
 
 1. **Given** criteria blocks whose totals do not match the configured total question count, **When** configuration is saved or published, **Then** the system rejects the configuration.
 2. **Given** a criteria block with neither percentage nor fixed count, **When** configuration is saved or published, **Then** the system rejects the configuration.
-3. **Given** criteria that can create overlaps causing duplicates, **When** configuration is saved or published, **Then** the system warns or blocks according to policy and prevents invalid publication.
+3. **Given** criteria that can create overlaps causing duplicates, **When** configuration is saved or published, **Then** the system blocks publication when overlap can make the unique final set undersized.
 
 ---
 
@@ -54,11 +60,11 @@ As an exam manager, I need to combine manually selected questions with automatic
 
 ### Edge Cases
 
-- What happens when the eligible pool size equals the required count exactly for one or more criteria blocks?
-- How does the system handle two overlapping criteria blocks that independently appear valid but collide on the same candidate questions?
-- What happens when visibility rules remove questions after criteria are defined but before attempt start?
-- How does the system behave when mixed manual + auto configuration already consumes the full total question count?
-- What happens when high concurrent attempt starts target the same exam definition?
+- When the eligible pool size equals the required count for a criteria block, the system selects the full eligible pool and proceeds.
+- When overlapping criteria can reduce the unique final set below required count, configuration save/publish is blocked.
+- When visibility rules remove questions after criteria definition and pool sufficiency is lost, attempt start fails with a structured insufficiency error.
+- When manual + auto configuration already consumes the full total question count through manual questions, auto selection contributes zero additional questions and preserves uniqueness.
+- When high concurrent attempt starts target the same exam definition, each attempt runs isolated atomic selection and persists its own deterministic snapshot.
 
 ## Requirements _(mandatory)_
 
@@ -77,6 +83,7 @@ As an exam manager, I need to combine manually selected questions with automatic
 - **FR-011**: System MUST fail fast with structured errors when candidate pools are insufficient, criteria are invalid, visibility constraints cannot be satisfied, or runtime constraints prevent safe selection.
 - **FR-012**: System MUST handle concurrent attempt starts without creating duplicate question assignments within the same attempt.
 - **FR-013**: System MUST provide selection diagnostics for audit and operations, including tenant/workspace context, exam identity, and correlation metadata.
+- **FR-014**: System MUST block configuration save/publish when overlapping criteria can make the unique final selected set smaller than the required total.
 
 ### Key Entities _(include if feature involves data)_
 
