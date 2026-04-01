@@ -9,20 +9,26 @@ Runtime: Backend service
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-04-02T00:00:00Z
+Last Updated: 2026-04-01T23:42:10Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Deterministic auto-selection scope for MCQ exams and assessments
+- Hybrid manual + auto selection behavior and constraints captured
+- Runtime failure boundaries and auditability requirements defined
+
+Deferred Scope:
+
+- Advanced optimization path (materialized index/caching) remains out of v1
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted - governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
