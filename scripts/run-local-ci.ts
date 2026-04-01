@@ -26,6 +26,12 @@ interface StepResult {
   output: string
 }
 
+interface StepDefinition {
+  name: string
+  scriptKey: string
+  ciArgs?: string[]
+}
+
 const RESET = '\x1b[0m'
 const GREEN = '\x1b[32m'
 const RED = '\x1b[31m'
@@ -49,18 +55,17 @@ function run(command: string, args: string[]): { success: boolean; output: strin
   return { success, output }
 }
 
-function runBunScript(scriptKey: string): { success: boolean; output: string } {
-  const ciEligible = new Set([
-    'validate:scripts:all',
-    'dev:generate:script-docs',
-    'arch:guard',
-    'arch:type-safety-guard',
-  ])
+function getBunRunArgs(step: StepDefinition): string[] {
+  const ciArgs = isCi ? (step.ciArgs ?? []) : []
+  return ciArgs.length > 0 ? ['run', step.scriptKey, '--', ...ciArgs] : ['run', step.scriptKey]
+}
 
-  return run(
-    'bun',
-    isCi && ciEligible.has(scriptKey) ? ['run', scriptKey, '--', '--ci'] : ['run', scriptKey]
-  )
+function formatBunCommand(step: StepDefinition): string {
+  return `bun ${getBunRunArgs(step).join(' ')}`
+}
+
+function runBunScript(step: StepDefinition): { success: boolean; output: string } {
+  return run('bun', getBunRunArgs(step))
 }
 
 function checkDocker(): { running: boolean; message: string } {
@@ -71,11 +76,15 @@ function checkDocker(): { running: boolean; message: string } {
   }
 }
 
-const STEPS: Array<{ name: string; scriptKey: string }> = [
-  { name: 'validate:scripts:all', scriptKey: 'validate:scripts:all' },
-  { name: 'dev:generate:script-docs', scriptKey: 'dev:generate:script-docs' },
-  { name: 'arch:guard', scriptKey: 'arch:guard' },
-  { name: 'arch:type-safety-guard', scriptKey: 'arch:type-safety-guard' },
+const STEPS: StepDefinition[] = [
+  { name: 'validate:scripts:all', scriptKey: 'validate:scripts:all', ciArgs: ['--ci'] },
+  {
+    name: 'dev:generate:script-docs',
+    scriptKey: 'dev:generate:script-docs',
+    ciArgs: ['--ci', '--check-only'],
+  },
+  { name: 'arch:guard', scriptKey: 'arch:guard', ciArgs: ['--ci', '--check-only'] },
+  { name: 'arch:type-safety-guard', scriptKey: 'arch:type-safety-guard', ciArgs: ['--ci'] },
   { name: 'lint', scriptKey: 'lint' },
   { name: 'ci:local', scriptKey: 'ci:local' },
 ]
@@ -87,7 +96,7 @@ function printSeparator(): void {
 function main(): void {
   log.header('ZIDNEY LOCAL CI ORCHESTRATOR', '7-step governance sequence + Docker fail-fast check')
   if (isCi) {
-    log.info('[ci:run-local] CI mode enabled for internal script-backed steps')
+    log.info('[ci:run-local] CI mode enabled for CI-aware steps')
   }
 
   // ── Step 0: Docker fail-fast check ────────────────────────────────────
@@ -108,12 +117,13 @@ function main(): void {
 
   for (let i = 0; i < STEPS.length; i++) {
     const stepNum = i + 1
-    const { name, scriptKey } = STEPS[i]
+    const step = STEPS[i]
+    const { name } = step
 
     process.stdout.write(`${BOLD}[STEP ${stepNum}/7]${RESET} ${name} ... `)
 
     const start = Date.now()
-    const { success, output } = runBunScript(scriptKey)
+    const { success, output } = runBunScript(step)
     const durationMs = Date.now() - start
 
     const status: 'PASS' | 'FAIL' = success ? 'PASS' : 'FAIL'
@@ -135,7 +145,7 @@ function main(): void {
     results.push({
       step: stepNum,
       name,
-      command: `bun run ${scriptKey}`,
+      command: formatBunCommand(step),
       status,
       durationMs,
       output,

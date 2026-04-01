@@ -6,8 +6,9 @@
  * @category dev
  * @description Walk scripts/**\/*.ts, parse @script metadata headers, generate
  *   docs/scripts/SCRIPT_REGISTRY.md plus one page per root package.json runner.
- *   Exits 1 on missing required metadata fields.
- * @usage bun run dev:generate:script-docs
+ *   Supports --check-only to validate the current docs state without writing files.
+ *   Exits 1 on missing required metadata fields or docs drift in check-only mode.
+ * @usage bun run dev:generate:script-docs [-- --check-only] [--ci]
  */
 
 import { randomUUID } from 'node:crypto'
@@ -26,6 +27,7 @@ import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
 const correlationId = randomUUID()
 const args = process.argv.slice(2)
 const isCi = hasCiFlag(args)
+const checkOnly = args.includes('--check-only')
 const logger = createLogger('dev:generate:script-docs')
 logger.setContext({ correlationId, ci: isCi })
 
@@ -81,6 +83,19 @@ interface RootScriptDocEntry {
   reference?: PackageReferenceSection
   dependsOn: string[]
   usedBy: string[]
+}
+
+interface GeneratedDocsSnapshot {
+  registry: string
+  docsIndex: string
+  perScriptDocs: Map<string, string>
+  staleDocFiles: string[]
+}
+
+interface CheckOnlyResult {
+  missingFiles: string[]
+  staleFiles: string[]
+  changedFiles: string[]
 }
 
 export function walkTsFiles(dir: string, excludeDirs: string[] = ['__tests__']): string[] {
@@ -444,7 +459,7 @@ export function generateScriptDoc(entry: RootScriptDocEntry): string {
   const purpose = inferPurpose(entry)
   const source =
     stripWrapping(entry.reference?.source) ??
-    (entry.sourcePath ? entry.sourcePath : 'Wrapper only; no single scripts/*.ts source file.')
+    (entry.sourcePath ? entry.sourcePath : 'Wrapper only; no single scripts/\\*.ts source file.')
   const packageUsage = `bun run ${entry.script}`
 
   const lines = [
@@ -579,6 +594,92 @@ export function generateRegistry(metas: ScriptMeta[]): string {
   return lines.join('\n')
 }
 
+export function normalizeGeneratedDocContent(filePath: string, content: string): string {
+  const relativePath = filePath.replace(`${REPO_ROOT}/`, '')
+  const isRegistryPath =
+    relativePath === 'docs/scripts/SCRIPT_REGISTRY.md' ||
+    filePath === 'docs/scripts/SCRIPT_REGISTRY.md' ||
+    filePath.endsWith('/docs/scripts/SCRIPT_REGISTRY.md')
+  const normalizedLines = content
+    .split('\n')
+    .filter((line) => !(isRegistryPath && line.startsWith('> Last generated:')))
+    .map((line) => line.trimEnd().replace(/\\\*/g, '*'))
+
+  while (normalizedLines.length > 0 && normalizedLines[normalizedLines.length - 1] === '') {
+    normalizedLines.pop()
+  }
+
+  return normalizedLines.join('\n')
+}
+
+function buildGeneratedDocsSnapshot(
+  metas: readonly ScriptMeta[],
+  rootScriptDocs: readonly RootScriptDocEntry[]
+): GeneratedDocsSnapshot {
+  const perScriptDocs = new Map<string, string>()
+  for (const entry of rootScriptDocs) {
+    perScriptDocs.set(join(DOCS_DIR, entry.filePath), generateScriptDoc(entry))
+  }
+
+  const existingDocFiles = existsSync(DOCS_DIR) ? readdirSync(DOCS_DIR) : []
+
+  return {
+    registry: generateRegistry([...metas]),
+    docsIndex: generateDocsIndex(rootScriptDocs),
+    perScriptDocs,
+    staleDocFiles: findStaleDocFiles(
+      existingDocFiles,
+      rootScriptDocs.map((entry) => entry.filePath)
+    ),
+  }
+}
+
+export function validateGeneratedDocsState(snapshot: GeneratedDocsSnapshot): CheckOnlyResult {
+  const filesToValidate = new Map<string, string>([
+    [REGISTRY_PATH, snapshot.registry],
+    [DOCS_INDEX_PATH, snapshot.docsIndex],
+    ...Array.from(snapshot.perScriptDocs.entries()),
+  ])
+
+  return compareGeneratedDocsFiles(
+    filesToValidate,
+    snapshot.staleDocFiles.map((fileName) => `docs/scripts/${fileName}`)
+  )
+}
+
+export function compareGeneratedDocsFiles(
+  filesToValidate: ReadonlyMap<string, string>,
+  staleFiles: readonly string[],
+  repoRoot = REPO_ROOT
+): CheckOnlyResult {
+  const normalizePath = (filePath: string) =>
+    filePath.startsWith(`${repoRoot}/`) ? filePath.replace(`${repoRoot}/`, '') : filePath
+
+  const missingFiles: string[] = []
+  const changedFiles: string[] = []
+
+  for (const [filePath, expectedContent] of filesToValidate) {
+    if (!existsSync(filePath)) {
+      missingFiles.push(normalizePath(filePath))
+      continue
+    }
+
+    const currentContent = readFileSync(filePath, 'utf-8')
+    if (
+      normalizeGeneratedDocContent(filePath, currentContent) !==
+      normalizeGeneratedDocContent(filePath, expectedContent)
+    ) {
+      changedFiles.push(normalizePath(filePath))
+    }
+  }
+
+  return {
+    missingFiles,
+    staleFiles: Array.from(staleFiles),
+    changedFiles,
+  }
+}
+
 function loadPackageReferenceSections(): Map<string, PackageReferenceSection> {
   if (!existsSync(PACKAGE_REFERENCE_PATH)) {
     return new Map<string, PackageReferenceSection>()
@@ -601,9 +702,12 @@ function main(): void {
   if (isCi) {
     log.info('[dev:generate:script-docs] CI mode enabled')
   }
+  if (checkOnly) {
+    log.info('[dev:generate:script-docs] Check-only mode enabled')
+  }
   logger.info('Generating script registry', { scriptsDir: SCRIPTS_DIR })
 
-  if (!existsSync(DOCS_DIR)) {
+  if (!checkOnly && !existsSync(DOCS_DIR)) {
     mkdirSync(DOCS_DIR, { recursive: true })
   }
 
@@ -652,30 +756,65 @@ function main(): void {
     exit(1)
   }
 
-  const registry = generateRegistry(metas)
   const rootScriptDocs = buildRootScriptDocs(
     loadPackageReferenceSections(),
     loadExistingDocNameMap()
   )
-  const staleDocFiles = findStaleDocFiles(
-    readdirSync(DOCS_DIR),
-    rootScriptDocs.map((entry) => entry.filePath)
-  )
+  const snapshot = buildGeneratedDocsSnapshot(metas, rootScriptDocs)
 
-  for (const fileName of staleDocFiles) {
+  if (checkOnly) {
+    const check = validateGeneratedDocsState(snapshot)
+    const driftCount =
+      check.missingFiles.length + check.staleFiles.length + check.changedFiles.length
+
+    if (driftCount === 0) {
+      logger.info('Script docs are up to date', { files: rootScriptDocs.length + 2 })
+      process.stdout.write(
+        `\n✓ Script docs are up to date (${rootScriptDocs.length} root runners)\n`
+      )
+      log.result({ total: rootScriptDocs.length, passed: rootScriptDocs.length, failed: 0 })
+      exit(0)
+    }
+
+    logger.error('Script docs drift detected', {
+      missingFiles: check.missingFiles.length,
+      staleFiles: check.staleFiles.length,
+      changedFiles: check.changedFiles.length,
+    })
+    process.stderr.write(`\n❌ Script docs drift detected: ${driftCount}\n\n`)
+    for (const filePath of check.missingFiles) {
+      process.stderr.write(`  missing: ${filePath}\n`)
+    }
+    for (const filePath of check.changedFiles) {
+      process.stderr.write(`  changed: ${filePath}\n`)
+    }
+    for (const filePath of check.staleFiles) {
+      process.stderr.write(`  stale:   ${filePath}\n`)
+    }
+    process.stderr.write('\nRun: bun run dev:generate:script-docs\n')
+    log.result({
+      total: rootScriptDocs.length,
+      passed: 0,
+      failed: driftCount,
+      message: 'Script docs are out of date',
+    })
+    exit(1)
+  }
+
+  for (const fileName of snapshot.staleDocFiles) {
     rmSync(join(DOCS_DIR, fileName), { force: true })
   }
 
-  writeFileSync(REGISTRY_PATH, registry, 'utf-8')
-  for (const entry of rootScriptDocs) {
-    writeFileSync(join(DOCS_DIR, entry.filePath), generateScriptDoc(entry), 'utf-8')
+  writeFileSync(REGISTRY_PATH, snapshot.registry, 'utf-8')
+  for (const [filePath, content] of snapshot.perScriptDocs) {
+    writeFileSync(filePath, content, 'utf-8')
   }
-  writeFileSync(DOCS_INDEX_PATH, generateDocsIndex(rootScriptDocs), 'utf-8')
+  writeFileSync(DOCS_INDEX_PATH, snapshot.docsIndex, 'utf-8')
 
   logger.info('Registry written', {
     path: REGISTRY_PATH,
     scripts: metas.length,
-    removedDocs: staleDocFiles.length,
+    removedDocs: snapshot.staleDocFiles.length,
   })
   process.stdout.write(
     `\n✓ Script docs written to docs/scripts/ (${rootScriptDocs.length} root runners)\n`
