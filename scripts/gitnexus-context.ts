@@ -64,10 +64,16 @@ export interface AssembleOptions {
   baseRef: string
 }
 
+interface DependencyEntry {
+  imports: string[]
+  imported_by: string[]
+  violations: string[]
+}
+
 interface ArchitectureBrain {
-  modules: string[]
+  modules: string[] | Record<string, unknown>
   layers: Record<string, string>
-  dependencies: Record<string, string[]>
+  dependencies: Record<string, string[] | DependencyEntry>
   hotspots?: Array<{ module: string; score: number }>
   architectureScore?: number
 }
@@ -188,10 +194,16 @@ export function buildDependencyGraph(
   full: boolean
 ): Record<string, string[]> {
   const graph: Record<string, string[]> = {}
-  const targetModules = full ? brain.modules : modules
+  const brainModules = Array.isArray(brain.modules) ? brain.modules : Object.keys(brain.modules)
+  const targetModules = full ? brainModules : modules
 
   for (const mod of targetModules) {
-    const deps = brain.dependencies[mod] ?? []
+    const depsEntry = brain.dependencies[mod]
+    const deps = Array.isArray(depsEntry)
+      ? depsEntry
+      : depsEntry && typeof depsEntry === 'object' && 'imports' in depsEntry
+        ? (depsEntry as DependencyEntry).imports
+        : []
     graph[mod] = [...deps].sort()
   }
 
@@ -208,7 +220,8 @@ export function buildArchitectureLayerMap(
   full: boolean
 ): Record<string, string> {
   const map: Record<string, string> = {}
-  const targetModules = full ? brain.modules : modules
+  const brainModules = Array.isArray(brain.modules) ? brain.modules : Object.keys(brain.modules)
+  const targetModules = full ? brainModules : modules
 
   for (const mod of targetModules) {
     map[mod] = brain.layers[mod] ?? 'unknown'
@@ -262,7 +275,13 @@ export function computeRiskIndicators(
     const filesInModule = changedFiles.filter((f) => f.startsWith(`${mod}/`))
     const hotspotBase = hotspotMap.get(mod) ?? 0
     const fileBonus = Math.min(filesInModule.length * 5, 40)
-    const noDepsBonus = (brain.dependencies[mod]?.length ?? 0) === 0 ? 10 : 0
+    const depsRaw = brain.dependencies[mod]
+    const depsLen = Array.isArray(depsRaw)
+      ? depsRaw.length
+      : depsRaw && typeof depsRaw === 'object' && 'imports' in depsRaw
+        ? (depsRaw as DependencyEntry).imports.length
+        : 0
+    const noDepsBonus = depsLen === 0 ? 10 : 0
     const rawScore = hotspotBase + fileBonus + noDepsBonus
     const riskScore = Math.min(Math.round(rawScore), 100)
 
@@ -336,8 +355,9 @@ export function assembleContext(options: AssembleOptions): GitNexusContext {
   const brain = loadBrain()
 
   const changedFiles = detectChangedFiles({ baseRef: options.baseRef, all: options.all })
+  const brainModulesList = Array.isArray(brain.modules) ? brain.modules : Object.keys(brain.modules)
   const impactedModules = options.all
-    ? [...brain.modules].sort()
+    ? [...brainModulesList].sort()
     : mapFilesToModules(changedFiles, brain.modules)
 
   const analysisMode: 'changed-only' | 'full' = options.all ? 'full' : 'changed-only'
