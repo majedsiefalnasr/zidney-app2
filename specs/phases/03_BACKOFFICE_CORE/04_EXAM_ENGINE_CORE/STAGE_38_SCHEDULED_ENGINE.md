@@ -9,33 +9,32 @@ Runtime: Backend + Redis + Worker
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-04-01T00:15:00Z
+Last Updated: 2026-04-01T00:30:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Scheduled exam CRUD + workflow transitions
-- Server-side time gate + late tolerance enforcement
-- Attempt binding with scheduled_end_time
-- Single-attempt enforcement via `pg_try_advisory_xact_lock`
-- Heartbeat API with BullMQ dedup auto-submit trigger
-- Auto-submit worker (tenant dispatcher + per-attempt job)
-- Immutability post-ENABLED and post-attempts
-- Workflow invalidation on base exam change + re-approval
-- base_exam_snapshot_hash: SHA-256 exported constant in domain-core
+- 36 tasks across 7 phases (P0–P6)
+- 2 tenant DB migrations (016: scheduled_exams table, 017: attempts columns)
+- 10 API endpoints (admin CRUD + workflow + student attempt + heartbeat + submit)
+- Domain core module: scheduled-exam entity, hash, time gates, workflow rules, repository, service
+- Auto-submit BullMQ worker + per-tenant dispatcher
+- Job queue package extensions (2 new job types)
+- ~60 test scenarios (unit + integration + worker + migration)
 
 Deferred Scope:
 
-- Reminder dispatch job (schema captured, implementation deferred)
-- Per-exam enrollment (workspace auth sufficient for this stage)
+- Reminder dispatch job
+- Per-exam enrollment
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- ADR alignment: ADR-0001, ADR-0002, ADR-0006 (no new ADR required)
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
