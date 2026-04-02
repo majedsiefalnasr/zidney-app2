@@ -21,9 +21,9 @@
  * 10. WARN log with correlation fields
  */
 
+import { randomBytes } from 'node:crypto'
 import type { AutoSubmitScheduledAttemptJob } from '@zidney/job-queue/types'
 import { createLogger } from '@zidney/logger'
-import { randomBytes } from 'crypto'
 import type { RedisClientType } from 'redis'
 
 const logger = createLogger('worker:auto-submit-scheduled-attempt')

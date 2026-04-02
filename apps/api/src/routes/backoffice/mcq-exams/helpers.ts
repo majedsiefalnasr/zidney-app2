@@ -7,13 +7,16 @@
  * Shared utilities used by all MCQ exam route handlers.
  */
 
-import type { AuditContext, DbClient } from '@zidney/domain-core/mcq-exams'
+import type {
+  AuditContext,
+  CriteriaValidationResult,
+  DbClient,
+} from '@zidney/domain-core/mcq-exams'
 import {
   MCQ_EXAM_ERROR_HTTP_STATUS,
   MCQ_EXAM_ERROR_MESSAGES,
   McqExamError,
 } from '@zidney/domain-core/mcq-exams'
-import type { CriteriaValidationResult } from '@zidney/domain-core/mcq-exams'
 import { createLogger } from '@zidney/logger'
 import type { Context } from 'hono'
 
@@ -64,9 +67,7 @@ export function successResponse<T>(data: T): SuccessResponse<T> {
 // ---------------------------------------------------------------------------
 
 /** Map internal criteria validation codes to public API error codes (Stage 39). */
-function criteriaCodeToApiCode(
-  code: CriteriaValidationResult['errors'][number]['code']
-): string {
+function criteriaCodeToApiCode(code: CriteriaValidationResult['errors'][number]['code']): string {
   switch (code) {
     case 'INVALID_CRITERIA_MODE':
     case 'CRITERIA_COUNT_MISMATCH':

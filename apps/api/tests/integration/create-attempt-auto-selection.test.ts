@@ -11,31 +11,23 @@
  * Task: T014
  */
 
+import { AutoSelectionError, type AutoSelectionInput, runAutoSelection } from '@zidney/domain-core'
 import { describe, expect, it, vi } from 'vitest'
 import {
-  runAutoSelection,
-  type AutoSelectionInput,
-  AutoSelectionError,
-} from '../../../packages/domain-core/src/attempts/auto-selection.service'
-import {
-  FIXTURE_WORKSPACE_ID,
-  FIXTURE_EXAM_ID,
   FIXTURE_CRITERIA_ID,
+  FIXTURE_EXAM_ID,
   FIXTURE_QUESTION_IDS,
+  FIXTURE_WORKSPACE_ID,
 } from '../fixtures/auto-selection.fixture'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function makeInput(
-  overrides: Partial<AutoSelectionInput> = {}
-): AutoSelectionInput {
+function makeInput(overrides: Partial<AutoSelectionInput> = {}): AutoSelectionInput {
   return {
     workspaceId: FIXTURE_WORKSPACE_ID,
     examId: FIXTURE_EXAM_ID,
     totalQuestions: 10,
-    criteriaBlocks: [
-      { id: FIXTURE_CRITERIA_ID, percentage: null, fixed_count: 10, filters: {} },
-    ],
+    criteriaBlocks: [{ id: FIXTURE_CRITERIA_ID, percentage: null, fixed_count: 10, filters: {} }],
     manualQuestionIds: [],
     selectionSeed: 'integration-test-seed',
     fetchEligiblePool: vi.fn().mockResolvedValue([...FIXTURE_QUESTION_IDS]),
@@ -103,9 +95,7 @@ describe('create-attempt auto-selection integration', () => {
 
   it('throws AutoSelectionError with INSUFFICIENT_POOL when pool is too small', async () => {
     const input = makeInput({
-      criteriaBlocks: [
-        { id: FIXTURE_CRITERIA_ID, percentage: null, fixed_count: 50, filters: {} },
-      ],
+      criteriaBlocks: [{ id: FIXTURE_CRITERIA_ID, percentage: null, fixed_count: 50, filters: {} }],
       fetchEligiblePool: vi.fn().mockResolvedValue(FIXTURE_QUESTION_IDS.slice(0, 5)),
     })
     await expect(runAutoSelection(input)).rejects.toThrow(AutoSelectionError)
@@ -147,7 +137,7 @@ describe('create-attempt auto-selection integration', () => {
   it('fetchEligiblePool receives excludeIds including manual IDs and prior block selections', async () => {
     const manualIds = [FIXTURE_QUESTION_IDS[0]!]
     const block1Pool = FIXTURE_QUESTION_IDS.slice(1, 11) // 10 questions
-    const block2Pool = FIXTURE_QUESTION_IDS.slice(11)    // remaining questions
+    const block2Pool = FIXTURE_QUESTION_IDS.slice(11) // remaining questions
 
     const fetchFn = vi.fn().mockImplementation(async (_w, _e, blockId, _f, excludeIds) => {
       if (blockId === 'b1') {
@@ -162,7 +152,11 @@ describe('create-attempt auto-selection integration', () => {
     ]
 
     const result = await runAutoSelection(
-      makeInput({ manualQuestionIds: manualIds, criteriaBlocks: blocks, fetchEligiblePool: fetchFn })
+      makeInput({
+        manualQuestionIds: manualIds,
+        criteriaBlocks: blocks,
+        fetchEligiblePool: fetchFn,
+      })
     )
 
     // Verify b2 call received excludeIds containing manualIds

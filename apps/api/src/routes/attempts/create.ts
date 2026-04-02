@@ -37,20 +37,19 @@
  * - Advisory lock for auto-selection concurrency guard
  */
 
+import {
+  AutoSelectionError,
+  logSelectionFailure,
+  logSelectionSuccess,
+  runAutoSelection,
+} from '@zidney/domain-core'
 import { createLogger } from '@zidney/logger'
-import { AutoSelectionError, runAutoSelection } from '@zidney/domain-core'
-import { logSelectionSuccess, logSelectionFailure } from '@zidney/domain-core'
 import { AutoSelectionErrorCode, getAutoSelectionHTTPStatus } from '@zidney/types'
 import type { Context } from 'hono'
 import type { Pool, PoolClient } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 import type { UserContextStage06 } from '../../middleware/auth-context-stage06'
 import { loadQuestionsForExam } from '../../modules/attempt/exam-loader'
-import {
-  buildFlagsSnapshot,
-  buildGradingConfigSnapshot,
-  buildQuestionSnapshot,
-} from '../../modules/attempt/snapshot-builder'
 import {
   claimIdempotencyKey,
   findExistingClaim,
@@ -60,6 +59,11 @@ import {
   persistAutoSelections,
   persistManualSelections,
 } from '../../modules/attempt/selection-persistence'
+import {
+  buildFlagsSnapshot,
+  buildGradingConfigSnapshot,
+  buildQuestionSnapshot,
+} from '../../modules/attempt/snapshot-builder'
 import {
   computePayloadHash,
   validateCreateAttemptRequestFormat,
@@ -101,8 +105,25 @@ export async function createAttemptHandler(c: Context) {
     }
   }
 
-  const exam_id = requestValidation.data!.exam_id!
-  const attempt_mode = requestValidation.data!.attempt_mode ?? 'CHRONO'
+  const requestData = requestValidation.data as
+    | { exam_id?: string; attempt_mode?: string }
+    | undefined
+  if (!requestData?.exam_id) {
+    logger.warn('Attempt creation failed: missing exam_id in request', {
+      correlation_id: correlationId,
+      workspace_id: workspace.id,
+      user_id: user.id,
+    })
+
+    throw {
+      code: 'VALIDATION_ERROR',
+      message: 'Missing exam_id in request body',
+      status: 400,
+    }
+  }
+
+  const exam_id = requestData.exam_id
+  const attempt_mode = requestData.attempt_mode ?? 'CHRONO'
 
   // 2. Validate exam exists and is active
   const examValidation = await validateExamExists(
@@ -128,7 +149,8 @@ export async function createAttemptHandler(c: Context) {
     }
   }
 
-  const exam = examValidation.data!
+  type ExamRecord = NonNullable<Awaited<ReturnType<typeof validateExamExists>>['data']>
+  const exam = examValidation.data as ExamRecord
 
   // 3. Validate user eligibility
   const eligibilityValidation = await validateUserEligibility(
@@ -396,11 +418,12 @@ async function _handleAutomaticAttemptCreation(
   if (!keyValidation.valid) {
     throw {
       code: 'VALIDATION_ERROR',
-      message: keyValidation.errors?.[0] ?? 'Idempotency-Key header is required for automatic exams',
+      message:
+        keyValidation.errors?.[0] ?? 'Idempotency-Key header is required for automatic exams',
       status: 400,
     }
   }
-  const idempotencyKey = keyValidation.data!
+  const idempotencyKey = keyValidation.data as string
 
   const payloadHash = await computePayloadHash(requestBody)
   const selectionSeed = uuidv4()
@@ -513,7 +536,7 @@ async function _handleAutomaticAttemptCreation(
       },
     }))
 
-    let selectionResult
+    let selectionResult: import('@zidney/domain-core').AutoSelectionResult | undefined
     try {
       selectionResult = await runAutoSelection({
         workspaceId: workspace.id,
@@ -549,6 +572,12 @@ async function _handleAutomaticAttemptCreation(
         }
       }
       throw selErr
+    }
+
+    if (!selectionResult) {
+      // Defensive: runAutoSelection must have returned a result or thrown
+      await client.query('ROLLBACK')
+      throw new Error('AUTO_SELECTION_FAILURE: missing selection result')
     }
 
     // Step: Insert attempt with selection metadata
@@ -697,11 +726,7 @@ function buildFetchEligiblePool(
     filters: import('@zidney/domain-core').CriteriaBlockFilters,
     excludeIds: string[]
   ): Promise<string[]> => {
-    const conditions: string[] = [
-      'q.workspace_id = $1',
-      'q.exam_id = $2',
-      'q.deleted_at IS NULL',
-    ]
+    const conditions: string[] = ['q.workspace_id = $1', 'q.exam_id = $2', 'q.deleted_at IS NULL']
     const params: unknown[] = [workspaceId, examId]
     let paramIdx = 3
 

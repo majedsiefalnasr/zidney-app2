@@ -11,17 +11,18 @@
  * surface returns a clean failure, not a partial success.)
  */
 
-import { describe, expect, it, vi } from 'vitest'
+import type { FetchEligiblePoolFn } from '@zidney/domain-core/attempts/auto-selection.service'
 import { validateAutoCriteria } from '@zidney/domain-core/mcq-exams/mcq-auto-criteria-validation.service'
 import type { CriteriaEntry } from '@zidney/domain-core/mcq-exams/mcq-exams.types'
-import type { FetchEligiblePoolFn } from '@zidney/domain-core/attempts/auto-selection.service'
+import { describe, expect, it } from 'vitest'
 
 const WORKSPACE = '10000000-0000-0000-0000-000000000001'
-const EXAM      = '30000000-0000-0000-0000-000000000001'
+const EXAM = '30000000-0000-0000-0000-000000000001'
 
 function makePool(size: number): FetchEligiblePoolFn {
-  const ids = Array.from({ length: size }, (_, i) =>
-    `60000000-0000-0000-0000-${String(i + 1).padStart(12, '0')}`
+  const ids = Array.from(
+    { length: size },
+    (_, i) => `60000000-0000-0000-0000-${String(i + 1).padStart(12, '0')}`
   )
   return async () => ids
 }
@@ -69,18 +70,30 @@ describe('T052 — criteria validation: no partial state on failure', () => {
       fetchEligiblePool: makePool(50),
     })
     expect(result.valid).toBe(false)
-    expect(result.errors!.some(e => e.code === 'CRITERIA_COUNT_MISMATCH')).toBe(true)
+    expect(result.errors!.some((e) => e.code === 'CRITERIA_COUNT_MISMATCH')).toBe(true)
   })
 
   it('no side-effect: calling validateAutoCriteria twice with same invalid input returns identical errors', async () => {
     const criteria: CriteriaEntry[] = []
     const [r1, r2] = await Promise.all([
-      validateAutoCriteria({ workspaceId: WORKSPACE, examId: EXAM, totalQuestions: 10, criteria, fetchEligiblePool: makePool(50) }),
-      validateAutoCriteria({ workspaceId: WORKSPACE, examId: EXAM, totalQuestions: 10, criteria, fetchEligiblePool: makePool(50) }),
+      validateAutoCriteria({
+        workspaceId: WORKSPACE,
+        examId: EXAM,
+        totalQuestions: 10,
+        criteria,
+        fetchEligiblePool: makePool(50),
+      }),
+      validateAutoCriteria({
+        workspaceId: WORKSPACE,
+        examId: EXAM,
+        totalQuestions: 10,
+        criteria,
+        fetchEligiblePool: makePool(50),
+      }),
     ])
     expect(r1.valid).toBe(false)
     expect(r2.valid).toBe(false)
-    expect(r1.errors!.map(e => e.code)).toEqual(r2.errors!.map(e => e.code))
+    expect(r1.errors!.map((e) => e.code)).toEqual(r2.errors!.map((e) => e.code))
   })
 
   it('valid result has no errors field or empty errors', async () => {

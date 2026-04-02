@@ -49,9 +49,7 @@ export interface SelectionDiagnostics {
  * Log a successful auto-selection event.
  * Also returns the diagnostics object for persistence.
  */
-export function logSelectionSuccess(
-  diagnostics: SelectionDiagnostics
-): SelectionDiagnostics {
+export function logSelectionSuccess(diagnostics: SelectionDiagnostics): SelectionDiagnostics {
   logger.info('auto_selection_success', {
     request_id: diagnostics.request_id,
     correlation_id: diagnostics.correlation_id,

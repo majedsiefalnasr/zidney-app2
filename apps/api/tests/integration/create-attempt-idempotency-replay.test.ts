@@ -9,17 +9,16 @@
  * identical ordered selectedIds (deterministic shuffle).
  */
 
+import {
+  type AutoSelectionInput,
+  type FetchEligiblePoolFn,
+  runAutoSelection,
+} from '@zidney/domain-core/attempts/auto-selection.service'
 import { describe, expect, it, vi } from 'vitest'
 import {
-  runAutoSelection,
-  type AutoSelectionInput,
-  type CriteriaBlock,
-  type FetchEligiblePoolFn,
-} from '@zidney/domain-core/attempts/auto-selection.service'
-import {
-  FIXTURE_WORKSPACE_ID,
   FIXTURE_EXAM_ID,
   FIXTURE_QUESTION_IDS,
+  FIXTURE_WORKSPACE_ID,
 } from '../fixtures/auto-selection.fixture'
 
 const POOL = FIXTURE_QUESTION_IDS
@@ -31,7 +30,9 @@ function makeInput(seed: string, fetch: FetchEligiblePoolFn): AutoSelectionInput
     workspaceId: FIXTURE_WORKSPACE_ID,
     examId: FIXTURE_EXAM_ID,
     totalQuestions: 10,
-    criteriaBlocks: [{ id: 'B1', percentage: null, fixed_count: 10, filters: { lessonIds: ['L1'] } }],
+    criteriaBlocks: [
+      { id: 'B1', percentage: null, fixed_count: 10, filters: { lessonIds: ['L1'] } },
+    ],
     manualQuestionIds: [],
     selectionSeed: seed,
     fetchEligiblePool: fetch,
@@ -72,8 +73,10 @@ describe('T041 — idempotency replay', () => {
 
 describe('T041 — selection_seed fingerprint consistency', () => {
   it('fingerprint changes when pool changes (different questions available)', async () => {
-    const r1 = await runAutoSelection(makeInput(SEED_A, vi.fn().mockResolvedValue([...POOL])))
-    const r2 = await runAutoSelection(makeInput(SEED_A, vi.fn().mockResolvedValue([...POOL].reverse())))
+    const _r1 = await runAutoSelection(makeInput(SEED_A, vi.fn().mockResolvedValue([...POOL])))
+    const r2 = await runAutoSelection(
+      makeInput(SEED_A, vi.fn().mockResolvedValue([...POOL].reverse()))
+    )
     // Same IDs but fetched in different order — fingerprint shouldn't change because
     // fingerprint is based on the final pool composition, not fetch order
     // (actual assertion depends on implementation — just ensure it's a string)

@@ -9,18 +9,17 @@
  * combined total = totalQuestions, no overlaps, zero-auto edge case.
  */
 
-import { describe, expect, it, vi } from 'vitest'
 import {
-  runAutoSelection,
-  AutoSelectionError,
   type AutoSelectionInput,
   type CriteriaBlock,
   type FetchEligiblePoolFn,
+  runAutoSelection,
 } from '@zidney/domain-core/attempts/auto-selection.service'
+import { describe, expect, it, vi } from 'vitest'
 import {
-  FIXTURE_WORKSPACE_ID,
   FIXTURE_EXAM_ID,
   FIXTURE_QUESTION_IDS,
+  FIXTURE_WORKSPACE_ID,
 } from '../fixtures/auto-selection.fixture'
 
 const MANUAL_Q1 = FIXTURE_QUESTION_IDS[0]!
@@ -41,7 +40,12 @@ function block(id: string, overrides: Partial<CriteriaBlock> = {}): CriteriaBloc
   }
 }
 
-function makeInput(manual: string[], autoBlocks: CriteriaBlock[], fetch: FetchEligiblePoolFn, total = 10): AutoSelectionInput {
+function makeInput(
+  manual: string[],
+  autoBlocks: CriteriaBlock[],
+  fetch: FetchEligiblePoolFn,
+  total = 10
+): AutoSelectionInput {
   return {
     workspaceId: FIXTURE_WORKSPACE_ID,
     examId: FIXTURE_EXAM_ID,
@@ -59,14 +63,19 @@ describe('T031 — hybrid selection (manual + auto)', () => {
   it('auto pool excludes manual IDs', async () => {
     const fetch = vi.fn().mockResolvedValue(AUTO_POOL.slice(0, 8))
     await runAutoSelection(makeInput([MANUAL_Q1, MANUAL_Q2], [block('B1')], fetch, 10))
-    const [, , , filters, excludeIds] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]!
+    const [, , , _filters, excludeIds] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]!
     expect(excludeIds).toContain(MANUAL_Q1)
     expect(excludeIds).toContain(MANUAL_Q2)
   })
 
   it('selectedIds does not contain any manual IDs', async () => {
     const result = await runAutoSelection(
-      makeInput([MANUAL_Q1, MANUAL_Q2], [block('B1', { fixed_count: 5 })], poolOf(AUTO_POOL.slice(0, 8)), 7)
+      makeInput(
+        [MANUAL_Q1, MANUAL_Q2],
+        [block('B1', { fixed_count: 5 })],
+        poolOf(AUTO_POOL.slice(0, 8)),
+        7
+      )
     )
     expect(result.selectedIds).not.toContain(MANUAL_Q1)
     expect(result.selectedIds).not.toContain(MANUAL_Q2)
@@ -74,14 +83,24 @@ describe('T031 — hybrid selection (manual + auto)', () => {
 
   it('blockAssignments count equals totalQuestions - manualCount', async () => {
     const result = await runAutoSelection(
-      makeInput([MANUAL_Q1, MANUAL_Q2], [block('B1', { fixed_count: 5 })], poolOf(AUTO_POOL.slice(0, 8)), 7)
+      makeInput(
+        [MANUAL_Q1, MANUAL_Q2],
+        [block('B1', { fixed_count: 5 })],
+        poolOf(AUTO_POOL.slice(0, 8)),
+        7
+      )
     )
     expect(result.blockAssignments.length).toBe(5)
   })
 
   it('blockAssignments orders start after manual positions', async () => {
     const result = await runAutoSelection(
-      makeInput([MANUAL_Q1, MANUAL_Q2], [block('B1', { fixed_count: 3 })], poolOf(AUTO_POOL.slice(0, 6)), 5)
+      makeInput(
+        [MANUAL_Q1, MANUAL_Q2],
+        [block('B1', { fixed_count: 3 })],
+        poolOf(AUTO_POOL.slice(0, 6)),
+        5
+      )
     )
     const orders = result.blockAssignments.map((a) => a.order).sort((a, b) => a - b)
     expect(orders[0]).toBeGreaterThanOrEqual(2) // manual occupies 0,1

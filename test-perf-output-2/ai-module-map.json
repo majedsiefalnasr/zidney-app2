@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-01T22:29:14.223Z",
+  "generated_at": "2026-04-02T17:52:59.955Z",
   "source_metadata": {
     "module_boundaries_hash": "6493a7d6",
-    "audit_timestamp": "2026-04-01T22:29:14.195Z"
+    "audit_timestamp": "2026-04-02T17:52:59.938Z"
   },
   "modules": {
     "apps/api": {

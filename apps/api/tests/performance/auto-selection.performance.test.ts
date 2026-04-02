@@ -10,24 +10,24 @@
  *   - 500 concurrent starts: all must complete within 5s total wall-clock
  */
 
-import { describe, expect, it } from 'vitest'
-import { runAutoSelection } from '@zidney/domain-core/attempts/auto-selection.service'
 import type { FetchEligiblePoolFn } from '@zidney/domain-core/attempts/auto-selection.service'
+import { runAutoSelection } from '@zidney/domain-core/attempts/auto-selection.service'
+import { describe, expect, it } from 'vitest'
 
 const WORKSPACE = '10000000-0000-0000-0000-000000000001'
-const EXAM      = '30000000-0000-0000-0000-000000000001'
+const EXAM = '30000000-0000-0000-0000-000000000001'
 
 function makePool(size: number): string[] {
-  return Array.from({ length: size }, (_, i) =>
-    `60000000-0000-0000-0000-${String(i + 1).padStart(12, '0')}`
+  return Array.from(
+    { length: size },
+    (_, i) => `60000000-0000-0000-0000-${String(i + 1).padStart(12, '0')}`
   )
 }
 
 const POOL_50K = makePool(50_000)
 
 function makeFetch(pool: string[]): FetchEligiblePoolFn {
-  return async (_ws, _ex, _filters, excludeIds) =>
-    pool.filter(id => !excludeIds.includes(id))
+  return async (_ws, _ex, _filters, excludeIds) => pool.filter((id) => !excludeIds.includes(id))
 }
 
 describe('T036 — performance: single selection with 50k pool', () => {

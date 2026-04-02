@@ -42,7 +42,5 @@ export const attemptStartIdempotencyClaims = pgTable(
   ]
 )
 
-export type AttemptStartIdempotencyClaim =
-  typeof attemptStartIdempotencyClaims.$inferSelect
-export type NewAttemptStartIdempotencyClaim =
-  typeof attemptStartIdempotencyClaims.$inferInsert
+export type AttemptStartIdempotencyClaim = typeof attemptStartIdempotencyClaims.$inferSelect
+export type NewAttemptStartIdempotencyClaim = typeof attemptStartIdempotencyClaims.$inferInsert

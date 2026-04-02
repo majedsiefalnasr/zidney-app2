@@ -9,28 +9,32 @@
  * is forwarded to fetchEligiblePool with the correct CriteriaBlockFilters.
  */
 
-import { describe, expect, it, vi } from 'vitest'
 import {
-  runAutoSelection,
   type AutoSelectionInput,
   type CriteriaBlock,
-  type FetchEligiblePoolFn,
   type CriteriaBlockFilters,
+  type FetchEligiblePoolFn,
+  runAutoSelection,
 } from '@zidney/domain-core/attempts/auto-selection.service'
+import { describe, expect, it, vi } from 'vitest'
 import {
-  FIXTURE_WORKSPACE_ID,
-  FIXTURE_EXAM_ID,
-  FIXTURE_QUESTION_IDS,
-  FIXTURE_LESSON_ID,
-  FIXTURE_CATEGORY_ID,
-  FIXTURE_TAG_ID,
   FIXTURE_BASKET_ID,
+  FIXTURE_CATEGORY_ID,
+  FIXTURE_EXAM_ID,
+  FIXTURE_LESSON_ID,
+  FIXTURE_QUESTION_IDS,
   FIXTURE_SEMESTER_ID,
+  FIXTURE_TAG_ID,
+  FIXTURE_WORKSPACE_ID,
 } from '../fixtures/auto-selection.fixture'
 
 const POOL = FIXTURE_QUESTION_IDS
 
-function makeInput(blocks: CriteriaBlock[], fetch: FetchEligiblePoolFn, total = 5): AutoSelectionInput {
+function makeInput(
+  blocks: CriteriaBlock[],
+  fetch: FetchEligiblePoolFn,
+  total = 5
+): AutoSelectionInput {
   return {
     workspaceId: FIXTURE_WORKSPACE_ID,
     examId: FIXTURE_EXAM_ID,
@@ -46,7 +50,10 @@ function block(id: string, filters: CriteriaBlockFilters): CriteriaBlock {
   return { id, percentage: null, fixed_count: 5, filters }
 }
 
-function extractFetchCallFilters(fetch: ReturnType<typeof vi.fn>, callIndex = 0): CriteriaBlockFilters {
+function extractFetchCallFilters(
+  fetch: ReturnType<typeof vi.fn>,
+  callIndex = 0
+): CriteriaBlockFilters {
   return fetch.mock.calls[callIndex]![3] as CriteriaBlockFilters
 }
 
@@ -119,10 +126,7 @@ describe('T039 — combined filters', () => {
     const fetch = vi.fn().mockResolvedValue([...POOL])
     await runAutoSelection(
       makeInput(
-        [
-          block('B1', { lessonIds: ['L1'] }),
-          block('B2', { categoryIds: ['C1'] }),
-        ],
+        [block('B1', { lessonIds: ['L1'] }), block('B2', { categoryIds: ['C1'] })],
         fetch,
         10
       )

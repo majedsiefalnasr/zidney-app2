@@ -9,13 +9,9 @@
  * the transitionExamStatus service function.
  */
 
-import {
-  getExam,
-  transitionExamStatus,
-  validateAutoCriteria,
-} from '@zidney/domain-core/mcq-exams'
-import type { DbClient } from '@zidney/domain-core/mcq-exams'
 import type { CriteriaBlockFilters } from '@zidney/domain-core'
+import type { DbClient } from '@zidney/domain-core/mcq-exams'
+import { getExam, transitionExamStatus, validateAutoCriteria } from '@zidney/domain-core/mcq-exams'
 import { createLogger } from '@zidney/logger'
 import {
   examIdParamSchema,
@@ -48,11 +44,7 @@ function buildFetchEligiblePoolForTransition(
   excludeIds: string[]
 ) => Promise<string[]> {
   return async (_wid, examId, _blockId, filters, excludeIds) => {
-    const conditions: string[] = [
-      'q.workspace_id = $1',
-      'q.exam_id = $2',
-      'q.deleted_at IS NULL',
-    ]
+    const conditions: string[] = ['q.workspace_id = $1', 'q.exam_id = $2', 'q.deleted_at IS NULL']
     const params: unknown[] = [workspaceId, examId]
     let paramIdx = 3
 
@@ -69,7 +61,9 @@ function buildFetchEligiblePoolForTransition(
       params.push(filters.categoryValueIds)
     }
     if (filters.tagIds && filters.tagIds.length > 0) {
-      conditions.push(`EXISTS (SELECT 1 FROM question_tags qt WHERE qt.question_id = q.id AND qt.tag_id = ANY($${paramIdx++}))`)
+      conditions.push(
+        `EXISTS (SELECT 1 FROM question_tags qt WHERE qt.question_id = q.id AND qt.tag_id = ANY($${paramIdx++}))`
+      )
       params.push(filters.tagIds)
     }
     if (filters.basketIds && filters.basketIds.length > 0) {

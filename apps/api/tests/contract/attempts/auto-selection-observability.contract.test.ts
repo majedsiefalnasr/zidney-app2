@@ -9,16 +9,15 @@
  * structured fields for observability purposes.
  */
 
+import {
+  type AutoSelectionInput,
+  runAutoSelection,
+} from '@zidney/domain-core/attempts/auto-selection.service'
 import { describe, expect, it, vi } from 'vitest'
 import {
-  runAutoSelection,
-  type AutoSelectionInput,
-  type AutoSelectionResult,
-} from '@zidney/domain-core/attempts/auto-selection.service'
-import {
-  FIXTURE_WORKSPACE_ID,
   FIXTURE_EXAM_ID,
   FIXTURE_QUESTION_IDS,
+  FIXTURE_WORKSPACE_ID,
 } from '../../fixtures/auto-selection.fixture'
 
 const POOL = FIXTURE_QUESTION_IDS
@@ -28,7 +27,14 @@ function makeInput(overrides: Partial<AutoSelectionInput> = {}): AutoSelectionIn
     workspaceId: FIXTURE_WORKSPACE_ID,
     examId: FIXTURE_EXAM_ID,
     totalQuestions: 5,
-    criteriaBlocks: [{ id: 'B1', percentage: null, fixed_count: 5, filters: { lessonIds: ['L1'] } }],
+    criteriaBlocks: [
+      {
+        id: 'B1',
+        percentage: null,
+        fixed_count: 5,
+        filters: { lessonIds: ['L1'] },
+      },
+    ],
     manualQuestionIds: [],
     selectionSeed: 'obs-contract-seed-001',
     fetchEligiblePool: vi.fn().mockResolvedValue([...POOL]),

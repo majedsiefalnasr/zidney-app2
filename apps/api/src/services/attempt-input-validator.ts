@@ -419,9 +419,7 @@ const IDEMPOTENCY_KEY_MAX_LEN = 255
  * Returns a ValidationResult. Callers decide whether to reject based on
  * exam mode — this function only checks format.
  */
-export function validateIdempotencyKey(
-  key: string | null | undefined
-): ValidationResult<string> {
+export function validateIdempotencyKey(key: string | null | undefined): ValidationResult<string> {
   if (!key || typeof key !== 'string' || key.trim().length === 0) {
     return { valid: false, errors: ['Idempotency-Key header is required'] }
   }

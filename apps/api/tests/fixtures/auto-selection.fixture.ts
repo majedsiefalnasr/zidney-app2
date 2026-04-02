@@ -199,9 +199,7 @@ export interface AttemptFixture {
   selection_diagnostics: Record<string, unknown> | null
 }
 
-export function makeAttemptWithSelection(
-  overrides: Partial<AttemptFixture> = {}
-): AttemptFixture {
+export function makeAttemptWithSelection(overrides: Partial<AttemptFixture> = {}): AttemptFixture {
   return {
     id: FIXTURE_ATTEMPT_ID,
     workspace_id: FIXTURE_WORKSPACE_ID,

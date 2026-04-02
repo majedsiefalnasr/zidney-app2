@@ -12,7 +12,7 @@
  * to keep this module framework-free.
  */
 
-import type { FetchEligiblePoolFn, CriteriaBlockFilters } from '../attempts/auto-selection.service'
+import type { CriteriaBlockFilters, FetchEligiblePoolFn } from '../attempts/auto-selection.service'
 import type { CriteriaEntry } from './mcq-exams.types'
 import { validateCriteriaMode, validateCriteriaTotalMatch } from './mcq-exams.validators'
 
@@ -64,7 +64,10 @@ export async function validateAutoCriteria(
   // 1. Mode integrity
   const modeResult = validateCriteriaMode(criteria)
   if (!modeResult.valid) {
-    errors.push({ code: 'INVALID_CRITERIA_MODE', message: modeResult.reason ?? 'Invalid criteria mode' })
+    errors.push({
+      code: 'INVALID_CRITERIA_MODE',
+      message: modeResult.reason ?? 'Invalid criteria mode',
+    })
     // Cannot proceed with further checks if modes are invalid
     return { valid: false, errors }
   }
@@ -72,13 +75,18 @@ export async function validateAutoCriteria(
   // 2. Total match
   const totalResult = validateCriteriaTotalMatch(criteria, totalQuestions)
   if (!totalResult.valid) {
-    errors.push({ code: 'CRITERIA_COUNT_MISMATCH', message: totalResult.reason ?? 'Criteria total mismatch' })
+    errors.push({
+      code: 'CRITERIA_COUNT_MISMATCH',
+      message: totalResult.reason ?? 'Criteria total mismatch',
+    })
   }
 
   // 3. Overlap-risk: two blocks are considered overlapping if their non-null filter sets are identical
   for (let i = 0; i < criteria.length; i++) {
     for (let j = i + 1; j < criteria.length; j++) {
-      if (_criteriaFilterEquals(criteria[i]!, criteria[j]!)) {
+      const ci = criteria[i]
+      const cj = criteria[j]
+      if (_criteriaFilterEquals(ci, cj)) {
         errors.push({
           code: 'CRITERIA_OVERLAP_RISK',
           message: `Blocks ${i + 1} and ${j + 1} share identical filter dimensions — they may draw from the same candidate pool`,

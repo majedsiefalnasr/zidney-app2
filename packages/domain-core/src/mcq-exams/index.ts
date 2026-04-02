@@ -14,14 +14,6 @@ export * from './mcq-auto-criteria-validation.service'
 export * from './mcq-exams.dependency-registry'
 export * from './mcq-exams.errors'
 export * from './mcq-exams.service'
-export {
-  validateCriteriaMode,
-  validateCriteriaTotalMatch,
-  validateCriteriaSum,
-  validatePassValue,
-  validateTotalQuestions,
-} from './mcq-exams.validators'
-export type { ValidationResult } from './mcq-exams.validators'
 export type {
   AddExamQuestionsInput,
   AuditContext,
@@ -50,3 +42,11 @@ export {
   VALID_PASS_TYPES,
   VALID_SELECTION_MODES,
 } from './mcq-exams.types'
+export type { ValidationResult } from './mcq-exams.validators'
+export {
+  validateCriteriaMode,
+  validateCriteriaSum,
+  validateCriteriaTotalMatch,
+  validatePassValue,
+  validateTotalQuestions,
+} from './mcq-exams.validators'

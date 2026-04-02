@@ -9,13 +9,13 @@
  * scenarios.  Uses mocked fetchEligiblePool — no real DB required.
  */
 
-import { describe, expect, it, vi } from 'vitest'
+import type { FetchEligiblePoolFn } from '@zidney/domain-core/attempts/auto-selection.service'
 import {
-  validateAutoCriteria,
   type ValidateCriteriaInput,
+  validateAutoCriteria,
 } from '@zidney/domain-core/mcq-exams/mcq-auto-criteria-validation.service'
 import type { CriteriaEntry } from '@zidney/domain-core/mcq-exams/mcq-exams.types'
-import type { FetchEligiblePoolFn } from '@zidney/domain-core/attempts/auto-selection.service'
+import { describe, expect, it, vi } from 'vitest'
 
 const WORKSPACE_ID = '10000000-0000-0000-0000-000000000001'
 const EXAM_ID = '30000000-0000-0000-0000-000000000001'
@@ -25,15 +25,27 @@ const poolOf = (n: number): FetchEligiblePoolFn =>
 
 const emptyPool = (): FetchEligiblePoolFn => vi.fn().mockResolvedValue([])
 
-function input(criteria: CriteriaEntry[], fetch: FetchEligiblePoolFn, total = 10): ValidateCriteriaInput {
-  return { workspaceId: WORKSPACE_ID, examId: EXAM_ID, totalQuestions: total, criteria, fetchEligiblePool: fetch }
+function input(
+  criteria: CriteriaEntry[],
+  fetch: FetchEligiblePoolFn,
+  total = 10
+): ValidateCriteriaInput {
+  return {
+    workspaceId: WORKSPACE_ID,
+    examId: EXAM_ID,
+    totalQuestions: total,
+    criteria,
+    fetchEligiblePool: fetch,
+  }
 }
 
 // ── Valid scenarios ───────────────────────────────────────────────────────────
 
 describe('T023 — valid criteria', () => {
   it('accepts single 100% percentage block with adequate pool', async () => {
-    const r = await validateAutoCriteria(input([{ lesson_ids: ['L1'], percentage: 100 }], poolOf(20)))
+    const r = await validateAutoCriteria(
+      input([{ lesson_ids: ['L1'], percentage: 100 }], poolOf(20))
+    )
     expect(r.valid).toBe(true)
     expect(r.errors).toHaveLength(0)
   })
@@ -52,7 +64,9 @@ describe('T023 — valid criteria', () => {
   })
 
   it('accepts valid fixed_count block', async () => {
-    const r = await validateAutoCriteria(input([{ category_ids: ['C1'], fixed_count: 5 }], poolOf(20), 5))
+    const r = await validateAutoCriteria(
+      input([{ category_ids: ['C1'], fixed_count: 5 }], poolOf(20), 5)
+    )
     expect(r.valid).toBe(true)
   })
 })
@@ -130,14 +144,20 @@ describe('T023 — CRITERIA_OVERLAP_RISK blocks save/publish', () => {
 describe('T023 — UNDERSIZED_POOL blocks save/publish', () => {
   it('blocks when pool smaller than required count', async () => {
     const r = await validateAutoCriteria(
-      input([{ category_ids: ['C1'], fixed_count: 10 }], vi.fn().mockResolvedValue(['q1', 'q2']), 10)
+      input(
+        [{ category_ids: ['C1'], fixed_count: 10 }],
+        vi.fn().mockResolvedValue(['q1', 'q2']),
+        10
+      )
     )
     expect(r.valid).toBe(false)
     expect(r.errors.some((e) => e.code === 'UNDERSIZED_POOL')).toBe(true)
   })
 
   it('blocks when pool is empty', async () => {
-    const r = await validateAutoCriteria(input([{ category_ids: ['C1'], fixed_count: 5 }], emptyPool(), 5))
+    const r = await validateAutoCriteria(
+      input([{ category_ids: ['C1'], fixed_count: 5 }], emptyPool(), 5)
+    )
     expect(r.valid).toBe(false)
     expect(r.errors.some((e) => e.code === 'UNDERSIZED_POOL')).toBe(true)
   })

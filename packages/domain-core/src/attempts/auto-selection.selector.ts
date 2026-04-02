@@ -69,15 +69,9 @@ export function seededShuffle(ids: readonly string[], seed: string): string[] {
  *
  * @throws If pool is smaller than requested count.
  */
-export function selectFromPool(
-  pool: readonly string[],
-  count: number,
-  seed: string
-): string[] {
+export function selectFromPool(pool: readonly string[], count: number, seed: string): string[] {
   if (count > pool.length) {
-    throw new Error(
-      `Insufficient pool: need ${count} but got ${pool.length}`
-    )
+    throw new Error(`Insufficient pool: need ${count} but got ${pool.length}`)
   }
   if (count === pool.length) {
     return [...pool]
@@ -117,7 +111,5 @@ export function resolveBlockCount(
   if (percentage != null) {
     return Math.round((percentage / 100) * totalQuestions)
   }
-  throw new Error(
-    'resolveBlockCount: either percentage or fixedCount must be provided'
-  )
+  throw new Error('resolveBlockCount: either percentage or fixedCount must be provided')
 }

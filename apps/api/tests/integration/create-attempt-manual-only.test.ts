@@ -9,15 +9,15 @@
  * blocks, 0 auto questions selected.
  */
 
+import {
+  type AutoSelectionInput,
+  runAutoSelection,
+} from '@zidney/domain-core/attempts/auto-selection.service'
 import { describe, expect, it, vi } from 'vitest'
 import {
-  runAutoSelection,
-  type AutoSelectionInput,
-} from '@zidney/domain-core/attempts/auto-selection.service'
-import {
-  FIXTURE_WORKSPACE_ID,
   FIXTURE_EXAM_ID,
   FIXTURE_QUESTION_IDS,
+  FIXTURE_WORKSPACE_ID,
 } from '../fixtures/auto-selection.fixture'
 
 const MANUAL_IDS = FIXTURE_QUESTION_IDS.slice(0, 5)

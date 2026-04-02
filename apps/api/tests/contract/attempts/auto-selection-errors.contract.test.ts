@@ -8,18 +8,18 @@
  * Validates AutoSelectionError shape and all Stage 39 error codes.
  */
 
-import { describe, expect, it, vi } from 'vitest'
 import {
-  runAutoSelection,
   AutoSelectionError,
   type AutoSelectionInput,
   type CriteriaBlock,
   type FetchEligiblePoolFn,
+  runAutoSelection,
 } from '@zidney/domain-core/attempts/auto-selection.service'
+import { describe, expect, it, vi } from 'vitest'
 import {
-  FIXTURE_WORKSPACE_ID,
   FIXTURE_EXAM_ID,
   FIXTURE_QUESTION_IDS,
+  FIXTURE_WORKSPACE_ID,
 } from '../../fixtures/auto-selection.fixture'
 
 const POOL = FIXTURE_QUESTION_IDS
@@ -28,7 +28,11 @@ function block(id: string, fixed: number): CriteriaBlock {
   return { id, percentage: null, fixed_count: fixed, filters: { lessonIds: ['L1'] } }
 }
 
-function input(blocks: CriteriaBlock[], fetch: FetchEligiblePoolFn, total = 10): AutoSelectionInput {
+function input(
+  blocks: CriteriaBlock[],
+  fetch: FetchEligiblePoolFn,
+  total = 10
+): AutoSelectionInput {
   return {
     workspaceId: FIXTURE_WORKSPACE_ID,
     examId: FIXTURE_EXAM_ID,
@@ -95,17 +99,23 @@ describe('T044 — INSUFFICIENT_POOL error', () => {
 
 describe('T044 — success result shape', () => {
   it('result has selectedIds array', async () => {
-    const r = await runAutoSelection(input([block('B1', 5)], vi.fn().mockResolvedValue([...POOL]), 5))
+    const r = await runAutoSelection(
+      input([block('B1', 5)], vi.fn().mockResolvedValue([...POOL]), 5)
+    )
     expect(Array.isArray(r.selectedIds)).toBe(true)
   })
 
   it('result has blockAssignments array', async () => {
-    const r = await runAutoSelection(input([block('B1', 5)], vi.fn().mockResolvedValue([...POOL]), 5))
+    const r = await runAutoSelection(
+      input([block('B1', 5)], vi.fn().mockResolvedValue([...POOL]), 5)
+    )
     expect(Array.isArray(r.blockAssignments)).toBe(true)
   })
 
   it('result has diagnostics object with required keys', async () => {
-    const r = await runAutoSelection(input([block('B1', 5)], vi.fn().mockResolvedValue([...POOL]), 5))
+    const r = await runAutoSelection(
+      input([block('B1', 5)], vi.fn().mockResolvedValue([...POOL]), 5)
+    )
     expect(r.diagnostics).toHaveProperty('criteria_block_count')
     expect(r.diagnostics).toHaveProperty('pool_sizes')
     expect(r.diagnostics).toHaveProperty('selected_count')

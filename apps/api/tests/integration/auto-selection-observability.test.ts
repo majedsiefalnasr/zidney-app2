@@ -9,16 +9,15 @@
  * fields with correct types and values on both success and failure paths.
  */
 
+import {
+  type AutoSelectionInput,
+  runAutoSelection,
+} from '@zidney/domain-core/attempts/auto-selection.service'
 import { describe, expect, it, vi } from 'vitest'
 import {
-  runAutoSelection,
-  AutoSelectionError,
-  type AutoSelectionInput,
-} from '@zidney/domain-core/attempts/auto-selection.service'
-import {
-  FIXTURE_WORKSPACE_ID,
   FIXTURE_EXAM_ID,
   FIXTURE_QUESTION_IDS,
+  FIXTURE_WORKSPACE_ID,
 } from '../fixtures/auto-selection.fixture'
 
 const POOL = FIXTURE_QUESTION_IDS
@@ -28,7 +27,14 @@ function makeInput(overrides: Partial<AutoSelectionInput> = {}): AutoSelectionIn
     workspaceId: FIXTURE_WORKSPACE_ID,
     examId: FIXTURE_EXAM_ID,
     totalQuestions: 5,
-    criteriaBlocks: [{ id: 'B1', percentage: null, fixed_count: 5, filters: { lessonIds: ['L1'] } }],
+    criteriaBlocks: [
+      {
+        id: 'B1',
+        percentage: null,
+        fixed_count: 5,
+        filters: { lessonIds: ['L1'] },
+      },
+    ],
     manualQuestionIds: [],
     selectionSeed: 'obs-metric-seed-001',
     fetchEligiblePool: vi.fn().mockResolvedValue([...POOL]),
@@ -45,7 +51,9 @@ describe('T040 — diagnostics fields present on success', () => {
   })
 
   it('pool_sizes[0] reflects the pool returned by fetchEligiblePool', async () => {
-    const r = await runAutoSelection(makeInput({ fetchEligiblePool: vi.fn().mockResolvedValue(POOL.slice(0, 7)) }))
+    const r = await runAutoSelection(
+      makeInput({ fetchEligiblePool: vi.fn().mockResolvedValue(POOL.slice(0, 7)) })
+    )
     expect(r.diagnostics.pool_sizes[0]).toBe(7)
   })
 

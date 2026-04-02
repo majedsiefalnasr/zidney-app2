@@ -25,20 +25,20 @@ export function computeBaseExamHash(input: Record<string, unknown>): string {
   // names (total_marks vs total_questions, duration_minutes vs durationMinutes) to be handled.
   const inAny = input as Record<string, unknown>
   const normalized: Record<string, unknown> = {
-    exam_type: inAny['exam_type'] ?? inAny['examType'] ?? null,
-    name: inAny['name'] ?? inAny['title'] ?? null,
-    description: inAny['description'] ?? inAny['instructions'] ?? null,
-    subject_id: inAny['subject_id'] ?? inAny['subjectId'] ?? null,
-    duration_minutes: inAny['duration_minutes'] ?? inAny['durationMinutes'] ?? null,
-    pass_percentage: inAny['pass_percentage'] ?? inAny['passPercentage'] ?? null,
+    exam_type: inAny.exam_type ?? inAny.examType ?? null,
+    name: inAny.name ?? inAny.title ?? null,
+    description: inAny.description ?? inAny.instructions ?? null,
+    subject_id: inAny.subject_id ?? inAny.subjectId ?? null,
+    duration_minutes: inAny.duration_minutes ?? inAny.durationMinutes ?? null,
+    pass_percentage: inAny.pass_percentage ?? inAny.passPercentage ?? null,
     // unify total marks/questions into `total_questions`
     total_questions:
-      inAny['total_questions'] ??
-      inAny['totalQuestions'] ??
-      inAny['total_marks'] ??
-      inAny['totalMarks'] ??
+      inAny.total_questions ??
+      inAny.totalQuestions ??
+      inAny.total_marks ??
+      inAny.totalMarks ??
       null,
-    updated_at: inAny['updated_at'] ?? inAny['updatedAt'] ?? null,
+    updated_at: inAny.updated_at ?? inAny.updatedAt ?? null,
   }
 
   const sorted = Object.fromEntries(

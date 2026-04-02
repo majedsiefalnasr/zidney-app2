@@ -13,10 +13,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   AutoSelectionError,
-  runAutoSelection,
   type AutoSelectionInput,
   type CriteriaBlock,
   type FetchEligiblePoolFn,
+  runAutoSelection,
 } from '../../../src/attempts/auto-selection.service'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -44,7 +44,10 @@ function makeFetchFn(pools: Record<string, string[]>): FetchEligiblePoolFn {
   })
 }
 
-const BASE: Omit<AutoSelectionInput, 'criteriaBlocks' | 'fetchEligiblePool' | 'manualQuestionIds' | 'totalQuestions'> = {
+const BASE: Omit<
+  AutoSelectionInput,
+  'criteriaBlocks' | 'fetchEligiblePool' | 'manualQuestionIds' | 'totalQuestions'
+> = {
   workspaceId: 'ws-1',
   examId: 'exam-1',
   selectionSeed: 'hybrid-test-seed',
@@ -100,7 +103,7 @@ describe('hybrid selection — manual exclusion', () => {
   it('no duplicates between manual and auto IDs', async () => {
     const pool = makePool(30)
     const manualIds = pool.slice(0, 10)
-    const fetchFn = makeFetchFn({ 'b1': pool })
+    const fetchFn = makeFetchFn({ b1: pool })
 
     const result = await runAutoSelection({
       ...BASE,
@@ -154,10 +157,7 @@ describe('hybrid selection — manual-first ordering', () => {
       fetchEligiblePool: fetchFn,
     })
 
-    const expectedOrders = Array.from(
-      { length: result.blockAssignments.length },
-      (_, i) => i + 5
-    )
+    const expectedOrders = Array.from({ length: result.blockAssignments.length }, (_, i) => i + 5)
     const actualOrders = result.blockAssignments.map((a) => a.order).sort((a, b) => a - b)
     expect(actualOrders).toEqual(expectedOrders)
   })
@@ -213,17 +213,14 @@ describe('hybrid selection — multi-block uniqueness', () => {
     // Both blocks return overlapping pools
     const sharedPool = makePool(20, 'shared')
     const fetchFn = makeFetchFn({
-      'b1': sharedPool,
-      'b2': sharedPool, // same pool → many duplicates
+      b1: sharedPool,
+      b2: sharedPool, // same pool → many duplicates
     })
 
     const result = await runAutoSelection({
       ...BASE,
       totalQuestions: 10,
-      criteriaBlocks: [
-        makeBlock('b1', { fixedCount: 6 }),
-        makeBlock('b2', { fixedCount: 6 }),
-      ],
+      criteriaBlocks: [makeBlock('b1', { fixedCount: 6 }), makeBlock('b2', { fixedCount: 6 })],
       manualQuestionIds: [],
       fetchEligiblePool: fetchFn,
     })
@@ -244,10 +241,7 @@ describe('hybrid selection — multi-block uniqueness', () => {
     const result = await runAutoSelection({
       ...BASE,
       totalQuestions: 20,
-      criteriaBlocks: [
-        makeBlock('b1', { fixedCount: 8 }),
-        makeBlock('b2', { fixedCount: 7 }),
-      ],
+      criteriaBlocks: [makeBlock('b1', { fixedCount: 8 }), makeBlock('b2', { fixedCount: 7 })],
       manualQuestionIds: manualIds,
       fetchEligiblePool: fetchFn,
     })

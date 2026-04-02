@@ -12,26 +12,27 @@
  *   - Results are deterministic for the same seed
  */
 
-import { describe, expect, it } from 'vitest'
-import { runAutoSelection } from '@zidney/domain-core/attempts/auto-selection.service'
 import type { FetchEligiblePoolFn } from '@zidney/domain-core/attempts/auto-selection.service'
+import { runAutoSelection } from '@zidney/domain-core/attempts/auto-selection.service'
+import { describe, expect, it } from 'vitest'
 
 const WORKSPACE = '10000000-0000-0000-0000-000000000001'
-const EXAM      = '30000000-0000-0000-0000-000000000001'
+const EXAM = '30000000-0000-0000-0000-000000000001'
 const POOL_SIZE = 200
-const TOTAL_Q   = 10
+const TOTAL_Q = 10
 const CONCURRENCY = 500
 
 function makePool(size: number): string[] {
-  return Array.from({ length: size }, (_, i) =>
-    `60000000-0000-0000-0000-${String(i + 1).padStart(12, '0')}`
+  return Array.from(
+    { length: size },
+    (_, i) => `60000000-0000-0000-0000-${String(i + 1).padStart(12, '0')}`
   )
 }
 
 const FIXED_POOL = makePool(POOL_SIZE)
 
 const fetchFn: FetchEligiblePoolFn = async (_ws, _ex, _filters, excludeIds) => {
-  return FIXED_POOL.filter(id => !excludeIds.includes(id))
+  return FIXED_POOL.filter((id) => !excludeIds.includes(id))
 }
 
 describe('T035 — load: 500 concurrent auto-selections', () => {

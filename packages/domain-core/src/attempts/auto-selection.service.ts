@@ -112,9 +112,7 @@ export class AutoSelectionError extends Error {
  *
  * Throws AutoSelectionError on pool insufficiency or criteria misconfiguration.
  */
-export async function runAutoSelection(
-  input: AutoSelectionInput
-): Promise<AutoSelectionResult> {
+export async function runAutoSelection(input: AutoSelectionInput): Promise<AutoSelectionResult> {
   const {
     workspaceId,
     examId,
@@ -140,11 +138,7 @@ export async function runAutoSelection(
   let duplicateCount = 0
 
   for (const block of criteriaBlocks) {
-    const requiredCount = resolveBlockCount(
-      totalQuestions,
-      block.percentage,
-      block.fixed_count
-    )
+    const requiredCount = resolveBlockCount(totalQuestions, block.percentage, block.fixed_count)
 
     if (requiredCount === 0) {
       // Zero-auto edge case (US3): skip block entirely
@@ -156,13 +150,7 @@ export async function runAutoSelection(
     const excludeIds = Array.from(seen)
 
     // Fetch eligible pool (caller provides stable, deduplicated, ordered IDs)
-    const pool = await fetchEligiblePool(
-      workspaceId,
-      examId,
-      block.id,
-      block.filters,
-      excludeIds
-    )
+    const pool = await fetchEligiblePool(workspaceId, examId, block.id, block.filters, excludeIds)
 
     poolSizes.push(pool.length)
     allCandidateIds.push(...pool)

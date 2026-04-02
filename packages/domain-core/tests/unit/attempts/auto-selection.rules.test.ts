@@ -11,10 +11,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   AutoSelectionError,
-  runAutoSelection,
   type AutoSelectionInput,
   type CriteriaBlock,
   type FetchEligiblePoolFn,
+  runAutoSelection,
 } from '../../../src/attempts/auto-selection.service'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

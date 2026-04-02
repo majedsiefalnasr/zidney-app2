@@ -128,9 +128,7 @@ describe('018_auto_selection_engine migration — up()', () => {
   })
 
   it('adds unique constraint on (attempt_id, question_id) in attempt_questions', () => {
-    const ddl = calls.find(
-      (c) => c.text.includes('attempt_questions') && c.text.includes('UNIQUE')
-    )
+    const ddl = calls.find((c) => c.text.includes('attempt_questions') && c.text.includes('UNIQUE'))
     expect(ddl).toBeDefined()
     expect(ddl!.text).toContain('attempt_id')
     expect(ddl!.text).toContain('question_id')
@@ -150,8 +148,7 @@ describe('018_auto_selection_engine migration — up()', () => {
 
   it('creates attempt_start_idempotency_claims table', () => {
     const ddl = calls.find(
-      (c) =>
-        c.text.includes('CREATE TABLE') && c.text.includes('attempt_start_idempotency_claims')
+      (c) => c.text.includes('CREATE TABLE') && c.text.includes('attempt_start_idempotency_claims')
     )
     expect(ddl).toBeDefined()
     const sql = ddl!.text
@@ -177,16 +174,12 @@ describe('018_auto_selection_engine migration — up()', () => {
   })
 
   it('creates idx_attempt_start_idempotency_claims_lookup index', () => {
-    const ddl = calls.find((c) =>
-      c.text.includes('idx_attempt_start_idempotency_claims_lookup')
-    )
+    const ddl = calls.find((c) => c.text.includes('idx_attempt_start_idempotency_claims_lookup'))
     expect(ddl).toBeDefined()
   })
 
   it('creates idx_attempt_start_idempotency_claims_expiry index', () => {
-    const ddl = calls.find((c) =>
-      c.text.includes('idx_attempt_start_idempotency_claims_expiry')
-    )
+    const ddl = calls.find((c) => c.text.includes('idx_attempt_start_idempotency_claims_expiry'))
     expect(ddl).toBeDefined()
   })
 
@@ -194,8 +187,7 @@ describe('018_auto_selection_engine migration — up()', () => {
 
   it('adds fixed_count column to mcq_exam_auto_criteria', () => {
     const ddl = calls.find(
-      (c) =>
-        c.text.includes('ALTER TABLE mcq_exam_auto_criteria') && c.text.includes('fixed_count')
+      (c) => c.text.includes('ALTER TABLE mcq_exam_auto_criteria') && c.text.includes('fixed_count')
     )
     expect(ddl).toBeDefined()
     expect(ddl!.text).toContain('INTEGER')
@@ -211,8 +203,7 @@ describe('018_auto_selection_engine migration — up()', () => {
 
   it('adds semester_id column to mcq_exam_auto_criteria', () => {
     const ddl = calls.find(
-      (c) =>
-        c.text.includes('ALTER TABLE mcq_exam_auto_criteria') && c.text.includes('semester_id')
+      (c) => c.text.includes('ALTER TABLE mcq_exam_auto_criteria') && c.text.includes('semester_id')
     )
     expect(ddl).toBeDefined()
   })
@@ -231,8 +222,7 @@ describe('018_auto_selection_engine migration — up()', () => {
   it('adds new quota check constraint allowing percentage OR fixed_count', () => {
     const ddl = calls.find(
       (c) =>
-        c.text.includes('ADD CONSTRAINT') &&
-        c.text.includes('mcq_exam_auto_criteria_quota_check')
+        c.text.includes('ADD CONSTRAINT') && c.text.includes('mcq_exam_auto_criteria_quota_check')
     )
     expect(ddl).toBeDefined()
     const sql = ddl!.text

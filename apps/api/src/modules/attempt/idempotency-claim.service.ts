@@ -99,9 +99,7 @@ export async function findExistingClaim(
  *
  * @throws Error on unexpected database failure
  */
-export async function claimIdempotencyKey(
-  input: ClaimIdempotencyKeyInput
-): Promise<void> {
+export async function claimIdempotencyKey(input: ClaimIdempotencyKeyInput): Promise<void> {
   const { client, workspaceId, userId, examId, idempotencyKey, attemptId, payloadHash } = input
 
   const expiresAt = new Date(Date.now() + CLAIM_TTL_MS)

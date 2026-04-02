@@ -1,18 +1,19 @@
 # Architecture Health Summary
 
-- Score: 96
+- Score: 91
 - Health State: EXCELLENT
 - Verdict: PASS
 - Threshold: 80
 
 ## Findings
 
+- **HIGH** apps/api: Relative architecture leak: "../../../packages/domain-core/src/attempts/auto-selection.service" should use module import instead of relative path
 - **MEDIUM** gitnexus query: GitNexus query failed during architecture-health enrichment.
 - **MEDIUM** gitnexus impact: GitNexus impact failed during architecture-health enrichment.
 
 ## Signals
 
-- dependency_integrity: PASS (0 findings, delta 0)
+- dependency_integrity: FAIL (1 findings, delta 5)
 - layer_integrity: PASS (0 findings, delta 0)
 - circular_dependency_risk: PASS (0 findings, delta 0)
 - type_safety_governance: PASS (0 findings, delta 0)

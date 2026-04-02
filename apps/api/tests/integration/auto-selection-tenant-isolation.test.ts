@@ -9,30 +9,34 @@
  * cross-tenant data leakage: separate pool fetches, independent results.
  */
 
-import { describe, expect, it, vi } from 'vitest'
-import { runAutoSelection } from '@zidney/domain-core/attempts/auto-selection.service'
 import type { FetchEligiblePoolFn } from '@zidney/domain-core/attempts/auto-selection.service'
+import { runAutoSelection } from '@zidney/domain-core/attempts/auto-selection.service'
+import { describe, expect, it } from 'vitest'
 
 const WORKSPACE_A = '10000000-0000-0000-0000-000000000001'
 const WORKSPACE_B = '10000000-0000-0000-0000-000000000002'
-const EXAM_A      = '30000000-0000-0000-0000-000000000001'
-const EXAM_B      = '30000000-0000-0000-0000-000000000002'
+const EXAM_A = '30000000-0000-0000-0000-000000000001'
+const EXAM_B = '30000000-0000-0000-0000-000000000002'
 
 // Generate N unique question IDs for a given tenant prefix
 function tenantPool(prefix: string, count: number): string[] {
-  return Array.from({ length: count }, (_, i) =>
-    `${prefix}0000-0000-0000-${String(i + 1).padStart(12, '0')}`
+  return Array.from(
+    { length: count },
+    (_, i) => `${prefix}0000-0000-0000-${String(i + 1).padStart(12, '0')}`
   )
 }
 
 const poolA = tenantPool('aaaaaaaaa', 20)
 const poolB = tenantPool('bbbbbbbbb', 20)
 
-function makeFetch(pool: string[]): { fn: FetchEligiblePoolFn; calls: Parameters<FetchEligiblePoolFn>[] } {
+function makeFetch(pool: string[]): {
+  fn: FetchEligiblePoolFn
+  calls: Parameters<FetchEligiblePoolFn>[]
+} {
   const calls: Parameters<FetchEligiblePoolFn>[] = []
   const fn: FetchEligiblePoolFn = async (workspaceId, examId, filters, excludeIds) => {
     calls.push([workspaceId, examId, filters, excludeIds])
-    return pool.filter(id => !excludeIds.includes(id))
+    return pool.filter((id) => !excludeIds.includes(id))
   }
   return { fn, calls }
 }
@@ -96,7 +100,7 @@ describe('T049 — tenant isolation: no cross-tenant data leakage', () => {
     ])
 
     // Pool contents are tenant-specific — no overlap
-    const overlap = resultA.selectedIds.filter(id => resultB.selectedIds.includes(id))
+    const overlap = resultA.selectedIds.filter((id) => resultB.selectedIds.includes(id))
     expect(overlap).toHaveLength(0)
   })
 

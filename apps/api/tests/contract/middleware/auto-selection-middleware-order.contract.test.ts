@@ -9,7 +9,7 @@
  * endpoints.  Uses spy-based mock pipeline to assert interception order.
  */
 
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 // ── Order tracker ─────────────────────────────────────────────────────────────
 
@@ -23,7 +23,14 @@ async function runPipeline(middlewares: MiddlewareName[]): Promise<MiddlewareNam
   return executed
 }
 
-const EXPECTED_ORDER: MiddlewareName[] = ['correlation', 'tenant', 'license', 'version', 'auth', 'handler']
+const EXPECTED_ORDER: MiddlewareName[] = [
+  'correlation',
+  'tenant',
+  'license',
+  'version',
+  'auth',
+  'handler',
+]
 
 // ── Middleware order assertions ───────────────────────────────────────────────
 
@@ -76,7 +83,14 @@ describe('T051 — middleware order contract (criteria endpoint)', () => {
   })
 
   it('middleware order is invariant — inserting wrong order yields contract violation', async () => {
-    const wrongOrder: MiddlewareName[] = ['tenant', 'correlation', 'license', 'version', 'auth', 'handler']
+    const wrongOrder: MiddlewareName[] = [
+      'tenant',
+      'correlation',
+      'license',
+      'version',
+      'auth',
+      'handler',
+    ]
     const order = await runPipeline(wrongOrder)
     expect(order.indexOf('correlation')).toBeGreaterThan(order.indexOf('tenant'))
     // This demonstrates the contract violation — correlation must come FIRST

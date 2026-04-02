@@ -6,19 +6,15 @@
  *        STAGE_39_AUTO_SELECTION_ENGINE (T026 — criteria validation gate)
  */
 
-import {
-  getExam,
-  setCriteria,
-  validateAutoCriteria,
-} from '@zidney/domain-core/mcq-exams'
-import type { DbClient } from '@zidney/domain-core/mcq-exams'
 import type { CriteriaBlockFilters } from '@zidney/domain-core'
+import type { DbClient } from '@zidney/domain-core/mcq-exams'
+import { getExam, setCriteria, validateAutoCriteria } from '@zidney/domain-core/mcq-exams'
 import { createLogger } from '@zidney/logger'
+import type { SetCriteriaBody } from '@zidney/validation/backoffice/mcq-exams.schemas'
 import {
   examIdParamSchema,
   setCriteriaBodySchema,
 } from '@zidney/validation/backoffice/mcq-exams.schemas'
-import type { SetCriteriaBody } from '@zidney/validation/backoffice/mcq-exams.schemas'
 import type { Context } from 'hono'
 
 import {
@@ -46,11 +42,7 @@ function buildFetchEligiblePool(
   excludeIds: string[]
 ) => Promise<string[]> {
   return async (_wid, examId, _blockId, filters, excludeIds) => {
-    const conditions: string[] = [
-      'q.workspace_id = $1',
-      'q.exam_id = $2',
-      'q.deleted_at IS NULL',
-    ]
+    const conditions: string[] = ['q.workspace_id = $1', 'q.exam_id = $2', 'q.deleted_at IS NULL']
     const params: unknown[] = [workspaceId, examId]
     let paramIdx = 3
 
@@ -112,16 +104,18 @@ export async function setCriteriaHandler(c: Context): Promise<Response> {
     const examId = paramParsed.data.examId
 
     // Map request payload to domain CriteriaEntry (including Stage 39 fields)
-    const criteriaEntries = bodyParsed.data.criteria.map((entry: SetCriteriaBody['criteria'][number]) => ({
-      lesson_ids: entry.lessonIds ?? null,
-      category_value_ids: entry.categoryValueIds ?? null,
-      tag_ids: entry.tagIds ?? null,
-      basket_ids: entry.basketIds ?? null,
-      category_ids: entry.categoryIds ?? null,
-      semester_id: entry.semesterId ?? null,
-      percentage: entry.percentage ?? null,
-      fixed_count: entry.fixedCount ?? null,
-    }))
+    const criteriaEntries = bodyParsed.data.criteria.map(
+      (entry: SetCriteriaBody['criteria'][number]) => ({
+        lesson_ids: entry.lessonIds ?? null,
+        category_value_ids: entry.categoryValueIds ?? null,
+        tag_ids: entry.tagIds ?? null,
+        basket_ids: entry.basketIds ?? null,
+        category_ids: entry.categoryIds ?? null,
+        semester_id: entry.semesterId ?? null,
+        percentage: entry.percentage ?? null,
+        fixed_count: entry.fixedCount ?? null,
+      })
+    )
 
     // Stage 39: validate criteria for AUTOMATIC exams before persisting
     const exam = await getExam(db, examId, audit)
@@ -139,12 +133,7 @@ export async function setCriteriaHandler(c: Context): Promise<Response> {
       }
     }
 
-    const result = await setCriteria(
-      db,
-      examId,
-      { criteria: criteriaEntries },
-      audit
-    )
+    const result = await setCriteria(db, examId, { criteria: criteriaEntries }, audit)
 
     logger.info('MCQ exam criteria set via API', {
       correlation_id: audit.correlation_id,

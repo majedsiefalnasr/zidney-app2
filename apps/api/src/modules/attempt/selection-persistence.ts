@@ -18,10 +18,9 @@
  * ADRs: ADR-0001 (workspace isolation), ADR-0002 (snapshot immutability)
  */
 
+import type { BlockAssignment } from '@zidney/domain-core'
 import { createLogger } from '@zidney/logger'
 import type { PoolClient } from 'pg'
-
-import type { BlockAssignment } from '@zidney/domain-core'
 
 const logger = createLogger('selection-persistence')
 
@@ -125,7 +124,7 @@ export async function persistManualSelections({
   let paramIdx = 1
 
   for (let i = 0; i < manualQuestionIds.length; i++) {
-    const questionId = manualQuestionIds[i]!
+    const questionId = manualQuestionIds[i]
     placeholders.push(
       `($${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++})`
     )

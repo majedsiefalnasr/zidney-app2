@@ -11,10 +11,10 @@
 
 import { describe, expect, it } from 'vitest'
 import {
-  runAutoSelection,
   type AutoSelectionInput,
   type CriteriaBlock,
   type FetchEligiblePoolFn,
+  runAutoSelection,
 } from '../../../src/attempts/auto-selection.service'
 
 function makePool(size: number, prefix = 'q'): string[] {

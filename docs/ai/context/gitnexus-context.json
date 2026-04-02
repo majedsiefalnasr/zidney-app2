@@ -1,1 +1,73 @@
-{"schemaVersion":"1.0.0","generatedAt":"2026-04-01T23:37:20.294Z","analyzedAt":"2026-04-01T23:37:20.294Z","analysisMode":"changed-only","changedFiles":[".agents/agents/code-reviewer.agent.md",".agents/agents/security-auditor.agent.md",".oxlintrc.json",".vscode/settings.json","apps/api/src/app.ts","apps/api/src/db/tenant/migrations/20260402_016_create_scheduled_exams.ts","apps/api/src/db/tenant/migrations/20260402_017_add_scheduled_fields_to_attempts.ts","apps/api/src/db/tenant/migrations/__tests__/scheduled-exam-migrations.test.ts","apps/api/src/db/tenant/schemas/attempts.schema.ts","apps/api/src/db/tenant/schemas/index.ts","apps/api/src/db/tenant/schemas/scheduled-exams.schema.ts","apps/api/src/routes/backoffice/scheduled-exams/__tests__/scheduled-exams.integration.test.ts","apps/api/src/routes/backoffice/scheduled-exams/create-scheduled-exam.ts","apps/api/src/routes/backoffice/scheduled-exams/delete-scheduled-exam.ts","apps/api/src/routes/backoffice/scheduled-exams/get-scheduled-exam.ts","apps/api/src/routes/backoffice/scheduled-exams/heartbeat.ts","apps/api/src/routes/backoffice/scheduled-exams/helpers.ts","apps/api/src/routes/backoffice/scheduled-exams/index.ts","apps/api/src/routes/backoffice/scheduled-exams/list-scheduled-exams.ts","apps/api/src/routes/backoffice/scheduled-exams/re-approve.ts","apps/api/src/routes/backoffice/scheduled-exams/start-attempt.ts","apps/api/src/routes/backoffice/scheduled-exams/submit-attempt.ts","apps/api/src/routes/backoffice/scheduled-exams/update-scheduled-exam.ts","apps/api/src/routes/backoffice/scheduled-exams/workflow-transition.ts","apps/worker/src/grading/worker-startup.ts","apps/worker/src/jobs/auto-submit-scheduled-attempt.ts","apps/worker/src/jobs/scheduled-exam-dispatcher.ts","apps/worker/tests/unit/auto-submit-scheduled-attempt.test.ts","docs/ai/context/ai-architecture-brain.json","docs/ai/context/ai-architecture-summary.md","docs/ai/context/ai-context-mini.json","docs/ai/context/ai-dependency-graph.json","docs/ai/context/ai-layer-model.json","docs/ai/context/ai-module-map.json","docs/ai/context/ai-runtime-dependents.json","docs/ai/context/ai-runtime-map.json","docs/ai/context/gitnexus-context.json","docs/architecture/ARCHITECTURE_DIAGRAMS.md","docs/architecture/audits/history/audit-1775070908672.json","docs/architecture/audits/history/audit-1775082556744.json","docs/architecture/audits/history/audit-1775082557616.json","docs/architecture/audits/history/audit-1775082722800.json","docs/architecture/audits/history/audit-1775082727708.json","docs/architecture/audits/history/audit-1775082729729.json","docs/architecture/graphs/architecture-graph.html","docs/architecture/graphs/architecture-graph.mmd","docs/architecture/graphs/dependency-graph-ai.json","docs/architecture/graphs/dependency-graph.json","docs/architecture/graphs/dependency-graph.mmd","docs/architecture/graphs/module-dependency-graph.mmd","docs/architecture/health/architecture-health.json","docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json","docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json","docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md","docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md","docs/reports/infra-audit-report.json","packages/domain-core/package.json","packages/domain-core/src/scheduled-exam/__tests__/scheduled-exam-hash.test.ts","packages/domain-core/src/scheduled-exam/__tests__/scheduled-exam-time.test.ts","packages/domain-core/src/scheduled-exam/__tests__/scheduled-exam-workflow.test.ts","packages/domain-core/src/scheduled-exam/index.ts","packages/domain-core/src/scheduled-exam/scheduled-exam-hash.ts","packages/domain-core/src/scheduled-exam/scheduled-exam-time.ts","packages/domain-core/src/scheduled-exam/scheduled-exam-workflow.ts","packages/domain-core/src/scheduled-exam/scheduled-exam.errors.ts","packages/domain-core/src/scheduled-exam/scheduled-exam.repository.ts","packages/domain-core/src/scheduled-exam/scheduled-exam.service.ts","packages/domain-core/src/scheduled-exam/scheduled-exam.types.ts","packages/job-queue/src/job-schema.ts","packages/validation/src/backoffice/index.ts","packages/validation/src/backoffice/scheduled-exams.schemas.ts","specs/phases/03_BACKOFFICE_CORE/04_EXAM_ENGINE_CORE/STAGE_38_SCHEDULED_ENGINE.md","specs/runtime/038-scheduled-exam-engine/.workflow-state.json","specs/runtime/038-scheduled-exam-engine/PR_SUMMARY.md","specs/runtime/038-scheduled-exam-engine/README.md","specs/runtime/038-scheduled-exam-engine/audits/ANALYZE_REPORT.md","specs/runtime/038-scheduled-exam-engine/audits/VALIDATION_REPORT.md","specs/runtime/038-scheduled-exam-engine/checklists/requirements.md","specs/runtime/038-scheduled-exam-engine/data-model.md","specs/runtime/038-scheduled-exam-engine/guides/TESTING_GUIDE.md","specs/runtime/038-scheduled-exam-engine/plan.md","specs/runtime/038-scheduled-exam-engine/reports/CLARIFY_REPORT.md","specs/runtime/038-scheduled-exam-engine/reports/CLOSURE_REPORT.md","specs/runtime/038-scheduled-exam-engine/reports/IMPLEMENT_REPORT.md","specs/runtime/038-scheduled-exam-engine/reports/PLAN_REPORT.md","specs/runtime/038-scheduled-exam-engine/reports/SPECIFY_REPORT.md","specs/runtime/038-scheduled-exam-engine/reports/TASKS_REPORT.md","specs/runtime/038-scheduled-exam-engine/research.md","specs/runtime/038-scheduled-exam-engine/spec.md","specs/runtime/038-scheduled-exam-engine/tasks.md","test-perf-output-2/ai-architecture-brain.json","test-perf-output-2/ai-architecture-summary.md","test-perf-output-2/ai-context-mini.json","test-perf-output-2/ai-dependency-graph.json","test-perf-output-2/ai-layer-model.json","test-perf-output-2/ai-module-map.json","test-perf-output-2/ai-runtime-map.json","test-perf-output/ai-architecture-brain.json","test-perf-output/ai-architecture-summary.md","test-perf-output/ai-context-mini.json","test-perf-output/ai-dependency-graph.json","test-perf-output/ai-layer-model.json","test-perf-output/ai-module-map.json","test-perf-output/ai-runtime-map.json","tsconfig.base.json"],"impactedModules":["apps/api","apps/worker","packages/domain-core","packages/job-queue","packages/validation"],"dependencyGraph":{"apps/api":["packages/domain-core","packages/job-queue","packages/logger","packages/redis-utils","packages/types","packages/validation"],"apps/worker":["packages/domain-core","packages/job-queue","packages/logger","packages/types"],"packages/domain-core":["packages/logger","packages/types","packages/validation"],"packages/job-queue":["packages/logger"],"packages/validation":["packages/logger","packages/types"]},"architectureLayerMap":{"apps/api":"unknown","apps/worker":"unknown","packages/domain-core":"unknown","packages/job-queue":"unknown","packages/validation":"unknown"},"recentCommits":[{"hash":"fd27362b2d8779403f10db6789f0c8ac2364dbc2","message":"Merge pull request #83 from majedsiefalnasr/spec/038-scheduled-exam-engine","author":"Majed Sief Alnasr","date":"2026-04-02T01:00:04+02:00"},{"hash":"58aabd7c2cf13d12b042f4730b2e929b3e9068fa","message":"fix(scheduled-exam): make 'code' immutable when ENABLED (fix workflow tests)","author":"Majed Sief Alnasr","date":"2026-04-02T00:57:01+02:00"},{"hash":"82f23cc7c1002b1637a3ae854698cdce3f5b33d2","message":"docs(agents): add preventive security and code review rules from Coderabit findings","author":"Majed Sief Alnasr","date":"2026-04-02T00:37:25+02:00"},{"hash":"dcf771ad585c9ee732e5558766c632282e347e33","message":"fix: correct HTTP status codes and add SQL injection protection","author":"Majed Sief Alnasr","date":"2026-04-02T00:28:13+02:00"},{"hash":"7e57717da80fdbf347025da7db3e4e4f9766aafc","message":"fix: add missing columns and constraints to scheduled exam migrations","author":"Majed Sief Alnasr","date":"2026-04-02T00:14:55+02:00"},{"hash":"903757dc9da2518dbcf9a70c2e6a6426d7641918","message":"fix: resolve 8 critical issues from Coderabit AI scan","author":"Majed Sief Alnasr","date":"2026-04-01T23:55:40+02:00"},{"hash":"f3ab2e3858cc16a902997c2c4f22db04ad9f4cd3","message":"fix(domain-core/scheduled-exam): align workflow API and canonical base-exam hash with test expectations","author":"Majed Sief Alnasr","date":"2026-04-01T23:10:01+02:00"},{"hash":"03c80257c62647036ac9a20cb4c85956a437ba09","message":"chore(spec): add VALIDATION_REPORT.md for stage 038","author":"Majed Sief Alnasr","date":"2026-04-01T22:05:58+02:00"},{"hash":"04f4ae6b5ba00f721f86db59ba6b78b6326b9534","message":"spec(038-scheduled-exam-engine): closure — stage PRODUCTION READY","author":"Majed Sief Alnasr","date":"2026-04-01T21:49:09+02:00"},{"hash":"2815312ddbcd980370b8c33f85101de0c8f751fa","message":"feat(038-scheduled-exam-engine): complete implement step","author":"Majed Sief Alnasr","date":"2026-04-01T21:32:50+02:00"}],"riskIndicators":[{"module":"apps/api","riskScore":40,"reason":"20 changed file(s)","affectedBy":["apps/api/src/app.ts","apps/api/src/db/tenant/migrations/20260402_016_create_scheduled_exams.ts","apps/api/src/db/tenant/migrations/20260402_017_add_scheduled_fields_to_attempts.ts","apps/api/src/db/tenant/migrations/__tests__/scheduled-exam-migrations.test.ts","apps/api/src/db/tenant/schemas/attempts.schema.ts","apps/api/src/db/tenant/schemas/index.ts","apps/api/src/db/tenant/schemas/scheduled-exams.schema.ts","apps/api/src/routes/backoffice/scheduled-exams/__tests__/scheduled-exams.integration.test.ts","apps/api/src/routes/backoffice/scheduled-exams/create-scheduled-exam.ts","apps/api/src/routes/backoffice/scheduled-exams/delete-scheduled-exam.ts","apps/api/src/routes/backoffice/scheduled-exams/get-scheduled-exam.ts","apps/api/src/routes/backoffice/scheduled-exams/heartbeat.ts","apps/api/src/routes/backoffice/scheduled-exams/helpers.ts","apps/api/src/routes/backoffice/scheduled-exams/index.ts","apps/api/src/routes/backoffice/scheduled-exams/list-scheduled-exams.ts","apps/api/src/routes/backoffice/scheduled-exams/re-approve.ts","apps/api/src/routes/backoffice/scheduled-exams/start-attempt.ts","apps/api/src/routes/backoffice/scheduled-exams/submit-attempt.ts","apps/api/src/routes/backoffice/scheduled-exams/update-scheduled-exam.ts","apps/api/src/routes/backoffice/scheduled-exams/workflow-transition.ts"]},{"module":"packages/domain-core","riskScore":40,"reason":"12 changed file(s)","affectedBy":["packages/domain-core/package.json","packages/domain-core/src/scheduled-exam/__tests__/scheduled-exam-hash.test.ts","packages/domain-core/src/scheduled-exam/__tests__/scheduled-exam-time.test.ts","packages/domain-core/src/scheduled-exam/__tests__/scheduled-exam-workflow.test.ts","packages/domain-core/src/scheduled-exam/index.ts","packages/domain-core/src/scheduled-exam/scheduled-exam-hash.ts","packages/domain-core/src/scheduled-exam/scheduled-exam-time.ts","packages/domain-core/src/scheduled-exam/scheduled-exam-workflow.ts","packages/domain-core/src/scheduled-exam/scheduled-exam.errors.ts","packages/domain-core/src/scheduled-exam/scheduled-exam.repository.ts","packages/domain-core/src/scheduled-exam/scheduled-exam.service.ts","packages/domain-core/src/scheduled-exam/scheduled-exam.types.ts"]},{"module":"apps/worker","riskScore":20,"reason":"4 changed file(s)","affectedBy":["apps/worker/src/grading/worker-startup.ts","apps/worker/src/jobs/auto-submit-scheduled-attempt.ts","apps/worker/src/jobs/scheduled-exam-dispatcher.ts","apps/worker/tests/unit/auto-submit-scheduled-attempt.test.ts"]},{"module":"packages/validation","riskScore":10,"reason":"2 changed file(s)","affectedBy":["packages/validation/src/backoffice/index.ts","packages/validation/src/backoffice/scheduled-exams.schemas.ts"]},{"module":"packages/job-queue","riskScore":5,"reason":"1 changed file(s)","affectedBy":["packages/job-queue/src/job-schema.ts"]}]}
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-04-02T17:56:47.899Z",
+  "analyzedAt": "2026-04-02T17:56:47.899Z",
+  "analysisMode": "changed-only",
+  "changedFiles": [],
+  "impactedModules": [],
+  "dependencyGraph": {},
+  "architectureLayerMap": {},
+  "recentCommits": [
+    {
+      "hash": "11e93c833138228f5340cef92d295a8bf33d9bd3",
+      "message": "feat(stage39): T022-T054 — complete test suite, docs and validation report",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T19:18:14+02:00"
+    },
+    {
+      "hash": "a144cac2b383ccf9aada3a8dc2d80e0fd51b4904",
+      "message": "feat(stage39): T024-T029 — criteria validation service, repo, route integration",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T18:16:30+02:00"
+    },
+    {
+      "hash": "7642bef30f97e002eea01cc1be899b8693bb78fb",
+      "message": "feat(stage39): T001-T021 T034 T045-T047 T050 — auto-selection engine phase 1-3",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T17:39:44+02:00"
+    },
+    {
+      "hash": "384ff7ebb685b07c12cf5316257c6c32894e6f93",
+      "message": "chore(039-auto-selection-engine): complete analyze step — APPROVED",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T16:34:15+02:00"
+    },
+    {
+      "hash": "987f5e1d65ba6ec1798e00217363ebb47cd9c610",
+      "message": "chore(039-auto-selection-engine): amend tasks — add T041-T054 idempotency/observability/rollback/trust-chain tasks",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T16:30:15+02:00"
+    },
+    {
+      "hash": "8d2ccaef3931a469152148c66f1650f4e46016e9",
+      "message": "chore(039-auto-selection-engine): complete tasks step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T02:14:57+02:00"
+    },
+    {
+      "hash": "f84beaaabeddfd776761140d029ef381d88c9578",
+      "message": "chore(039-auto-selection-engine): complete plan step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T02:06:25+02:00"
+    },
+    {
+      "hash": "47a21b3c20013a0144c660c21b00a6d53653ec4b",
+      "message": "chore(039-auto-selection-engine): complete clarify step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T01:50:36+02:00"
+    },
+    {
+      "hash": "26a2046d5a6bc38cf276c2d6250dd96f13690d4b",
+      "message": "chore(039-auto-selection-engine): complete specify step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T01:43:20+02:00"
+    },
+    {
+      "hash": "473f3ec87038c7669e88a5cdb5504d4c222238e1",
+      "message": "chore(039-auto-selection-engine): initialize stage branch and directory",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-02T01:38:46+02:00"
+    }
+  ],
+  "riskIndicators": []
+}

@@ -34,7 +34,8 @@ function simulateTrustChain(
   if (auth === 'invalid') return { status: 401, error: 'INVALID_AUTH_TOKEN' }
   if (license === 'expired') return { status: 403, error: 'LICENSE_EXPIRED' }
   if (license === 'missing') return { status: 403, error: 'LICENSE_NOT_FOUND' }
-  if (endpoint === 'criteria-save' && role !== 'backoffice') return { status: 403, error: 'FORBIDDEN_ROLE' }
+  if (endpoint === 'criteria-save' && role !== 'backoffice')
+    return { status: 403, error: 'FORBIDDEN_ROLE' }
   return { status: 200 }
 }
 
