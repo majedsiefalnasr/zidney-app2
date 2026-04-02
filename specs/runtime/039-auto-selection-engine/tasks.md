@@ -11,9 +11,9 @@
 
 **Purpose**: Stage scaffolding for migration and test execution entry points.
 
-- [ ] T001 Create tenant migration file `apps/api/src/db/tenant/migrations/20260403_018_auto_selection_engine.ts` for additive Stage 39 schema updates, including filter-support indexes and idempotency-claim persistence constraints
-- [ ] T002 Create migration verification test `apps/api/src/db/tenant/migrations/__tests__/018_auto_selection_engine.migration.test.ts` validating required indexes and uniqueness constraints
-- [ ] T003 [P] Create auto-selection fixture helpers in `apps/api/tests/fixtures/auto-selection.fixture.ts`
+- [X] T001 Create tenant migration file `apps/api/src/db/tenant/migrations/20260403_018_auto_selection_engine.ts` for additive Stage 39 schema updates, including filter-support indexes and idempotency-claim persistence constraints
+- [X] T002 Create migration verification test `apps/api/src/db/tenant/migrations/__tests__/018_auto_selection_engine.migration.test.ts` validating required indexes and uniqueness constraints
+- [X] T003 [P] Create auto-selection fixture helpers in `apps/api/tests/fixtures/auto-selection.fixture.ts`
 
 ---
 
@@ -23,15 +23,15 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Update `apps/api/src/db/tenant/schemas/attempts.schema.ts` with deterministic selection seed, candidate-pool fingerprint, and diagnostics snapshot columns
-- [ ] T005 [P] Create `apps/api/src/db/tenant/schemas/attempt-questions.schema.ts` with immutable assignment constraints and unique indexes
-- [ ] T006 [P] Extend `apps/api/src/db/tenant/schemas/mcq-exam-auto-criteria.schema.ts` for `fixed_count` and additional optional filters
-- [ ] T050 [P] Create `apps/api/src/db/tenant/schemas/attempt-start-idempotency-claims.schema.ts` with tenant-scoped unique claim constraints
-- [ ] T007 Update `apps/api/src/db/tenant/schemas/index.ts` to export Stage 39 schema additions
-- [ ] T008 Add Stage 39 selection error codes in `packages/types/src/error-codes.ts`
-- [ ] T009 Extend criteria validation schemas in `packages/validation/src/backoffice/mcq-exams.schemas.ts` for percentage-or-fixed-count mode rules
-- [ ] T010 Update `packages/validation/src/backoffice/index.ts` with Stage 39 schema exports
-- [ ] T011 Create structured selection diagnostics helper in `packages/domain-core/src/logging/selection-events.ts`
+- [X] T004 Update `apps/api/src/db/tenant/schemas/attempts.schema.ts` with deterministic selection seed, candidate-pool fingerprint, and diagnostics snapshot columns
+- [X] T005 [P] Create `apps/api/src/db/tenant/schemas/attempt-questions.schema.ts` with immutable assignment constraints and unique indexes
+- [X] T006 [P] Extend `apps/api/src/db/tenant/schemas/mcq-exam-auto-criteria.schema.ts` for `fixed_count` and additional optional filters
+- [X] T050 [P] Create `apps/api/src/db/tenant/schemas/attempt-start-idempotency-claims.schema.ts` with tenant-scoped unique claim constraints
+- [X] T007 Update `apps/api/src/db/tenant/schemas/index.ts` to export Stage 39 schema additions
+- [X] T008 Add Stage 39 selection error codes in `packages/types/src/error-codes.ts`
+- [X] T009 Extend criteria validation schemas in `packages/validation/src/backoffice/mcq-exams.schemas.ts` for percentage-or-fixed-count mode rules
+- [X] T010 Update `packages/validation/src/backoffice/index.ts` with Stage 39 schema exports
+- [X] T011 Create structured selection diagnostics helper in `packages/domain-core/src/logging/selection-events.ts`
 
 **Checkpoint**: Foundation ready; user stories can proceed.
 
@@ -45,25 +45,25 @@
 
 ### Tests for User Story 1
 
-- [ ] T012 [P] [US1] Add deterministic shuffle unit tests in `packages/domain-core/tests/unit/attempts/auto-selection.shuffle.test.ts`
-- [ ] T013 [P] [US1] Add pool insufficiency and duplicate guard tests in `packages/domain-core/tests/unit/attempts/auto-selection.rules.test.ts`
-- [ ] T014 [P] [US1] Add attempt-start auto-selection integration tests in `apps/api/tests/integration/create-attempt-auto-selection.test.ts`
+- [X] T012 [P] [US1] Add deterministic shuffle unit tests in `packages/domain-core/tests/unit/attempts/auto-selection.shuffle.test.ts`
+- [X] T013 [P] [US1] Add pool insufficiency and duplicate guard tests in `packages/domain-core/tests/unit/attempts/auto-selection.rules.test.ts`
+- [X] T014 [P] [US1] Add attempt-start auto-selection integration tests in `apps/api/tests/integration/create-attempt-auto-selection.test.ts`
 - [ ] T041 [P] [US1] Add idempotency replay integration tests (same-key replay and payload-conflict) in `apps/api/tests/integration/create-attempt-idempotency-replay.test.ts`
 - [ ] T042 [P] [US1] Add schema/product version mismatch (HTTP 426) integration tests in `apps/api/tests/integration/create-attempt-version-guard.test.ts`
 - [ ] T044 [P] [US1] Add attempt-start error-contract matrix tests for all Stage 39 codes in `apps/api/tests/contract/attempts/auto-selection-errors.contract.test.ts`
-- [ ] T045 [P] [US1] Add deterministic candidate-order repository tests in `packages/domain-core/tests/unit/attempts/auto-selection.candidate-order.test.ts`
+- [X] T045 [P] [US1] Add deterministic candidate-order repository tests in `packages/domain-core/tests/unit/attempts/auto-selection.candidate-order.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] Implement seeded selector primitives in `packages/domain-core/src/attempts/auto-selection.selector.ts`
-- [ ] T016 [US1] Implement orchestration service for per-criteria selection and merge in `packages/domain-core/src/attempts/auto-selection.service.ts`
-- [ ] T017 [US1] Export Stage 39 attempt selection APIs from `packages/domain-core/src/index.ts`
-- [ ] T018 [US1] Integrate auto-selection orchestration into attempt creation flow in `apps/api/src/routes/attempts/create.ts`
-- [ ] T019 [US1] Implement immutable assignment persistence helper (including candidate-pool fingerprint snapshot persistence) in `apps/api/src/modules/attempt/selection-persistence.ts`
-- [ ] T020 [US1] Add `Idempotency-Key` validation and conflict behavior in `apps/api/src/services/attempt-input-validator.ts`
-- [ ] T021 [US1] Map Stage 39 selection failures to response envelope/error codes in `apps/api/src/routes/attempts/create.ts`
-- [ ] T046 [US1] Implement tenant-scoped idempotency claim/replay service in `apps/api/src/modules/attempt/idempotency-claim.service.ts`
-- [ ] T047 [US1] Enforce mandatory advisory lock and post-lock revalidation in attempt-start orchestration in `apps/api/src/routes/attempts/create.ts`
+- [X] T015 [US1] Implement seeded selector primitives in `packages/domain-core/src/attempts/auto-selection.selector.ts`
+- [X] T016 [US1] Implement orchestration service for per-criteria selection and merge in `packages/domain-core/src/attempts/auto-selection.service.ts`
+- [X] T017 [US1] Export Stage 39 attempt selection APIs from `packages/domain-core/src/index.ts`
+- [X] T018 [US1] Integrate auto-selection orchestration into attempt creation flow in `apps/api/src/routes/attempts/create.ts`
+- [X] T019 [US1] Implement immutable assignment persistence helper (including candidate-pool fingerprint snapshot persistence) in `apps/api/src/modules/attempt/selection-persistence.ts`
+- [X] T020 [US1] Add `Idempotency-Key` validation and conflict behavior in `apps/api/src/services/attempt-input-validator.ts`
+- [X] T021 [US1] Map Stage 39 selection failures to response envelope/error codes in `apps/api/src/routes/attempts/create.ts`
+- [X] T046 [US1] Implement tenant-scoped idempotency claim/replay service in `apps/api/src/modules/attempt/idempotency-claim.service.ts`
+- [X] T047 [US1] Enforce mandatory advisory lock and post-lock revalidation in attempt-start orchestration in `apps/api/src/routes/attempts/create.ts`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -109,7 +109,7 @@
 
 - [ ] T032 [US3] Extend selection orchestration to exclude manual IDs and support zero-auto edge case in `packages/domain-core/src/attempts/auto-selection.service.ts`
 - [ ] T033 [US3] Add manual-first ordering merge logic in `apps/api/src/modules/attempt/selection-persistence.ts`
-- [ ] T034 [US3] Integrate hybrid diagnostics and final-count enforcement in `apps/api/src/routes/attempts/create.ts`
+- [X] T034 [US3] Integrate hybrid diagnostics and final-count enforcement in `apps/api/src/routes/attempts/create.ts`
 
 **Checkpoint**: User Story 3 is independently functional and testable.
 

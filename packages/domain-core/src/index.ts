@@ -9,6 +9,11 @@
 
 // Attempts module
 export * from './attempts/attempt-init'
+// Auto-selection engine (Stage 039)
+export * from './attempts/auto-selection.selector'
+export * from './attempts/auto-selection.service'
+// Logging — selection events (Stage 039)
+export * from './logging/selection-events'
 // Audit module
 export * from './audit/attempt-event-logger'
 // Auth module

@@ -60,6 +60,47 @@ export enum MasterDBErrorCode {
 }
 
 /**
+ * Auto-Selection Engine Error Codes (Stage 39)
+ *
+ * Tenant-scoped errors for the automatic question selection engine.
+ * Used by auto-selection.service.ts and attempt start route.
+ */
+export enum AutoSelectionErrorCode {
+  // 422 Unprocessable Entity — criteria configuration is invalid/insufficient
+  INSUFFICIENT_POOL = 'AUTO_SELECTION_INSUFFICIENT_POOL',
+  INVALID_CRITERIA = 'AUTO_SELECTION_INVALID_CRITERIA',
+  OVERLAP_UNDERSIZED = 'AUTO_SELECTION_OVERLAP_UNDERSIZED',
+
+  // 409 Conflict — duplicate or concurrency issue
+  DUPLICATE_CONFLICT = 'AUTO_SELECTION_DUPLICATE_CONFLICT',
+
+  // 500 Internal Server Error — unexpected failure during selection
+  SELECTION_ABORTED = 'AUTO_SELECTION_SELECTION_ABORTED',
+
+  // 409 Conflict — idempotency key already claimed with different payload
+  IDEMPOTENCY_CONFLICT = 'ATTEMPT_START_IDEMPOTENCY_CONFLICT',
+}
+
+/**
+ * HTTP status code mapping for AutoSelectionErrorCode
+ */
+export const AUTO_SELECTION_ERROR_HTTP_CODES: Record<AutoSelectionErrorCode, number> = {
+  [AutoSelectionErrorCode.INSUFFICIENT_POOL]: 422,
+  [AutoSelectionErrorCode.INVALID_CRITERIA]: 422,
+  [AutoSelectionErrorCode.OVERLAP_UNDERSIZED]: 422,
+  [AutoSelectionErrorCode.DUPLICATE_CONFLICT]: 409,
+  [AutoSelectionErrorCode.SELECTION_ABORTED]: 500,
+  [AutoSelectionErrorCode.IDEMPOTENCY_CONFLICT]: 409,
+}
+
+/**
+ * Get HTTP status for auto-selection error code
+ */
+export function getAutoSelectionHTTPStatus(code: AutoSelectionErrorCode): number {
+  return AUTO_SELECTION_ERROR_HTTP_CODES[code] ?? 500
+}
+
+/**
  * Standard error response structure
  *
  * Matches API envelope format:

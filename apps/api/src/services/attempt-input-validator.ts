@@ -402,3 +402,59 @@ export function validateTimeNotExceeded(
     data: { time_remaining_seconds: timeRemaining },
   }
 }
+
+// ── Stage 39: Idempotency key validation ─────────────────────────────────────
+
+/** Maximum length of an Idempotency-Key header value. */
+const IDEMPOTENCY_KEY_MAX_LEN = 255
+
+/**
+ * Validate the Idempotency-Key header for attempt-start requests.
+ *
+ * Rules:
+ * - Required for automatic / hybrid exams.
+ * - Must be a non-empty string of ≤ 255 characters.
+ * - Only printable ASCII characters (0x20–0x7E) are allowed.
+ *
+ * Returns a ValidationResult. Callers decide whether to reject based on
+ * exam mode — this function only checks format.
+ */
+export function validateIdempotencyKey(
+  key: string | null | undefined
+): ValidationResult<string> {
+  if (!key || typeof key !== 'string' || key.trim().length === 0) {
+    return { valid: false, errors: ['Idempotency-Key header is required'] }
+  }
+
+  if (key.length > IDEMPOTENCY_KEY_MAX_LEN) {
+    return {
+      valid: false,
+      errors: [`Idempotency-Key must not exceed ${IDEMPOTENCY_KEY_MAX_LEN} characters`],
+    }
+  }
+
+  // Reject non-printable or non-ASCII characters
+  if (!/^[\x20-\x7E]+$/.test(key)) {
+    return {
+      valid: false,
+      errors: ['Idempotency-Key must contain only printable ASCII characters'],
+    }
+  }
+
+  return { valid: true, data: key }
+}
+
+/**
+ * Compute a SHA-256 hex payload hash for idempotency conflict detection.
+ *
+ * Uses the Web Crypto API (available in Bun and modern Node.js without imports).
+ * The payload is JSON-serialised in a deterministic order using sorted keys.
+ */
+export async function computePayloadHash(payload: unknown): Promise<string> {
+  const json = JSON.stringify(payload, Object.keys(payload as object).sort())
+  const bytes = new TextEncoder().encode(json)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', bytes)
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
