@@ -9,15 +9,16 @@ Runtime: Backend service
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
-Risk Level: MEDIUM
-Last Updated: 2026-04-01T23:49:50Z
+Step: plan
+Risk Level: HIGH
+Last Updated: 2026-04-02T00:05:30Z
 
-Scope Defined:
+Scope Planned:
 
 - Deterministic auto-selection scope for MCQ exams and assessments
 - Hybrid manual + auto selection behavior and constraints captured
 - Runtime failure boundaries and auditability requirements defined
+- Tenant-DB additive migration scope and transaction model defined
 
 Deferred Scope:
 
@@ -25,10 +26,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved - planning authorized
+- Technical plan compliant - task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 

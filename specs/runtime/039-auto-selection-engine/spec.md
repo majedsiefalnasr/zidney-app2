@@ -107,7 +107,7 @@ As an exam manager, I need to combine manually selected questions with automatic
 
 - **SC-001**: 100% of successful auto-selection attempt starts produce exactly the configured total number of questions with zero duplicates.
 - **SC-002**: 100% of failed selection attempts are blocked before attempt activation and return a categorized, actionable error.
-- **SC-003**: For audited samples, replaying selection with the same seed and unchanged candidate pool reproduces the identical question set in at least 99.9% of cases.
+- **SC-003**: For audited samples, replaying selection with the same seed and unchanged candidate pool reproduces the identical question set in 100% of cases.
 - **SC-004**: During peak registration windows, the platform supports 500 concurrent attempt-start requests for eligible exams without integrity violations.
 - **SC-005**: At least 95% of valid auto-selection attempt starts complete question assembly within 200 ms under agreed performance test conditions.
 - **SC-006**: Configuration validation prevents publication of invalid criteria sets in 100% of tested misconfiguration scenarios.
