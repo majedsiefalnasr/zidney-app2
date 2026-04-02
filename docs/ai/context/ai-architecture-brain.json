@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-01T22:32:09.784Z",
+  "generated_at": "2026-04-02T17:53:06.909Z",
   "metadata": {
     "total_modules": 14,
     "total_violations": 0,
     "generation_time_ms": 0,
     "source_hash": "6493a7d6",
-    "source_timestamp": "2026-04-01T22:32:09.778Z",
+    "source_timestamp": "2026-04-02T17:53:06.887Z",
     "generator_version": "1.0.0"
   },
   "layers": [
@@ -309,19 +309,19 @@
     "hotspots": [
       {
         "module": "packages/logger",
-        "violation_count": 394
+        "violation_count": 397
       },
       {
         "module": "packages/domain-core",
-        "violation_count": 271
+        "violation_count": 302
       },
       {
         "module": "packages/validation",
-        "violation_count": 163
+        "violation_count": 164
       },
       {
         "module": "packages/types",
-        "violation_count": 100
+        "violation_count": 101
       },
       {
         "module": "packages/api-client",

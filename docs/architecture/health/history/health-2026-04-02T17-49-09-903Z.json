@@ -1,0 +1,273 @@
+{
+  "schema_version": "1.0.0",
+  "assessment_id": "0e8eda51946d3b5811535469d81a3f7a75d424d1",
+  "generated_at": "2026-04-02T17:49:09.903Z",
+  "overall": {
+    "score": 91,
+    "health_state": "EXCELLENT",
+    "threshold": {
+      "policy_id": "default-health-threshold-v1",
+      "minimum_passing_score": 80
+    },
+    "verdict": "PASS"
+  },
+  "threshold_policy": {
+    "policy_id": "default-health-threshold-v1",
+    "minimum_passing_score": 80,
+    "weights": {
+      "dependency_integrity": 30,
+      "layer_integrity": 20,
+      "circular_dependency_risk": 15,
+      "type_safety_governance": 15,
+      "architecture_drift": 10,
+      "intelligence_synchronization": 10
+    },
+    "hard_fail_conditions": [
+      "invalid_architecture_intelligence"
+    ],
+    "status_mapping": {
+      "excellent_minimum": 90,
+      "healthy_minimum": 75,
+      "warning_minimum": 50
+    }
+  },
+  "signals": [
+    {
+      "signal_id": "dependency_integrity",
+      "weight": 30,
+      "status": "FAIL",
+      "score_delta": 5,
+      "finding_count": 1,
+      "summary": "Dependency violations: 1",
+      "sources": [
+        "architecture-guard",
+        "infra-audit --quick"
+      ]
+    },
+    {
+      "signal_id": "layer_integrity",
+      "weight": 20,
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "Layer violations: 0",
+      "sources": [
+        "architecture-guard",
+        "infra-audit --quick"
+      ]
+    },
+    {
+      "signal_id": "circular_dependency_risk",
+      "weight": 15,
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "Circular dependencies: 0",
+      "sources": [
+        "architecture-guard",
+        "infra-audit --quick"
+      ]
+    },
+    {
+      "signal_id": "type_safety_governance",
+      "weight": 15,
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "Type safety violations: 0",
+      "sources": [
+        "type-safety-guard",
+        "arch:validate-brain"
+      ]
+    },
+    {
+      "signal_id": "architecture_drift",
+      "weight": 10,
+      "status": "WARN",
+      "score_delta": 4,
+      "finding_count": 2,
+      "summary": "Architecture drift and map violations: 0; GitNexus enrichment findings: 2",
+      "sources": [
+        "architecture-guard",
+        "infra-audit --quick"
+      ]
+    },
+    {
+      "signal_id": "intelligence_synchronization",
+      "weight": 10,
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "All required architecture intelligence artifacts are present and current.",
+      "sources": [
+        "docs/ai/context",
+        "arch:validate-brain"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "dependency-boundaries-0-apps/api/tests/integration/create-attempt-auto-selection.test.ts",
+      "signal_ids": [
+        "dependency_integrity"
+      ],
+      "classification": "direct_rule_violation",
+      "severity": "high",
+      "impacted_surface": "apps/api",
+      "location": {
+        "file": "apps/api/tests/integration/create-attempt-auto-selection.test.ts"
+      },
+      "message": "Relative architecture leak: \"../../../packages/domain-core/src/attempts/auto-selection.service\" should use module import instead of relative path",
+      "remediation": "Move shared logic into an allowed package and update imports to respect module boundaries.",
+      "source_tools": [
+        "architecture-guard"
+      ]
+    },
+    {
+      "finding_id": "gitnexus-query-failed",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "medium",
+      "impacted_surface": "gitnexus query",
+      "message": "GitNexus query failed during architecture-health enrichment.",
+      "remediation": "/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:16\n  process.dlopen(\n          ^\n\nError: /Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node: cannot open shared object file: No such file or directory\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:16:11)\n    at Module._compile (node:internal/modules/cjs/loader:1812:14)\n    at Object..js (node:internal/modules/cjs/loader:1943:10)\n    at Module.load (node:internal/modules/cjs/loader:1533:32)\n    at Module._load (node:internal/modules/cjs/loader:1335:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.require (node:internal/modules/cjs/loader:1556:12)\n    at require (node:internal/modules/helpers:152:16)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/connection.js:3:20)\n    at Module._compile (node:internal/modules/cjs/loader:1812:14) {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v24.14.0",
+      "source_tools": [
+        "gitnexus"
+      ]
+    },
+    {
+      "finding_id": "gitnexus-impact-failed",
+      "signal_ids": [
+        "architecture_drift"
+      ],
+      "classification": "drift",
+      "severity": "medium",
+      "impacted_surface": "gitnexus impact",
+      "message": "GitNexus impact failed during architecture-health enrichment.",
+      "remediation": "/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:16\n  process.dlopen(\n          ^\n\nError: /Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node: cannot open shared object file: No such file or directory\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:16:11)\n    at Module._compile (node:internal/modules/cjs/loader:1812:14)\n    at Object..js (node:internal/modules/cjs/loader:1943:10)\n    at Module.load (node:internal/modules/cjs/loader:1533:32)\n    at Module._load (node:internal/modules/cjs/loader:1335:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.require (node:internal/modules/cjs/loader:1556:12)\n    at require (node:internal/modules/helpers:152:16)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/connection.js:3:20)\n    at Module._compile (node:internal/modules/cjs/loader:1812:14) {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v24.14.0",
+      "source_tools": [
+        "gitnexus"
+      ]
+    }
+  ],
+  "intelligence_snapshot": {
+    "snapshot_id": "current-5",
+    "artifacts": [
+      {
+        "artifact_name": "ai-dependency-graph.json",
+        "path": "docs/ai/context/ai-dependency-graph.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-04-02T17:49:09.467Z"
+      },
+      {
+        "artifact_name": "ai-module-map.json",
+        "path": "docs/ai/context/ai-module-map.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-04-02T17:49:09.463Z"
+      },
+      {
+        "artifact_name": "ai-layer-model.json",
+        "path": "docs/ai/context/ai-layer-model.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-04-02T17:49:09.466Z"
+      },
+      {
+        "artifact_name": "ai-runtime-map.json",
+        "path": "docs/ai/context/ai-runtime-map.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-04-02T17:49:09.467Z"
+      },
+      {
+        "artifact_name": "ai-architecture-brain.json",
+        "path": "docs/ai/context/ai-architecture-brain.json",
+        "required": true,
+        "exists": true,
+        "status": "CURRENT",
+        "last_modified_at": "2026-04-02T17:49:09.626Z",
+        "validator": "bun run arch:validate:brain"
+      }
+    ],
+    "validation_status": "CURRENT",
+    "validation_notes": "All required architecture intelligence artifacts are present and current."
+  },
+  "source_runs": [
+    {
+      "tool": "arch_guard_ci",
+      "command": "/root/.bun/bin/bun scripts/architecture-guard/architecture-guard.ts --ci --output json",
+      "timeout_ms": 30000,
+      "duration_ms": 13603,
+      "timed_out": false,
+      "started_at": "2026-04-02T17:48:56.054Z",
+      "finished_at": "2026-04-02T17:49:09.657Z",
+      "exit_code": 1,
+      "output_format": "json"
+    },
+    {
+      "tool": "infra_audit_quick",
+      "command": "/root/.bun/bin/bun scripts/infra-audit.ts --quick",
+      "timeout_ms": 60000,
+      "duration_ms": 9076,
+      "timed_out": false,
+      "started_at": "2026-04-02T17:48:56.063Z",
+      "finished_at": "2026-04-02T17:49:05.139Z",
+      "exit_code": 0,
+      "output_format": "text"
+    },
+    {
+      "tool": "type_safety_guard_json",
+      "command": "/root/.bun/bin/bun scripts/type-safety-guard.ts --json --no-exit-error",
+      "timeout_ms": 30000,
+      "duration_ms": 2540,
+      "timed_out": false,
+      "started_at": "2026-04-02T17:48:56.064Z",
+      "finished_at": "2026-04-02T17:48:58.604Z",
+      "exit_code": 0,
+      "output_format": "json"
+    },
+    {
+      "tool": "arch_validate_brain",
+      "command": "/root/.bun/bin/bun scripts/governance/validate-architecture-brain.ts",
+      "timeout_ms": 30000,
+      "duration_ms": 436,
+      "timed_out": false,
+      "started_at": "2026-04-02T17:48:56.065Z",
+      "finished_at": "2026-04-02T17:48:56.501Z",
+      "exit_code": 0,
+      "output_format": "text"
+    },
+    {
+      "tool": "gitnexus_query",
+      "command": "gitnexus query architecture health governance drift",
+      "enrichment_mode": "gitnexus_query",
+      "timeout_ms": 15000,
+      "duration_ms": 236,
+      "timed_out": false,
+      "started_at": "2026-04-02T17:49:09.666Z",
+      "finished_at": "2026-04-02T17:49:09.902Z",
+      "exit_code": 1,
+      "output_format": "text"
+    },
+    {
+      "tool": "gitnexus_impact",
+      "command": "gitnexus impact scripts/architecture-health/architecture-health.ts",
+      "enrichment_mode": "gitnexus_impact",
+      "timeout_ms": 15000,
+      "duration_ms": 228,
+      "timed_out": false,
+      "started_at": "2026-04-02T17:49:09.668Z",
+      "finished_at": "2026-04-02T17:49:09.896Z",
+      "exit_code": 1,
+      "output_format": "text"
+    }
+  ]
+}

@@ -110,7 +110,12 @@ export interface McqExamAutoCriteriaRow {
   category_value_ids: string[] | null
   tag_ids: string[] | null
   basket_ids: string[] | null
-  percentage: number
+  category_ids: string[] | null
+  semester_id: string | null
+  /** Mutually exclusive with fixed_count. */
+  percentage: number | null
+  /** Mutually exclusive with percentage. */
+  fixed_count: number | null
   created_at: Date
   updated_at: Date
 }
@@ -186,7 +191,12 @@ export interface CriteriaEntry {
   category_value_ids?: string[] | null
   tag_ids?: string[] | null
   basket_ids?: string[] | null
-  percentage: number
+  category_ids?: string[] | null
+  semester_id?: string | null
+  /** Mutually exclusive with fixed_count. Percentage of total_questions (0-100). */
+  percentage?: number | null
+  /** Mutually exclusive with percentage. Absolute question count (> 0). */
+  fixed_count?: number | null
 }
 
 export interface SetCriteriaInput {

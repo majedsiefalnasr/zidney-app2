@@ -198,6 +198,69 @@ Block if:
 
 ---
 
+## 9. Concurrency & Race Condition Prevention (CRITICAL)
+
+**NEW RULE** — Prevents concurrent state corruption and duplicate submissions.
+
+When reviewing code that handles critical state mutations (attempt creation, payment processing, etc.):
+
+You MUST verify:
+
+- **Lock-Before-Check Pattern**: In transactional operations, acquire advisory lock or SELECT FOR UPDATE BEFORE checking conditions.
+- **Pre-Lock Conditions Untrusted**: Any eligibility/uniqueness condition checked BEFORE lock acquisition must be re-verified AFTER holding lock.
+- **Race Window Elimination**: Verify no window exists where two concurrent requests can both pass eligibility checks.
+- **Clear Rollback on Re-check Failure**: If re-check after lock fails, code must ROLLBACK and return (idempotent, not error).
+- **Concurrent Duplicate Prevention**: Operations with "single attempt" or "no concurrent X" constraints must re-validate AFTER lock.
+
+**Example Pattern** (Secure):
+```typescript
+BEGIN TRANSACTION
+ACQUIRE advisory_lock
+RE-CHECK eligibility (no in-progress attempt)
+IF check passes → INSERT attempt
+ELSE → ROLLBACK (idempotent skip)
+COMMIT
+```
+
+**Anti-Pattern** (Vulnerable):
+```typescript
+IF no_concurrent_attempt THEN → (check without lock)
+ACQUIRE lock
+INSERT attempt → (race condition! another request passed check too)
+```
+
+Block if:
+
+- Critical operation lacks advisory lock or SELECT FOR UPDATE.
+- State condition checked before lock, not re-checked after.
+- Race condition window exists between check and mutation.
+- Duplicate submissions possible due to missing re-validation.
+- No explicit rollback path for re-check failures.
+
+---
+
+## 10. Data Persistence Integrity (CRITICAL)
+
+When reviewing code that persists frozen snapshots or audit logs:
+
+You MUST verify:
+
+- **Snapshot Completeness**: Persistent snapshots contain ALL data needed for reconstruction (grading, replay, audit), not just identifiers.
+- **Consistency Across Paths**: All code paths creating similar snapshots use identical builder functions to prevent inconsistencies.
+- **Immutability Enforcement**: Snapshots are serialized once and never mutated after persistence.
+- **Audit Trail**: All mutations logged with: actor, timestamp, old value, new value, reason.
+
+Block if:
+
+- Snapshot missing critical fields needed later (e.g., question snapshot without marks/difficulty).
+- Different code paths create incompatible snapshot structures.
+- Snapshots mutated after persistence.
+- Audit mutations lack complete trail.
+
+---
+
+## 9. JWT & Session Hardening
+
 ## 8.5. OWASP LLM Top 10 (AI/LLM Systems)
 
 When auditing code that integrates with LLMs or AI models, additionally verify:

@@ -2,10 +2,12 @@
  * Drizzle Schema — attempts
  *
  * File: apps/api/src/db/tenant/schemas/attempts.schema.ts
- * Stage: STAGE_38_SCHEDULED_EXAM_ENGINE
+ * Stage: STAGE_38_SCHEDULED_EXAM_ENGINE (columns added in migration 017)
+ *        STAGE_39_AUTO_SELECTION_ENGINE (columns added in migration 018)
  *
  * Covers all existing attempts table columns (from v1.0.0/001_create_attempt_engine_tables.sql)
- * plus the 6 new scheduled exam columns added in migration 017.
+ * plus the 6 new scheduled exam columns added in migration 017,
+ * plus the 3 auto-selection columns added in migration 018.
  */
 
 import { sql } from 'drizzle-orm'
@@ -74,6 +76,11 @@ export const attempts = pgTable(
     auto_submitted: boolean('auto_submitted').notNull().default(false),
     forced_submission_reason: varchar('forced_submission_reason', { length: 50 }),
     last_heartbeat_at: timestamp('last_heartbeat_at', { withTimezone: true }),
+
+    // ── Auto-Selection Fields (added in migration 018) ────────────
+    selection_seed: text('selection_seed'),
+    candidate_pool_fingerprint: text('candidate_pool_fingerprint'),
+    selection_diagnostics: jsonb('selection_diagnostics'),
   },
   (table) => [
     check(

@@ -133,13 +133,20 @@ export const reorderQuestionsBodySchema = z.object({
 
 // ── Set Criteria Body ────────────────────────────────────────────────────────
 
-const criteriaEntrySchema = z.object({
-  lessonIds: z.array(z.string().uuid()).nullable().optional(),
-  categoryValueIds: z.array(z.string().uuid()).nullable().optional(),
-  tagIds: z.array(z.string().uuid()).nullable().optional(),
-  basketIds: z.array(z.string().uuid()).nullable().optional(),
-  percentage: z.number().int().min(1).max(100),
-})
+const criteriaEntrySchema = z
+  .object({
+    lessonIds: z.array(z.string().uuid()).nullable().optional(),
+    categoryValueIds: z.array(z.string().uuid()).nullable().optional(),
+    tagIds: z.array(z.string().uuid()).nullable().optional(),
+    basketIds: z.array(z.string().uuid()).nullable().optional(),
+    categoryIds: z.array(z.string().uuid()).nullable().optional(),
+    semesterId: z.string().uuid().nullable().optional(),
+    percentage: z.number().int().min(1).max(100).nullable().optional(),
+    fixedCount: z.number().int().min(1).nullable().optional(),
+  })
+  .refine((d) => (d.percentage != null) !== (d.fixedCount != null), {
+    message: 'Exactly one of percentage or fixedCount must be provided per criteria entry',
+  })
 
 export const setCriteriaBodySchema = z.object({
   criteria: z.array(criteriaEntrySchema).min(1, 'at least one criteria entry is required'),

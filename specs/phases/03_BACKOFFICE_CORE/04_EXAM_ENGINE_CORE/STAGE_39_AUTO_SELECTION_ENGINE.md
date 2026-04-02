@@ -8,7 +8,33 @@ Runtime: Backend service
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: HIGH
+Closure Date: 2026-04-02T18:16:00Z
+
+Drift Analysis: PASSED (all 9 criteria)
+Implementation: COMPLETE
+
+Scope Closed:
+
+- Deterministic auto-selection for MCQ exams and assessments (54 atomic tasks)
+- Hybrid manual + auto selection with duplicate prevention
+- Idempotency-Key semantics for attempt-start replay safety
+- Additive tenant-DB migration with all filter-support indexes
+- Advisory lock + atomic transaction boundary for concurrent starts
+- Full observability contract (10 required fields)
+
+Deferred Scope:
+
+- Advanced optimization path (materialized index/caching) remains out of v1
+
+Architecture Governance Compliance:
+
+- Task set compliant — ADRs and architecture guard satisfied
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
 
 ---
 

@@ -7,6 +7,8 @@
  * Consumed by migrations, service layer, and route handlers.
  */
 
+export * from './attempt-questions.schema'
+export * from './attempt-start-idempotency-claims.schema'
 export * from './attempts.schema'
 export * from './backoffice-role-module-permissions.schema'
 export * from './backoffice-roles.schema'
