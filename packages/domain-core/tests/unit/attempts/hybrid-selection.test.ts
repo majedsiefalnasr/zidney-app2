@@ -210,12 +210,11 @@ describe('hybrid selection — zero-auto edge case', () => {
 
 describe('hybrid selection — multi-block uniqueness', () => {
   it('cross-block duplicates are removed and tracked in diagnostics', async () => {
-    // Both blocks return overlapping pools
+    // Both blocks return overlapping pools (simulating DB returning full pool without exclusion)
     const sharedPool = makePool(20, 'shared')
-    const fetchFn = makeFetchFn({
-      b1: sharedPool,
-      b2: sharedPool, // same pool → many duplicates
-    })
+    // Mock returns the SAME pool for both blocks WITHOUT filtering excludeIds
+    // This simulates a scenario where the DB returns overlapping results
+    const fetchFn = vi.fn(async () => sharedPool)
 
     const result = await runAutoSelection({
       ...BASE,
