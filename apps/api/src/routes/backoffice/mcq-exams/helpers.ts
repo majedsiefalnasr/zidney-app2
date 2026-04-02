@@ -13,6 +13,7 @@ import {
   MCQ_EXAM_ERROR_MESSAGES,
   McqExamError,
 } from '@zidney/domain-core/mcq-exams'
+import type { CriteriaValidationResult } from '@zidney/domain-core/mcq-exams'
 import { createLogger } from '@zidney/logger'
 import type { Context } from 'hono'
 
@@ -61,6 +62,51 @@ export function successResponse<T>(data: T): SuccessResponse<T> {
 // ---------------------------------------------------------------------------
 // MCQ Exams Error Response
 // ---------------------------------------------------------------------------
+
+/** Map internal criteria validation codes to public API error codes (Stage 39). */
+function criteriaCodeToApiCode(
+  code: CriteriaValidationResult['errors'][number]['code']
+): string {
+  switch (code) {
+    case 'INVALID_CRITERIA_MODE':
+    case 'CRITERIA_COUNT_MISMATCH':
+      return 'AUTO_SELECTION_INVALID_CRITERIA'
+    case 'CRITERIA_OVERLAP_RISK':
+      return 'AUTO_SELECTION_OVERLAP_UNDERSIZED'
+    case 'UNDERSIZED_POOL':
+      return 'AUTO_SELECTION_INSUFFICIENT_POOL'
+  }
+}
+
+/**
+ * Return a 422 JSON response derived from a failed CriteriaValidationResult.
+ * Picks the first error entry as the primary code/message.
+ */
+export function criteriaValidationErrorResponse(
+  c: Context,
+  result: CriteriaValidationResult
+): Response {
+  const first = result.errors[0]
+  const code = first ? criteriaCodeToApiCode(first.code) : 'AUTO_SELECTION_INVALID_CRITERIA'
+  const message = first?.message ?? 'Criteria validation failed'
+
+  const correlationId = c.get('correlation_id') as string | undefined
+  const workspaceId = c.get('workspace_id') as string | undefined
+  logger.warn('Criteria validation failed', {
+    correlation_id: correlationId,
+    workspace_id: workspaceId,
+    errors: result.errors,
+  })
+
+  return c.json(
+    {
+      success: false,
+      data: null,
+      error: { code, message },
+    } as ErrorResponse,
+    422
+  )
+}
 
 export function mcqExamsErrorResponse(c: Context, err: unknown): Response {
   const correlationId = c.get('correlation_id') as string | undefined

@@ -615,7 +615,7 @@ async function validatePreEnable(db: DbClient, exam: McqExamRow): Promise<void> 
   // 5. Automatic mode: criteria percentages must sum to 100
   if (exam.selection_mode === 'AUTOMATIC') {
     const criteria = await repo.findCriteriaByExamId(db, exam.id)
-    const sum = criteria.reduce((acc, c) => acc + c.percentage, 0)
+    const sum = criteria.reduce((acc, c) => acc + (c.percentage ?? 0), 0)
     if (sum !== 100) {
       throw new McqExamError('MCQ_EXAM_AUTO_SUM_INVALID')
     }

@@ -2,16 +2,26 @@
  * MCQ Exams — Public API Barrel
  *
  * File: packages/domain-core/src/mcq-exams/index.ts
- * Stage: STAGE_36_MCQ_EXAM_CONFIG
+ * Stage: STAGE_36_MCQ_EXAM_CONFIG (original)
+ *        STAGE_39_AUTO_SELECTION_ENGINE (added criteria validation exports)
  *
  * Exports the public surface of the mcq-exams domain module.
  * Type-only exports are listed explicitly to keep the surface slim
  * and to avoid exposing internal repository / row-mapper types.
  */
 
+export * from './mcq-auto-criteria-validation.service'
 export * from './mcq-exams.dependency-registry'
 export * from './mcq-exams.errors'
 export * from './mcq-exams.service'
+export {
+  validateCriteriaMode,
+  validateCriteriaTotalMatch,
+  validateCriteriaSum,
+  validatePassValue,
+  validateTotalQuestions,
+} from './mcq-exams.validators'
+export type { ValidationResult } from './mcq-exams.validators'
 export type {
   AddExamQuestionsInput,
   AuditContext,

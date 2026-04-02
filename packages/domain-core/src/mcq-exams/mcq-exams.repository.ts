@@ -81,7 +81,10 @@ interface CriteriaDbRow extends Record<string, unknown> {
   category_value_ids: string[] | null
   tag_ids: string[] | null
   basket_ids: string[] | null
-  percentage: number
+  category_ids: string[] | null
+  semester_id: string | null
+  percentage: number | null
+  fixed_count: number | null
   created_at: Date
   updated_at: Date
 }
@@ -156,7 +159,10 @@ function mapCriteriaRow(row: CriteriaDbRow): McqExamAutoCriteriaRow {
     category_value_ids: row.category_value_ids,
     tag_ids: row.tag_ids,
     basket_ids: row.basket_ids,
-    percentage: Number(row.percentage),
+    category_ids: row.category_ids,
+    semester_id: row.semester_id,
+    percentage: row.percentage != null ? Number(row.percentage) : null,
+    fixed_count: row.fixed_count != null ? Number(row.fixed_count) : null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   }
@@ -556,7 +562,8 @@ export async function findCriteriaByExamId(
 ): Promise<McqExamAutoCriteriaRow[]> {
   const result = await db.query<CriteriaDbRow>(
     `SELECT id, exam_id, lesson_ids, category_value_ids, tag_ids, basket_ids,
-            percentage, created_at, updated_at
+            category_ids, semester_id, percentage, fixed_count,
+            created_at, updated_at
        FROM mcq_exam_auto_criteria
       WHERE exam_id = $1
       ORDER BY created_at ASC`,
@@ -580,23 +587,30 @@ export async function replaceCriteria(
   let idx = 1
 
   for (const c of criteria) {
-    valueParts.push(`($${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++})`)
+    valueParts.push(
+      `($${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++}, $${idx++})`
+    )
     params.push(
       examId,
       c.lesson_ids ?? null,
       c.category_value_ids ?? null,
       c.tag_ids ?? null,
       c.basket_ids ?? null,
-      c.percentage
+      c.category_ids ?? null,
+      c.semester_id ?? null,
+      c.percentage ?? null,
+      c.fixed_count ?? null
     )
   }
 
   const result = await db.query<CriteriaDbRow>(
     `INSERT INTO mcq_exam_auto_criteria
-       (exam_id, lesson_ids, category_value_ids, tag_ids, basket_ids, percentage)
+       (exam_id, lesson_ids, category_value_ids, tag_ids, basket_ids,
+        category_ids, semester_id, percentage, fixed_count)
      VALUES ${valueParts.join(', ')}
      RETURNING id, exam_id, lesson_ids, category_value_ids, tag_ids, basket_ids,
-               percentage, created_at, updated_at`,
+               category_ids, semester_id, percentage, fixed_count,
+               created_at, updated_at`,
     params
   )
   return result.rows.map(mapCriteriaRow)
