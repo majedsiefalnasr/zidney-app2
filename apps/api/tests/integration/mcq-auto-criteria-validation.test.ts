@@ -20,7 +20,7 @@ import { describe, expect, it, vi } from 'vitest'
 const WORKSPACE_ID = '10000000-0000-0000-0000-000000000001'
 const EXAM_ID = '30000000-0000-0000-0000-000000000001'
 
-const poolOf = (n: number): FetchEligiblePoolFn =>
+const poolOf = (n: number = 20): FetchEligiblePoolFn =>
   vi.fn().mockResolvedValue(Array.from({ length: n }, (_, i) => `q-${i}`))
 
 const emptyPool = (): FetchEligiblePoolFn => vi.fn().mockResolvedValue([])
