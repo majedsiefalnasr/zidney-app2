@@ -9,9 +9,21 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-04-02T00:03:00.000Z
+Last Updated: 2026-04-02T00:04:00.000Z
+
+Tasks Generated:
+
+- Total: 19 atomic tasks
+- Phase 1: 5 schema/infrastructure tasks
+- Phase 2: 1 migration task
+- Phase 3: 2 type/error tasks (parallel)
+- Phase 4: 3 pure grader tasks (parallel)
+- Phase 5: 1 repository task
+- Phase 6: 1 engine orchestrator task
+- Phase 7: 2 barrel export tasks
+- Phase 8-9: 4 test tasks (3 parallel unit + 1 integration)
 
 Scope Planned:
 
