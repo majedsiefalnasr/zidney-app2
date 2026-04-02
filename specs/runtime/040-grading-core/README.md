@@ -12,9 +12,9 @@
 | Pre-Step  | ✅     | —                           | —                           |
 | Specify   | ✅     | spec.md, checklists/        | reports/SPECIFY_REPORT.md   |
 | Clarify   | ✅     | spec.md (updated in-place)  | reports/CLARIFY_REPORT.md   |
-| Plan      | ✅     | plan.md, data-model.md      | reports/PLAN_REPORT.md      |
+| Plan      | ✅     | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
 | Tasks     | ✅     | tasks.md                    | reports/TASKS_REPORT.md     |
-| Analyze   | ⬜     | (read-only — no output)     | audits/ANALYZE_REPORT.md    |
+| Analyze   | ✅     | (read-only — no output)     | audits/ANALYZE_REPORT.md    |
 | Implement | ⬜     | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
 | Closure   | ⬜     | —                           | reports/CLOSURE_REPORT.md   |
 
