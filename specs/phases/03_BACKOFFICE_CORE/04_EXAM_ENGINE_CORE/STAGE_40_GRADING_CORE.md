@@ -9,20 +9,32 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-04-02T00:00:00.000Z
+Last Updated: 2026-04-02T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- MCQ grading engine (SINGLE, MULTIPLE, TRUE_FALSE, ARRANGEMENT)
+- Traditional grading engine (TRUE_FALSE, FILL_BLANK, SHORT_ANSWER)
+- Score aggregation with pass/fail
+- Grading results persistence (3 new tables)
+- Admin override with audit trail
+
+Deferred Scope:
+
+- AI grading for SHORT_ANSWER
+- Partial scoring for MULTIPLE choice
+- Negative scoring
+- Grading API endpoints (Phase 04_RUNTIME)
+- Worker integration (Phase 04_RUNTIME)
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
