@@ -450,6 +450,34 @@ async function _handleAutomaticAttemptCreation(
       }
     }
 
+    // CRITICAL: Re-check eligibility AFTER acquiring the lock
+    // This prevents race conditions where two concurrent requests both passed the initial
+    // eligibility check but can try to create duplicate attempts for the same user+exam.
+    // Now that we hold the lock, no other concurrent request can interfere.
+    const eligibilityRecheck = await client.query(
+      `
+      SELECT COUNT(*) as existing_attempt_count
+      FROM attempts a
+      WHERE a.workspace_id = $1
+        AND a.user_id = $2
+        AND a.exam_id = $3
+        AND a.status = 'IN_PROGRESS'
+      LIMIT 1
+      `,
+      [workspace.id, user.id, examId]
+    )
+    const existingAttemptCount = (
+      eligibilityRecheck.rows[0] as { existing_attempt_count: string } | undefined
+    )?.existing_attempt_count
+    if (existingAttemptCount && Number(existingAttemptCount) > 0 && !exam.allow_multiple_attempts) {
+      await client.query('ROLLBACK')
+      throw {
+        code: 'ATTEMPT_IN_PROGRESS',
+        message: 'User already has an in-progress attempt for this exam',
+        status: 409,
+      }
+    }
+
     // Step: Check idempotency claim (replay detection)
     const existingClaim = await findExistingClaim({
       client,
@@ -580,6 +608,40 @@ async function _handleAutomaticAttemptCreation(
       throw new Error('AUTO_SELECTION_FAILURE: missing selection result')
     }
 
+    // CRITICAL: Load full question data for selected IDs and build proper snapshot
+    // The snapshot must include all frozen question metadata for grading integrity
+    // (not just IDs, which would create incomplete snapshots)
+    const allSelectedIds = [...selectionResult.selectedIds, ...manualQuestionIds]
+    const questionsResult = await client.query(
+      `
+      SELECT * FROM questions
+      WHERE id = ANY($1::uuid[])
+        AND exam_id = $2
+        AND deleted_at IS NULL
+      ORDER BY ARRAY_POSITION($1::uuid[], id)
+      `,
+      [allSelectedIds, examId]
+    )
+
+    // Parse question rows using the same parser as the manual path
+    const selectedQuestions = questionsResult.rows.map((r) => ({
+      id: r.id,
+      order_index: r.order_index,
+      type: r.type,
+      text: r.text,
+      difficulty: r.difficulty,
+      marks: r.marks,
+      negative_marks: r.negative_marks,
+      explanation: r.explanation,
+      bank_id: r.bank_id,
+      is_deleted: r.deleted_at !== null,
+    }))
+
+    // Build proper question snapshot using the standard function
+    const questionSnapshot = buildQuestionSnapshot(
+      selectedQuestions as unknown as Parameters<typeof buildQuestionSnapshot>[0]
+    )
+
     // Step: Insert attempt with selection metadata
     await client.query(
       `
@@ -601,7 +663,7 @@ async function _handleAutomaticAttemptCreation(
         user.id,
         examId,
         'IN_PROGRESS',
-        JSON.stringify({ questions: selectionResult.selectedIds.map((id) => ({ id })) }),
+        JSON.stringify(questionSnapshot),
         selectionResult.selectedIds,
         JSON.stringify({}), // grading config snapshot — filled by exam-loader if needed
         attemptMode,
