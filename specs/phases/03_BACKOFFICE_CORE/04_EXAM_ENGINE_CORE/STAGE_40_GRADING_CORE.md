@@ -9,9 +9,9 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-04-02T00:00:00.000Z
+Step: clarify
+Risk Level: MEDIUM
+Last Updated: 2026-04-02T00:02:00.000Z
 
 Scope Defined:
 
@@ -20,6 +20,7 @@ Scope Defined:
 - Score aggregation with pass/fail
 - Grading results persistence (3 new tables)
 - Admin override with audit trail
+- Grading config snapshot structure defined
 
 Deferred Scope:
 
@@ -31,10 +32,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

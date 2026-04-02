@@ -295,3 +295,42 @@ Future integration points:
 - Re-grading pipeline (future stage)
 - Grading API endpoints (Phase 04_RUNTIME)
 - Worker integration (Phase 04_RUNTIME)
+
+---
+
+## Clarifications
+
+### Session 2026-04-02
+
+**C1: FILL_BLANK case normalization**  
+Q: How should case normalization work for FILL_BLANK?  
+A: Case normalization is controlled by a `normalize_case: boolean` flag in the grading config snapshot. When `true`, both user response and correct answer are lowercased and trimmed before comparison. Default: `true`.
+
+**C2: Attempt status transition**  
+Q: Should the existing `attempts.status` check constraint be modified to include `GRADED`?  
+A: Yes. The migration will ALTER the `valid_status` check constraint to include `GRADED`. Additionally, the new `grading_status` column provides grading-specific status tracking (`PENDING | GRADING | GRADED | OVERRIDE`) independent of the attempt lifecycle status.
+
+**C3: Grading config snapshot structure**  
+Q: What is the expected shape of `grading_config_snapshot` that the grading engine parses?  
+A: The snapshot must contain:
+
+```json
+{
+  "pass_type": "PERCENTAGE" | "SCORE",
+  "pass_value": number,
+  "total_possible_score": number,
+  "normalize_case": boolean,
+  "question_scores": { "[question_id]": number },
+  "question_correct_answers": { "[question_id]": { "type": string, "answer": any } }
+}
+```
+
+If any required field is missing, the grading engine returns `GRADING_SNAPSHOT_INCOMPLETE`.
+
+**C4: Score field semantics**  
+Q: How does `attempts.score` relate to `grading_results.total_score`?  
+A: `attempts.score` stores the percentage (0-100, numeric 5,2). `grading_results.total_score` stores the raw score (e.g., 85 out of 120, numeric 10,2). After grading, `attempts.score` is updated with the computed percentage.
+
+**C5: Concurrent grading safety**  
+Q: What happens if two workers try to grade the same attempt?  
+A: `SELECT FOR UPDATE` on the attempt row prevents concurrent grading. The second worker will block until the first completes, then see `grading_status = GRADED` and return the existing result (idempotent).
