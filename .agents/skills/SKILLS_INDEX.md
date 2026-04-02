@@ -1,7 +1,7 @@
 # Zidney AI Skills Index
 
-**Generated**: 2026-03-15  
-**Total Skills**: 39 (30 active + 9 new audit skills; 8 AWS archived)  
+**Generated**: 2026-04-02  
+**Total Skills**: 45 (36 active + 9 new audit skills; 8 AWS archived)  
 **Phase 5 Compliance**: All SKILL.md <500 lines ✓  
 
 ## Skill Directory Organization
@@ -38,6 +38,12 @@ All skills are located in `.agents/skills/` with domain-based organization:
 | Build | subagent-parallelization | 175 | Parallel subagent execution strategy | on-demand |
 | Build | package-manager-governance | 209 | Package manager governance rules | prompt-loaded |
 | Testing | analysis-retry-engine | 231 | Intelligent retry and remediation strategy | on-demand |
+| Workflow | subagent-handoff-governance | ~45 | Exact agent registry and handoff failure governance | on-demand |
+| Workflow | documentation-writer-protocol | ~40 | Route governed markdown artifacts through Technical Writer | on-demand |
+| Workflow | post-implementation-simplification | ~35 | Constrained code-simplifier cleanup after implementation | on-demand |
+| Governance | ai-context-lifecycle-governance | ~35 | Enforce AI context regeneration points and deterministic source ordering | on-demand |
+| Governance | stage-workflow-governance | ~40 | Govern Stage Status changes, ADR escalation, and scope amendments | on-demand |
+| Terminal | terminal-capability-governance | ~30 | Govern tool detection, RTK-first policy, and shell fallbacks | on-demand |
 | Terminal | terminal-safety | 173 | Safety rules for terminal operations | prompt-loaded |
 | Diagnostics | precommit-diagnostics | 222 | Husky pre-commit failure diagnostics | prompt-loaded |
 | Tooling | tool-advisor | 297 | Tool environment discovery and capability awareness | on-demand |
@@ -68,7 +74,7 @@ All skills are located in `.agents/skills/` with domain-based organization:
 
 ## Skill Domain Grouping
 
-### Architecture & Governance (14 skills)
+### Architecture & Governance (20 skills)
 - `architecture-self-healing` - Detect and remediate architectural drift
 - `architecture-intelligence` - Architecture reasoning and validation
 - `ai-governance` - AI development governance patterns
@@ -82,6 +88,12 @@ All skills are located in `.agents/skills/` with domain-based organization:
 - `rtk-execution-layer` - Token-optimized command execution
 - `tool-advisor` - Tool and capability discovery
 - `analysis-retry-engine` - Intelligent error recovery
+- `subagent-handoff-governance` - Exact registry matching and handoff failure handling
+- `documentation-writer-protocol` - Technical Writer routing for governed markdown artifacts
+- `post-implementation-simplification` - Constrained cleanup pass via code-simplifier
+- `ai-context-lifecycle-governance` - AI context refresh points, freshness gates, and deterministic source ordering
+- `stage-workflow-governance` - Stage lifecycle, ADR escalation, and scope amendment controls
+- `terminal-capability-governance` - Tool capability cache and RTK-first fallback policy
 
 ### Serverless & AWS (8 skills — ARCHIVED)
 - All AWS skills moved to `_archived/aws-skills/` (not loaded by default)
@@ -197,5 +209,5 @@ When a user request matches, these skills are automatically loaded:
 
 ---
 
-**Last Updated**: 2026-03-15 during Phase 5 Skill Cleanup  
+**Last Updated**: 2026-04-02 during orchestrator governance extraction  
 **Next Review**: After new skills are added or existing skills exceed 400 lines

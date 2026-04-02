@@ -25,6 +25,7 @@
     "validate:tsconfig": "bash scripts/validate/check-tsconfig-strict.sh",
     "validate:ai-context-fresh": "bun scripts/validate/ai-context-fresh.ts",
     "validate:ai-context-schemas": "bun scripts/validate/ai-context-schemas.ts",
+    "validate:orchestrator:handoffs": "bun scripts/validate/orchestrator-handoffs.ts",
     "validate:scripts:all": "bun scripts/validate/index.ts",
     "validate:scripts:fast": "bun scripts/validate/runtime-scripts.ts",
     "validate:scripts:naming": "bun scripts/validate/script-naming.ts",

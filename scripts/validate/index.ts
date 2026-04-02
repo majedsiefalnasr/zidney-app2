@@ -5,7 +5,7 @@
  * @domain validate
  * @category governance
  * @description Orchestrator that runs all script-system validators sequentially.
- *   Composes: runtime-scripts, detect-broken-scripts, spec-sync, docs-drift.
+ *   Composes: runtime-scripts, detect-broken-scripts, spec-sync, docs-drift, orchestrator handoff validation.
  *   Also enforces the Script Evolution Guard: if package.json scripts changed
  *   in the current git diff, the migration-map must have been updated too.
  *   Exits non-zero on the first failure. Prints a timing summary.
@@ -40,6 +40,7 @@ const VALIDATORS: ValidatorStep[] = [
   { label: 'Broken script detection', script: 'scripts/validate/detect-broken-scripts.ts' },
   { label: 'Spec-sync validation', script: 'scripts/validate/spec-sync.ts' },
   { label: 'Docs drift guard', script: 'scripts/validate/docs-drift.ts' },
+  { label: 'Orchestrator handoff registry', script: 'scripts/validate/orchestrator-handoffs.ts' },
 ]
 
 const MIGRATION_MAP_PATH = 'docs/scripts/migration-map.json'

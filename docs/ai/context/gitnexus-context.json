@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-04-02T17:56:47.899Z",
-  "analyzedAt": "2026-04-02T17:56:47.899Z",
+  "generatedAt": "2026-04-02T19:16:35.067Z",
+  "analyzedAt": "2026-04-02T19:16:35.067Z",
   "analysisMode": "changed-only",
   "changedFiles": [],
   "impactedModules": [],
@@ -9,64 +9,64 @@
   "architectureLayerMap": {},
   "recentCommits": [
     {
-      "hash": "11e93c833138228f5340cef92d295a8bf33d9bd3",
-      "message": "feat(stage39): T022-T054 — complete test suite, docs and validation report",
+      "hash": "fd27362b2d8779403f10db6789f0c8ac2364dbc2",
+      "message": "Merge pull request #83 from majedsiefalnasr/spec/038-scheduled-exam-engine",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T19:18:14+02:00"
+      "date": "2026-04-02T01:00:04+02:00"
     },
     {
-      "hash": "a144cac2b383ccf9aada3a8dc2d80e0fd51b4904",
-      "message": "feat(stage39): T024-T029 — criteria validation service, repo, route integration",
+      "hash": "58aabd7c2cf13d12b042f4730b2e929b3e9068fa",
+      "message": "fix(scheduled-exam): make 'code' immutable when ENABLED (fix workflow tests)",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T18:16:30+02:00"
+      "date": "2026-04-02T00:57:01+02:00"
     },
     {
-      "hash": "7642bef30f97e002eea01cc1be899b8693bb78fb",
-      "message": "feat(stage39): T001-T021 T034 T045-T047 T050 — auto-selection engine phase 1-3",
+      "hash": "82f23cc7c1002b1637a3ae854698cdce3f5b33d2",
+      "message": "docs(agents): add preventive security and code review rules from Coderabit findings",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T17:39:44+02:00"
+      "date": "2026-04-02T00:37:25+02:00"
     },
     {
-      "hash": "384ff7ebb685b07c12cf5316257c6c32894e6f93",
-      "message": "chore(039-auto-selection-engine): complete analyze step — APPROVED",
+      "hash": "dcf771ad585c9ee732e5558766c632282e347e33",
+      "message": "fix: correct HTTP status codes and add SQL injection protection",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T16:34:15+02:00"
+      "date": "2026-04-02T00:28:13+02:00"
     },
     {
-      "hash": "987f5e1d65ba6ec1798e00217363ebb47cd9c610",
-      "message": "chore(039-auto-selection-engine): amend tasks — add T041-T054 idempotency/observability/rollback/trust-chain tasks",
+      "hash": "7e57717da80fdbf347025da7db3e4e4f9766aafc",
+      "message": "fix: add missing columns and constraints to scheduled exam migrations",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T16:30:15+02:00"
+      "date": "2026-04-02T00:14:55+02:00"
     },
     {
-      "hash": "8d2ccaef3931a469152148c66f1650f4e46016e9",
-      "message": "chore(039-auto-selection-engine): complete tasks step",
+      "hash": "903757dc9da2518dbcf9a70c2e6a6426d7641918",
+      "message": "fix: resolve 8 critical issues from Coderabit AI scan",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T02:14:57+02:00"
+      "date": "2026-04-01T23:55:40+02:00"
     },
     {
-      "hash": "f84beaaabeddfd776761140d029ef381d88c9578",
-      "message": "chore(039-auto-selection-engine): complete plan step",
+      "hash": "f3ab2e3858cc16a902997c2c4f22db04ad9f4cd3",
+      "message": "fix(domain-core/scheduled-exam): align workflow API and canonical base-exam hash with test expectations",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T02:06:25+02:00"
+      "date": "2026-04-01T23:10:01+02:00"
     },
     {
-      "hash": "47a21b3c20013a0144c660c21b00a6d53653ec4b",
-      "message": "chore(039-auto-selection-engine): complete clarify step",
+      "hash": "03c80257c62647036ac9a20cb4c85956a437ba09",
+      "message": "chore(spec): add VALIDATION_REPORT.md for stage 038",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T01:50:36+02:00"
+      "date": "2026-04-01T22:05:58+02:00"
     },
     {
-      "hash": "26a2046d5a6bc38cf276c2d6250dd96f13690d4b",
-      "message": "chore(039-auto-selection-engine): complete specify step",
+      "hash": "04f4ae6b5ba00f721f86db59ba6b78b6326b9534",
+      "message": "spec(038-scheduled-exam-engine): closure — stage PRODUCTION READY",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T01:43:20+02:00"
+      "date": "2026-04-01T21:49:09+02:00"
     },
     {
-      "hash": "473f3ec87038c7669e88a5cdb5504d4c222238e1",
-      "message": "chore(039-auto-selection-engine): initialize stage branch and directory",
+      "hash": "2815312ddbcd980370b8c33f85101de0c8f751fa",
+      "message": "feat(038-scheduled-exam-engine): complete implement step",
       "author": "Majed Sief Alnasr",
-      "date": "2026-04-02T01:38:46+02:00"
+      "date": "2026-04-01T21:32:50+02:00"
     }
   ],
   "riskIndicators": []

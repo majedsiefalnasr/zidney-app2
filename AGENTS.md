@@ -136,7 +136,7 @@ This contract is authoritative.
 | Architecture intelligence | `docs/ai/context/ai-architecture-summary.md`           |
 | UI system rules           | `docs/AGENT_GOVERNANCE.md` (Rules 7.1–7.10)            |
 | Skill index               | `.agents/skills/SKILLS_INDEX.md`                       |
-| Orchestrator              | `.agents/agents/zidney-orchestrator.agent.md`          |
+| Orchestrator              | `.agents/agents/orchestrator.agent.md`                 |
 
 ---
 
