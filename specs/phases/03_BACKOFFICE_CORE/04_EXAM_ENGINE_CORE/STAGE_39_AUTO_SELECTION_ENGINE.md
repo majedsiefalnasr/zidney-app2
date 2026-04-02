@@ -8,24 +8,22 @@ Runtime: Backend service
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: HIGH
-Last Updated: 2026-04-02T00:13:37Z
+Last Updated: 2026-04-02T14:30:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all 9 criteria)
+Implementation: AUTHORIZED
 
-- Total: 50 atomic tasks
-- Setup/Foundational: 12
-- US1/US2/US3: 29
-- Polish/Cross-cutting: 9
+Scope Authorized:
 
-Scope Planned:
-
-- Deterministic auto-selection scope for MCQ exams and assessments
-- Hybrid manual + auto selection behavior and constraints captured
-- Runtime failure boundaries and auditability requirements defined
-- Tenant-DB additive migration scope and transaction model defined
+- Deterministic auto-selection for MCQ exams and assessments (54 atomic tasks)
+- Hybrid manual + auto selection with duplicate prevention
+- Idempotency-Key semantics for attempt-start replay safety
+- Additive tenant-DB migration with all filter-support indexes
+- Advisory lock + atomic transaction boundary for concurrent starts
+- Full observability contract (10 required fields)
 
 Deferred Scope:
 
