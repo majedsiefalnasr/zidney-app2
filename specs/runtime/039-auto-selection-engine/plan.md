@@ -10,15 +10,15 @@
 
 ## Technical Context
 
-| Context Item        | Value                                                                                    |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| Runtime             | Bun + Hono API, worker-backed finalization                                               |
-| Core Packages       | packages/domain-core, packages/validation, packages/types, packages/logger               |
-| API Surfaces        | Attempt start flow and MCQ exam configuration validation paths                           |
-| Tenant Data         | attempts, mcq_exams, mcq_exam_auto_criteria, attempt_progress, planned attempt_questions |
-| Performance Targets | P95 valid attempt-start selection <= 200 ms, 500 concurrent starts                       |
-| Determinism Target  | Seeded replay returns identical set when seed and pool are unchanged                     |
-| Unknowns            | NEEDS CLARIFICATION: none                                                                |
+| Context Item        | Value                                                                      |
+| ------------------- | -------------------------------------------------------------------------- |
+| Runtime             | Bun + Hono API, worker-backed finalization                                 |
+| Core Packages       | packages/domain-core, packages/validation, packages/types, packages/logger |
+| API Surfaces        | Attempt start flow and MCQ exam configuration validation paths             |
+| Tenant Data         | attempts, mcq_exams, mcq_exam_auto_criteria, attempt_questions             |
+| Performance Targets | P95 valid attempt-start selection <= 200 ms, 500 concurrent starts         |
+| Determinism Target  | Seeded replay returns identical set when seed and pool are unchanged       |
+| Unknowns            | NEEDS CLARIFICATION: none                                                  |
 
 ## Constitution Check (Pre-Design)
 
@@ -89,7 +89,7 @@ Resolved design questions:
 ### API Layer
 
 - Extend attempt-start flow to invoke deterministic auto-selection once for AUTOMATIC/hybrid exams.
-- Keep middleware order unchanged: correlation -> tenant resolver -> license -> auth -> handlers.
+- Keep middleware order unchanged: correlation -> tenant resolver -> license -> version guards -> auth -> handlers.
 - Use packages/validation schemas for criteria integrity and publish guards.
 - Perform attempt row creation and selected-question persistence atomically.
 
@@ -97,6 +97,7 @@ Resolved design questions:
 
 - Add auto-selection module (pure functions + orchestration service):
   - eligible pool resolution
+  - stable ordered candidate ID retrieval contract
   - deterministic seed derivation
   - seeded shuffle and slice
   - uniqueness merge across criteria/manual IDs
@@ -124,12 +125,14 @@ Master DB:
 Tenant DB:
 
 - Tables touched:
-  - attempts (selection seed and selection diagnostics persistence support)
+  - attempts (selection seed, candidate-pool fingerprint, and selection diagnostics persistence support)
   - mcq_exam_auto_criteria (count-mode and filter extensibility)
-  - attempt_questions (new immutable selected-question persistence table if absent in current tenant schema)
+  - attempt_questions (immutable selected-question persistence table introduced/normalized by Stage 39 additive migration)
+  - attempt_start_idempotency_claims (tenant-scoped idempotency claim and replay payload hash)
 - Migration required: Yes (forward-only, Stage 02C model)
 - Schema version change: Yes (minor bump, additive only)
 - product_version compatibility impact: backward-compatible additive changes only
+- Required filter-support indexes: subject/workflow/visibility plus lesson/category/category_value/tag/basket dimensions must be present and migration-verified.
 
 ## Transaction Design
 
@@ -143,11 +146,11 @@ Attempt start (mutating):
   - insert attempt row with immutable snapshot payload
   - insert attempt_questions rows ordered and deduplicated
 - Rollback behavior: any insufficiency/constraint failure aborts entire start flow
-- Isolation level: REPEATABLE READ (or stricter SERIALIZABLE if race observations require)
+- Isolation level: default REPEATABLE READ; escalate to SERIALIZABLE when replay mismatch or duplicate-conflict telemetry appears in staging/perf validation.
 - Concurrency protection:
   - unique(attempt_id, question_id) on attempt_questions
   - existing attempt single-attempt guard constraints
-  - row-level lock or advisory lock around attempt start for same user+exam where needed
+  - mandatory advisory lock on tenant+exam+user attempt-start key with post-lock eligibility revalidation
 
 Criteria configuration publish/save (mutating):
 
@@ -161,8 +164,11 @@ Criteria configuration publish/save (mutating):
 - Attempt submission idempotency remains existing submission_idempotency_keys contract.
 - Attempt start replay safety:
   - require `Idempotency-Key` per attempt-start mutation request
+  - atomically claim `(workspace_slug, user_id, exam_id, idempotency_key)` before side effects
+  - persist payload hash and response reference in claim store
   - same key + same request payload returns the original successful response (same `attempt_id`)
   - same key + different request payload returns conflict (`ATTEMPT_START_IDEMPOTENCY_CONFLICT`)
+  - claim and attempt persistence are transaction-coupled to prevent check-then-act races
   - no partial question persistence allowed
 - Worker dedup strategy unchanged.
 
@@ -197,6 +203,7 @@ Planned new error codes (selection domain):
 
 - Structured logging only through shared logger package.
 - Required fields for selection events:
+  - request_id (correlation_id alias accepted)
   - correlation_id
   - workspace_slug
   - exam_id
@@ -246,6 +253,8 @@ Planned new error codes (selection domain):
   - failure path for insufficient pool
   - hybrid manual+auto uniqueness
   - middleware ordering and 426 mismatch behavior
+  - explicit middleware chain order contract for attempt and criteria endpoints
+  - criteria save/publish transactional rollback with no partial writes on validation failure
 - Isolation tests:
   - tenant context separation for candidate pools
 - Concurrency tests:
@@ -253,12 +262,15 @@ Planned new error codes (selection domain):
   - same user+exam race does not produce duplicate in-progress attempts
 - Rollback tests:
   - forced DB error produces no attempt_questions rows and no active attempt
+  - forced DB error in attempt-start path rolls back idempotency claim and attempt snapshot writes atomically
+- Observability contract tests:
+  - required structured selection fields are emitted on both success and failure paths
 - Replay tests:
   - same seed + same pool yields identical selected IDs
 
 ## Rollback Strategy
 
-- Feature rollout guarded behind stage-scoped runtime flag if needed.
+- Feature rollout guarded behind stage-scoped runtime flag; flag is mandatory for first production rollout and can be removed only after T035/T036 pass criteria are met.
 - Additive migrations only; rollback by disabling feature path before data rollback.
 - Preserve attempt and snapshot integrity; never delete committed attempt artifacts during rollback.
 

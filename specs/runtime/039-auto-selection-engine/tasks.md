@@ -11,8 +11,8 @@
 
 **Purpose**: Stage scaffolding for migration and test execution entry points.
 
-- [ ] T001 Create tenant migration file `apps/api/src/db/tenant/migrations/20260403_018_auto_selection_engine.ts` for additive Stage 39 schema updates
-- [ ] T002 Create migration verification test `apps/api/src/db/tenant/migrations/__tests__/018_auto_selection_engine.migration.test.ts`
+- [ ] T001 Create tenant migration file `apps/api/src/db/tenant/migrations/20260403_018_auto_selection_engine.ts` for additive Stage 39 schema updates, including filter-support indexes and idempotency-claim persistence constraints
+- [ ] T002 Create migration verification test `apps/api/src/db/tenant/migrations/__tests__/018_auto_selection_engine.migration.test.ts` validating required indexes and uniqueness constraints
 - [ ] T003 [P] Create auto-selection fixture helpers in `apps/api/tests/fixtures/auto-selection.fixture.ts`
 
 ---
@@ -23,9 +23,10 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Update `apps/api/src/db/tenant/schemas/attempts.schema.ts` with deterministic selection seed and diagnostics snapshot columns
+- [ ] T004 Update `apps/api/src/db/tenant/schemas/attempts.schema.ts` with deterministic selection seed, candidate-pool fingerprint, and diagnostics snapshot columns
 - [ ] T005 [P] Create `apps/api/src/db/tenant/schemas/attempt-questions.schema.ts` with immutable assignment constraints and unique indexes
 - [ ] T006 [P] Extend `apps/api/src/db/tenant/schemas/mcq-exam-auto-criteria.schema.ts` for `fixed_count` and additional optional filters
+- [ ] T050 [P] Create `apps/api/src/db/tenant/schemas/attempt-start-idempotency-claims.schema.ts` with tenant-scoped unique claim constraints
 - [ ] T007 Update `apps/api/src/db/tenant/schemas/index.ts` to export Stage 39 schema additions
 - [ ] T008 Add Stage 39 selection error codes in `packages/types/src/error-codes.ts`
 - [ ] T009 Extend criteria validation schemas in `packages/validation/src/backoffice/mcq-exams.schemas.ts` for percentage-or-fixed-count mode rules
@@ -40,13 +41,17 @@
 
 **Goal**: Execute deterministic, atomic auto-selection during attempt start and persist immutable snapshot data.
 
-**Independent Test**: Start an attempt for an automatic exam and verify exact question count, zero duplicates, deterministic replay behavior, and transactional abort on insufficiency.
+**Independent Test**: Start an attempt for an automatic exam and verify exact question count, zero duplicates, deterministic replay behavior, idempotency replay/conflict behavior, 426 version-guard behavior, and transactional abort on insufficiency.
 
 ### Tests for User Story 1
 
 - [ ] T012 [P] [US1] Add deterministic shuffle unit tests in `packages/domain-core/tests/unit/attempts/auto-selection.shuffle.test.ts`
 - [ ] T013 [P] [US1] Add pool insufficiency and duplicate guard tests in `packages/domain-core/tests/unit/attempts/auto-selection.rules.test.ts`
 - [ ] T014 [P] [US1] Add attempt-start auto-selection integration tests in `apps/api/tests/integration/create-attempt-auto-selection.test.ts`
+- [ ] T041 [P] [US1] Add idempotency replay integration tests (same-key replay and payload-conflict) in `apps/api/tests/integration/create-attempt-idempotency-replay.test.ts`
+- [ ] T042 [P] [US1] Add schema/product version mismatch (HTTP 426) integration tests in `apps/api/tests/integration/create-attempt-version-guard.test.ts`
+- [ ] T044 [P] [US1] Add attempt-start error-contract matrix tests for all Stage 39 codes in `apps/api/tests/contract/attempts/auto-selection-errors.contract.test.ts`
+- [ ] T045 [P] [US1] Add deterministic candidate-order repository tests in `packages/domain-core/tests/unit/attempts/auto-selection.candidate-order.test.ts`
 
 ### Implementation for User Story 1
 
@@ -54,9 +59,11 @@
 - [ ] T016 [US1] Implement orchestration service for per-criteria selection and merge in `packages/domain-core/src/attempts/auto-selection.service.ts`
 - [ ] T017 [US1] Export Stage 39 attempt selection APIs from `packages/domain-core/src/index.ts`
 - [ ] T018 [US1] Integrate auto-selection orchestration into attempt creation flow in `apps/api/src/routes/attempts/create.ts`
-- [ ] T019 [US1] Implement immutable assignment persistence helper in `apps/api/src/modules/attempt/selection-persistence.ts`
+- [ ] T019 [US1] Implement immutable assignment persistence helper (including candidate-pool fingerprint snapshot persistence) in `apps/api/src/modules/attempt/selection-persistence.ts`
 - [ ] T020 [US1] Add `Idempotency-Key` validation and conflict behavior in `apps/api/src/services/attempt-input-validator.ts`
 - [ ] T021 [US1] Map Stage 39 selection failures to response envelope/error codes in `apps/api/src/routes/attempts/create.ts`
+- [ ] T046 [US1] Implement tenant-scoped idempotency claim/replay service in `apps/api/src/modules/attempt/idempotency-claim.service.ts`
+- [ ] T047 [US1] Enforce mandatory advisory lock and post-lock revalidation in attempt-start orchestration in `apps/api/src/routes/attempts/create.ts`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -80,7 +87,7 @@
 - [ ] T026 [US2] Integrate Stage 39 validation into criteria mutation endpoint in `apps/api/src/routes/backoffice/mcq-exams/set-criteria.ts`
 - [ ] T027 [US2] Integrate publish-time blocking checks in `apps/api/src/routes/backoffice/mcq-exams/transition-exam.ts`
 - [ ] T028 [US2] Add validation error mapping helpers for Stage 39 codes in `apps/api/src/routes/backoffice/mcq-exams/helpers.ts`
-- [ ] T029 [US2] Update criteria data access for new filter dimensions in `packages/domain-core/src/mcq-exams/mcq-exams.repository.ts`
+- [ ] T029 [US2] Update criteria data access for new filter dimensions with stable ordered candidate retrieval and index-backed query constraints in `packages/domain-core/src/mcq-exams/mcq-exams.repository.ts`
 
 **Checkpoint**: User Story 2 is independently functional and testable.
 
@@ -96,6 +103,7 @@
 
 - [ ] T030 [P] [US3] Add hybrid merge/uniqueness unit tests in `packages/domain-core/tests/unit/attempts/hybrid-selection.test.ts`
 - [ ] T031 [P] [US3] Add hybrid attempt-start integration tests in `apps/api/tests/integration/create-attempt-hybrid-selection.test.ts`
+- [ ] T043 [P] [US3] Add manual-only attempt-start integration tests in `apps/api/tests/integration/create-attempt-manual-only.test.ts`
 
 ### Implementation for User Story 3
 
@@ -111,10 +119,18 @@
 
 **Purpose**: Performance, observability, and governance closure across all stories.
 
-- [ ] T035 [P] Add 500-concurrent attempt-start load test in `apps/api/tests/load/auto-selection-concurrency.test.ts`
-- [ ] T036 [P] Add selection latency benchmark (P95 <= 200 ms target) in `apps/api/tests/performance/auto-selection.performance.test.ts`
+- [ ] T035 [P] Add 500-concurrent attempt-start load test with explicit integrity assertions (no duplicate assignments, exact counts, no partial writes) in `apps/api/tests/load/auto-selection-concurrency.test.ts`
+- [ ] T036 [P] Add combined benchmark gate (50k+ pool, 500 concurrent starts, P95 <= 200 ms) in `apps/api/tests/performance/auto-selection.performance.test.ts`
 - [ ] T037 Update Stage 39 operator verification flow in `specs/runtime/039-auto-selection-engine/quickstart.md`
-- [ ] T038 Record validation run outcomes in `specs/runtime/039-auto-selection-engine/reports/TASKS_VALIDATION_REPORT.md`
+- [ ] T038 Record validation run outcomes and threshold pass/fail evidence in `specs/runtime/039-auto-selection-engine/reports/TASKS_VALIDATION_REPORT.md`
+- [ ] T039 [P] Add mandatory eligibility-constraints integration matrix test in `apps/api/tests/integration/create-attempt-eligibility-matrix.test.ts`
+- [ ] T040 [P] Add selection observability metrics emission and assertions in `apps/api/tests/integration/auto-selection-observability.test.ts`
+- [ ] T048 [P] Add trust-chain negative tests (401/403/license blocked) for attempt and criteria endpoints in `apps/api/tests/integration/auto-selection-trust-chain-negative.test.ts`
+- [ ] T049 [P] Add cross-tenant isolation integration tests for selection and criteria routes in `apps/api/tests/integration/auto-selection-tenant-isolation.test.ts`
+- [ ] T051 [P] Add middleware-order contract tests asserting correlation -> tenant -> license -> version -> auth -> handler for attempt and criteria endpoints in `apps/api/tests/contract/middleware/auto-selection-middleware-order.contract.test.ts`
+- [ ] T052 [P] Add criteria save/publish transactional rollback tests (no partial writes on validation failure) in `apps/api/tests/integration/mcq-auto-criteria-transaction-rollback.test.ts`
+- [ ] T053 [P] Add observability contract tests asserting required structured fields on success and failure (`request_id`, `correlation_id`, `workspace_slug`, `exam_id`, `attempt_id`, `selection_seed`, `criteria_block_count`, `pool_sizes`, `selected_count`, `duplicate_count`) in `apps/api/tests/contract/attempts/auto-selection-observability.contract.test.ts`
+- [ ] T054 [P] Add forced DB-error rollback integration test proving attempt-start atomic rollback across idempotency claim, attempt snapshot, and attempt_questions writes in `apps/api/tests/integration/create-attempt-transaction-rollback.test.ts`
 
 ---
 
@@ -156,7 +172,7 @@
 
 ### User Story 1
 
-- T012, T013, and T014 can run in parallel.
+- T012, T013, T014, T041, T042, T044, and T045 can run in parallel.
 - T015 and T019 can run in parallel before T018 integration.
 
 ### User Story 2
@@ -166,12 +182,14 @@
 
 ### User Story 3
 
-- T030 and T031 can run in parallel.
+- T030, T031, and T043 can run in parallel.
 - T032 and T033 can run in parallel before T034 integration.
 
 ### Polish Phase
 
 - T035 and T036 can run in parallel.
+- T039 and T040 can run in parallel with other polish checks once core behavior is stable.
+- T048 and T049 can run in parallel as post-integration security/isolation verification gates.
 
 ---
 

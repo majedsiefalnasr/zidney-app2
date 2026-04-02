@@ -26,6 +26,7 @@ As an exam taker, I need my attempt to start only when the system can assemble a
 1. **Given** an exam with valid selection criteria and enough eligible questions, **When** a learner starts an attempt, **Then** the system creates exactly the required number of questions and starts the attempt.
 2. **Given** an exam with insufficient eligible questions for one or more criteria, **When** a learner starts an attempt, **Then** the system rejects attempt creation and returns a clear failure reason.
 3. **Given** two audit replays with the same seed and same eligible pool, **When** the system re-evaluates the selection outcome, **Then** the selected question set matches exactly.
+4. **Given** the same `Idempotency-Key` and identical attempt-start payload, **When** a client retries the request, **Then** the API returns the original successful attempt response instead of creating a duplicate attempt.
 
 ---
 
@@ -70,20 +71,21 @@ As an exam manager, I need to combine manually selected questions with automatic
 
 ### Functional Requirements
 
-- **FR-001**: System MUST perform automatic question selection exactly once per attempt start flow for supported exam types.
+- **FR-001**: System MUST perform automatic question selection exactly once per attempt start flow for MCQ exams and MCQ assessments.
 - **FR-002**: System MUST complete selection and persistence atomically; if any selection rule fails, attempt creation MUST be aborted.
 - **FR-003**: System MUST apply mandatory eligibility constraints for subject membership, active workflow status, division visibility, and exam type compatibility.
 - **FR-004**: System MUST support optional filtering criteria including lessons, categories, category values, tags, baskets, semester, and optional manual inclusion constraints where configured.
 - **FR-005**: System MUST support criteria blocks that define either percentage-based or fixed-count selection; each block MUST define one method.
-- **FR-006**: System MUST validate configuration before runtime so total selected questions across criteria are consistent with configured exam total.
+- **FR-006**: System MUST validate configuration before runtime so aggregated selected-question totals remain consistent with configured exam total and count-mode rules.
 - **FR-007**: System MUST prevent duplicate questions across criteria blocks and across manual + auto modes in the final set.
 - **FR-008**: System MUST generate and store a reproducibility seed per attempt so selection outcomes are auditable and replayable under the same conditions.
 - **FR-009**: System MUST persist selected questions and selection summary in immutable attempt snapshot data at attempt start.
 - **FR-010**: System MUST support manual-only, auto-only, and hybrid manual + auto question assembly.
 - **FR-011**: System MUST fail fast with structured errors when candidate pools are insufficient, criteria are invalid, visibility constraints cannot be satisfied, or runtime constraints prevent safe selection.
 - **FR-012**: System MUST handle concurrent attempt starts without creating duplicate question assignments within the same attempt.
-- **FR-013**: System MUST provide selection diagnostics for audit and operations, including tenant/workspace context, exam identity, and correlation metadata.
+- **FR-013**: System MUST provide selection diagnostics for audit and operations, including tenant/workspace context, exam identity, and request correlation metadata (`request_id` with `correlation_id` alias support).
 - **FR-014**: System MUST block configuration save/publish when overlapping criteria can make the unique final selected set smaller than the required total.
+- **FR-015**: System MUST enforce idempotent attempt-start behavior using `Idempotency-Key` semantics (same key + same payload replays original success; same key + different payload returns conflict).
 
 ### Key Entities _(include if feature involves data)_
 
@@ -95,11 +97,19 @@ As an exam manager, I need to combine manually selected questions with automatic
 
 ## Assumptions
 
-- Auto selection applies to MCQ exams and MCQ assessments by default; traditional exams may opt in to the same engine.
+- Auto selection scope for Stage 39 is MCQ exams and MCQ assessments; traditional-exam enablement is deferred.
 - Selection fairness requires deterministic reproducibility for audit when seed and candidate pool are unchanged.
 - Attempt start remains blocked unless a complete valid question set is produced.
 - Visibility and enablement rules are authoritative and can reduce candidate pools at runtime.
 - Operational observability for selection outcomes is required in institutional environments.
+
+## Non-Functional Requirements
+
+- Determinism: replay with same seed and unchanged candidate pool must reproduce identical selected IDs.
+- Performance: under benchmark conditions, P95 valid selection latency target remains <= 200 ms.
+- Concurrency: 500 concurrent attempt starts must preserve count integrity and duplicate prevention.
+- Observability: selection execution must emit structured diagnostics and metrics for duration/failure/replay mismatch.
+- Error contract: all API outcomes must use `{ success, data, error }` with machine-readable codes.
 
 ## Success Criteria _(mandatory)_
 
@@ -109,5 +119,5 @@ As an exam manager, I need to combine manually selected questions with automatic
 - **SC-002**: 100% of failed selection attempts are blocked before attempt activation and return a categorized, actionable error.
 - **SC-003**: For audited samples, replaying selection with the same seed and unchanged candidate pool reproduces the identical question set in 100% of cases.
 - **SC-004**: During peak registration windows, the platform supports 500 concurrent attempt-start requests for eligible exams without integrity violations.
-- **SC-005**: At least 95% of valid auto-selection attempt starts complete question assembly within 200 ms under agreed performance test conditions.
+- **SC-005**: At least 95% of valid auto-selection attempt starts complete question assembly within 200 ms under benchmark conditions: 50k+ subject pool, 500 concurrent starts, warm DB connection pool, and production-equivalent index set.
 - **SC-006**: Configuration validation prevents publication of invalid criteria sets in 100% of tested misconfiguration scenarios.

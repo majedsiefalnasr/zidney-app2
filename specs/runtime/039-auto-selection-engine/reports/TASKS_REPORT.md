@@ -22,15 +22,15 @@ Atomic implementation tasks were generated successfully from specification and p
 
 ## Task Breakdown
 
-| Category       | Count  | Notes                                                                                                  |
-| -------------- | ------ | ------------------------------------------------------------------------------------------------------ |
-| Infrastructure | 11     | Setup + foundational schema/contracts/logging tasks (T001-T011)                                        |
-| API            | 8      | Attempt-start + backoffice route integration and response mapping (T018-T021, T026-T028, T034)         |
-| Worker         | 0      | Stage 39 intentionally does not change worker logic                                                    |
-| Frontend       | 0      | No UI/business-logic shift; backoffice flow remains API-driven                                         |
-| Observability  | 2      | Structured diagnostics helper + final validation/reporting hooks (T011, T038)                          |
-| Testing        | 10     | Unit/integration/contract/load/performance coverage (T002, T012-T014, T022-T023, T030-T031, T035-T036) |
-| **Total**      | **38** | Includes implementation, docs/polish, and cross-cutting governance tasks                               |
+| Category       | Count  | Notes                                                                                                    |
+| -------------- | ------ | -------------------------------------------------------------------------------------------------------- |
+| Infrastructure | 12     | Setup + foundational schema/contracts/logging tasks (including idempotency-claim schema)                 |
+| API            | 10     | Attempt-start/backoffice integrations plus idempotency/locking orchestration tasks                       |
+| Worker         | 0      | Stage 39 intentionally does not change worker logic                                                      |
+| Frontend       | 0      | No UI/business-logic shift; backoffice flow remains API-driven                                           |
+| Observability  | 3      | Diagnostics + metrics/validation evidence coverage (T011, T038, T040)                                    |
+| Testing        | 19     | Unit/integration/contract/load/performance plus explicit eligibility/idempotency/version/isolation tests |
+| **Total**      | **50** | Includes implementation, docs/polish, and cross-cutting governance/security tasks                        |
 
 ---
 
@@ -76,46 +76,58 @@ Atomic implementation tasks were generated successfully from specification and p
 
 ## Risk-Ranked Task Summary
 
-| Task ID | Risk      | Description                                            |
-| ------- | --------- | ------------------------------------------------------ |
-| T001    | 🔴 HIGH   | Tenant migration for Stage 39 schema updates           |
-| T002    | 🟢 LOW    | Migration verification test                            |
-| T003    | 🟢 LOW    | Auto-selection fixture helpers                         |
-| T004    | 🔴 HIGH   | Attempts schema deterministic seed/diagnostics columns |
-| T005    | 🔴 HIGH   | Attempt-questions schema + unique indexes              |
-| T006    | 🔴 HIGH   | MCQ auto-criteria schema extension                     |
-| T007    | 🟡 MEDIUM | Schema exports update                                  |
-| T008    | 🟡 MEDIUM | Stage 39 error codes in shared types                   |
-| T009    | 🟡 MEDIUM | Criteria validation schema extension                   |
-| T010    | 🟢 LOW    | Validation package export wiring                       |
-| T011    | 🟡 MEDIUM | Structured selection diagnostics helper                |
-| T012    | 🟢 LOW    | Deterministic shuffle unit tests                       |
-| T013    | 🟢 LOW    | Pool insufficiency/duplicate guard tests               |
-| T014    | 🟢 LOW    | Attempt-start integration tests                        |
-| T015    | 🔴 HIGH   | Seeded selector primitives                             |
-| T016    | 🔴 HIGH   | Auto-selection orchestration service                   |
-| T017    | 🟢 LOW    | Domain-core Stage 39 API exports                       |
-| T018    | 🔴 HIGH   | Integrate auto-selection in attempt create route       |
-| T019    | 🔴 HIGH   | Immutable assignment persistence helper                |
-| T020    | 🔴 HIGH   | `Idempotency-Key` validation + conflict behavior       |
-| T021    | 🔴 HIGH   | Selection failure mapping to response envelope         |
-| T022    | 🟢 LOW    | Auto-criteria validation contract tests                |
-| T023    | 🟢 LOW    | Criteria save/publish blocking integration tests       |
-| T024    | 🟡 MEDIUM | Criteria count-mode and total-match validation         |
-| T025    | 🔴 HIGH   | Overlap-risk and undersized-uniqueness validator       |
-| T026    | 🔴 HIGH   | Criteria mutation endpoint integration                 |
-| T027    | 🔴 HIGH   | Publish-time blocking checks integration               |
-| T028    | 🟡 MEDIUM | Validation error mapping helpers                       |
-| T029    | 🟡 MEDIUM | Criteria repository filter-dimension updates           |
-| T030    | 🟢 LOW    | Hybrid merge/uniqueness unit tests                     |
-| T031    | 🟢 LOW    | Hybrid attempt-start integration tests                 |
-| T032    | 🔴 HIGH   | Manual-ID exclusion and zero-auto edge handling        |
-| T033    | 🟡 MEDIUM | Manual-first ordering merge logic                      |
-| T034    | 🔴 HIGH   | Hybrid diagnostics + final-count enforcement           |
-| T035    | 🟡 MEDIUM | 500-concurrency load test                              |
-| T036    | 🟡 MEDIUM | Selection latency performance benchmark                |
-| T037    | 🟢 LOW    | Quickstart operator verification update                |
-| T038    | 🟢 LOW    | Tasks validation evidence report                       |
+| Task ID | Risk      | Description                                                         |
+| ------- | --------- | ------------------------------------------------------------------- |
+| T001    | 🔴 HIGH   | Tenant migration for Stage 39 schema updates                        |
+| T002    | 🟢 LOW    | Migration verification test                                         |
+| T003    | 🟢 LOW    | Auto-selection fixture helpers                                      |
+| T004    | 🔴 HIGH   | Attempts schema deterministic seed/diagnostics columns              |
+| T005    | 🔴 HIGH   | Attempt-questions schema + unique indexes                           |
+| T006    | 🔴 HIGH   | MCQ auto-criteria schema extension                                  |
+| T007    | 🟡 MEDIUM | Schema exports update                                               |
+| T008    | 🟡 MEDIUM | Stage 39 error codes in shared types                                |
+| T009    | 🟡 MEDIUM | Criteria validation schema extension                                |
+| T010    | 🟢 LOW    | Validation package export wiring                                    |
+| T011    | 🟡 MEDIUM | Structured selection diagnostics helper                             |
+| T012    | 🟢 LOW    | Deterministic shuffle unit tests                                    |
+| T013    | 🟢 LOW    | Pool insufficiency/duplicate guard tests                            |
+| T014    | 🟢 LOW    | Attempt-start integration tests                                     |
+| T015    | 🔴 HIGH   | Seeded selector primitives                                          |
+| T016    | 🔴 HIGH   | Auto-selection orchestration service                                |
+| T017    | 🟢 LOW    | Domain-core Stage 39 API exports                                    |
+| T018    | 🔴 HIGH   | Integrate auto-selection in attempt create route                    |
+| T019    | 🔴 HIGH   | Immutable assignment persistence helper                             |
+| T020    | 🔴 HIGH   | `Idempotency-Key` validation + conflict behavior                    |
+| T021    | 🔴 HIGH   | Selection failure mapping to response envelope                      |
+| T022    | 🟢 LOW    | Auto-criteria validation contract tests                             |
+| T023    | 🟢 LOW    | Criteria save/publish blocking integration tests                    |
+| T024    | 🟡 MEDIUM | Criteria count-mode and total-match validation                      |
+| T025    | 🔴 HIGH   | Overlap-risk and undersized-uniqueness validator                    |
+| T026    | 🔴 HIGH   | Criteria mutation endpoint integration                              |
+| T027    | 🔴 HIGH   | Publish-time blocking checks integration                            |
+| T028    | 🟡 MEDIUM | Validation error mapping helpers                                    |
+| T029    | 🟡 MEDIUM | Criteria repository filter-dimension updates                        |
+| T030    | 🟢 LOW    | Hybrid merge/uniqueness unit tests                                  |
+| T031    | 🟢 LOW    | Hybrid attempt-start integration tests                              |
+| T032    | 🔴 HIGH   | Manual-ID exclusion and zero-auto edge handling                     |
+| T033    | 🟡 MEDIUM | Manual-first ordering merge logic                                   |
+| T034    | 🔴 HIGH   | Hybrid diagnostics + final-count enforcement                        |
+| T035    | 🟡 MEDIUM | 500-concurrency load test                                           |
+| T036    | 🟡 MEDIUM | Selection latency performance benchmark                             |
+| T037    | 🟢 LOW    | Quickstart operator verification update                             |
+| T038    | 🟢 LOW    | Tasks validation evidence report                                    |
+| T039    | 🟢 LOW    | Mandatory eligibility-constraints integration matrix test           |
+| T040    | 🟡 MEDIUM | Selection observability metrics emission/assertion test             |
+| T041    | 🟢 LOW    | Idempotency replay integration tests                                |
+| T042    | 🟢 LOW    | Version mismatch (426) integration tests                            |
+| T043    | 🟢 LOW    | Manual-only attempt-start integration tests                         |
+| T044    | 🟢 LOW    | Attempt-start error-contract matrix tests                           |
+| T045    | 🟢 LOW    | Deterministic candidate-order repository tests                      |
+| T046    | 🔴 HIGH   | Tenant-scoped idempotency claim/replay service                      |
+| T047    | 🔴 HIGH   | Mandatory advisory lock and post-lock revalidation                  |
+| T048    | 🟢 LOW    | Trust-chain negative tests across endpoints                         |
+| T049    | 🟢 LOW    | Cross-tenant isolation integration tests                            |
+| T050    | 🔴 HIGH   | Idempotency-claims schema with tenant-scoped uniqueness constraints |
 
 ## Tasks with External Dependencies
 

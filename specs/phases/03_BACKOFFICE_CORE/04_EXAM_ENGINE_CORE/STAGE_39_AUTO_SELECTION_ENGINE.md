@@ -15,10 +15,10 @@ Last Updated: 2026-04-02T00:13:37Z
 
 Tasks Generated:
 
-- Total: 38 atomic tasks
-- Setup/Foundational: 11
-- US1/US2/US3: 23
-- Polish/Cross-cutting: 4
+- Total: 50 atomic tasks
+- Setup/Foundational: 12
+- US1/US2/US3: 29
+- Polish/Cross-cutting: 9
 
 Scope Planned:
 
