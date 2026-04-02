@@ -195,7 +195,49 @@ Block merge if:
 
 ---
 
-## 5c. SQL Query Predicate Best Practices (MEDIUM)
+## 5c. Snapshot & State Persistence Integrity (CRITICAL)
+
+**NEW RULE** — Prevents incomplete state snapshots that break grading or replay.
+
+When reviewing code that creates persistent snapshots of mutable state (exam snapshots, attempt snapshots, etc.):
+
+You MUST verify:
+
+- **Full Frozen State**: Snapshots must include all data needed for later reconstruction (grading, replay, audit), not just IDs.
+- **Consistent with Source**: When multiple code paths create snapshots (e.g., manual vs. auto attempt creation), both must use the same snapshot builder function for consistency.
+- **No Partial Objects**: Avoid storing `{ questions: [{ id }] }` when grading needs `{ questions: [{ id, text, marks, grade_type, ... }] }`.
+- **Test Coverage**: Unit tests verify snapshot structure includes all required fields.
+- **Documentation**: Snapshot schema clearly documented (e.g., "question_snapshot must include difficulty, not just ID").
+
+Block merge if:
+
+- Snapshot builder called inconsistently across similar code paths.
+- Snapshot missing fields needed for grading or replay.
+- Snapshot documentation absent or outdated.
+
+---
+
+## 5d. Test Helper Default Parameters (MEDIUM)
+
+**NEW RULE** — Improves test readability and reduces boilerplate.
+
+When reviewing test helper functions (mock factories, stub builders, etc.):
+
+You MUST verify:
+
+- **Sensible Defaults**: Helpers support being called with NO arguments if they have a reasonable default (e.g., `pool()` defaults to size 20).
+- **Explicit Usage**: Cases requiring specific values use explicit arguments (e.g., `pool(5)`).
+- **Documented Defaults**: Default values clearly stated in JSDoc.
+- **Test Coverage**: Tests exercise both default and explicit argument paths.
+
+Suggestion if:
+
+- Helper requires arguments but would benefit from defaults (makes tests less verbose).
+- Default not documented.
+
+---
+
+## 5e. SQL Query Predicate Best Practices (MEDIUM)
 
 **NEW RULE** — Improves index utilization and query correctness.
 
@@ -213,6 +255,30 @@ Suggestion if:
 - Query permissively checks negated states (x != y).
 - WHERE predicates don't align with defined indexes.
 - An explicit allowlist would be more readable.
+
+---
+
+## 5f. Lock-Protected State Re-validation (CRITICAL)
+
+**REINFORCED RULE** — Critical for concurrency safety.
+
+When reviewing code that uses advisory locks or SELECT FOR UPDATE:
+
+You MUST verify:
+
+- **After Lock == Before Mutation**: Any condition checked BEFORE lock acquisition that affects business logic must be re-checked AFTER holding the lock, immediately before mutation.
+- **Pattern Example**:
+  ```
+  CHECK eligibility (no lock) → ACQUIRE LOCK → RE-CHECK eligibility → INSERT/UPDATE → COMMIT
+  ```
+- **Defensive Coding**: Assume other requests raced past the initial check; re-check defends against it.
+- **Clear Rollback**: Failed re-checks explicitly ROLLBACK and return (idempotent, not error).
+
+Block merge if:
+
+- Advisory lock acquired but eligibility not re-checked before mutation.
+- Race condition window exists (check → unlock → acquire → mutate).
+- No explicit rollback path for failed re-check.
 
 ---
 
