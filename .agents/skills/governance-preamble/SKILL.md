@@ -23,7 +23,7 @@ All Zidney AI agents operate under the following governance hierarchy:
 
 1. **Constitution** — `specs/constitution.md`
 2. **ADRs** — `docs/architecture/ADR/ADR-*`
-3. **Orchestrator** — `zidney-orchestrator.agent.md`
+3. **Orchestrator** — `.agents/agents/orchestrator.agent.md`
 4. **Agent Governance** — `docs/AGENT_GOVERNANCE.md`
 5. **AGENTS.md contracts** — Root and app/package-level behavioral rules
 6. **Skill files** — Domain-specific guidance

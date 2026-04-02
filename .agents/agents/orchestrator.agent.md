@@ -52,8 +52,9 @@ agents:
     'planner',
     'ADR Generator',
   ]
-version: 2.0.0
 ---
+
+> Canonical path: `.agents/agents/orchestrator.agent.md`
 
 **Routing Authority:** See docs/architecture/intelligence/ROUTING_AUTHORITY_REGISTRY.md for the authoritative routing roots for agents, prompts, and templates.
 
@@ -86,6 +87,12 @@ Loaded skills:
 - api-testing-patterns
 - drizzle-orm-patterns
 - script-system-governance
+- subagent-handoff-governance
+- documentation-writer-protocol
+- post-implementation-simplification
+- ai-context-lifecycle-governance
+- stage-workflow-governance
+- terminal-capability-governance
 
 The orchestrator MUST NOT duplicate logic implemented by these skills.
 
@@ -113,6 +120,12 @@ Responsibility mapping:
 | Multi-tenant test patterns       | api-testing-patterns       |
 | Drizzle ORM usage patterns       | drizzle-orm-patterns       |
 | Script system governance         | script-system-governance   |
+| Subagent handoff governance      | subagent-handoff-governance |
+| Governed markdown drafting       | documentation-writer-protocol |
+| Post-implementation cleanup      | post-implementation-simplification |
+| AI context freshness and loading | ai-context-lifecycle-governance |
+| Stage lifecycle and ADR control  | stage-workflow-governance |
+| Terminal capability fallbacks    | terminal-capability-governance |
 
 Execution model:
 
@@ -128,6 +141,41 @@ The orchestrator retains responsibility only for:
 - `.workflow-state.json` management
 - Step progress reporting
 - Subagent coordination
+
+---
+
+## Subagent Registry Contract
+
+The frontmatter `agents` array is the authoritative subagent registry for this orchestrator.
+
+Rules:
+
+- Every `/handoff` MUST target an exact, case-sensitive agent name that already exists in the frontmatter `agents` list.
+- The orchestrator MUST NOT invent placeholder agent names, informal aliases, or implied specialists that are not registered.
+- If a required capability does not have a matching registered subagent, the workflow MUST STOP and surface the gap instead of silently routing to a different role.
+- Run `bun run validate:orchestrator:handoffs` after agent-registry or delegated-skill edits.
+
+This contract exists to keep execution deterministic and to ensure the orchestrator uses the same subagent surface it advertises.
+
+---
+
+## Documentation Writer Protocol
+
+**Delegated to:** `.agents/skills/documentation-writer-protocol`
+
+Referenced throughout as **Apply Documentation Writer Protocol first.**
+
+The orchestrator coordinates documentation generation, but artifact drafting rules, handoff shape, and Technical Writer routing are owned by the documentation-writer-protocol skill.
+
+---
+
+## Post-Implementation Simplification Protocol
+
+**Delegated to:** `.agents/skills/post-implementation-simplification`
+
+Referenced throughout as **Apply Post-Implementation Simplification Protocol.**
+
+The orchestrator coordinates timing for the cleanup pass, while the code-simplifier routing and cleanup constraints are owned by the post-implementation-simplification skill.
 
 ---
 
@@ -256,57 +304,11 @@ Invoke architecture-intelligence skill to refresh architecture intelligence when
 
 ## AI Context Lifecycle
 
-The orchestrator MUST ensure AI agents operate on **fresh, validated context** at every workflow stage. Stale context causes hallucination, incorrect impact analysis, and architectural drift.
+**Delegated to:** `.agents/skills/ai-context-lifecycle-governance`
 
-### Regeneration Command
+Referenced throughout as **Apply AI Context Lifecycle Governance.**
 
-```bash
-bun run ai:context:refresh-all
-```
-
-This composite command regenerates **all** AI context artifacts in the correct dependency order:
-
-1. `arch:generate` → Regenerates `ARCHITECTURE_MAP.json` (structural source of truth)
-2. `ai:context:refresh` → Force-generates all 7 AI context artifacts (brain, module map, dependency graph, runtime map, layer model, diff, summary)
-3. `arch:gitnexus:context` → Regenerates `gitnexus-context.json` (impact analysis data)
-4. `ai:context:validate` → Validates freshness (≤24h) and schema compliance
-
-### Lifecycle Regeneration Points
-
-AI context MUST be regenerated at these 4 mandatory points during every workflow:
-
-| Lifecycle Point              | When                                      | Why                                                                  | Step Reference |
-| ---------------------------- | ----------------------------------------- | -------------------------------------------------------------------- | -------------- |
-| **Workflow Bootstrap**       | Pre-Step, before any SpecKit agent runs   | Ensure AI starts with fresh architecture understanding               | Pre.9          |
-| **Pre-Implementation**       | Before Step 6 — Implement                 | Ensure implementation uses current dependency graph and module map    | 6.2B           |
-| **Post-Implementation**      | After Step 6 commit, before Closure gate  | Code changed → context is stale → refresh before closure reports     | 6.12B          |
-| **Closure Finalization**     | Before Step 7.1 — Writing closure reports | Ensure closure reports and PR summary reflect accurate final state    | 7.0A           |
-
-### Artifacts Regenerated
-
-Each refresh produces/updates these files in `docs/ai/context/`:
-
-| Artifact                        | Purpose                                |
-| ------------------------------- | -------------------------------------- |
-| `ai-architecture-brain.json`    | Full architecture graph for AI agents  |
-| `ai-module-map.json`            | Module → layer mapping                 |
-| `ai-dependency-graph.json`      | Inter-module dependency edges          |
-| `ai-runtime-map.json`           | Runtime service composition            |
-| `ai-layer-model.json`           | Layer hierarchy and rules              |
-| `ai-architecture-summary.md`    | Human-readable architecture overview   |
-| `ai-architecture-diff.json`     | Changes since last generation          |
-| `gitnexus-context.json`         | Git state + impact analysis for CI     |
-
-### Validation Contract
-
-After every regeneration, the orchestrator MUST confirm:
-
-- All 8 artifacts exist in `docs/ai/context/`
-- `ai-context-mini.json` timestamp is ≤1h old
-- Schema validation passes (`bun run ai:context:validate`)
-- GitNexus context is valid (`bun run arch:gitnexus:validate`)
-
-If validation fails → **STOP** the current step and surface the error. Do NOT proceed with stale context.
+The orchestrator coordinates when AI context must be refreshed, but artifact regeneration points, freshness gates, deterministic source ordering, and stage-scoped context loading are owned by the ai-context-lifecycle-governance skill.
 
 ---
 
@@ -320,122 +322,17 @@ Invoke architecture-self-healing skill when architecture validation fails. The o
 
 ## Deterministic AI Execution Mode
 
-To reduce hallucination and nondeterministic behavior during implementation, the orchestrator operates in **Deterministic AI Execution Mode**.
+**Delegated to:** `.agents/skills/ai-context-lifecycle-governance`
 
-Purpose:
-
-```
-Eliminate ambiguous execution paths and force AI agents to operate only from verified sources of truth.
-```
-
-### Deterministic Sources of Truth
-
-During execution the orchestrator MUST prioritize context in this strict order:
-
-1. `docs/ai/context/ai-architecture-brain.json` ← regenerated at lifecycle points (see AI Context Lifecycle)
-2. `docs/architecture/intelligence/ARCHITECTURE_MAP.json` ← regenerated by `arch:generate`
-3. `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
-4. ADR decisions inside `docs/architecture/ADR/`
-5. GitNexus knowledge graph + `docs/ai/context/gitnexus-context.json` ← regenerated at lifecycle points
-6. Repository source code
-
-Training data or assumptions must NEVER override these sources.
-
-**Freshness requirement:** Sources 1, 2, and 5 MUST be regenerated at each AI Context Lifecycle point (Pre-Step, Pre-Implement, Post-Implement, Pre-Closure). See the AI Context Lifecycle section for details.
-
-### Deterministic Implementation Rules
-
-During Step 6 — Implement, the agent MUST only generate code that:
-
-- corresponds to tasks defined in `tasks.md`
-- conforms to the design described in `plan.md`
-- respects architecture rules defined in `ARCHITECTURE_MAP.json`
-- passes validation by `ai-guard.ts` and `infra-audit.ts`
-
-The agent MUST NOT:
-
-- invent new modules not present in the plan
-- introduce dependencies not declared in architecture rules
-- modify architecture layers outside INFRA stages
-- skip validation steps
-
-### Deterministic Command Execution
-
-Command execution is routed through the RTK execution layer.
-
-Implementation: `.agents/skills/rtk-execution-layer`
-
-All shell commands are automatically rewritten and executed through the RTK layer to ensure terminal output remains bounded and deterministic.
-
-### Deterministic Workflow Constraint
-
-The orchestrator must always follow the strict workflow sequence:
-
-```
-Pre-Step
-→ Specify
-→ Clarify
-→ Plan
-→ Tasks
-→ Analyze
-→ Implement
-→ Closure
-```
-
-No step may be skipped or reordered.
-
-### Result
-
-Deterministic AI Execution Mode significantly reduces hallucination and prevents AI agents from introducing unexpected architectural changes during implementation.
+Deterministic AI source-of-truth ordering and context-readiness rules are owned by the ai-context-lifecycle-governance skill. The orchestrator only enforces workflow order and step boundaries.
 
 ---
 
 ## Stage‑Aware AI Context Compression
 
-Large orchestrator files can increase token usage and introduce unnecessary reasoning overhead. To improve efficiency, Zidney uses **Stage‑Aware AI Context Compression**.
+**Delegated to:** `.agents/skills/ai-context-lifecycle-governance`
 
-Concept:
-
-Instead of loading the entire orchestration logic into every AI reasoning step, the system dynamically loads **only the context relevant to the current workflow stage**.
-
-Context selection priority:
-
-1. Current stage runtime directory  
-   `specs/runtime/<STAGE_DIR_NAME>/`
-
-2. Stage workflow state  
-   `.workflow-state.json`
-
-3. Architecture intelligence context  
-   `docs/ai/context/ai-architecture-brain.json`
-
-4. Architecture rules  
-   `ARCHITECTURE_MAP.json`
-
-5. Relevant ADR decisions  
-   `docs/architecture/ADR/`
-
-Only the context required for the current step is injected into the AI reasoning environment.
-
-Example:
-
-| Step      | Loaded Context                                           |
-| --------- | -------------------------------------------------------- |
-| Pre-Step  | architecture brain + AI context artifacts (regenerated)  |
-| Specify   | spec.md + architecture rules + AI module map             |
-| Plan      | spec.md + clarifications + ADRs + AI dependency graph    |
-| Tasks     | plan.md + data model + AI module map                     |
-| Analyze   | plan.md + tasks.md + architecture brain + GitNexus context |
-| Implement | tasks.md + architecture map + AI context (regenerated)   |
-| Closure   | reports + tasks.md + AI context (final regeneration)     |
-
-Benefits:
-
-- Reduces orchestrator token usage by **60–80%**
-- Improves reasoning determinism
-- Minimizes hallucination risk
-- Speeds up AI decision cycles
-- Allows extremely large repositories to remain AI‑navigable
+Stage-scoped context loading and compression policy are owned by the ai-context-lifecycle-governance skill.
 
 ---
 
@@ -678,40 +575,11 @@ The orchestrator MUST rely on precommit-diagnostics for early detection and MUST
 
 ## Sub-Agent Handoff Error Protocol
 
+**Delegated to:** `.agents/skills/subagent-handoff-governance`
+
 Referenced throughout as **"Apply Handoff Error Protocol."**
 
-Every `/handoff` call is subject to failure. After every handoff the orchestrator MUST evaluate the response before proceeding:
-
-| Failure mode                    | Detection                                    | Response                                                                      |
-| ------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
-| Agent returned no output        | Empty or null response                       | STOP — display error below, present retry/abort                               |
-| Agent returned an error message | Response begins with ERROR or exception text | STOP — display full error, present retry/abort                                |
-| Agent timed out                 | No response within expected window           | STOP — display timeout error, present retry/abort                             |
-| Agent returned partial output   | Required sections missing from response      | STOP — list missing sections, present retry/abort                             |
-| Agent returned BLOCKED verdict  | Response contains `VERDICT: BLOCKED`         | Follow the BLOCKED protocol for that step (do not treat as a handoff failure) |
-
-**On any handoff failure, display:**
-
-```
-❌ Sub-agent handoff failed — <agent name> did not return a valid response.
-   Why it matters: Workflow cannot continue without this agent's output.
-   Failure type: <no output | error | timeout | partial output>
-   Details: <raw error or missing sections>
-```
-
-Then present:
-
-```widget choice
-prompt: "How would you like to proceed?"
-options:
-  - label: "🔄 Retry handoff"
-    value: "retry"
-  - label: "🛑 Abort and save state"
-    value: "abort"
-```
-
-- `retry` → re-issue the same `/handoff` with identical context. Maximum 2 retries before escalating to abort.
-- `abort` → write current state to `.workflow-state.json` (preserve all completed work), then halt. The session can be resumed from the failed step.
+The orchestrator coordinates handoff sequencing, but target validation, failure-mode handling, and retry-or-abort semantics are owned by the subagent-handoff-governance skill.
 
 ---
 
@@ -725,7 +593,14 @@ For each skill in the loaded skills list, verify the skill directory exists and 
 # Use fd if available for faster discovery, fall back to shell test
 for skill in architecture-intelligence architecture-self-healing analysis-retry-engine \
              git-governance mcp-routing package-manager-governance precommit-diagnostics \
-             rtk-execution-layer subagent-parallelization terminal-safety; do
+             rtk-execution-layer subagent-parallelization terminal-safety \
+             governance-preamble db-migration-governance observability-standards \
+             error-handling-patterns i18n-governance worker-job-governance \
+             security-hardening api-testing-patterns drizzle-orm-patterns \
+             script-system-governance subagent-handoff-governance \
+             documentation-writer-protocol post-implementation-simplification \
+             ai-context-lifecycle-governance stage-workflow-governance \
+             terminal-capability-governance; do
   [ -f ".agents/skills/$skill/SKILL.md" ] || echo "MISSING: $skill"
 done
 ```
@@ -744,288 +619,11 @@ STOP the session. Do not proceed to intake or workflow steps until all required 
 
 # Terminal Tool Capability Layer
 
-> **Why this exists:** The `ai-terminal` and `rtk-execution-layer` skills may fail to load in some environments. This section bakes tool detection and RTK execution policy directly into the orchestrator so every command that depends on a specific tool checks for it first and uses the best available fallback — regardless of whether the skills loaded.
->
-> RTK (Rust Token Killer) is the **default file inspection tool** in this repository. It must always be preferred over `cat`, `head`, or raw `rg` output when inspecting large files for AI reasoning.
+**Delegated to:** `.agents/skills/terminal-capability-governance`
 
----
+This skill owns tool detection, capability caching, RTK-first command preference, installation guidance, and fallback wrappers for `rtk`, `jq`, `rg`, `fd`, `gitnexus`, and `sg`.
 
-## RTK Installation Reference
-
-If RTK is not installed, the orchestrator MUST display installation instructions before proceeding with any large-file inspection:
-
-```bash
-# Homebrew (recommended — macOS/Linux)
-brew install rtk
-
-# Quick install (Linux/macOS)
-curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
-
-# Cargo (Rust toolchain required)
-cargo install --git https://github.com/rtk-ai/rtk
-
-# Verify
-rtk --version
-rtk gain
-```
-
----
-
-## Command Preference Hierarchy
-
-The orchestrator MUST follow this preference order for every terminal operation. These are not suggestions — they are execution policy.
-
-| Operation             | Preferred         | Fallback                        |
-| --------------------- | ----------------- | ------------------------------- |
-| Large file inspection | `rtk summarize`   | `head -100 <file>` with warning |
-| Search                | `rg`              | `grep -r`                       |
-| File discovery        | `fd`              | `find`                          |
-| JSON inspection       | `jq`              | `python3 -c` / `node -e`        |
-| Token measurement     | `rtk gain`        | N/A — informational only        |
-| Output trimming       | `rtk trim`        | N/A — skip if unavailable       |
-| Code transformation   | `ast-grep` (`sg`) | `sed`                           |
-| Formatting            | `biome`           | `prettier`                      |
-
-**Never use `cat` on files in `apps/`, `packages/`, or `docs/ai/context/` without checking line count first.** These files are large and will flood the context window.
-
----
-
-## Tool Detection Functions
-
-The orchestrator MUST treat these as named functions, checked once per session and cached. Do NOT re-run `command -v` on every use.
-
-```bash
-# Token-efficient file inspection — ALWAYS preferred for large files
-has_rtk()      { command -v rtk      >/dev/null 2>&1; }
-
-# JSON inspection
-has_jq()       { command -v jq       >/dev/null 2>&1; }
-
-# Search
-has_rg()       { command -v rg       >/dev/null 2>&1; }
-
-# File discovery
-has_fd()       { command -v fd       >/dev/null 2>&1; }
-
-# Architecture knowledge graph
-has_gitnexus() { command -v gitnexus >/dev/null 2>&1; }
-
-# Structural code search / replace
-has_astgrep()  { command -v sg       >/dev/null 2>&1; }
-```
-
----
-
-## Session Capability Cache
-
-Run ALL detections once at session start (after Skill Health Check). Record results in session memory — do NOT re-run `command -v` again unless a cached tool fails unexpectedly.
-
-```bash
-TOOL_RTK=$(has_rtk      && echo "true" || echo "false")
-TOOL_JQ=$(has_jq        && echo "true" || echo "false")
-TOOL_RG=$(has_rg        && echo "true" || echo "false")
-TOOL_FD=$(has_fd        && echo "true" || echo "false")
-TOOL_GITNEXUS=$(has_gitnexus && echo "true" || echo "false")
-TOOL_ASTGREP=$(has_astgrep   && echo "true" || echo "false")
-```
-
-Display capability summary to the user (informational only — does not block workflow):
-
-```
-🔧 Terminal Tool Capability Cache
-  rtk:      <available ✅ | missing ⚠️>
-  jq:       <available ✅ | missing ⚠️>
-  rg:       <available ✅ | missing ⚠️>
-  fd:       <available ✅ | missing ⚠️>
-  gitnexus: <available ✅ | missing ⚠️>
-  ast-grep: <available ✅ | missing ⚠️>
-```
-
-**If RTK is missing**, display this warning immediately — before any file inspection step:
-
-```
-⚠️ RTK (Rust Token Killer) is not installed.
-   RTK is the default file inspection tool for this repository.
-   Without it, large file reads may flood the AI context window.
-   Install: brew install rtk
-         or: curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
-   Fallback active — all large file reads will be truncated to 100 lines with a warning.
-```
-
-**If `jq` is missing**, warn:
-
-```
-⚠️ jq is not installed. JSON inspection will fall back to python3.
-   Install: brew install jq
-   Fallback active — workflow will continue.
-```
-
-Cache scope: **AI session only**. Never persisted to disk. If a cached tool fails unexpectedly mid-session → re-run its `command -v` detection and update the cache entry.
-
----
-
-## Tool Fallback Rules
-
-These rules apply to **every command block** in this orchestrator file. When a command uses a specific tool, always use the corresponding guarded block.
-
-### rtk summarize → head with warning
-
-This is the most critical fallback in the entire orchestrator. RTK prevents context window flooding. Without it, large file reads must be aggressively truncated.
-
-```bash
-# Inspect a file for AI reasoning
-inspect_file() {
-  local file="$1"
-  if $TOOL_RTK; then
-    rtk summarize "$file"
-  else
-    local lines
-    lines=$(wc -l < "$file")
-    if [ "$lines" -gt 500 ]; then
-      echo "⚠️  RTK unavailable. File is ${lines} lines — showing first 100 lines only."
-      echo "    Install RTK for full context: brew install rtk"
-      head -100 "$file"
-    else
-      cat "$file"
-    fi
-  fi
-}
-```
-
-Use `inspect_file <path>` everywhere a file needs to be read for AI reasoning (architecture brain, plan.md, tasks.md, spec.md inspection).
-
-### rtk gain — token measurement (informational)
-
-```bash
-# Measure context token usage — run after any large output
-if $TOOL_RTK; then
-  rtk gain
-else
-  echo "ℹ️  RTK unavailable — skipping token measurement."
-fi
-```
-
-### rtk trim — output reduction before AI analysis
-
-```bash
-# Trim a large output before passing to AI
-if $TOOL_RTK; then
-  <command> | rtk trim
-else
-  <command> | head -200
-fi
-```
-
-### jq → python3 / node
-
-```bash
-# Read a JSON field
-read_json_field() {
-  local file="$1"
-  local field="$2"
-  if $TOOL_JQ; then
-    jq "$field" "$file"
-  else
-    python3 -c "import json; d=json.load(open('$file')); print(d.get('${field#.}', ''))" 2>/dev/null \
-      || node -e "const d=require('./$file'); console.log(d${field});" 2>/dev/null \
-      || echo "⚠️  Cannot read JSON — jq, python3, and node all unavailable."
-  fi
-}
-```
-
-### rg → grep
-
-```bash
-# Search for a pattern in scoped path
-search_pattern() {
-  local pattern="$1"
-  local path="$2"
-  if $TOOL_RG; then
-    rg "$pattern" "$path"
-  else
-    grep -r "$pattern" "$path"
-  fi
-}
-```
-
-Always scope searches — never run `rg <pattern>` or `grep -r <pattern>` on the repo root.
-
-### fd → find
-
-```bash
-# Discover files by name or extension
-discover_files() {
-  local pattern="$1"
-  local path="$2"
-  if $TOOL_FD; then
-    fd "$pattern" "$path"
-  else
-    find "$path" -name "$pattern"
-  fi
-}
-```
-
-### gitnexus → rg + ARCHITECTURE_MAP.json
-
-```bash
-# Architecture impact query
-query_architecture_impact() {
-  local symbol="$1"
-  if $TOOL_GITNEXUS; then
-    gitnexus impact "$symbol"
-  else
-    echo "⚠️  GitNexus unavailable — falling back to static search."
-    if $TOOL_RG; then
-      rg "$symbol" apps/ packages/
-    else
-      grep -r "$symbol" apps/ packages/
-    fi
-    echo "Also inspect: docs/architecture/intelligence/ARCHITECTURE_MAP.json for module rules."
-  fi
-}
-
-# Architecture context lookup
-query_architecture_context() {
-  local symbol="$1"
-  if $TOOL_GITNEXUS; then
-    gitnexus context "$symbol"
-  else
-    echo "⚠️  GitNexus unavailable — using ARCHITECTURE_MAP.json only."
-    if $TOOL_JQ; then
-      jq ".modules | to_entries[] | select(.key | contains(\"$symbol\"))" \
-        docs/architecture/intelligence/ARCHITECTURE_MAP.json
-    else
-      python3 -c "
-import json
-d = json.load(open('docs/architecture/intelligence/ARCHITECTURE_MAP.json'))
-for k, v in d.get('modules', {}).items():
-    if '$symbol' in k:
-        print(k, ':', json.dumps(v, indent=2))
-"
-    fi
-  fi
-}
-```
-
-### stat (file age check) — macOS vs Linux
-
-`stat` syntax differs between macOS and Linux. Always use the portable wrapper:
-
-```bash
-# Portable file modification time in epoch seconds
-get_mtime() {
-  if stat -f %m "$1" >/dev/null 2>&1; then
-    stat -f %m "$1"   # macOS
-  else
-    stat -c %Y "$1"   # Linux (GNU stat)
-  fi
-}
-
-# Usage
-now=$(date +%s)
-file_mtime=$(get_mtime "<file>")
-age_hours=$(( (now - file_mtime) / 3600 ))
-```
+The orchestrator should cache these capabilities once per session and use the delegated hierarchy instead of embedding tool-policy logic inline.
 
 ---
 
@@ -1346,223 +944,27 @@ style: primary
 
 ## ADR Creation Protocol
 
+**Delegated to:** `.agents/skills/stage-workflow-governance`
+
 Referenced throughout as **"ADR required before proceeding."**
 
-When any step detects that an architectural decision is required (new module, layer boundary change, cross-app dependency, schema design choice with long-term implications), the orchestrator MUST pause and follow this protocol before continuing.
+ADR escalation triggers, creation requirements, numbering expectations, and stop-the-workflow behavior are owned by the stage-workflow-governance skill.
 
-### When ADR is required
+## Stage Lifecycle Guard
 
-- A new `packages/` module is introduced that does not exist in `ARCHITECTURE_MAP.json`
-- A dependency between layers is proposed that violates current `ARCHITECTURE_CONTRACT.json` rules
-- A database schema decision has permanent implications (e.g. multi-tenant isolation strategy change)
-- A new external integration is proposed (external API, third-party service)
-- Any change to `ARCHITECTURE_MAP.json` or `ARCHITECTURE_CONTRACT.json` is required
-
-### ADR creation steps
-
-1. **STOP current workflow step.** Do not write any plan, task, or implementation artifact until the ADR is recorded.
-
-2. Present to the user:
-
-   ```
-   ⏸ ADR Required
-
-   An architectural decision must be recorded before this step can continue.
-   Decision needed: <describe the decision>
-   Impact: <which modules, layers, or contracts are affected>
-   ```
-
-3. Collect from the user:
-   - Decision title
-   - Context (why is this decision needed)
-   - Decision (what was decided)
-   - Consequences (what changes as a result)
-
-4. Write ADR to: `docs/architecture/ADR/ADR-<NNNN>-<kebab-title>.md`
-
-   Use template:
-
-   ```markdown
-   # ADR-<NNNN>: <Title>
-
-   **Status:** Accepted
-   **Date:** <ISO_DATE>
-   **Deciders:** <user name or team>
-
-   ## Context
-
-   <Why this decision was needed>
-
-   ## Decision
-
-   <What was decided>
-
-   ## Consequences
-
-   <What changes, what constraints are introduced>
-
-   ## Related stages
-
-   - <STAGE_NAME>
-   ```
-
-5. Stage and commit the ADR file:
-
-   ```bash
-   git add docs/architecture/ADR/ADR-<NNNN>-<kebab-title>.md
-   git commit -m "docs(adr): ADR-<NNNN> <title>"
-   ```
-
-6. Record in `.workflow-state.json`:
-
-   ```json
-   {
-     "event": "adr_created",
-     "adr": "ADR-<NNNN>",
-     "title": "<title>",
-     "timestamp": "<ISO_TIMESTAMP>"
-   }
-   ```
-
-7. Resume the paused workflow step.
-
-**ADR numbers:** Use the next sequential number from the highest existing ADR in `docs/architecture/ADR/`. If no ADRs exist, start at `ADR-0001`.
+**Delegated to:** `.agents/skills/stage-workflow-governance`
 
 Referenced throughout as **"Apply Stage Lifecycle Guard first."**
 
-> Defined here — before Pre-Step — so it is available from the first step that references it.
-
-Before creating, replacing, or updating any `## Stage Status` block:
-
-1. Read current `Status:` from `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`.
-2. If `PRODUCTION READY` or `PRODUCTION HARDENED`:
-   ```
-   ❌ Stage is locked — no modifications permitted.
-      Why it matters: PRODUCTION READY and PRODUCTION HARDENED stages are immutable.
-      Fix: Create a new stage to continue work on this feature area.
-   ```
-   → STOP. Do not modify. Propose a new stage.
-3. If `BACKEND CLOSED` → allow only Step 7 closure metadata writes. No structural changes.
-4. If `DEPRECATED`:
-   ```
-   ❌ Stage is deprecated — all writes are forbidden.
-      Why it matters: Deprecated stages are read-only. Modifying them would corrupt governance history.
-      Fix: Reference the superseding stage for any further work.
-   ```
-   → STOP. A deprecated stage is read-only. No writes permitted. See DEPRECATED lifecycle path below.
-5. If `## Stage Status` block is missing:
-   ```
-   ❌ Stage Status block missing — cannot validate lifecycle state.
-      Why it matters: The Stage Status block is required for lifecycle enforcement. Without it the orchestrator cannot determine what operations are permitted.
-      Fix: Add a ## Stage Status block to specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME> with a valid Status: value.
-   ```
-   → STOP and request clarification.
-6. Allowed values: `DRAFT` | `IN PROGRESS` | `BACKEND CLOSED` | `PRODUCTION READY` | `PRODUCTION HARDENED` | `DEPRECATED`
-
-### DEPRECATED Lifecycle Path
-
-A stage is deprecated when its delivered scope is superseded, removed, or replaced by a subsequent stage.
-
-**Who can deprecate:** Only the developer explicitly. The orchestrator never auto-deprecates.
-
-**How to deprecate a stage:**
-
-1. The user must provide a written reason and the superseding stage name (if applicable).
-2. The orchestrator updates `## Stage Status` in the stage file:
-   ```markdown
-   Status: DEPRECATED
-   Deprecated: <ISO_DATE>
-   Reason: <user-provided reason>
-   Superseded by: <STAGE_NAME or "N/A">
-   ```
-3. Update `.workflow-state.json`:
-   ```json
-   {
-     "stage_status": "DEPRECATED",
-     "last_updated": "<ISO_TIMESTAMP>",
-     "history": [..., { "event": "stage_deprecated", "reason": "<reason>", "timestamp": "<ISO_TIMESTAMP>" }]
-   }
-   ```
-4. Commit the deprecation with message: `chore(<stage>): deprecate stage — <reason>`
-5. After deprecation, all workflow operations on this stage are FORBIDDEN. The stage is read-only.
-
-### Risk Level Scoring Rubric
-
-Every `## Stage Status` block requires a `Risk Level`. Compute it using this rubric:
-
-**Score each factor present in the stage:**
-
-| Factor                                               | Points |
-| ---------------------------------------------------- | ------ |
-| Database migration (schema change)                   | +3     |
-| New table or column added                            | +2     |
-| Security-sensitive logic (auth, tokens, permissions) | +3     |
-| Worker interaction or async job                      | +2     |
-| Multi-tenant data isolation logic                    | +3     |
-| External API integration                             | +2     |
-| More than 10 tasks                                   | +1     |
-| More than 20 tasks                                   | +2     |
-| New package dependency added                         | +1     |
-
-**Score → Risk Level:**
-
-| Total score | Risk Level |
-| ----------- | ---------- |
-| 0–3         | LOW        |
-| 4–7         | MEDIUM     |
-| 8+          | HIGH       |
-
-Compute this score at Step 2 (Clarify) when scope is fully known. Update it at Step 5 (Analyze) if the plan revealed additional risk factors.
+Stage lock handling, DEPRECATED behavior, allowed status values, and risk scoring are owned by the stage-workflow-governance skill.
 
 ---
 
 # Scope Amendment Protocol
 
-If the user requests a requirement change, addition, or removal **after any step has been committed**, the orchestrator MUST NOT silently absorb it. Follow this protocol before any further execution:
+**Delegated to:** `.agents/skills/stage-workflow-governance`
 
-## Step 1 — Identify Invalidated Steps
-
-Map the amendment to the steps it affects:
-
-| Amendment type                              | Steps invalidated                      |
-| ------------------------------------------- | -------------------------------------- |
-| New or changed functional requirement       | Specify, Clarify, Plan, Tasks, Analyze |
-| New or changed data model / schema          | Plan, Tasks, Analyze                   |
-| New or changed endpoint / API contract      | Plan, Tasks, Analyze                   |
-| Security or compliance change               | Clarify, Plan, Analyze                 |
-| Descoping an already-planned feature        | Plan, Tasks                            |
-| Implementation-only change (no spec impact) | Tasks, Analyze                         |
-
-## Step 2 — Present Amendment Impact Widget
-
-```widget choice
-prompt: "Scope amendment detected. The following already-committed steps are invalidated and must be re-run: <list>. How would you like to proceed?"
-options:
-  - label: "✏️ Apply amendment and re-run invalidated steps"
-    value: "apply"
-    style: primary
-  - label: "🛑 Discard amendment — keep current scope"
-    value: "discard"
-```
-
-## Step 3 — Record Amendment
-
-If `apply`:
-
-1. Append to `.workflow-state.json`:
-   ```json
-   {
-     "event": "scope_amendment",
-     "description": "<user-provided description of the change>",
-     "invalidated_steps": ["<step names>"],
-     "timestamp": "<ISO_TIMESTAMP>"
-   }
-   ```
-2. Update `spec.md` with the amended requirement under a `## Amendments` section (append, do not overwrite).
-3. Re-run each invalidated step in sequence from the earliest one affected.
-4. Re-commit each re-run step with a commit message noting the amendment.
-
-**Do NOT carry forward any plan, task, or analysis artifact that was produced before the amendment was recorded. Stale artifacts must be regenerated.**
+The stage-workflow-governance skill owns invalidated-step mapping, amendment recording, and regeneration requirements when scope changes after committed work.
 
 ---
 
@@ -1949,6 +1351,8 @@ If ADR is required:
 
 ## 1.2 — Write Specify Report
 
+Apply Documentation Writer Protocol first.
+
 Load `specs/templates/reports/specify-report-template.md`.  
 Fill from `specs/runtime/<STAGE_DIR_NAME>/spec.md`.  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md`
@@ -2079,6 +1483,8 @@ If `speckit.checklist` is unavailable, the orchestrator must manually create min
 - [ ] Structured logging used
 
 ## 2.2 — Write Clarify Report
+
+Apply Documentation Writer Protocol first.
 
 Load `specs/templates/reports/clarify-report-template.md`.  
 Fill from the `## Clarifications` section of `specs/runtime/<STAGE_DIR_NAME>/spec.md`.  
@@ -2229,6 +1635,8 @@ Apply Handoff Error Protocol after both handoffs return. Both MUST return `VERDI
 
 ## 3.2 — Write Plan Report
 
+Apply Documentation Writer Protocol first.
+
 Load `specs/templates/reports/plan-report-template.md`.  
 Fill from `specs/runtime/<STAGE_DIR_NAME>/plan.md` (and `research.md`, `data-model.md` if present).  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/PLAN_REPORT.md`
@@ -2344,6 +1752,8 @@ Format components:
 After generation, count all `- [ ]` lines and record total as `TASKS_TOTAL`.
 
 ## 4.2 — Write Tasks Report
+
+Apply Documentation Writer Protocol first.
 
 Load `specs/templates/reports/tasks-report-template.md`.  
 Fill from `specs/runtime/<STAGE_DIR_NAME>/tasks.md`.  
@@ -2553,6 +1963,8 @@ Status key:
 Remediation is complete only when ALL rows show `✅ Fixed` and there are zero `❌ Remaining` and zero `🆕 New`. Delegate detailed retry state tracking to `.agents/skills/analysis-retry-engine`.
 
 ## 5.2 — Write Analyze Report
+
+Apply Documentation Writer Protocol first.
 
 Load `specs/templates/audits/analyze-report-template.md`.  
 Fill from step output — drift audit findings and all guardian verdicts.  
@@ -2845,6 +2257,12 @@ Apply Package Manager Enforcement — use `$PKG_MANAGER` for all dependency inst
 
 If Constitution conflict at any point → STOP immediately and explain before continuing.
 
+## 6.3B — Post-Implementation Simplification Pass
+
+Apply Post-Implementation Simplification Protocol.
+
+The simplification pass executes after `speckit.implement` and before 6.4 so that any dead-code removal, duplicate consolidation, or readability-only refactors are validated as part of the same implementation cycle.
+
 ## 6.4 — Verify Implementation Completeness
 
 ```
@@ -2940,9 +2358,9 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md`
 
 ## 6.6 — Pre-Closure Guardian Validation (Parallel)
 
+/handoff to=GitHub Actions Expert  
 /handoff to=DevOps Engineer  
-/handoff to=DevOps Engineer  
-/handoff to=DevOps Engineer
+/handoff to=Security Auditor
 
 Apply Handoff Error Protocol after all three handoffs return. Each MUST return `VERDICT: PASS | BLOCKED`. If any returns BLOCKED:
 
@@ -2957,6 +2375,8 @@ Apply Handoff Error Protocol after all three handoffs return. Each MUST return `
 → STOP. Require remediation before Pre-Closure Review Gate.
 
 ## 6.7 — Write Implement Report
+
+Apply Documentation Writer Protocol first.
 
 Load `specs/templates/reports/implement-report-template.md`.  
 Fill from `specs/runtime/<STAGE_DIR_NAME>/tasks.md` (count `- [X]` lines for TASKS_COMPLETED), implementation output, and formally deferred tasks.  
@@ -3064,9 +2484,9 @@ Merge:
     }
   ],
   "guardian_verdicts": {
-    "cicd_automation": "PASS | BLOCKED",
-    "deployment_engineer": "PASS | BLOCKED",
-    "docker_specialist": "PASS | BLOCKED"
+    "github_actions_expert": "PASS | BLOCKED",
+    "devops_engineer": "PASS | BLOCKED",
+    "security_auditor": "PASS | BLOCKED"
   },
   "step_timings": {
     "implement": {
@@ -3347,11 +2767,15 @@ If all validations pass → proceed to 7.1.
 
 ## 7.1 — Write Closure Report
 
+Apply Documentation Writer Protocol first.
+
 Load `specs/templates/reports/closure-report-template.md`.  
 Fill from all prior step outputs and reports.  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/CLOSURE_REPORT.md`
 
 ## 7.2 — Generate Testing Guide
+
+Apply Documentation Writer Protocol first.
 
 Load `specs/templates/guides/testing-guide-template.md`.
 
@@ -3455,6 +2879,8 @@ Mark Closure row as `✅` and all steps complete. Update Stage Artifacts table t
 ```
 
 ## 7.6 — Generate PR Summary
+
+Apply Documentation Writer Protocol first.
 
 Load `specs/templates/pr-template.md`.  
 Populate every section from workflow artifacts — all reports, stage file, task list, implementation output.  

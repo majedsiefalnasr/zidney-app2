@@ -43,6 +43,19 @@ bun run validate:scripts:ux --staged --fix || {
 }
 
 
+# ── Orchestrator Governance Validation (targeted) ─────────────────────────
+ORCHESTRATOR_GOVERNANCE_FILES=$(echo "$STAGED_FILES" | grep -E '^\.agents/agents/orchestrator\.agent\.md$|^\.agents/skills/.+/SKILL\.md$' || true)
+
+if [ -n "$ORCHESTRATOR_GOVERNANCE_FILES" ]; then
+  echo "Running orchestrator handoff governance validation…"
+  bun run validate:orchestrator:handoffs || {
+    echo "❌ Orchestrator handoff validation failed — commit blocked."
+    echo "   Run: bun run validate:orchestrator:handoffs to see the registry violations."
+    exit 1
+  }
+fi
+
+
 # ── TypeScript incremental validation (only if TS files changed) ────────────
 TS_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' || true)
 
