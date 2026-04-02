@@ -48,9 +48,9 @@
 - [X] T012 [P] [US1] Add deterministic shuffle unit tests in `packages/domain-core/tests/unit/attempts/auto-selection.shuffle.test.ts`
 - [X] T013 [P] [US1] Add pool insufficiency and duplicate guard tests in `packages/domain-core/tests/unit/attempts/auto-selection.rules.test.ts`
 - [X] T014 [P] [US1] Add attempt-start auto-selection integration tests in `apps/api/tests/integration/create-attempt-auto-selection.test.ts`
-- [ ] T041 [P] [US1] Add idempotency replay integration tests (same-key replay and payload-conflict) in `apps/api/tests/integration/create-attempt-idempotency-replay.test.ts`
-- [ ] T042 [P] [US1] Add schema/product version mismatch (HTTP 426) integration tests in `apps/api/tests/integration/create-attempt-version-guard.test.ts`
-- [ ] T044 [P] [US1] Add attempt-start error-contract matrix tests for all Stage 39 codes in `apps/api/tests/contract/attempts/auto-selection-errors.contract.test.ts`
+- [X] T041 [P] [US1] Add idempotency replay integration tests (same-key replay and payload-conflict) in `apps/api/tests/integration/create-attempt-idempotency-replay.test.ts`
+- [X] T042 [P] [US1] Add schema/product version mismatch (HTTP 426) integration tests in `apps/api/tests/integration/create-attempt-version-guard.test.ts`
+- [X] T044 [P] [US1] Add attempt-start error-contract matrix tests for all Stage 39 codes in `apps/api/tests/contract/attempts/auto-selection-errors.contract.test.ts`
 - [X] T045 [P] [US1] Add deterministic candidate-order repository tests in `packages/domain-core/tests/unit/attempts/auto-selection.candidate-order.test.ts`
 
 ### Implementation for User Story 1
@@ -77,17 +77,17 @@
 
 ### Tests for User Story 2
 
-- [ ] T022 [P] [US2] Add contract tests for auto-criteria validation responses in `apps/api/tests/contract/exams/auto-criteria-validation.contract.test.ts`
-- [ ] T023 [P] [US2] Add integration tests for criteria save/publish blocking in `apps/api/tests/integration/mcq-auto-criteria-validation.test.ts`
+- [X] T022 [P] [US2] Add contract tests for auto-criteria validation responses in `apps/api/tests/contract/exams/auto-criteria-validation.contract.test.ts`
+- [X] T023 [P] [US2] Add integration tests for criteria save/publish blocking in `apps/api/tests/integration/mcq-auto-criteria-validation.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Implement strict criteria count-mode and total-match validation in `packages/domain-core/src/mcq-exams/mcq-exams.validators.ts`
-- [ ] T025 [US2] Implement overlap-risk and undersized-uniqueness validation service in `packages/domain-core/src/mcq-exams/mcq-auto-criteria-validation.service.ts`
-- [ ] T026 [US2] Integrate Stage 39 validation into criteria mutation endpoint in `apps/api/src/routes/backoffice/mcq-exams/set-criteria.ts`
-- [ ] T027 [US2] Integrate publish-time blocking checks in `apps/api/src/routes/backoffice/mcq-exams/transition-exam.ts`
-- [ ] T028 [US2] Add validation error mapping helpers for Stage 39 codes in `apps/api/src/routes/backoffice/mcq-exams/helpers.ts`
-- [ ] T029 [US2] Update criteria data access for new filter dimensions with stable ordered candidate retrieval and index-backed query constraints in `packages/domain-core/src/mcq-exams/mcq-exams.repository.ts`
+- [X] T024 [US2] Implement strict criteria count-mode and total-match validation in `packages/domain-core/src/mcq-exams/mcq-exams.validators.ts`
+- [X] T025 [US2] Implement overlap-risk and undersized-uniqueness validation service in `packages/domain-core/src/mcq-exams/mcq-auto-criteria-validation.service.ts`
+- [X] T026 [US2] Integrate Stage 39 validation into criteria mutation endpoint in `apps/api/src/routes/backoffice/mcq-exams/set-criteria.ts`
+- [X] T027 [US2] Integrate publish-time blocking checks in `apps/api/src/routes/backoffice/mcq-exams/transition-exam.ts`
+- [X] T028 [US2] Add validation error mapping helpers for Stage 39 codes in `apps/api/src/routes/backoffice/mcq-exams/helpers.ts`
+- [X] T029 [US2] Update criteria data access for new filter dimensions with stable ordered candidate retrieval and index-backed query constraints in `packages/domain-core/src/mcq-exams/mcq-exams.repository.ts`
 
 **Checkpoint**: User Story 2 is independently functional and testable.
 
@@ -101,14 +101,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T030 [P] [US3] Add hybrid merge/uniqueness unit tests in `packages/domain-core/tests/unit/attempts/hybrid-selection.test.ts`
-- [ ] T031 [P] [US3] Add hybrid attempt-start integration tests in `apps/api/tests/integration/create-attempt-hybrid-selection.test.ts`
-- [ ] T043 [P] [US3] Add manual-only attempt-start integration tests in `apps/api/tests/integration/create-attempt-manual-only.test.ts`
+- [X] T030 [P] [US3] Add hybrid merge/uniqueness unit tests in `packages/domain-core/tests/unit/attempts/hybrid-selection.test.ts`
+- [X] T031 [P] [US3] Add hybrid attempt-start integration tests in `apps/api/tests/integration/create-attempt-hybrid-selection.test.ts`
+- [X] T043 [P] [US3] Add manual-only attempt-start integration tests in `apps/api/tests/integration/create-attempt-manual-only.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Extend selection orchestration to exclude manual IDs and support zero-auto edge case in `packages/domain-core/src/attempts/auto-selection.service.ts`
-- [ ] T033 [US3] Add manual-first ordering merge logic in `apps/api/src/modules/attempt/selection-persistence.ts`
+- [X] T032 [US3] Extend selection orchestration to exclude manual IDs and support zero-auto edge case in `packages/domain-core/src/attempts/auto-selection.service.ts`
+- [X] T033 [US3] Add manual-first ordering merge logic in `apps/api/src/modules/attempt/selection-persistence.ts`
 - [X] T034 [US3] Integrate hybrid diagnostics and final-count enforcement in `apps/api/src/routes/attempts/create.ts`
 
 **Checkpoint**: User Story 3 is independently functional and testable.
@@ -119,18 +119,18 @@
 
 **Purpose**: Performance, observability, and governance closure across all stories.
 
-- [ ] T035 [P] Add 500-concurrent attempt-start load test with explicit integrity assertions (no duplicate assignments, exact counts, no partial writes) in `apps/api/tests/load/auto-selection-concurrency.test.ts`
-- [ ] T036 [P] Add combined benchmark gate (50k+ pool, 500 concurrent starts, P95 <= 200 ms) in `apps/api/tests/performance/auto-selection.performance.test.ts`
-- [ ] T037 Update Stage 39 operator verification flow in `specs/runtime/039-auto-selection-engine/quickstart.md`
-- [ ] T038 Record validation run outcomes and threshold pass/fail evidence in `specs/runtime/039-auto-selection-engine/reports/TASKS_VALIDATION_REPORT.md`
-- [ ] T039 [P] Add mandatory eligibility-constraints integration matrix test in `apps/api/tests/integration/create-attempt-eligibility-matrix.test.ts`
-- [ ] T040 [P] Add selection observability metrics emission and assertions in `apps/api/tests/integration/auto-selection-observability.test.ts`
-- [ ] T048 [P] Add trust-chain negative tests (401/403/license blocked) for attempt and criteria endpoints in `apps/api/tests/integration/auto-selection-trust-chain-negative.test.ts`
-- [ ] T049 [P] Add cross-tenant isolation integration tests for selection and criteria routes in `apps/api/tests/integration/auto-selection-tenant-isolation.test.ts`
-- [ ] T051 [P] Add middleware-order contract tests asserting correlation -> tenant -> license -> version -> auth -> handler for attempt and criteria endpoints in `apps/api/tests/contract/middleware/auto-selection-middleware-order.contract.test.ts`
-- [ ] T052 [P] Add criteria save/publish transactional rollback tests (no partial writes on validation failure) in `apps/api/tests/integration/mcq-auto-criteria-transaction-rollback.test.ts`
-- [ ] T053 [P] Add observability contract tests asserting required structured fields on success and failure (`request_id`, `correlation_id`, `workspace_slug`, `exam_id`, `attempt_id`, `selection_seed`, `criteria_block_count`, `pool_sizes`, `selected_count`, `duplicate_count`) in `apps/api/tests/contract/attempts/auto-selection-observability.contract.test.ts`
-- [ ] T054 [P] Add forced DB-error rollback integration test proving attempt-start atomic rollback across idempotency claim, attempt snapshot, and attempt_questions writes in `apps/api/tests/integration/create-attempt-transaction-rollback.test.ts`
+- [X] T035 [P] Add 500-concurrent attempt-start load test with explicit integrity assertions (no duplicate assignments, exact counts, no partial writes) in `apps/api/tests/load/auto-selection-concurrency.test.ts`
+- [X] T036 [P] Add combined benchmark gate (50k+ pool, 500 concurrent starts, P95 <= 200 ms) in `apps/api/tests/performance/auto-selection.performance.test.ts`
+- [X] T037 Update Stage 39 operator verification flow in `specs/runtime/039-auto-selection-engine/quickstart.md`
+- [X] T038 Record validation run outcomes and threshold pass/fail evidence in `specs/runtime/039-auto-selection-engine/reports/TASKS_VALIDATION_REPORT.md`
+- [X] T039 [P] Add mandatory eligibility-constraints integration matrix test in `apps/api/tests/integration/create-attempt-eligibility-matrix.test.ts`
+- [X] T040 [P] Add selection observability metrics emission and assertions in `apps/api/tests/integration/auto-selection-observability.test.ts`
+- [X] T048 [P] Add trust-chain negative tests (401/403/license blocked) for attempt and criteria endpoints in `apps/api/tests/integration/auto-selection-trust-chain-negative.test.ts`
+- [X] T049 [P] Add cross-tenant isolation integration tests for selection and criteria routes in `apps/api/tests/integration/auto-selection-tenant-isolation.test.ts`
+- [X] T051 [P] Add middleware-order contract tests asserting correlation -> tenant -> license -> version -> auth -> handler for attempt and criteria endpoints in `apps/api/tests/contract/middleware/auto-selection-middleware-order.contract.test.ts`
+- [X] T052 [P] Add criteria save/publish transactional rollback tests (no partial writes on validation failure) in `apps/api/tests/integration/mcq-auto-criteria-transaction-rollback.test.ts`
+- [X] T053 [P] Add observability contract tests asserting required structured fields on success and failure (`request_id`, `correlation_id`, `workspace_slug`, `exam_id`, `attempt_id`, `selection_seed`, `criteria_block_count`, `pool_sizes`, `selected_count`, `duplicate_count`) in `apps/api/tests/contract/attempts/auto-selection-observability.contract.test.ts`
+- [X] T054 [P] Add forced DB-error rollback integration test proving attempt-start atomic rollback across idempotency claim, attempt snapshot, and attempt_questions writes in `apps/api/tests/integration/create-attempt-transaction-rollback.test.ts`
 
 ---
 

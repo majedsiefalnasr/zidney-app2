@@ -1,72 +1,113 @@
-# Quickstart: Stage 39 Auto Selection Engine
+# Stage 39 — Auto-Selection Engine: Operator Quickstart
 
-## Purpose
+This guide explains how to run, verify, and validate the Stage 39 implementation locally.
 
-This quickstart validates that Stage 39 planning artifacts are complete and implementation-ready under Zidney governance constraints.
+---
 
 ## Prerequisites
 
-- Current branch: spec/039-auto-selection-engine
-- Stage spec available: specs/runtime/039-auto-selection-engine/spec.md
-- Plan artifacts available:
-  - plan.md
-  - research.md
-  - data-model.md
-  - contracts/
+- Bun ≥ 1.1
+- PostgreSQL (for integration tests that touch the DB), or use the mocked patterns
+- All dependencies installed: `bun install` from repo root
 
-## Step 1: Verify Artifact Completeness
+---
 
-Confirm the following files exist:
+## Running Stage 39 Tests
 
-- specs/runtime/039-auto-selection-engine/plan.md
-- specs/runtime/039-auto-selection-engine/research.md
-- specs/runtime/039-auto-selection-engine/data-model.md
-- specs/runtime/039-auto-selection-engine/contracts/attempt-start-auto-selection.md
-- specs/runtime/039-auto-selection-engine/contracts/auto-criteria-validation.md
-- specs/runtime/039-auto-selection-engine/quickstart.md
+### Run all Stage 39 unit tests (domain-core)
 
-## Step 2: Confirm Governance Alignment
+```bash
+bun run test --filter packages/domain-core
+```
 
-Review plan checklist sections:
+### Run all Stage 39 API tests
 
-- Stage alignment and ADR references
-- Trust chain verification
-- Import boundary compliance
-- Transaction and idempotency strategy
-- Version enforcement and authoritative time handling
+```bash
+cd apps/api
+bun run test --run
+```
 
-## Step 3: Validate Technical Decisions Against Spec
+### Run specific test suites
 
-Cross-check:
+```bash
+# Auto-selection unit tests
+bun vitest run packages/domain-core/tests/unit/attempts/
 
-- Deterministic seed and replay behavior (FR-008, SC-003)
-- Atomic selection plus attempt persistence (FR-002)
-- Duplicate prevention and hybrid mode behavior (FR-007, FR-010)
-- Publish-time overlap blocking (FR-014)
+# Contract tests (no DB required)
+bun vitest run apps/api/tests/contract/
 
-## Step 4: Run Governance Gate Before Implementation
+# Integration tests (domain logic, no real DB)
+bun vitest run apps/api/tests/integration/
 
-Run:
+# Load tests (500-concurrent)
+bun vitest run apps/api/tests/load/
 
-- bun run ai:guard
-- bun run arch:audit
-- bun run lint
-- bun run typecheck
-- bun run test
+# Performance benchmark gates
+bun vitest run apps/api/tests/performance/
+```
 
-## Step 5: Implementation Entry Points
+---
 
-Planned implementation surfaces:
+## Key Modules Introduced in Stage 39
 
-- packages/domain-core selection orchestration module
-- apps/api attempt start flow integration
-- packages/validation criteria validation schemas
-- apps/api tenant migrations for additive schema support
+| Module | Path |
+|--------|------|
+| Auto-selection service | `packages/domain-core/src/attempts/auto-selection.service.ts` |
+| Selection persistence  | `packages/domain-core/src/attempts/selection-persistence.ts` |
+| MCQ auto-criteria validation | `packages/domain-core/src/mcq-exams/mcq-auto-criteria-validation.service.ts` |
+| MCQ exams types | `packages/domain-core/src/mcq-exams/mcq-exams.types.ts` |
+| Create-attempt route | `apps/api/src/routes/workspace/attempts/create-attempt.ts` |
+| MCQ criteria route | `apps/api/src/routes/workspace/mcq-exams/mcq-auto-criteria.ts` |
 
-## Done Criteria
+---
 
-Proceed to tasks/implementation only when:
+## Verifying Hybrid Selection Behavior
 
-- all above checks pass
-- no unresolved clarification markers remain
-- no ADR or architecture contract conflict is detected
+Manual IDs take priority — auto-selection fills the remainder:
+
+```typescript
+import { runAutoSelection } from '@zidney/domain-core/attempts/auto-selection.service'
+
+const result = await runAutoSelection({
+  workspaceId: 'ws-uuid',
+  examId: 'exam-uuid',
+  totalQuestions: 10,
+  criteriaBlocks: [{ id: 'blk1', percentage: 100, fixed_count: null, filters: {} }],
+  manualQuestionIds: ['manual-q-1', 'manual-q-2'],
+  selectionSeed: 'my-seed',
+  fetchEligiblePool: async (ws, ex, filters, excludeIds) => {
+    // Provide your pool here — excludeIds will contain the manual IDs
+    return yourPoolFetchImplementation(ws, ex, filters, excludeIds)
+  },
+})
+
+console.log(result.selectedIds)          // Last 8 auto-selected
+console.log(result.diagnostics)          // Pool sizes, counts, duplicate check
+console.log(result.candidatePoolFingerprint) // Deterministic hash
+```
+
+---
+
+## Environment Variables
+
+No environment variables are required for unit/contract/integration tests — all use mocked `fetchEligiblePool` implementations.
+
+For integration tests that touch real DB, ensure `TEST_DATABASE_URL` is set (see `apps/api/.env.test`).
+
+---
+
+## Typecheck
+
+```bash
+bun run typecheck
+```
+
+---
+
+## Common Issues
+
+| Issue | Fix |
+|-------|-----|
+| `Failed to load url @zidney/domain-core/...` | Run `bun install` from repo root to ensure workspace symlinks are created |
+| Pool size < totalQuestions throws INSUFFICIENT_POOL | Provide a pool with at least `totalQuestions` unique IDs in your test mock |
+| Fingerprint changes between runs | Check that `selectionSeed` is stable — the fingerprint is deterministic per seed+pool |
