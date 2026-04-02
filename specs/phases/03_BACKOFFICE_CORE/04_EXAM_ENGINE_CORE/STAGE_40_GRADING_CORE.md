@@ -9,18 +9,20 @@ Database: Tenant DB
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-04-02T00:02:00.000Z
+Last Updated: 2026-04-02T00:03:00.000Z
 
-Scope Defined:
+Scope Planned:
 
 - MCQ grading engine (SINGLE, MULTIPLE, TRUE_FALSE, ARRANGEMENT)
 - Traditional grading engine (TRUE_FALSE, FILL_BLANK, SHORT_ANSWER)
 - Score aggregation with pass/fail
-- Grading results persistence (3 new tables)
+- 3 new tables: grading_results, grading_question_results, grading_overrides
+- 1 column addition: attempts.grading_status
+- Migration 019: schema 1.24.0 → 1.25.0
 - Admin override with audit trail
-- Grading config snapshot structure defined
+- 8 domain-core source files + 4 test files
 
 Deferred Scope:
 
@@ -32,10 +34,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
