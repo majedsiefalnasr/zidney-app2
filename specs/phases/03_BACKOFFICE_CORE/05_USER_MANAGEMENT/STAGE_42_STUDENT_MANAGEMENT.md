@@ -9,20 +9,29 @@ Scope: Frontoffice student lifecycle, academic assignment enforcement, and subsc
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
-Risk Level: UNKNOWN
-Initiated: 2026-04-03T00:00:00.000Z
+Step: specify
+Risk Level: MEDIUM
+Last Updated: 2026-04-03T00:10:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Migration 022: add 7 columns to students table (phone, password_hash, subscription_status, status, token_version, failed_login_count, locked_until)
+- Domain-core students module (types, errors, repository, service, bulk-import)
+- Backoffice API: 9 routes (CRUD + disable/enable + subscription + bulk-import)
+- Update frontoffice-login.ts to query students table (legacy users table migration)
+- Update Drizzle schema students.schema.ts
+- Register studentsRouter in app.ts
+
+Deferred Scope:
+
+- None
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
