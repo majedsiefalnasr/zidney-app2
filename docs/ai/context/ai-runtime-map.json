@@ -1,32 +1,17 @@
 {
-  "mmc": [
-    "packages/types",
-    "packages/logger",
-    "packages/api-client",
-    "packages/ui-system"
-  ],
-  "frontoffice": [
-    "packages/types",
-    "packages/logger",
-    "packages/api-client"
-  ],
-  "backoffice": [
-    "packages/api-client",
-    "packages/types",
-    "packages/logger"
-  ],
-  "api": [
-    "packages/types",
-    "packages/validation",
-    "packages/logger",
-    "packages/domain-core",
-    "packages/redis-utils",
-    "packages/job-queue"
-  ],
-  "worker": [
-    "packages/types",
-    "packages/job-queue",
-    "packages/domain-core",
-    "packages/logger"
-  ]
+  "schema_version": "1.0.0",
+  "generated_at": "2026-04-03T19:19:55.549Z",
+  "services": {},
+  "infrastructure": {
+    "postgres": {
+      "type": "postgres",
+      "version": "15",
+      "port": 5432
+    },
+    "redis": {
+      "type": "redis",
+      "version": "7",
+      "port": 6379
+    }
+  }
 }
