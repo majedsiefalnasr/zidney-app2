@@ -1,0 +1,38 @@
+#!/bin/sh
+set -e
+
+MESSAGE_FILE="$1"
+
+if [ -z "$MESSAGE_FILE" ] || [ ! -f "$MESSAGE_FILE" ]; then
+  echo "❌ Commit message hook could not read the commit message file."
+  exit 1
+fi
+
+COMMIT_MESSAGE=$(head -n 1 "$MESSAGE_FILE" | tr -d '\r')
+
+case "$COMMIT_MESSAGE" in
+  Merge\ *|Revert\ *|fixup!\ *|squash!\ *)
+    exit 0
+    ;;
+esac
+
+if ! printf '%s' "$COMMIT_MESSAGE" | grep -Eq '^(feat|fix|chore|refactor|test|docs|infra)\([a-z0-9][a-z0-9-]*\): .+'; then
+  echo "❌ Invalid commit message format."
+  echo "   Expected: type(stage): description"
+  echo "   Example: feat(040-grading-core): align orchestrator governance hooks"
+  exit 1
+fi
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+
+if printf '%s' "$BRANCH" | grep -Eq '^spec/.+'; then
+  BRANCH_STAGE=${BRANCH#spec/}
+
+  if ! printf '%s' "$COMMIT_MESSAGE" | grep -Eq "^(feat|fix|chore|refactor|test|docs|infra)\(${BRANCH_STAGE}\): .+"; then
+    echo "❌ Commit scope must match the active spec branch."
+    echo "   Current branch: $BRANCH"
+    echo "   Expected scope: ${BRANCH_STAGE}"
+    echo "   Example: feat(${BRANCH_STAGE}): align orchestrator governance hooks"
+    exit 1
+  fi
+fi

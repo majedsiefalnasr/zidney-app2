@@ -14,19 +14,19 @@ set -e
 # ── Detect changed files in this push ───────────────────────────────────────
 # FIX #9 — @{u} fails fatally on branches with no upstream (e.g. first push
 # of a new branch), causing the hook to silently skip ALL checks via the
-# 2>/dev/null fallback. Now we fall back to the merge-base against main, then
+# 2>/dev/null fallback. Now we fall back to the merge-base against develop, then
 # to HEAD~1, with a visible warning so the developer knows what happened.
 UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || true)
 
 if [ -n "$UPSTREAM" ]; then
   CHANGED_FILES=$(git diff --name-only HEAD "@{u}")
 else
-  MERGE_BASE=$(git merge-base HEAD origin/main 2>/dev/null || true)
+  MERGE_BASE=$(git merge-base HEAD origin/develop 2>/dev/null || true)
   if [ -n "$MERGE_BASE" ]; then
-    echo "⚠️  No upstream set — diffing against merge-base with origin/main."
+    echo "⚠️  No upstream set — diffing against merge-base with origin/develop."
     CHANGED_FILES=$(git diff --name-only "$MERGE_BASE" HEAD)
   else
-    echo "⚠️  No upstream and no origin/main — diffing against HEAD~1."
+    echo "⚠️  No upstream and no origin/develop — diffing against HEAD~1."
     CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
   fi
 fi
@@ -44,23 +44,35 @@ bun run arch:context:changed -- --ci || {
 }
 
 
+# ── Orchestrator Governance Validation (targeted) ─────────────────────────
+ORCHESTRATOR_GOVERNANCE_FILES=$(echo "$CHANGED_FILES" | grep -E '^\.agents/agents/orchestrator\.agent\.md$|^\.agents/skills/.+/SKILL\.md$' || true)
+
+if [ -n "$ORCHESTRATOR_GOVERNANCE_FILES" ]; then
+  echo "Running orchestrator handoff governance validation…"
+  bun run validate:orchestrator:handoffs -- --ci || {
+    echo "❌ Orchestrator handoff validation failed — push blocked."
+    echo "   Run: bun run validate:orchestrator:handoffs to see the registry violations."
+    exit 1
+  }
+fi
+
+
 # ── Architecture Governance (blocking) ──────────────────────────────────────
 # FIX #2 — removed --full flag (does not exist on ai-guard.ts).
 # ai-guard.ts runs a full staged/changed-file scan by default.
 echo "Running architecture governance validation..."
-bun run ai:guard --ci || {
+bun run ai:guard -- --ci || {
   echo "❌ Architecture guard failed — push blocked."
   exit 1
 }
 
 
 # ── Infrastructure Audit ─────────────────────────────────────────────────────
-# FIX #8 — Pre-push runs the FULL audit (not --quick) so that the architecture
-# brain, context files, and dashboards are regenerated before code leaves the
-# machine. --quick skips all file writes and is only appropriate for the
-# pre-commit hook where speed is critical.
-echo "Running full infrastructure audit..."
-bun run arch:audit --quick || {
+# Pre-push keeps the audit in quick mode so pushes stay bounded and do not
+# rewrite generated artifacts in the working tree. CI remains the authoritative
+# full-write governance pass.
+echo "Running quick infrastructure audit..."
+bun run arch:audit -- --quick --ci || {
   echo "❌ Infrastructure audit failed — push blocked."
   exit 1
 }

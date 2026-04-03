@@ -45,10 +45,10 @@ AI coding agents generate and modify code rapidly, which increases the risk of h
 
 3. Create the logs directory and add it to `.gitignore`:
 
-   ```bash
-   mkdir -p logs/copilot/secrets
-   echo "logs/" >> .gitignore
-   ```
+  ```bash
+  mkdir -p .copilot/logs/secrets
+  echo ".copilot/logs/" >> .gitignore
+  ```
 
 4. Commit the hook configuration to your repository's default branch.
 
@@ -83,7 +83,7 @@ The hook is configured in `hooks.json` to run on the `sessionEnd` event:
 | `SCAN_MODE` | `warn`, `block` | `warn` | `warn` logs findings only; `block` exits non-zero to prevent auto-commit |
 | `SCAN_SCOPE` | `diff`, `staged` | `diff` | `diff` scans uncommitted changes vs HEAD; `staged` scans only staged files |
 | `SKIP_SECRETS_SCAN` | `true` | unset | Disable the scanner entirely |
-| `SECRETS_LOG_DIR` | path | `logs/copilot/secrets` | Directory where scan logs are written |
+| `SECRETS_LOG_DIR` | path | `.copilot/logs/secrets` | Directory where scan logs are written |
 | `SECRETS_ALLOWLIST` | comma-separated | unset | Patterns to ignore (e.g., `test_key_123,example.com`) |
 
 ## How It Works
@@ -161,7 +161,7 @@ See the full list in `scan-secrets.sh`.
 
 ## Log Format
 
-Scan events are written to `logs/copilot/secrets/scan.log` in JSON Lines format:
+Scan events are written to `.copilot/logs/secrets/scan.log` in JSON Lines format:
 
 ```json
 {"timestamp":"2026-03-13T10:30:00Z","event":"secrets_found","mode":"warn","scope":"diff","files_scanned":3,"finding_count":2,"findings":[{"file":"src/config.ts","line":12,"pattern":"GITHUB_PAT","severity":"critical","match":"ghp_...xyz1"}]}

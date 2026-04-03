@@ -23,8 +23,8 @@
         "bash": ".github/hooks/governance-audit/audit-prompt.sh",
         "cwd": ".",
         "env": {
-          "GOVERNANCE_LEVEL": "standard",
-          "BLOCK_ON_THREAT": "false"
+          "GOVERNANCE_LEVEL": "strict",
+          "BLOCK_ON_THREAT": "true"
         },
         "timeoutSec": 10
       }

@@ -6,7 +6,7 @@
   "branch": "spec/040-grading-core",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "orchestrator_session_complete",
+  "current_step": "stage_production_ready",
   "stage_status": "PRODUCTION READY",
   "auto_advance": true,
   "clarifications_resolved": true,

@@ -44,10 +44,10 @@ AI coding agents can autonomously execute shell commands, file operations, and d
 
 3. Create the logs directory and add it to `.gitignore`:
 
-   ```bash
-   mkdir -p .github/logs/copilot/tool-guardian
-   echo ".github/logs/" >> .gitignore
-   ```
+  ```bash
+  mkdir -p .copilot/logs/tool-guardian
+  echo ".copilot/logs/" >> .gitignore
+  ```
 
 4. Commit the hook configuration to your repository's default branch.
 
@@ -80,7 +80,7 @@ The hook is configured in `hooks.json` to run on the `preToolUse` event:
 |----------|--------|---------|-------------|
 | `GUARD_MODE` | `warn`, `block` | `block` | `warn` logs threats only; `block` exits non-zero to prevent tool execution |
 | `SKIP_TOOL_GUARD` | `true` | unset | Disable the guardian entirely |
-| `TOOL_GUARD_LOG_DIR` | path | `.github/logs/copilot/tool-guardian` | Directory where guard logs are written |
+| `TOOL_GUARD_LOG_DIR` | path | `.copilot/logs/tool-guardian` | Directory where guard logs are written |
 | `TOOL_GUARD_ALLOWLIST` | comma-separated | unset | Patterns to skip (e.g., `git push --force,npm publish`) |
 
 ## How It Works
@@ -147,7 +147,7 @@ echo '{"toolName":"bash","toolInput":"git push --force origin main"}' | \
 
 ## Log Format
 
-Guard events are written to `.github/logs/copilot/tool-guardian/guard.log` in JSON Lines format:
+Guard events are written to `.copilot/logs/tool-guardian/guard.log` in JSON Lines format:
 
 ```json
 {"timestamp":"2026-03-16T10:30:00Z","event":"threats_detected","mode":"block","tool":"bash","threat_count":1,"threats":[{"category":"destructive_git_ops","severity":"critical","match":"git push --force origin main","suggestion":"Use 'git push --force-with-lease' or push to a feature branch"}]}

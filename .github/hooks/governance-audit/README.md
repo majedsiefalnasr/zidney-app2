@@ -49,8 +49,8 @@ This hook provides governance controls for Copilot coding agent sessions:
 
 3. Create the logs directory and add to `.gitignore`:
    ```bash
-   mkdir -p logs/copilot/governance
-   echo "logs/" >> .gitignore
+   mkdir -p .copilot/logs/governance
+   echo ".copilot/logs/" >> .gitignore
    ```
 
 4. Commit to your repository's default branch.
@@ -76,7 +76,7 @@ Set environment variables in `hooks.json`:
 
 ## Log Format
 
-Events are written to `logs/copilot/governance/audit.log` in JSON Lines format:
+Events are written to `.copilot/logs/governance/audit.log` in JSON Lines format:
 
 ```json
 {"timestamp":"2026-01-15T10:30:00Z","event":"session_start","governance_level":"standard","cwd":"/workspace/project"}
