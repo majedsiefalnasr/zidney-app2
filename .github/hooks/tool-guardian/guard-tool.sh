@@ -96,10 +96,14 @@ PATTERNS=(
   "destructive_file_ops:::critical:::(rm|del|unlink).*\.git[^i]:::Never delete .git directory — use 'git' commands to manage repo state"
 
   # Destructive git operations
-  "destructive_git_ops:::critical:::git push --force.*(main|master):::Use 'git push --force-with-lease' or push to a feature branch"
-  "destructive_git_ops:::critical:::git push -f.*(main|master):::Use 'git push --force-with-lease' or push to a feature branch"
+  "destructive_git_ops:::critical:::git push --force-with-lease.*(main|master|develop):::Protected branches must not be force-pushed"
+  "destructive_git_ops:::critical:::git push --force.*(main|master|develop):::Use a feature branch instead of force-pushing a protected branch"
+  "destructive_git_ops:::critical:::git push -f.*(main|master|develop):::Use a feature branch instead of force-pushing a protected branch"
+  "destructive_git_ops:::high:::git checkout --:::Avoid discarding worktree changes without explicit approval"
   "destructive_git_ops:::high:::git reset --hard:::Use 'git stash' to preserve changes, or 'git reset --soft'"
   "destructive_git_ops:::high:::git clean -fd:::Use 'git clean -n' (dry run) first to preview what will be deleted"
+  "destructive_git_ops:::high:::git commit .*--no-verify:::Do not bypass Husky governance hooks"
+  "destructive_git_ops:::high:::git push .*--no-verify:::Do not bypass Husky governance hooks"
 
   # Database destruction
   "database_destruction:::critical:::DROP TABLE:::Use 'ALTER TABLE' or create a migration with rollback support"

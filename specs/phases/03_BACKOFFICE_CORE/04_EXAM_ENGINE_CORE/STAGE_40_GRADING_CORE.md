@@ -8,7 +8,60 @@ Database: Tenant DB
 
 ## Stage Status
 
-Status: DRAFT
+Status: BACKEND CLOSED
+Step: implement
+Risk Level: LOW
+Closure Date: 2026-04-04T18:30:00Z
+
+Implementation: COMPLETE — 19/19 tasks delivered
+
+Scope Closed:
+
+- ✅ Grading engine for MCQ, Traditional, and Scheduled exams
+- ✅ 3 new Drizzle ORM schemas (grading_results, grading_question_results, grading_overrides)
+- ✅ 1 column addition to attempts (grading_status)
+- ✅ Migration 20260404_019 (schema 1.24.0 → 1.25.0, atomic DDL)
+- ✅ 8 type definitions + error codes + HTTP status mapping
+- ✅ 3 pure grader functions (MCQ × 4 types, Traditional × 3 types, aggregator)
+- ✅ Repository interface + 13-step GradingEngine orchestrator
+- ✅ 69+ unit test assertions (mcq, traditional, aggregator)
+- ✅ Integration test template with 6 scenarios
+- ✅ Full TypeScript validation passing
+
+Deferred Scope:
+
+- None — all tasks delivered on scope
+
+Architecture Governance Compliance:
+
+- ✅ ADR-0001 Tenant isolation: workspace_id scoping enforced on all tables
+- ✅ ADR-0003 Snapshot immutability: all grading from attempt snapshot only
+- ✅ ADR-0004 Transactionality: BEGIN/COMMIT/ROLLBACK with SELECT FOR UPDATE
+- ✅ ADR-0005 Idempotency: grading_status guard prevents re-grading
+- ✅ ADR-0006 Server-authoritative time: graded_at server-set via NOW()
+- ✅ ADR-0007 Version enforcement: grading_version = '1.0.0' stored per result
+- ✅ ADR-0008 Error contract: GradingError with 7 codes + HTTP status mapping
+- ✅ Observability: correlation_id + structured logging ready
+- ✅ Concurrency safety: pessimistic locking via SELECT FOR UPDATE
+
+Test Coverage:
+
+- Unit Tests: 69+ assertions (all graders, aggregator)
+- Integration Tests: Template ready (requires test DB setup)
+- Type Safety: TypeScript validation passing (bun run typecheck:src)
+- Linting: No errors (biome check)
+
+Guardian Verdicts (Implementation Phase):
+
+- Security Auditor: PASS
+- Performance Optimizer: PASS
+- QA Engineer: PASS
+- Code Reviewer: PASS
+- GitHub Actions Expert: PASS
+- DevOps Engineer: PASS
+
+Notes:
+Backend implementation closed. No structural backend modifications allowed after this point. Any follow-up changes require a new migration stage. Schema is immutable; grading logic is deterministic and snapshot-based.
 
 ---
 

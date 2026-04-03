@@ -1,0 +1,35 @@
+# .coderabbit.yaml - High-Strictness Configuration
+reviews:
+  # Enable the assertive profile for comprehensive, detailed feedback
+  profile: "assertive"
+
+  # Configuration for automatic reviews
+  auto_review:
+    enabled: true
+    drafts: true # Prevents noise on incomplete work
+
+  # Enable high-level summaries and release notes in PR descriptions
+  high_level_summary: true
+
+  # Integrated tools to catch security and style issues early
+  tools:
+    gitleaks:
+      enabled: true # Detects hardcoded secrets
+    eslint:
+      enabled: true # Standard JS/TS linting
+    ruff:
+      enabled: true # High-performance Python linting
+    shellcheck:
+      enabled: true # Validates shell scripts
+
+  # Targeted instructions for different parts of your codebase
+  path_instructions:
+    - path: "src/**"
+      instructions: "Ensure strict adherence to SOLID principles and DRY. Suggest performance optimizations for loops and data structures."
+    - path: "tests/**"
+      instructions: "Verify that edge cases are covered. Ensure tests are independent and follow the Arrange-Act-Assert pattern."
+    - path: "docs/**"
+      instructions: "Check for clarity, grammar, and ensure all technical terms are used consistently."
+
+# Advanced features
+early_access: false

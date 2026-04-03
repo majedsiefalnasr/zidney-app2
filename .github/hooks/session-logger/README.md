@@ -31,7 +31,7 @@ This hook provides detailed logging of Copilot coding agent activity:
 
 2. Create the logs directory:
    ```bash
-   mkdir -p logs/copilot
+   mkdir -p .copilot/logs
    ```
 
 3. Ensure scripts are executable:
@@ -43,7 +43,7 @@ This hook provides detailed logging of Copilot coding agent activity:
 
 ## Log Format
 
-Session events are written to `logs/copilot/session.log` and prompt events to `logs/copilot/prompts.log` in JSON format:
+Session events are written to `.copilot/logs/session.log` and prompt events to `.copilot/logs/prompts.log` in JSON format:
 
 ```json
 {"timestamp":"2024-01-15T10:30:00Z","event":"sessionStart","cwd":"/workspace/project"}
@@ -52,7 +52,7 @@ Session events are written to `logs/copilot/session.log` and prompt events to `l
 
 ## Privacy & Security
 
-- Add `logs/` to `.gitignore` to avoid committing session data
+- Add `.copilot/logs/` to `.gitignore` to avoid committing session data
 - Use `LOG_LEVEL=ERROR` to only log errors
 - Set `SKIP_LOGGING=true` environment variable to disable
 - Logs are stored locally only

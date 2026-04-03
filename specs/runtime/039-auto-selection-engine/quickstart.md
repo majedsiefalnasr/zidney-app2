@@ -50,14 +50,14 @@ bun vitest run apps/api/tests/performance/
 
 ## Key Modules Introduced in Stage 39
 
-| Module | Path |
-|--------|------|
-| Auto-selection service | `packages/domain-core/src/attempts/auto-selection.service.ts` |
-| Selection persistence  | `packages/domain-core/src/attempts/selection-persistence.ts` |
+| Module                       | Path                                                                         |
+| ---------------------------- | ---------------------------------------------------------------------------- |
+| Auto-selection service       | `packages/domain-core/src/attempts/auto-selection.service.ts`                |
+| Selection persistence        | `packages/domain-core/src/attempts/selection-persistence.ts`                 |
 | MCQ auto-criteria validation | `packages/domain-core/src/mcq-exams/mcq-auto-criteria-validation.service.ts` |
-| MCQ exams types | `packages/domain-core/src/mcq-exams/mcq-exams.types.ts` |
-| Create-attempt route | `apps/api/src/routes/workspace/attempts/create-attempt.ts` |
-| MCQ criteria route | `apps/api/src/routes/workspace/mcq-exams/mcq-auto-criteria.ts` |
+| MCQ exams types              | `packages/domain-core/src/mcq-exams/mcq-exams.types.ts`                      |
+| Create-attempt route         | `apps/api/src/routes/workspace/attempts/create-attempt.ts`                   |
+| MCQ criteria route           | `apps/api/src/routes/workspace/mcq-exams/mcq-auto-criteria.ts`               |
 
 ---
 
@@ -66,24 +66,24 @@ bun vitest run apps/api/tests/performance/
 Manual IDs take priority — auto-selection fills the remainder:
 
 ```typescript
-import { runAutoSelection } from '@zidney/domain-core/attempts/auto-selection.service'
+import { runAutoSelection } from "@zidney/domain-core/attempts/auto-selection.service";
 
 const result = await runAutoSelection({
-  workspaceId: 'ws-uuid',
-  examId: 'exam-uuid',
+  workspaceId: "ws-uuid",
+  examId: "exam-uuid",
   totalQuestions: 10,
-  criteriaBlocks: [{ id: 'blk1', percentage: 100, fixed_count: null, filters: {} }],
-  manualQuestionIds: ['manual-q-1', 'manual-q-2'],
-  selectionSeed: 'my-seed',
+  criteriaBlocks: [{ id: "blk1", percentage: 100, fixed_count: null, filters: {} }],
+  manualQuestionIds: ["manual-q-1", "manual-q-2"],
+  selectionSeed: "my-seed",
   fetchEligiblePool: async (ws, ex, filters, excludeIds) => {
     // Provide your pool here — excludeIds will contain the manual IDs
-    return yourPoolFetchImplementation(ws, ex, filters, excludeIds)
+    return yourPoolFetchImplementation(ws, ex, filters, excludeIds);
   },
-})
+});
 
-console.log(result.selectedIds)          // Last 8 auto-selected
-console.log(result.diagnostics)          // Pool sizes, counts, duplicate check
-console.log(result.candidatePoolFingerprint) // Deterministic hash
+console.log(result.selectedIds); // Last 8 auto-selected
+console.log(result.diagnostics); // Pool sizes, counts, duplicate check
+console.log(result.candidatePoolFingerprint); // Deterministic hash
 ```
 
 ---
@@ -106,8 +106,8 @@ bun run typecheck
 
 ## Common Issues
 
-| Issue | Fix |
-|-------|-----|
-| `Failed to load url @zidney/domain-core/...` | Run `bun install` from repo root to ensure workspace symlinks are created |
-| Pool size < totalQuestions throws INSUFFICIENT_POOL | Provide a pool with at least `totalQuestions` unique IDs in your test mock |
-| Fingerprint changes between runs | Check that `selectionSeed` is stable — the fingerprint is deterministic per seed+pool |
+| Issue                                               | Fix                                                                                   |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `Failed to load url @zidney/domain-core/...`        | Run `bun install` from repo root to ensure workspace symlinks are created             |
+| Pool size < totalQuestions throws INSUFFICIENT_POOL | Provide a pool with at least `totalQuestions` unique IDs in your test mock            |
+| Fingerprint changes between runs                    | Check that `selectionSeed` is stable — the fingerprint is deterministic per seed+pool |

@@ -4,10 +4,12 @@
  * File: apps/api/src/db/tenant/schemas/attempts.schema.ts
  * Stage: STAGE_38_SCHEDULED_EXAM_ENGINE (columns added in migration 017)
  *        STAGE_39_AUTO_SELECTION_ENGINE (columns added in migration 018)
+ *        STAGE_40_GRADING_CORE (grading_status column added in migration 019)
  *
  * Covers all existing attempts table columns (from v1.0.0/001_create_attempt_engine_tables.sql)
  * plus the 6 new scheduled exam columns added in migration 017,
- * plus the 3 auto-selection columns added in migration 018.
+ * plus the 3 auto-selection columns added in migration 018,
+ * plus the grading_status column added in migration 019.
  */
 
 import { sql } from 'drizzle-orm'
@@ -63,6 +65,7 @@ export const attempts = pgTable(
     status: varchar('status', { length: 20 }).notNull().default('IN_PROGRESS'),
     score: numeric('score', { precision: 5, scale: 2 }),
     passed: boolean('passed'),
+    grading_status: varchar('grading_status', { length: 20 }).notNull().default('PENDING'),
     result_snapshot: jsonb('result_snapshot'),
 
     // ── Audit ────────────────────────────────────────────────────
@@ -85,7 +88,11 @@ export const attempts = pgTable(
   (table) => [
     check(
       'valid_status',
-      sql`${table.status} IN ('IN_PROGRESS', 'SUBMITTED', 'FINALIZED', 'EXPIRED', 'ABORTED')`
+      sql`${table.status} IN ('IN_PROGRESS', 'SUBMITTED', 'FINALIZED', 'EXPIRED', 'ABORTED', 'GRADED')`
+    ),
+    check(
+      'valid_grading_status',
+      sql`${table.grading_status} IN ('PENDING', 'GRADING', 'GRADED', 'OVERRIDE')`
     ),
     check('valid_mode', sql`${table.mode} IN ('RELAX', 'CHRONO', 'RUSH')`),
     check(

@@ -40,10 +40,10 @@ AI coding agents may add new dependencies during a session without considering l
 
 3. Create the logs directory and add it to `.gitignore`:
 
-   ```bash
-   mkdir -p logs/copilot/license-checker
-   echo "logs/" >> .gitignore
-   ```
+  ```bash
+  mkdir -p .copilot/logs/license-checker
+  echo ".copilot/logs/" >> .gitignore
+  ```
 
 4. Commit the hook configuration to your repository's default branch.
 
@@ -76,7 +76,7 @@ The hook is configured in `hooks.json` to run on the `sessionEnd` event:
 |----------|--------|---------|-------------|
 | `LICENSE_MODE` | `warn`, `block` | `warn` | `warn` logs violations only; `block` exits non-zero to prevent auto-commit |
 | `SKIP_LICENSE_CHECK` | `true` | unset | Disable the checker entirely |
-| `LICENSE_LOG_DIR` | path | `logs/copilot/license-checker` | Directory where check logs are written |
+| `LICENSE_LOG_DIR` | path | `.copilot/logs/license-checker` | Directory where check logs are written |
 | `BLOCKED_LICENSES` | comma-separated SPDX IDs | copyleft set | Licenses to flag as violations |
 | `LICENSE_ALLOWLIST` | comma-separated | unset | Package names to skip (e.g., `linux-headers,glibc`) |
 
@@ -173,7 +173,7 @@ Override with `BLOCKED_LICENSES` to customize.
 
 ## Log Format
 
-Check events are written to `logs/copilot/license-checker/check.log` in JSON Lines format:
+Check events are written to `.copilot/logs/license-checker/check.log` in JSON Lines format:
 
 ```json
 {"timestamp":"2026-03-17T10:30:00Z","event":"license_check_complete","mode":"warn","dependencies_checked":3,"violation_count":1,"violations":[{"package":"readline-sync","ecosystem":"npm","license":"GPL-3.0","status":"BLOCKED"}]}

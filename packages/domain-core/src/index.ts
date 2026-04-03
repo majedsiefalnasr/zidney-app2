@@ -20,6 +20,8 @@ export * from './auth/index'
 export * as departments from './departments'
 // Divisions module (Stage 022)
 export * as divisions from './divisions'
+// Grading module (Stage 040)
+export * from './grading/index'
 // Groups module (Stage 024)
 export * as groups from './groups'
 // Hierarchy module (Stage 025)
