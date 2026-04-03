@@ -367,6 +367,198 @@ Block merge if:
 
 ---
 
+## 5j. Request ID Extraction & Error Response Consistency (CRITICAL)
+
+**NEW RULE** — Ensures all error responses include request_id for traceability and follows standard contract.
+
+When reviewing route handlers and error paths:
+
+You MUST verify:
+
+- **Extract Once, Early**: Inside each handler, extract `request_id` once at the start: `const requestId = (c.get('request_id') as string | undefined) ?? null`.
+- **Include in Every Error Response**: ALL error responses (4xx, 5xx) MUST include `request_id` at the top level: `{ success: false, data: null, error: { ... }, request_id: requestId }`.
+- **Consistent Contract**: Error responses must always follow the standard: `{ success: false, data: null, error: { code: string, message: string }, request_id: string | null }`.
+- **Log with requestId**: Error logs MUST include `request_id` context for correlation across services.
+
+**Correct Pattern**:
+```typescript
+const requestId = (c.get('request_id') as string | undefined) ?? null
+
+if (validationFails) {
+  return c.json(
+    { success: false, data: null, error: { code: 'INVALID_REQUEST', message: '...' }, request_id: requestId },
+    400
+  )
+}
+```
+
+**Anti-Pattern** (Missing requestId):
+```typescript
+return c.json({ success: false, data: null, error: { code: 'INVALID_REQUEST', message: '...' } }, 400)
+```
+
+Block merge if:
+
+- Any error response branch missing `request_id`.
+- `request_id` extracted multiple times (should be once at handler start).
+- Error logs lack `request_id` context.
+- Standard contract shape violated.
+
+---
+
+## 5k. Email Normalization & Case Sensitivity (CRITICAL)
+
+**NEW RULE** — Prevents case-sensitivity bugs and whitespace issues in email lookups.
+
+When reviewing code that accepts email input from clients:
+
+You MUST verify:
+
+- **Normalize Immediately**: After extracting email from request body, convert to lowercase AND trim whitespace: `email.toLowerCase().trim()`.
+- **Query with Normalized Email**: Database queries MUST use the normalized email value.
+- **Consistent Across Paths**: All code paths that look up users by email (login, password reset, etc.) must normalize identically.
+- **Test Case-Insensitivity**: Tests must verify that `USER@EXAMPLE.COM`, `user@example.com`, and ` user@example.com ` all resolve to the same user.
+
+**Correct Pattern**:
+```typescript
+const { email, password } = body
+const normalizedEmail = email.toLowerCase().trim()
+const user = await db.query('SELECT * FROM users WHERE email = $1', [normalizedEmail])
+```
+
+**Anti-Pattern** (Skips normalization):
+```typescript
+const user = await db.query('SELECT * FROM users WHERE email = $1', [email])
+```
+
+Block merge if:
+
+- Email used in query without `.toLowerCase()` and `.trim()`.
+- Normalization happens AFTER query.
+- Different code paths normalize email differently.
+- No test verifying case-insensitive lookup.
+
+---
+
+## 5l. Database Time Authoritativeness & Timezone Verification (CRITICAL)
+
+**NEW RULE** — Prevents time-of-check, time-of-use (TOCTOU) bugs by enforcing DB-authoritative time.
+
+When reviewing code with time-sensitive business logic (lockouts, expirations, timeouts, etc.):
+
+You MUST verify:
+
+- **Never Use Client Time**: Never compare client-provided timestamps or `new Date()` against persistence timestamps. The server time may drift; database time is authoritative.
+- **Compute in Database**: Time comparisons MUST happen in SQL: `NOW() > locked_until`, `scheduled_end_time < NOW()`, etc.
+- **Return Computed Boolean**: Have the query compute the result (e.g., `(locked_until > NOW()) AS is_locked`) as a boolean, then check it in application code.
+- **TOCTOU Prevention**: For critical operations (account locks, submission windows), compute the boolean INSIDE the same transaction that checks it, after acquiring locks.
+- **Timezone Consistency**: Ensure all `TIMESTAMPTZ` columns are compared with `NOW()` (which uses server timezone); no `getTime()` or `Date.parse()`.
+
+**Correct Pattern** (Account Lockout):
+```typescript
+const result = await client.query(
+  `SELECT (locked_until > NOW()) AS is_locked FROM backoffice_staff_users WHERE id = $1`,
+  [userId]
+)
+const isLocked = result.rows[0].is_locked
+if (isLocked) { /* deny login */ }
+```
+
+**Anti-Pattern** (Node Time):
+```typescript
+const user = await db.query('SELECT locked_until FROM users WHERE id = $1', [userId])
+if (user.locked_until > new Date()) { /* deny login */ }  // ❌ Client time vs DB storage
+```
+
+Block merge if:
+
+- Time comparison uses `new Date()` or client-provided timestamp against persistence data.
+- Boolean (is_locked, is_expired, etc.) computed in JavaScript instead of SQL.
+- No TOCTOU protection for critical operations.
+- Timezone handling inconsistent (mixing UTC and local time).
+
+---
+
+## 5m. Zod Validation Order — Transformations Before Validators (CRITICAL)
+
+**NEW RULE** — Ensures Zod validators work on transformed (clean) values.
+
+When reviewing Zod schemas:
+
+You MUST verify:
+
+- **Transform First**: `.trim()`, `.toLowerCase()`, `.toUpperCase()` MUST come before `.min()`, `.max()`, `.regex()`.
+- **Reason**: Validators check the TRANSFORMED value. If `.min()` runs before `.trim()`, "   " (3 spaces) passes, then `.trim()` converts to "" (fails invariant).
+- **Chain Order**: Correct order is `.string()` → `.trim()` → `.min().max()` → `.optional()`.
+- **Test Both**: Unit tests must verify both the trimmed value AND the invariant (e.g., trimmed string satisfies min length).
+
+**Correct Pattern**:
+```typescript
+name: z.string()
+  .trim()                                           // Transform first
+  .min(1, 'name is required')                       // Validate on trimmed value
+  .max(256, 'name must not exceed 256 characters')
+  .describe('Full name')
+```
+
+**Anti-Pattern** (Validates before transform):
+```typescript
+name: z.string()
+  .min(1, 'name is required')        // ❌ Validates untrimmed
+  .max(256, 'name must...')
+  .trim()                             // ❌ Transform after
+```
+
+Block merge if:
+
+- `.trim()` comes after `.min()` or `.max()`.
+- `.toLowerCase()` comes after validation that depends on case.
+- No tests verify edge cases (whitespace-only strings, empty after trim).
+- Validators run on untransformed input.
+
+---
+
+## 5n. Workspace-Scoped Database Queries (CRITICAL)
+
+**NEW RULE** — Prevents cross-tenant data leaks via missing workspace scoping.
+
+When reviewing database queries on shared tenant tables:
+
+You MUST verify:
+
+- **Every Query Scoped**: ALL SELECT/UPDATE/DELETE queries on workspace-shared tables MUST filter by `workspace_id` in the WHERE clause.
+- **Scope in JOIN**: If joining across multiple tables, include `workspace_id` check in both the WHERE and JOIN ON conditions.
+- **Parameter Passed**: Handler extracts `workspaceId` from context and passes it as a query parameter, never omits or inlines it.
+- **Consistent Naming**: Use `workspace_id` consistently (or `organization_id`); don't mix naming across queries.
+- **Test Cross-Workspace Isolation**: Tests must verify that workspaceA queries cannot see workspaceB data.
+
+**Correct Pattern**:
+```typescript
+const results = await client.query(
+  `SELECT u.* FROM backoffice_staff_users u
+   WHERE u.workspace_id = $1 AND u.email = $2`,
+  [workspaceId, email]
+)
+```
+
+**Anti-Pattern** (Missing workspace scope):
+```typescript
+const results = await client.query(
+  `SELECT u.* FROM backoffice_staff_users u
+   WHERE u.email = $1`,    // ❌ No workspace_id filter!
+  [email]
+)
+```
+
+Block merge if:
+
+- Query on shared table lacks `workspace_id` filter in WHERE.
+- `workspace_id` not passed as parameter (inlined or omitted).
+- JOIN queries don't include workspace filters on both tables.
+- No cross-workspace isolation test.
+
+---
+
 ## 6. Modular Monolith Discipline
 
 You MUST verify:

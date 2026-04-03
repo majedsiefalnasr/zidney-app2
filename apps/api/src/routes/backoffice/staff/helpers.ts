@@ -63,18 +63,26 @@ export function isValidUuid(value: string): boolean {
 // ---------------------------------------------------------------------------
 
 export function staffErrorResponse(c: Context, err: unknown) {
+  const requestId = (c.get('request_id') as string | undefined) ?? null
+
   if (err instanceof StaffError) {
     const status = STAFF_ERROR_HTTP[err.code] as 400 | 403 | 404 | 409 | 422 | 500
     return c.json(
-      { success: false, data: null, error: { code: err.code, message: err.message } },
+      {
+        success: false,
+        data: null,
+        error: { code: err.code, message: err.message },
+        request_id: requestId,
+      },
       status
     )
   }
 
+  const safeError = err instanceof Error ? err : new Error(String(err))
   logger.error('Unhandled staff error', {
-    error: err instanceof Error ? err.message : String(err),
-    correlation_id: c.get('correlation_id'),
-    workspace_id: c.get('workspace_id'),
+    message: safeError.message,
+    code: (safeError as NodeJS.ErrnoException).code,
+    request_id: requestId,
   })
 
   return c.json(
@@ -82,6 +90,7 @@ export function staffErrorResponse(c: Context, err: unknown) {
       success: false,
       data: null,
       error: { code: 'INTERNAL_ERROR', message: 'Internal server error' },
+      request_id: requestId,
     },
     500
   )

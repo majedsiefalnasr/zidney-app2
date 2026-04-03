@@ -96,6 +96,7 @@ import type { Context } from 'hono'
  */
 export async function backofficeLoginHandler(c: Context) {
   const correlationId = c.get('correlationId') || 'unknown'
+  const requestId = (c.get('request_id') as string | undefined) ?? null
   const workspaceSlug = c.get('workspaceSlug') || 'unknown'
   const workspaceId = c.get('workspaceId')
   const tenantDb = c.get('tenantDb')
@@ -114,11 +115,15 @@ export async function backofficeLoginHandler(c: Context) {
             code: 'INVALID_JSON',
             message: 'Request body must be valid JSON',
           },
+          request_id: requestId,
         },
         400
       )
     }
-    const { email, password } = body as Record<string, unknown>
+    let { email, password } = body as Record<string, unknown>
+    if (typeof email === 'string') {
+      email = email.toLowerCase().trim()
+    }
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return c.json(
@@ -129,6 +134,7 @@ export async function backofficeLoginHandler(c: Context) {
             code: 'INVALID_REQUEST',
             message: 'Email is required and must be valid',
           },
+          request_id: requestId,
         },
         400
       )
@@ -143,6 +149,7 @@ export async function backofficeLoginHandler(c: Context) {
             code: 'INVALID_REQUEST',
             message: 'Password is required',
           },
+          request_id: requestId,
         },
         400
       )
@@ -158,6 +165,7 @@ export async function backofficeLoginHandler(c: Context) {
             code: 'WORKSPACE_NOT_RESOLVED',
             message: 'Workspace not found',
           },
+          request_id: requestId,
         },
         400
       )
@@ -172,12 +180,13 @@ export async function backofficeLoginHandler(c: Context) {
 
       const userResult = await client.query(
         `SELECT u.id, u.email, u.password_hash, r.name AS role, u.token_version,
-                u.locked_until, u.failed_login_count, u.status
+                u.locked_until, u.failed_login_count, u.status,
+                (u.locked_until > NOW()) AS is_locked
          FROM backoffice_staff_users u
          JOIN backoffice_roles r ON r.id = u.role_id
-         WHERE u.email = $1 AND u.is_deleted = false
+         WHERE u.email = $1 AND u.workspace_id = $2 AND u.is_deleted = false
          FOR UPDATE`,
-        [email]
+        [email, workspaceId]
       )
 
       const user = userResult.rows[0]
@@ -199,13 +208,14 @@ export async function backofficeLoginHandler(c: Context) {
               code: 'INVALID_CREDENTIALS',
               message: 'Invalid email or password',
             },
+            request_id: requestId,
           },
           401
         )
       }
 
-      // === STEP 6: Check account lock ===
-      if (user.locked_until && new Date(user.locked_until) > new Date()) {
+      // === STEP 6: Check account lock (using DB-computed is_locked) ===
+      if (user.is_locked) {
         await logLoginFailure(
           correlationId,
           email,
@@ -222,6 +232,7 @@ export async function backofficeLoginHandler(c: Context) {
               code: 'ACCOUNT_LOCKED',
               message: 'Account temporarily locked. Please try again later.',
             },
+            request_id: requestId,
           },
           401
         )
@@ -272,6 +283,7 @@ export async function backofficeLoginHandler(c: Context) {
               code: 'INVALID_CREDENTIALS',
               message: 'Invalid email or password',
             },
+            request_id: requestId,
           },
           401
         )
@@ -352,7 +364,6 @@ export async function backofficeLoginHandler(c: Context) {
       client.release()
     }
   } catch (error) {
-    const requestId = correlationId ?? 'unknown'
     const safeError = error instanceof Error ? error : new Error(String(error))
     logger.error('Backoffice login error', {
       message: safeError.message,

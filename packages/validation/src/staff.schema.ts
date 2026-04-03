@@ -22,9 +22,9 @@ export const createStaffBodySchema = z.object({
     .describe('Staff email address'),
   name: z
     .string()
+    .trim()
     .min(1, 'name is required')
     .max(256, 'name must not exceed 256 characters')
-    .trim()
     .describe('Full name'),
   password: z
     .string()
@@ -53,9 +53,9 @@ export const updateStaffBodySchema = z
   .object({
     name: z
       .string()
+      .trim()
       .min(1, 'name must not be empty')
       .max(256, 'name must not exceed 256 characters')
-      .trim()
       .optional()
       .describe('Full name of the staff member'),
     email: z
@@ -96,6 +96,7 @@ export const staffListQuerySchema = z.object({
     .number()
     .int('page must be an integer')
     .min(1, 'page must be at least 1')
+    .describe('Page number for pagination, defaults to 1')
     .optional()
     .default(1),
   limit: z.coerce
@@ -103,12 +104,15 @@ export const staffListQuerySchema = z.object({
     .int('limit must be an integer')
     .min(1, 'limit must be at least 1')
     .max(100, 'limit must not exceed 100')
+    .describe('Number of items per page, defaults to 20, max 100')
     .optional()
     .default(20),
   status: z
     .enum(['ACTIVE', 'INACTIVE', 'SUSPENDED'])
     .optional()
-    .describe('Filter by staff status (ACTIVE, INACTIVE, or SUSPENDED)'),
+    .describe(
+      'Filter by staff status (ACTIVE, INACTIVE, or SUSPENDED) — per database migration constraint'
+    ),
   division_id: z
     .string()
     .uuid('division_id must be a valid UUID')
