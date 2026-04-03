@@ -8,30 +8,39 @@ Scope: Frontoffice student lifecycle, academic assignment enforcement, and subsc
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: MEDIUM
-Last Updated: 2026-04-06T00:40:00.000Z
+Last Updated: 2026-04-06T22:51:00.000Z
 
-Drift Analysis: PASSED (9/9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 25 / 25 completed
 
-Scope Authorized:
+Scope Closed:
 
-- Migration 20260406_022: 7 columns + 2 CHECK + schema 1.27.0 → 1.28.0
-- Domain-core: students module (types/errors/repo/service/bulk-import/barrel)
-- Validation: student.schema.ts (6 Zod schemas)
-- Backoffice routes: 9 handlers + helpers + router (PermissionModule.USERS)
-- frontoffice-login.ts: query students table (remove legacy users table)
-- app.ts: studentsRouter registered
+- Migration 20260406_022: students table (18 columns, 6 indexes)
+- Domain-core: students module (types, errors, repository, service, bulk-import, barrel)
+- Validation: student.schema.ts (CreateStudentSchema, UpdateStudentSchema, StudentListQuerySchema, StudentSubscriptionSchema, BulkImportSchema)
+- Backoffice routes: 10 handlers (create, list, get, update, delete, disable, enable, subscription, bulk-import) + helpers + router
+- frontoffice-login.ts: migrated to query students table (role: student)
+- app.ts: studentsRouter registered under backoffice prefix
+- Tests: 16 route integration + 15 domain-core unit (31/31 pass)
+
+Deferred Scope:
+
+- None
 
 Architecture Governance Compliance:
 
-- ADR alignment verified — all drift criteria passed
-- Guardian verdicts: Security PASS, Performance PASS, QA PASS, Code Review PASS
+- ADR-0001 Database-per-tenant isolation enforced (tenant DB via req.tenantDb)
+- ADR-0002 Snapshot immutability enforced (deleteStudent blocks if attempts exist)
+- ADR-0006 Server-authoritative time enforced (no client timestamps)
+- ADR-0007 Version compatibility enforced (license limit checked via resolveStudentLimit)
+- All guardian verdicts: Security PASS, Performance PASS, QA PASS, Code Review PASS
 
 Notes:
-Full drift analysis passed. Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 
