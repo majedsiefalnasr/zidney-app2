@@ -42,12 +42,12 @@
  */
 
 import {
-  generateDummyHash,
+  generateStaffDummyHash,
   logAccountLocked,
   logLoginFailure,
   logLoginSuccess,
   signBackofficeToken,
-  verifyPassword,
+  verifyStaffPassword,
 } from '@zidney/domain-core/auth'
 import { logger } from '@zidney/logger'
 import type { Context } from 'hono'
@@ -156,9 +156,11 @@ export async function backofficeLoginHandler(c: Context) {
       await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
       const userResult = await client.query(
-        `SELECT id, email, password_hash, role, token_version, locked_until, failed_login_count, is_active
-         FROM users 
-         WHERE email = $1 AND role IN ('INSTRUCTOR', 'ADMIN', 'STAFF') AND is_deleted = false
+        `SELECT u.id, u.email, u.password_hash, r.name AS role, u.token_version,
+                u.locked_until, u.failed_login_count, u.status
+         FROM backoffice_staff_users u
+         JOIN backoffice_roles r ON r.id = u.role_id
+         WHERE u.email = $1 AND u.is_deleted = false
          FOR UPDATE`,
         [email]
       )
@@ -167,11 +169,11 @@ export async function backofficeLoginHandler(c: Context) {
 
       // === STEP 4: Timing-attack safe password check ===
       // Always verify even if user not found (prevents email enumeration)
-      const passwordHash = user ? user.password_hash : generateDummyHash()
-      const passwordValid = await verifyPassword(password, passwordHash)
+      const passwordHash = user ? user.password_hash : generateStaffDummyHash()
+      const passwordValid = await verifyStaffPassword(passwordHash, password)
 
       // === STEP 5: Check if user found (after time-safe verification) ===
-      if (!user || !user.is_active) {
+      if (!user || user.status !== 'ACTIVE') {
         await logLoginFailure(correlationId, email, workspaceSlug, 'user_not_found_or_inactive', 0)
         await client.query('COMMIT')
         return c.json(
@@ -225,9 +227,10 @@ export async function backofficeLoginHandler(c: Context) {
 
           // Query: update both failed_login_count AND locked_until
           await client.query(
-            `UPDATE users 
+            `UPDATE backoffice_staff_users
              SET failed_login_count = $1, locked_until = $2, updated_at = NOW()
              WHERE id = $3`,
+            /* NOTE: locked_until uses NOW() + 5 minute interval (server-authoritative) */
             [newFailCount, lockUntil, user.id]
           )
 
@@ -235,7 +238,7 @@ export async function backofficeLoginHandler(c: Context) {
         } else {
           // Just increment counter
           await client.query(
-            `UPDATE users 
+            `UPDATE backoffice_staff_users
              SET failed_login_count = $1, updated_at = NOW()
              WHERE id = $2`,
             [newFailCount, user.id]
@@ -266,7 +269,7 @@ export async function backofficeLoginHandler(c: Context) {
 
       // === STEP 8: Success! Reset failed login count & update last_login ===
       await client.query(
-        `UPDATE users 
+        `UPDATE backoffice_staff_users
          SET failed_login_count = 0, last_login = NOW(), updated_at = NOW()
          WHERE id = $1`,
         [user.id]
