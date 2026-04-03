@@ -7,24 +7,25 @@
   "base_branch": "develop",
   "pkg_manager": "bun",
   "auto_advance": true,
-  "current_step": "plan",
+  "current_step": "tasks",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": true,
-  "tasks_total": null,
-  "tasks_completed": null,
+  "tasks_total": 34,
+  "tasks_completed": 0,
   "deferred_tasks": [],
   "guardian_verdicts": {},
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-04-03T00:00:00Z",
-  "last_updated": "2026-04-03T03:00:00Z",
+  "last_updated": "2026-04-03T04:00:00Z",
   "step_timings": {
     "specify": { "started_at": "2026-04-03T00:00:00Z", "completed_at": "2026-04-03T01:00:00Z" },
     "clarify": { "started_at": "2026-04-03T01:00:00Z", "completed_at": "2026-04-03T02:00:00Z" },
-    "plan": { "started_at": "2026-04-03T02:00:00Z", "completed_at": "2026-04-03T03:00:00Z" }
+    "plan": { "started_at": "2026-04-03T02:00:00Z", "completed_at": "2026-04-03T03:00:00Z" },
+    "tasks": { "started_at": "2026-04-03T03:00:00Z", "completed_at": "2026-04-03T04:00:00Z" }
   },
   "history": [
     {
@@ -43,6 +44,11 @@
     {
       "event": "plan_complete",
       "timestamp": "2026-04-03T03:00:00Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 34,
+      "timestamp": "2026-04-03T04:00:00Z"
     }
   ]
 }
