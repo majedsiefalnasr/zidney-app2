@@ -8,15 +8,15 @@ Scope: Backoffice staff lifecycle, assignment boundaries, and enforcement model
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: MEDIUM
-Last Updated: 2026-04-03T15:05:00Z
+Last Updated: 2026-04-04T00:00:00Z
 
-Drift Analysis: PASSED (all 9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 34 / 34 completed
 
-Scope Authorized:
+Scope Closed:
 
 - Staff CRUD (create, list, get, update, disable, enable, delete) — 7 endpoints
 - Migration `20260404_020_staff_management.ts`: schema 1.25.0 → 1.26.0
@@ -25,7 +25,7 @@ Scope Authorized:
 - `packages/validation/src/staff.schema.ts` — 4 Zod schemas
 - Backoffice login updated to `backoffice_staff_users` + JOIN roles + Argon2id
 - Dead code `apps/api/src/routes/backoffice/users.ts` deleted
-- 3 integration test files (crud, isolation, limit)
+- 3 test files: staff.crud (19), staff.isolation (7), staff.limit (4) — 30/30 passing
 
 Deferred Scope:
 
@@ -36,12 +36,14 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- All drift criteria passed — implementation authorized
-- ADR-0001 (database-per-tenant) preserved throughout
-- Migration is forward-only; rollback documented but not embedded in migration file
+- ADR-0001 (database-per-tenant) preserved — `c.get('tenant').pool` in all handlers
+- All write operations transactional — SERIALIZABLE for createStaff
+- Import boundaries respected — apps/api → packages/\* only
+- Implementation compliant with Architecture Governance (AGENTS.md + ADRs)
 
 Notes:
-Technical plan complete. 34 atomic tasks generated. Drift analysis gate pending.
+Backend implementation complete. No structural backend modifications allowed.
+Closure step pending.
 
 ---
 
