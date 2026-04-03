@@ -8,32 +8,30 @@ Scope: Frontoffice student lifecycle, academic assignment enforcement, and subsc
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: MEDIUM
-Last Updated: 2026-04-06T00:30:00.000Z
+Last Updated: 2026-04-06T00:40:00.000Z
 
-Tasks Generated:
+Drift Analysis: PASSED (9/9 criteria)
+Implementation: AUTHORIZED
 
-- Total: 25 atomic tasks across 6 phases (A–F)
-- Phase A: 2 tasks (migration + schema)
-- Phase B: 7 tasks (domain-core module + unit tests)
-- Phase C: 2 tasks (validation schemas)
-- Phase D: 11 tasks (backoffice route handlers)
-- Phase E: 1 task (auth migration)
-- Phase F: 2 tasks (app registration + integration tests)
-- Parallelizable: T009, T025
+Scope Authorized:
 
-Deferred Scope:
-
-- None
+- Migration 20260406_022: 7 columns + 2 CHECK + schema 1.27.0 → 1.28.0
+- Domain-core: students module (types/errors/repo/service/bulk-import/barrel)
+- Validation: student.schema.ts (6 Zod schemas)
+- Backoffice routes: 9 handlers + helpers + router (PermissionModule.USERS)
+- frontoffice-login.ts: query students table (remove legacy users table)
+- app.ts: studentsRouter registered
 
 Architecture Governance Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- ADR alignment verified — all drift criteria passed
+- Guardian verdicts: Security PASS, Performance PASS, QA PASS, Code Review PASS
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed. Implementation gate open.
 
 ---
 
