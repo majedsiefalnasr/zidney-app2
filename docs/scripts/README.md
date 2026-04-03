@@ -6,7 +6,7 @@ This directory contains one page per root `package.json` script runner, plus the
 
 ## Scope
 
-- Root package.json runners documented: 123
+- Root package.json runners documented: 124
 - Metadata-backed script implementations are also listed in `SCRIPT_REGISTRY.md`.
 
 ## ai
@@ -170,6 +170,7 @@ This directory contains one page per root `package.json` script runner, plus the
 
 - [validate:ai-context-fresh](validate-ai-context-fresh.md) — Check that the AI context mini artifact exists and is not older than 24 hours
 - [validate:ai-context-schemas](validate-ai-context-schemas.md) — Validate that all required AI context JSON artifacts exist and are valid JSON
+- [validate:orchestrator:handoffs](validate-orchestrator-handoffs.md) — Validates orchestrator handoff targets against the declared agent registry and checks delegated skills are listed in the loaded-skills section.
 - [validate:scan:packages](validate-scan-packages.md) — Walk all runtime spec docs and extract unique script references
 - [validate:scripts:all](validate-scripts-infra.md) — Orchestrator that runs all script-system validators sequentially. Composes: runtime-scripts, detect-broken-scripts, spec-sync, docs-drift. Also enforces the Script Evolution Guard: if package.json scripts changed in the current git diff, the migration-map must have been updated too. Exits non-zero on the first failure. Prints a timing summary.
 - [validate:scripts:docs-drift](validate-scripts-docs-drift.md) — Detects scripts in root package.json that have no corresponding documentation file in docs/scripts/. Reports missing docs and exits non-zero when undocumented scripts are found.
