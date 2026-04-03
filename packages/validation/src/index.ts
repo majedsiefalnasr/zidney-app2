@@ -121,6 +121,25 @@ export {
   type UpdateStaffBody,
   updateStaffBodySchema,
 } from './staff.schema'
+// Student management validation (Stage 042)
+export {
+  type BulkImportBody,
+  type BulkImportRow,
+  bulkImportBodySchema,
+  bulkImportRowSchema,
+  type CreateStudentBody,
+  createStudentBodySchema,
+  type StudentIdParams,
+  type StudentListQuery,
+  studentIdParamsSchema,
+  studentListQuerySchema,
+  studentStatusSchema,
+  subscriptionStatusSchema,
+  type UpdateStudentBody,
+  type UpdateSubscriptionStatusBody,
+  updateStudentBodySchema,
+  updateSubscriptionStatusBodySchema,
+} from './student.schema'
 // Upgrade request validation
 export {
   validateRollbackRequest,
