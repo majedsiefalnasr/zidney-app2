@@ -9,20 +9,31 @@ Scope: Backoffice staff lifecycle, assignment boundaries, and enforcement model
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
-Risk Level: UNKNOWN
-Initiated: 2026-04-03T00:00:00Z
+Step: specify
+Risk Level: MEDIUM
+Last Updated: 2026-04-03T01:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Staff CRUD (create, list, get, update, disable, enable, delete)
+- Migration: add `status` column, widen `password_hash` to text, create `staff_hierarchy_levels`
+- Domain-core `staff` module with Argon2id password hashing
+- Backoffice login updated to use `backoffice_staff_users` + Argon2id
+- Dead code `users.ts` removed
+
+Deferred Scope:
+
+- `is_active` column removal (future cleanup stage)
+- `division_ids` array column removal (future cleanup stage)
+- Bulk staff import
+- Password reset / change-password flow
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarifications resolved inline. Planning step pending.
 
 ---
 

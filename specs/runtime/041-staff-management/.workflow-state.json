@@ -7,9 +7,9 @@
   "base_branch": "develop",
   "pkg_manager": "bun",
   "auto_advance": true,
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -21,12 +21,18 @@
   "current_parallel_group": null,
   "session_started_at": "2026-04-03T00:00:00Z",
   "last_updated": "2026-04-03T00:00:00Z",
-  "step_timings": {},
+  "step_timings": {
+    "specify": { "started_at": "2026-04-03T00:00:00Z", "completed_at": "2026-04-03T01:00:00Z" }
+  },
   "history": [
     {
       "event": "branch_created",
       "branch": "spec/041-staff-management",
       "timestamp": "2026-04-03T00:00:00Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-04-03T01:00:00Z"
     }
   ]
 }
