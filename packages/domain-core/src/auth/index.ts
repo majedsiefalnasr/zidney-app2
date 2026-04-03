@@ -38,7 +38,6 @@ export {
   validatePasswordComplexity,
   verifyPassword,
 } from './password'
-
 // RBAC
 export {
   buildRbacContext,
@@ -50,5 +49,11 @@ export {
   getRoleDescription,
   isValidPermissionCode,
 } from './rbac'
+// Staff password hashing (Argon2id) — STAGE_41
+export {
+  generateStaffDummyHash,
+  hashStaffPassword,
+  verifyStaffPassword,
+} from './staff-password'
 // Types
 export * from './types'

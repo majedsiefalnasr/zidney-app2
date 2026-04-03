@@ -42,6 +42,8 @@ export * from './migrations/migrate'
 export * from './monitoring/provisioning-metrics'
 // Provisioning module
 export * from './provisioning/idempotency-handler'
+// Staff module (Stage 041)
+export * as staff from './staff'
 // Teams module (Stage 026)
 export * as teams from './teams'
 // Tenant resolver module

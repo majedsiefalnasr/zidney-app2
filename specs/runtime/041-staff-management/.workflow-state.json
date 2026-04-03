@@ -1,0 +1,81 @@
+{
+  "stage": "Staff Management",
+  "phase": "PHASE_03_BACKOFFICE_CORE / 05_USER_MANAGEMENT",
+  "stage_dir": "specs/runtime/041-staff-management",
+  "stage_file": "specs/phases/03_BACKOFFICE_CORE/05_USER_MANAGEMENT/STAGE_41_STAFF_MANAGEMENT.md",
+  "branch": "spec/041-staff-management",
+  "base_branch": "develop",
+  "pkg_manager": "bun",
+  "auto_advance": true,
+  "current_step": "stage_production_ready",
+  "stage_status": "PRODUCTION READY",
+  "clarifications_resolved": true,
+  "drift_passed": true,
+  "implementation_allowed": true,
+  "plan_completed": true,
+  "tasks_total": 34,
+  "tasks_completed": 34,
+  "deferred_tasks": [],
+  "guardian_verdicts": {
+    "architecture_guardian": "PASS",
+    "security_auditor": "PASS",
+    "performance_optimizer": "PASS",
+    "qa_engineer": "PASS"
+  },
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "2026-04-03T00:00:00Z",
+  "last_updated": "2026-04-04T01:00:00Z",
+  "step_timings": {
+    "specify": { "started_at": "2026-04-03T00:00:00Z", "completed_at": "2026-04-03T01:00:00Z" },
+    "clarify": { "started_at": "2026-04-03T01:00:00Z", "completed_at": "2026-04-03T02:00:00Z" },
+    "plan": { "started_at": "2026-04-03T02:00:00Z", "completed_at": "2026-04-03T03:00:00Z" },
+    "tasks": { "started_at": "2026-04-03T03:00:00Z", "completed_at": "2026-04-03T04:00:00Z" },
+    "analyze": { "started_at": "2026-04-03T15:00:00Z", "completed_at": "2026-04-03T15:05:00Z" },
+    "implement": { "started_at": "2026-04-03T15:10:00Z", "completed_at": "2026-04-04T00:00:00Z" },
+    "closure": { "started_at": "2026-04-04T00:30:00Z", "completed_at": "2026-04-04T01:00:00Z" }
+  },
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/041-staff-management",
+      "timestamp": "2026-04-03T00:00:00Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-04-03T01:00:00Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "timestamp": "2026-04-03T02:00:00Z"
+    },
+    {
+      "event": "plan_complete",
+      "timestamp": "2026-04-03T03:00:00Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 34,
+      "timestamp": "2026-04-03T04:00:00Z"
+    },
+    {
+      "event": "drift_analysis_passed",
+      "timestamp": "2026-04-03T15:05:00Z"
+    },
+    {
+      "event": "stage_backend_closed",
+      "tasks_completed": 34,
+      "tasks_total": 34,
+      "deferred_count": 0,
+      "timestamp": "2026-04-04T00:00:00Z"
+    },
+    {
+      "event": "pre_closure_review_approved",
+      "timestamp": "2026-04-04T00:30:00Z"
+    },
+    {
+      "event": "stage_production_ready",
+      "timestamp": "2026-04-04T01:00:00Z"
+    }
+  ]
+}

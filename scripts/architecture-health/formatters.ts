@@ -1,8 +1,20 @@
 /** @library-module */
 import type { ArchitectureHealthAssessment } from './types'
 
+const HOME = process.env.HOME ?? ''
+const REPO_ROOT = process.cwd()
+
+function sanitizePaths(str: string): string {
+  let result = str
+  if (REPO_ROOT) result = result.replaceAll(REPO_ROOT, '<repo>')
+  if (HOME) result = result.replaceAll(HOME, '<home>')
+  // Also strip absolute node_modules paths
+  result = result.replace(/\/[^"\s]*?\/node_modules\//g, '<home>/node_modules/')
+  return result
+}
+
 export function formatAssessmentAsJson(assessment: ArchitectureHealthAssessment): string {
-  return `${JSON.stringify(assessment, null, 2)}\n`
+  return sanitizePaths(`${JSON.stringify(assessment, null, 2)}\n`)
 }
 
 export function formatAssessmentAsMarkdown(assessment: ArchitectureHealthAssessment): string {
@@ -15,7 +27,7 @@ export function formatAssessmentAsMarkdown(assessment: ArchitectureHealthAssessm
         .join('\n')
     : '- No findings detected.'
 
-  return [
+  const output = [
     '# Architecture Health Summary',
     '',
     `- Score: ${assessment.overall.score}`,
@@ -33,15 +45,17 @@ export function formatAssessmentAsMarkdown(assessment: ArchitectureHealthAssessm
     ),
     '',
   ].join('\n')
+  return sanitizePaths(output)
 }
 
 export function formatAssessmentAsText(assessment: ArchitectureHealthAssessment): string {
-  return [
+  const output = [
     `Architecture Health Score: ${assessment.overall.score}`,
     `Health State: ${assessment.overall.health_state}`,
     `Verdict: ${assessment.overall.verdict}`,
     `Findings: ${assessment.findings.length}`,
   ].join('\n')
+  return sanitizePaths(output)
 }
 
 export function formatDriftReportAsMarkdown(assessment: ArchitectureHealthAssessment): string {
@@ -49,7 +63,7 @@ export function formatDriftReportAsMarkdown(assessment: ArchitectureHealthAssess
     (finding) => finding.classification === 'drift' || finding.classification === 'synchronization'
   )
 
-  return [
+  const output = [
     '# Architecture Drift Report',
     '',
     ...(relevantFindings.length > 0
@@ -60,4 +74,5 @@ export function formatDriftReportAsMarkdown(assessment: ArchitectureHealthAssess
       : ['- No drift or synchronization findings detected.']),
     '',
   ].join('\n')
+  return sanitizePaths(output)
 }

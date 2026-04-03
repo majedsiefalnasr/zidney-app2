@@ -1165,6 +1165,7 @@ function validateDependencyGraphEdges(edges: { from: string; to: string }[]): nu
 function buildDependencyGraph(files: Map<string, string>): DependencyGraph {
   const nodes = new Set<string>()
   const edges: { from: string; to: string }[] = []
+  const seenEdges = new Set<string>()
 
   for (const [rel, full] of files) {
     if (!rel.endsWith('.ts') && !rel.endsWith('.js')) continue
@@ -1194,7 +1195,11 @@ function buildDependencyGraph(files: Map<string, string>): DependencyGraph {
         // Only add edge if it's a valid monorepo module path
         if (isValidModulePath(target)) {
           nodes.add(target)
-          edges.push({ from: moduleRoot, to: target })
+          const edgeKey = `${moduleRoot}→${target}`
+          if (!seenEdges.has(edgeKey)) {
+            seenEdges.add(edgeKey)
+            edges.push({ from: moduleRoot, to: target })
+          }
         }
         // External npm packages are filtered out here — they don't create edges
       }

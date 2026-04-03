@@ -110,6 +110,17 @@ export {
 } from './schema-version-validator'
 // Logging schema
 export * from './schemas/logging-schema'
+// Staff management validation (Stage 041)
+export {
+  type CreateStaffBody,
+  createStaffBodySchema,
+  type StaffIdParams,
+  type StaffListQuery,
+  staffIdParamsSchema,
+  staffListQuerySchema,
+  type UpdateStaffBody,
+  updateStaffBodySchema,
+} from './staff.schema'
 // Upgrade request validation
 export {
   validateRollbackRequest,

@@ -49,14 +49,13 @@ export async function buildDependencyGraph(metadata: SourceMetadata): Promise<AI
     if (!dependencySets.get(edge.from)?.has(edge.to)) {
       dependencySets.get(edge.from)?.add(edge.to)
       modules[edge.from]?.dependencies.push(edge.to)
+      edges.push({ from: edge.from, to: edge.to })
     }
 
     if (!reverseDependencySets.get(edge.to)?.has(edge.from)) {
       reverseDependencySets.get(edge.to)?.add(edge.from)
       reverseDependencies[edge.to]?.push(edge.from)
     }
-
-    edges.push({ from: edge.from, to: edge.to })
   }
 
   return {

@@ -42,12 +42,12 @@
  */
 
 import {
-  generateDummyHash,
+  generateStaffDummyHash,
   logAccountLocked,
   logLoginFailure,
   logLoginSuccess,
   signBackofficeToken,
-  verifyPassword,
+  verifyStaffPassword,
 } from '@zidney/domain-core/auth'
 import { logger } from '@zidney/logger'
 import type { Context } from 'hono'
@@ -96,14 +96,34 @@ import type { Context } from 'hono'
  */
 export async function backofficeLoginHandler(c: Context) {
   const correlationId = c.get('correlationId') || 'unknown'
+  const requestId = (c.get('request_id') as string | undefined) ?? null
   const workspaceSlug = c.get('workspaceSlug') || 'unknown'
   const workspaceId = c.get('workspaceId')
   const tenantDb = c.get('tenantDb')
 
   try {
     // === STEP 1: Parse & validate request ===
-    const body = await c.req.json().catch(() => ({}))
-    const { email, password } = body
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'INVALID_JSON',
+            message: 'Request body must be valid JSON',
+          },
+          request_id: requestId,
+        },
+        400
+      )
+    }
+    let { email, password } = body as Record<string, unknown>
+    if (typeof email === 'string') {
+      email = email.toLowerCase().trim()
+    }
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return c.json(
@@ -114,6 +134,7 @@ export async function backofficeLoginHandler(c: Context) {
             code: 'INVALID_REQUEST',
             message: 'Email is required and must be valid',
           },
+          request_id: requestId,
         },
         400
       )
@@ -128,6 +149,7 @@ export async function backofficeLoginHandler(c: Context) {
             code: 'INVALID_REQUEST',
             message: 'Password is required',
           },
+          request_id: requestId,
         },
         400
       )
@@ -143,6 +165,7 @@ export async function backofficeLoginHandler(c: Context) {
             code: 'WORKSPACE_NOT_RESOLVED',
             message: 'Workspace not found',
           },
+          request_id: requestId,
         },
         400
       )
@@ -156,22 +179,25 @@ export async function backofficeLoginHandler(c: Context) {
       await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
       const userResult = await client.query(
-        `SELECT id, email, password_hash, role, token_version, locked_until, failed_login_count, is_active
-         FROM users 
-         WHERE email = $1 AND role IN ('INSTRUCTOR', 'ADMIN', 'STAFF') AND is_deleted = false
+        `SELECT u.id, u.email, u.password_hash, r.name AS role, u.token_version,
+                u.locked_until, u.failed_login_count, u.status,
+                (u.locked_until > NOW()) AS is_locked
+         FROM backoffice_staff_users u
+         JOIN backoffice_roles r ON r.id = u.role_id
+         WHERE u.email = $1 AND u.workspace_id = $2 AND u.is_deleted = false
          FOR UPDATE`,
-        [email]
+        [email, workspaceId]
       )
 
       const user = userResult.rows[0]
 
       // === STEP 4: Timing-attack safe password check ===
       // Always verify even if user not found (prevents email enumeration)
-      const passwordHash = user ? user.password_hash : generateDummyHash()
-      const passwordValid = await verifyPassword(password, passwordHash)
+      const passwordHash = user ? user.password_hash : generateStaffDummyHash()
+      const passwordValid = await verifyStaffPassword(passwordHash, password)
 
       // === STEP 5: Check if user found (after time-safe verification) ===
-      if (!user || !user.is_active) {
+      if (!user || user.status !== 'ACTIVE') {
         await logLoginFailure(correlationId, email, workspaceSlug, 'user_not_found_or_inactive', 0)
         await client.query('COMMIT')
         return c.json(
@@ -182,13 +208,14 @@ export async function backofficeLoginHandler(c: Context) {
               code: 'INVALID_CREDENTIALS',
               message: 'Invalid email or password',
             },
+            request_id: requestId,
           },
           401
         )
       }
 
-      // === STEP 6: Check account lock ===
-      if (user.locked_until && new Date(user.locked_until) > new Date()) {
+      // === STEP 6: Check account lock (using DB-computed is_locked) ===
+      if (user.is_locked) {
         await logLoginFailure(
           correlationId,
           email,
@@ -205,6 +232,7 @@ export async function backofficeLoginHandler(c: Context) {
               code: 'ACCOUNT_LOCKED',
               message: 'Account temporarily locked. Please try again later.',
             },
+            request_id: requestId,
           },
           401
         )
@@ -216,26 +244,22 @@ export async function backofficeLoginHandler(c: Context) {
         const newFailCount = user.failed_login_count + 1
         const shouldLock = newFailCount >= 5
 
-        let lockUntil = null
         if (shouldLock) {
-          // Lock for 5 minutes
-          const lockTime = new Date()
-          lockTime.setMinutes(lockTime.getMinutes() + 5)
-          lockUntil = lockTime
-
-          // Query: update both failed_login_count AND locked_until
+          // Lock for 5 minutes — locked_until set by the DB server (server-authoritative time)
           await client.query(
-            `UPDATE users 
-             SET failed_login_count = $1, locked_until = $2, updated_at = NOW()
-             WHERE id = $3`,
-            [newFailCount, lockUntil, user.id]
+            `UPDATE backoffice_staff_users
+             SET failed_login_count = $1,
+                 locked_until = NOW() + INTERVAL '5 minutes',
+                 updated_at = NOW()
+             WHERE id = $2`,
+            [newFailCount, user.id]
           )
 
           await logAccountLocked(correlationId, user.id, user.email, workspaceSlug, 300)
         } else {
           // Just increment counter
           await client.query(
-            `UPDATE users 
+            `UPDATE backoffice_staff_users
              SET failed_login_count = $1, updated_at = NOW()
              WHERE id = $2`,
             [newFailCount, user.id]
@@ -259,6 +283,7 @@ export async function backofficeLoginHandler(c: Context) {
               code: 'INVALID_CREDENTIALS',
               message: 'Invalid email or password',
             },
+            request_id: requestId,
           },
           401
         )
@@ -266,7 +291,7 @@ export async function backofficeLoginHandler(c: Context) {
 
       // === STEP 8: Success! Reset failed login count & update last_login ===
       await client.query(
-        `UPDATE users 
+        `UPDATE backoffice_staff_users
          SET failed_login_count = 0, last_login = NOW(), updated_at = NOW()
          WHERE id = $1`,
         [user.id]
@@ -339,7 +364,12 @@ export async function backofficeLoginHandler(c: Context) {
       client.release()
     }
   } catch (error) {
-    logger.error('Backoffice login error:', { error })
+    const safeError = error instanceof Error ? error : new Error(String(error))
+    logger.error('Backoffice login error', {
+      message: safeError.message,
+      code: (safeError as NodeJS.ErrnoException).code,
+      request_id: requestId,
+    })
     return c.json(
       {
         success: false,
@@ -348,6 +378,7 @@ export async function backofficeLoginHandler(c: Context) {
           code: 'INTERNAL_ERROR',
           message: 'Login failed',
         },
+        request_id: requestId,
       },
       500
     )

@@ -23,7 +23,17 @@
  */
 
 import { sql } from 'drizzle-orm'
-import { boolean, index, integer, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  check,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core'
 
 import { backofficeRoles } from './backoffice-roles.schema'
 
@@ -40,10 +50,11 @@ export const backofficeStaffUsers = pgTable(
     email: varchar('email', { length: 320 }).notNull(),
     name: varchar('name', { length: 256 }).notNull(),
     /**
-     * bcrypt password hash — plaintext is never stored.
+     * Argon2id password hash — plaintext is never stored.
+     * Migrated from VARCHAR(72) bcrypt to TEXT for Argon2id (~97 chars encoded).
      * NEVER included in API response payloads per SC-007.
      */
-    password_hash: varchar('password_hash', { length: 72 }).notNull(),
+    password_hash: text('password_hash').notNull(),
     /**
      * Token version for forced-logout / credential-change invalidation.
      * Incremented on password change or admin revoke.
@@ -52,9 +63,33 @@ export const backofficeStaffUsers = pgTable(
     /**
      * Whether the staff user account is active.
      * false → guard returns 403 even with a valid JWT.
-     * Maps to "status == ACTIVE" in spec language.
+     * Kept for backward compatibility. New code uses `status` column.
      */
     is_active: boolean('is_active').notNull().default(true),
+    /**
+     * Explicit account status (ACTIVE | INACTIVE | SUSPENDED).
+     * Added in STAGE_41 (migration 20260404_020_staff_management.ts).
+     * Backfilled from is_active on migration.
+     */
+    status: varchar('status', { length: 20 }).notNull().default('ACTIVE'),
+    /**
+     * Consecutive failed login attempts since last success.
+     * Reset to 0 on successful login. Auto-lock at threshold.
+     * Added in STAGE_41.
+     */
+    failed_login_count: integer('failed_login_count').notNull().default(0),
+    /**
+     * Timestamp until which the account is locked.
+     * NULL = not locked. Set by login handler when threshold exceeded.
+     * Added in STAGE_41.
+     */
+    locked_until: timestamp('locked_until', { withTimezone: true }),
+    /**
+     * Timestamp of last successful login.
+     * Updated on each successful authentication.
+     * Added in STAGE_41.
+     */
+    last_login: timestamp('last_login', { withTimezone: true }),
     /**
      * Single-role FK — references backoffice_roles(id).
      * ON DELETE SET NULL: deleting a role nulls role_id here (no cascade deletion of user).
@@ -79,6 +114,11 @@ export const backofficeStaffUsers = pgTable(
     idx_role_id: index('idx_bsu_role_id').on(table.role_id),
     /** Login lookup — workspace + email composite index. */
     idx_workspace_email: index('idx_bsu_workspace_email').on(table.workspace_id, table.email),
+    /** Enforce valid status values at ORM level (mirrors DB CHECK constraint). */
+    valid_status: check(
+      'bsu_valid_status',
+      sql`${table.status} IN ('ACTIVE', 'INACTIVE', 'SUSPENDED')`
+    ),
   })
 )
 
