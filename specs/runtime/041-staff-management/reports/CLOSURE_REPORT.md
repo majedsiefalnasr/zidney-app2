@@ -36,7 +36,7 @@ Stage 41 (Staff Management) is complete and production-ready. All 34 tasks execu
 - Domain-core `staff` module: `StaffService`, `StaffRepository`, `StaffError`, `StaffTypes`
 - Domain-core auth module: `hashStaffPassword`, `verifyStaffPassword`, `generateStaffDummyHash` (Argon2id)
 - Validation schemas: `createStaffBodySchema`, `updateStaffBodySchema`, `staffListQuerySchema`, `staffIdParamsSchema`
-- Staff API router (7 handlers): `POST /staff`, `GET /staff`, `GET /staff/:id`, `PATCH /staff/:id`, `PATCH /staff/:id/disable`, `PATCH /staff/:id/enable`, `DELETE /staff/:id`
+- Staff API router (7 handlers): `POST /staff`, `GET /staff`, `GET /staff/:id`, `PUT /staff/:id`, `PATCH /staff/:id/disable`, `PATCH /staff/:id/enable`, `DELETE /staff/:id`
 - `backoffice-login.ts` migrated from legacy SQL + bcrypt → `backoffice_staff_users` + Argon2id
 - `staffRouter` registered in `app.ts` at `/api/v1/backoffice/workspace`
 - Legacy dead-code file `apps/api/src/routes/backoffice/users.ts` deleted
@@ -62,7 +62,7 @@ None. All 34 tasks completed.
 | ADR-0009 Rate limiting (N/A for this stage) | ✅ N/A | Rate limiting is applied at the API gateway / middleware level (pre-existing)         |
 | No middleware bypass                        | ✅     | All staff routes: tenant resolver → license middleware → RBAC guard mandatory         |
 | All writes transactional                    | ✅     | Create, delete, disable, enable all use explicit DB transactions with rollback        |
-| Idempotency enforced where required         | ✅     | All mutations are idempotent (duplicate email → 409, delete → idempotent 204)         |
+| Idempotency enforced where required         | ✅     | All mutations are idempotent (duplicate email → 409, delete non-existent → 404)       |
 | Structured logging present                  | ✅     | All handlers use `createLogger(name)` from `@zidney/logger`; no `console.log`         |
 | Trust chain respected                       | ✅     | Isolation → License → Authentication → Attempt(N/A) → Runtime(N/A) → Frontoffice(N/A) |
 | Import boundaries respected                 | ✅     | `apps/api` imports `packages/*`; no cross-app imports; UI does not import DB schemas  |

@@ -72,7 +72,7 @@ export async function buildArchitectureBrain(
       violating_modules: Array.from(violatingModules),
       hotspots: metadata.architectureContext?.hotspots?.map((hotspot) => ({
         module: hotspot.module,
-        violation_count: hotspot.score,
+        hotspot_score: hotspot.score,
       })),
     },
   }

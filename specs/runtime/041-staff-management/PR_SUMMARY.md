@@ -1,5 +1,6 @@
----
 # Pull Request — Zidney Hard Mode
+
+---
 
 ## 1. Stage & Phase
 

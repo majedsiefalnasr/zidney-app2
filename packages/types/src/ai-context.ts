@@ -563,7 +563,7 @@ export interface AIArchitectureBrain {
     /** Most problematic dependencies */
     hotspots?: {
       module: string
-      violation_count: number
+      hotspot_score: number
     }[]
   }
 }

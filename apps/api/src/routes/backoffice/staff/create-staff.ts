@@ -18,7 +18,25 @@ export async function handleCreateStaff(c: Context) {
     const workspaceId: string = c.get('workspace_id')
     const correlationId: string = c.get('correlation_id')
 
-    const body = await c.req.json().catch(() => ({}))
+    const requestId: string | null = (c.get('request_id') as string | undefined) ?? null
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'INVALID_JSON',
+            message: 'Request body is not valid JSON',
+          },
+          request_id: requestId,
+        },
+        400
+      )
+    }
     const parsed = createStaffBodySchema.safeParse(body)
     if (!parsed.success) {
       return c.json(
@@ -29,6 +47,7 @@ export async function handleCreateStaff(c: Context) {
             code: 'VALIDATION_ERROR',
             message: parsed.error.issues[0]?.message ?? 'Invalid input',
           },
+          request_id: requestId,
         },
         422
       )

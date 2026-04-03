@@ -22,14 +22,14 @@
 
 ---
 
-## GROUP C — Domain-Core Auth Layer
+## GROUP C1 — Domain-Core Auth Layer
 
 - [x] T006 Create `packages/domain-core/src/auth/staff-password.ts` — hashStaffPassword (Argon2id, memoryCost:65536 timeCost:3 parallelism:4), verifyStaffPassword, generateStaffDummyHash (constant pre-computed string, no async)
 - [x] T007 Update `packages/domain-core/src/auth/index.ts` — add named exports: generateStaffDummyHash, hashStaffPassword, verifyStaffPassword from './staff-password'
 
 ---
 
-## GROUP C — Domain-Core Staff Module
+## GROUP C2 — Domain-Core Staff Module
 
 - [x] T008 Create `packages/domain-core/src/staff/staff.types.ts` — DbClient interface, StaffStatus, StaffRow (all columns), StaffRecord (no password_hash), CreateStaffInput, UpdateStaffInput, StaffListQuery, StaffListResult, AuditContext
 - [x] T009 Create `packages/domain-core/src/staff/staff.errors.ts` — StaffErrorCode union type, STAFF_ERROR_HTTP map (all 6 codes), StaffError class extending Error with code and httpStatus

@@ -337,7 +337,13 @@ export async function backofficeLoginHandler(c: Context) {
       client.release()
     }
   } catch (error) {
-    logger.error('Backoffice login error:', { error })
+    const requestId = correlationId ?? 'unknown'
+    const safeError = error instanceof Error ? error : new Error(String(error))
+    logger.error('Backoffice login error', {
+      message: safeError.message,
+      code: (safeError as NodeJS.ErrnoException).code,
+      request_id: requestId,
+    })
     return c.json(
       {
         success: false,
@@ -346,6 +352,7 @@ export async function backofficeLoginHandler(c: Context) {
           code: 'INTERNAL_ERROR',
           message: 'Login failed',
         },
+        request_id: requestId,
       },
       500
     )

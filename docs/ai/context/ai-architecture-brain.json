@@ -309,43 +309,43 @@
     "hotspots": [
       {
         "module": "packages/logger",
-        "violation_count": 9
+        "hotspot_score": 9
       },
       {
         "module": "packages/types",
-        "violation_count": 7
+        "hotspot_score": 7
       },
       {
         "module": "packages/api-client",
-        "violation_count": 3
+        "hotspot_score": 3
       },
       {
         "module": "packages/job-queue",
-        "violation_count": 2
+        "hotspot_score": 2
       },
       {
         "module": "packages/domain-core",
-        "violation_count": 2
+        "hotspot_score": 2
       },
       {
         "module": "packages/validation",
-        "violation_count": 2
+        "hotspot_score": 2
       },
       {
         "module": "packages/redis-utils",
-        "violation_count": 1
+        "hotspot_score": 1
       },
       {
         "module": "packages/ui-system",
-        "violation_count": 1
+        "hotspot_score": 1
       },
       {
         "module": "packages/config",
-        "violation_count": 0
+        "hotspot_score": 0
       },
       {
         "module": "apps/mmc",
-        "violation_count": 0
+        "hotspot_score": 0
       }
     ]
   }

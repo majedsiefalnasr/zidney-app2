@@ -12,6 +12,7 @@
 import { pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 import { backofficeStaffUsers } from './backoffice-staff-users.schema'
+import { hierarchyNodes } from './hierarchy-nodes.schema'
 
 export const staffHierarchyLevels = pgTable(
   'staff_hierarchy_levels',
@@ -19,7 +20,9 @@ export const staffHierarchyLevels = pgTable(
     staff_id: uuid('staff_id')
       .notNull()
       .references(() => backofficeStaffUsers.id, { onDelete: 'cascade' }),
-    hierarchy_node_id: uuid('hierarchy_node_id').notNull(),
+    hierarchy_node_id: uuid('hierarchy_node_id')
+      .notNull()
+      .references(() => hierarchyNodes.id, { onDelete: 'cascade' }),
     workspace_id: uuid('workspace_id').notNull(),
     assigned_at: timestamp('assigned_at', { withTimezone: true }).notNull().defaultNow(),
   },

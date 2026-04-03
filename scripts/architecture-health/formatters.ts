@@ -1,8 +1,20 @@
 /** @library-module */
 import type { ArchitectureHealthAssessment } from './types'
 
+const HOME = process.env.HOME ?? ''
+const REPO_ROOT = process.cwd()
+
+function sanitizePaths(str: string): string {
+  let result = str
+  if (REPO_ROOT) result = result.replaceAll(REPO_ROOT, '<repo>')
+  if (HOME) result = result.replaceAll(HOME, '<home>')
+  // Also strip absolute node_modules paths
+  result = result.replace(/\/[^"\s]*?\/node_modules\//g, '<home>/node_modules/')
+  return result
+}
+
 export function formatAssessmentAsJson(assessment: ArchitectureHealthAssessment): string {
-  return `${JSON.stringify(assessment, null, 2)}\n`
+  return sanitizePaths(`${JSON.stringify(assessment, null, 2)}\n`)
 }
 
 export function formatAssessmentAsMarkdown(assessment: ArchitectureHealthAssessment): string {

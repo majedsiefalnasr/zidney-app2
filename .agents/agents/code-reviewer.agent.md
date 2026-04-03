@@ -282,6 +282,89 @@ Block merge if:
 
 ---
 
+## 5g. Error Response Contract (CRITICAL)
+
+**NEW RULE** — Ensures consistent, traceable API error responses.
+
+All Hono route handlers MUST return errors using the standard contract:
+
+```typescript
+{ success: false, data: null, error: { code: string, message: string }, request_id: string | null }
+```
+
+You MUST verify:
+
+- **`request_id` always present**: Extract from `c.get('request_id')` early in the handler; include in every error response and every structured log entry.
+- **Complete contract**: Error responses must include all four fields (`success`, `data`, `error`, `request_id`). Responses missing `request_id` are non-conformant.
+- **Consistent extraction**: Use `const requestId = (c.get('request_id') as string | undefined) ?? null` — never omit or inline.
+
+Block merge if:
+
+- Any error response branch is missing `request_id`.
+- `request_id` extracted inconsistently between success and error paths.
+- Standard contract shape violated (`data` not `null` on error, `success` not `false`, etc.).
+
+---
+
+## 5h. Catch Block Security (CRITICAL)
+
+**NEW RULE** — Prevents sensitive data leakage through error logging.
+
+When reviewing `catch` blocks in route handlers, middleware, and services:
+
+You MUST verify:
+
+- **Never log the full error object**: `logger.error('msg', { error })` leaks stack traces, internal paths, DB connection strings, and system metadata. This is a security violation.
+- **Log only safe fields**: Destructure to `{ message, code }` from `error instanceof Error ? error : new Error(String(error))`.
+- **Include correlation**: Always include `request_id` / `correlation_id` in catch logs.
+- **Correct pattern**:
+  ```typescript
+  } catch (error) {
+    const safeError = error instanceof Error ? error : new Error(String(error))
+    logger.error('Operation failed', {
+      message: safeError.message,
+      code: (safeError as NodeJS.ErrnoException).code,
+      request_id: requestId,
+    })
+  ```
+
+Block merge if:
+
+- `{ error }` or `{ error: err }` passed directly to `logger.*`.
+- Stack trace or full error object included in log payload.
+- Catch block logs without `request_id` / correlation data.
+
+---
+
+## 5i. JSON Parse Safety (CRITICAL)
+
+**NEW RULE** — Prevents silent data corruption from swallowed parse errors.
+
+When reviewing request body parsing in route handlers:
+
+You MUST verify:
+
+- **No `.catch(() => ({}))` pattern**: This silently converts invalid JSON bodies into empty objects, bypassing validation and producing confusing errors downstream.
+- **Use explicit try/catch**: Wrap `await c.req.json()` in a try/catch that returns a `400 INVALID_JSON` response immediately.
+- **Include `request_id`**: The `INVALID_JSON` error response must include `request_id` for client traceability.
+- **Correct pattern**:
+  ```typescript
+  let body: unknown
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ success: false, data: null, error: { code: 'INVALID_JSON', message: 'Request body must be valid JSON' }, request_id: requestId }, 400)
+  }
+  ```
+
+Block merge if:
+
+- `.catch(() => ({}))` or similar swallowing applied to JSON parsing.
+- Invalid JSON produces a 422/500 instead of an explicit 400 INVALID_JSON.
+- Parse error response missing `request_id`.
+
+---
+
 ## 6. Modular Monolith Discipline
 
 You MUST verify:

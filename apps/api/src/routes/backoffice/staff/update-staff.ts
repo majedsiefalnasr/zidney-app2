@@ -18,6 +18,8 @@ export async function handleUpdateStaff(c: Context) {
     const workspaceId: string = c.get('workspace_id')
     const correlationId: string = c.get('correlation_id')
 
+    const requestId: string | null = (c.get('request_id') as string | undefined) ?? null
+
     const parsedParams = staffIdParamsSchema.safeParse({ id: c.req.param('id') })
     if (!parsedParams.success) {
       return c.json(
@@ -28,6 +30,7 @@ export async function handleUpdateStaff(c: Context) {
             code: 'VALIDATION_ERROR',
             message: parsedParams.error.issues[0]?.message ?? 'Invalid id',
           },
+          request_id: requestId,
         },
         422
       )
@@ -45,6 +48,7 @@ export async function handleUpdateStaff(c: Context) {
             code: 'MALFORMED_BODY',
             message: 'Request body is not valid JSON',
           },
+          request_id: requestId,
         },
         400
       )
@@ -59,6 +63,7 @@ export async function handleUpdateStaff(c: Context) {
             code: 'VALIDATION_ERROR',
             message: parsedBody.error.issues[0]?.message ?? 'Invalid input',
           },
+          request_id: requestId,
         },
         422
       )
@@ -69,6 +74,7 @@ export async function handleUpdateStaff(c: Context) {
 
     logger.debug('Update staff request', {
       workspace_id: workspaceId,
+      user_id: c.get('user_id') as string | undefined,
       staff_id: parsedParams.data.id,
       correlation_id: correlationId,
     })

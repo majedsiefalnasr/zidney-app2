@@ -96,7 +96,7 @@ tooling and type inference, but actual runtime queries use `db.query(sql, params
 **Decision**: Both `status` and `is_active` are maintained in sync by all service functions:
 
 - `status = 'ACTIVE'` ↔ `is_active = true`
-- `status = 'DISABLED'` ↔ `is_active = false`
+- `status = 'INACTIVE'` ↔ `is_active = false`
 
 This is a backward-compatibility requirement documented in CLA-001. Services always write both
 columns together in a single UPDATE statement.
@@ -113,7 +113,7 @@ hierarchy node assignments. No migration to a normalized join table for `divisio
 
 Implementation proceeds in strict dependency order:
 
-```
+```text
 GROUP A: Package Install
   └── install argon2 in apps/api
 
@@ -195,7 +195,7 @@ ALTER TABLE backoffice_staff_users
 -- 2. Add status enum column (with check constraint)
 ALTER TABLE backoffice_staff_users
   ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
-  CHECK (status IN ('ACTIVE', 'DISABLED'));
+  CHECK (status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED'));
 
 -- 3. Add brute-force protection columns (required by updated login route)
 ALTER TABLE backoffice_staff_users
@@ -205,7 +205,7 @@ ALTER TABLE backoffice_staff_users
 
 -- 4. Backfill status from is_active
 UPDATE backoffice_staff_users
-  SET status = CASE WHEN is_active = true THEN 'ACTIVE' ELSE 'DISABLED' END;
+  SET status = CASE WHEN is_active = true THEN 'ACTIVE' ELSE 'INACTIVE' END;
 
 -- 5. Create staff_hierarchy_levels join table
 CREATE TABLE staff_hierarchy_levels (
@@ -283,7 +283,7 @@ export interface DbClient {
 }
 
 // Staff status
-export type StaffStatus = "ACTIVE" | "DISABLED";
+export type StaffStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
 
 // Full DB row (includes all tenant columns — never exposed to API consumers)
 export interface StaffRow {
@@ -422,12 +422,12 @@ Service functions (all take injected `DbClient` + `AuditContext`):
 - `createStaff`: Wrapped in `BEGIN SERIALIZABLE` — limit check + INSERT atomically
 - `disableStaff` / `enableStaff`: `BEGIN READ COMMITTED` — single row UPDATE
 - `updateStaff`: `BEGIN READ COMMITTED` — optional email uniqueness check + UPDATE
-- `deleteStaff`: `BEGIN READ COMMITTED` — content check + DELETE
+- `deleteStaff`: `BEGIN READ COMMITTED` — content check + soft-delete (status update)
 - `listStaff` / `getStaffById`: Read-only, no transaction wrapper
 
 **staff_limit enforcement** (in `createStaff`):
 
-```
+```text
 1. Lock with FOR UPDATE: SELECT COUNT(*) FROM backoffice_staff_users WHERE workspace_id=$1 AND status='ACTIVE' FOR UPDATE
 2. If count >= staffLimit → throw StaffError('STAFF_LIMIT_EXCEEDED')
 3. Proceed with INSERT
@@ -491,7 +491,7 @@ export const updateStaffBodySchema = z
 export const staffListQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
-  status: z.enum(["ACTIVE", "DISABLED"]).optional(),
+  status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]).optional(),
   division_id: z.string().uuid().optional(),
   search: z.string().max(100).optional(),
 });
@@ -692,7 +692,7 @@ UPDATE backoffice_staff_users
 | `disableStaff` | `READ COMMITTED`          | Single-row UPDATE                                   |
 | `enableStaff`  | `READ COMMITTED`          | Single-row UPDATE                                   |
 | `updateStaff`  | `READ COMMITTED`          | Email uniqueness check (if provided) + UPDATE       |
-| `deleteStaff`  | `READ COMMITTED`          | Content check + DELETE                              |
+| `deleteStaff`  | `READ COMMITTED`          | Content check + soft-delete (status update)         |
 | Login success  | `SERIALIZABLE` (existing) | SELECT FOR UPDATE + UPDATE(reset) + COMMIT          |
 | Login failure  | `SERIALIZABLE` (existing) | SELECT FOR UPDATE + UPDATE(increment/lock) + COMMIT |
 

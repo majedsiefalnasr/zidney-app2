@@ -17,7 +17,7 @@ Staff users are workspace-scoped Backoffice accounts stored exclusively in the t
 **What is being built:**
 
 - A `status` VARCHAR(20) column on `backoffice_staff_users` (normalizing the `is_active` boolean
-  into an `ACTIVE | DISABLED` enum for Stage 41 and beyond).
+  into an `ACTIVE | INACTIVE | SUSPENDED` enum for Stage 41 and beyond).
 - A `staff_hierarchy_levels` join table enabling many-to-many staff-to-hierarchy-node assignment.
 - Migration of `password_hash` column from `varchar(72)` to `text` to accommodate Argon2id hashes.
 - Domain-core `staff` module (`packages/domain-core/src/staff/`) with Argon2id password hashing,
@@ -135,11 +135,11 @@ resolved tenant context, never from the request body.
 -- Add status column (normalized from is_active boolean)
 ALTER TABLE backoffice_staff_users
   ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
-    CONSTRAINT bsu_status_check CHECK (status IN ('ACTIVE', 'DISABLED'));
+    CONSTRAINT bsu_status_check CHECK (status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED'));
 
 -- Backfill status from is_active
 UPDATE backoffice_staff_users
-  SET status = CASE WHEN is_active THEN 'ACTIVE' ELSE 'DISABLED' END;
+  SET status = CASE WHEN is_active THEN 'ACTIVE' ELSE 'INACTIVE' END;
 
 -- Widen password_hash to TEXT for Argon2id hashes (argon2id output ~95+ chars, exceeds varchar(72))
 ALTER TABLE backoffice_staff_users
@@ -150,7 +150,7 @@ CREATE INDEX idx_bsu_status ON backoffice_staff_users (workspace_id, status);
 ```
 
 **Note:** `is_active` column is NOT removed in this stage. It will be synchronized by the service
-layer (set `is_active = false` when `status = 'DISABLED'`, `is_active = true` when
+layer (set `is_active = false` when `status = 'INACTIVE'`, `is_active = true` when
 `status = 'ACTIVE'`). Removal of `is_active` is deferred to a future cleanup migration once all
 dependent code is updated.
 
@@ -297,7 +297,7 @@ Note:          Use /disable to revoke access without removing the record.
   email: string;
   name: string;
   role_id: string | null;
-  status: "ACTIVE" | "DISABLED";
+  status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
   token_version: number;
   created_at: string; // ISO 8601
   updated_at: string; // ISO 8601

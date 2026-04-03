@@ -262,6 +262,8 @@ export async function checkAuthoredContent(
        SELECT 1 FROM traditional_exams WHERE workspace_id = $1 AND created_by = $2
        UNION ALL
        SELECT 1 FROM mcq_questions WHERE workspace_id = $1 AND created_by = $2
+       UNION ALL
+       SELECT 1 FROM traditional_questions WHERE workspace_id = $1 AND created_by = $2
      ) AS exists`,
     [workspaceId, staffId]
   )
