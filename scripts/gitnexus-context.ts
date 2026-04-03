@@ -212,7 +212,7 @@ export function buildDependencyGraph(
     const edgeDeps: Record<string, Set<string>> = {}
     for (const edge of brain.edges) {
       if (!edgeDeps[edge.from]) edgeDeps[edge.from] = new Set()
-      const deps = edgeDeps[edge.from]!
+      const deps = edgeDeps[edge.from] ?? new Set<string>()
       if (edge.to) deps.add(edge.to)
     }
     for (const mod of targetModules) {

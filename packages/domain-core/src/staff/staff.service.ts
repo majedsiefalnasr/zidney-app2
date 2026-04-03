@@ -64,7 +64,7 @@ export async function createStaff(
   db: DbClient,
   input: CreateStaffInput,
   staffLimit: number,
-  audit: AuditContext
+  _audit: AuditContext
 ): Promise<StaffRecord> {
   await db.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
   try {
@@ -162,7 +162,7 @@ export async function updateStaff(
   workspaceId: string,
   staffId: string,
   input: UpdateStaffInput,
-  audit: AuditContext
+  _audit: AuditContext
 ): Promise<StaffRecord> {
   await db.query('BEGIN')
   try {
@@ -208,7 +208,7 @@ export async function disableStaff(
   db: DbClient,
   workspaceId: string,
   staffId: string,
-  audit: AuditContext
+  _audit: AuditContext
 ): Promise<StaffRecord> {
   await db.query('BEGIN')
   try {
@@ -248,7 +248,7 @@ export async function enableStaff(
   db: DbClient,
   workspaceId: string,
   staffId: string,
-  audit: AuditContext
+  _audit: AuditContext
 ): Promise<StaffRecord> {
   await db.query('BEGIN')
   try {
@@ -289,7 +289,7 @@ export async function deleteStaff(
   db: DbClient,
   workspaceId: string,
   staffId: string,
-  audit: AuditContext
+  _audit: AuditContext
 ): Promise<void> {
   await db.query('BEGIN')
   try {

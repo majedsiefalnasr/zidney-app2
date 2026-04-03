@@ -1,1 +1,73 @@
-{"schemaVersion":"1.0.0","generatedAt":"2026-04-03T19:19:55.825Z","analyzedAt":"2026-04-03T19:19:55.825Z","analysisMode":"changed-only","changedFiles":[".agents/agents/code-reviewer.agent.md",".agents/session/archive/session-memory-archive-2026-04-03.md",".agents/session/session-memory.md","apps/api/package.json","apps/api/src/app.ts","apps/api/src/db/tenant/migrations/20260404_020_staff_management.ts","apps/api/src/db/tenant/migrations/20260405_021_add_staff_hierarchy_levels_fkey.ts","apps/api/src/db/tenant/schemas/backoffice-staff-users.schema.ts","apps/api/src/db/tenant/schemas/hierarchy-nodes.schema.ts","apps/api/src/db/tenant/schemas/index.ts","apps/api/src/db/tenant/schemas/staff-hierarchy-levels.schema.ts","apps/api/src/routes/auth/backoffice-login.ts","apps/api/src/routes/backoffice/staff/__tests__/staff.crud.test.ts","apps/api/src/routes/backoffice/staff/__tests__/staff.isolation.test.ts","apps/api/src/routes/backoffice/staff/__tests__/staff.limit.test.ts","apps/api/src/routes/backoffice/staff/create-staff.ts","apps/api/src/routes/backoffice/staff/delete-staff.ts","apps/api/src/routes/backoffice/staff/disable-staff.ts","apps/api/src/routes/backoffice/staff/enable-staff.ts","apps/api/src/routes/backoffice/staff/get-staff.ts","apps/api/src/routes/backoffice/staff/helpers.ts","apps/api/src/routes/backoffice/staff/index.ts","apps/api/src/routes/backoffice/staff/list-staff.ts","apps/api/src/routes/backoffice/staff/update-staff.ts","apps/api/src/routes/backoffice/users.ts","bun.lock","docs/ai/context/ai-architecture-brain.json","docs/ai/context/ai-architecture-summary.md","docs/ai/context/ai-context-mini.json","docs/ai/context/ai-dependency-graph.json","docs/ai/context/ai-layer-model.json","docs/ai/context/ai-module-map.json","docs/ai/context/ai-runtime-dependents.json","docs/ai/context/ai-runtime-map.json","docs/ai/context/context-changed.json","docs/ai/context/gitnexus-context.json","docs/architecture/ARCHITECTURE_DIAGRAMS.md","docs/architecture/audits/history/audit-1775222303261.json","docs/architecture/audits/history/audit-1775227390213.json","docs/architecture/audits/history/audit-1775241462144.json","docs/architecture/graphs/architecture-graph.html","docs/architecture/graphs/architecture-graph.mmd","docs/architecture/graphs/dependency-graph-ai.json","docs/architecture/graphs/dependency-graph.json","docs/architecture/graphs/dependency-graph.mmd","docs/architecture/graphs/module-dependency-graph.mmd","docs/architecture/health/architecture-drift-report.md","docs/architecture/health/architecture-health-summary.md","docs/architecture/health/architecture-health.json","docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json","docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json","docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md","docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md","docs/reports/infra-audit-report.json","packages/domain-core/package.json","packages/domain-core/src/auth/index.ts","packages/domain-core/src/auth/staff-password.ts","packages/domain-core/src/index.ts","packages/domain-core/src/staff/index.ts","packages/domain-core/src/staff/staff.errors.ts","packages/domain-core/src/staff/staff.repository.ts","packages/domain-core/src/staff/staff.service.ts","packages/domain-core/src/staff/staff.types.ts","packages/types/src/ai-context.ts","packages/validation/src/index.ts","packages/validation/src/staff.schema.ts","scripts/ai-context/artifact-builders/architecture-brain-builder.ts","scripts/ai-context/artifact-builders/dependency-graph-builder.ts","scripts/architecture-health/formatters.ts","scripts/gitnexus-context.ts","scripts/infra-audit.ts","specs/phases/03_BACKOFFICE_CORE/05_USER_MANAGEMENT/STAGE_41_STAFF_MANAGEMENT.md","specs/runtime/041-staff-management/.workflow-state.json","specs/runtime/041-staff-management/PR_SUMMARY.md","specs/runtime/041-staff-management/README.md","specs/runtime/041-staff-management/audits/ANALYZE_REPORT.md","specs/runtime/041-staff-management/audits/VALIDATION_REPORT.md","specs/runtime/041-staff-management/checklists/requirements.md","specs/runtime/041-staff-management/guides/TESTING_GUIDE.md","specs/runtime/041-staff-management/plan.md","specs/runtime/041-staff-management/reports/CLARIFY_REPORT.md","specs/runtime/041-staff-management/reports/CLOSURE_REPORT.md","specs/runtime/041-staff-management/reports/IMPLEMENT_REPORT.md","specs/runtime/041-staff-management/reports/PLAN_REPORT.md","specs/runtime/041-staff-management/reports/SPECIFY_REPORT.md","specs/runtime/041-staff-management/reports/TASKS_REPORT.md","specs/runtime/041-staff-management/spec.md","specs/runtime/041-staff-management/tasks.md"],"impactedModules":["apps/api","packages/domain-core","packages/types","packages/validation"],"dependencyGraph":{"apps/api":["packages/domain-core","packages/job-queue","packages/logger","packages/redis-utils","packages/types","packages/validation"],"packages/domain-core":["packages/logger","packages/types","packages/validation"],"packages/types":[],"packages/validation":["packages/logger","packages/types"]},"architectureLayerMap":{"apps/api":"unknown","packages/domain-core":"unknown","packages/types":"unknown","packages/validation":"unknown"},"recentCommits":[{"hash":"a13ad1d5f172e15276d158cb83409a5a1188eceb","message":"Merge pull request #86 from majedsiefalnasr/spec/041-staff-management","author":"Majed Sief Alnasr","date":"2026-04-03T21:10:39+02:00"},{"hash":"dcdb5eb6d02f0ba385180ddf0eda1e1f8631b84e","message":"fix(041-staff-management): audit fixes — staff/auth/schema/migration & agent rules","author":"Majed Sief Alnasr","date":"2026-04-03T20:59:47+02:00"},{"hash":"930db5d68a9ea6555d7d0e737a26c30017453c52","message":"chore(041-staff-management): update generated AI context and docs (auto-fixed)","author":"Majed Sief Alnasr","date":"2026-04-03T20:52:59+02:00"},{"hash":"c8970ed946c4cd0bc652740c695b18f5bbf6b9c2","message":"fix(041-staff-management): third-wave audit fixes - MD031, JSON parse safety, sanitize outputs, ai-architecture-brain schema","author":"Majed Sief Alnasr","date":"2026-04-03T19:47:05+02:00"},{"hash":"aae50d34a1db01ce3882381cf2605621aaffdb61","message":"fix(041-staff-management): second wave audit fixes — request_id contracts, security hardening, schema corrections","author":"Majed Sief Alnasr","date":"2026-04-03T19:15:32+02:00"},{"hash":"f4e9594a1f209835c3307aa490556274e05ce502","message":"fix(041-staff-management): audit fixes — security, architecture, and doc corrections","author":"Majed Sief Alnasr","date":"2026-04-03T17:21:05+02:00"},{"hash":"a2794ead368cc7762f71d5820454cb5902ae7840","message":"fix(041-staff-management): deduplicate dependency graph edges (infra-audit, ai-context builder)","author":"Majed Sief Alnasr","date":"2026-04-03T16:50:50+02:00"},{"hash":"5f28b10db661927a2a342b28c18e61820c6b8b05","message":"chore(041-staff-management): complete closure step — stage PRODUCTION READY","author":"Majed Sief Alnasr","date":"2026-04-03T16:14:06+02:00"},{"hash":"f39eb50297f8da250f03f7c76c37f91602f94d22","message":"chore(041-staff-management): complete implement step — 34/34 tasks, 30/30 tests","author":"Majed Sief Alnasr","date":"2026-04-03T16:06:06+02:00"},{"hash":"3caa2d12ab8236b347e73a57ad16724ac71b6faf","message":"feat(041-staff-management): implement staff CRUD API","author":"Majed Sief Alnasr","date":"2026-04-03T16:00:30+02:00"}],"riskIndicators":[{"module":"apps/api","riskScore":40,"reason":"22 changed file(s)","affectedBy":["apps/api/package.json","apps/api/src/app.ts","apps/api/src/db/tenant/migrations/20260404_020_staff_management.ts","apps/api/src/db/tenant/migrations/20260405_021_add_staff_hierarchy_levels_fkey.ts","apps/api/src/db/tenant/schemas/backoffice-staff-users.schema.ts","apps/api/src/db/tenant/schemas/hierarchy-nodes.schema.ts","apps/api/src/db/tenant/schemas/index.ts","apps/api/src/db/tenant/schemas/staff-hierarchy-levels.schema.ts","apps/api/src/routes/auth/backoffice-login.ts","apps/api/src/routes/backoffice/staff/__tests__/staff.crud.test.ts","apps/api/src/routes/backoffice/staff/__tests__/staff.isolation.test.ts","apps/api/src/routes/backoffice/staff/__tests__/staff.limit.test.ts","apps/api/src/routes/backoffice/staff/create-staff.ts","apps/api/src/routes/backoffice/staff/delete-staff.ts","apps/api/src/routes/backoffice/staff/disable-staff.ts","apps/api/src/routes/backoffice/staff/enable-staff.ts","apps/api/src/routes/backoffice/staff/get-staff.ts","apps/api/src/routes/backoffice/staff/helpers.ts","apps/api/src/routes/backoffice/staff/index.ts","apps/api/src/routes/backoffice/staff/list-staff.ts","apps/api/src/routes/backoffice/staff/update-staff.ts","apps/api/src/routes/backoffice/users.ts"]},{"module":"packages/domain-core","riskScore":40,"reason":"9 changed file(s)","affectedBy":["packages/domain-core/package.json","packages/domain-core/src/auth/index.ts","packages/domain-core/src/auth/staff-password.ts","packages/domain-core/src/index.ts","packages/domain-core/src/staff/index.ts","packages/domain-core/src/staff/staff.errors.ts","packages/domain-core/src/staff/staff.repository.ts","packages/domain-core/src/staff/staff.service.ts","packages/domain-core/src/staff/staff.types.ts"]},{"module":"packages/types","riskScore":15,"reason":"1 changed file(s); foundational module with no outbound dependencies","affectedBy":["packages/types/src/ai-context.ts"]},{"module":"packages/validation","riskScore":10,"reason":"2 changed file(s)","affectedBy":["packages/validation/src/index.ts","packages/validation/src/staff.schema.ts"]}]}
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-03-31T13:32:15.135Z",
+  "analyzedAt": "2026-03-31T13:32:15.135Z",
+  "analysisMode": "changed-only",
+  "changedFiles": [],
+  "impactedModules": [],
+  "dependencyGraph": {},
+  "architectureLayerMap": {},
+  "recentCommits": [
+    {
+      "hash": "66a344e29c0c5faebe2c3abad3d113e1fe1e195f",
+      "message": "fix(ai-guard): log error as an object in loadTsAliases function",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T13:18:19+02:00"
+    },
+    {
+      "hash": "84a83209bf7a2cc401d9f7d72e008056fb213b6e",
+      "message": "fix(tests): console.warn in logger and db connection config",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T13:04:51+02:00"
+    },
+    {
+      "hash": "27b53ee75fd03f999a901ff32e22e4ea89aebe87",
+      "message": "fix(dev:generate:script-docs): skip scripts starting with underscore",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T12:45:50+02:00"
+    },
+    {
+      "hash": "191b8433620e1d72304debb4777568ba06e65e3b",
+      "message": "chore(docs): regenerate script registry and docs",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T12:02:17+02:00"
+    },
+    {
+      "hash": "7ae546fe8afeaf6685574df7642b1aaff97332ce",
+      "message": "fix(ci): always run bun install via bun download cache",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T11:56:34+02:00"
+    },
+    {
+      "hash": "32c295b0a4c3705a4de340f03970d836b34d5e19",
+      "message": "fix(validate): exclude generated arch-health dir from script-usage scan",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T11:51:54+02:00"
+    },
+    {
+      "hash": "2475c52f1fdec5f45b4da4a11e5a66642d2c8e38",
+      "message": "fix(test): prevent test:integration from running all workspace projects",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T11:12:43+02:00"
+    },
+    {
+      "hash": "a7edad68e8228909781dd98c2acb280aa81e3594",
+      "message": "fix(arch-guard): resolve false arch-drift violations in dependency graph check",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T10:53:00+02:00"
+    },
+    {
+      "hash": "60659c8dedf8fd2da9b8d6fdacee53f1a641537f",
+      "message": "fix(validate): resolve 3 script-usage violations",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T10:37:31+02:00"
+    },
+    {
+      "hash": "0644ae3a9dd6d768f901a573b44df0c2c5a7d615",
+      "message": "docs(034): add missing VALIDATION_REPORT.md for stage_production_ready check",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-03-31T10:31:33+02:00"
+    }
+  ],
+  "riskIndicators": []
+}
