@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-03T13:18:23.328Z",
+  "generated_at": "2026-04-03T14:43:10.270Z",
   "metadata": {
     "total_modules": 14,
     "total_violations": 0,
     "generation_time_ms": 0,
     "source_hash": "6493a7d6",
-    "source_timestamp": "2026-04-03T13:18:23.321Z",
+    "source_timestamp": "2026-04-03T14:43:10.264Z",
     "generator_version": "1.0.0"
   },
   "layers": [
@@ -309,31 +309,31 @@
     "hotspots": [
       {
         "module": "packages/logger",
-        "violation_count": 397
-      },
-      {
-        "module": "packages/domain-core",
-        "violation_count": 303
-      },
-      {
-        "module": "packages/validation",
-        "violation_count": 164
+        "violation_count": 9
       },
       {
         "module": "packages/types",
-        "violation_count": 103
-      },
-      {
-        "module": "packages/api-client",
-        "violation_count": 17
-      },
-      {
-        "module": "packages/job-queue",
         "violation_count": 7
       },
       {
-        "module": "packages/redis-utils",
+        "module": "packages/api-client",
         "violation_count": 3
+      },
+      {
+        "module": "packages/job-queue",
+        "violation_count": 2
+      },
+      {
+        "module": "packages/domain-core",
+        "violation_count": 2
+      },
+      {
+        "module": "packages/validation",
+        "violation_count": 2
+      },
+      {
+        "module": "packages/redis-utils",
+        "violation_count": 1
       },
       {
         "module": "packages/ui-system",

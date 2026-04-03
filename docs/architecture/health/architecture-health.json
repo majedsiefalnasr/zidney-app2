@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
-  "assessment_id": "0e8eda51946d3b5811535469d81a3f7a75d424d1",
-  "generated_at": "2026-04-02T17:52:30.966Z",
+  "assessment_id": "997da3f08073e1632a351ba746ddc7974dc09f15",
+  "generated_at": "2026-04-03T14:43:10.646Z",
   "overall": {
-    "score": 91,
+    "score": 96,
     "health_state": "EXCELLENT",
     "threshold": {
       "policy_id": "default-health-threshold-v1",
@@ -35,10 +35,10 @@
     {
       "signal_id": "dependency_integrity",
       "weight": 30,
-      "status": "FAIL",
-      "score_delta": 5,
-      "finding_count": 1,
-      "summary": "Dependency violations: 1",
+      "status": "PASS",
+      "score_delta": 0,
+      "finding_count": 0,
+      "summary": "Dependency violations: 0",
       "sources": [
         "architecture-guard",
         "infra-audit --quick"
@@ -107,23 +107,6 @@
   ],
   "findings": [
     {
-      "finding_id": "dependency-boundaries-0-apps/api/tests/integration/create-attempt-auto-selection.test.ts",
-      "signal_ids": [
-        "dependency_integrity"
-      ],
-      "classification": "direct_rule_violation",
-      "severity": "high",
-      "impacted_surface": "apps/api",
-      "location": {
-        "file": "apps/api/tests/integration/create-attempt-auto-selection.test.ts"
-      },
-      "message": "Relative architecture leak: \"../../../packages/domain-core/src/attempts/auto-selection.service\" should use module import instead of relative path",
-      "remediation": "Move shared logic into an allowed package and update imports to respect module boundaries.",
-      "source_tools": [
-        "architecture-guard"
-      ]
-    },
-    {
       "finding_id": "gitnexus-query-failed",
       "signal_ids": [
         "architecture_drift"
@@ -132,7 +115,7 @@
       "severity": "medium",
       "impacted_surface": "gitnexus query",
       "message": "GitNexus query failed during architecture-health enrichment.",
-      "remediation": "/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:16\n  process.dlopen(\n          ^\n\nError: /Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node: cannot open shared object file: No such file or directory\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:16:11)\n    at Module._compile (node:internal/modules/cjs/loader:1812:14)\n    at Object..js (node:internal/modules/cjs/loader:1943:10)\n    at Module.load (node:internal/modules/cjs/loader:1533:32)\n    at Module._load (node:internal/modules/cjs/loader:1335:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.require (node:internal/modules/cjs/loader:1556:12)\n    at require (node:internal/modules/helpers:152:16)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/connection.js:3:20)\n    at Module._compile (node:internal/modules/cjs/loader:1812:14) {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v24.14.0",
+      "remediation": "/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:22\n  process.dlopen(lbugNativeModule, modulePath);\n          ^\n\nError: dlopen(/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node, 0x0001): tried: '/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file), '/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:22:11)\n    at Module._compile (node:internal/modules/cjs/loader:1734:14)\n    at Object..js (node:internal/modules/cjs/loader:1899:10)\n    at Module.load (node:internal/modules/cjs/loader:1469:32)\n    at Function._load (node:internal/modules/cjs/loader:1286:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)\n    at Module.require (node:internal/modules/cjs/loader:1491:12)\n    at require (node:internal/modules/helpers:135:16)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/connection.js:3:20) {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v23.11.0",
       "source_tools": [
         "gitnexus"
       ]
@@ -146,7 +129,7 @@
       "severity": "medium",
       "impacted_surface": "gitnexus impact",
       "message": "GitNexus impact failed during architecture-health enrichment.",
-      "remediation": "/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:16\n  process.dlopen(\n          ^\n\nError: /Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node: cannot open shared object file: No such file or directory\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:16:11)\n    at Module._compile (node:internal/modules/cjs/loader:1812:14)\n    at Object..js (node:internal/modules/cjs/loader:1943:10)\n    at Module.load (node:internal/modules/cjs/loader:1533:32)\n    at Module._load (node:internal/modules/cjs/loader:1335:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.require (node:internal/modules/cjs/loader:1556:12)\n    at require (node:internal/modules/helpers:152:16)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/connection.js:3:20)\n    at Module._compile (node:internal/modules/cjs/loader:1812:14) {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v24.14.0",
+      "remediation": "/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:22\n  process.dlopen(lbugNativeModule, modulePath);\n          ^\n\nError: dlopen(/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node, 0x0001): tried: '/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file), '/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbugjs.node' (no such file)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/lbug_native.js:22:11)\n    at Module._compile (node:internal/modules/cjs/loader:1734:14)\n    at Object..js (node:internal/modules/cjs/loader:1899:10)\n    at Module.load (node:internal/modules/cjs/loader:1469:32)\n    at Function._load (node:internal/modules/cjs/loader:1286:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)\n    at Module.require (node:internal/modules/cjs/loader:1491:12)\n    at require (node:internal/modules/helpers:135:16)\n    at Object.<anonymous> (/Users/majedsiefalnasr/Documents/Work/MAJED/zidney-app2/node_modules/.bun/@ladybugdb+core@0.15.2/node_modules/@ladybugdb/core/connection.js:3:20) {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v23.11.0",
       "source_tools": [
         "gitnexus"
       ]
@@ -161,7 +144,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-02T17:52:30.630Z"
+        "last_modified_at": "2026-04-03T14:43:10.272Z"
       },
       {
         "artifact_name": "ai-module-map.json",
@@ -169,7 +152,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-02T17:52:30.629Z"
+        "last_modified_at": "2026-04-03T14:43:10.271Z"
       },
       {
         "artifact_name": "ai-layer-model.json",
@@ -177,7 +160,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-02T17:52:30.630Z"
+        "last_modified_at": "2026-04-03T14:43:10.272Z"
       },
       {
         "artifact_name": "ai-runtime-map.json",
@@ -185,7 +168,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-02T17:52:30.631Z"
+        "last_modified_at": "2026-04-03T14:43:10.272Z"
       },
       {
         "artifact_name": "ai-architecture-brain.json",
@@ -193,7 +176,7 @@
         "required": true,
         "exists": true,
         "status": "CURRENT",
-        "last_modified_at": "2026-04-02T17:52:30.821Z",
+        "last_modified_at": "2026-04-03T14:43:10.281Z",
         "validator": "bun run arch:validate:brain"
       }
     ],
@@ -203,45 +186,45 @@
   "source_runs": [
     {
       "tool": "arch_guard_ci",
-      "command": "/root/.bun/bin/bun scripts/architecture-guard/architecture-guard.ts --ci --output json",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/architecture-guard/architecture-guard.ts --ci --output json",
       "timeout_ms": 30000,
-      "duration_ms": 4669,
+      "duration_ms": 1715,
       "timed_out": false,
-      "started_at": "2026-04-02T17:52:26.163Z",
-      "finished_at": "2026-04-02T17:52:30.832Z",
-      "exit_code": 1,
+      "started_at": "2026-04-03T14:43:08.705Z",
+      "finished_at": "2026-04-03T14:43:10.420Z",
+      "exit_code": 0,
       "output_format": "json"
     },
     {
       "tool": "infra_audit_quick",
-      "command": "/root/.bun/bin/bun scripts/infra-audit.ts --quick",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/infra-audit.ts --quick",
       "timeout_ms": 60000,
-      "duration_ms": 3302,
+      "duration_ms": 1006,
       "timed_out": false,
-      "started_at": "2026-04-02T17:52:26.166Z",
-      "finished_at": "2026-04-02T17:52:29.468Z",
+      "started_at": "2026-04-03T14:43:08.716Z",
+      "finished_at": "2026-04-03T14:43:09.722Z",
       "exit_code": 0,
       "output_format": "text"
     },
     {
       "tool": "type_safety_guard_json",
-      "command": "/root/.bun/bin/bun scripts/type-safety-guard.ts --json --no-exit-error",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/type-safety-guard.ts --json --no-exit-error",
       "timeout_ms": 30000,
-      "duration_ms": 1110,
+      "duration_ms": 392,
       "timed_out": false,
-      "started_at": "2026-04-02T17:52:26.167Z",
-      "finished_at": "2026-04-02T17:52:27.277Z",
+      "started_at": "2026-04-03T14:43:08.717Z",
+      "finished_at": "2026-04-03T14:43:09.109Z",
       "exit_code": 0,
       "output_format": "json"
     },
     {
       "tool": "arch_validate_brain",
-      "command": "/root/.bun/bin/bun scripts/governance/validate-architecture-brain.ts",
+      "command": "/Users/majedsiefalnasr/.bun/bin/bun scripts/governance/validate-architecture-brain.ts",
       "timeout_ms": 30000,
-      "duration_ms": 154,
+      "duration_ms": 105,
       "timed_out": false,
-      "started_at": "2026-04-02T17:52:26.169Z",
-      "finished_at": "2026-04-02T17:52:26.323Z",
+      "started_at": "2026-04-03T14:43:08.718Z",
+      "finished_at": "2026-04-03T14:43:08.823Z",
       "exit_code": 0,
       "output_format": "text"
     },
@@ -250,10 +233,10 @@
       "command": "gitnexus query architecture health governance drift",
       "enrichment_mode": "gitnexus_query",
       "timeout_ms": 15000,
-      "duration_ms": 127,
+      "duration_ms": 222,
       "timed_out": false,
-      "started_at": "2026-04-02T17:52:30.838Z",
-      "finished_at": "2026-04-02T17:52:30.965Z",
+      "started_at": "2026-04-03T14:43:10.423Z",
+      "finished_at": "2026-04-03T14:43:10.645Z",
       "exit_code": 1,
       "output_format": "text"
     },
@@ -262,10 +245,10 @@
       "command": "gitnexus impact scripts/architecture-health/architecture-health.ts",
       "enrichment_mode": "gitnexus_impact",
       "timeout_ms": 15000,
-      "duration_ms": 126,
+      "duration_ms": 219,
       "timed_out": false,
-      "started_at": "2026-04-02T17:52:30.839Z",
-      "finished_at": "2026-04-02T17:52:30.965Z",
+      "started_at": "2026-04-03T14:43:10.426Z",
+      "finished_at": "2026-04-03T14:43:10.645Z",
       "exit_code": 1,
       "output_format": "text"
     }
