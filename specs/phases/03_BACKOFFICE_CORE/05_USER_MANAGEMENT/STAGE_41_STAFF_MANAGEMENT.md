@@ -8,12 +8,15 @@ Scope: Backoffice staff lifecycle, assignment boundaries, and enforcement model
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: MEDIUM
-Last Updated: 2026-04-03T04:00:00Z
+Last Updated: 2026-04-03T15:05:00Z
 
-Scope Planned:
+Drift Analysis: PASSED (all 9 criteria)
+Implementation: AUTHORIZED
+
+Scope Authorized:
 
 - Staff CRUD (create, list, get, update, disable, enable, delete) — 7 endpoints
 - Migration `20260404_020_staff_management.ts`: schema 1.25.0 → 1.26.0
@@ -33,8 +36,7 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Technical plan compliant — task generation authorized
-- All 7 clarifications resolved and encoded in plan
+- All drift criteria passed — implementation authorized
 - ADR-0001 (database-per-tenant) preserved throughout
 - Migration is forward-only; rollback documented but not embedded in migration file
 
