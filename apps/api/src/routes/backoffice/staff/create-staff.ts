@@ -43,6 +43,7 @@ export async function handleCreateStaff(c: Context) {
 
     logger.debug('Create staff request', {
       workspace_id: workspaceId,
+      user_id: c.get('user_id'),
       correlation_id: correlationId,
     })
 

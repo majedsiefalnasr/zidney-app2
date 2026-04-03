@@ -18,18 +18,29 @@ export const createStaffBodySchema = z.object({
     .string()
     .email('email must be a valid email address')
     .max(320, 'email must not exceed 320 characters')
-    .toLowerCase(),
+    .toLowerCase()
+    .describe('Staff email address'),
   name: z
     .string()
     .min(1, 'name is required')
     .max(256, 'name must not exceed 256 characters')
-    .trim(),
+    .trim()
+    .describe('Full name'),
   password: z
     .string()
     .min(8, 'password must be at least 8 characters')
-    .max(128, 'password must not exceed 128 characters'),
-  role_id: z.string().uuid('role_id must be a valid UUID').nullable().optional(),
-  division_ids: z.array(z.string().uuid('each division_id must be a valid UUID')).optional(),
+    .max(128, 'password must not exceed 128 characters')
+    .describe('Account password'),
+  role_id: z
+    .string()
+    .uuid('role_id must be a valid UUID')
+    .nullable()
+    .optional()
+    .describe('Optional role UUID'),
+  division_ids: z
+    .array(z.string().uuid('each division_id must be a valid UUID'))
+    .optional()
+    .describe('Optional array of division UUIDs'),
 })
 
 export type CreateStaffBody = z.infer<typeof createStaffBodySchema>

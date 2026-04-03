@@ -9,18 +9,24 @@
  * Composite PK: (staff_id, hierarchy_node_id).
  */
 
-import { pgTable, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 import { backofficeStaffUsers } from './backoffice-staff-users.schema'
 
-export const staffHierarchyLevels = pgTable('staff_hierarchy_levels', {
-  staff_id: uuid('staff_id')
-    .notNull()
-    .references(() => backofficeStaffUsers.id, { onDelete: 'cascade' }),
-  hierarchy_node_id: uuid('hierarchy_node_id').notNull(),
-  workspace_id: uuid('workspace_id').notNull(),
-  assigned_at: timestamp('assigned_at', { withTimezone: true }).notNull().defaultNow(),
-})
+export const staffHierarchyLevels = pgTable(
+  'staff_hierarchy_levels',
+  {
+    staff_id: uuid('staff_id')
+      .notNull()
+      .references(() => backofficeStaffUsers.id, { onDelete: 'cascade' }),
+    hierarchy_node_id: uuid('hierarchy_node_id').notNull(),
+    workspace_id: uuid('workspace_id').notNull(),
+    assigned_at: timestamp('assigned_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.staff_id, table.hierarchy_node_id] }),
+  })
+)
 
 export type StaffHierarchyLevel = typeof staffHierarchyLevels.$inferSelect
 export type NewStaffHierarchyLevel = typeof staffHierarchyLevels.$inferInsert

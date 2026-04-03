@@ -3,7 +3,7 @@
 **Stage**: `STAGE_41_STAFF_MANAGEMENT`  
 **Phase**: `03_BACKOFFICE_CORE`  
 **Tasks Generated**: 2026-04-03  
-**Total Tasks**: 45
+**Total Tasks**: 34
 
 ---
 

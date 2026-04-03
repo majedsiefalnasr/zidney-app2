@@ -77,7 +77,7 @@ describe('Staff Service — CRUD', () => {
   // ---------------------------------------------------------------------------
 
   describe('createStaff', () => {
-    it('returns 201 with created staff record on success', async () => {
+    it('returns created staff record on success', async () => {
       vi.mocked(createStaff).mockResolvedValue(staffRecord)
 
       const result = await createStaff(

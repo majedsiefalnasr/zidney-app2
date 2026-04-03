@@ -33,7 +33,22 @@ export async function handleUpdateStaff(c: Context) {
       )
     }
 
-    const body = await c.req.json().catch(() => ({}))
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'MALFORMED_BODY',
+            message: 'Request body is not valid JSON',
+          },
+        },
+        400
+      )
+    }
     const parsedBody = updateStaffBodySchema.safeParse(body)
     if (!parsedBody.success) {
       return c.json(

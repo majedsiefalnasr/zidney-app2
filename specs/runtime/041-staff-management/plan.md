@@ -388,17 +388,17 @@ export class StaffError extends Error {
 
 Raw SQL via injected `DbClient`. Key queries:
 
-| Function                    | SQL Operation                                                                            |
-| --------------------------- | ---------------------------------------------------------------------------------------- |
-| `findStaffByEmailForUpdate` | `SELECT ... FROM backoffice_staff_users WHERE email=$1 AND workspace_id=$2 FOR UPDATE`   |
-| `findStaffById`             | `SELECT ... FROM backoffice_staff_users WHERE id=$1 AND workspace_id=$2`                 |
-| `countActiveStaff`          | `SELECT COUNT(*) FROM backoffice_staff_users WHERE workspace_id=$1 AND status='ACTIVE'`  |
-| `insertStaff`               | `INSERT INTO backoffice_staff_users (...) VALUES (...) RETURNING id,...`                 |
-| `updateStaff`               | `UPDATE backoffice_staff_users SET ... WHERE id=$1 AND workspace_id=$2 RETURNING id,...` |
-| `updateStaffStatus`         | `UPDATE backoffice_staff_users SET status=$1, is_active=$2, updated_at=NOW() WHERE ...`  |
-| `softDeleteStaff`           | `DELETE FROM backoffice_staff_users WHERE id=$1 AND workspace_id=$2`                     |
-| `listStaff`                 | Full-text search + status filter + keyset pagination on (created_at, id)                 |
-| `checkAuthoredContent`      | Check whether removing staff would orphan content                                        |
+| Function                    | SQL Operation                                                                                                                      |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `findStaffByEmailForUpdate` | `SELECT ... FROM backoffice_staff_users WHERE email=$1 AND workspace_id=$2 FOR UPDATE`                                             |
+| `findStaffById`             | `SELECT ... FROM backoffice_staff_users WHERE id=$1 AND workspace_id=$2`                                                           |
+| `countActiveStaff`          | `SELECT COUNT(*) FROM backoffice_staff_users WHERE workspace_id=$1 AND status='ACTIVE'`                                            |
+| `insertStaff`               | `INSERT INTO backoffice_staff_users (...) VALUES (...) RETURNING id,...`                                                           |
+| `updateStaff`               | `UPDATE backoffice_staff_users SET ... WHERE id=$1 AND workspace_id=$2 RETURNING id,...`                                           |
+| `updateStaffStatus`         | `UPDATE backoffice_staff_users SET status=$1, is_active=$2, updated_at=NOW() WHERE ...`                                            |
+| `softDeleteStaff`           | `UPDATE backoffice_staff_users SET status = 'INACTIVE', is_active = false, updated_at = NOW() WHERE workspace_id = $1 AND id = $2` |
+| `listStaff`                 | Full-text search + status filter + keyset pagination on (created_at, id)                                                           |
+| `checkAuthoredContent`      | Check whether removing staff would orphan content                                                                                  |
 
 All SELECT projections exclude `password_hash`, `failed_login_count`, `locked_until`, `last_login`
 (security-sensitive columns never returned to API consumer layer).
@@ -413,9 +413,9 @@ Service functions (all take injected `DbClient` + `AuditContext`):
 | `listStaff(db, query, audit)`                         | Paginated list with optional status/division/search filters                      |
 | `getStaffById(db, staffId, workspaceId, audit)`       | Single staff record or throw `STAFF_NOT_FOUND`                                   |
 | `updateStaff(db, staffId, workspaceId, input, audit)` | Partial update (name, email, division_ids), check email conflict                 |
-| `disableStaff(db, staffId, workspaceId, audit)`       | Set `status=DISABLED, is_active=false`; guard `STAFF_ALREADY_DISABLED`           |
+| `disableStaff(db, staffId, workspaceId, audit)`       | Set `status=INACTIVE, is_active=false`; guard `STAFF_ALREADY_DISABLED`           |
 | `enableStaff(db, staffId, workspaceId, audit)`        | Set `status=ACTIVE, is_active=true`; guard `STAFF_ALREADY_ACTIVE`                |
-| `deleteStaff(db, staffId, workspaceId, audit)`        | Check authored content, then hard delete                                         |
+| `deleteStaff(db, staffId, workspaceId, audit)`        | Check authored content, then soft delete (status → INACTIVE)                     |
 
 **Transaction discipline**:
 

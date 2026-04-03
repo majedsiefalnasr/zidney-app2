@@ -128,8 +128,10 @@ export async function down(client: PoolClient): Promise<void> {
         DROP COLUMN IF EXISTS locked_until,
         DROP COLUMN IF EXISTS failed_login_count,
         DROP CONSTRAINT IF EXISTS bsu_valid_status,
-        DROP COLUMN IF EXISTS status,
-        ALTER COLUMN password_hash TYPE VARCHAR(72)
+        DROP COLUMN IF EXISTS status
+        -- WARNING: reverting password_hash to a short VARCHAR type is intentionally omitted.
+        -- Argon2id hashes are ~97 chars; VARCHAR(72) would truncate them and corrupt credentials.
+        -- Do NOT alter password_hash type in a rollback without a full credential migration plan.
     `)
     await client.query(`
       UPDATE workspace_schema_versions

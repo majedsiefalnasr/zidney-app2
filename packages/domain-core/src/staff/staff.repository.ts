@@ -106,7 +106,7 @@ export async function insertStaff(
       data.name,
       data.password_hash,
       data.role_id ?? null,
-      `{${divisionIds.join(',')}}`,
+      divisionIds,
     ]
   )
   return rows[0] as StaffRecord
@@ -137,7 +137,7 @@ export async function updateStaff(
   }
   if (data.division_ids !== undefined) {
     sets.push(`division_ids = $${idx++}::uuid[]`)
-    params.push(`{${data.division_ids.join(',')}}`)
+    params.push(data.division_ids)
   }
   if (data.role_id !== undefined) {
     sets.push(`role_id = $${idx++}`)

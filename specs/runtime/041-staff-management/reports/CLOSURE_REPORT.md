@@ -29,7 +29,7 @@ Stage 41 (Staff Management) is complete and production-ready. All 34 tasks execu
 
 ## Scope Delivered
 
-- `status` VARCHAR(20) column on `backoffice_staff_users` (`ACTIVE` | `DISABLED` enum)
+- `status` VARCHAR(20) column on `backoffice_staff_users` (`ACTIVE` | `INACTIVE` | `SUSPENDED` enum)
 - `staff_hierarchy_levels` join table for many-to-many staff-to-hierarchy-node assignment
 - Migration of `password_hash` column from `varchar(72)` → `text` for Argon2id hashes
 - DB migration `20260404_020_staff_management.ts` (schema 1.25 → 1.26)

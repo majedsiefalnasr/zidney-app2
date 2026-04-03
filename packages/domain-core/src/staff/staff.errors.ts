@@ -19,6 +19,7 @@ export type StaffErrorCode =
   | 'STAFF_ALREADY_ACTIVE'
   | 'STAFF_ALREADY_DISABLED'
   | 'STAFF_HAS_AUTHORED_CONTENT'
+  | 'STAFF_INVALID_PASSWORD'
 
 // ---------------------------------------------------------------------------
 // HTTP status map
@@ -31,6 +32,7 @@ export const STAFF_ERROR_HTTP: Record<StaffErrorCode, number> = {
   STAFF_ALREADY_ACTIVE: 409,
   STAFF_ALREADY_DISABLED: 409,
   STAFF_HAS_AUTHORED_CONTENT: 409,
+  STAFF_INVALID_PASSWORD: 422,
 }
 
 // ---------------------------------------------------------------------------

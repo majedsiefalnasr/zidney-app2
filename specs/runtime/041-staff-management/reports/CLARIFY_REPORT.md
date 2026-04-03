@@ -30,7 +30,7 @@ canonical state column and backfills it from `is_active`. Both columns must rema
 via the service layer during Stage 41. `is_active` removal is formally deferred to a later
 cleanup migration.
 
-**Impact:** Service layer must write both columns on every status change (ACTIVE/DISABLED). No
+**Impact:** Service layer must write both columns on every status change (ACTIVE/INACTIVE/SUSPENDED). No
 functional regression risk.
 
 ---

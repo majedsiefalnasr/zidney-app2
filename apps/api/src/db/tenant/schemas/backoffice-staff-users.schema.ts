@@ -25,6 +25,7 @@
 import { sql } from 'drizzle-orm'
 import {
   boolean,
+  check,
   index,
   integer,
   pgTable,
@@ -113,6 +114,11 @@ export const backofficeStaffUsers = pgTable(
     idx_role_id: index('idx_bsu_role_id').on(table.role_id),
     /** Login lookup — workspace + email composite index. */
     idx_workspace_email: index('idx_bsu_workspace_email').on(table.workspace_id, table.email),
+    /** Enforce valid status values at ORM level (mirrors DB CHECK constraint). */
+    valid_status: check(
+      'bsu_valid_status',
+      sql`${table.status} IN ('ACTIVE', 'INACTIVE', 'SUSPENDED')`
+    ),
   })
 )
 

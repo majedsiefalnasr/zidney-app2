@@ -124,7 +124,7 @@ All endpoints return `{ success: boolean, data: object | null, error: { code, me
 
 ## Final Gate
 
-```
+```text
 Implementation: AUTHORIZED
 drift_passed: true
 ```

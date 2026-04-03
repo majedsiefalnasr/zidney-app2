@@ -227,7 +227,7 @@ UPDATE _schema_versions SET version = '1.26.0' WHERE name = 'schema_version';
 
 #### POST /staff
 
-```
+```text
 Request body:  { email: string, name: string, password: string, role_id: string (uuid) }
 Success (201): { success: true, data: StaffRecord, error: null }
 Errors:        400 VALIDATION_ERROR | 409 STAFF_EMAIL_CONFLICT | 403 STAFF_LIMIT_EXCEEDED |
@@ -236,8 +236,8 @@ Errors:        400 VALIDATION_ERROR | 409 STAFF_EMAIL_CONFLICT | 403 STAFF_LIMIT
 
 #### GET /staff
 
-```
-Query params:  page? (default 1), limit? (default 20, max 100), status? (ACTIVE|DISABLED),
+```text
+Query params:  page? (default 1), limit? (default 20, max 100), status? (ACTIVE|INACTIVE|SUSPENDED),
                division_id? (UUID), search? (name/email substring)
 Success (200): { success: true, data: { items: StaffRecord[], total: number, page: number,
                limit: number }, error: null }
@@ -245,15 +245,15 @@ Success (200): { success: true, data: { items: StaffRecord[], total: number, pag
 
 #### GET /staff/:id
 
-```
+```text
 Path params:   id (UUID)
 Success (200): { success: true, data: StaffRecord, error: null }
 Errors:        404 STAFF_NOT_FOUND
 ```
 
-#### PATCH /staff/:id
+#### PUT /staff/:id
 
-```
+```text
 Request body:  { name?: string, email?: string } (at least one required)
 Success (200): { success: true, data: StaffRecord, error: null }
 Errors:        400 VALIDATION_ERROR | 404 STAFF_NOT_FOUND | 409 STAFF_EMAIL_CONFLICT
@@ -261,16 +261,16 @@ Errors:        400 VALIDATION_ERROR | 404 STAFF_NOT_FOUND | 409 STAFF_EMAIL_CONF
 
 #### PATCH /staff/:id/disable
 
-```
+```text
 No body required.
-Success (200): { success: true, data: { id: string, status: "DISABLED" }, error: null }
-Effects:       status = DISABLED, is_active = false, token_version++ (invalidates JWT)
+Success (200): { success: true, data: StaffRecord, error: null }
+Effects:       status = INACTIVE, is_active = false, token_version++ (invalidates JWT)
 Errors:        404 STAFF_NOT_FOUND | 409 STAFF_ALREADY_DISABLED
 ```
 
 #### PATCH /staff/:id/enable
 
-```
+```text
 No body required.
 Success (200): { success: true, data: { id: string, status: "ACTIVE" }, error: null }
 Effects:       status = ACTIVE, is_active = true
@@ -279,14 +279,13 @@ Errors:        404 STAFF_NOT_FOUND | 409 STAFF_ALREADY_ACTIVE
 
 #### DELETE /staff/:id
 
-```
+```text
 No body required.
-Success (200): { success: true, data: { id: string, deleted: true }, error: null }
-Effects:       Transactional deletion: remove from staff_divisions, staff_departments,
-               staff_groups, staff_hierarchy_levels, staff_teams, then backoffice_staff_users.
-               Audit log preserved — no `ON DELETE CASCADE` on audit_logs.
+Success (200): { success: true, data: null, error: null }
+Effects:       Soft delete — sets status = 'INACTIVE', is_active = false.
+               Blocks if staff has authored content (exams, questions).
 Errors:        404 STAFF_NOT_FOUND | 409 STAFF_HAS_AUTHORED_CONTENT (if content check fails)
-Note:          Hard delete only allowed if no authored content exists. Otherwise, use /disable.
+Note:          Use /disable to revoke access without removing the record.
 ```
 
 **StaffRecord shape (never includes password_hash):**

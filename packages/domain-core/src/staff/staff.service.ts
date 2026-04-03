@@ -10,6 +10,7 @@
  *
  * Constitutional Compliance:
  * ✓ No HTTP, no framework imports
+ * ✓ No logging side-effects — callers are responsible for logging
  * ✓ All writes are transactional (BEGIN/COMMIT/ROLLBACK)
  * ✓ SERIALIZABLE isolation for limit-check + insert (createStaff)
  * ✓ Server-authoritative time (via DB NOW())
@@ -17,7 +18,6 @@
  * ✓ password_hash never returned to callers — only StaffRecord shapes
  */
 
-import { createLogger } from '@zidney/logger'
 import { hashStaffPassword } from '../auth/staff-password'
 import { StaffError } from './staff.errors'
 import {
@@ -40,8 +40,6 @@ import type {
   StaffRecord,
   UpdateStaffInput,
 } from './staff.types'
-
-const logger = createLogger('staff-service')
 
 // ---------------------------------------------------------------------------
 // createStaff
@@ -99,12 +97,6 @@ export async function createStaff(
     })
 
     await db.query('COMMIT')
-
-    logger.info('Staff created', {
-      staff_id: record.id,
-      workspace_id: audit.workspace_id,
-      correlation_id: audit.correlation_id,
-    })
 
     return record
   } catch (err) {
@@ -195,12 +187,6 @@ export async function updateStaff(
 
     await db.query('COMMIT')
 
-    logger.info('Staff updated', {
-      staff_id: staffId,
-      workspace_id: audit.workspace_id,
-      correlation_id: audit.correlation_id,
-    })
-
     return updated
   } catch (err) {
     await db.query('ROLLBACK')
@@ -241,12 +227,6 @@ export async function disableStaff(
 
     await db.query('COMMIT')
 
-    logger.info('Staff disabled', {
-      staff_id: staffId,
-      workspace_id: audit.workspace_id,
-      correlation_id: audit.correlation_id,
-    })
-
     return updated
   } catch (err) {
     await db.query('ROLLBACK')
@@ -286,12 +266,6 @@ export async function enableStaff(
     }
 
     await db.query('COMMIT')
-
-    logger.info('Staff enabled', {
-      staff_id: staffId,
-      workspace_id: audit.workspace_id,
-      correlation_id: audit.correlation_id,
-    })
 
     return updated
   } catch (err) {
@@ -335,12 +309,6 @@ export async function deleteStaff(
     await softDeleteStaff(db, workspaceId, staffId)
 
     await db.query('COMMIT')
-
-    logger.info('Staff deleted (soft)', {
-      staff_id: staffId,
-      workspace_id: audit.workspace_id,
-      correlation_id: audit.correlation_id,
-    })
   } catch (err) {
     await db.query('ROLLBACK')
     throw err

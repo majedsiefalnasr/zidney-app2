@@ -30,7 +30,7 @@
 
 - Implements full Backoffice staff lifecycle management (create, list, get, update, disable, enable, delete) within the tenant scope — all records are workspace-scoped and stored exclusively in the tenant database.
 - Introduces Argon2id password hashing for staff accounts, replacing legacy bcrypt usage in the Backoffice login route.
-- Adds a `status` column (`ACTIVE` | `DISABLED`) to `backoffice_staff_users`, replacing the previous `is_active` boolean, and a `staff_hierarchy_levels` join table for many-to-many staff-to-hierarchy-node assignments.
+- Adds a `status` column (`ACTIVE` | `INACTIVE` | `SUSPENDED`) to `backoffice_staff_users`, replacing the previous `is_active` boolean, and a `staff_hierarchy_levels` join table for many-to-many staff-to-hierarchy-node assignments.
 - Enforces the tenant `staff_limit` transactionally on every staff creation — no race condition over-limit possible.
 - Deletes the dead-code `users.ts` route and replaces it with a fully governed, RBAC-guarded `staffRouter`.
 - No attempt engine, worker, Frontoffice, or master database affected; change is scoped entirely to tenant DB + `apps/api` + `packages/domain-core` + `packages/validation`.
@@ -85,7 +85,7 @@ Stage Directory: `specs/runtime/041-staff-management/`
 ## 7. Transaction & Concurrency Safety
 
 - [x] All write operations wrapped in transactions (create, disable, enable, delete)
-- [x] Proper isolation level declared (PostgreSQL default Serializable for staff limit check)
+- [x] Proper isolation level declared (explicit Serializable isolation level for staff limit check)
 - [x] Explicit locking: `staff_limit` enforced inside a transaction to prevent race-condition over-provisioning
 - [x] Idempotency guarantees preserved (duplicate email → 409; delete of non-existent → 404)
 - [x] No race conditions introduced

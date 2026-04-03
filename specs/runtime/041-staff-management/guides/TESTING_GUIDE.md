@@ -237,7 +237,7 @@ curl -s "$BASE/staff/$STAFF_ID" \
 1. Send PATCH update:
 
 ```bash
-curl -s -X PATCH "$BASE/staff/$STAFF_ID" \
+curl -s -X PUT "$BASE/staff/$STAFF_ID" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -H "X-Workspace-Slug: $WORKSPACE" \
@@ -269,7 +269,7 @@ curl -s -X POST http://localhost:3000/api/v1/auth/backoffice/login \
   -d '{"email":"john.doe@demo.com","password":"SecurePass123!"}' | jq .
 ```
 
-**Expected:** After disable, login returns `403` with `ACCOUNT_DISABLED`. GET /staff/:id shows `status: "DISABLED"`.
+**Expected:** After disable, login returns `403` with `ACCOUNT_DISABLED`. GET /staff/:id shows `status: "INACTIVE"`.
 
 **Troubleshooting:** If login still works, confirm migration was applied (`status` column exists).
 
@@ -313,7 +313,7 @@ curl -s "$BASE/staff/$STAFF_ID" \
   -H "X-Workspace-Slug: $WORKSPACE" | jq .
 ```
 
-**Expected:** DELETE returns HTTP 204. Subsequent GET returns 404.
+**Expected:** DELETE returns HTTP 200 with `{ success: true, data: null, error: null }`. Subsequent GET returns 404.
 
 ---
 

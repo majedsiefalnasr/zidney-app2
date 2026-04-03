@@ -218,20 +218,15 @@ export async function backofficeLoginHandler(c: Context) {
         const newFailCount = user.failed_login_count + 1
         const shouldLock = newFailCount >= 5
 
-        let lockUntil = null
         if (shouldLock) {
-          // Lock for 5 minutes
-          const lockTime = new Date()
-          lockTime.setMinutes(lockTime.getMinutes() + 5)
-          lockUntil = lockTime
-
-          // Query: update both failed_login_count AND locked_until
+          // Lock for 5 minutes — locked_until set by the DB server (server-authoritative time)
           await client.query(
             `UPDATE backoffice_staff_users
-             SET failed_login_count = $1, locked_until = $2, updated_at = NOW()
-             WHERE id = $3`,
-            /* NOTE: locked_until uses NOW() + 5 minute interval (server-authoritative) */
-            [newFailCount, lockUntil, user.id]
+             SET failed_login_count = $1,
+                 locked_until = NOW() + INTERVAL '5 minutes',
+                 updated_at = NOW()
+             WHERE id = $2`,
+            [newFailCount, user.id]
           )
 
           await logAccountLocked(correlationId, user.id, user.email, workspaceSlug, 300)

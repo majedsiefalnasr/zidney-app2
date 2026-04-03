@@ -32,6 +32,7 @@
  */
 
 import argon2 from 'argon2'
+import { StaffError } from '../staff/staff.errors'
 
 // ---------------------------------------------------------------------------
 // Argon2id parameters
@@ -46,10 +47,11 @@ const ARGON2_OPTIONS: argon2.Options & { raw: false } = {
 }
 
 // Pre-computed dummy hash for timing-safe negative-path login.
-// Generated once at build time — MUST NOT match any real password.
-// The literal value was produced with: argon2.hash('__dummy_staff_seed__', ARGON2_OPTIONS)
+// Generated with: argon2.hash('__dummy_staff_seed__', ARGON2_OPTIONS)
+// Must be a valid PHC string so argon2.verify runs the full expensive computation
+// (not a fast parse failure) — this prevents timing-based email enumeration.
 const STAFF_DUMMY_HASH =
-  '$argon2id$v=19$m=65536,t=3,p=4$dummysalt012345678901234567890012$dummy0000000000000000000000000000000000000000000'
+  '$argon2id$v=19$m=65536,t=3,p=4$QGRFQ/Ifjrv45NdkySnNLg$cbqtUlzBf2p3ZBpjE5p5eWApooDK49bx+c39Bc6sUtM'
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -64,7 +66,7 @@ const STAFF_DUMMY_HASH =
  */
 export async function hashStaffPassword(password: string): Promise<string> {
   if (!password || typeof password !== 'string' || password.length === 0) {
-    throw new Error('Password must be a non-empty string')
+    throw new StaffError('STAFF_INVALID_PASSWORD', 'Password must be a non-empty string')
   }
   return argon2.hash(password, ARGON2_OPTIONS)
 }

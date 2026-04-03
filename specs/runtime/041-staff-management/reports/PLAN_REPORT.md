@@ -31,7 +31,7 @@ files. All clarifications from Step 2 are resolved and encoded in the plan.
 
 ## Implementation Groups
 
-```
+```text
 GROUP A: Package Install — bun add argon2 in apps/api
 GROUP B: Database Layer — migration 020 + schema files (4 file changes)
 GROUP C: Domain-Core Layer — staff module (8 files) + staff-password.ts (2 files)
@@ -48,30 +48,30 @@ Total: **21 new files** | **7 modified files** | **1 deleted file**
 
 **Migration**: `20260404_020_staff_management.ts` — schema `1.25.0 → 1.26.0`
 
-| Table                    | Operation  | Detail                                                                |
-| ------------------------ | ---------- | --------------------------------------------------------------------- |
-| `backoffice_staff_users` | ALTER      | `password_hash varchar(72) → text`                                    |
-| `backoffice_staff_users` | ADD COLUMN | `status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK(ACTIVE/DISABLED)` |
-| `backoffice_staff_users` | ADD COLUMN | `failed_login_count INT NOT NULL DEFAULT 0`                           |
-| `backoffice_staff_users` | ADD COLUMN | `locked_until TIMESTAMPTZ NULL`                                       |
-| `backoffice_staff_users` | ADD COLUMN | `last_login TIMESTAMPTZ NULL`                                         |
-| `backoffice_staff_users` | UPDATE     | Backfill status from is_active                                        |
-| `staff_hierarchy_levels` | CREATE     | Join table: staff_id + hierarchy_node_id composite PK                 |
-| `_schema_versions`       | UPDATE     | `1.25.0 → 1.26.0`                                                     |
+| Table                    | Operation  | Detail                                                                          |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------- |
+| `backoffice_staff_users` | ALTER      | `password_hash varchar(72) → text`                                              |
+| `backoffice_staff_users` | ADD COLUMN | `status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK(ACTIVE/INACTIVE/SUSPENDED)` |
+| `backoffice_staff_users` | ADD COLUMN | `failed_login_count INT NOT NULL DEFAULT 0`                                     |
+| `backoffice_staff_users` | ADD COLUMN | `locked_until TIMESTAMPTZ NULL`                                                 |
+| `backoffice_staff_users` | ADD COLUMN | `last_login TIMESTAMPTZ NULL`                                                   |
+| `backoffice_staff_users` | UPDATE     | Backfill status from is_active                                                  |
+| `staff_hierarchy_levels` | CREATE     | Join table: staff_id + hierarchy_node_id composite PK                           |
+| `_schema_versions`       | UPDATE     | `1.25.0 → 1.26.0`                                                               |
 
 ---
 
 ## API Endpoint Catalogue
 
-| Method | Path                                           | RBAC Guard       | Response            |
-| ------ | ---------------------------------------------- | ---------------- | ------------------- |
-| POST   | /api/v1/backoffice/workspace/staff             | USERS can_create | 201 StaffRecord     |
-| GET    | /api/v1/backoffice/workspace/staff             | USERS can_view   | 200 StaffListResult |
-| GET    | /api/v1/backoffice/workspace/staff/:id         | USERS can_view   | 200 StaffRecord     |
-| PUT    | /api/v1/backoffice/workspace/staff/:id         | USERS can_edit   | 200 StaffRecord     |
-| PATCH  | /api/v1/backoffice/workspace/staff/:id/disable | USERS can_edit   | 200 StaffRecord     |
-| PATCH  | /api/v1/backoffice/workspace/staff/:id/enable  | USERS can_edit   | 200 StaffRecord     |
-| DELETE | /api/v1/backoffice/workspace/staff/:id         | USERS can_delete | 204 (empty)         |
+| Method | Path                                           | RBAC Guard       | Response                                       |
+| ------ | ---------------------------------------------- | ---------------- | ---------------------------------------------- |
+| POST   | /api/v1/backoffice/workspace/staff             | USERS can_create | 201 StaffRecord                                |
+| GET    | /api/v1/backoffice/workspace/staff             | USERS can_view   | 200 StaffListResult                            |
+| GET    | /api/v1/backoffice/workspace/staff/:id         | USERS can_view   | 200 StaffRecord                                |
+| PUT    | /api/v1/backoffice/workspace/staff/:id         | USERS can_edit   | 200 StaffRecord                                |
+| PATCH  | /api/v1/backoffice/workspace/staff/:id/disable | USERS can_edit   | 200 StaffRecord                                |
+| PATCH  | /api/v1/backoffice/workspace/staff/:id/enable  | USERS can_edit   | 200 StaffRecord                                |
+| DELETE | /api/v1/backoffice/workspace/staff/:id         | USERS can_delete | 200 { success: true, data: null, error: null } |
 
 ---
 

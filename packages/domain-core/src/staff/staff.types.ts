@@ -7,15 +7,16 @@
  * Pure type definitions — no logic, no imports from framework layer.
  */
 
-import type { Pool, PoolClient } from 'pg'
-
 // ---------------------------------------------------------------------------
 // Database client interface
 // ---------------------------------------------------------------------------
 
-/** Minimal interface for query execution — satisfied by Pool, PoolClient, or mock */
+/** Minimal structural interface for query execution — satisfied by Pool, PoolClient, or mock */
 export interface DbClient {
-  query: Pool['query']
+  query<T = unknown>(
+    text: string,
+    values?: unknown[]
+  ): Promise<{ rows: T[]; rowCount: number | null }>
 }
 
 // ---------------------------------------------------------------------------
@@ -113,6 +114,3 @@ export interface AuditContext {
   workspace_slug: string
   correlation_id: string
 }
-
-// Re-export PoolClient for use in repository transaction helpers
-export type { PoolClient }
