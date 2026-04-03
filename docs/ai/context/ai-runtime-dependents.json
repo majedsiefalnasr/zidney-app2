@@ -413,6 +413,8 @@
     "packages/domain-core",
     "packages/domain-core",
     "packages/domain-core",
+    "packages/domain-core",
+    "packages/domain-core",
     "packages/validation",
     "packages/validation",
     "packages/validation",
@@ -690,6 +692,7 @@
     "apps/mmc"
   ],
   "packages/domain-core": [
+    "apps/api",
     "apps/api",
     "apps/api",
     "apps/api",

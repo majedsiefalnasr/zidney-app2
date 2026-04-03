@@ -58,6 +58,14 @@
     },
     {
       "from": "packages/domain-core",
+      "to": "packages/types"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "packages/types"
+    },
+    {
+      "from": "packages/domain-core",
       "to": "packages/logger"
     },
     {
@@ -611,6 +619,10 @@
     {
       "from": "apps/api",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
     },
     {
       "from": "apps/api",

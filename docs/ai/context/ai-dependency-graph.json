@@ -1,8 +1,8 @@
 {
   "schema_version": "2",
-  "generated_at": "2026-04-03T12:05:53.279Z",
+  "generated_at": "2026-04-03T13:18:23.327Z",
   "source_metadata": {
-    "infra_audit_timestamp": "2026-04-02T17:53:06.735Z"
+    "infra_audit_timestamp": "2026-04-03T13:18:23.263Z"
   },
   "modules": {
     "apps/mmc": {
@@ -217,6 +217,14 @@
     {
       "from": "packages/domain-core",
       "to": "packages/logger"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "packages/types"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "packages/types"
     },
     {
       "from": "packages/domain-core",
@@ -773,6 +781,10 @@
     {
       "from": "apps/api",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
     },
     {
       "from": "apps/api",

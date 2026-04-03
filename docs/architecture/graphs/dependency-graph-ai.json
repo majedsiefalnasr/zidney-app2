@@ -100,6 +100,14 @@
     },
     {
       "from": "packages/domain-core",
+      "to": "packages/types"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "packages/types"
+    },
+    {
+      "from": "packages/domain-core",
       "to": "packages/logger"
     },
     {
@@ -653,6 +661,10 @@
     {
       "from": "apps/api",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
     },
     {
       "from": "apps/api",
@@ -4030,12 +4042,12 @@
   "centrality": {
     "packages/job-queue": 7,
     "packages/logger": 397,
-    "packages/types": 101,
+    "packages/types": 103,
     "packages/config": 0,
     "packages/redis-utils": 3,
     "packages/ui-system": 1,
     "packages/api-client": 17,
-    "packages/domain-core": 302,
+    "packages/domain-core": 303,
     "packages/validation": 164,
     "apps/mmc": 0,
     "apps/frontoffice": 0,

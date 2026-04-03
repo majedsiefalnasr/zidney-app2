@@ -8,24 +8,24 @@ Scope: Backoffice staff lifecycle, assignment boundaries, and enforcement model
 
 ## Stage Status
 
-Status: BACKEND CLOSED
-Step: implement
-Risk Level: MEDIUM
-Last Updated: 2026-04-04T00:00:00Z
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: LOW
+Closure Date: 2026-04-04
 
 Implementation: COMPLETE
 Tasks: 34 / 34 completed
 
-Scope Closed:
+Scope Delivered:
 
-- Staff CRUD (create, list, get, update, disable, enable, delete) — 7 endpoints
-- Migration `20260404_020_staff_management.ts`: schema 1.25.0 → 1.26.0
-- Domain-core `packages/domain-core/src/staff/` module (5 files)
-- `packages/domain-core/src/auth/staff-password.ts` — Argon2id hash/verify
-- `packages/validation/src/staff.schema.ts` — 4 Zod schemas
-- Backoffice login updated to `backoffice_staff_users` + JOIN roles + Argon2id
-- Dead code `apps/api/src/routes/backoffice/users.ts` deleted
-- 3 test files: staff.crud (19), staff.isolation (7), staff.limit (4) — 30/30 passing
+- ✅ Staff CRUD (create, list, get, update, disable, enable, delete) — 7 endpoints
+- ✅ Migration `20260404_020_staff_management.ts`: schema 1.25.0 → 1.26.0
+- ✅ Domain-core `packages/domain-core/src/staff/` module (5 files)
+- ✅ `packages/domain-core/src/auth/staff-password.ts` — Argon2id hash/verify
+- ✅ `packages/validation/src/staff.schema.ts` — 4 Zod schemas
+- ✅ Backoffice login updated to `backoffice_staff_users` + JOIN roles + Argon2id
+- ✅ Dead code `apps/api/src/routes/backoffice/users.ts` deleted
+- ✅ 3 test files: staff.crud (19), staff.isolation (7), staff.limit (4) — 30/30 passing
 
 Deferred Scope:
 
@@ -33,6 +33,28 @@ Deferred Scope:
 - `division_ids` array column removal (future cleanup stage)
 - Bulk staff import
 - Password reset / change-password flow
+
+Architecture Governance Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced — `workspace_id` scopes all queries
+- ADR-0006 Server-authoritative time enforced — `NOW()` in PostgreSQL only
+- ADR-0007 Version compatibility enforced — schema_version bumped to 1.26
+- ADR-0008 Semantic versioning aligned — commit scope validated by hook
+
+Audit Results:
+
+- Drift analysis: APPROVED (all 9 criteria passed)
+- Architecture guardian: PASS
+- Security auditor: PASS
+- Performance optimizer: PASS
+- QA engineer: PASS
+- TypeScript: 0 errors
+- Biome lint: 0 errors
+- Tests: 30/30 passing
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 Architecture Governance Compliance:
 

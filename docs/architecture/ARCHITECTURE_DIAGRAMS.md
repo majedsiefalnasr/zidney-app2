@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-04-02T17:53:06.732Z
-Git SHA: 11e93c833138228f5340cef92d295a8bf33d9bd3
+Generated: 2026-04-03T13:18:23.261Z
+Git SHA: 1869a6e6c35b9c4bca5ca70de610971bdc829ee8
 
 ---
 
@@ -50,6 +50,8 @@ graph LR
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
+  packages_domain_core --> packages_types
+  packages_domain_core --> packages_types
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_types
   packages_domain_core --> packages_types
@@ -189,6 +191,7 @@ graph LR
   apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_logger
@@ -1051,6 +1054,8 @@ graph TD
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
+  packages_domain_core --> packages_types
+  packages_domain_core --> packages_types
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_types
   packages_domain_core --> packages_types
@@ -1190,6 +1195,7 @@ graph TD
   apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_domain_core
   apps_api --> packages_logger
