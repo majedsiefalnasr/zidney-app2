@@ -12,14 +12,17 @@
  */
 
 import type { PoolClient } from 'pg'
-
+import { GRADING_ERROR_CODES, GradingError } from './grading.errors'
 import type {
   GradeAttemptInput,
   GradeAttemptResult,
   GradingConfigSnapshot,
   QuestionGradingResult,
+  QuestionSnapshot,
 } from './grading.types'
+import { gradeMultipleChoiceQuestion } from './mcq-grader'
 import { aggregateScores } from './score-aggregator'
+import { gradeTraditionalQuestion } from './traditional-grader'
 
 /**
  * Grading engine configuration
@@ -182,7 +185,10 @@ export class GradingEngine {
   private validateAttemptStatus(attempt: Record<string, unknown>): void {
     const validStatuses = ['SUBMITTED', 'IN_PROGRESS', 'FINALIZED']
     if (!validStatuses.includes(String(attempt.status))) {
-      throw new Error(`Invalid attempt status: ${attempt.status}`)
+      throw new GradingError(
+        GRADING_ERROR_CODES.ATTEMPT_NOT_FOUND,
+        `Attempt not found or in invalid status: ${attempt.status}`
+      )
     }
   }
 

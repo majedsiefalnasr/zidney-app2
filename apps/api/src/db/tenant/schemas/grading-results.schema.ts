@@ -11,6 +11,7 @@
 import { sql } from 'drizzle-orm'
 import {
   boolean,
+  check,
   index,
   jsonb,
   numeric,
@@ -31,7 +32,7 @@ export const gradingResults = pgTable(
     total_possible_score: numeric('total_possible_score', { precision: 10, scale: 2 }).notNull(),
     percentage: numeric('percentage', { precision: 5, scale: 2 }).notNull(),
     passed: boolean('passed').notNull(),
-    pass_type: varchar('pass_type', { length: 10 }).notNull(),
+    pass_type: varchar('pass_type', { length: 20 }).notNull(),
     pass_value: numeric('pass_value', { precision: 10, scale: 2 }).notNull(),
     grading_version: varchar('grading_version', { length: 20 }).notNull(),
     graded_at: timestamp('graded_at', { withTimezone: true }).notNull().defaultNow(),
@@ -43,9 +44,9 @@ export const gradingResults = pgTable(
     uniqueIndex('uq_grading_results_attempt').on(table.workspace_id, table.attempt_id),
     index('idx_grading_results_workspace_attempt').on(table.workspace_id, table.attempt_id),
     index('idx_grading_results_attempt').on(table.attempt_id),
-    sql`CHECK (${table.pass_type} IN ('PERCENTAGE', 'SCORE'))`,
-    sql`CHECK (${table.graded_by} IN ('ENGINE', 'SELF', 'ADMIN'))`,
-    sql`CHECK (${table.percentage} >= 0 AND ${table.percentage} <= 100)`,
+    check('valid_pass_type', sql`${table.pass_type} IN ('PERCENTAGE', 'SCORE')`),
+    check('valid_graded_by', sql`${table.graded_by} IN ('ENGINE', 'SELF', 'ADMIN')`),
+    check('percentage_range', sql`${table.percentage} >= 0 AND ${table.percentage} <= 100`),
   ]
 )
 
