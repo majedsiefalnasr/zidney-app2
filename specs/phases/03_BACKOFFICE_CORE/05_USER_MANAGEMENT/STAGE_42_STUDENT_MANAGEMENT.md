@@ -9,19 +9,20 @@ Scope: Frontoffice student lifecycle, academic assignment enforcement, and subsc
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-04-06T00:20:00.000Z
+Last Updated: 2026-04-06T00:30:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Migration 20260406_022: 7 columns + 2 CHECK constraints + 2 indexes; schema 1.27.0 → 1.28.0
-- Domain-core: students.types.ts, errors.ts, repository.ts, service.ts, bulk-import.ts, index.ts
-- Validation: student.schema.ts (6 Zod schemas)
-- Backoffice API: 9 routes (CRUD + disable/enable + subscription + bulk-import)
-- frontoffice-login.ts migrated to query students table
-- app.ts: studentsRouter registered after staffRouter
-- Tests: 16 integration + 11 unit scenarios
+- Total: 25 atomic tasks across 6 phases (A–F)
+- Phase A: 2 tasks (migration + schema)
+- Phase B: 7 tasks (domain-core module + unit tests)
+- Phase C: 2 tasks (validation schemas)
+- Phase D: 11 tasks (backoffice route handlers)
+- Phase E: 1 task (auth migration)
+- Phase F: 2 tasks (app registration + integration tests)
+- Parallelizable: T009, T025
 
 Deferred Scope:
 
@@ -29,10 +30,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 

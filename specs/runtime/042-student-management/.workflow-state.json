@@ -6,15 +6,15 @@
   "branch": "spec/042-student-management",
   "base_branch": "develop",
   "pkg_manager": "bun",
-  "current_step": "plan",
+  "current_step": "tasks",
   "stage_status": "DRAFT",
   "auto_advance": true,
   "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": true,
-  "tasks_total": null,
-  "tasks_completed": null,
+  "tasks_total": 25,
+  "tasks_completed": 0,
   "deferred_tasks": [],
   "guardian_verdicts": {
     "architecture_checker": "PASS",
@@ -35,9 +35,13 @@
     "plan": {
       "started_at": "2026-04-06T00:00:00.000Z",
       "completed_at": "2026-04-06T00:20:00.000Z"
+    },
+    "tasks": {
+      "started_at": "2026-04-06T00:20:00.000Z",
+      "completed_at": "2026-04-06T00:30:00.000Z"
     }
   },
-  "last_updated": "2026-04-06T00:20:00.000Z",
+  "last_updated": "2026-04-06T00:30:00.000Z",
   "history": [
     {
       "event": "branch_created",
@@ -55,6 +59,11 @@
     {
       "event": "plan_complete",
       "timestamp": "2026-04-06T00:20:00.000Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 25,
+      "timestamp": "2026-04-06T00:30:00.000Z"
     }
   ]
 }
