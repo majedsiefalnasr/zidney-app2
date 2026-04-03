@@ -8,8 +8,18 @@
  * Schema: 1.25.0
  */
 
-import { pgTable, uuid, numeric, boolean, varchar, timestamp, jsonb, uniqueIndex, index } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
+import {
+  boolean,
+  index,
+  jsonb,
+  numeric,
+  pgTable,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core'
 
 export const gradingResults = pgTable(
   'grading_results',
@@ -36,7 +46,7 @@ export const gradingResults = pgTable(
     sql`CHECK (${table.pass_type} IN ('PERCENTAGE', 'SCORE'))`,
     sql`CHECK (${table.graded_by} IN ('ENGINE', 'SELF', 'ADMIN'))`,
     sql`CHECK (${table.percentage} >= 0 AND ${table.percentage} <= 100)`,
-  ],
+  ]
 )
 
 export type GradingResult = typeof gradingResults.$inferSelect

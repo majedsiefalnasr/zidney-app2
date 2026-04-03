@@ -178,7 +178,12 @@ function gradeTraditionalShortAnswer(
  * @returns true if valid, false otherwise
  */
 export function validateTraditionalQuestionSnapshot(snapshot: QuestionSnapshot): boolean {
-  if (!snapshot || !snapshot.type || !snapshot.score || typeof snapshot.correct_answer === 'undefined') {
+  if (
+    !snapshot ||
+    !snapshot.type ||
+    !snapshot.score ||
+    typeof snapshot.correct_answer === 'undefined'
+  ) {
     return false
   }
 

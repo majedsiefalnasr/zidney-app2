@@ -12,13 +12,8 @@
  */
 
 import type { PoolClient } from 'pg'
-import type { Transaction } from 'drizzle-orm'
 
-import type {
-  DrizzleTransaction,
-  GradeAttemptResult,
-  QuestionGradingResult,
-} from './grading.types'
+import type { DrizzleTransaction } from './grading.types'
 
 /**
  * Repository interface for grading persistence
@@ -89,9 +84,9 @@ export interface IGradingRepository {
  * @param db - Drizzle database client
  * @returns Repository instance
  */
-export function createGradingRepository(db: unknown): IGradingRepository {
+export function createGradingRepository(_db: unknown): IGradingRepository {
   return {
-    async saveGradingResult(tx, workspaceId, result) {
+    async saveGradingResult(_tx, workspaceId, result) {
       // Stub: Actual implementation uses db.insert().values()
       // For now, demonstrates the contract
       if (!workspaceId || !result.attemptId) {
@@ -99,27 +94,27 @@ export function createGradingRepository(db: unknown): IGradingRepository {
       }
     },
 
-    async saveQuestionResult(tx, workspaceId, questionResult) {
+    async saveQuestionResult(_tx, workspaceId, questionResult) {
       if (!workspaceId || !questionResult.attemptId) {
         throw new Error('workspace_id and attempt_id required')
       }
     },
 
-    async getGradingResult(client, workspaceId, attemptId) {
+    async getGradingResult(_client, workspaceId, attemptId) {
       if (!workspaceId || !attemptId) {
         throw new Error('workspace_id and attempt_id required')
       }
       return null
     },
 
-    async checkAttemptAlreadyGraded(client, workspaceId, attemptId) {
+    async checkAttemptAlreadyGraded(_client, workspaceId, attemptId) {
       if (!workspaceId || !attemptId) {
         throw new Error('workspace_id and attempt_id required')
       }
       return false
     },
 
-    async recordGradingOverride(tx, workspaceId, override) {
+    async recordGradingOverride(_tx, workspaceId, override) {
       if (!workspaceId || !override.attemptId) {
         throw new Error('workspace_id and attempt_id required')
       }

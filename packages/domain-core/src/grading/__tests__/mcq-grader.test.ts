@@ -7,10 +7,9 @@
  * 25+ assertions for all MCQ grading logic
  */
 
-import { describe, it, expect } from 'vitest'
-
+import { describe, expect, it } from 'vitest'
+import type { QuestionSnapshot } from '../grading.types'
 import { gradeMultipleChoiceQuestion, validateMcqQuestionSnapshot } from '../mcq-grader'
-import type { QuestionSnapshot, McqAnswerResponse } from '../grading.types'
 
 describe('MCQ Grader', () => {
   describe('MCQ_SINGLE', () => {

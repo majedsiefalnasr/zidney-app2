@@ -175,12 +175,12 @@ export async function up(client: PoolClient): Promise<void> {
 // Migration Down
 // ---------------------------------------------------------------------------
 
-export async function down(client: PoolClient): Promise<void> {
+export async function down(_client: PoolClient): Promise<void> {
   // ⚠️ Downgrade not supported for forward-only migration model.
   // This migration introduces new tables and constraints that cannot be safely rolled back.
   // If a rollback is required, use database restore from backup or manual intervention.
   throw new Error(
     'Downgrade not supported for migration 019_grading_core. ' +
-    'This migration introduces immutable grading tables. Use database restore from backup instead.',
+      'This migration introduces immutable grading tables. Use database restore from backup instead.'
   )
 }

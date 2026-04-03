@@ -8,8 +8,19 @@
  * Schema: 1.25.0
  */
 
-import { pgTable, uuid, numeric, boolean, varchar, timestamp, jsonb, uniqueIndex, index, foreignKey } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
+import {
+  boolean,
+  foreignKey,
+  index,
+  jsonb,
+  numeric,
+  pgTable,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core'
 import { gradingResults } from './grading-results.schema'
 
 export const gradingQuestionResults = pgTable(
@@ -33,9 +44,12 @@ export const gradingQuestionResults = pgTable(
     uniqueIndex('uq_grading_question_results_attempt_question').on(
       table.workspace_id,
       table.attempt_id,
-      table.question_id,
+      table.question_id
     ),
-    index('idx_grading_question_results_workspace_attempt').on(table.workspace_id, table.attempt_id),
+    index('idx_grading_question_results_workspace_attempt').on(
+      table.workspace_id,
+      table.attempt_id
+    ),
     index('idx_grading_question_results_grading_result').on(table.grading_result_id),
     foreignKey({
       columns: [table.grading_result_id],
@@ -43,7 +57,7 @@ export const gradingQuestionResults = pgTable(
     }),
     sql`CHECK (${table.awarded_score} >= 0 AND ${table.awarded_score} <= ${table.question_score})`,
     sql`CHECK (${table.question_type} IN ('MCQ_SINGLE', 'MCQ_MULTIPLE', 'MCQ_TRUE_FALSE', 'MCQ_ARRANGEMENT', 'TRADITIONAL_TRUE_FALSE', 'TRADITIONAL_FILL_BLANK', 'TRADITIONAL_SHORT_ANSWER'))`,
-  ],
+  ]
 )
 
 export type GradingQuestionResult = typeof gradingQuestionResults.$inferSelect

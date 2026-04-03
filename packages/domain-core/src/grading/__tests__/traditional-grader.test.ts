@@ -7,13 +7,12 @@
  * 18+ assertions for all Traditional grading logic
  */
 
-import { describe, it, expect } from 'vitest'
-
+import { describe, expect, it } from 'vitest'
+import type { GradingConfigSnapshot, QuestionSnapshot } from '../grading.types'
 import {
   gradeTraditionalQuestion,
   validateTraditionalQuestionSnapshot,
 } from '../traditional-grader'
-import type { QuestionSnapshot, TraditionalAnswerResponse, GradingConfigSnapshot } from '../grading.types'
 
 describe('Traditional Grader', () => {
   const mockConfigSnapshot: GradingConfigSnapshot = {

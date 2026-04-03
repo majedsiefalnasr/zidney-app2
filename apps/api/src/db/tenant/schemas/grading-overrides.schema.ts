@@ -8,7 +8,16 @@
  * Schema: 1.25.0
  */
 
-import { pgTable, uuid, numeric, boolean, varchar, text, timestamp, foreignKey, index } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  foreignKey,
+  index,
+  numeric,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core'
 import { gradingResults } from './grading-results.schema'
 
 export const gradingOverrides = pgTable(
@@ -33,7 +42,7 @@ export const gradingOverrides = pgTable(
       columns: [table.grading_result_id],
       foreignColumns: [gradingResults.id],
     }),
-  ],
+  ]
 )
 
 export type GradingOverride = typeof gradingOverrides.$inferSelect

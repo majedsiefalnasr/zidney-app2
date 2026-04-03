@@ -29,7 +29,10 @@ import type { McqAnswerResponse, QuestionSnapshot, QuestionType } from './gradin
  * // Returns: { awardedScore: 5, isCorrect: true }
  */
 export function gradeMultipleChoiceQuestion(
-  questionType: Exclude<QuestionType, 'TRADITIONAL_TRUE_FALSE' | 'TRADITIONAL_FILL_BLANK' | 'TRADITIONAL_SHORT_ANSWER'>,
+  questionType: Exclude<
+    QuestionType,
+    'TRADITIONAL_TRUE_FALSE' | 'TRADITIONAL_FILL_BLANK' | 'TRADITIONAL_SHORT_ANSWER'
+  >,
   questionSnapshot: QuestionSnapshot,
   userResponse: McqAnswerResponse | unknown
 ): { awardedScore: number; isCorrect: boolean } {
@@ -178,7 +181,12 @@ function gradeMcqArrangement(
  * @returns true if valid, false otherwise
  */
 export function validateMcqQuestionSnapshot(snapshot: QuestionSnapshot): boolean {
-  if (!snapshot || !snapshot.type || !snapshot.score || typeof snapshot.correct_answer === 'undefined') {
+  if (
+    !snapshot ||
+    !snapshot.type ||
+    !snapshot.score ||
+    typeof snapshot.correct_answer === 'undefined'
+  ) {
     return false
   }
 

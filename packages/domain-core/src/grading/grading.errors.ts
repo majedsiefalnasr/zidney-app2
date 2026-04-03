@@ -9,6 +9,7 @@
  */
 
 import type { APIErrorResponse } from '@zidney/types'
+import { MasterDBErrorCode } from '@zidney/types'
 
 /**
  * Grading-specific error codes
@@ -45,10 +46,38 @@ export const GRADING_ERROR_MESSAGES: Record<GradingErrorCode, string> = {
   [GRADING_ERROR_CODES.ATTEMPT_NOT_FOUND]: 'Attempt not found.',
   [GRADING_ERROR_CODES.ATTEMPT_ALREADY_GRADED]: 'Attempt has already been graded.',
   [GRADING_ERROR_CODES.INVALID_QUESTION_RESPONSE]: 'Invalid response provided for question.',
-  [GRADING_ERROR_CODES.CONFIG_SNAPSHOT_CORRUPTED]: 'Grading configuration snapshot is invalid or corrupted.',
-  [GRADING_ERROR_CODES.QUESTION_SNAPSHOT_MISSING]: 'Required question snapshot is missing from attempt.',
+  [GRADING_ERROR_CODES.CONFIG_SNAPSHOT_CORRUPTED]:
+    'Grading configuration snapshot is invalid or corrupted.',
+  [GRADING_ERROR_CODES.QUESTION_SNAPSHOT_MISSING]:
+    'Required question snapshot is missing from attempt.',
   [GRADING_ERROR_CODES.GRADING_ENGINE_ERROR]: 'An internal grading engine error occurred.',
   [GRADING_ERROR_CODES.WORKSPACE_ISOLATION_VIOLATION]: 'Workspace isolation violation detected.',
+}
+
+/**
+ * Map grading-specific error codes to master database error codes.
+ * Translates domain-layer error codes to platform-wide error codes.
+ */
+export function mapGradingErrorToMasterCode(code: GradingErrorCode): MasterDBErrorCode {
+  // Map grading errors to closest matching master error codes by HTTP status
+  switch (code) {
+    case GRADING_ERROR_CODES.ATTEMPT_NOT_FOUND:
+      return MasterDBErrorCode.PRODUCT_NOT_FOUND // 404
+    case GRADING_ERROR_CODES.ATTEMPT_ALREADY_GRADED:
+      return MasterDBErrorCode.LICENSE_STATE_CONFLICT // 409 Conflict
+    case GRADING_ERROR_CODES.INVALID_QUESTION_RESPONSE:
+      return MasterDBErrorCode.INVALID_REQUEST_BODY // 400
+    case GRADING_ERROR_CODES.CONFIG_SNAPSHOT_CORRUPTED:
+      return MasterDBErrorCode.DATABASE_ERROR // 500
+    case GRADING_ERROR_CODES.QUESTION_SNAPSHOT_MISSING:
+      return MasterDBErrorCode.DATABASE_ERROR // 500
+    case GRADING_ERROR_CODES.GRADING_ENGINE_ERROR:
+      return MasterDBErrorCode.INTERNAL_ERROR // 500
+    case GRADING_ERROR_CODES.WORKSPACE_ISOLATION_VIOLATION:
+      return MasterDBErrorCode.RBAC_DENIED // 403
+    default:
+      return MasterDBErrorCode.INTERNAL_ERROR
+  }
 }
 
 /**
@@ -59,11 +88,7 @@ export class GradingError extends Error {
   httpStatus: number
   details?: Record<string, unknown>
 
-  constructor(
-    code: GradingErrorCode,
-    message?: string,
-    details?: Record<string, unknown>
-  ) {
+  constructor(code: GradingErrorCode, message?: string, details?: Record<string, unknown>) {
     const finalMessage = message || GRADING_ERROR_MESSAGES[code]
     super(finalMessage)
     this.name = 'GradingError'
@@ -80,7 +105,7 @@ export class GradingError extends Error {
       success: false,
       data: null,
       error: {
-        code: this.code as any,
+        code: mapGradingErrorToMasterCode(this.code),
         message: this.message,
       },
     }

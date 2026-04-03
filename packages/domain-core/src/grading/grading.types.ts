@@ -10,7 +10,7 @@
 /**
  * Drizzle transaction type alias for database operations
  */
-export type DrizzleTransaction = any
+export type DrizzleTransaction = unknown
 
 /**
  * Input parameters for grading an attempt

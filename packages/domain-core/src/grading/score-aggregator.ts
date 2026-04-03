@@ -57,7 +57,12 @@ export function aggregateScores(
   }
 
   // Determine pass/fail based on pass_type
-  const passed = evaluatePassRule(totalScore, percentage, configSnapshot.pass_type, configSnapshot.pass_value)
+  const passed = evaluatePassRule(
+    totalScore,
+    percentage,
+    configSnapshot.pass_type,
+    configSnapshot.pass_value
+  )
 
   return {
     totalScore,

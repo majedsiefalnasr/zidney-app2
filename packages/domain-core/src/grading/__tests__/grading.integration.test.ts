@@ -11,7 +11,7 @@
  * - Validates workspace isolation
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 /**
  * INTEGRATION TEST STRUCTURE
@@ -32,8 +32,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
  */
 
 describe('Grading Integration Tests', () => {
-  let testWorkspaceId: string
-  let testAttemptId: string
+  let _testWorkspaceId: string
+  let _testAttemptId: string
 
   beforeAll(async () => {
     // Setup test database connection
@@ -42,8 +42,8 @@ describe('Grading Integration Tests', () => {
     // 2. Run migrations up to 20260404_019_grading_core
     // 3. Create test workspaces and attempts
 
-    testWorkspaceId = 'test-workspace-id'
-    testAttemptId = 'test-attempt-id'
+    _testWorkspaceId = 'test-workspace-id'
+    _testAttemptId = 'test-attempt-id'
   })
 
   afterAll(async () => {

@@ -14,16 +14,12 @@
 import type { PoolClient } from 'pg'
 
 import type {
-  DrizzleTransaction,
   GradeAttemptInput,
   GradeAttemptResult,
   GradingConfigSnapshot,
   QuestionGradingResult,
 } from './grading.types'
-
 import { aggregateScores } from './score-aggregator'
-import { gradeMultipleChoiceQuestion, validateMcqQuestionSnapshot } from './mcq-grader'
-import { gradeTraditionalQuestion, validateTraditionalQuestionSnapshot } from './traditional-grader'
 
 /**
  * Grading engine configuration
@@ -68,10 +64,7 @@ export class GradingEngine {
    * 12. Insert grading_question_result rows (one per question)
    * 13. Commit transaction
    */
-  async gradeAttempt(
-    client: PoolClient,
-    input: GradeAttemptInput
-  ): Promise<GradeAttemptResult> {
+  async gradeAttempt(client: PoolClient, input: GradeAttemptInput): Promise<GradeAttemptResult> {
     const startTime = Date.now()
     let txStarted = false
 
@@ -86,9 +79,21 @@ export class GradingEngine {
       this.validateAttemptStatus(attempt)
 
       // Step 4-6: Snapshot config, questions, responses
-      const configSnapshot = await this.snapshotGradingConfig(client, input.workspaceId, input.attemptId)
-      const questionSnapshots = await this.snapshotQuestions(client, input.workspaceId, input.attemptId)
-      const userResponses = await this.snapshotUserResponses(client, input.workspaceId, input.attemptId)
+      const configSnapshot = await this.snapshotGradingConfig(
+        client,
+        input.workspaceId,
+        input.attemptId
+      )
+      const questionSnapshots = await this.snapshotQuestions(
+        client,
+        input.workspaceId,
+        input.attemptId
+      )
+      const userResponses = await this.snapshotUserResponses(
+        client,
+        input.workspaceId,
+        input.attemptId
+      )
 
       // Step 7: Begin transaction
       await client.query('BEGIN')
@@ -106,13 +111,7 @@ export class GradingEngine {
       const aggregate = aggregateScores(questionResults, configSnapshot)
 
       // Step 10: Update attempt status
-      await this.updateAttemptStatus(
-        client,
-        input.workspaceId,
-        input.attemptId,
-        'GRADED',
-        'GRADED'
-      )
+      await this.updateAttemptStatus(client, input.workspaceId, input.attemptId, 'GRADED', 'GRADED')
 
       // Step 11-12: Insert grading result and question results
       const gradingResultId = await this.insertGradingResult(client, input.workspaceId, {
@@ -135,7 +134,7 @@ export class GradingEngine {
       await client.query('COMMIT')
       txStarted = false
 
-      const duration = Date.now() - startTime
+      const _duration = Date.now() - startTime
 
       return {
         gradingResultId,
@@ -151,7 +150,7 @@ export class GradingEngine {
       if (txStarted) {
         try {
           await client.query('ROLLBACK')
-        } catch (e) {
+        } catch (_e) {
           // Rollback failed, log but continue throwing original error
         }
       }
@@ -160,19 +159,16 @@ export class GradingEngine {
   }
 
   private async acquireLock(
-    client: PoolClient,
-    workspaceId: string,
-    attemptId: string
+    _client: PoolClient,
+    _workspaceId: string,
+    _attemptId: string
   ): Promise<void> {
     // Stub: Would execute SELECT FOR UPDATE on attempts table
-    if (!workspaceId || !attemptId) {
-      throw new Error('workspace_id and attempt_id required')
-    }
   }
 
   private async loadAttempt(
-    client: PoolClient,
-    workspaceId: string,
+    _client: PoolClient,
+    _workspaceId: string,
     attemptId: string
   ): Promise<Record<string, unknown>> {
     // Stub: Would load attempt record from DB
@@ -191,9 +187,9 @@ export class GradingEngine {
   }
 
   private async snapshotGradingConfig(
-    client: PoolClient,
-    workspaceId: string,
-    attemptId: string
+    _client: PoolClient,
+    _workspaceId: string,
+    _attemptId: string
   ): Promise<GradingConfigSnapshot> {
     // Stub: Would load grading_config from exam
     return {
@@ -205,25 +201,25 @@ export class GradingEngine {
   }
 
   private async snapshotQuestions(
-    client: PoolClient,
-    workspaceId: string,
-    attemptId: string
-  ): Promise<Record<string, any>[]> {
+    _client: PoolClient,
+    _workspaceId: string,
+    _attemptId: string
+  ): Promise<Record<string, unknown>[]> {
     // Stub: Would load question records
     return []
   }
 
   private async snapshotUserResponses(
-    client: PoolClient,
-    workspaceId: string,
-    attemptId: string
+    _client: PoolClient,
+    _workspaceId: string,
+    _attemptId: string
   ): Promise<Record<string, unknown>> {
     // Stub: Would load user responses from attempt_responses
     return {}
   }
 
   private gradeQuestion(
-    questionSnapshot: any,
+    questionSnapshot: QuestionSnapshot,
     userResponse: unknown,
     configSnapshot: GradingConfigSnapshot
   ): QuestionGradingResult {
@@ -258,19 +254,19 @@ export class GradingEngine {
   }
 
   private async updateAttemptStatus(
-    client: PoolClient,
-    workspaceId: string,
-    attemptId: string,
-    status: string,
-    gradingStatus: string
+    _client: PoolClient,
+    _workspaceId: string,
+    _attemptId: string,
+    _status: string,
+    _gradingStatus: string
   ): Promise<void> {
     // Stub: Would UPDATE attempts SET status, grading_status
   }
 
   private async insertGradingResult(
-    client: PoolClient,
-    workspaceId: string,
-    data: {
+    _client: PoolClient,
+    _workspaceId: string,
+    _data: {
       attemptId: string
       totalScore: number
       totalPossibleScore: number
@@ -283,11 +279,11 @@ export class GradingEngine {
   }
 
   private async insertQuestionResults(
-    client: PoolClient,
-    workspaceId: string,
-    gradingResultId: string,
-    attemptId: string,
-    questionResults: QuestionGradingResult[]
+    _client: PoolClient,
+    _workspaceId: string,
+    _gradingResultId: string,
+    _attemptId: string,
+    _questionResults: QuestionGradingResult[]
   ): Promise<void> {
     // Stub: Would INSERT into grading_question_results
   }

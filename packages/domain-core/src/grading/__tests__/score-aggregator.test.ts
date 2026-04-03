@@ -7,10 +7,13 @@
  * 20+ assertions for score aggregation and pass/fail logic
  */
 
-import { describe, it, expect } from 'vitest'
-
-import { aggregateScores, evaluatePassRule, validateGradingConfigSnapshot } from '../score-aggregator'
-import type { QuestionGradingResult, GradingConfigSnapshot } from '../grading.types'
+import { describe, expect, it } from 'vitest'
+import type { GradingConfigSnapshot, QuestionGradingResult } from '../grading.types'
+import {
+  aggregateScores,
+  evaluatePassRule,
+  validateGradingConfigSnapshot,
+} from '../score-aggregator'
 
 describe('Score Aggregator', () => {
   describe('aggregateScores', () => {

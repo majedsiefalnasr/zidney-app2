@@ -11,17 +11,17 @@
 
 **Status:** ✅ PASSED — All 9/9 criteria met
 
-| Criterion | Status | Evidence |
-|-----------|--------|----------|
-| Tenant Isolation | ✅ PASS | All queries scope by workspace_id; workspace_id on all new tables; composite indexes on (workspace_id, *) |
-| Snapshot Integrity | ✅ PASS | grading_config_snapshot stored at attempt start; grading engine reads only snapshot; no references to live exam config |
-| Transactionality | ✅ PASS | SELECT FOR UPDATE locks attempt row; all grading compute + inserts + updates in single tx; atomic COMMIT |
-| Idempotency | ✅ PASS | grading_status PENDING→GRADING→GRADED guards duplicate grading; second call returns existing grading_result |
-| Server-Authoritative Time | ✅ PASS | graded_at computed server-side; grading_question_results.created_at server-set; no client timestamp accepted |
-| Version Enforcement | ✅ PASS | grading_version stored per result; schema_version bumped to 1.25.0; provides audit trail for future grading logic changes |
-| Error Contract | ✅ PASS | All errors follow ZIDNEY_ERROR_CONTRACT: GradingError with code + httpStatus + message; 7 domain codes defined; mapped to 404/409/422/500 |
-| Structured Logging | ✅ PASS | gradeAttempt logs with workspace_slug, attempt_id, exam_id, total_score, passed, grading_duration_ms, correlation_id |
-| Concurrency Safety | ✅ PASS | SELECT FOR UPDATE row-lock; pessimistic locking prevents race conditions during concurrent submissions |
+| Criterion                 | Status  | Evidence                                                                                                                                  |
+| ------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Tenant Isolation          | ✅ PASS | All queries scope by workspace_id; workspace_id on all new tables; composite indexes on (workspace_id, \*)                                |
+| Snapshot Integrity        | ✅ PASS | grading_config_snapshot stored at attempt start; grading engine reads only snapshot; no references to live exam config                    |
+| Transactionality          | ✅ PASS | SELECT FOR UPDATE locks attempt row; all grading compute + inserts + updates in single tx; atomic COMMIT                                  |
+| Idempotency               | ✅ PASS | grading_status PENDING→GRADING→GRADED guards duplicate grading; second call returns existing grading_result                               |
+| Server-Authoritative Time | ✅ PASS | graded_at computed server-side; grading_question_results.created_at server-set; no client timestamp accepted                              |
+| Version Enforcement       | ✅ PASS | grading_version stored per result; schema_version bumped to 1.25.0; provides audit trail for future grading logic changes                 |
+| Error Contract            | ✅ PASS | All errors follow ZIDNEY_ERROR_CONTRACT: GradingError with code + httpStatus + message; 7 domain codes defined; mapped to 404/409/422/500 |
+| Structured Logging        | ✅ PASS | gradeAttempt logs with workspace_slug, attempt_id, exam_id, total_score, passed, grading_duration_ms, correlation_id                      |
+| Concurrency Safety        | ✅ PASS | SELECT FOR UPDATE row-lock; pessimistic locking prevents race conditions during concurrent submissions                                    |
 
 ---
 
@@ -126,7 +126,7 @@
 **Table: `grading_results`**
 
 ```
-Columns: id (UUID), workspace_id (UUID), attempt_id (UUID), 
+Columns: id (UUID), workspace_id (UUID), attempt_id (UUID),
          total_score (numeric 10,2), total_possible_score (numeric 10,2),
          percentage (numeric 5,2), passed (boolean),
          pass_type (varchar 10), pass_value (numeric 10,2),
@@ -221,16 +221,16 @@ Constraints:
 
 ✅ **PASS**
 
-| Module | Responsibility | Examples |
-|--------|-----------------|----------|
-| grading.types.ts | Type definitions | GradeAttemptInput, QuestionGradingResult |
-| grading.errors.ts | Error codes & mapping | GRADING_ATTEMPT_NOT_FOUND → 404 |
-| mcq-grader.ts | MCQ grading logic | SINGLE, MULTIPLE, ARRANGEMENT branches |
+| Module                | Responsibility            | Examples                                              |
+| --------------------- | ------------------------- | ----------------------------------------------------- |
+| grading.types.ts      | Type definitions          | GradeAttemptInput, QuestionGradingResult              |
+| grading.errors.ts     | Error codes & mapping     | GRADING_ATTEMPT_NOT_FOUND → 404                       |
+| mcq-grader.ts         | MCQ grading logic         | SINGLE, MULTIPLE, ARRANGEMENT branches                |
 | traditional-grader.ts | Traditional grading logic | FILL_BLANK case normalization, SHORT_ANSWER self-eval |
-| score-aggregator.ts | Aggregation logic | SUM, percentage, pass/fail determination |
-| grading.repository.ts | DB persistence | findAttemptForGrading, insertGradingResult |
-| grading-engine.ts | Orchestration | 13-step transactional flow |
-| index.ts | Barrel exports | Public API surface |
+| score-aggregator.ts   | Aggregation logic         | SUM, percentage, pass/fail determination              |
+| grading.repository.ts | DB persistence            | findAttemptForGrading, insertGradingResult            |
+| grading-engine.ts     | Orchestration             | 13-step transactional flow                            |
+| index.ts              | Barrel exports            | Public API surface                                    |
 
 ### 4.3 Testability
 
@@ -249,14 +249,14 @@ Constraints:
 
 ✅ **PASS** — All 7 question types covered
 
-| Type | Handler | Logic |
-|------|---------|-------|
-| MCQ_SINGLE | mcqGrader | selectedOptionId === correctOptionId |
-| MCQ_MULTIPLE | mcqGrader | sorted array equality check |
-| MCQ_TRUE_FALSE | mcqGrader | boolean equality |
-| MCQ_ARRANGEMENT | mcqGrader | index-by-index sequence match |
-| TRADITIONAL_TRUE_FALSE | traditionalGrader | boolean equality |
-| TRADITIONAL_FILL_BLANK | traditionalGrader | string match ± case normalization |
+| Type                     | Handler           | Logic                                  |
+| ------------------------ | ----------------- | -------------------------------------- |
+| MCQ_SINGLE               | mcqGrader         | selectedOptionId === correctOptionId   |
+| MCQ_MULTIPLE             | mcqGrader         | sorted array equality check            |
+| MCQ_TRUE_FALSE           | mcqGrader         | boolean equality                       |
+| MCQ_ARRANGEMENT          | mcqGrader         | index-by-index sequence match          |
+| TRADITIONAL_TRUE_FALSE   | traditionalGrader | boolean equality                       |
+| TRADITIONAL_FILL_BLANK   | traditionalGrader | string match ± case normalization      |
 | TRADITIONAL_SHORT_ANSWER | traditionalGrader | self-evaluated (explicit awardedScore) |
 
 ### 5.2 Score Aggregation
@@ -273,11 +273,11 @@ passed = (pass_type === PERCENTAGE ? percentage >= pass_value : totalScore >= pa
 
 ✅ **PASS** — All handled
 
-| Trigger | Behavior |
-|---------|----------|
-| Manual submit | status SUBMITTED → graded |
-| Auto-submit (TIME_EXPIRED) | forced_submission=true, graded |
-| Late submission | rejected before grading with error |
+| Trigger                    | Behavior                           |
+| -------------------------- | ---------------------------------- |
+| Manual submit              | status SUBMITTED → graded          |
+| Auto-submit (TIME_EXPIRED) | forced_submission=true, graded     |
+| Late submission            | rejected before grading with error |
 
 ### 5.4 Immutability After Grading
 
@@ -359,13 +359,13 @@ passed = (pass_type === PERCENTAGE ? percentage >= pass_value : totalScore >= pa
 
 ## 8. Risk Assessment
 
-| Risk | Severity | Mitigation |
-|------|----------|-----------|
-| Concurrent grading of same attempt | MEDIUM | SELECT FOR UPDATE + idempotency check |
-| Snapshot data corruption | LOW | Schema validation + type definitions |
-| Score overflow (totalScore > numeric 10,2 max) | LOW | Application layer validates question_score values < 9999.99 |
-| Late submission bypass | MEDIUM | Submission layer validates deadline before invoking gradeAttempt |
-| Admin override audit trail loss | LOW | immutable grading_overrides table with all prior state |
+| Risk                                           | Severity | Mitigation                                                       |
+| ---------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| Concurrent grading of same attempt             | MEDIUM   | SELECT FOR UPDATE + idempotency check                            |
+| Snapshot data corruption                       | LOW      | Schema validation + type definitions                             |
+| Score overflow (totalScore > numeric 10,2 max) | LOW      | Application layer validates question_score values < 9999.99      |
+| Late submission bypass                         | MEDIUM   | Submission layer validates deadline before invoking gradeAttempt |
+| Admin override audit trail loss                | LOW      | immutable grading_overrides table with all prior state           |
 
 **Overall Risk Level:** 🟢 **LOW** — All identified risks mitigated by design
 

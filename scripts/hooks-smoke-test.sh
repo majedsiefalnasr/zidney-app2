@@ -1,12 +1,18 @@
-#!/bin/sh
-set -e
+#!/bin/bash
+# ───────────────────────────────────────────────────────────────────────────
+# START: Smoke Test Husky Hooks
+# Validates commit-msg, pre-commit, and pre-push hooks locally with mocked tools
+# ───────────────────────────────────────────────────────────────────────────
 
-# Smoke test for Husky hooks (commit-msg, pre-commit, pre-push)
-# - Runs hooks locally with mocked external tools to avoid heavy operations
-# - Does not create a real commit or push
+set -e
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT" || exit 1
+
+SHELL_HELPER_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$SHELL_HELPER_DIR/utils/shell-ai.sh"
+shell_ai_parse_args "$@"
+shell_ai_init "scripts/hooks-smoke-test.sh"
 
 TMP_BIN="$(mktemp -d)"
 cleanup() { rm -rf "$TMP_BIN"; rm -f "$MSGFILE"; rm -f "$TESTFILE"; }
@@ -62,4 +68,9 @@ echo "=== Running pre-commit hook ==="
 echo "=== Running pre-push hook (dry-run via mocked tools) ==="
 ./.husky/pre-push && echo "pre-push: OK" || { echo "pre-push: FAILED"; exit 1; }
 
-echo "=== Smoke test succeeded ==="
+echo ""
+echo "───────────────────────────────────────────────────────────────────────────"
+echo "RESULT"
+echo "Status: All Husky hooks passed (commit-msg, pre-commit, pre-push)"
+echo "───────────────────────────────────────────────────────────────────────────"
+exit 0
