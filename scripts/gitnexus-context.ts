@@ -72,8 +72,9 @@ interface DependencyEntry {
 
 interface ArchitectureBrain {
   modules: string[] | Record<string, unknown>
-  layers: Record<string, string>
-  dependencies: Record<string, string[] | DependencyEntry>
+  layers?: Record<string, string>
+  dependencies?: Record<string, string[] | DependencyEntry>
+  edges?: Array<{ from: string; to: string }>
   hotspots?: Array<{ module: string; score: number }>
   architectureScore?: number
 }
@@ -197,23 +198,31 @@ export function buildDependencyGraph(
   const brainModules = Array.isArray(brain.modules) ? brain.modules : Object.keys(brain.modules)
   const targetModules = full ? brainModules : modules
 
-  for (const mod of targetModules) {
-    const depsEntry = brain.dependencies[mod]
-    const deps = Array.isArray(depsEntry)
-      ? depsEntry
-      : depsEntry && typeof depsEntry === 'object' && 'imports' in depsEntry
-        ? (depsEntry as DependencyEntry).imports
-        : []
-    graph[mod] = [...deps].sort()
+  if (brain.dependencies) {
+    for (const mod of targetModules) {
+      const depsEntry = brain.dependencies[mod]
+      const deps = Array.isArray(depsEntry)
+        ? depsEntry
+        : depsEntry && typeof depsEntry === 'object' && 'imports' in depsEntry
+          ? (depsEntry as DependencyEntry).imports
+          : []
+      graph[mod] = [...deps].sort()
+    }
+  } else if (brain.edges) {
+    const edgeDeps: Record<string, Set<string>> = {}
+    for (const edge of brain.edges) {
+      if (!edgeDeps[edge.from]) edgeDeps[edge.from] = new Set()
+      const deps = edgeDeps[edge.from]!
+      if (edge.to) deps.add(edge.to)
+    }
+    for (const mod of targetModules) {
+      graph[mod] = Array.from(edgeDeps[mod] ?? []).sort()
+    }
   }
 
-  // Sort keys for determinism
   return Object.fromEntries(Object.entries(graph).sort(([a], [b]) => a.localeCompare(b)))
 }
 
-/**
- * Map each module to its architecture layer using the brain's layer definitions.
- */
 export function buildArchitectureLayerMap(
   modules: string[],
   brain: ArchitectureBrain,
@@ -224,7 +233,7 @@ export function buildArchitectureLayerMap(
   const targetModules = full ? brainModules : modules
 
   for (const mod of targetModules) {
-    map[mod] = brain.layers[mod] ?? 'unknown'
+    map[mod] = brain.layers?.[mod] ?? 'unknown'
   }
 
   return Object.fromEntries(Object.entries(map).sort(([a], [b]) => a.localeCompare(b)))
@@ -275,7 +284,7 @@ export function computeRiskIndicators(
     const filesInModule = changedFiles.filter((f) => f.startsWith(`${mod}/`))
     const hotspotBase = hotspotMap.get(mod) ?? 0
     const fileBonus = Math.min(filesInModule.length * 5, 40)
-    const depsRaw = brain.dependencies[mod]
+    const depsRaw = brain.dependencies?.[mod]
     const depsLen = Array.isArray(depsRaw)
       ? depsRaw.length
       : depsRaw && typeof depsRaw === 'object' && 'imports' in depsRaw
