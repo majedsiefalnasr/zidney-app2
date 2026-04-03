@@ -9,17 +9,20 @@ Scope: Backoffice staff lifecycle, assignment boundaries, and enforcement model
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-04-03T02:00:00Z
+Last Updated: 2026-04-03T03:00:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Staff CRUD (create, list, get, update, disable, enable, delete)
-- Migration: add `status` column, widen `password_hash` to text, create `staff_hierarchy_levels`
-- Domain-core `staff` module with Argon2id password hashing
-- Backoffice login updated to use `backoffice_staff_users` + Argon2id
-- Dead code `users.ts` removed
+- Staff CRUD (create, list, get, update, disable, enable, delete) — 7 endpoints
+- Migration `20260404_020_staff_management.ts`: schema 1.25.0 → 1.26.0
+- Domain-core `packages/domain-core/src/staff/` module (5 files)
+- `packages/domain-core/src/auth/staff-password.ts` — Argon2id hash/verify
+- `packages/validation/src/staff.schema.ts` — 4 Zod schemas
+- Backoffice login updated to `backoffice_staff_users` + JOIN roles + Argon2id
+- Dead code `apps/api/src/routes/backoffice/users.ts` deleted
+- 3 integration test files (crud, isolation, limit)
 
 Deferred Scope:
 
@@ -30,10 +33,13 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- All 7 clarifications resolved and encoded in plan
+- ADR-0001 (database-per-tenant) preserved throughout
+- Migration is forward-only; rollback documented but not embedded in migration file
 
 Notes:
-All specification ambiguities resolved. 5 clarifications locked. Ready for technical planning.
+Technical plan complete. 21 new files, 7 modified, 1 deleted. Task breakdown in progress.
 
 ---
 
