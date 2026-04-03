@@ -9,9 +9,7 @@
  * This stub is required for FK reference from staff_hierarchy_levels.
  */
 
-import { pgEnum, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
-
-export const hierarchyNodeStatusEnum = pgEnum('hierarchy_node_status', ['ENABLED', 'DISABLED'])
+import { pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
 export const hierarchyNodes = pgTable('hierarchy_nodes', {
   id: uuid('id').primaryKey().defaultRandom(),

@@ -318,6 +318,7 @@ You MUST verify:
 - **Log only safe fields**: Destructure to `{ message, code }` from `error instanceof Error ? error : new Error(String(error))`.
 - **Include correlation**: Always include `request_id` / `correlation_id` in catch logs.
 - **Correct pattern**:
+
   ```typescript
   } catch (error) {
     const safeError = error instanceof Error ? error : new Error(String(error))
@@ -348,6 +349,7 @@ You MUST verify:
 - **Use explicit try/catch**: Wrap `await c.req.json()` in a try/catch that returns a `400 INVALID_JSON` response immediately.
 - **Include `request_id`**: The `INVALID_JSON` error response must include `request_id` for client traceability.
 - **Correct pattern**:
+
   ```typescript
   let body: unknown
   try {

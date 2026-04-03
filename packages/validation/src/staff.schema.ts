@@ -105,9 +105,20 @@ export const staffListQuerySchema = z.object({
     .max(100, 'limit must not exceed 100')
     .optional()
     .default(20),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']).optional(),
-  division_id: z.string().uuid('division_id must be a valid UUID').optional(),
-  search: z.string().max(200, 'search must not exceed 200 characters').optional(),
+  status: z
+    .enum(['ACTIVE', 'INACTIVE', 'SUSPENDED'])
+    .optional()
+    .describe('Filter by staff status (ACTIVE, INACTIVE, or SUSPENDED)'),
+  division_id: z
+    .string()
+    .uuid('division_id must be a valid UUID')
+    .optional()
+    .describe('UUID of the division to filter by'),
+  search: z
+    .string()
+    .max(200, 'search must not exceed 200 characters')
+    .optional()
+    .describe('Search term to filter by name or email (max 200 characters)'),
 })
 
 export type StaffListQuery = z.infer<typeof staffListQuerySchema>

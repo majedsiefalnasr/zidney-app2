@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.0.0",
+  "schema_version": "1.0.0",
   "generated_at": "2026-04-03T14:43:10.270Z",
   "metadata": {
     "total_modules": 14,
@@ -31,22 +31,92 @@
       "order": 4
     }
   ],
-  "modules": [
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/api",
-    "apps/worker",
-    "packages/job-queue",
-    "packages/types",
-    "packages/logger",
-    "packages/config",
-    "packages/redis-utils",
-    "packages/ui-system",
-    "packages/api-client",
-    "packages/domain-core",
-    "packages/validation"
-  ],
+  "modules": {
+    "apps/mmc": {
+      "layer": "ui",
+      "type": "application",
+      "description": "Multi-Media Creator application",
+      "path": "apps/mmc"
+    },
+    "apps/frontoffice": {
+      "layer": "ui",
+      "type": "application",
+      "description": "Frontoffice user-facing application",
+      "path": "apps/frontoffice"
+    },
+    "apps/backoffice": {
+      "layer": "runtime",
+      "type": "application",
+      "description": "Backoffice administration application",
+      "path": "apps/backoffice"
+    },
+    "apps/api": {
+      "layer": "runtime",
+      "type": "application",
+      "description": "Core API application",
+      "path": "apps/api"
+    },
+    "apps/worker": {
+      "layer": "infrastructure",
+      "type": "application",
+      "description": "Background job worker",
+      "path": "apps/worker"
+    },
+    "packages/job-queue": {
+      "layer": "infrastructure",
+      "type": "package",
+      "description": "Job queue management",
+      "path": "packages/job-queue"
+    },
+    "packages/types": {
+      "layer": "domain",
+      "type": "package",
+      "description": "Core type definitions",
+      "path": "packages/types"
+    },
+    "packages/logger": {
+      "layer": "infrastructure",
+      "type": "package",
+      "description": "Structured logging",
+      "path": "packages/logger"
+    },
+    "packages/config": {
+      "layer": "infrastructure",
+      "type": "package",
+      "description": "Configuration management",
+      "path": "packages/config"
+    },
+    "packages/redis-utils": {
+      "layer": "infrastructure",
+      "type": "package",
+      "description": "Redis utilities and abstractions",
+      "path": "packages/redis-utils"
+    },
+    "packages/ui-system": {
+      "layer": "ui",
+      "type": "package",
+      "description": "UI component system",
+      "path": "packages/ui-system"
+    },
+    "packages/api-client": {
+      "layer": "runtime",
+      "type": "package",
+      "description": "API client library",
+      "path": "packages/api-client"
+    },
+    "packages/domain-core": {
+      "layer": "domain",
+      "type": "package",
+      "description": "Core domain logic and services",
+      "path": "packages/domain-core"
+    },
+    "packages/validation": {
+      "layer": "runtime",
+      "type": "package",
+      "description": "Validation schemas and utilities",
+      "path": "packages/validation"
+    }
+  },
   "rules": {},
   "dependencies": {
     "apps/mmc": {

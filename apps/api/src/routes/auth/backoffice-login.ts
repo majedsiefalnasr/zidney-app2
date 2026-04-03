@@ -102,8 +102,23 @@ export async function backofficeLoginHandler(c: Context) {
 
   try {
     // === STEP 1: Parse & validate request ===
-    const body = await c.req.json().catch(() => ({}))
-    const { email, password } = body
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'INVALID_JSON',
+            message: 'Request body must be valid JSON',
+          },
+        },
+        400
+      )
+    }
+    const { email, password } = body as Record<string, unknown>
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return c.json(

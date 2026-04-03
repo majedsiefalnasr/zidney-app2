@@ -27,7 +27,7 @@ export function formatAssessmentAsMarkdown(assessment: ArchitectureHealthAssessm
         .join('\n')
     : '- No findings detected.'
 
-  return [
+  const output = [
     '# Architecture Health Summary',
     '',
     `- Score: ${assessment.overall.score}`,
@@ -45,15 +45,17 @@ export function formatAssessmentAsMarkdown(assessment: ArchitectureHealthAssessm
     ),
     '',
   ].join('\n')
+  return sanitizePaths(output)
 }
 
 export function formatAssessmentAsText(assessment: ArchitectureHealthAssessment): string {
-  return [
+  const output = [
     `Architecture Health Score: ${assessment.overall.score}`,
     `Health State: ${assessment.overall.health_state}`,
     `Verdict: ${assessment.overall.verdict}`,
     `Findings: ${assessment.findings.length}`,
   ].join('\n')
+  return sanitizePaths(output)
 }
 
 export function formatDriftReportAsMarkdown(assessment: ArchitectureHealthAssessment): string {
@@ -61,7 +63,7 @@ export function formatDriftReportAsMarkdown(assessment: ArchitectureHealthAssess
     (finding) => finding.classification === 'drift' || finding.classification === 'synchronization'
   )
 
-  return [
+  const output = [
     '# Architecture Drift Report',
     '',
     ...(relevantFindings.length > 0
@@ -72,4 +74,5 @@ export function formatDriftReportAsMarkdown(assessment: ArchitectureHealthAssess
       : ['- No drift or synchronization findings detected.']),
     '',
   ].join('\n')
+  return sanitizePaths(output)
 }

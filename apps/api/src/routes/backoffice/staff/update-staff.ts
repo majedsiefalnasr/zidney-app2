@@ -45,7 +45,7 @@ export async function handleUpdateStaff(c: Context) {
           success: false,
           data: null,
           error: {
-            code: 'MALFORMED_BODY',
+            code: 'INVALID_JSON',
             message: 'Request body is not valid JSON',
           },
           request_id: requestId,
