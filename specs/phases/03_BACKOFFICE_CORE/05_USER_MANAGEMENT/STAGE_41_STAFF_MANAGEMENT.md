@@ -9,9 +9,9 @@ Scope: Backoffice staff lifecycle, assignment boundaries, and enforcement model
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: MEDIUM
-Last Updated: 2026-04-03T01:00:00Z
+Last Updated: 2026-04-03T02:00:00Z
 
 Scope Defined:
 
@@ -30,10 +30,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarifications resolved inline. Planning step pending.
+All specification ambiguities resolved. 5 clarifications locked. Ready for technical planning.
 
 ---
 

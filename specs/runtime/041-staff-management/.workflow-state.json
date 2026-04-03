@@ -7,7 +7,7 @@
   "base_branch": "develop",
   "pkg_manager": "bun",
   "auto_advance": true,
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
   "drift_passed": false,
@@ -20,9 +20,10 @@
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-04-03T00:00:00Z",
-  "last_updated": "2026-04-03T00:00:00Z",
+  "last_updated": "2026-04-03T02:00:00Z",
   "step_timings": {
-    "specify": { "started_at": "2026-04-03T00:00:00Z", "completed_at": "2026-04-03T01:00:00Z" }
+    "specify": { "started_at": "2026-04-03T00:00:00Z", "completed_at": "2026-04-03T01:00:00Z" },
+    "clarify": { "started_at": "2026-04-03T01:00:00Z", "completed_at": "2026-04-03T02:00:00Z" }
   },
   "history": [
     {
@@ -33,6 +34,10 @@
     {
       "event": "specify_complete",
       "timestamp": "2026-04-03T01:00:00Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "timestamp": "2026-04-03T02:00:00Z"
     }
   ]
 }
