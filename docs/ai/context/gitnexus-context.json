@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-03-31T13:32:15.135Z",
-  "analyzedAt": "2026-03-31T13:32:15.135Z",
+  "generatedAt": "2026-04-03T21:23:30.602Z",
+  "analyzedAt": "2026-04-03T21:23:30.602Z",
   "analysisMode": "changed-only",
   "changedFiles": [],
   "impactedModules": [],
@@ -9,64 +9,64 @@
   "architectureLayerMap": {},
   "recentCommits": [
     {
-      "hash": "66a344e29c0c5faebe2c3abad3d113e1fe1e195f",
-      "message": "fix(ai-guard): log error as an object in loadTsAliases function",
+      "hash": "49fee50af148f52425d1885cef9bd90d1ccdc14a",
+      "message": "spec(042-student-management): implement step — workflow artifacts and stage BACKEND CLOSED",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T13:18:19+02:00"
+      "date": "2026-04-03T22:58:14+02:00"
     },
     {
-      "hash": "84a83209bf7a2cc401d9f7d72e008056fb213b6e",
-      "message": "fix(tests): console.warn in logger and db connection config",
+      "hash": "6f2c4aab80d014bafb81900ee2d0b70d6d5f72ad",
+      "message": "feat(042-student-management): implement student management system",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T13:04:51+02:00"
+      "date": "2026-04-03T22:53:02+02:00"
     },
     {
-      "hash": "27b53ee75fd03f999a901ff32e22e4ea89aebe87",
-      "message": "fix(dev:generate:script-docs): skip scripts starting with underscore",
+      "hash": "f1607e68d7bc65f36a61a113854a739d572d27bf",
+      "message": "feat(042-student-management): analyze — drift gate APPROVED, implementation authorized",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T12:45:50+02:00"
+      "date": "2026-04-03T21:55:58+02:00"
     },
     {
-      "hash": "191b8433620e1d72304debb4777568ba06e65e3b",
-      "message": "chore(docs): regenerate script registry and docs",
+      "hash": "71d56bde06cc24fe5556f2f8fe0b9dd214a11dc1",
+      "message": "feat(042-student-management): tasks — 25 atomic tasks across phases A-F",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T12:02:17+02:00"
+      "date": "2026-04-03T21:50:53+02:00"
     },
     {
-      "hash": "7ae546fe8afeaf6685574df7642b1aaff97332ce",
-      "message": "fix(ci): always run bun install via bun download cache",
+      "hash": "dfa2df9ba66e0e0921a60c716f33ad3e52b0ebb3",
+      "message": "feat(042-student-management): plan — implementation plan for student management",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T11:56:34+02:00"
+      "date": "2026-04-03T21:45:26+02:00"
     },
     {
-      "hash": "32c295b0a4c3705a4de340f03970d836b34d5e19",
-      "message": "fix(validate): exclude generated arch-health dir from script-usage scan",
+      "hash": "ca57b9fdd0ac999121e504a3d0561bff2d4eef2c",
+      "message": "feat(042-student-management): clarify — all ambiguities resolved",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T11:51:54+02:00"
+      "date": "2026-04-03T21:36:40+02:00"
     },
     {
-      "hash": "2475c52f1fdec5f45b4da4a11e5a66642d2c8e38",
-      "message": "fix(test): prevent test:integration from running all workspace projects",
+      "hash": "e69231bff890a6bfbb762300694f6a1b8f36e0b9",
+      "message": "feat(042-student-management): specify — student management feature specification",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T11:12:43+02:00"
+      "date": "2026-04-03T21:34:29+02:00"
     },
     {
-      "hash": "a7edad68e8228909781dd98c2acb280aa81e3594",
-      "message": "fix(arch-guard): resolve false arch-drift violations in dependency graph check",
+      "hash": "740d52f0bbe253152e753b3a1e2d2971c9ea4266",
+      "message": "chore(042-student-management): initialize stage branch and directory",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T10:53:00+02:00"
+      "date": "2026-04-03T21:22:57+02:00"
     },
     {
-      "hash": "60659c8dedf8fd2da9b8d6fdacee53f1a641537f",
-      "message": "fix(validate): resolve 3 script-usage violations",
+      "hash": "a13ad1d5f172e15276d158cb83409a5a1188eceb",
+      "message": "Merge pull request #86 from majedsiefalnasr/spec/041-staff-management",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T10:37:31+02:00"
+      "date": "2026-04-03T21:10:39+02:00"
     },
     {
-      "hash": "0644ae3a9dd6d768f901a573b44df0c2c5a7d615",
-      "message": "docs(034): add missing VALIDATION_REPORT.md for stage_production_ready check",
+      "hash": "dcdb5eb6d02f0ba385180ddf0eda1e1f8631b84e",
+      "message": "fix(041-staff-management): audit fixes — staff/auth/schema/migration & agent rules",
       "author": "Majed Sief Alnasr",
-      "date": "2026-03-31T10:31:33+02:00"
+      "date": "2026-04-03T20:59:47+02:00"
     }
   ],
   "riskIndicators": []
