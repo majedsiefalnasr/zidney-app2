@@ -27,9 +27,9 @@ Date: 2026-04-04
 
 ## Import Boundaries
 
-- [x] apps/_ → packages/_ only (no cross-app imports)
+- [x] `apps/*` → `packages/*` only (no cross-app imports)
 - [x] No UI → DB schema imports
-- [x] No packages/_ → apps/_ imports
+- [x] No `packages/*` → `apps/*` imports
 
 ## Functional Completeness
 

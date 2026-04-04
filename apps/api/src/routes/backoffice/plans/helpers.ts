@@ -56,9 +56,11 @@ export function buildAuditCtx(c: Context): AuditContext {
   }
 }
 
-// ---------------------------------------------------------------------------
 // Error Response Mapping
 // ---------------------------------------------------------------------------
+
+const ALLOWED_PLAN_ERROR_STATUSES = new Set<number>([400, 404, 409, 422, 500])
+const DEFAULT_ERROR_STATUS = 500
 
 export function planErrorResponse(c: Context, err: unknown) {
   const requestId = (c.get('request_id') as string | undefined) ?? null
@@ -67,7 +69,13 @@ export function planErrorResponse(c: Context, err: unknown) {
   const userId = user?.id
 
   if (err instanceof PlanError) {
-    const status = PLAN_ERROR_HTTP[err.code] as 400 | 404 | 409 | 422 | 500
+    // Safely resolve HTTP status code with runtime validation
+    const mappedStatus = PLAN_ERROR_HTTP[err.code]
+    let status: 400 | 404 | 409 | 422 | 500 = DEFAULT_ERROR_STATUS
+    if (typeof mappedStatus === 'number' && ALLOWED_PLAN_ERROR_STATUSES.has(mappedStatus)) {
+      status = mappedStatus as 400 | 404 | 409 | 422 | 500
+    }
+
     return c.json(
       {
         success: false,

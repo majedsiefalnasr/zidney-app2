@@ -16,6 +16,7 @@ const logger = createLogger('backoffice-plans-update')
 
 export async function handleUpdatePlan(c: Context) {
   try {
+    const requestId = (c.get('request_id') as string | undefined) ?? null
     const workspaceId: string = c.get('workspace_id')
     const correlationId: string = c.get('correlation_id')
 
@@ -29,6 +30,7 @@ export async function handleUpdatePlan(c: Context) {
             code: 'VALIDATION_ERROR',
             message: idParsed.error.issues[0]?.message ?? 'Invalid id',
           },
+          request_id: requestId,
         },
         422
       )
@@ -43,6 +45,7 @@ export async function handleUpdatePlan(c: Context) {
           success: false,
           data: null,
           error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' },
+          request_id: requestId,
         },
         400
       )
@@ -58,6 +61,7 @@ export async function handleUpdatePlan(c: Context) {
             code: 'VALIDATION_ERROR',
             message: parsed.error.issues[0]?.message ?? 'Invalid input',
           },
+          request_id: requestId,
         },
         422
       )

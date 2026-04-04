@@ -1,5 +1,5 @@
 /**
- * Cancel Subscription — DELETE /subscriptions/:id
+ * Cancel Subscription — POST /subscriptions/:id/cancel
  *
  * File: apps/api/src/routes/backoffice/subscriptions/cancel-subscription.ts
  * Stage: STAGE_44_PLANS_AND_SUBSCRIPTIONS
@@ -19,6 +19,7 @@ const logger = createLogger('backoffice-subscriptions-cancel')
 
 export async function handleCancelSubscription(c: Context) {
   try {
+    const requestId = (c.get('request_id') as string | undefined) ?? null
     const workspaceId: string = c.get('workspace_id')
     const correlationId: string = c.get('correlation_id')
 
@@ -32,6 +33,7 @@ export async function handleCancelSubscription(c: Context) {
             code: 'VALIDATION_ERROR',
             message: parsed.error.issues[0]?.message ?? 'Invalid id',
           },
+          request_id: requestId,
         },
         422
       )

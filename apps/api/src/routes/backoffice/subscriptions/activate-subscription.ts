@@ -60,6 +60,7 @@ export async function handleActivateSubscription(c: Context) {
 
     logger.debug('Activate subscription request', {
       workspace_id: workspaceId,
+      user_id: audit.user_id,
       student_id: parsed.data.student_id,
       plan_id: parsed.data.plan_id,
       correlation_id: correlationId,

@@ -10,7 +10,7 @@ workspace
 Status: PRODUCTION READY
 Step: stage_production_ready
 Risk Level: MEDIUM
-Closure Date: 2025-01-09
+Closure Date: 2026-04-04
 
 Implementation: COMPLETE
 Tasks: 27 / 27 completed
@@ -54,49 +54,7 @@ Audit Results:
 
 Notes:
 Stage is production ready. No structural backend modifications allowed.
-Modifications require a new migration stage.
-
-Scope Planned:
-
-- Migration 023: plans + subscriptions tables with constraints and partial indexes
-- Drizzle schemas: plans.schema.ts, subscriptions.schema.ts
-- Domain modules: packages/domain-core/src/plans/ and /subscriptions/
-- 9 new API endpoints: 5 plans routes + 4 subscriptions routes — mounted via app.ts
-- RBAC: PLANS and SUBSCRIPTIONS PermissionModule entries added
-- Validation: plans.schemas.ts and subscriptions.schemas.ts in packages/validation
-- SERIALIZABLE transaction for activateSubscription (race-condition safe)
-- Student subscription_status sync within same transaction
-- subscription-enforcement.ts middleware: created but NOT mounted (Stage 45+)
-
-Deferred Scope:
-
-- Full payment gateway integration (FR-05)
-- Auto-renew worker job (FR-07)
-- Module access enforcement on student routes (FR-08)
-- Subscription enforcement middleware mounting
-
-Architecture Governance Compliance:
-
-- 27 atomic tasks generated across 13 execution waves
-- Plans and subscriptions domain layers fully parallelized
-- Migration T001 isolated as first task (unblocks all schema work)
-- Task dependency order enforces strict import boundary compliance
-
-Deferred Scope:
-
-- Full payment gateway integration (FR-05)
-- Auto-renew worker job (FR-07)
-- Module access enforcement on student routes (FR-08)
-- subscription-enforcement middleware mounting (Stage 45+)
-
-Architecture Governance Compliance:
-
-- Task set compliant — drift analysis required before implementation
-- All writes transactional in task design
-- Student status sync atomic within subscriptions tasks
-
-Notes:
-Atomic task set generated. Drift analysis gate pending.
+Modifications require a new migration stage. **Validate stage status before modifying any spec.**
 
 ---
 

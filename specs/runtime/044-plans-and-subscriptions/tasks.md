@@ -3,14 +3,14 @@
 **Stage:** STAGE_44_PLANS_AND_SUBSCRIPTIONS
 **Phase:** 03_BACKOFFICE_CORE / 06_COMMERCIAL_LAYER
 **Branch:** `spec/044-plans-and-subscriptions`
-**Tasks Total:** 24
-**Generated:** 2025-01-09
+**Tasks Total:** 27
+**Generated:** 2026-04-04
 
 ---
 
 ## Task Format
 
-```
+```text
 - [X] T001 [P] [US1] Description — exact/file/path.ts
 ```
 
@@ -69,7 +69,7 @@
 
 ## Wave 7 — Domain-core root barrel + validation schemas (all parallel)
 
-- [x] T016 [P] Update domain-core root barrel (export _ as plans, export _ as subscriptions) — `packages/domain-core/src/index.ts`
+- [x] T016 [P] Update domain-core root barrel (export `*` as plans, export `*` as subscriptions) — `packages/domain-core/src/index.ts`
 - [x] T017 [P] Create plans validation schemas (planIdParamsSchema, createPlanBodySchema, updatePlanBodySchema) — `packages/validation/src/backoffice/plans.schemas.ts`
 - [x] T018 [P] Create subscriptions validation schemas (subscriptionIdParamsSchema, createSubscriptionBodySchema, listSubscriptionsQuerySchema) — `packages/validation/src/backoffice/subscriptions.schemas.ts`
 

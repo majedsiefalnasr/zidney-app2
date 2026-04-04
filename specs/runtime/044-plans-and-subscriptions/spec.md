@@ -164,7 +164,7 @@ Steps:
 
 ### New: `packages/domain-core/src/plans/`
 
-```
+```text
 plans.types.ts        — Pure types: PlanRow, PlanInput, PlanUpdateInput
 plans.repository.ts   — listPlans, getPlan, createPlan, updatePlan, softDeletePlan
 plans.service.ts      — Business logic: validatePlan, canDeletePlan, getActivePlans
@@ -174,7 +174,7 @@ index.ts              — Public exports
 
 ### New: `packages/domain-core/src/subscriptions/`
 
-```
+```text
 subscriptions.types.ts        — Pure types: SubscriptionRow, SubscriptionInput
 subscriptions.repository.ts   — createSubscription, getActiveSubscription, listStudentSubscriptions, expireSubscriptions
 subscriptions.service.ts      — activateSubscription, cancelSubscription, checkSubscriptionAccess, syncStudentStatus
@@ -458,12 +458,14 @@ app.route("/api/v1/backoffice/workspace", subscriptionsRouter);
 - The `students.subscription_status` column retains its Stage 42 type constraint (`'ACTIVE' | 'SUSPENDED' | 'EXPIRED' | 'NONE'`). No migration alters this column.
 - The `subscriptions.status` column uses Stage 44's own enum: `'ACTIVE' | 'EXPIRED' | 'CANCELED' | 'PENDING'`.
 - Status synchronization mapping (Stage 44 → students table):
-  | subscriptions.status | → students.subscription_status |
-  |----------------------|-------------------------------|
-  | `ACTIVE` | `'ACTIVE'` |
-  | `EXPIRED` | `'EXPIRED'` |
-  | `CANCELED` | `'NONE'` |
-  | `PENDING` | `'NONE'` (not yet activated) |
+
+| subscriptions.status | → students.subscription_status |
+| -------------------- | ------------------------------ |
+| `ACTIVE`             | `'ACTIVE'`                     |
+| `EXPIRED`            | `'EXPIRED'`                    |
+| `CANCELED`           | `'NONE'`                       |
+| `PENDING`            | `'NONE'` (not yet activated)   |
+
 - `SUSPENDED` is a Stage 42 flag set by admin action on the student record directly (via `PATCH /students/:id/disable`). It is not a subscription state. Stage 44 does not set or unset `SUSPENDED`.
 - The `SubscriptionStatus` type in `packages/domain-core/src/students/students.types.ts` is unchanged in Stage 44.
 - New type `SubscriptionState` will be introduced in `packages/domain-core/src/subscriptions/subscriptions.types.ts` for the subscriptions table values: `'ACTIVE' | 'EXPIRED' | 'CANCELED' | 'PENDING'`.

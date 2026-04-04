@@ -313,5 +313,6 @@ describe('cancelSubscriptionService', () => {
     const err = await cancelSubscriptionService(pool as any, SUB_ID, audit).catch((e) => e)
     expect(err).toBeInstanceOf(SubscriptionError)
     expect((err as SubscriptionError).code).toBe('SUBSCRIPTION_CANNOT_CANCEL')
+    expect(pool._client.release).toHaveBeenCalledTimes(1)
   })
 })

@@ -152,7 +152,14 @@ export async function insertPlan(
       JSON.stringify(input.enabled_modules ?? []),
     ]
   )
-  return toPlanRecord(rows[0] as PlanRow)
+
+  if (!rows[0]) {
+    throw new Error(
+      `insertPlan failed: no row returned from database. workspace_id: ${input.workspace_id}, name: ${input.name}`
+    )
+  }
+
+  return toPlanRecord(rows[0])
 }
 
 /**

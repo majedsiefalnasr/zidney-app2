@@ -4,7 +4,7 @@
 **Phase:** 03_BACKOFFICE_CORE / 06_COMMERCIAL_LAYER
 **Branch:** `spec/044-plans-and-subscriptions`
 **Status:** PRODUCTION READY
-**Closure Date:** 2025-01-09
+**Closure Date:** 2026-04-04
 **Tasks:** 27 / 27 completed
 
 ---

@@ -3,7 +3,7 @@
 **Stage:** STAGE_44_PLANS_AND_SUBSCRIPTIONS
 **Phase:** 03_BACKOFFICE_CORE / 06_COMMERCIAL_LAYER
 **Branch:** `spec/044-plans-and-subscriptions`
-**Report Date:** 2025-01-09
+**Report Date:** 2026-04-04
 **Tasks Total:** 27 (T001–T027)
 
 ---

@@ -1,7 +1,7 @@
 # Plan Report — Stage 44: Plans & Subscriptions
 
 **Step:** 3 — Plan
-**Date:** 2025-01-09
+**Date:** 2026-04-04
 **Stage:** STAGE_44_PLANS_AND_SUBSCRIPTIONS
 **Phase:** 03_BACKOFFICE_CORE / 06_COMMERCIAL_LAYER
 
@@ -105,7 +105,7 @@ All routes mount via `app.ts` directly (no `backoffice/index.ts` — pattern con
 
 ## Files to Create / Modify
 
-### New Files (24 total)
+### New Files (33 total)
 
 | File                                                                                       | Type               |
 | ------------------------------------------------------------------------------------------ | ------------------ |

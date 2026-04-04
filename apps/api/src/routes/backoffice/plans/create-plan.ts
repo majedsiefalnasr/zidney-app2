@@ -59,7 +59,8 @@ export async function handleCreatePlan(c: Context) {
       correlation_id: correlationId,
     })
 
-    const record = await createPlan(db, { workspace_id: workspaceId, ...parsed.data }, audit)
+    // Ensure workspace_id cannot be overridden by request input — server-authoritative value
+    const record = await createPlan(db, { ...parsed.data, workspace_id: workspaceId }, audit)
 
     return c.json({ success: true, data: record, error: null, request_id: requestId }, 201)
   } catch (err) {

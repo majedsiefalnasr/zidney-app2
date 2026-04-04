@@ -16,7 +16,7 @@
 
 Environment variables assumed:
 
-```
+```bash
 BASE_URL=http://localhost:3000
 WORKSPACE_SLUG=<your-test-tenant-slug>
 TOKEN=<backoffice-jwt>

@@ -16,7 +16,7 @@
  *   POST   /subscriptions        activate    SUBSCRIPTIONS.can_create
  *   GET    /subscriptions        list        SUBSCRIPTIONS.can_view
  *   GET    /subscriptions/:id    detail      SUBSCRIPTIONS.can_view
- *   DELETE /subscriptions/:id    cancel      SUBSCRIPTIONS.can_delete
+ *   PATCH  /subscriptions/:id/cancel cancel SUBSCRIPTIONS.can_edit
  *
  * Constitutional Compliance:
  * ✓ No business logic — delegates to handler functions
@@ -73,8 +73,8 @@ subscriptionsRouter.get(
 // Cancel subscription
 // ---------------------------------------------------------------------------
 
-subscriptionsRouter.delete(
-  '/subscriptions/:id',
-  createPermissionGuard(logger, PermissionModule.SUBSCRIPTIONS, 'can_delete'),
+subscriptionsRouter.patch(
+  '/subscriptions/:id/cancel',
+  createPermissionGuard(logger, PermissionModule.SUBSCRIPTIONS, 'can_edit'),
   handleCancelSubscription
 )

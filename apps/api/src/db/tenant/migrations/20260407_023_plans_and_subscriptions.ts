@@ -49,21 +49,39 @@ export async function up(client: PoolClient): Promise<void> {
     `)
 
     await client.query(`
-      ALTER TABLE plans
-        ADD CONSTRAINT IF NOT EXISTS chk_plans_billing_type
-          CHECK (billing_type IN ('one-time', 'recurring'))
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'chk_plans_billing_type' AND conrelid = 'plans'::regclass
+        ) THEN
+          ALTER TABLE plans ADD CONSTRAINT chk_plans_billing_type
+            CHECK (billing_type IN ('one-time', 'recurring'));
+        END IF;
+      END $$;
     `)
 
     await client.query(`
-      ALTER TABLE plans
-        ADD CONSTRAINT IF NOT EXISTS chk_plans_duration_days
-          CHECK (duration_days > 0)
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'chk_plans_duration_days' AND conrelid = 'plans'::regclass
+        ) THEN
+          ALTER TABLE plans ADD CONSTRAINT chk_plans_duration_days
+            CHECK (duration_days > 0);
+        END IF;
+      END $$;
     `)
 
     await client.query(`
-      ALTER TABLE plans
-        ADD CONSTRAINT IF NOT EXISTS chk_plans_price
-          CHECK (price >= 0)
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'chk_plans_price' AND conrelid = 'plans'::regclass
+        ) THEN
+          ALTER TABLE plans ADD CONSTRAINT chk_plans_price
+            CHECK (price >= 0);
+        END IF;
+      END $$;
     `)
 
     await client.query(`
@@ -93,21 +111,39 @@ export async function up(client: PoolClient): Promise<void> {
     `)
 
     await client.query(`
-      ALTER TABLE subscriptions
-        ADD CONSTRAINT IF NOT EXISTS chk_subscriptions_status
-          CHECK (status IN ('ACTIVE', 'EXPIRED', 'CANCELED', 'PENDING'))
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'chk_subscriptions_status' AND conrelid = 'subscriptions'::regclass
+        ) THEN
+          ALTER TABLE subscriptions ADD CONSTRAINT chk_subscriptions_status
+            CHECK (status IN ('ACTIVE', 'EXPIRED', 'CANCELED', 'PENDING'));
+        END IF;
+      END $$;
     `)
 
     await client.query(`
-      ALTER TABLE subscriptions
-        ADD CONSTRAINT IF NOT EXISTS chk_subscriptions_payment_method
-          CHECK (payment_method IN ('MANUAL', 'GATEWAY'))
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'chk_subscriptions_payment_method' AND conrelid = 'subscriptions'::regclass
+        ) THEN
+          ALTER TABLE subscriptions ADD CONSTRAINT chk_subscriptions_payment_method
+            CHECK (payment_method IN ('MANUAL', 'GATEWAY'));
+        END IF;
+      END $$;
     `)
 
     await client.query(`
-      ALTER TABLE subscriptions
-        ADD CONSTRAINT IF NOT EXISTS chk_subscriptions_expires_after_start
-          CHECK (expires_at > started_at)
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'chk_subscriptions_expires_after_start' AND conrelid = 'subscriptions'::regclass
+        ) THEN
+          ALTER TABLE subscriptions ADD CONSTRAINT chk_subscriptions_expires_after_start
+            CHECK (expires_at > started_at);
+        END IF;
+      END $$;
     `)
 
     // Unique partial index: at most one ACTIVE subscription per student

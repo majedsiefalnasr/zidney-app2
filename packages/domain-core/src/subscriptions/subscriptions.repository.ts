@@ -128,15 +128,27 @@ export async function insertSubscription(
   input: CreateSubscriptionInput,
   durationDays: number
 ): Promise<SubscriptionRecord> {
-  const startedAt = input.started_at ? `'${input.started_at}'::TIMESTAMPTZ` : 'NOW()'
   const { rows } = await client.query<SubscriptionRow>(
     `INSERT INTO subscriptions
        (student_id, plan_id, status, started_at, expires_at, payment_method, notes)
-     VALUES ($1, $2, 'ACTIVE', ${startedAt}, ${startedAt}::TIMESTAMPTZ + INTERVAL '${durationDays} days', 'MANUAL', $3)
+     VALUES (
+       $1, $2, 'ACTIVE',
+       COALESCE($3::TIMESTAMPTZ, NOW()),
+       COALESCE($3::TIMESTAMPTZ, NOW()) + MAKE_INTERVAL(days => $4),
+       'MANUAL',
+       $5
+     )
      RETURNING ${SUB_COLUMNS}`,
-    [input.student_id, input.plan_id, input.notes ?? null]
+    [input.student_id, input.plan_id, input.started_at ?? null, durationDays, input.notes ?? null]
   )
-  return rows[0] as SubscriptionRecord
+
+  if (!rows[0]) {
+    throw new Error(
+      `insertSubscription failed: no row returned from database. student_id: ${input.student_id}, plan_id: ${input.plan_id}`
+    )
+  }
+
+  return rows[0]
 }
 
 /**

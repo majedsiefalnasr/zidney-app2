@@ -49,7 +49,7 @@ export enum RoleStatus {
 }
 
 /**
- * Permission module keys — the 10 functional areas of the Backoffice.
+ * Permission module keys — the 12 functional areas of the Backoffice.
  * Stored as varchar in DB; validated against this enum at application layer.
  * No DB enum is used — extensible without a migration.
  */
