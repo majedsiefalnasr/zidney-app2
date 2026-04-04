@@ -8,20 +8,33 @@ workspace
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-04-04T00:00:00.000Z
+Last Updated: 2026-04-04T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Plans table with workspace-scoped plan definitions
+- Subscriptions table with student-plan lifecycle
+- Backoffice CRUD for plans (5 routes)
+- Backoffice subscription management (4 routes)
+- Manual and gateway subscription activation
+- Runtime expiration enforcement middleware (Frontoffice)
+- Module access control (backend primary)
+- Student subscription_status sync
+- Reporting: list by student/status/date, revenue overview
+
+Deferred Scope:
+
+- Full payment gateway integration (stub/callback only)
+- Auto-renew async job (structure defined, job trigger deferred to Worker stage)
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
