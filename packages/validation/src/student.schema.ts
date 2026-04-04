@@ -240,35 +240,41 @@ export const bulkImportRowSchema = z.object({
     .string()
     .email('email must be a valid email address')
     .max(320, 'email must not exceed 320 characters')
-    .toLowerCase(),
+    .toLowerCase()
+    .describe('Student email address'),
   password: z
     .string()
     .min(8, 'password must be at least 8 characters')
-    .max(128, 'password must not exceed 128 characters'),
+    .max(128, 'password must not exceed 128 characters')
+    .describe('Initial password for student login'),
   first_name: z
     .string()
     .trim()
     .min(1, 'first_name must not be empty')
     .max(128, 'first_name must not exceed 128 characters')
-    .optional(),
+    .optional()
+    .describe('Student first name'),
   last_name: z
     .string()
     .trim()
     .min(1, 'last_name must not be empty')
     .max(128, 'last_name must not exceed 128 characters')
-    .optional(),
+    .optional()
+    .describe('Student last name'),
   phone: z
     .string()
     .trim()
     .min(1, 'phone must not be empty')
     .max(32, 'phone must not exceed 32 characters')
-    .optional(),
+    .optional()
+    .describe('Student phone number'),
   external_id: z
     .string()
     .trim()
     .min(1, 'external_id must not be empty')
     .max(64, 'external_id must not exceed 64 characters')
-    .optional(),
+    .optional()
+    .describe('External identifier (e.g., from SIS system)'),
 })
 
 export type BulkImportRow = z.infer<typeof bulkImportRowSchema>

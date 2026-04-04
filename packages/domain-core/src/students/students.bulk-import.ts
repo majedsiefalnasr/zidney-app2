@@ -144,7 +144,6 @@ export async function processBulkImport(
           semester_id: null,
           phone: row.phone ?? null,
           external_id: row.external_id ?? null,
-          password: row.password,
           password_hash: passwordHash,
         })
         batchInserted++
@@ -162,7 +161,7 @@ export async function processBulkImport(
           row_index: absoluteIdx,
           email: row.email,
           reason: err instanceof Error ? err.message : 'Batch transaction failed',
-          code: 'STUDENT_EMAIL_CONFLICT', // generic batch failure
+          code: 'STUDENT_BATCH_FAILED',
         })
         skipped++
       }

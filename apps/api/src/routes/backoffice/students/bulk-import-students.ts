@@ -16,6 +16,7 @@ const logger = createLogger('backoffice-students-bulk-import')
 
 export async function handleBulkImportStudents(c: Context) {
   try {
+    const requestId = (c.get('request_id') as string | undefined) ?? null
     const workspaceId: string = c.get('workspace_id')
     const correlationId: string = c.get('correlation_id')
 
@@ -30,12 +31,28 @@ export async function handleBulkImportStudents(c: Context) {
             code: 'VALIDATION_ERROR',
             message: parsed.error.issues[0]?.message ?? 'Invalid request body',
           },
+          request_id: requestId,
         },
         422
       )
     }
 
-    const studentLimit: number = c.get('license')?.student_limit ?? 100
+    const license = c.get('license')
+    if (!license || license.status !== 'ACTIVE') {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'LICENSE_INACTIVE',
+            message: 'Workspace license is not active',
+          },
+          request_id: requestId,
+        },
+        403
+      )
+    }
+    const studentLimit: number = license.student_limit
     const db = getDb(c)
     const audit = buildAuditCtx(c)
 
@@ -55,7 +72,7 @@ export async function handleBulkImportStudents(c: Context) {
       audit
     )
 
-    return c.json({ success: true, data: result, error: null }, 200)
+    return c.json({ success: true, data: result, error: null, request_id: requestId }, 200)
   } catch (err) {
     return studentErrorResponse(c, err)
   }

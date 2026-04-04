@@ -22,6 +22,7 @@ export async function handleListStudents(c: Context) {
     const rawQuery = c.req.query()
     const parsed = studentListQuerySchema.safeParse(rawQuery)
     if (!parsed.success) {
+      const requestId = (c.get('request_id') as string | undefined) ?? null
       return c.json(
         {
           success: false,
@@ -30,6 +31,7 @@ export async function handleListStudents(c: Context) {
             code: 'VALIDATION_ERROR',
             message: parsed.error.issues[0]?.message ?? 'Invalid query',
           },
+          request_id: requestId,
         },
         422
       )
@@ -43,7 +45,7 @@ export async function handleListStudents(c: Context) {
       correlation_id: correlationId,
     })
 
-    const result = await listStudents(db, { workspace_id: workspaceId, ...parsed.data }, audit)
+    const result = await listStudents(db, { ...parsed.data, workspace_id: workspaceId }, audit)
 
     return c.json({ success: true, data: result, error: null }, 200)
   } catch (err) {

@@ -21,6 +21,7 @@ export async function handleDisableStudent(c: Context) {
 
     const parsed = studentIdParamsSchema.safeParse({ id: c.req.param('id') })
     if (!parsed.success) {
+      const requestId = (c.get('request_id') as string | undefined) ?? null
       return c.json(
         {
           success: false,
@@ -29,6 +30,7 @@ export async function handleDisableStudent(c: Context) {
             code: 'VALIDATION_ERROR',
             message: parsed.error.issues[0]?.message ?? 'Invalid id',
           },
+          request_id: requestId,
         },
         422
       )

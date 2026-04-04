@@ -95,8 +95,8 @@ export async function createStudent(
   studentLimit = Number.MAX_SAFE_INTEGER
 ): Promise<StudentRecord> {
   const client = await db.connect()
-  await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
   try {
+    await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
     // 1. Email uniqueness — SELECT FOR UPDATE
     const existing = await findStudentByEmailForUpdate(client, input.workspace_id, input.email)
     if (existing) {
@@ -216,8 +216,8 @@ export async function updateStudent(
   _audit: AuditContext
 ): Promise<StudentRecord> {
   const client = await db.connect()
-  await client.query('BEGIN')
   try {
+    await client.query('BEGIN')
     const current = await findStudentById(client, workspaceId, studentId)
     if (!current) {
       throw new StudentError('STUDENT_NOT_FOUND', `Student not found: ${studentId}`)
@@ -292,8 +292,8 @@ export async function disableStudent(
   _audit: AuditContext
 ): Promise<StudentRecord> {
   const client = await db.connect()
-  await client.query('BEGIN')
   try {
+    await client.query('BEGIN')
     const current = await findStudentById(client, workspaceId, studentId)
     if (!current) {
       throw new StudentError('STUDENT_NOT_FOUND', `Student not found: ${studentId}`)
@@ -343,8 +343,8 @@ export async function enableStudent(
   _audit: AuditContext
 ): Promise<StudentRecord> {
   const client = await db.connect()
-  await client.query('BEGIN')
   try {
+    await client.query('BEGIN')
     const current = await findStudentById(client, workspaceId, studentId)
     if (!current) {
       throw new StudentError('STUDENT_NOT_FOUND', `Student not found: ${studentId}`)
@@ -392,8 +392,8 @@ export async function deleteStudent(
   _audit: AuditContext
 ): Promise<void> {
   const client = await db.connect()
-  await client.query('BEGIN')
   try {
+    await client.query('BEGIN')
     const current = await findStudentById(client, workspaceId, studentId)
     if (!current) {
       throw new StudentError('STUDENT_NOT_FOUND', `Student not found: ${studentId}`)

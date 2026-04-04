@@ -41,7 +41,7 @@ const STUDENT_ROW_COLS = `
   created_at, updated_at
 `.trim()
 
-/** Public record — strips sensitive fields */
+/** Public record — strips sensitive fields and workspace_id */
 const STUDENT_RECORD_COLS = `
   id, external_id, email, first_name, last_name,
   division_id, department_id, group_id, semester_id,
@@ -92,14 +92,12 @@ export async function findStudentByEmailForUpdate(
 
 /**
  * Count ACTIVE students (used inside SERIALIZABLE tx for limit enforcement).
- * Uses SELECT ... FOR UPDATE to prevent phantom reads under concurrent inserts.
+ * Locks the matching rows first then counts them.
  */
 export async function countActiveStudents(client: DbClient, _workspaceId: string): Promise<number> {
   const { rows } = await client.query<{ count: string }>(
     `SELECT COUNT(*) AS count
-       FROM students
-      WHERE status = 'ACTIVE'
-        FOR UPDATE`,
+       FROM (SELECT id FROM students WHERE status = 'ACTIVE' FOR UPDATE) AS sub`,
     []
   )
   return parseInt(rows[0]?.count ?? '0', 10)
@@ -180,7 +178,7 @@ export async function listStudents(
  */
 export async function insertStudent(
   client: DbClient,
-  data: CreateStudentInput & { password_hash: string }
+  data: CreateStudentInput & { password_hash: string; subscription_status?: SubscriptionStatus }
 ): Promise<StudentRow> {
   const { rows } = await client.query<StudentRow>(
     `INSERT INTO students
@@ -188,7 +186,7 @@ export async function insertStudent(
         division_id, department_id, group_id, semester_id,
         phone, password_hash, subscription_status, status,
         token_version, failed_login_count)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'NONE', 'ACTIVE', 0, 0)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'ACTIVE', 0, 0)
        RETURNING ${STUDENT_ROW_COLS}`,
     [
       data.external_id ?? null,
@@ -201,6 +199,7 @@ export async function insertStudent(
       data.semester_id ?? null,
       data.phone ?? null,
       data.password_hash,
+      data.subscription_status ?? 'NONE',
     ]
   )
   return rows[0] as StudentRow
@@ -434,10 +433,10 @@ export async function validateGroupBelongsToDepartmentOrDivision(
   _workspaceId: string,
   groupId: string,
   departmentId: string | null | undefined,
-  _divisionId: string
+  divisionId: string
 ): Promise<void> {
   // If department is provided, the group must be scoped to that department.
-  // Otherwise any group within the workspace is acceptable.
+  // Otherwise the group must belong to the division.
   if (departmentId) {
     const { rows } = await client.query<{ id: string }>(
       `SELECT id FROM groups WHERE id = $1 AND department_id = $2`,
@@ -448,10 +447,11 @@ export async function validateGroupBelongsToDepartmentOrDivision(
       throw new StudentError('STUDENT_GROUP_MISMATCH')
     }
   } else {
-    // No department — just confirm the group exists
-    const { rows } = await client.query<{ id: string }>(`SELECT id FROM groups WHERE id = $1`, [
-      groupId,
-    ])
+    // No department — the group must belong to the division
+    const { rows } = await client.query<{ id: string }>(
+      `SELECT id FROM groups WHERE id = $1 AND division_id = $2`,
+      [groupId, divisionId]
+    )
     if (rows.length === 0) {
       const { StudentError } = await import('./students.errors')
       throw new StudentError('STUDENT_GROUP_MISMATCH')

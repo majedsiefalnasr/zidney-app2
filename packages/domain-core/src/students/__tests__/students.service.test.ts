@@ -144,19 +144,6 @@ describe('createStudent', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    await expect(
-      createStudent(
-        pool as any,
-        {
-          workspace_id: WORKSPACE_ID,
-          email: 'student@example.com',
-          password: 'Password123!',
-          division_id: DIVISION_ID,
-        },
-        audit
-      )
-    ).rejects.toThrow(StudentError)
-
     const err = await createStudent(
       pool as any,
       {
@@ -262,6 +249,50 @@ describe('createStudent', () => {
     expect('password_hash' in record).toBe(false)
     expect(pool._client.release).toHaveBeenCalled()
   })
+
+  it('validates department and group when both provided', async () => {
+    const DEPT_ID = 'dept-00000000-0000-0000-0000-000000000001'
+    const GROUP_ID = 'grp-00000000-0000-0000-0000-000000000001'
+    const inserted = makeStudentRow({ department_id: DEPT_ID, group_id: GROUP_ID })
+    const pool = makePool((sql) => {
+      if (sql.includes('FOR UPDATE') && sql.includes('students WHERE email')) {
+        return { rows: [], rowCount: 0 }
+      }
+      if (sql.includes('COUNT(*)') || sql.includes('count(*)')) {
+        return { rows: [{ count: '0' }], rowCount: 1 }
+      }
+      if (sql.includes('divisions WHERE id')) {
+        return { rows: [{ id: DIVISION_ID, status: 'ENABLED' }], rowCount: 1 }
+      }
+      if (sql.includes('departments')) {
+        return { rows: [{ id: DEPT_ID }], rowCount: 1 }
+      }
+      if (sql.includes('groups')) {
+        return { rows: [{ id: GROUP_ID }], rowCount: 1 }
+      }
+      if (sql.includes('INSERT INTO students')) {
+        return { rows: [inserted], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const record = await createStudent(
+      pool as any,
+      {
+        workspace_id: WORKSPACE_ID,
+        email: 'new@example.com',
+        password: 'Password123!',
+        division_id: DIVISION_ID,
+        department_id: DEPT_ID,
+        group_id: GROUP_ID,
+      },
+      audit
+    )
+
+    expect(record.id).toBe(STUDENT_ID)
+    expect(record.department_id).toBe(DEPT_ID)
+    expect('password_hash' in record).toBe(false)
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -361,6 +392,97 @@ describe('updateStudent', () => {
     expect(err).toBeInstanceOf(StudentError)
     expect((err as StudentError).code).toBe('STUDENT_EMAIL_CONFLICT')
   })
+
+  it('returns updated StudentRecord on success', async () => {
+    const current = makeStudentRow()
+    const updated = makeStudentRow({ first_name: 'Updated' })
+
+    const pool = makePool((sql) => {
+      if (sql.includes('UPDATE students')) {
+        return { rows: [updated], rowCount: 1 }
+      }
+      if (sql.includes('WHERE id = $1')) {
+        return { rows: [current], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const record = await updateStudent(
+      pool as any,
+      WORKSPACE_ID,
+      STUDENT_ID,
+      { first_name: 'Updated' },
+      audit
+    )
+
+    expect(record.first_name).toBe('Updated')
+    expect('password_hash' in record).toBe(false)
+    expect(pool._client.release).toHaveBeenCalled()
+  })
+
+  it('skips email conflict check when new email is available', async () => {
+    const current = makeStudentRow()
+    const updated = makeStudentRow({ email: 'new-unique@example.com' })
+
+    const pool = makePool((sql) => {
+      if (sql.includes('FOR UPDATE') && sql.includes('WHERE email')) {
+        return { rows: [], rowCount: 0 } // no conflict found
+      }
+      if (sql.includes('UPDATE students')) {
+        return { rows: [updated], rowCount: 1 }
+      }
+      if (sql.includes('WHERE id = $1')) {
+        return { rows: [current], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const record = await updateStudent(
+      pool as any,
+      WORKSPACE_ID,
+      STUDENT_ID,
+      { email: 'new-unique@example.com' },
+      audit
+    )
+
+    expect(record.email).toBe('new-unique@example.com')
+    expect('password_hash' in record).toBe(false)
+  })
+
+  it('validates department and group when both provided in update', async () => {
+    const DEPT_ID = 'dept-00000000-0000-0000-0000-000000000001'
+    const GROUP_ID = 'grp-00000000-0000-0000-0000-000000000001'
+    const current = makeStudentRow()
+    const updated = makeStudentRow({ department_id: DEPT_ID, group_id: GROUP_ID })
+
+    const pool = makePool((sql) => {
+      if (sql.includes('UPDATE students')) {
+        return { rows: [updated], rowCount: 1 }
+      }
+      if (sql.includes('departments')) {
+        return { rows: [{ id: DEPT_ID }], rowCount: 1 }
+      }
+      if (sql.includes('groups')) {
+        return { rows: [{ id: GROUP_ID }], rowCount: 1 }
+      }
+      if (sql.includes('WHERE id = $1')) {
+        return { rows: [current], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const record = await updateStudent(
+      pool as any,
+      WORKSPACE_ID,
+      STUDENT_ID,
+      { department_id: DEPT_ID, group_id: GROUP_ID },
+      audit
+    )
+
+    expect(record.department_id).toBe(DEPT_ID)
+    expect('password_hash' in record).toBe(false)
+    expect(pool._client.release).toHaveBeenCalled()
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -368,6 +490,14 @@ describe('updateStudent', () => {
 // ---------------------------------------------------------------------------
 
 describe('disableStudent', () => {
+  it('throws STUDENT_NOT_FOUND when student does not exist', async () => {
+    const pool = makePool(() => ({ rows: [], rowCount: 0 }))
+
+    const err = await disableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit).catch((e) => e)
+    expect(err).toBeInstanceOf(StudentError)
+    expect((err as StudentError).code).toBe('STUDENT_NOT_FOUND')
+  })
+
   it('throws STUDENT_ALREADY_DISABLED when status is already DISABLED', async () => {
     const disabled = makeStudentRow({ status: 'DISABLED' })
     const pool = makePool((sql) => {
@@ -381,6 +511,42 @@ describe('disableStudent', () => {
     expect(err).toBeInstanceOf(StudentError)
     expect((err as StudentError).code).toBe('STUDENT_ALREADY_DISABLED')
   })
+
+  it('returns StudentRecord with DISABLED status on success', async () => {
+    const active = makeStudentRow({ status: 'ACTIVE' })
+    const disabledRow = makeStudentRow({ status: 'DISABLED', token_version: 1 })
+    const pool = makePool((sql) => {
+      if (sql.includes('UPDATE students')) {
+        return { rows: [disabledRow], rowCount: 1 }
+      }
+      if (sql.includes('WHERE id = $1')) {
+        return { rows: [active], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const record = await disableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit)
+    expect(record.status).toBe('DISABLED')
+    expect('password_hash' in record).toBe(false)
+    expect(pool._client.release).toHaveBeenCalled()
+  })
+
+  it('throws STUDENT_NOT_FOUND when UPDATE returns null (concurrent delete)', async () => {
+    const active = makeStudentRow({ status: 'ACTIVE' })
+    const pool = makePool((sql) => {
+      if (sql.includes('UPDATE students')) {
+        return { rows: [], rowCount: 0 } // UPDATE finds nothing (student was deleted concurrently)
+      }
+      if (sql.includes('WHERE id = $1')) {
+        return { rows: [active], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await disableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit).catch((e) => e)
+    expect(err).toBeInstanceOf(StudentError)
+    expect((err as StudentError).code).toBe('STUDENT_NOT_FOUND')
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -388,6 +554,14 @@ describe('disableStudent', () => {
 // ---------------------------------------------------------------------------
 
 describe('enableStudent', () => {
+  it('throws STUDENT_NOT_FOUND when student does not exist', async () => {
+    const pool = makePool(() => ({ rows: [], rowCount: 0 }))
+
+    const err = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit).catch((e) => e)
+    expect(err).toBeInstanceOf(StudentError)
+    expect((err as StudentError).code).toBe('STUDENT_NOT_FOUND')
+  })
+
   it('throws STUDENT_ALREADY_ACTIVE when status is already ACTIVE', async () => {
     const active = makeStudentRow({ status: 'ACTIVE' })
     const pool = makePool((sql) => {
@@ -401,6 +575,42 @@ describe('enableStudent', () => {
     expect(err).toBeInstanceOf(StudentError)
     expect((err as StudentError).code).toBe('STUDENT_ALREADY_ACTIVE')
   })
+
+  it('returns StudentRecord with ACTIVE status on success', async () => {
+    const disabled = makeStudentRow({ status: 'DISABLED' })
+    const enabledRow = makeStudentRow({ status: 'ACTIVE' })
+    const pool = makePool((sql) => {
+      if (sql.includes('UPDATE students')) {
+        return { rows: [enabledRow], rowCount: 1 }
+      }
+      if (sql.includes('WHERE id = $1')) {
+        return { rows: [disabled], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const record = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit)
+    expect(record.status).toBe('ACTIVE')
+    expect('password_hash' in record).toBe(false)
+    expect(pool._client.release).toHaveBeenCalled()
+  })
+
+  it('throws STUDENT_NOT_FOUND when UPDATE returns null (concurrent delete)', async () => {
+    const disabled = makeStudentRow({ status: 'DISABLED' })
+    const pool = makePool((sql) => {
+      if (sql.includes('UPDATE students')) {
+        return { rows: [], rowCount: 0 } // UPDATE finds nothing (student was deleted concurrently)
+      }
+      if (sql.includes('WHERE id = $1')) {
+        return { rows: [disabled], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit).catch((e) => e)
+    expect(err).toBeInstanceOf(StudentError)
+    expect((err as StudentError).code).toBe('STUDENT_NOT_FOUND')
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -408,6 +618,14 @@ describe('enableStudent', () => {
 // ---------------------------------------------------------------------------
 
 describe('deleteStudent', () => {
+  it('throws STUDENT_NOT_FOUND when student does not exist', async () => {
+    const pool = makePool(() => ({ rows: [], rowCount: 0 }))
+
+    const err = await deleteStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit).catch((e) => e)
+    expect(err).toBeInstanceOf(StudentError)
+    expect((err as StudentError).code).toBe('STUDENT_NOT_FOUND')
+  })
+
   it('throws STUDENT_HAS_ATTEMPTS when student has submitted attempts', async () => {
     const row = makeStudentRow()
     const pool = makePool((sql) => {
@@ -424,6 +642,24 @@ describe('deleteStudent', () => {
     const err = await deleteStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit).catch((e) => e)
     expect(err).toBeInstanceOf(StudentError)
     expect((err as StudentError).code).toBe('STUDENT_HAS_ATTEMPTS')
+  })
+
+  it('soft-deletes student successfully when no attempts exist', async () => {
+    const row = makeStudentRow()
+    const pool = makePool((sql) => {
+      if (sql.includes('WHERE id = $1') && !sql.includes('FOR UPDATE')) {
+        return { rows: [row], rowCount: 1 }
+      }
+      if (sql.includes('FROM attempts')) {
+        return { rows: [{ exists: false }], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    await expect(
+      deleteStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit)
+    ).resolves.toBeUndefined()
+    expect(pool._client.release).toHaveBeenCalled()
   })
 })
 
@@ -460,5 +696,106 @@ describe('updateStudentSubscriptionStatus', () => {
     )
     expect(record.subscription_status).toBe('ACTIVE')
     expect('password_hash' in record).toBe(false)
+  })
+
+  it('throws STUDENT_NOT_FOUND when UPDATE returns null (concurrent delete)', async () => {
+    const current = makeStudentRow()
+    const db = {
+      query: vi.fn(async (sql: string) => {
+        if (sql.trim().includes('UPDATE')) {
+          return { rows: [], rowCount: 0 } // UPDATE finds nothing (concurrent delete)
+        }
+        return { rows: [current], rowCount: 1 } // SELECT finds student
+      }),
+    }
+
+    const err = await updateStudentSubscriptionStatus(
+      db as any,
+      WORKSPACE_ID,
+      STUDENT_ID,
+      { subscription_status: 'ACTIVE' },
+      audit
+    ).catch((e) => e)
+
+    expect(err).toBeInstanceOf(StudentError)
+    expect((err as StudentError).code).toBe('STUDENT_NOT_FOUND')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 10. HIGH-VALUE ADDITIONAL TESTS — Coverage gap focus
+// ---------------------------------------------------------------------------
+
+describe('createStudent — group_id edge cases', () => {
+  it('validates group_id (workspace-level group without department)', async () => {
+    const GROUP_ID = 'grp-00000000-0000-0000-0000-000000000001'
+    const inserted = makeStudentRow({ department_id: null, group_id: GROUP_ID })
+
+    const pool = makePool((sql) => {
+      if (sql === 'BEGIN ISOLATION LEVEL SERIALIZABLE' || sql === 'COMMIT' || sql === 'ROLLBACK') {
+        return { rows: [], rowCount: 0 }
+      }
+      if (sql.includes('FOR UPDATE')) {
+        return { rows: [], rowCount: 0 }
+      }
+      if (sql.includes('COUNT(*)') || sql.includes('count(*)')) {
+        return { rows: [{ count: '0' }], rowCount: 1 }
+      }
+      if (sql.includes('divisions WHERE')) {
+        return { rows: [{ id: DIVISION_ID, status: 'ENABLED' }], rowCount: 1 }
+      }
+      if (sql.includes('groups WHERE')) {
+        return { rows: [{ id: GROUP_ID }], rowCount: 1 }
+      }
+      if (sql.includes('INSERT INTO students')) {
+        return { rows: [inserted], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const record = await createStudent(
+      pool as any,
+      {
+        workspace_id: WORKSPACE_ID,
+        email: 'new@example.com',
+        password: 'Password123!',
+        division_id: DIVISION_ID,
+        group_id: GROUP_ID,
+      },
+      audit
+    )
+
+    expect(record.group_id).toBe(GROUP_ID)
+  })
+})
+
+describe('updateStudent — email conflict edge cases', () => {
+  it('throws STUDENT_EMAIL_CONFLICT when another student already has the email', async () => {
+    const current = makeStudentRow()
+    const other = makeStudentRow({ id: 'other' })
+
+    const pool = makePool((sql) => {
+      if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') {
+        return { rows: [], rowCount: 0 }
+      }
+      if (sql.includes('WHERE id = $1') && !sql.includes('FOR UPDATE')) {
+        return { rows: [current], rowCount: 1 }
+      }
+      if (sql.includes('FOR UPDATE')) {
+        return { rows: [other], rowCount: 1 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await updateStudent(
+      pool as any,
+      WORKSPACE_ID,
+      STUDENT_ID,
+      { email: 'taken@example.com' },
+      audit
+    ).catch((e) => e)
+
+    expect(err).toBeInstanceOf(StudentError)
+    expect((err as StudentError).code).toBe('STUDENT_EMAIL_CONFLICT')
   })
 })

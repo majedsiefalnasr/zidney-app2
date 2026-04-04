@@ -16,6 +16,7 @@ const logger = createLogger('backoffice-students-create')
 
 export async function handleCreateStudent(c: Context) {
   try {
+    const requestId = (c.get('request_id') as string | undefined) ?? null
     const workspaceId: string = c.get('workspace_id')
     const correlationId: string = c.get('correlation_id')
 
@@ -28,6 +29,7 @@ export async function handleCreateStudent(c: Context) {
           success: false,
           data: null,
           error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' },
+          request_id: requestId,
         },
         400
       )
@@ -43,13 +45,28 @@ export async function handleCreateStudent(c: Context) {
             code: 'VALIDATION_ERROR',
             message: parsed.error.issues[0]?.message ?? 'Invalid input',
           },
+          request_id: requestId,
         },
         422
       )
     }
 
     const license = c.get('license')
-    const studentLimit: number = license?.student_limit ?? 100
+    if (!license || license.status !== 'ACTIVE') {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'LICENSE_INACTIVE',
+            message: 'Workspace license is not active',
+          },
+          request_id: requestId,
+        },
+        403
+      )
+    }
+    const studentLimit: number = license.student_limit
 
     const db = getDb(c)
     const audit = buildAuditCtx(c)
@@ -66,7 +83,7 @@ export async function handleCreateStudent(c: Context) {
       studentLimit
     )
 
-    return c.json({ success: true, data: record, error: null }, 201)
+    return c.json({ success: true, data: record, error: null, request_id: requestId }, 201)
   } catch (err) {
     return studentErrorResponse(c, err)
   }

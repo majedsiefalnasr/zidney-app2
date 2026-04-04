@@ -25,6 +25,7 @@ export type StudentErrorCode =
   | 'STUDENT_DEPARTMENT_MISMATCH'
   | 'STUDENT_GROUP_MISMATCH'
   | 'STUDENT_INVALID_SUBSCRIPTION_STATUS'
+  | 'STUDENT_BATCH_FAILED'
 
 // ---------------------------------------------------------------------------
 // HTTP status map
@@ -43,6 +44,7 @@ export const STUDENT_ERROR_HTTP: Record<StudentErrorCode, number> = {
   STUDENT_DEPARTMENT_MISMATCH: 422,
   STUDENT_GROUP_MISMATCH: 422,
   STUDENT_INVALID_SUBSCRIPTION_STATUS: 422,
+  STUDENT_BATCH_FAILED: 422,
 }
 
 // ---------------------------------------------------------------------------

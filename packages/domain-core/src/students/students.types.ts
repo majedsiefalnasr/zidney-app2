@@ -11,12 +11,22 @@
 // Database client interface
 // ---------------------------------------------------------------------------
 
-/** Minimal structural interface for query execution — satisfied by Pool, PoolClient, or mock */
+/** Minimal structural interface for query execution and transaction control */
+export interface TransactionClient {
+  query<T = unknown>(
+    text: string,
+    values?: unknown[]
+  ): Promise<{ rows: T[]; rowCount: number | null }>
+  release(): void
+}
+
+/** Database pool with transaction capabilities */
 export interface DbClient {
   query<T = unknown>(
     text: string,
     values?: unknown[]
   ): Promise<{ rows: T[]; rowCount: number | null }>
+  connect(): Promise<TransactionClient>
 }
 
 // ---------------------------------------------------------------------------
@@ -57,10 +67,9 @@ export interface StudentRow {
 // Public record (safe to serialize in HTTP responses)
 // ---------------------------------------------------------------------------
 
-/** Student record without password_hash, failed_login_count, locked_until — safe for API responses */
+/** Student record without password_hash, failed_login_count, locked_until, workspace_id — safe for API responses */
 export interface StudentRecord {
   id: string
-  workspace_id: string
   external_id: string | null
   email: string
   first_name: string | null

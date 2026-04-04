@@ -40,11 +40,19 @@ export function buildAuditCtx(c: Context): AuditContext {
     logger.error('User not present in context', { correlation_id: c.get('correlation_id') })
     throw new Error('User not authenticated')
   }
+  const workspaceId = c.get('workspace_id')
+  const workspaceSlug = c.get('workspace_slug')
+  const correlationId = c.get('correlation_id')
+
+  if (!workspaceId) throw new Error('missing workspace_id')
+  if (!workspaceSlug) throw new Error('missing workspace_slug')
+  if (!correlationId) throw new Error('missing correlation_id')
+
   return {
     user_id: user.id,
-    workspace_id: c.get('workspace_id') || '',
-    workspace_slug: c.get('workspace_slug') || '',
-    correlation_id: c.get('correlation_id') || '',
+    workspace_id: workspaceId,
+    workspace_slug: workspaceSlug,
+    correlation_id: correlationId,
   }
 }
 
@@ -52,7 +60,7 @@ export function buildAuditCtx(c: Context): AuditContext {
 // UUID validation
 // ---------------------------------------------------------------------------
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export function isValidUuid(value: string): boolean {
   return UUID_RE.test(value)
@@ -64,6 +72,9 @@ export function isValidUuid(value: string): boolean {
 
 export function studentErrorResponse(c: Context, err: unknown) {
   const requestId = (c.get('request_id') as string | undefined) ?? null
+  const workspaceSlug = c.get('workspace_slug')
+  const user = c.get('user')
+  const userId = user?.id
 
   if (err instanceof StudentError) {
     const status = STUDENT_ERROR_HTTP[err.code] as 400 | 403 | 404 | 409 | 422 | 500
@@ -83,6 +94,8 @@ export function studentErrorResponse(c: Context, err: unknown) {
     message: safeError.message,
     code: (safeError as NodeJS.ErrnoException).code,
     request_id: requestId,
+    workspace_slug: workspaceSlug,
+    user_id: userId,
   })
 
   return c.json(
