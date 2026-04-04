@@ -8,7 +8,40 @@ Scope: Frontoffice student lifecycle, academic assignment enforcement, and subsc
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: MEDIUM
+Closure Date: 2026-04-03T22:55:00.000Z
+Last Updated: 2026-04-03T22:55:00.000Z
+
+Implementation: COMPLETE
+Tasks: 25 / 25 completed
+
+Scope Closed:
+
+- Migration 20260406_022: students table (18 columns, 6 indexes)
+- Domain-core: students module (types, errors, repository, service, bulk-import, barrel)
+- Validation: student.schema.ts (CreateStudentSchema, UpdateStudentSchema, StudentListQuerySchema, StudentSubscriptionSchema, BulkImportSchema)
+- Backoffice routes: 10 handlers (create, list, get, update, delete, disable, enable, subscription, bulk-import) + helpers + router
+- frontoffice-login.ts: migrated to query students table (role: student)
+- app.ts: studentsRouter registered under backoffice prefix
+- Tests: 16 route integration + 15 domain-core unit (31/31 pass)
+
+Deferred Scope:
+
+- None
+
+Architecture Governance Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced (tenant DB via req.tenantDb)
+- ADR-0002 Snapshot immutability enforced (deleteStudent blocks if attempts exist)
+- ADR-0006 Server-authoritative time enforced (no client timestamps)
+- ADR-0007 Version compatibility enforced (license limit checked via resolveStudentLimit)
+- All guardian verdicts: Security PASS, Performance PASS, QA PASS, Code Review PASS
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 

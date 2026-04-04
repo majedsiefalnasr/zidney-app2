@@ -114,9 +114,9 @@ router.post(
         // Fetch user with lock
         const userResult = await client.query(
           `
-          SELECT id, email, password_hash, token_version, locked_until, role
-          FROM users
-          WHERE email = $1 AND role = 'student'
+          SELECT id, email, password_hash, token_version, locked_until
+          FROM students
+          WHERE email = $1 AND status = 'ACTIVE'
           FOR UPDATE
           `,
           [request.email]
@@ -173,7 +173,7 @@ router.post(
         if (!passwordValid) {
           const failed = await client.query(
             `
-            UPDATE users
+            UPDATE students
             SET failed_login_count = failed_login_count + 1,
                 locked_until = CASE
                   WHEN failed_login_count >= 4 THEN NOW() + INTERVAL '15 minutes'
@@ -215,7 +215,7 @@ router.post(
         // Success - reset counters
         await client.query(
           `
-          UPDATE users
+          UPDATE students
           SET failed_login_count = 0,
               locked_until = NULL,
               last_login_at = NOW()
@@ -260,7 +260,7 @@ router.post(
           data: {
             user_id: user.id,
             email: user.email,
-            role: user.role,
+            role: 'student',
             token,
             expires_at: expiresAt.toISOString(),
           },

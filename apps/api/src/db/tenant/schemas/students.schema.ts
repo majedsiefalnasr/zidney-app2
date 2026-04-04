@@ -21,7 +21,17 @@
  * ✓ Tenant DB only — no master DB references
  */
 
-import { index, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import {
+  check,
+  index,
+  integer,
+  pgTable,
+  sql,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core'
 
 import { departments } from './departments.schema'
 import { divisions } from './divisions.schema'
@@ -77,6 +87,31 @@ export const students = pgTable(
      * NULLABLE: no backfill required; existing students start with semester_id = null.
      */
     semester_id: uuid('semester_id').references(() => semesters.id, { onDelete: 'restrict' }),
+    /** Optional contact phone number. */
+    phone: varchar('phone', { length: 50 }),
+    /** Argon2id password hash for frontoffice authentication. NULL until password is set. */
+    password_hash: text('password_hash'),
+    /**
+     * Subscription binding status.
+     * ACTIVE | SUSPENDED | EXPIRED | NONE (default: NONE)
+     * Controlled by backoffice only. Does not block login but may restrict exam access.
+     */
+    subscription_status: varchar('subscription_status', { length: 20 }).notNull().default('NONE'),
+    /**
+     * Account status. ACTIVE | DISABLED (default: ACTIVE)
+     * Disabled students cannot log in to the frontoffice.
+     */
+    status: varchar('status', { length: 20 }).notNull().default('ACTIVE'),
+    /**
+     * Token version for JWT invalidation.
+     * Incremented on disable. Frontoffice login embeds token_version in the JWT;
+     * any JWT with an older version is rejected.
+     */
+    token_version: integer('token_version').notNull().default(0),
+    /** Count of consecutive failed login attempts. Reset to 0 on successful login. */
+    failed_login_count: integer('failed_login_count').notNull().default(0),
+    /** Timestamp until which further login attempts are blocked (temporary lockout). */
+    locked_until: timestamp('locked_until', { withTimezone: true }),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -91,6 +126,19 @@ export const students = pgTable(
     semesterIdIdx: index('idx_students_semester_id').on(table.semester_id),
     /** uniqueIndex on email is handled by DB bootstrap — not declared here. */
     externalIdIdx: index('idx_students_external_id').on(table.external_id),
+    /** Partial index for status-filtered queries (list disabled students). */
+    statusIdx: index('idx_students_status').on(table.status),
+    /** Partial index for subscription-filtered queries. */
+    subscriptionStatusIdx: index('idx_students_subscription_status').on(table.subscription_status),
+    /** Email index for uniqueness check performance (login + create). */
+    emailIdx: index('idx_students_email').on(table.email),
+    /** CHECK: status must be ACTIVE or DISABLED. */
+    validStatus: check('chk_students_status', sql`${table.status} IN ('ACTIVE', 'DISABLED')`),
+    /** CHECK: subscription_status must be a valid enum value. */
+    validSubscriptionStatus: check(
+      'chk_students_subscription_status',
+      sql`${table.subscription_status} IN ('ACTIVE', 'SUSPENDED', 'EXPIRED', 'NONE')`
+    ),
   })
 )
 

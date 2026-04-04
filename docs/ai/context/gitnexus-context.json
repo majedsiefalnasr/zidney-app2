@@ -1,1 +1,73 @@
-{"schemaVersion":"1.0.0","generatedAt":"2026-04-03T18:37:42.481Z","analyzedAt":"2026-04-03T18:37:42.481Z","analysisMode":"changed-only","changedFiles":[".agents/agents/code-reviewer.agent.md","apps/api/src/db/tenant/schemas/hierarchy-nodes.schema.ts","apps/api/src/routes/auth/backoffice-login.ts","apps/api/src/routes/backoffice/staff/update-staff.ts","docs/ai/context/ai-architecture-brain.json","packages/validation/src/staff.schema.ts","scripts/architecture-health/formatters.ts"],"impactedModules":["apps/api","packages/validation"],"dependencyGraph":{"apps/api":["packages/domain-core","packages/job-queue","packages/logger","packages/redis-utils","packages/types","packages/validation"],"packages/validation":["packages/logger","packages/types"]},"architectureLayerMap":{"apps/api":"unknown","packages/validation":"unknown"},"recentCommits":[{"hash":"c8970ed946c4cd0bc652740c695b18f5bbf6b9c2","message":"fix(041-staff-management): third-wave audit fixes - MD031, JSON parse safety, sanitize outputs, ai-architecture-brain schema","author":"Majed Sief Alnasr","date":"2026-04-03T19:47:05+02:00"},{"hash":"aae50d34a1db01ce3882381cf2605621aaffdb61","message":"fix(041-staff-management): second wave audit fixes — request_id contracts, security hardening, schema corrections","author":"Majed Sief Alnasr","date":"2026-04-03T19:15:32+02:00"},{"hash":"f4e9594a1f209835c3307aa490556274e05ce502","message":"fix(041-staff-management): audit fixes — security, architecture, and doc corrections","author":"Majed Sief Alnasr","date":"2026-04-03T17:21:05+02:00"},{"hash":"a2794ead368cc7762f71d5820454cb5902ae7840","message":"fix(041-staff-management): deduplicate dependency graph edges (infra-audit, ai-context builder)","author":"Majed Sief Alnasr","date":"2026-04-03T16:50:50+02:00"},{"hash":"5f28b10db661927a2a342b28c18e61820c6b8b05","message":"chore(041-staff-management): complete closure step — stage PRODUCTION READY","author":"Majed Sief Alnasr","date":"2026-04-03T16:14:06+02:00"},{"hash":"f39eb50297f8da250f03f7c76c37f91602f94d22","message":"chore(041-staff-management): complete implement step — 34/34 tasks, 30/30 tests","author":"Majed Sief Alnasr","date":"2026-04-03T16:06:06+02:00"},{"hash":"3caa2d12ab8236b347e73a57ad16724ac71b6faf","message":"feat(041-staff-management): implement staff CRUD API","author":"Majed Sief Alnasr","date":"2026-04-03T16:00:30+02:00"},{"hash":"1869a6e6c35b9c4bca5ca70de610971bdc829ee8","message":"chore(041-staff-management): complete analyze step — drift check passed","author":"Majed Sief Alnasr","date":"2026-04-03T15:14:47+02:00"},{"hash":"e3295a933739fdaf6cd0798a8852103674f83af4","message":"chore(041-staff-management): complete tasks step — 34 atomic tasks generated","author":"Majed Sief Alnasr","date":"2026-04-03T15:01:33+02:00"},{"hash":"ada017f5546bce431c68dc19bec42f6d07ec9899","message":"chore(041-staff-management): complete plan step","author":"Majed Sief Alnasr","date":"2026-04-03T14:44:02+02:00"}],"riskIndicators":[{"module":"apps/api","riskScore":25,"reason":"3 changed file(s); foundational module with no outbound dependencies","affectedBy":["apps/api/src/db/tenant/schemas/hierarchy-nodes.schema.ts","apps/api/src/routes/auth/backoffice-login.ts","apps/api/src/routes/backoffice/staff/update-staff.ts"]},{"module":"packages/validation","riskScore":17,"reason":"architectural hotspot (score 2); 1 changed file(s); foundational module with no outbound dependencies","affectedBy":["packages/validation/src/staff.schema.ts"]}]}
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-04-03T21:23:30.602Z",
+  "analyzedAt": "2026-04-03T21:23:30.602Z",
+  "analysisMode": "changed-only",
+  "changedFiles": [],
+  "impactedModules": [],
+  "dependencyGraph": {},
+  "architectureLayerMap": {},
+  "recentCommits": [
+    {
+      "hash": "49fee50af148f52425d1885cef9bd90d1ccdc14a",
+      "message": "spec(042-student-management): implement step — workflow artifacts and stage BACKEND CLOSED",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T22:58:14+02:00"
+    },
+    {
+      "hash": "6f2c4aab80d014bafb81900ee2d0b70d6d5f72ad",
+      "message": "feat(042-student-management): implement student management system",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T22:53:02+02:00"
+    },
+    {
+      "hash": "f1607e68d7bc65f36a61a113854a739d572d27bf",
+      "message": "feat(042-student-management): analyze — drift gate APPROVED, implementation authorized",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T21:55:58+02:00"
+    },
+    {
+      "hash": "71d56bde06cc24fe5556f2f8fe0b9dd214a11dc1",
+      "message": "feat(042-student-management): tasks — 25 atomic tasks across phases A-F",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T21:50:53+02:00"
+    },
+    {
+      "hash": "dfa2df9ba66e0e0921a60c716f33ad3e52b0ebb3",
+      "message": "feat(042-student-management): plan — implementation plan for student management",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T21:45:26+02:00"
+    },
+    {
+      "hash": "ca57b9fdd0ac999121e504a3d0561bff2d4eef2c",
+      "message": "feat(042-student-management): clarify — all ambiguities resolved",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T21:36:40+02:00"
+    },
+    {
+      "hash": "e69231bff890a6bfbb762300694f6a1b8f36e0b9",
+      "message": "feat(042-student-management): specify — student management feature specification",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T21:34:29+02:00"
+    },
+    {
+      "hash": "740d52f0bbe253152e753b3a1e2d2971c9ea4266",
+      "message": "chore(042-student-management): initialize stage branch and directory",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T21:22:57+02:00"
+    },
+    {
+      "hash": "a13ad1d5f172e15276d158cb83409a5a1188eceb",
+      "message": "Merge pull request #86 from majedsiefalnasr/spec/041-staff-management",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T21:10:39+02:00"
+    },
+    {
+      "hash": "dcdb5eb6d02f0ba385180ddf0eda1e1f8631b84e",
+      "message": "fix(041-staff-management): audit fixes — staff/auth/schema/migration & agent rules",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-03T20:59:47+02:00"
+    }
+  ],
+  "riskIndicators": []
+}

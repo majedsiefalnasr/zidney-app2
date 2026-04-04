@@ -1,23 +1,196 @@
 {
-  "generatedAt": "2026-04-03T18:37:42.142Z",
-  "gitSha": "c8970ed946c4cd0bc652740c695b18f5bbf6b9c2",
-  "architectureScore": 100,
+  "schema_version": "1.0.0",
+  "generated_at": "2026-04-03T21:16:52.850Z",
+  "metadata": {
+    "total_modules": 14,
+    "total_violations": 0,
+    "generation_time_ms": 0,
+    "source_hash": "6493a7d6",
+    "source_timestamp": "2026-04-03T21:16:52.837Z",
+    "generator_version": "1.0.0"
+  },
+  "layers": [
+    {
+      "name": "infrastructure",
+      "description": "Infrastructure layer",
+      "order": 1
+    },
+    {
+      "name": "domain",
+      "description": "Domain layer",
+      "order": 2
+    },
+    {
+      "name": "runtime",
+      "description": "Runtime layer",
+      "order": 3
+    },
+    {
+      "name": "ui",
+      "description": "Ui layer",
+      "order": 4
+    }
+  ],
   "modules": [
+    "apps/mmc",
+    "apps/frontoffice",
+    "apps/backoffice",
+    "apps/api",
+    "apps/worker",
     "packages/job-queue",
-    "packages/logger",
     "packages/types",
+    "packages/logger",
     "packages/config",
     "packages/redis-utils",
     "packages/ui-system",
     "packages/api-client",
     "packages/domain-core",
-    "packages/validation",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/api",
-    "apps/worker"
+    "packages/validation"
   ],
+  "rules": {},
+  "dependencies": {
+    "apps/mmc": {
+      "imports": [
+        "packages/types",
+        "packages/logger",
+        "packages/api-client",
+        "packages/ui-system"
+      ],
+      "imported_by": [],
+      "violations": []
+    },
+    "apps/frontoffice": {
+      "imports": [
+        "packages/types",
+        "packages/logger",
+        "packages/api-client"
+      ],
+      "imported_by": [],
+      "violations": []
+    },
+    "apps/backoffice": {
+      "imports": [
+        "packages/api-client",
+        "packages/types",
+        "packages/logger"
+      ],
+      "imported_by": [],
+      "violations": []
+    },
+    "apps/api": {
+      "imports": [
+        "packages/types",
+        "packages/validation",
+        "packages/logger",
+        "packages/domain-core",
+        "packages/redis-utils",
+        "packages/job-queue"
+      ],
+      "imported_by": [],
+      "violations": []
+    },
+    "apps/worker": {
+      "imports": [
+        "packages/types",
+        "packages/job-queue",
+        "packages/domain-core",
+        "packages/logger"
+      ],
+      "imported_by": [],
+      "violations": []
+    },
+    "packages/job-queue": {
+      "imports": [
+        "packages/logger"
+      ],
+      "imported_by": [
+        "apps/api",
+        "apps/worker"
+      ],
+      "violations": []
+    },
+    "packages/types": {
+      "imports": [],
+      "imported_by": [
+        "packages/domain-core",
+        "packages/validation",
+        "apps/mmc",
+        "apps/frontoffice",
+        "apps/backoffice",
+        "apps/api",
+        "apps/worker"
+      ],
+      "violations": []
+    },
+    "packages/logger": {
+      "imports": [],
+      "imported_by": [
+        "packages/job-queue",
+        "packages/redis-utils",
+        "packages/domain-core",
+        "packages/validation",
+        "apps/mmc",
+        "apps/frontoffice",
+        "apps/backoffice",
+        "apps/api",
+        "apps/worker"
+      ],
+      "violations": []
+    },
+    "packages/config": {
+      "imports": [],
+      "imported_by": [],
+      "violations": []
+    },
+    "packages/redis-utils": {
+      "imports": [
+        "packages/logger"
+      ],
+      "imported_by": [
+        "apps/api"
+      ],
+      "violations": []
+    },
+    "packages/ui-system": {
+      "imports": [],
+      "imported_by": [
+        "apps/mmc"
+      ],
+      "violations": []
+    },
+    "packages/api-client": {
+      "imports": [],
+      "imported_by": [
+        "apps/mmc",
+        "apps/frontoffice",
+        "apps/backoffice"
+      ],
+      "violations": []
+    },
+    "packages/domain-core": {
+      "imports": [
+        "packages/logger",
+        "packages/types",
+        "packages/validation"
+      ],
+      "imported_by": [
+        "apps/api",
+        "apps/worker"
+      ],
+      "violations": []
+    },
+    "packages/validation": {
+      "imports": [
+        "packages/types",
+        "packages/logger"
+      ],
+      "imported_by": [
+        "packages/domain-core",
+        "apps/api"
+      ],
+      "violations": []
+    }
+  },
   "edges": [
     {
       "from": "packages/job-queue",
@@ -128,81 +301,52 @@
       "to": "packages/logger"
     }
   ],
-  "hotspots": [
-    {
-      "module": "packages/logger",
-      "score": 9
-    },
-    {
-      "module": "packages/types",
-      "score": 7
-    },
-    {
-      "module": "packages/api-client",
-      "score": 3
-    },
-    {
-      "module": "packages/job-queue",
-      "score": 2
-    },
-    {
-      "module": "packages/domain-core",
-      "score": 2
-    },
-    {
-      "module": "packages/validation",
-      "score": 2
-    },
-    {
-      "module": "packages/redis-utils",
-      "score": 1
-    },
-    {
-      "module": "packages/ui-system",
-      "score": 1
-    },
-    {
-      "module": "packages/config",
-      "score": 0
-    },
-    {
-      "module": "apps/mmc",
-      "score": 0
-    }
-  ],
-  "moduleRisk": {
-    "packages/job-queue": "LOW",
-    "packages/logger": "HIGH",
-    "packages/types": "HIGH",
-    "packages/config": "LOW",
-    "packages/redis-utils": "LOW",
-    "packages/ui-system": "LOW",
-    "packages/api-client": "MEDIUM",
-    "packages/domain-core": "LOW",
-    "packages/validation": "LOW",
-    "apps/mmc": "LOW",
-    "apps/frontoffice": "LOW",
-    "apps/backoffice": "LOW",
-    "apps/api": "LOW",
-    "apps/worker": "LOW"
-  },
-  "architectureDrift": [],
-  "rules": {
-    "dependencyRules": {
-      "forbidPackagesImportingApps": true,
-      "forbidAppsImportingOtherApps": true,
-      "forbidScriptsImportingServiceLogger": true,
-      "forbidAppsPackagesImportingScriptLogger": true
-    },
-    "layerRules": {
-      "forbidUiImportingDomain": {
-        "source": "packages/ui-system",
-        "target": "packages/domain-core"
+  "violations": [],
+  "metrics": {
+    "max_severity": "none",
+    "compliance_percentage": 100,
+    "violating_modules": [],
+    "hotspots": [
+      {
+        "module": "packages/logger",
+        "hotspot_score": 9
       },
-      "forbidApiClientImportingWorker": {
-        "source": "packages/api-client",
-        "target": "apps/worker"
+      {
+        "module": "packages/types",
+        "hotspot_score": 7
+      },
+      {
+        "module": "packages/api-client",
+        "hotspot_score": 3
+      },
+      {
+        "module": "packages/job-queue",
+        "hotspot_score": 2
+      },
+      {
+        "module": "packages/domain-core",
+        "hotspot_score": 2
+      },
+      {
+        "module": "packages/validation",
+        "hotspot_score": 2
+      },
+      {
+        "module": "packages/redis-utils",
+        "hotspot_score": 1
+      },
+      {
+        "module": "packages/ui-system",
+        "hotspot_score": 1
+      },
+      {
+        "module": "packages/config",
+        "hotspot_score": 0
+      },
+      {
+        "module": "apps/mmc",
+        "hotspot_score": 0
       }
-    }
+    ]
   }
 }
