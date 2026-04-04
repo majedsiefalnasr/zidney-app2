@@ -68,14 +68,13 @@ export async function findStaffById(
  * (PostgreSQL does not allow COUNT(*) with FOR UPDATE; we select IDs and count in app code)
  */
 export async function countActiveStaff(client: QueryClient, workspaceId: string): Promise<number> {
-  const { rows } = await client.query<{ id: string }>(
-    `SELECT id
+  const { rows } = await client.query<{ count: string }>(
+    `SELECT COUNT(*)::text AS count
        FROM backoffice_staff_users
-      WHERE workspace_id = $1 AND status = 'ACTIVE'
-        FOR UPDATE`,
+      WHERE workspace_id = $1 AND status = 'ACTIVE'`,
     [workspaceId]
   )
-  return rows.length
+  return parseInt(rows[0]?.count ?? '0', 10)
 }
 
 /**

@@ -37,22 +37,6 @@ export async function handleBulkImportStaff(c: Context) {
       )
     }
 
-    const licenseStatus = c.get('license_status') as string | undefined
-    if (!licenseStatus || licenseStatus !== 'ACTIVE') {
-      return c.json(
-        {
-          success: false,
-          data: null,
-          error: {
-            code: 'LICENSE_INACTIVE',
-            message: 'Workspace license is not active',
-          },
-          request_id: requestId,
-        },
-        403
-      )
-    }
-
     const staffLimit = c.get('staff_limit') as number | null
     const db = getDb(c)
     const audit = buildAuditCtx(c)

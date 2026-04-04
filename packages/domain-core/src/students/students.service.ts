@@ -107,10 +107,11 @@ export async function createStudent(
     if (studentLimit !== null) {
       const activeCount = await countActiveStudents(client, input.workspace_id)
       if (activeCount >= studentLimit) {
-        throw new StudentError(
-          'STUDENT_LIMIT_EXCEEDED',
-          `Workspace has reached the student limit of ${studentLimit}`
-        )
+        throw new StudentError('STUDENT_LIMIT_EXCEEDED', {
+          message: `Workspace has reached the student limit of ${studentLimit}`,
+          limit_value: studentLimit,
+          current_value: activeCount,
+        })
       }
     }
 
@@ -381,6 +382,11 @@ export async function enableStudent(
     await client.query('COMMIT')
     return toStudentRecord(updated)
   } catch (err) {
+    // Detect Postgres 40001 (serialization failure) and translate to domain conflict error
+    if ((err as { code?: string }).code === '40001') {
+      await client.query('ROLLBACK')
+      throw new StudentError('STUDENT_CONFLICT', `Concurrent update conflict: ${studentId}`)
+    }
     await client.query('ROLLBACK')
     throw err
   } finally {

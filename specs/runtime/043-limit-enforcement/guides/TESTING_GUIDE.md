@@ -20,7 +20,7 @@ bun run test:unit  # 1719 tests, ~25s
 
 ### Key Endpoints to Test
 
-```
+```text
 POST /api/v1/backoffice/workspace/staff               (license: create new staff)
 PATCH /api/v1/backoffice/workspace/staff/:id/enable   (license: enable existing staff)
 POST /api/v1/backoffice/workspace/staff/bulk-import    (license: import staff batch)
@@ -253,7 +253,7 @@ bun run test:unit -- apps/api/src/routes/backoffice/staff/__tests__/staff-limit-
 
 ### Expected Output
 
-```
+```text
  ✓ |domain-core| packages/domain-core/src/staff/__tests__/staff.service.test.ts (6 tests)
  ✓ |domain-core| packages/domain-core/src/staff/__tests__/staff.bulk-import.test.ts (5 tests)
  ✓ |api| apps/api/src/routes/backoffice/staff/__tests__/staff-limit-enforcement.test.ts (9 tests)

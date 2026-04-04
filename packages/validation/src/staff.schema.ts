@@ -144,12 +144,15 @@ export type StaffIdParams = z.infer<typeof staffIdParamsSchema>
 export const bulkImportStaffRowSchema = z.object({
   email: z
     .string()
+    .trim()
+    .toLowerCase()
     .email('email must be a valid email address')
     .max(320, 'email must not exceed 320 characters')
     .describe('Staff email address'),
   name: z
     .string()
-    .min(1, 'name is required')
+    .trim()
+    .min(1, 'name must not be empty')
     .max(256, 'name must not exceed 256 characters')
     .describe('Staff display name'),
   password: z

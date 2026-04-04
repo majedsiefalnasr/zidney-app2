@@ -68,10 +68,12 @@ export async function createStaff(
   staffLimit: number | null,
   _audit: AuditContext
 ): Promise<StaffRecord> {
-  await db.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+  const client = await db.connect()
   try {
+    await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+
     // 1. Lock + check email uniqueness
-    const existing = await findStaffByEmailForUpdate(db, input.workspace_id, input.email)
+    const existing = await findStaffByEmailForUpdate(client, input.workspace_id, input.email)
     if (existing) {
       throw new StaffError('STAFF_EMAIL_CONFLICT', {
         message: `Email already registered: ${input.email}`,
@@ -79,7 +81,7 @@ export async function createStaff(
     }
 
     // 2. Lock + check staff limit
-    const activeCount = await countActiveStaff(db, input.workspace_id)
+    const activeCount = await countActiveStaff(client, input.workspace_id)
     if (staffLimit !== null && activeCount >= staffLimit) {
       throw new StaffError('STAFF_LIMIT_EXCEEDED', {
         message: `Workspace has reached the staff limit of ${staffLimit}`,
@@ -92,7 +94,7 @@ export async function createStaff(
     const passwordHash = await hashStaffPassword(input.password)
 
     // 4. Insert
-    const record = await insertStaff(db, {
+    const record = await insertStaff(client, {
       workspace_id: input.workspace_id,
       email: input.email,
       name: input.name,
@@ -101,12 +103,14 @@ export async function createStaff(
       division_ids: input.division_ids ?? [],
     })
 
-    await db.query('COMMIT')
+    await client.query('COMMIT')
 
     return record
   } catch (err) {
-    await db.query('ROLLBACK')
+    await client.query('ROLLBACK')
     throw err
+  } finally {
+    client.release()
   }
 }
 

@@ -103,7 +103,7 @@ export async function processStaffBulkImport(
   const failed = [];
 
   for (let batchIdx = 0; batchIdx < rows.length; batchIdx++) {
-    const row = batch[batchIdx];
+    const row = rows[batchIdx];
     if (!row) continue; // NEW: safe guard (no ! assertion)
 
     try {
