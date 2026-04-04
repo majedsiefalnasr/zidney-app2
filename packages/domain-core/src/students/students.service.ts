@@ -92,7 +92,7 @@ export async function createStudent(
   db: DbClient,
   input: CreateStudentInput,
   _audit: AuditContext,
-  studentLimit = Number.MAX_SAFE_INTEGER
+  studentLimit: number | null = null
 ): Promise<StudentRecord> {
   const client = await db.connect()
   try {
@@ -103,13 +103,15 @@ export async function createStudent(
       throw new StudentError('STUDENT_EMAIL_CONFLICT', `Email already registered: ${input.email}`)
     }
 
-    // 2. Student limit — SELECT COUNT FOR UPDATE
-    const activeCount = await countActiveStudents(client, input.workspace_id)
-    if (activeCount >= studentLimit) {
-      throw new StudentError(
-        'STUDENT_LIMIT_EXCEEDED',
-        `Workspace has reached the student limit of ${studentLimit}`
-      )
+    // 2. Student limit — SELECT COUNT FOR UPDATE (only check if limit is not null)
+    if (studentLimit !== null) {
+      const activeCount = await countActiveStudents(client, input.workspace_id)
+      if (activeCount >= studentLimit) {
+        throw new StudentError(
+          'STUDENT_LIMIT_EXCEEDED',
+          `Workspace has reached the student limit of ${studentLimit}`
+        )
+      }
     }
 
     // 3. Validate division exists and is ENABLED

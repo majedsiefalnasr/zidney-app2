@@ -25,7 +25,7 @@ a new staff bulk import feature.
 
 ## Layer Architecture
 
-```
+```text
 Request
   └─ license-enforcement.ts (middleware)        ← G13: fix string → number|null
        └─ BackofficeVariables (types.ts)         ← G12: fix number → number|null
@@ -42,7 +42,7 @@ Request
 
 Changes must be applied bottom-up to satisfy TypeScript type checking:
 
-```
+```text
 Phase A — Foundation (types, error classes, middleware)
   ├─ G12: Fix BackofficeVariables types (types.ts)
   ├─ G13: Fix middleware limit setting (license-enforcement.ts)
@@ -252,12 +252,12 @@ Route: `POST /backoffice/:workspace_slug/v1/staff/bulk-import`
 
 ## Risk Assessment
 
-| Risk                                                    | Severity | Mitigation                                                                                       |
-| ------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ | ---------------------------- |
-| Serialization failures on concurrent enable             | MEDIUM   | Return LICENSE_LIMIT_REACHED immediately (no retry). Document in error response.                 |
-| Staff bulk import missing divisionId                    | LOW      | Staff have no division_id column — N/A, no change needed.                                        |
-| Breaking change to enableStudent/enableStaff signatures | HIGH     | Update all callers (route handlers) in same PR. TypeScript compile confirms all callers updated. |
-| Middleware string→null change breaks existing routes    | HIGH     | All routes reading student_limit/staff_limit use c.get() which is typed. Number                  | null is backward compatible. |
+| Risk                                                    | Severity | Mitigation                                                                                                   |
+| ------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| Serialization failures on concurrent enable             | MEDIUM   | Return LICENSE_LIMIT_REACHED immediately (no retry). Document in error response.                             |
+| Staff bulk import missing divisionId                    | LOW      | Staff have no division_id column — N/A, no change needed.                                                    |
+| Breaking change to enableStudent/enableStaff signatures | HIGH     | Update all callers (route handlers) in same PR. TypeScript compile confirms all callers updated.             |
+| Middleware string→null change breaks existing routes    | HIGH     | All routes reading student_limit/staff_limit use c.get() which is typed. Number null is backward compatible. |
 
 ---
 

@@ -142,7 +142,7 @@ STAGE 43 is complete and production-ready. All 24 tasks implemented, 35 tests pa
 
 - SERIALIZABLE isolation chosen over row-level locks (safer for correctness, minor perf trade-off acceptable)
 - Null semantics for unlimited capacity (simpler than sentinel value or separate column)
-- Per-batch enforcement in bulk import (prevents partial impo on limit violation)
+- Per-batch enforcement in bulk import (prevents partial import on limit violation)
 
 ---
 

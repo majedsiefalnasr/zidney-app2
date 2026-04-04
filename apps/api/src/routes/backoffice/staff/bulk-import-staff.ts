@@ -37,8 +37,8 @@ export async function handleBulkImportStaff(c: Context) {
       )
     }
 
-    const license = c.get('license')
-    if (!license || license.status !== 'ACTIVE') {
+    const licenseStatus = c.get('license_status') as string | undefined
+    if (!licenseStatus || licenseStatus !== 'ACTIVE') {
       return c.json(
         {
           success: false,
@@ -58,7 +58,10 @@ export async function handleBulkImportStaff(c: Context) {
     const audit = buildAuditCtx(c)
 
     logger.debug('Bulk import staff request', {
+      request_id: requestId,
       workspace_id: workspaceId,
+      workspace_slug: c.get('workspace_slug'),
+      user_id: c.get('user_id'),
       row_count: parsed.data.rows.length,
       correlation_id: correlationId,
     })

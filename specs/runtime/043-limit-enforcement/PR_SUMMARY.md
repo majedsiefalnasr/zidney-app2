@@ -1,4 +1,4 @@
-## STAGE 43 – License Limit Enforcement
+# STAGE 43 – License Limit Enforcement
 
 **Type:** Feat (Feature)  
 **Branch:** `spec/043-limit-enforcement`  

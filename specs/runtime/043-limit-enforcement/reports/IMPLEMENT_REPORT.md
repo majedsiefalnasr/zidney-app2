@@ -48,32 +48,32 @@ All 24 tasks implemented across 7 phases (A–G). Staff and student limit enforc
 
 ## Tasks Completion
 
-| Task ID | Description                                         | Layer       | Status |
-| ------- | --------------------------------------------------- | ----------- | ------ |
-| T001    | Fix `BackofficeVariables` limit types               | API / Types | ✅     |
-| T002    | Fix middleware limit context assignment             | Middleware  | ✅     |
-| T003    | Extend `StudentError`                               | Domain      | ✅     |
-| T004    | Extend `StaffError`                                 | Domain      | ✅     |
-| T005    | `createStaff()` null-limit param                    | Domain      | ✅     |
-| T006    | `createStaff()` null-limit guard                    | Domain      | ✅     |
-| T007    | `createStaff()` SERIALIZABLE transaction            | Domain      | ✅     |
-| T008    | `enableStaff()` signature                           | Domain      | ✅     |
-| T009    | `enableStaff()` null-limit guard                    | Domain      | ✅     |
-| T010    | `enableStaff()` SERIALIZABLE transaction            | Domain      | ✅     |
-| T011    | `createStudent()` null-limit param                  | Domain      | ✅     |
-| T012    | `createStudent()` null-limit guard                  | Domain      | ✅     |
-| T013    | `enableStudent()` signature                         | Domain      | ✅     |
-| T014    | `enableStudent()` null-limit guard                  | Domain      | ✅     |
-| T015    | `processStaffBulkImport()` signature                | Domain      | ✅     |
-| T016    | `processStaffBulkImport()` limit enforcement        | Domain      | ✅     |
-| T017    | Route: `enable-staff.ts` context pass               | API Routes  | ✅     |
-| T018    | Route: `bulk-import-staff.ts` context pass          | API Routes  | ✅     |
-| T019    | `staffErrorResponse()` helper                       | API Routes  | ✅     |
-| T020    | E2E wiring smoke test                               | API Routes  | ✅     |
-| T021    | `enableStudent` route wiring                        | API Routes  | ✅     |
-| T022    | `processBulkImport` route wiring                    | API Routes  | ✅     |
-| T023    | Unit tests (staff + student services, bulk imports) | Tests       | ✅     |
-| T024    | Route tests (enable-staff, bulk-import-staff)       | Tests       | ✅     |
+| Task ID | Description                                       | Layer       | Status |
+| ------- | ------------------------------------------------- | ----------- | ------ |
+| T001    | Fix `BackofficeVariables` limit types             | API / Types | ✅     |
+| T002    | Fix middleware limit context assignment           | Middleware  | ✅     |
+| T003    | Extend `StudentError` with limit metadata         | Domain      | ✅     |
+| T004    | Extend `StaffError` with limit metadata           | Domain      | ✅     |
+| T005    | `createStaff()` staffLimit param normalization    | Domain      | ✅     |
+| T006    | `processBulkImport()` studentLimit param          | Domain      | ✅     |
+| T007    | `bulkImportStudents()` studentLimit param         | Domain      | ✅     |
+| T008    | `enableStudent()` SERIALIZABLE + limit check      | Domain      | ✅     |
+| T009    | `enableStaff()` SERIALIZABLE + limit check        | Domain      | ✅     |
+| T010    | Route: `enable-student.ts` studentLimit pass      | API Routes  | ✅     |
+| T011    | Route: `enable-staff.ts` staffLimit pass          | API Routes  | ✅     |
+| T012    | Route: `create-staff.ts` staffLimit handling      | API Routes  | ✅     |
+| T013    | Route: `bulk-import-students.ts` studentLimit fix | API Routes  | ✅     |
+| T014    | Error mapping: `studentErrorResponse` helper      | API Routes  | ✅     |
+| T015    | Error mapping: `staffErrorResponse` helper        | API Routes  | ✅     |
+| T016    | New: Staff bulk import types                      | Domain      | ✅     |
+| T017    | New: Bulk import staff schema                     | Validation  | ✅     |
+| T018    | New: Schema type exports                          | Validation  | ✅     |
+| T019    | New: `processStaffBulkImport()` function          | Domain      | ✅     |
+| T020    | New: `bulkImportStaff()` service wrapper          | Domain      | ✅     |
+| T021    | New: `handleBulkImportStaff()` route handler      | API Routes  | ✅     |
+| T022    | New: Register route and exports                   | API Routes  | ✅     |
+| T023    | Unit tests (domain functions)                     | Tests       | ✅     |
+| T024    | Integration tests (route handlers)                | Tests       | ✅     |
 
 **Completed:** 24 / 24
 

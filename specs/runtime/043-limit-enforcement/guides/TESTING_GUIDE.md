@@ -21,12 +21,12 @@ bun run test:unit  # 1719 tests, ~25s
 ### Key Endpoints to Test
 
 ```
-POST /api/backoffice/staff/enable        (license: enable existing staff)
-POST /api/backoffice/staff                (license: create new staff + enable)
-POST /api/backoffice/staff/bulk-import    (license: import staff batch)
-POST /api/backoffice/students/enable      (license: enable existing student)
-POST /api/backoffice/students             (license: create new student + enable)
-POST /api/backoffice/students/bulk-import (license: import student batch)
+POST /api/v1/backoffice/workspace/staff               (license: create new staff)
+PATCH /api/v1/backoffice/workspace/staff/:id/enable   (license: enable existing staff)
+POST /api/v1/backoffice/workspace/staff/bulk-import    (license: import staff batch)
+POST /api/v1/backoffice/workspace/students             (license: create new student)
+PATCH /api/v1/backoffice/workspace/students/:id/enable (license: enable existing student)
+POST /api/v1/backoffice/workspace/students/bulk-import (license: import student batch)
 ```
 
 ---
@@ -164,7 +164,7 @@ POST /api/backoffice/students/bulk-import (license: import student batch)
 
 ```bash
 # In database:
-SELECT COUNT(*) FROM staff WHERE tenant_id = ? AND active = true;
+SELECT COUNT(*) FROM backoffice_staff_users WHERE workspace_id = ? AND status = 'ACTIVE';
 # Should return: 10 (not 8 + 5 = 13)
 
 # In logs (per batch):
@@ -183,7 +183,7 @@ SELECT COUNT(*) FROM staff WHERE tenant_id = ? AND active = true;
 
 **Test Steps:**
 
-1. Call `POST /api/backoffice/staff/{id}/enable` to enable the inactive staff
+1. Call `PATCH /api/v1/backoffice/workspace/staff/:id/enable` to enable the inactive staff
 2. Expect: **403 Forbidden** — cannot enable because limit reached
 
 **Response:**
