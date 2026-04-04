@@ -9,9 +9,9 @@ Scope: Transactional enforcement of student and staff limits per license
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: HIGH
-Last Updated: 2026-04-04T00:30:00.000Z
+Last Updated: 2026-04-04T00:40:00.000Z
 
 Scope Defined:
 
@@ -30,10 +30,10 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
