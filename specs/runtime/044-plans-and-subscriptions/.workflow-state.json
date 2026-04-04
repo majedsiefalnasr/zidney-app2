@@ -1,0 +1,32 @@
+{
+  "stage": "STAGE 44 – Plans & Subscriptions",
+  "phase": "03_BACKOFFICE_CORE / 06_COMMERCIAL_LAYER",
+  "stage_dir": "specs/runtime/044-plans-and-subscriptions",
+  "stage_file": "specs/phases/03_BACKOFFICE_CORE/06_COMMERCIAL_LAYER/STAGE_44_PLANS_AND_SUBSCRIPTIONS.md",
+  "branch": "spec/044-plans-and-subscriptions",
+  "base_branch": "develop",
+  "pkg_manager": "bun",
+  "auto_advance": true,
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "deferred_tasks": [],
+  "guardian_verdicts": {},
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "2026-04-04T00:00:00.000Z",
+  "last_updated": "2026-04-04T00:00:00.000Z",
+  "step_timings": {},
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/044-plans-and-subscriptions",
+      "timestamp": "2026-04-04T00:00:00.000Z"
+    }
+  ]
+}
