@@ -8,9 +8,9 @@ workspace
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2025-01-09T00:03:00.000Z
+Last Updated: 2025-01-09T00:04:00.000Z
 
 Scope Planned:
 
@@ -33,13 +33,26 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Technical plan compliant — task generation authorized
-- No cross-tenant logic: workspace_id column on plans table
-- SERIALIZABLE isolation for activation transaction
-- Forward-only migration 023
+- 27 atomic tasks generated across 13 execution waves
+- Plans and subscriptions domain layers fully parallelized
+- Migration T001 isolated as first task (unblocks all schema work)
+- Task dependency order enforces strict import boundary compliance
+
+Deferred Scope:
+
+- Full payment gateway integration (FR-05)
+- Auto-renew worker job (FR-07)
+- Module access enforcement on student routes (FR-08)
+- subscription-enforcement middleware mounting (Stage 45+)
+
+Architecture Governance Compliance:
+
+- Task set compliant — drift analysis required before implementation
+- All writes transactional in task design
+- Student status sync atomic within subscriptions tasks
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
