@@ -92,7 +92,7 @@ export async function createStudent(
   db: DbClient,
   input: CreateStudentInput,
   _audit: AuditContext,
-  studentLimit = Number.MAX_SAFE_INTEGER
+  studentLimit: number | null = null
 ): Promise<StudentRecord> {
   const client = await db.connect()
   try {
@@ -103,13 +103,16 @@ export async function createStudent(
       throw new StudentError('STUDENT_EMAIL_CONFLICT', `Email already registered: ${input.email}`)
     }
 
-    // 2. Student limit — SELECT COUNT FOR UPDATE
-    const activeCount = await countActiveStudents(client, input.workspace_id)
-    if (activeCount >= studentLimit) {
-      throw new StudentError(
-        'STUDENT_LIMIT_EXCEEDED',
-        `Workspace has reached the student limit of ${studentLimit}`
-      )
+    // 2. Student limit — SELECT COUNT FOR UPDATE (only check if limit is not null)
+    if (studentLimit !== null) {
+      const activeCount = await countActiveStudents(client, input.workspace_id)
+      if (activeCount >= studentLimit) {
+        throw new StudentError('STUDENT_LIMIT_EXCEEDED', {
+          message: `Workspace has reached the student limit of ${studentLimit}`,
+          limit_value: studentLimit,
+          current_value: activeCount,
+        })
+      }
     }
 
     // 3. Validate division exists and is ENABLED
@@ -340,17 +343,29 @@ export async function enableStudent(
   db: DbClient,
   workspaceId: string,
   studentId: string,
+  studentLimit: number | null,
   _audit: AuditContext
 ): Promise<StudentRecord> {
   const client = await db.connect()
   try {
-    await client.query('BEGIN')
+    await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
     const current = await findStudentById(client, workspaceId, studentId)
     if (!current) {
       throw new StudentError('STUDENT_NOT_FOUND', `Student not found: ${studentId}`)
     }
     if (current.status === 'ACTIVE') {
       throw new StudentError('STUDENT_ALREADY_ACTIVE', `Student is already active: ${studentId}`)
+    }
+
+    if (studentLimit !== null) {
+      const activeCount = await countActiveStudents(client, workspaceId)
+      if (activeCount >= studentLimit) {
+        throw new StudentError('STUDENT_LIMIT_EXCEEDED', {
+          message: `Workspace has reached the student limit of ${studentLimit}`,
+          limit_value: studentLimit,
+          current_value: activeCount,
+        })
+      }
     }
 
     const updated = await updateStudentStatus(
@@ -367,6 +382,11 @@ export async function enableStudent(
     await client.query('COMMIT')
     return toStudentRecord(updated)
   } catch (err) {
+    // Detect Postgres 40001 (serialization failure) and translate to domain conflict error
+    if ((err as { code?: string }).code === '40001') {
+      await client.query('ROLLBACK')
+      throw new StudentError('STUDENT_CONFLICT', `Concurrent update conflict: ${studentId}`)
+    }
     await client.query('ROLLBACK')
     throw err
   } finally {
@@ -466,7 +486,7 @@ export async function bulkImportStudents(
   db: DbClient,
   workspaceId: string,
   rows: BulkImportRow[],
-  studentLimit: number,
+  studentLimit: number | null,
   divisionId: string,
   _audit: AuditContext
 ): Promise<BulkImportResult> {

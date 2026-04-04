@@ -14,7 +14,7 @@
  * ✓ password_hash SELECT-excluded from list/get — only in findStaffByEmailForUpdate
  */
 
-import type { DbClient, StaffListQuery, StaffRecord, StaffRow } from './staff.types'
+import type { QueryClient, StaffListQuery, StaffRecord, StaffRow } from './staff.types'
 
 // ---------------------------------------------------------------------------
 // Read helpers
@@ -26,7 +26,7 @@ import type { DbClient, StaffListQuery, StaffRecord, StaffRow } from './staff.ty
  * Returns the FULL row including password_hash (login and create flows only).
  */
 export async function findStaffByEmailForUpdate(
-  client: DbClient,
+  client: QueryClient,
   workspaceId: string,
   email: string
 ): Promise<StaffRow | null> {
@@ -47,7 +47,7 @@ export async function findStaffByEmailForUpdate(
  * Find staff by ID (no password_hash). Returns public StaffRecord.
  */
 export async function findStaffById(
-  client: DbClient,
+  client: QueryClient,
   workspaceId: string,
   staffId: string
 ): Promise<StaffRecord | null> {
@@ -64,14 +64,14 @@ export async function findStaffById(
 
 /**
  * Count ACTIVE staff in workspace (exact count, used inside SERIALIZABLE tx).
- * Uses SELECT FOR UPDATE to prevent phantom reads under concurrent inserts.
+ * Uses a direct COUNT(*) SQL query (no FOR UPDATE). Correctness relies on
+ * the caller using SERIALIZABLE isolation for concurrent limit enforcement.
  */
-export async function countActiveStaff(client: DbClient, workspaceId: string): Promise<number> {
+export async function countActiveStaff(client: QueryClient, workspaceId: string): Promise<number> {
   const { rows } = await client.query<{ count: string }>(
-    `SELECT COUNT(*) AS count
+    `SELECT COUNT(*)::text AS count
        FROM backoffice_staff_users
-      WHERE workspace_id = $1 AND status = 'ACTIVE'
-        FOR UPDATE`,
+      WHERE workspace_id = $1 AND status = 'ACTIVE'`,
     [workspaceId]
   )
   return parseInt(rows[0]?.count ?? '0', 10)
@@ -82,7 +82,7 @@ export async function countActiveStaff(client: DbClient, workspaceId: string): P
  * Returns the full public StaffRecord (no password_hash).
  */
 export async function insertStaff(
-  client: DbClient,
+  client: QueryClient,
   data: {
     workspace_id: string
     email: string
@@ -117,7 +117,7 @@ export async function insertStaff(
  * Only updates fields that are provided (non-undefined).
  */
 export async function updateStaff(
-  client: DbClient,
+  client: QueryClient,
   workspaceId: string,
   staffId: string,
   data: { name?: string; email?: string; division_ids?: string[]; role_id?: string | null }
@@ -160,7 +160,7 @@ export async function updateStaff(
  * Update staff status and is_active (both kept in sync).
  */
 export async function updateStaffStatus(
-  client: DbClient,
+  client: QueryClient,
   workspaceId: string,
   staffId: string,
   status: 'ACTIVE' | 'INACTIVE',
@@ -183,7 +183,7 @@ export async function updateStaffStatus(
  * Hard-delete is forbidden at this layer.
  */
 export async function softDeleteStaff(
-  client: DbClient,
+  client: QueryClient,
   workspaceId: string,
   staffId: string
 ): Promise<void> {
@@ -200,7 +200,7 @@ export async function softDeleteStaff(
  * Filters: status, division_id, search (email/name ILIKE).
  */
 export async function listStaff(
-  client: DbClient,
+  client: QueryClient,
   query: StaffListQuery
 ): Promise<{ rows: StaffRecord[]; total: number }> {
   const conditions: string[] = ['workspace_id = $1']
@@ -251,7 +251,7 @@ export async function listStaff(
  * Returns true if any content exists — used to block hard-delete.
  */
 export async function checkAuthoredContent(
-  client: DbClient,
+  client: QueryClient,
   workspaceId: string,
   staffId: string
 ): Promise<boolean> {

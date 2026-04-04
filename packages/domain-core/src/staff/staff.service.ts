@@ -35,6 +35,8 @@ import type {
   AuditContext,
   CreateStaffInput,
   DbClient,
+  StaffBulkImportResult,
+  StaffBulkImportRow,
   StaffListQuery,
   StaffListResult,
   StaffRecord,
@@ -49,8 +51,8 @@ import type {
  * Create a new staff member in the workspace.
  *
  * Uses SERIALIZABLE isolation to prevent phantom reads under concurrent
- * create requests. The FOR UPDATE lock in countActiveStaff prevents
- * concurrent inserts from bypassing the staff_limit check.
+ * create requests. The limit check executes a direct COUNT(*) query; correctness
+ * depends on the caller using SERIALIZABLE isolation for atomic enforcement.
  *
  * @param db          - Tenant database client (Pool)
  * @param input       - Staff creation input
@@ -63,31 +65,38 @@ import type {
 export async function createStaff(
   db: DbClient,
   input: CreateStaffInput,
-  staffLimit: number,
+  staffLimit: number | null,
   _audit: AuditContext
 ): Promise<StaffRecord> {
-  await db.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+  const client = await db.connect()
   try {
+    await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+
     // 1. Lock + check email uniqueness
-    const existing = await findStaffByEmailForUpdate(db, input.workspace_id, input.email)
+    const existing = await findStaffByEmailForUpdate(client, input.workspace_id, input.email)
     if (existing) {
-      throw new StaffError('STAFF_EMAIL_CONFLICT', `Email already registered: ${input.email}`)
+      throw new StaffError('STAFF_EMAIL_CONFLICT', {
+        message: `Email already registered: ${input.email}`,
+      })
     }
 
-    // 2. Lock + check staff limit
-    const activeCount = await countActiveStaff(db, input.workspace_id)
-    if (activeCount >= staffLimit) {
-      throw new StaffError(
-        'STAFF_LIMIT_EXCEEDED',
-        `Workspace has reached the staff limit of ${staffLimit}`
-      )
+    // 2. Lock + check staff limit (only when a numeric limit is configured)
+    if (staffLimit !== null) {
+      const activeCount = await countActiveStaff(client, input.workspace_id)
+      if (activeCount >= staffLimit) {
+        throw new StaffError('STAFF_LIMIT_EXCEEDED', {
+          message: `Workspace has reached the staff limit of ${staffLimit}`,
+          limit_value: staffLimit,
+          current_value: activeCount,
+        })
+      }
     }
 
     // 3. Hash password (in-transaction — hash before insert)
     const passwordHash = await hashStaffPassword(input.password)
 
     // 4. Insert
-    const record = await insertStaff(db, {
+    const record = await insertStaff(client, {
       workspace_id: input.workspace_id,
       email: input.email,
       name: input.name,
@@ -96,12 +105,21 @@ export async function createStaff(
       division_ids: input.division_ids ?? [],
     })
 
-    await db.query('COMMIT')
+    await client.query('COMMIT')
 
     return record
   } catch (err) {
-    await db.query('ROLLBACK')
+    await client.query('ROLLBACK')
+    // Detect serialization failure and convert to conflict for retry
+    const pgErr = err as unknown as { code?: string }
+    if (pgErr?.code === '40001') {
+      throw new StaffError('STAFF_EMAIL_CONFLICT', {
+        message: 'Request conflicted with concurrent operation; please retry',
+      })
+    }
     throw err
+  } finally {
+    client.release()
   }
 }
 
@@ -142,7 +160,7 @@ export async function getStaffById(
 ): Promise<StaffRecord> {
   const record = await findStaffById(db, workspaceId, staffId)
   if (!record) {
-    throw new StaffError('STAFF_NOT_FOUND', `Staff not found: ${staffId}`)
+    throw new StaffError('STAFF_NOT_FOUND', { message: `Staff not found: ${staffId}` })
   }
   return record
 }
@@ -169,20 +187,24 @@ export async function updateStaff(
     // Check target exists
     const current = await findStaffById(db, workspaceId, staffId)
     if (!current) {
-      throw new StaffError('STAFF_NOT_FOUND', `Staff not found: ${staffId}`)
+      throw new StaffError('STAFF_NOT_FOUND', { message: `Staff not found: ${staffId}` })
     }
 
     // If email is being changed, check for conflict
     if (input.email && input.email !== current.email) {
       const conflict = await findStaffByEmailForUpdate(db, workspaceId, input.email)
       if (conflict && conflict.id !== staffId) {
-        throw new StaffError('STAFF_EMAIL_CONFLICT', `Email already in use: ${input.email}`)
+        throw new StaffError('STAFF_EMAIL_CONFLICT', {
+          message: `Email already in use: ${input.email}`,
+        })
       }
     }
 
     const updated = await updateStaffRow(db, workspaceId, staffId, input)
     if (!updated) {
-      throw new StaffError('STAFF_NOT_FOUND', `Staff not found after update: ${staffId}`)
+      throw new StaffError('STAFF_NOT_FOUND', {
+        message: `Staff not found after update: ${staffId}`,
+      })
     }
 
     await db.query('COMMIT')
@@ -214,15 +236,19 @@ export async function disableStaff(
   try {
     const current = await findStaffById(db, workspaceId, staffId)
     if (!current) {
-      throw new StaffError('STAFF_NOT_FOUND', `Staff not found: ${staffId}`)
+      throw new StaffError('STAFF_NOT_FOUND', { message: `Staff not found: ${staffId}` })
     }
     if (current.status === 'INACTIVE') {
-      throw new StaffError('STAFF_ALREADY_DISABLED', `Staff is already disabled: ${staffId}`)
+      throw new StaffError('STAFF_ALREADY_DISABLED', {
+        message: `Staff is already disabled: ${staffId}`,
+      })
     }
 
     const updated = await updateStaffStatus(db, workspaceId, staffId, 'INACTIVE', false)
     if (!updated) {
-      throw new StaffError('STAFF_NOT_FOUND', `Staff not found after disable: ${staffId}`)
+      throw new StaffError('STAFF_NOT_FOUND', {
+        message: `Staff not found after disable: ${staffId}`,
+      })
     }
 
     await db.query('COMMIT')
@@ -248,29 +274,54 @@ export async function enableStaff(
   db: DbClient,
   workspaceId: string,
   staffId: string,
+  staffLimit: number | null,
   _audit: AuditContext
 ): Promise<StaffRecord> {
-  await db.query('BEGIN')
+  const client = await db.connect()
   try {
-    const current = await findStaffById(db, workspaceId, staffId)
+    await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+    const current = await findStaffById(client, workspaceId, staffId)
     if (!current) {
-      throw new StaffError('STAFF_NOT_FOUND', `Staff not found: ${staffId}`)
+      throw new StaffError('STAFF_NOT_FOUND', { message: `Staff not found: ${staffId}` })
     }
     if (current.status === 'ACTIVE') {
-      throw new StaffError('STAFF_ALREADY_ACTIVE', `Staff is already active: ${staffId}`)
+      throw new StaffError('STAFF_ALREADY_ACTIVE', {
+        message: `Staff is already active: ${staffId}`,
+      })
     }
 
-    const updated = await updateStaffStatus(db, workspaceId, staffId, 'ACTIVE', true)
+    if (staffLimit !== null) {
+      const activeCount = await countActiveStaff(client, workspaceId)
+      if (activeCount >= staffLimit) {
+        throw new StaffError('STAFF_LIMIT_EXCEEDED', {
+          message: `Workspace has reached the staff limit of ${staffLimit}`,
+          limit_value: staffLimit,
+          current_value: activeCount,
+        })
+      }
+    }
+
+    const updated = await updateStaffStatus(client, workspaceId, staffId, 'ACTIVE', true)
     if (!updated) {
-      throw new StaffError('STAFF_NOT_FOUND', `Staff not found after enable: ${staffId}`)
+      throw new StaffError('STAFF_NOT_FOUND', {
+        message: `Staff not found after enable: ${staffId}`,
+      })
     }
 
-    await db.query('COMMIT')
-
+    await client.query('COMMIT')
     return updated
   } catch (err) {
-    await db.query('ROLLBACK')
+    await client.query('ROLLBACK')
+    // Detect serialization failure and convert to conflict for retry
+    const pgErr = err as unknown as { code?: string }
+    if (pgErr?.code === '40001') {
+      throw new StaffError('STAFF_EMAIL_CONFLICT', {
+        message: 'Request conflicted with concurrent operation; please retry',
+      })
+    }
     throw err
+  } finally {
+    client.release()
   }
 }
 
@@ -295,15 +346,14 @@ export async function deleteStaff(
   try {
     const current = await findStaffById(db, workspaceId, staffId)
     if (!current) {
-      throw new StaffError('STAFF_NOT_FOUND', `Staff not found: ${staffId}`)
+      throw new StaffError('STAFF_NOT_FOUND', { message: `Staff not found: ${staffId}` })
     }
 
     const hasContent = await checkAuthoredContent(db, workspaceId, staffId)
     if (hasContent) {
-      throw new StaffError(
-        'STAFF_HAS_AUTHORED_CONTENT',
-        `Cannot delete staff with authored content: ${staffId}`
-      )
+      throw new StaffError('STAFF_HAS_AUTHORED_CONTENT', {
+        message: `Cannot delete staff with authored content: ${staffId}`,
+      })
     }
 
     await softDeleteStaff(db, workspaceId, staffId)
@@ -313,4 +363,23 @@ export async function deleteStaff(
     await db.query('ROLLBACK')
     throw err
   }
+}
+
+// ---------------------------------------------------------------------------
+// bulkImportStaff
+// ---------------------------------------------------------------------------
+
+/**
+ * Bulk import staff via CSV payload.
+ * Delegates to staff.bulk-import.ts for batch processing.
+ */
+export async function bulkImportStaff(
+  db: DbClient,
+  workspaceId: string,
+  rows: StaffBulkImportRow[],
+  staffLimit: number | null,
+  audit: AuditContext
+): Promise<StaffBulkImportResult> {
+  const { processStaffBulkImport } = await import('./staff.bulk-import')
+  return processStaffBulkImport(db, workspaceId, rows, staffLimit, audit)
 }

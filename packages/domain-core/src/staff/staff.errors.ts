@@ -20,6 +20,7 @@ export type StaffErrorCode =
   | 'STAFF_ALREADY_DISABLED'
   | 'STAFF_HAS_AUTHORED_CONTENT'
   | 'STAFF_INVALID_PASSWORD'
+  | 'STAFF_BATCH_FAILED'
 
 // ---------------------------------------------------------------------------
 // HTTP status map
@@ -33,6 +34,7 @@ export const STAFF_ERROR_HTTP: Record<StaffErrorCode, number> = {
   STAFF_ALREADY_DISABLED: 409,
   STAFF_HAS_AUTHORED_CONTENT: 409,
   STAFF_INVALID_PASSWORD: 422,
+  STAFF_BATCH_FAILED: 500,
 }
 
 // ---------------------------------------------------------------------------
@@ -42,11 +44,18 @@ export const STAFF_ERROR_HTTP: Record<StaffErrorCode, number> = {
 export class StaffError extends Error {
   readonly code: StaffErrorCode
   readonly httpStatus: number
+  readonly limit_value?: number
+  readonly current_value?: number
 
-  constructor(code: StaffErrorCode, message?: string) {
-    super(message ?? code)
+  constructor(
+    code: StaffErrorCode,
+    options?: { message?: string; limit_value?: number; current_value?: number }
+  ) {
+    super(options?.message ?? code)
     this.name = 'StaffError'
     this.code = code
     this.httpStatus = STAFF_ERROR_HTTP[code]
+    this.limit_value = options?.limit_value
+    this.current_value = options?.current_value
   }
 }

@@ -43,6 +43,7 @@ import { Hono } from 'hono'
 
 import { createPermissionGuard } from '../../../middleware/backoffice-permission-guard-v2'
 import type { BackofficeEnv } from '../types'
+import { handleBulkImportStaff } from './bulk-import-staff'
 import { handleCreateStaff } from './create-staff'
 import { handleDeleteStaff } from './delete-staff'
 import { handleDisableStaff } from './disable-staff'
@@ -73,6 +74,16 @@ staffRouter.post(
   '/staff',
   createPermissionGuard(logger, PermissionModule.USERS, 'can_create'),
   handleCreateStaff
+)
+
+// ---------------------------------------------------------------------------
+// Bulk import staff
+// ---------------------------------------------------------------------------
+
+staffRouter.post(
+  '/staff/bulk-import',
+  createPermissionGuard(logger, PermissionModule.USERS, 'can_create'),
+  handleBulkImportStaff
 )
 
 // ---------------------------------------------------------------------------

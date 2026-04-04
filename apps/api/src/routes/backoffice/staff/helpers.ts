@@ -66,6 +66,23 @@ export function staffErrorResponse(c: Context, err: unknown) {
   const requestId = (c.get('request_id') as string | undefined) ?? null
 
   if (err instanceof StaffError) {
+    if (err.code === 'STAFF_LIMIT_EXCEEDED') {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'LICENSE_LIMIT_REACHED',
+            type: 'STAFF_LIMIT',
+            limit_value: err.limit_value ?? null,
+            current_value: err.current_value ?? null,
+            message: err.message,
+          },
+          request_id: requestId,
+        },
+        403
+      )
+    }
     const status = STAFF_ERROR_HTTP[err.code] as 400 | 403 | 404 | 409 | 422 | 500
     return c.json(
       {

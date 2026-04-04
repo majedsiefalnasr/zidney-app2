@@ -11,12 +11,22 @@
 // Database client interface
 // ---------------------------------------------------------------------------
 
-/** Minimal structural interface for query execution — satisfied by Pool, PoolClient, or mock */
-export interface DbClient {
+/** Minimal structural interface for query execution — satisfied by DbClient, TransactionClient, or Pool */
+export interface QueryClient {
   query<T = unknown>(
     text: string,
     values?: unknown[]
   ): Promise<{ rows: T[]; rowCount: number | null }>
+}
+
+/** Minimal structural interface for a checked-out pool client with release */
+export interface TransactionClient extends QueryClient {
+  release(): void
+}
+
+/** Minimal structural interface for query execution — satisfied by Pool, PoolClient, or mock */
+export interface DbClient extends QueryClient {
+  connect(): Promise<TransactionClient>
 }
 
 // ---------------------------------------------------------------------------
@@ -113,4 +123,28 @@ export interface AuditContext {
   workspace_id: string
   workspace_slug: string
   correlation_id: string
+}
+
+// ---------------------------------------------------------------------------
+// Bulk import types
+// ---------------------------------------------------------------------------
+
+export interface StaffBulkImportRow {
+  email: string
+  name: string
+  password: string
+  role_id?: string | null
+}
+
+export interface StaffBulkImportRowError {
+  row_index: number
+  email: string
+  reason: string
+  code: string
+}
+
+export interface StaffBulkImportResult {
+  inserted: number
+  skipped: number
+  errors: StaffBulkImportRowError[]
 }

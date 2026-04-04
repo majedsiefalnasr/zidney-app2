@@ -8,6 +8,7 @@
 export type { StaffErrorCode } from './staff.errors'
 export { STAFF_ERROR_HTTP, StaffError } from './staff.errors'
 export {
+  bulkImportStaff,
   createStaff,
   deleteStaff,
   disableStaff,
@@ -19,9 +20,15 @@ export {
 export type {
   AuditContext,
   CreateStaffInput,
+  DbClient,
+  QueryClient,
+  StaffBulkImportResult,
+  StaffBulkImportRow,
+  StaffBulkImportRowError,
   StaffListQuery,
   StaffListResult,
   StaffRecord,
   StaffStatus,
+  TransactionClient,
   UpdateStaffInput,
 } from './staff.types'

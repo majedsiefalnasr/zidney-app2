@@ -112,6 +112,10 @@ export {
 export * from './schemas/logging-schema'
 // Staff management validation (Stage 041)
 export {
+  type BulkImportStaffBody,
+  type BulkImportStaffRow,
+  bulkImportStaffBodySchema,
+  bulkImportStaffRowSchema,
   type CreateStaffBody,
   createStaffBodySchema,
   type StaffIdParams,

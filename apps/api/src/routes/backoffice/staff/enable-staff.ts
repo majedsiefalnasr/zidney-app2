@@ -35,6 +35,7 @@ export async function handleEnableStaff(c: Context) {
 
     const db = getDb(c)
     const audit = buildAuditCtx(c)
+    const staffLimit = c.get('staff_limit') as number | null
 
     logger.debug('Enable staff request', {
       workspace_id: workspaceId,
@@ -42,7 +43,7 @@ export async function handleEnableStaff(c: Context) {
       correlation_id: correlationId,
     })
 
-    const record = await enableStaff(db, workspaceId, parsed.data.id, audit)
+    const record = await enableStaff(db, workspaceId, parsed.data.id, staffLimit, audit)
 
     return c.json({ success: true, data: record, error: null }, 200)
   } catch (err) {

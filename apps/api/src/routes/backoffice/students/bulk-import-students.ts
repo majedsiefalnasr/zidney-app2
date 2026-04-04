@@ -52,7 +52,7 @@ export async function handleBulkImportStudents(c: Context) {
         403
       )
     }
-    const studentLimit: number = license.student_limit
+    const studentLimit = c.get('student_limit') as number | null
     const db = getDb(c)
     const audit = buildAuditCtx(c)
 

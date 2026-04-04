@@ -53,9 +53,8 @@ export async function handleCreateStaff(c: Context) {
       )
     }
 
-    // Read staff_limit from workspace license context
-    const license = c.get('license')
-    const staffLimit: number = license?.staff_limit ?? 50
+    // Read staff_limit from license enforcement middleware context
+    const staffLimit = c.get('staff_limit') as number | null
 
     const db = getDb(c)
     const audit = buildAuditCtx(c)

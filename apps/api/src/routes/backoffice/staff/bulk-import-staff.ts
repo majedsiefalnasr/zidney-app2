@@ -1,0 +1,83 @@
+/**
+ * Bulk Import Staff — POST /staff/bulk-import
+ *
+ * File: apps/api/src/routes/backoffice/staff/bulk-import-staff.ts
+ * Stage: STAGE_43_LIMIT_ENFORCEMENT
+ */
+
+import { bulkImportStaff } from '@zidney/domain-core/staff'
+import { createLogger } from '@zidney/logger'
+import { bulkImportStaffBodySchema } from '@zidney/validation'
+import type { Context } from 'hono'
+
+import { buildAuditCtx, getDb, staffErrorResponse } from './helpers'
+
+const logger = createLogger('backoffice-staff-bulk-import')
+
+export async function handleBulkImportStaff(c: Context) {
+  try {
+    const requestId = (c.get('request_id') as string | undefined) ?? null
+    const workspaceId: string = c.get('workspace_id')
+    const correlationId: string = c.get('correlation_id')
+
+    const rawBody = await c.req.json().catch(() => ({}))
+    const parsed = bulkImportStaffBodySchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: parsed.error.issues[0]?.message ?? 'Invalid request body',
+          },
+          request_id: requestId,
+        },
+        422
+      )
+    }
+
+    // Normalize staff_limit from context: explicit `null` = unlimited
+    // Invalid values fail closed (error instead of silent fallback)
+    const rawStaffLimit = c.get('staff_limit')
+    let staffLimit: number | null = null
+    if (rawStaffLimit !== undefined) {
+      if (rawStaffLimit === null) {
+        staffLimit = null
+      } else {
+        const n = Number(rawStaffLimit as unknown)
+        if (!Number.isFinite(n)) {
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: {
+                code: 'INVALID_STAFF_LIMIT',
+                message: 'Invalid staff_limit value',
+              },
+            },
+            400
+          )
+        }
+        staffLimit = n
+      }
+    }
+    const db = getDb(c)
+    const audit = buildAuditCtx(c)
+
+    logger.debug('Bulk import staff request', {
+      request_id: requestId,
+      workspace_id: workspaceId,
+      workspace_slug: c.get('workspace_slug'),
+      user_id: c.get('user_id'),
+      row_count: parsed.data.rows.length,
+      correlation_id: correlationId,
+    })
+
+    const result = await bulkImportStaff(db, workspaceId, parsed.data.rows, staffLimit, audit)
+
+    return c.json({ success: true, data: result, error: null, request_id: requestId }, 200)
+  } catch (err) {
+    return staffErrorResponse(c, err)
+  }
+}

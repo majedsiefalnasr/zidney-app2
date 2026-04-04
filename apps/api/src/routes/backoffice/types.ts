@@ -61,9 +61,9 @@ export type BackofficeVariables = {
   /** Set by license enforcement middleware */
   enabled_modules: Module[]
   /** Set by license enforcement middleware */
-  student_limit: number
+  student_limit: number | null
   /** Set by license enforcement middleware */
-  staff_limit: number
+  staff_limit: number | null
   /** Set by license enforcement middleware */
   product_version: string
   /** Set by schema version middleware */
