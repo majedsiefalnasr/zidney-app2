@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-04T10:41:42.589Z",
+  "generated_at": "2026-04-04T11:30:31.858Z",
   "services": {},
   "infrastructure": {
     "postgres": {
