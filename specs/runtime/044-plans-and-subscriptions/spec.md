@@ -407,12 +407,153 @@ New Zod schemas required:
 
 - `apps/api/src/db/tenant/schemas/index.ts` — export plans, subscriptions schemas
 - `packages/domain-core/src/index.ts` — export plans, subscriptions domains
-- `packages/validation/src/index.ts` — export plan/subscription schemas
-- `apps/api/src/routes/backoffice/index.ts` — mount plan & subscription routes
-- `apps/api/src/routes/frontoffice/index.ts` — apply subscriptionEnforcement middleware
+- `packages/domain-core/src/rbac/rbac.types.ts` — add PLANS and SUBSCRIPTIONS PermissionModule entries
+- `packages/validation/src/backoffice/index.ts` — re-export plan/subscription schemas
+- `apps/api/src/app.ts` — import and mount plansRouter and subscriptionsRouter (see C-01)
 
 ---
 
 ## Clarifications
 
-_(Will be populated by Step 2 — Clarify)_
+### Session 2025-01-09
+
+---
+
+#### C-01 — Route Mounting: No `backoffice/index.ts` Exists
+
+**Question:** The spec's "Modified Files" lists `apps/api/src/routes/backoffice/index.ts` as a file to modify. This file does NOT exist in the codebase.
+
+**Resolution:** All backoffice routes are mounted directly in `apps/api/src/app.ts` via:
+
+```ts
+app.route("/api/v1/backoffice/workspace", plansRouter);
+app.route("/api/v1/backoffice/workspace", subscriptionsRouter);
+```
+
+**Corrected file**: `apps/api/src/app.ts` (not a non-existent `backoffice/index.ts`). The plans and subscriptions routers will be imported and mounted following the same pattern as `studentsRouter` (Stage 42).
+
+---
+
+#### C-02 — Frontoffice Routes: No API Frontoffice Route Layer Exists
+
+**Question:** The spec's "Modified Files" lists `apps/api/src/routes/frontoffice/index.ts`. This directory and file do NOT exist in the API codebase. The frontoffice is a Vue 3 SPA located in `apps/frontoffice/`, not an API route directory.
+
+**Resolution:**
+
+- No `apps/api/src/routes/frontoffice/index.ts` — remove from Modified Files.
+- The `subscription-enforcement.ts` middleware is created in `apps/api/src/middleware/` but is **NOT mounted on any live routes in Stage 44**, since no frontoffice student API route group exists yet.
+- The middleware will be registered in a future stage when frontoffice student-facing API routes are introduced.
+- Remove `apps/api/src/routes/frontoffice/index.ts` from the implementation scope entirely.
+
+**Impact on FR-06:** The enforcement logic (checking expiry and returning 403) is fully implemented in `subscription-enforcement.ts`, but the mount point is deferred. The middleware is ready for plug-in in Stage 45+.
+
+---
+
+#### C-03 — SubscriptionStatus Enum Mismatch Between Stage 42 and Stage 44
+
+**Question:** Stage 42 defines `students.subscription_status` as `'ACTIVE' | 'SUSPENDED' | 'EXPIRED' | 'NONE'` (a direct column on the students table). Stage 44 introduces a separate `subscriptions` table with its own status: `'ACTIVE' | 'EXPIRED' | 'CANCELED' | 'PENDING'`. How do these sync? What happens to `SUSPENDED`?
+
+**Resolution:**
+
+- The `students.subscription_status` column retains its Stage 42 type constraint (`'ACTIVE' | 'SUSPENDED' | 'EXPIRED' | 'NONE'`). No migration alters this column.
+- The `subscriptions.status` column uses Stage 44's own enum: `'ACTIVE' | 'EXPIRED' | 'CANCELED' | 'PENDING'`.
+- Status synchronization mapping (Stage 44 → students table):
+  | subscriptions.status | → students.subscription_status |
+  |----------------------|-------------------------------|
+  | `ACTIVE` | `'ACTIVE'` |
+  | `EXPIRED` | `'EXPIRED'` |
+  | `CANCELED` | `'NONE'` |
+  | `PENDING` | `'NONE'` (not yet activated) |
+- `SUSPENDED` is a Stage 42 flag set by admin action on the student record directly (via `PATCH /students/:id/disable`). It is not a subscription state. Stage 44 does not set or unset `SUSPENDED`.
+- The `SubscriptionStatus` type in `packages/domain-core/src/students/students.types.ts` is unchanged in Stage 44.
+- New type `SubscriptionState` will be introduced in `packages/domain-core/src/subscriptions/subscriptions.types.ts` for the subscriptions table values: `'ACTIVE' | 'EXPIRED' | 'CANCELED' | 'PENDING'`.
+
+---
+
+#### C-04 — Validation Schema File Location and Naming
+
+**Question:** The spec says `packages/validation/src/index.ts` needs modification. What is the correct file pattern for new plan/subscription validation schemas?
+
+**Resolution:** The backoffice validation pattern in `packages/validation/src/backoffice/` uses `*.schemas.ts` files (e.g., `students.schemas.ts` → `subscriptionStatusSchema`, `mcq-exams.schemas.ts`). New validation files should be:
+
+- `packages/validation/src/backoffice/plans.schemas.ts` — `createPlanBodySchema`, `updatePlanBodySchema`, `planIdParamsSchema`
+- `packages/validation/src/backoffice/subscriptions.schemas.ts` — `createSubscriptionBodySchema`, `cancelSubscriptionBodySchema`, `subscriptionIdParamsSchema`, `listSubscriptionsQuerySchema`
+
+The backoffice `packages/validation/src/backoffice/index.ts` will be updated to re-export these. The root `packages/validation/src/index.ts` re-exports from `backoffice/index.ts` and does not need a direct edit if the barrel pattern is already in place.
+
+---
+
+#### C-05 — Payment Gateway Scope (FR-05 and FR-07)
+
+**Question:** FR-05 describes gateway subscription activation and FR-07 describes auto-renew via job queue. Is this in Stage 44 scope?
+
+**Resolution:**
+
+- **FR-05 (gateway callback):** Deferred from Stage 44 scope. Only `payment_method = 'MANUAL'` is supported in Stage 44. The `gateway_ref`, `payment_method` columns are created at DB level for future use, but no gateway callback handler is implemented.
+- **FR-07 (auto-renew):** Deferred from Stage 44 scope. The `auto_renew` column exists in the schema but no renewal logic or job queue trigger is implemented. A future stage will add the auto-renew worker job.
+- `payment_method` allowed values in Stage 44: `'MANUAL'` only.
+- `auto_renew` column exists but is treated as metadata only (always treated as `false` in Stage 44 business logic).
+
+---
+
+#### C-06 — Module Access Enforcement Backend Gate (FR-08)
+
+**Question:** FR-08 requires that backend API routes check `subscription.plan.enabled_modules`. Which routes perform this check and in Stage 44 scope?
+
+**Resolution:**
+
+- **Stage 44 scope**: Create the `subscriptions.service.ts#checkModuleAccess()` function that checks if a given module key is in the student's active plan's `enabled_modules` array.
+- Backend enforcement per existing content routes is NOT applied in Stage 44 (no enrolled student API route group exists yet).
+- `enabled_modules` data is returned as part of `GET /backoffice/subscriptions/:id` response and stored correctly in the plans table.
+- Full module enforcement is deferred to Stage 45+ when frontoffice student endpoints are created.
+
+---
+
+#### C-07 — `students.schema.ts` Drizzle Schema Does Not Need Modification
+
+**Question:** Will the Drizzle ORM schema for students need updating?
+
+**Resolution:** No. The `students.schema.ts` already includes the `subscription_status` column from Stage 42. No Drizzle schema update is needed. The `subscriptions.service.ts` will issue a raw SQL `UPDATE students SET subscription_status = $1 WHERE id = $2` within the same transaction as subscription state changes — following the same transactional pattern established in Stage 42.
+
+---
+
+#### C-08 — RBAC Permission Module Key for Plans/Subscriptions
+
+**Question:** Which `PermissionModule` enum key(s) govern plans and subscriptions CRUD? Does an existing key cover this or must a new one be added?
+
+**Resolution:** A new RBAC module will be introduced:
+
+- `PermissionModule.PLANS` — covers plan CRUD (`can_view`, `can_create`, `can_edit`, `can_delete`)
+- `PermissionModule.SUBSCRIPTIONS` — covers subscription management (`can_view`, `can_create`, `can_edit`)
+
+The `PermissionModule` enum is in `packages/domain-core/src/rbac/`. A new entry must be added. This requires modifying `packages/domain-core/src/rbac/rbac.types.ts` (or equivalent). No migration change needed for RBAC module keys (they are application-level constants).
+
+---
+
+#### C-09 — `schema-version` Middleware and plans/subscriptions Tables
+
+**Question:** Does adding `plans` and `subscriptions` tables require a `schema_version` bump in the tenant database?
+
+**Resolution:** No schema version bump required. The `schema_version` middleware validates that the tenant DB version matches a declared minimum before allowing requests. The new migration `023` will increment the schema version naturally when applied. No changes to the schema version middleware constants are needed — the migration itself is the version signal.
+
+---
+
+#### Scope Confirmation
+
+**In scope (Stage 44):**
+
+- Migration 023: create `plans` and `subscriptions` tables with constraints and indexes
+- Domain modules: `plans/` and `subscriptions/` in domain-core
+- Backoffice API routes: 5 plan routes + 4 subscription routes
+- Validation schemas in `packages/validation/src/backoffice/`
+- `subscription-enforcement.ts` middleware (created, not mounted)
+- Sync of `students.subscription_status` within transactions
+- Integration tests for all routes
+
+**Out of scope (deferred):**
+
+- Payment gateway callback handler (FR-05)
+- Auto-renew worker job (FR-07)
+- Module access enforcement on student API routes (FR-08 application)
+- Subscription enforcement middleware mounting (FR-06 mount point)
+- `apps/api/src/routes/frontoffice/` route directory

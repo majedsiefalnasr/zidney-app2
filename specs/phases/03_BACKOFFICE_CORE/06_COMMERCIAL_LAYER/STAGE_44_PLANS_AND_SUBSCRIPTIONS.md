@@ -8,33 +8,39 @@ workspace
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-04-04T00:00:00.000Z
+Step: clarify
+Risk Level: MEDIUM
+Last Updated: 2025-01-09T00:00:00.000Z
 
 Scope Defined:
 
 - Plans table with workspace-scoped plan definitions
 - Subscriptions table with student-plan lifecycle
-- Backoffice CRUD for plans (5 routes)
-- Backoffice subscription management (4 routes)
-- Manual and gateway subscription activation
-- Runtime expiration enforcement middleware (Frontoffice)
-- Module access control (backend primary)
-- Student subscription_status sync
+- Backoffice CRUD for plans (5 routes) mounted via app.ts
+- Backoffice subscription management (4 routes) mounted via app.ts
+- Manual subscription activation only (MANUAL payment_method)
+- subscription-enforcement.ts middleware (created, not mounted — deferred to Stage 45+)
+- Module access checkModuleAccess() service function (enforcement deferred)
+- Student subscription_status sync within transactions
 - Reporting: list by student/status/date, revenue overview
+- New RBAC PermissionModule keys: PLANS and SUBSCRIPTIONS
 
 Deferred Scope:
 
-- Full payment gateway integration (stub/callback only)
-- Auto-renew async job (structure defined, job trigger deferred to Worker stage)
+- Full payment gateway integration (FR-05 — no gateway in current codebase)
+- Auto-renew worker job (FR-07 — deferred to Worker stage)
+- Module access enforcement on student routes (FR-08 — no student API routes yet)
+- Subscription enforcement middleware mounting (no frontoffice student route group yet)
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
+- No new architecture changes: additive domain modules and RBAC entries only
+- Route mounting pattern confirmed: app.ts (C-01)
+- SubscriptionStatus enum mismatch resolved: two distinct enums with sync mapping (C-03)
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
