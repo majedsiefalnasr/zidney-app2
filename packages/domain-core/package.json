@@ -35,7 +35,9 @@
     "./mcq-exams": "./src/mcq-exams/index.ts",
     "./mcq-questions": "./src/mcq-questions/index.ts",
     "./traditional-questions": "./src/traditional-questions/index.ts",
-    "./scheduled-exam": "./src/scheduled-exam/index.ts"
+    "./scheduled-exam": "./src/scheduled-exam/index.ts",
+    "./plans": "./src/plans/index.ts",
+    "./subscriptions": "./src/subscriptions/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",

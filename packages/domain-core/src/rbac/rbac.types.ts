@@ -64,6 +64,8 @@ export enum PermissionModule {
   ADS = 'ads',
   DASHBOARD = 'dashboard',
   SETTINGS = 'settings',
+  PLANS = 'plans',
+  SUBSCRIPTIONS = 'subscriptions',
 }
 
 /**

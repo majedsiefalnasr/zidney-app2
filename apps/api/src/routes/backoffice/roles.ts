@@ -74,6 +74,8 @@ const MODULE_DISPLAY_NAMES: Record<PermissionModule, string> = {
   [PermissionModule.ADS]: 'Ads',
   [PermissionModule.DASHBOARD]: 'Dashboard',
   [PermissionModule.SETTINGS]: 'Settings',
+  [PermissionModule.PLANS]: 'Plans',
+  [PermissionModule.SUBSCRIPTIONS]: 'Subscriptions',
 }
 
 // ---------------------------------------------------------------------------

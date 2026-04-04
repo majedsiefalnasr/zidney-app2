@@ -51,6 +51,7 @@ import { hierarchyRouter } from './routes/backoffice/hierarchy/index'
 import { lessonsRouter } from './routes/backoffice/lessons'
 import { mcqExamsRouter } from './routes/backoffice/mcq-exams'
 import { mcqQuestionsRouter } from './routes/backoffice/mcq-questions'
+import { plansRouter } from './routes/backoffice/plans/index'
 import { rolesRouter } from './routes/backoffice/roles'
 import { scheduledExamsRouter } from './routes/backoffice/scheduled-exams'
 import { semestersRouter } from './routes/backoffice/semesters'
@@ -58,6 +59,7 @@ import { workspaceSettingsRouter } from './routes/backoffice/settings'
 import { staffRouter } from './routes/backoffice/staff/index'
 import { studentsRouter } from './routes/backoffice/students/index'
 import { subjectsRouter } from './routes/backoffice/subjects'
+import { subscriptionsRouter } from './routes/backoffice/subscriptions/index'
 import { tagsRouter } from './routes/backoffice/tags'
 import { teamsRouter } from './routes/backoffice/teams/index'
 import { traditionalExamsRouter } from './routes/backoffice/traditional-exams/router'
@@ -218,6 +220,12 @@ app.route('/api/v1/backoffice/workspace', staffRouter)
 
 // Student management endpoints — Stage 042, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', studentsRouter)
+
+// Plans endpoints — Stage 044, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', plansRouter)
+
+// Subscriptions endpoints — Stage 044, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', subscriptionsRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade
