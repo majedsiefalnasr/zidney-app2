@@ -9,18 +9,19 @@ Scope: Transactional enforcement of student and staff limits per license
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-04-04T00:40:00.000Z
+Last Updated: 2026-04-04T01:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Transactional limit enforcement for student creation, staff creation, bulk import, and reactivation
-- Staff bulk import (new feature)
-- Type-system fix: `student_limit`/`staff_limit` as `number | null` end-to-end
-- Middleware bug fix: string `'unlimited'` → `null`
-- Structured error: `LICENSE_LIMIT_REACHED` with `{type, limit_value, current_value}`
-- 13 identified gaps (G1–G13) to be resolved
+- Phase A: Fix BackofficeVariables types + middleware + error class extension
+- Phase B: Domain signature normalization (number | null)
+- Phase C: enableStudent/enableStaff — SERIALIZABLE + count guard (critical)
+- Phase D: Route handler limit wiring (G3, G4, G6, G7)
+- Phase E: Error response mapping → LICENSE_LIMIT_REACHED
+- Phase F: Staff bulk import new feature (domain + route + schema + exports)
+- Phase G: Unit + integration tests
 
 Deferred Scope:
 
@@ -30,10 +31,11 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian verdicts: Architecture Guardian PASS | API Designer PASS
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
