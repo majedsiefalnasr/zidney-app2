@@ -241,8 +241,8 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
     if (license) {
       ctx.set('license_id', license.id)
       ctx.set('license_status', license.status)
-      ctx.set('student_limit', String(license.student_limit ?? 'unlimited'))
-      ctx.set('staff_limit', String(license.staff_limit ?? 'unlimited'))
+      ctx.set('student_limit', license.student_limit ?? null)
+      ctx.set('staff_limit', license.staff_limit ?? null)
       // BLOCK-2 FIX: Inject enabled_modules and product_version for BackofficeContext
       ctx.set('enabled_modules', license.enabled_modules ?? [])
       ctx.set('product_version', license.expected_product_version ?? '1.0.0')

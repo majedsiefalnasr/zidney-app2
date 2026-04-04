@@ -59,7 +59,7 @@ export async function processBulkImport(
   db: DbClient,
   workspaceId: string,
   rows: BulkImportRow[],
-  studentLimit: number,
+  studentLimit: number | null,
   divisionId: string
 ): Promise<BulkImportResult> {
   let inserted = 0
@@ -87,7 +87,7 @@ export async function processBulkImport(
         const absoluteIdx = rowOffset + batchIdx
 
         // Enforce limit (counts already-inserted rows in this batch)
-        if (currentActive + inserted + batchInserted >= studentLimit) {
+        if (studentLimit !== null && currentActive + inserted + batchInserted >= studentLimit) {
           errors.push({
             row_index: absoluteIdx,
             email: row.email,

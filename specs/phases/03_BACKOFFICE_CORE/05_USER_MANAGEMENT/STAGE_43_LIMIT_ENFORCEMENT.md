@@ -8,20 +8,25 @@ Scope: Transactional enforcement of student and staff limits per license
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: HIGH
-Last Updated: 2026-04-04T02:00:00.000Z
+Last Updated: 2026-04-04T03:30:00.000Z
 
-Drift Analysis: PASSED (all criteria 9/9)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 24 / 24 completed
 
-Scope Authorized:
+Scope Closed:
 
-- 24 tasks across 7 phases (A–G)
-- All 13 spec gaps covered
-- No cross-tenant logic, no schema migrations
-- Staff bulk import new feature authorized (7 tasks)
+- ✅ BackofficeVariables limit types fixed (`number | null`)
+- ✅ License enforcement middleware updated to pass `number | null`
+- ✅ StaffError + StudentError extended with `limit_value`/`current_value`
+- ✅ `createStaff()`, `enableStaff()`, `createStudent()`, `enableStudent()` enforce null/count checks
+- ✅ `processStaffBulkImport()` limit enforcement per batch
+- ✅ Route-level `staffErrorResponse()` returns 403 with `LICENSE_LIMIT_REACHED` + metadata
+- ✅ Unit tests: null-limit allowed, count-at-limit blocked, correct error metadata
+- ✅ Route tests: 200 success, 403 limit exceeded, 422 validation, 503 license inactive
+- ✅ TypeScript: zero errors (`typecheck` passes)
 
 Deferred Scope:
 
@@ -31,11 +36,11 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- All drift criteria passed — implementation authorized
-- Guardian verdicts: Security Auditor PASS | Performance Optimizer PASS | QA Engineer PASS | Code Reviewer PASS
+- ADR alignment verified
+- Implementation compliant with Architecture Governance (AGENTS.md + ADRs)
 
 Notes:
-Full drift analysis passed. Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
 
 ---
 

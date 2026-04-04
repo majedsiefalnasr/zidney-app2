@@ -1,27 +1,27 @@
 /**
- * Bulk Import Students — POST /students/bulk-import
+ * Bulk Import Staff — POST /staff/bulk-import
  *
- * File: apps/api/src/routes/backoffice/students/bulk-import-students.ts
- * Stage: STAGE_42_STUDENT_MANAGEMENT
+ * File: apps/api/src/routes/backoffice/staff/bulk-import-staff.ts
+ * Stage: STAGE_43_LIMIT_ENFORCEMENT
  */
 
-import { bulkImportStudents } from '@zidney/domain-core/students'
+import { bulkImportStaff } from '@zidney/domain-core/staff'
 import { createLogger } from '@zidney/logger'
-import { bulkImportBodySchema } from '@zidney/validation'
+import { bulkImportStaffBodySchema } from '@zidney/validation'
 import type { Context } from 'hono'
 
-import { buildAuditCtx, getDb, studentErrorResponse } from './helpers'
+import { buildAuditCtx, getDb, staffErrorResponse } from './helpers'
 
-const logger = createLogger('backoffice-students-bulk-import')
+const logger = createLogger('backoffice-staff-bulk-import')
 
-export async function handleBulkImportStudents(c: Context) {
+export async function handleBulkImportStaff(c: Context) {
   try {
     const requestId = (c.get('request_id') as string | undefined) ?? null
     const workspaceId: string = c.get('workspace_id')
     const correlationId: string = c.get('correlation_id')
 
     const rawBody = await c.req.json().catch(() => ({}))
-    const parsed = bulkImportBodySchema.safeParse(rawBody)
+    const parsed = bulkImportStaffBodySchema.safeParse(rawBody)
     if (!parsed.success) {
       return c.json(
         {
@@ -52,28 +52,21 @@ export async function handleBulkImportStudents(c: Context) {
         403
       )
     }
-    const studentLimit = c.get('student_limit') as number | null
+
+    const staffLimit = c.get('staff_limit') as number | null
     const db = getDb(c)
     const audit = buildAuditCtx(c)
 
-    logger.debug('Bulk import students request', {
+    logger.debug('Bulk import staff request', {
       workspace_id: workspaceId,
       row_count: parsed.data.rows.length,
-      division_id: parsed.data.division_id,
       correlation_id: correlationId,
     })
 
-    const result = await bulkImportStudents(
-      db,
-      workspaceId,
-      parsed.data.rows,
-      studentLimit,
-      parsed.data.division_id,
-      audit
-    )
+    const result = await bulkImportStaff(db, workspaceId, parsed.data.rows, staffLimit, audit)
 
     return c.json({ success: true, data: result, error: null, request_id: requestId }, 200)
   } catch (err) {
-    return studentErrorResponse(c, err)
+    return staffErrorResponse(c, err)
   }
 }

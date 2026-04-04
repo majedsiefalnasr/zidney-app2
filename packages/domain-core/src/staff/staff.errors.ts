@@ -42,11 +42,18 @@ export const STAFF_ERROR_HTTP: Record<StaffErrorCode, number> = {
 export class StaffError extends Error {
   readonly code: StaffErrorCode
   readonly httpStatus: number
+  readonly limit_value?: number
+  readonly current_value?: number
 
-  constructor(code: StaffErrorCode, message?: string) {
-    super(message ?? code)
+  constructor(
+    code: StaffErrorCode,
+    options?: { message?: string; limit_value?: number; current_value?: number }
+  ) {
+    super(options?.message ?? code)
     this.name = 'StaffError'
     this.code = code
     this.httpStatus = STAFF_ERROR_HTTP[code]
+    this.limit_value = options?.limit_value
+    this.current_value = options?.current_value
   }
 }

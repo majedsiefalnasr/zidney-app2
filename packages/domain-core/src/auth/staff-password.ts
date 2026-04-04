@@ -66,7 +66,9 @@ const STAFF_DUMMY_HASH =
  */
 export async function hashStaffPassword(password: string): Promise<string> {
   if (!password || typeof password !== 'string' || password.length === 0) {
-    throw new StaffError('STAFF_INVALID_PASSWORD', 'Password must be a non-empty string')
+    throw new StaffError('STAFF_INVALID_PASSWORD', {
+      message: 'Password must be a non-empty string',
+    })
   }
   return argon2.hash(password, ARGON2_OPTIONS)
 }

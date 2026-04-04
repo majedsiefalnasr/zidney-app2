@@ -557,7 +557,9 @@ describe('enableStudent', () => {
   it('throws STUDENT_NOT_FOUND when student does not exist', async () => {
     const pool = makePool(() => ({ rows: [], rowCount: 0 }))
 
-    const err = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit).catch((e) => e)
+    const err = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, null, audit).catch(
+      (e) => e
+    )
     expect(err).toBeInstanceOf(StudentError)
     expect((err as StudentError).code).toBe('STUDENT_NOT_FOUND')
   })
@@ -571,7 +573,9 @@ describe('enableStudent', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    const err = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit).catch((e) => e)
+    const err = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, null, audit).catch(
+      (e) => e
+    )
     expect(err).toBeInstanceOf(StudentError)
     expect((err as StudentError).code).toBe('STUDENT_ALREADY_ACTIVE')
   })
@@ -589,7 +593,7 @@ describe('enableStudent', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    const record = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit)
+    const record = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, null, audit)
     expect(record.status).toBe('ACTIVE')
     expect('password_hash' in record).toBe(false)
     expect(pool._client.release).toHaveBeenCalled()
@@ -607,9 +611,56 @@ describe('enableStudent', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    const err = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, audit).catch((e) => e)
+    const err = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, null, audit).catch(
+      (e) => e
+    )
     expect(err).toBeInstanceOf(StudentError)
     expect((err as StudentError).code).toBe('STUDENT_NOT_FOUND')
+  })
+
+  it('throws STUDENT_LIMIT_EXCEEDED when activeCount >= studentLimit', async () => {
+    const disabled = makeStudentRow({ status: 'DISABLED' })
+    const pool = makePool((sql) => {
+      if (sql.includes('COUNT(*)')) return { rows: [{ count: '10' }], rowCount: 1 }
+      if (sql.includes('WHERE id = $1')) return { rows: [disabled], rowCount: 1 }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, 10, audit).catch(
+      (e) => e
+    )
+    expect(err).toBeInstanceOf(StudentError)
+    expect((err as StudentError).code).toBe('STUDENT_LIMIT_EXCEEDED')
+    expect((err as StudentError).limit_value).toBe(10)
+    expect((err as StudentError).current_value).toBe(10)
+  })
+
+  it('allows enable when studentLimit is null (unlimited)', async () => {
+    const disabled = makeStudentRow({ status: 'DISABLED' })
+    const enabledRow = makeStudentRow({ status: 'ACTIVE' })
+    const pool = makePool((sql) => {
+      if (sql.includes('UPDATE students')) return { rows: [enabledRow], rowCount: 1 }
+      if (sql.includes('WHERE id = $1')) return { rows: [disabled], rowCount: 1 }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const record = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, null, audit)
+    expect(record.status).toBe('ACTIVE')
+    expect(pool._client.release).toHaveBeenCalled()
+  })
+
+  it('allows enable when activeCount is below studentLimit', async () => {
+    const disabled = makeStudentRow({ status: 'DISABLED' })
+    const enabledRow = makeStudentRow({ status: 'ACTIVE' })
+    const pool = makePool((sql) => {
+      if (sql.includes('COUNT(*)')) return { rows: [{ count: '9' }], rowCount: 1 }
+      if (sql.includes('UPDATE students')) return { rows: [enabledRow], rowCount: 1 }
+      if (sql.includes('WHERE id = $1')) return { rows: [disabled], rowCount: 1 }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const record = await enableStudent(pool as any, WORKSPACE_ID, STUDENT_ID, 10, audit)
+    expect(record.status).toBe('ACTIVE')
   })
 })
 

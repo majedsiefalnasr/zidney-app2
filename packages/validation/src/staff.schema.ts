@@ -136,3 +136,25 @@ export const staffIdParamsSchema = z.object({
 })
 
 export type StaffIdParams = z.infer<typeof staffIdParamsSchema>
+
+// ---------------------------------------------------------------------------
+// Bulk import
+// ---------------------------------------------------------------------------
+
+export const bulkImportStaffRowSchema = z.object({
+  email: z.string().email('email must be a valid email address'),
+  name: z.string().min(1, 'name is required'),
+  password: z.string().min(8, 'password must be at least 8 characters'),
+  role_id: z.string().uuid('role_id must be a valid UUID').nullish(),
+})
+
+export type BulkImportStaffRow = z.infer<typeof bulkImportStaffRowSchema>
+
+export const bulkImportStaffBodySchema = z.object({
+  rows: z
+    .array(bulkImportStaffRowSchema)
+    .min(1, 'rows must contain at least one entry')
+    .max(500, 'rows must not exceed 500 entries'),
+})
+
+export type BulkImportStaffBody = z.infer<typeof bulkImportStaffBodySchema>

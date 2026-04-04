@@ -77,6 +77,23 @@ export function studentErrorResponse(c: Context, err: unknown) {
   const userId = user?.id
 
   if (err instanceof StudentError) {
+    if (err.code === 'STUDENT_LIMIT_EXCEEDED') {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'LICENSE_LIMIT_REACHED',
+            type: 'STUDENT_LIMIT',
+            limit_value: err.limit_value ?? null,
+            current_value: err.current_value ?? null,
+            message: err.message,
+          },
+          request_id: requestId,
+        },
+        403
+      )
+    }
     const status = STUDENT_ERROR_HTTP[err.code] as 400 | 403 | 404 | 409 | 422 | 500
     return c.json(
       {

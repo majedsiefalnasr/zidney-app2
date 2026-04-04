@@ -340,17 +340,29 @@ export async function enableStudent(
   db: DbClient,
   workspaceId: string,
   studentId: string,
+  studentLimit: number | null,
   _audit: AuditContext
 ): Promise<StudentRecord> {
   const client = await db.connect()
   try {
-    await client.query('BEGIN')
+    await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
     const current = await findStudentById(client, workspaceId, studentId)
     if (!current) {
       throw new StudentError('STUDENT_NOT_FOUND', `Student not found: ${studentId}`)
     }
     if (current.status === 'ACTIVE') {
       throw new StudentError('STUDENT_ALREADY_ACTIVE', `Student is already active: ${studentId}`)
+    }
+
+    if (studentLimit !== null) {
+      const activeCount = await countActiveStudents(client, workspaceId)
+      if (activeCount >= studentLimit) {
+        throw new StudentError('STUDENT_LIMIT_EXCEEDED', {
+          message: `Workspace has reached the student limit of ${studentLimit}`,
+          limit_value: studentLimit,
+          current_value: activeCount,
+        })
+      }
     }
 
     const updated = await updateStudentStatus(
@@ -466,7 +478,7 @@ export async function bulkImportStudents(
   db: DbClient,
   workspaceId: string,
   rows: BulkImportRow[],
-  studentLimit: number,
+  studentLimit: number | null,
   divisionId: string,
   _audit: AuditContext
 ): Promise<BulkImportResult> {

@@ -38,6 +38,7 @@ export async function handleEnableStudent(c: Context) {
 
     const db = getDb(c)
     const audit = buildAuditCtx(c)
+    const studentLimit = c.get('student_limit') as number | null
 
     logger.debug('Enable student request', {
       workspace_id: workspaceId,
@@ -45,7 +46,7 @@ export async function handleEnableStudent(c: Context) {
       correlation_id: correlationId,
     })
 
-    const record = await enableStudent(db, workspaceId, parsed.data.id, audit)
+    const record = await enableStudent(db, workspaceId, parsed.data.id, studentLimit, audit)
 
     return c.json({ success: true, data: record, error: null }, 200)
   } catch (err) {

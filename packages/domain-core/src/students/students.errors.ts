@@ -54,11 +54,21 @@ export const STUDENT_ERROR_HTTP: Record<StudentErrorCode, number> = {
 export class StudentError extends Error {
   readonly code: StudentErrorCode
   readonly httpStatus: number
+  readonly limit_value?: number
+  readonly current_value?: number
 
-  constructor(code: StudentErrorCode, message?: string) {
-    super(message ?? code)
+  constructor(
+    code: StudentErrorCode,
+    options?: string | { message?: string; limit_value?: number; current_value?: number }
+  ) {
+    const msg = typeof options === 'string' ? options : (options?.message ?? code)
+    super(msg)
     this.name = 'StudentError'
     this.code = code
     this.httpStatus = STUDENT_ERROR_HTTP[code]
+    if (typeof options !== 'string') {
+      this.limit_value = options?.limit_value
+      this.current_value = options?.current_value
+    }
   }
 }
