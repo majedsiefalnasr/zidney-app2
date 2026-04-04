@@ -64,8 +64,8 @@ export async function findStaffById(
 
 /**
  * Count ACTIVE staff in workspace (exact count, used inside SERIALIZABLE tx).
- * Uses SELECT ... FOR UPDATE to prevent phantom reads under concurrent inserts.
- * (PostgreSQL does not allow COUNT(*) with FOR UPDATE; we select IDs and count in app code)
+ * Uses a direct COUNT(*) SQL query (no FOR UPDATE). Correctness relies on
+ * the caller using SERIALIZABLE isolation for concurrent limit enforcement.
  */
 export async function countActiveStaff(client: QueryClient, workspaceId: string): Promise<number> {
   const { rows } = await client.query<{ count: string }>(

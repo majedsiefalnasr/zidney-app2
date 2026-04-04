@@ -51,8 +51,8 @@ import type {
  * Create a new staff member in the workspace.
  *
  * Uses SERIALIZABLE isolation to prevent phantom reads under concurrent
- * create requests. The FOR UPDATE lock in countActiveStaff prevents
- * concurrent inserts from bypassing the staff_limit check.
+ * create requests. The limit check executes a direct COUNT(*) query; correctness
+ * depends on the caller using SERIALIZABLE isolation for atomic enforcement.
  *
  * @param db          - Tenant database client (Pool)
  * @param input       - Staff creation input
@@ -80,14 +80,16 @@ export async function createStaff(
       })
     }
 
-    // 2. Lock + check staff limit
-    const activeCount = await countActiveStaff(client, input.workspace_id)
-    if (staffLimit !== null && activeCount >= staffLimit) {
-      throw new StaffError('STAFF_LIMIT_EXCEEDED', {
-        message: `Workspace has reached the staff limit of ${staffLimit}`,
-        limit_value: staffLimit,
-        current_value: activeCount,
-      })
+    // 2. Lock + check staff limit (only when a numeric limit is configured)
+    if (staffLimit !== null) {
+      const activeCount = await countActiveStaff(client, input.workspace_id)
+      if (activeCount >= staffLimit) {
+        throw new StaffError('STAFF_LIMIT_EXCEEDED', {
+          message: `Workspace has reached the staff limit of ${staffLimit}`,
+          limit_value: staffLimit,
+          current_value: activeCount,
+        })
+      }
     }
 
     // 3. Hash password (in-transaction — hash before insert)

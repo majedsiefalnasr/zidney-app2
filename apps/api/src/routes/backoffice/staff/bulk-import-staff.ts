@@ -37,7 +37,13 @@ export async function handleBulkImportStaff(c: Context) {
       )
     }
 
-    const staffLimit = c.get('staff_limit') as number | null
+    // Normalize staff_limit from context: explicit `null` = unlimited
+    const rawStaffLimit = c.get('staff_limit')
+    let staffLimit: number | null = null
+    if (rawStaffLimit !== undefined && rawStaffLimit !== null) {
+      const n = Number(rawStaffLimit as unknown)
+      staffLimit = Number.isFinite(n) ? n : null
+    }
     const db = getDb(c)
     const audit = buildAuditCtx(c)
 

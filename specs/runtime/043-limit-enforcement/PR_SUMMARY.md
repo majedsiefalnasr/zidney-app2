@@ -34,8 +34,8 @@ Implement strict, transactional enforcement of staff and student license limits 
 
 **Updated:** `BackofficeVariables`
 
-- `staffLimit`: `'unlimited' | number` → `number | null` (null = unlimited)
-- `studentLimit`: `'unlimited' | number` → `number | null`
+- `staff_limit`: `'unlimited' | number` → `number | null` (null = unlimited)
+- `student_limit`: `'unlimited' | number` → `number | null`
 - **Benefit:** Type-safe, no string parsing, matches license model
 
 **Updated:** Error classes
@@ -182,7 +182,7 @@ export async function handleEnableStaff(c: Context<BackofficeEnv>): Promise<Resp
 c.set("staff_limit", license.limit === "unlimited" ? null : parseInt(license.limit));
 
 // AFTER: Already passing number | null correctly
-c.set("staff_limit", license.staffLimit); // number | null
+c.set("staff_limit", license.staff_limit); // number | null
 ```
 
 ---

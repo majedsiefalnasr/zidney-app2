@@ -42,7 +42,7 @@ POST /api/v1/backoffice/workspace/students/bulk-import (license: import student 
 
 **Test Steps:**
 
-1. Call `POST /api/backoffice/staff` with new staff data
+1. Call `POST /api/v1/backoffice/workspace/staff` with new staff data
 2. Expect: **200 OK** — staff created and enabled
 
 **Verification:**
@@ -67,7 +67,7 @@ POST /api/v1/backoffice/workspace/students/bulk-import (license: import student 
 
 **Test Steps:**
 
-1. Call `POST /api/backoffice/staff` with new staff data
+1. Call `POST /api/v1/backoffice/workspace/staff` with new staff data
 2. Expect: **403 Forbidden**
 
 **Response Body:**
@@ -107,7 +107,7 @@ POST /api/v1/backoffice/workspace/students/bulk-import (license: import student 
 
 **Test Steps:**
 
-1. Call `POST /api/backoffice/staff` with new staff data
+1. Call `POST /api/v1/backoffice/workspace/staff` with new staff data
 2. Expect: **200 OK** — staff created and enabled
 3. Call it again
 4. Expect: **200 OK** — 50 staff limit reached but not exceeded
@@ -121,7 +121,7 @@ POST /api/v1/backoffice/workspace/students/bulk-import (license: import student 
 // [correlationId] staff_limit_check { limit: 50, count: 49, allowed: true }
 
 // After step 4: count = 50
-// [correlationId] staff_limit_check { limit: 50, count: 50, allowed: true }
+// [correlationId] staff_limit_check { limit: 50, count: 50, allowed: false }
 
 // Step 6: count = 50, trying to add 51
 // [correlationId] staff_limit_check { limit: 50, count: 50, allowed: false }
@@ -139,8 +139,8 @@ POST /api/v1/backoffice/workspace/students/bulk-import (license: import student 
 
 **Test Steps:**
 
-1. Call `POST /api/backoffice/staff/bulk-import` with CSV (5 rows)
-2. Expect: **200 OK** — first 2 staff imported, then 3 rejected
+1. Call `POST /api/v1/backoffice/workspace/staff/bulk-import` with a JSON body containing `rows` (see manual test below)
+2. Expect: **200 OK** — import attempts made until the workspace limit is reached; rows beyond the limit are skipped
 
 **Response:**
 
@@ -148,13 +148,27 @@ POST /api/v1/backoffice/workspace/students/bulk-import (license: import student 
 {
   "success": true,
   "data": {
-    "imported": 2,
-    "failed": 3,
-    "total": 5,
+    "inserted": 2,
+    "skipped": 3,
     "errors": [
-      { "row": 3, "email": "staff3@org.edu", "reason": "LICENSE_LIMIT_REACHED" },
-      { "row": 4, "email": "staff4@org.edu", "reason": "LICENSE_LIMIT_REACHED" },
-      { "row": 5, "email": "staff5@org.edu", "reason": "LICENSE_LIMIT_REACHED" }
+      {
+        "row_index": 2,
+        "email": "staff3@org.edu",
+        "reason": "LICENSE_LIMIT_REACHED",
+        "code": "LICENSE_LIMIT_REACHED"
+      },
+      {
+        "row_index": 3,
+        "email": "staff4@org.edu",
+        "reason": "LICENSE_LIMIT_REACHED",
+        "code": "LICENSE_LIMIT_REACHED"
+      },
+      {
+        "row_index": 4,
+        "email": "staff5@org.edu",
+        "reason": "LICENSE_LIMIT_REACHED",
+        "code": "LICENSE_LIMIT_REACHED"
+      }
     ]
   }
 }
@@ -216,8 +230,8 @@ SELECT COUNT(*) FROM backoffice_staff_users WHERE workspace_id = ? AND status = 
 
 **Test Steps:**
 
-1. Call `POST /api/backoffice/students/bulk-import` with CSV (10 rows)
-2. Expect: **200 OK** — first 5 imported, last 5 rejected
+1. Call `POST /api/v1/backoffice/workspace/students/bulk-import` with a JSON `rows` payload (10 rows)
+2. Expect: **200 OK** — import attempts made until the workspace limit is reached; rows beyond the limit are skipped
 
 **Response:**
 
@@ -225,11 +239,15 @@ SELECT COUNT(*) FROM backoffice_staff_users WHERE workspace_id = ? AND status = 
 {
   "success": true,
   "data": {
-    "imported": 5,
-    "failed": 5,
-    "total": 10,
+    "inserted": 5,
+    "skipped": 5,
     "errors": [
-      { "row": 6, "student_id": "...", "reason": "LICENSE_LIMIT_REACHED" }
+      {
+        "row_index": 5,
+        "student_id": "...",
+        "reason": "LICENSE_LIMIT_REACHED",
+        "code": "LICENSE_LIMIT_REACHED"
+      }
       // ... 4 more
     ]
   }
@@ -287,18 +305,12 @@ export LICENSE_TOKEN="..." # if auth required
 ### 3. Test Enable Staff (Below Limit)
 
 ```bash
-curl -X POST http://localhost:3000/api/backoffice/staff \
+curl -X PATCH http://localhost:3000/api/v1/backoffice/workspace/staff/{id}/enable \
   -H "Content-Type: application/json" \
-  -H "X-Tenant-ID: $TENANT_ID" \
-  -d '{
-    "email": "staff1@org.edu",
-    "name": "Staff One",
-    "phone": "+1234567890",
-    "active": true
-  }'
+  -H "X-Tenant-ID: $TENANT_ID"
 
 # Expect: 200 OK
-# Response: { success: true, data: { id: "...", email: "...", active: true } }
+# Response: { success: true, data: { id: "...", email: "...", is_active: true, status: "ACTIVE" } }
 ```
 
 ### 4. Test Create 5 More Staff (Hit Limit)
@@ -312,21 +324,24 @@ curl -X POST http://localhost:3000/api/backoffice/staff \
 ### 5. Test Bulk Import
 
 ```bash
-# Create CSV file: staff_import.csv
-# ---
-# email,name,phone
-# staff10@org.edu,Staff Ten,+1234567890
-# staff11@org.edu,Staff Eleven,+1234567890
-# staff12@org.edu,Staff Twelve,+1234567890
-# ---
+# Prepare JSON payload
+cat > staff_import.json <<'JSON'
+{
+  "rows": [
+    { "email": "staff10@org.edu", "name": "Staff Ten", "phone": "+1234567890" },
+    { "email": "staff11@org.edu", "name": "Staff Eleven", "phone": "+1234567890" },
+    { "email": "staff12@org.edu", "name": "Staff Twelve", "phone": "+1234567890" }
+  ]
+}
+JSON
 
-curl -X POST http://localhost:3000/api/backoffice/staff/bulk-import \
+curl -X POST http://localhost:3000/api/v1/backoffice/workspace/staff/bulk-import \
+  -H "Content-Type: application/json" \
   -H "X-Tenant-ID: $TENANT_ID" \
-  -F "file=@staff_import.csv"
+  -d @staff_import.json
 
 # Expect: 200 OK
-# Response: { success: true, data: { imported: 0, failed: 3, total: 3, errors: [...] } }
-# (Because we already have 5 staff at limit)
+# Response shape: { success: true, data: { inserted, skipped, errors: [...] } }
 ```
 
 ---
