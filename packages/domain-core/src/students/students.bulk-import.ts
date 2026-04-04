@@ -66,38 +66,20 @@ export async function processBulkImport(
   let skipped = 0
   const errors: BulkImportRowError[] = []
 
-  // Validate the assigned division before processing any rows
-  try {
-    const client = await db.connect()
-    try {
-      await validateDivisionActive(client, workspaceId, divisionId)
-    } finally {
-      client.release()
-    }
-  } catch (err) {
-    // All rows fail if the division is invalid
-    const code: StudentErrorCode =
-      err instanceof StudentError ? err.code : 'STUDENT_DIVISION_INACTIVE'
-    for (let i = 0; i < rows.length; i++) {
-      const r = rows[i]
-      errors.push({
-        row_index: i,
-        email: r?.email ?? '',
-
-        reason: err instanceof StudentError ? err.message : 'Division invalid',
-        code,
-      })
-    }
-    return { inserted: 0, skipped: 0, errors }
-  }
-
   let rowOffset = 0
+  let divisionValidated = false
 
   for (const batch of chunks(rows, BATCH_SIZE)) {
     const client = await db.connect()
     await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
     try {
+      // Validate division on first batch (inside transaction for SERIALIZABLE protection)
+      if (!divisionValidated) {
+        await validateDivisionActive(client, workspaceId, divisionId)
+        divisionValidated = true
+      }
+
       const currentActive = await countActiveStudents(client, workspaceId)
       let batchInserted = 0
 
@@ -153,17 +135,34 @@ export async function processBulkImport(
       inserted += batchInserted
     } catch (err) {
       await client.query('ROLLBACK')
-      // Mark all rows in this batch as failed
-      for (let batchIdx = 0; batchIdx < batch.length; batchIdx++) {
-        const absoluteIdx = rowOffset + batchIdx
-        const row = batch[batchIdx]
-        errors.push({
-          row_index: absoluteIdx,
-          email: row.email,
-          reason: err instanceof Error ? err.message : 'Batch transaction failed',
-          code: 'STUDENT_BATCH_FAILED',
-        })
-        skipped++
+
+      // For first batch with division validation error, mark all rows as failed with appropriate code
+      if (!divisionValidated && err instanceof StudentError) {
+        const code: StudentErrorCode = err.code
+        for (let batchIdx = 0; batchIdx < batch.length; batchIdx++) {
+          const absoluteIdx = rowOffset + batchIdx
+          const row = batch[batchIdx]
+          errors.push({
+            row_index: absoluteIdx,
+            email: row.email,
+            reason: err.message,
+            code,
+          })
+          skipped++
+        }
+      } else {
+        // For other batch errors, mark rows as failed with STUDENT_BATCH_FAILED
+        for (let batchIdx = 0; batchIdx < batch.length; batchIdx++) {
+          const absoluteIdx = rowOffset + batchIdx
+          const row = batch[batchIdx]
+          errors.push({
+            row_index: absoluteIdx,
+            email: row.email,
+            reason: err instanceof Error ? err.message : 'Batch transaction failed',
+            code: 'STUDENT_BATCH_FAILED',
+          })
+          skipped++
+        }
       }
     } finally {
       client.release()

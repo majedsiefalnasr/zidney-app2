@@ -45,7 +45,7 @@ export async function handleListStudents(c: Context) {
       correlation_id: correlationId,
     })
 
-    const result = await listStudents(db, { ...parsed.data, workspace_id: workspaceId }, audit)
+    const result = await listStudents(db, { workspace_id: workspaceId, ...parsed.data }, audit)
 
     return c.json({ success: true, data: result, error: null }, 200)
   } catch (err) {
