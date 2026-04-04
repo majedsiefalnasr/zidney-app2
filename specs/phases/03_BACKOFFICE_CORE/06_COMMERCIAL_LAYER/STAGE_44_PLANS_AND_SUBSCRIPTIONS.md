@@ -8,39 +8,38 @@ workspace
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2025-01-09T00:00:00.000Z
+Last Updated: 2025-01-09T00:03:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Plans table with workspace-scoped plan definitions
-- Subscriptions table with student-plan lifecycle
-- Backoffice CRUD for plans (5 routes) mounted via app.ts
-- Backoffice subscription management (4 routes) mounted via app.ts
-- Manual subscription activation only (MANUAL payment_method)
-- subscription-enforcement.ts middleware (created, not mounted — deferred to Stage 45+)
-- Module access checkModuleAccess() service function (enforcement deferred)
-- Student subscription_status sync within transactions
-- Reporting: list by student/status/date, revenue overview
-- New RBAC PermissionModule keys: PLANS and SUBSCRIPTIONS
+- Migration 023: plans + subscriptions tables with constraints and partial indexes
+- Drizzle schemas: plans.schema.ts, subscriptions.schema.ts
+- Domain modules: packages/domain-core/src/plans/ and /subscriptions/
+- 9 new API endpoints: 5 plans routes + 4 subscriptions routes — mounted via app.ts
+- RBAC: PLANS and SUBSCRIPTIONS PermissionModule entries added
+- Validation: plans.schemas.ts and subscriptions.schemas.ts in packages/validation
+- SERIALIZABLE transaction for activateSubscription (race-condition safe)
+- Student subscription_status sync within same transaction
+- subscription-enforcement.ts middleware: created but NOT mounted (Stage 45+)
 
 Deferred Scope:
 
-- Full payment gateway integration (FR-05 — no gateway in current codebase)
-- Auto-renew worker job (FR-07 — deferred to Worker stage)
-- Module access enforcement on student routes (FR-08 — no student API routes yet)
-- Subscription enforcement middleware mounting (no frontoffice student route group yet)
+- Full payment gateway integration (FR-05)
+- Auto-renew worker job (FR-07)
+- Module access enforcement on student routes (FR-08)
+- Subscription enforcement middleware mounting
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
-- No new architecture changes: additive domain modules and RBAC entries only
-- Route mounting pattern confirmed: app.ts (C-01)
-- SubscriptionStatus enum mismatch resolved: two distinct enums with sync mapping (C-03)
+- Technical plan compliant — task generation authorized
+- No cross-tenant logic: workspace_id column on plans table
+- SERIALIZABLE isolation for activation transaction
+- Forward-only migration 023
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
