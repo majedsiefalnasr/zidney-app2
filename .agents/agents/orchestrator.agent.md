@@ -2582,6 +2582,26 @@ If validation fails:
 
 ## ⏸ Mandatory Pre-Closure Review Gate
 
+### Autopilot Bypass Rule
+
+Before presenting the manual review gate, check `.workflow-state.json` for `"auto_advance": true`:
+
+```bash
+auto_advance=$(jq '.auto_advance // false' specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json)
+```
+
+**If `auto_advance === true` AND no blocking issues detected:**
+- Skip manual review → Auto-approve
+- Log: `[AUTOPILOT] Pre-Closure Review Gate bypassed (auto_advance=true, no blockers)`
+- Proceed immediately to Step 7 — Closure
+
+**If `auto_advance === false` OR blocking issues found:**
+- Present manual review gate (see below)
+
+---
+
+### Manual Review Gate (Non-Autopilot)
+
 **Hard STOP. Do NOT proceed to Step 7 without explicit user approval.**
 
 ```
