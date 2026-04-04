@@ -79,11 +79,10 @@ POST /api/v1/backoffice/workspace/students/bulk-import (license: import student 
   "error": {
     "code": "LICENSE_LIMIT_REACHED",
     "message": "Staff limit reached for workspace",
-    "metadata": {
-      "limit_value": 50,
-      "current_value": 50,
-      "resource_type": "staff"
-    }
+    "type": "LicenseError",
+    "request_id": "req-abc123",
+    "limit_value": 50,
+    "current_value": 50
   }
 }
 ```
@@ -209,11 +208,10 @@ SELECT COUNT(*) FROM backoffice_staff_users WHERE workspace_id = ? AND status = 
   "error": {
     "code": "LICENSE_LIMIT_REACHED",
     "message": "Cannot enable staff: limit reached",
-    "metadata": {
-      "limit_value": 50,
-      "current_value": 50,
-      "staff_id": "{id}"
-    }
+    "type": "LicenseError",
+    "request_id": "req-def456",
+    "limit_value": 50,
+    "current_value": 50
   }
 }
 ```
@@ -316,9 +314,16 @@ curl -X PATCH http://localhost:3000/api/v1/backoffice/workspace/staff/{id}/enabl
 ### 4. Test Create 5 More Staff (Hit Limit)
 
 ```bash
-# Repeat step 3 with different emails (staff2, staff3, staff4, staff5)
-# After the 5th: expect 200 (at limit)
-# 6th attempt: expect 403 with LICENSE_LIMIT_REACHED
+# Create five additional staff accounts using POST /api/v1/backoffice/workspace/staff
+# Use different emails (staff2, staff3, staff4, staff5, staff6@example.com, etc.)
+# After the 5th POST: expect 200 OK (workspace now at 5 total, under 50 limit)
+# 6th POST attempt: expect 200 OK (still under limit)
+# Once workspace has 50 staff members, subsequent POST /staff will return 403 with LICENSE_LIMIT_REACHED
+
+# Alternatively, using PATCH /api/v1/backoffice/workspace/staff/:id/enable:
+# Create 50 inactive staff records first
+# Enable 49 of them with successive PATCH calls (expect 200 on each)
+# On the 50th PATCH /staff/:id/enable: expect 403 with LICENSE_LIMIT_REACHED
 ```
 
 ### 5. Test Bulk Import

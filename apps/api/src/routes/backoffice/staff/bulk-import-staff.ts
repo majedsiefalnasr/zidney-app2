@@ -38,11 +38,29 @@ export async function handleBulkImportStaff(c: Context) {
     }
 
     // Normalize staff_limit from context: explicit `null` = unlimited
+    // Invalid values fail closed (error instead of silent fallback)
     const rawStaffLimit = c.get('staff_limit')
     let staffLimit: number | null = null
-    if (rawStaffLimit !== undefined && rawStaffLimit !== null) {
-      const n = Number(rawStaffLimit as unknown)
-      staffLimit = Number.isFinite(n) ? n : null
+    if (rawStaffLimit !== undefined) {
+      if (rawStaffLimit === null) {
+        staffLimit = null
+      } else {
+        const n = Number(rawStaffLimit as unknown)
+        if (!Number.isFinite(n)) {
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: {
+                code: 'INVALID_STAFF_LIMIT',
+                message: 'Invalid staff_limit value',
+              },
+            },
+            400
+          )
+        }
+        staffLimit = n
+      }
     }
     const db = getDb(c)
     const audit = buildAuditCtx(c)

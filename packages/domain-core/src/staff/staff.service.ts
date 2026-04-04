@@ -110,6 +110,13 @@ export async function createStaff(
     return record
   } catch (err) {
     await client.query('ROLLBACK')
+    // Detect serialization failure and convert to conflict for retry
+    const pgErr = err as unknown as { code?: string }
+    if (pgErr?.code === '40001') {
+      throw new StaffError('STAFF_EMAIL_CONFLICT', {
+        message: 'Request conflicted with concurrent operation; please retry',
+      })
+    }
     throw err
   } finally {
     client.release()
@@ -305,6 +312,13 @@ export async function enableStaff(
     return updated
   } catch (err) {
     await client.query('ROLLBACK')
+    // Detect serialization failure and convert to conflict for retry
+    const pgErr = err as unknown as { code?: string }
+    if (pgErr?.code === '40001') {
+      throw new StaffError('STAFF_EMAIL_CONFLICT', {
+        message: 'Request conflicted with concurrent operation; please retry',
+      })
+    }
     throw err
   } finally {
     client.release()

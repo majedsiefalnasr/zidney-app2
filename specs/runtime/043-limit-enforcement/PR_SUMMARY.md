@@ -95,34 +95,46 @@ async createStaff(staff: CreateStaffInput): Promise<PublicStaffRecord> {
 export async function processStaffBulkImport(
   db: DbClient,
   tenant: string,
-  file: File,
+  rows: Array<{ email: string; name: string; [key: string]: unknown }>,
   limit: number | null, // NEW: explicit limit parameter
 ): Promise<BulkImportResult> {
-  const rows = parseCsv(file);
-  const imported = [];
-  const failed = [];
+  const inserted = [];
+  const skipped = [];
+  const errors: Array<{ row?: unknown; code: string; message: string }> = [];
 
-  for (let batchIdx = 0; batchIdx < rows.length; batchIdx++) {
-    const row = rows[batchIdx];
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
     if (!row) continue; // NEW: safe guard (no ! assertion)
 
     try {
       // Each row checked against CURRENT count
-      const count = await client.query("SELECT COUNT(*) ...");
+      const countResult = await db.query(
+        "SELECT COUNT(*) as count FROM staff WHERE workspace_id = $1 AND is_active = true",
+        [tenant],
+      );
+      const count = countResult.rows[0]?.count ?? 0;
+
       if (limit !== null && count >= limit) {
-        failed.push({ row, reason: "LICENSE_LIMIT_EXCEEDED" });
+        skipped.push({ row_index: idx, reason: "LICENSE_LIMIT_EXCEEDED" });
         continue;
       }
 
-      // Insert row
-      await client.query("INSERT INTO staff ...");
-      imported.push(row);
+      // Insert row using db client
+      await db.query(
+        "INSERT INTO staff (workspace_id, email, name, is_active, status) VALUES ($1, $2, $3, true, $4)",
+        [tenant, row.email, row.name, "ACTIVE"],
+      );
+      inserted.push(row);
     } catch (err) {
-      failed.push({ row, reason: err.message });
+      errors.push({
+        row_index: idx,
+        code: "IMPORT_ERROR",
+        message: (err as Error).message,
+      });
     }
   }
 
-  return { imported: imported.length, failed: failed.length, errors: failed };
+  return { inserted: inserted.length, skipped: skipped.length, errors };
 }
 ```
 
@@ -265,7 +277,7 @@ c.set("staff_limit", license.staff_limit); // number | null
 
 1. **Pre-deployment:** No database migrations
 2. **During deployment:**
-   - License middleware must already pass `staffLimit`/`studentLimit` as `number | null`
+   - License middleware must already pass `staff_limit`/`student_limit` as `number | null`
    - If not, limit enforcement will use `null` (unlimited) as fallback
 3. **Post-deployment:** Monitor logs for `LICENSE_LIMIT_REACHED` errors
 4. **Rollback:** Safe to rollback; workspace APIs function with unlimited limits
