@@ -9,19 +9,20 @@ Scope: Transactional enforcement of student and staff limits per license
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-04-04T01:00:00.000Z
+Last Updated: 2026-04-04T01:30:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Phase A: Fix BackofficeVariables types + middleware + error class extension
-- Phase B: Domain signature normalization (number | null)
-- Phase C: enableStudent/enableStaff — SERIALIZABLE + count guard (critical)
-- Phase D: Route handler limit wiring (G3, G4, G6, G7)
-- Phase E: Error response mapping → LICENSE_LIMIT_REACHED
-- Phase F: Staff bulk import new feature (domain + route + schema + exports)
-- Phase G: Unit + integration tests
+- Total: 24 atomic tasks
+- Phase A (T001–T004): Types, error classes, middleware — 4 tasks
+- Phase B (T005–T007): Domain signature normalization — 3 tasks
+- Phase C (T008–T009): CRITICAL — enableStudent/enableStaff limit checks — 2 tasks
+- Phase D (T010–T013): Route handler wiring — 4 tasks
+- Phase E (T014–T015): Error response mapping — 2 tasks
+- Phase F (T016–T022): Staff bulk import new feature — 7 tasks
+- Phase G (T023–T024): Tests — 2 tasks
 
 Deferred Scope:
 
@@ -31,11 +32,11 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 - Guardian verdicts: Architecture Guardian PASS | API Designer PASS
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
