@@ -9,20 +9,31 @@ Scope: Transactional enforcement of student and staff limits per license
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
-Risk Level: UNKNOWN
-Initiated: 2026-04-04T00:00:00.000Z
+Step: specify
+Risk Level: HIGH
+Last Updated: 2026-04-04T00:30:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Transactional limit enforcement for student creation, staff creation, bulk import, and reactivation
+- Staff bulk import (new feature)
+- Type-system fix: `student_limit`/`staff_limit` as `number | null` end-to-end
+- Middleware bug fix: string `'unlimited'` → `null`
+- Structured error: `LICENSE_LIMIT_REACHED` with `{type, limit_value, current_value}`
+- 13 identified gaps (G1–G13) to be resolved
+
+Deferred Scope:
+
+- Aggregated counter table (v2 scaling)
+- Frontend error display components
+- Alerting on repeated limit hits
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
