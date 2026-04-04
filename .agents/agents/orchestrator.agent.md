@@ -39,6 +39,7 @@ agents:
     'Security Auditor',
     'Technical Writer',
     'Context7-Expert',
+    'CodeRabbit Review Resolver',
     'Debug Mode Instructions',
     'Accessibility Expert',
     'Expert Vue.js Frontend Engineer',
@@ -651,6 +652,7 @@ Before entering the standard SpecKit workflow, the orchestrator checks the user'
 | `debug`, `diagnose` | `debugger` | Root-cause analysis, stack trace diagnosis, regression bisection |
 | `simplify`, `cleanup` | `code-simplifier` | Remove dead code, reduce complexity, consolidate duplicates |
 | `review` | `Code Reviewer` | Production-grade code review and refactoring |
+| `coderabbit`, `review-bot` | `CodeRabbit Review Resolver` | Verify and remediate CodeRabbit or other review-bot findings |
 | `research`, `explore` | `researcher` | Codebase exploration, pattern discovery, dependency mapping |
 | `plan` | `planner` | DAG-based execution plans with task decomposition |
 | `implement`, `build` | `implementer` | TDD implementation, feature building, bug fixes |
@@ -698,7 +700,7 @@ These keywords trigger a **sequential multi-agent pipeline**. Each agent passes 
 ## Detection Rules
 
 - Check the **first word** (or first two hyphenated/compound words) of the user's message, **case-insensitive**.
-- Aliases map to the same action: `resume` = `continue`, `diagnose` = `debug`, `cleanup` = `simplify`, `a11y` = `accessibility`, `dryrun` = `dry-run`, `chat` = `discuss`, `perf` = `optimize`, `build` = `implement`.
+- Aliases map to the same action: `resume` = `continue`, `diagnose` = `debug`, `cleanup` = `simplify`, `a11y` = `accessibility`, `dryrun` = `dry-run`, `chat` = `discuss`, `perf` = `optimize`, `build` = `implement`, `reviewbot` = `review-bot`, `crbot` = `coderabbit`.
 - If the keyword matches a **Session Flow** entry → execute the flow action directly.
 - If the keyword matches an **Agent Route** entry → hand off to the target agent immediately. Do NOT present the intake form.
 - If the keyword matches a **Composite Sequence** entry → execute the pipeline sequentially.
@@ -1276,14 +1278,18 @@ Check `.agents/session/session-memory.md` for stale data from previous workflow 
 1. Read `.agents/session/session-memory.md`.
 2. If it contains data from a **different stage** (different `STAGE_NAME` or older than 7 days):
    - Archive the old content to `.agents/session/archive/session-memory-archive-<ISO_DATE>.md`.
+  - Normalize the archive header using the same rules as the active session file:
+    - `Stage: STAGE <NUMBER> – <STAGE_TITLE>`
+    - `Phase: <PHASE_CODE>` or `<PHASE_CODE> / <SUBPHASE_CODE>` (no `PHASE_` prefix)
+    - `Started: <ISO_TIMESTAMP_WITH_MILLISECONDS>`
    - Reset `.agents/session/session-memory.md` to:
 
 ```markdown
 # Session Memory
 
-Stage: <STAGE_NAME>
-Phase: <PHASE_NAME>
-Started: <ISO_TIMESTAMP>
+Stage: STAGE <NUMBER> – <STAGE_TITLE>
+Phase: <PHASE_CODE> / <SUBPHASE_CODE>
+Started: <ISO_TIMESTAMP_WITH_MILLISECONDS>
 
 ---
 ```
