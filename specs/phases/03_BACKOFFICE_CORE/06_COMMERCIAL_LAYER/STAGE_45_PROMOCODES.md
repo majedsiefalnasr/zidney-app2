@@ -9,6 +9,20 @@ Scope: Workspace-level discount and affiliate code system
 ## Stage Status
 
 Status: DRAFT
+Step: pre_step
+Risk Level: UNKNOWN
+Initiated: 2026-04-05T00:00:00.000Z
+
+Scope Open:
+
+- Specification pending
+
+Architecture Governance Compliance:
+
+- Pending governance audit
+
+Notes:
+Stage initialized. Specification in progress.
 
 ---
 
