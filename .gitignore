@@ -77,8 +77,9 @@ docs/ai/context/architecture-impact-report.json
 .ai-context-cache/
 tests/ai-context/
 
-# Development plans
-plans/
+# Development plans (top-level only, not source packages)
+/plans/
+!packages/*/src/plans/
 
 # AI engine runtime logs (generated output files — not for version control)
 docs/architecture/health/ai-execution-logs/*.json

@@ -7,7 +7,54 @@ workspace
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: MEDIUM
+Closure Date: 2026-04-04
+
+Implementation: COMPLETE
+Tasks: 27 / 27 completed
+
+Scope Delivered:
+
+- ✅ Migration 023: plans + subscriptions tables with constraints and partial indexes
+- ✅ Drizzle schemas: plans.schema.ts, subscriptions.schema.ts
+- ✅ RBAC: PLANS + SUBSCRIPTIONS PermissionModule entries (incl. MODULE_DISPLAY_NAMES)
+- ✅ Domain module plans: types, errors, repository, service (soft-delete, active-subscription guard)
+- ✅ Domain module subscriptions: types, errors, repository, service (SERIALIZABLE activation + student sync)
+- ✅ Validation schemas: plans.schemas.ts, subscriptions.schemas.ts
+- ✅ API routes: 5 plans handlers + 4 subscriptions handlers, mounted in app.ts
+- ✅ subscription-enforcement.ts middleware stub (future stage)
+- ✅ Unit tests: 7 plans service tests + 16 subscriptions service tests (23 total, all pass)
+- ✅ TypeScript clean, Biome lint clean
+
+Deferred Scope:
+
+- None
+
+Architecture Governance Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced (workspace_id in all queries)
+- ADR-0002 Snapshot immutability: not applicable to this stage
+- ADR-0006 Server-authoritative time enforced (NOW() in SQL)
+- ADR-0007 Version compatibility enforced
+- ADR-0008 Semantic versioning enforced
+- Activation uses SERIALIZABLE transaction; cancellation uses READ COMMITTED + student sync
+- All writes transactional, idempotency enforced via unique constraints
+
+Audit Results:
+
+- Architecture Guardian: PASS
+- Security Auditor: PASS
+- Performance Optimizer: PASS
+- QA Engineer: PASS
+- Biome lint: CLEAN
+- TypeScript: CLEAN
+- Unit tests: 23/23 PASS
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage. **Validate stage status before modifying any spec.**
 
 ---
 

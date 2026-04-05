@@ -40,10 +40,14 @@ export * from './migration/master-migration-runner'
 export * from './migrations/migrate'
 // Monitoring module
 export * from './monitoring/provisioning-metrics'
+// Plans module (Stage 044)
+export * as plans from './plans'
 // Provisioning module
 export * from './provisioning/idempotency-handler'
 // Staff module (Stage 041)
 export * as staff from './staff'
+// Subscriptions module (Stage 044)
+export * as subscriptions from './subscriptions'
 // Teams module (Stage 026)
 export * as teams from './teams'
 // Tenant resolver module
