@@ -61,7 +61,7 @@ The route handler loads the plan record to check `billing_type` for FREE_TRIAL c
 
 ---
 
-## File Structure (29 total: 24 new + 5 modified)
+## File Structure (29 total: 23 new + 6 modified)
 
 ### New Files (24)
 
@@ -228,7 +228,7 @@ export type PromocodeErrorCode =
   | "PROMOCODE_CODE_ALREADY_EXISTS"
   | "PROMOCODE_IMMUTABLE_FIELDS";
 
-export const HTTP_STATUS: Record<PromocodeErrorCode, number> = {
+export const PROMOCODE_ERROR_HTTP: Record<PromocodeErrorCode, number> = {
   PROMOCODE_NOT_FOUND: 404,
   PROMOCODE_INACTIVE: 422,
   PROMOCODE_EXPIRED: 422,
@@ -245,12 +245,14 @@ export const HTTP_STATUS: Record<PromocodeErrorCode, number> = {
 };
 
 export class PromocodeError extends Error {
-  constructor(
-    public readonly code: PromocodeErrorCode,
-    message: string,
-  ) {
-    super(message);
+  readonly code: PromocodeErrorCode;
+  readonly httpStatus: number;
+
+  constructor(code: PromocodeErrorCode, message?: string) {
+    super(message ?? code);
     this.name = "PromocodeError";
+    this.code = code;
+    this.httpStatus = PROMOCODE_ERROR_HTTP[code];
   }
 }
 ```
@@ -274,8 +276,9 @@ countTotalUsages(tx, promocodeId: string): Promise<number>
 countUserUsages(tx, promocodeId: string, studentId: string): Promise<number>
 
 // Locking
-lockPromocodeForUpdate(tx, promocodeId: string): Promise<void>
-// → tx.execute(sql`SELECT id FROM promocodes WHERE id = ${promocodeId} FOR UPDATE`)
+lockPromocodeForUpdate(tx, promocodeId: string): Promise<PromocodeRow | null>
+// → await tx.query('SELECT id, is_active, usage_limit, per_user_limit, type, is_stackable FROM promocodes WHERE id = $1 FOR UPDATE', [promocodeId])
+// Must be called inside an open SERIALIZABLE transaction
 
 // Usage insert (inside transaction)
 insertUsage(tx, input: NewPromocodeUsage): Promise<PromocodeUsageRow>
@@ -378,9 +381,10 @@ class PromocodeService {
     subscriptionId: string,
     planPrice: number,
   ): Promise<DiscountResult>;
-  // 1. lockPromocodeForUpdate(tx, promocodeId)
+  // 1. const locked = await lockPromocodeForUpdate(tx, context.promocodeId)
+  //    → if (!locked) throw new PromocodeError('PROMOCODE_NOT_FOUND', ...)
   // 2. Re-fetch usage counts inside tx
-  // 3. Re-run validatePromocodeApplication() — throws on failure
+  // 3. Re-run validatePromocodeApplication(locked, context, totalCount, userCount) — throws on failure
   // 4. calculateDiscount()
   // 5. insertUsage(tx, ...)
   // 6. Return DiscountResult
@@ -396,7 +400,8 @@ export const promocodeService = new PromocodeService();
 
 ```typescript
 export { promocodeService, PromocodeService } from "./promocodes.service";
-export { PromocodeError, HTTP_STATUS } from "./promocodes.errors";
+export { PromocodeError, PROMOCODE_ERROR_HTTP } from "./promocodes.errors";
+export type { PromocodeErrorCode } from "./promocodes.errors";
 export type {
   PromocodeRow,
   PromocodeInput,
@@ -405,7 +410,9 @@ export type {
   DiscountResult,
   ValidatorResult,
   PromocodeAnalytics,
-  ListPromocodesFilter,
+  SinglePromocodeAnalytics,
+  PromocodeUsageRow,
+  AnalyticsFilter,
 } from "./promocodes.types";
 ```
 
@@ -492,10 +499,37 @@ const router = new Hono();
 
 // Static routes MUST be registered before parameterised routes to prevent path conflicts.
 // /analytics and /validate registered first to prevent /:id capturing them.
+const validateRateLimiter = createRateLimiter();
+const VALIDATE_PROMO_RATE_LIMIT_MAX = 10;
+const VALIDATE_PROMO_RATE_LIMIT_WINDOW_SEC = 60;
+
 router.get("/analytics", handleGetPromocodeAnalytics);
 router.post(
   "/validate",
-  rateLimitMiddleware({ max: 10, window: "1m", key: "workspace" }),
+  async (c, next) => {
+    const tenantId = c.get("tenantId") as string;
+    const key = `validate-promo:${tenantId}`;
+    const isLimited = await validateRateLimiter.isLimited(
+      key,
+      VALIDATE_PROMO_RATE_LIMIT_MAX,
+      VALIDATE_PROMO_RATE_LIMIT_WINDOW_SEC,
+    );
+    if (isLimited) {
+      c.header("Retry-After", String(VALIDATE_PROMO_RATE_LIMIT_WINDOW_SEC));
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: "RATE_LIMIT_EXCEEDED",
+            message: "Too many validate requests. Retry after 60 seconds.",
+          },
+        },
+        429,
+      );
+    }
+    await next();
+  },
   handleValidatePromocode,
 );
 router.get("/", handleListPromocodes);
@@ -506,7 +540,7 @@ router.post("/:id/deactivate", handleDeactivatePromocode);
 
 > **Order matters (ENFORCED):** `/analytics` and `/validate` are registered BEFORE `/:id` to prevent Hono routing the validate path to the parameterised handler. `/validate` is registered second, immediately after `/analytics`.
 
-> **Rate limiting on POST /validate:** `rateLimitMiddleware({ max: 10, window: '1m', key: 'workspace' })` applies a 10-requests-per-minute per-workspace limit to prevent brute-force code enumeration. This uses the platform `rateLimit` utility from `packages/redis-utils`.
+> **Rate limiting on POST /validate:** Uses `createRateLimiter()` from `apps/api/src/middleware/rate-limit.middleware`, keyed by `tenantId` from context (`validate-promo:{tenantId}`). Applies a 10-requests-per-minute per-workspace limit to prevent brute-force code enumeration. Pattern follows `apps/api/src/routes/backoffice/workflow/index.ts`.
 
 > **POST /promocodes idempotency decision (AD-07):** Admin CRUD create is NOT given transparent idempotency via Idempotency-Key header. Rationale: AGENTS.md mandates idempotency for payment, exam submission, certificates, and webhooks — not admin resource creation. A duplicate POST returns 409 PROMOCODE_CODE_ALREADY_EXISTS. This is the documented and accepted behavior. If retry-transparent semantics are needed in the future, a separate ADR is required.
 
@@ -627,7 +661,7 @@ try {
   if (err instanceof PromocodeError) {
     return c.json(
       { success: false, data: null, error: { code: err.code, message: err.message } },
-      HTTP_STATUS[err.code]
+      err.httpStatus
     )
   }
   // Re-throw unknown errors for global error handler
@@ -823,8 +857,8 @@ These must be verified by the implementing engineer and CI:
 
 Stage 45 is DONE when:
 
-1. All 24 new files exist and compile without error
-2. 5 modified files pass typecheck
+1. All 23 new files exist and compile without error
+2. 6 modified files pass typecheck
 3. Unit tests: all 24 test cases green
 4. Integration tests: all endpoints tested including subscription integration
 5. Tenant isolation test passes (cross-tenant lookup returns 404)

@@ -473,7 +473,7 @@ If `target_division_ids IS NOT NULL` or `target_group_ids IS NOT NULL`:
 
 ### FR-13 — Subscription Flow Integration
 
-The `create-subscription.ts` route (Stage 44) is extended:
+The `activate-subscription.ts` route (Stage 44) is extended:
 
 - Accepts optional `promo_code: string` in body
 - If `promo_code` is provided:
@@ -545,7 +545,7 @@ When `valid_until < NOW()` at validation time:
 New Zod schemas:
 
 - `createPromocodeBodySchema` — All creation fields; conditional validation for type-specific fields
-- `promotcodeIdParamsSchema` — UUID
+- `promocodeIdParamsSchema` — UUID
 - `validatePromocodeBodySchema` — `{ code: string; student_id: UUID; plan_id: UUID }`
 - `listPromocodesQuerySchema` — `{ is_active?: boolean; type?: PromocodeType; status?: string; page?: number; limit?: number }`
 - `createSubscriptionWithPromoBodySchema` — Extends Stage 44 `createSubscriptionBodySchema` with optional `promo_code?: string`
@@ -589,7 +589,7 @@ All error responses conform to the platform contract: `{ success: false, data: n
 - Retroactive application of a promocode to an existing subscription (FORBIDDEN)
 - MMC access to individual student-level promocode usage data (FORBIDDEN)
 - Bulk code generation or CSV import (not in scope for this stage)
-- Public-facing (Frontoffice) endpoint for code submission by students (admin-only in this stage)
+- Public-facing (Frontoffice) endpoint for code submission by students (admin-only in this stage) — note: any future frontoffice student-facing validate endpoint MUST upgrade rate limiting to per-IP + per-user (≤3/min) before launch
 - Gateway refund orchestration on re-validation failure (out of scope; log and alert only)
 
 ---
@@ -757,7 +757,7 @@ Stage 45 is complete when:
 
 - Q: How are race conditions on `usage_limit` resolved — specifically, `SELECT COUNT(*) ... FOR UPDATE` is not valid PostgreSQL syntax; what is the correct locking mechanism? → A: The correct approach is a **two-step lock** inside the SERIALIZABLE transaction: (1) issue `SELECT id FROM promocodes WHERE id = $1 FOR UPDATE` to acquire a row-level exclusive lock on the `promocodes` record, then (2) issue a plain `SELECT COUNT(*) FROM promocode_usages WHERE promocode_id = $1` (no FOR UPDATE on the aggregate — it is unnecessary and invalid). The SERIALIZABLE isolation level combined with the row lock on `promocodes` serializes all concurrent applications of the same code. This replaces the ambiguous phrase "FOR UPDATE lock on the `promocode_usages` aggregate" in FR-10 and FR-11, which is now superseded by this two-step pattern. Both global `usage_limit` and `per_user_limit` checks follow the same pattern (lock `promocodes` row, then count). The same `SELECT ... FOR UPDATE` on `promocodes` covers both counts — it is acquired once per transaction.
 
-- Q: What happens when a `FREE_TRIAL` code is applied to a non-recurring (one-time) plan — at which validation step is this rejected? → A: The `FREE_TRIAL`/`billing_type` check is a **sub-check of Check #6 (Plan Eligibility)**, executed immediately after confirming the plan is in `applies_to_plan_ids`. If the resolved plan's `billing_type != 'recurring'`, validation fails with `PROMOCODE_FREE_TRIAL_REQUIRES_RECURRING` (HTTP 422) before the calculator is invoked. The 7-check table in the Validation Engine section is amended: Check 6 now includes two conditions — (a) plan ID eligibility against `applies_to_plan_ids`, and (b) when `type = 'FREE_TRIAL'`, the plan's `billing_type` must equal `'recurring'`. Both sub-conditions report under Check 6, but use distinct error codes (`PROMOCODE_PLAN_NOT_ELIGIBLE` for (a), `PROMOCODE_FREE_TRIAL_REQUIRES_RECURRING` for (b)).
+- Q: What happens when a `FREE_TRIAL` code is applied to a non-recurring (one-time) plan — at which validation step is this rejected? → A: The `FREE_TRIAL`/`billing_type` check is **Check #8 (post-stacking)**, executed after the stacking check (Check #7) and before the calculator is invoked. This is NOT a sub-check of Check #6 (Plan Eligibility). If `type = 'FREE_TRIAL'` and the resolved plan's `billing_type != 'recurring'`, validation fails with `PROMOCODE_FREE_TRIAL_REQUIRES_RECURRING` (HTTP 422). Check #8 is a new row in the 9-check validation table: condition `type != 'FREE_TRIAL' OR plan.billing_type = 'recurring'`, error code `PROMOCODE_FREE_TRIAL_REQUIRES_RECURRING`. Check #6 (Plan Eligibility) covers only `applies_to_plan_ids` membership and uses only `PROMOCODE_PLAN_NOT_ELIGIBLE`. The two checks are distinct and sequential: #6 → #7 (stacking) → #8 (FREE_TRIAL/recurring constraint).
 
 - Q: How is stacking order determined when multiple codes are applied, and what `redeemed_at` is used for a code being applied in the current transaction? → A: Stacking order is always **existing-codes-first, new-code-last**. Codes already recorded in `promocode_usages` for the subscription are ordered by `redeemed_at ASC`; the code being applied in the current transaction is treated as the final step and receives the current transaction timestamp as its `redeemed_at`. Discount chaining: each sequential code uses the `final_price` output of the previous code as its `plan_price` input. If two or more codes are submitted in a single subscription creation request (not supported in MVP — only one `promo_code` field exists), they would be ordered by their position in the request array. For MVP this is moot: at most one code is applied per subscription creation call; additional stacked codes (applied in subsequent calls to a subscription amendment flow) are not in scope for this stage.
 

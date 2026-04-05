@@ -8,17 +8,22 @@ Scope: Workspace-level discount and affiliate code system
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: MEDIUM
-Last Updated: 2026-04-05T00:30:00.000Z
+Last Updated: 2026-04-05T03:00:00.000Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all criteria — 5 guardian composite)
 
-- Total: 29 atomic tasks
-- 14 phases: infrastructure → domain → validation schemas → API handlers → subscription integration → tests
-- 5 parallel execution windows identified
-- Critical path: T001 → T004 → T005/T006 → T007/T008/T009 → T010 → T011→T012 → T013 → T016–T022 → T029
+Implementation: AUTHORIZED
+
+Scope Authorized:
+
+- Workspace-scoped promocode CRUD + validation engine (9 checks)
+- PERCENTAGE / FIXED / FREE_TRIAL discount types
+- Atomic `applyPromocode` integrated into SERIALIZABLE subscription transaction
+- Backoffice analytics endpoint
+- 29 tasks across 14 phases
 
 Deferred Scope:
 
@@ -26,15 +31,22 @@ Deferred Scope:
 - Advanced marketing rules
 - Cross-workspace analytics (forbidden per ADR-0001)
 - Analytics materialization/caching strategy
+- PG serialization error (40001) retry test (acceptable deferral)
+- `.trim()` / `.toUpperCase()` additions — implementation-time detail
 
 Architecture Governance Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed — implementation authorized
 - Architecture Guardian: PASS
 - API Designer: PASS
+- Security Auditor: PASS
+- Performance Optimizer: PASS
+- QA Engineer: PASS
+- Code Reviewer: PASS
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full composite drift analysis passed (5 guardians). All CRITICAL/HIGH findings resolved in spec artifacts.
+Implementation gate open.
 
 ---
 

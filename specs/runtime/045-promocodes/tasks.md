@@ -65,7 +65,7 @@
 > Pure type definitions and error registry. No DB calls, no framework imports. All domain phases depend directly on this phase.
 
 - [ ] T005 [P] Create all shared domain types (`PromocodeType`, `PromocodeRow`, `PromocodeInput`, `PromocodeValidationContext` with `plan_billing_type`, `DiscountResult`, `PromocodeUsageRow`, `ValidatorResult`, `ListPromocodesFilter`, `PromocodeAnalytics`, `SinglePromocodeAnalytics`, `AnalyticsFilter`) in `packages/domain-core/src/promocodes/promocodes.types.ts`
-- [ ] T006 [P] Create domain error registry (`PromocodeErrorCode` union of 13 codes, `HTTP_STATUS` map, `PromocodeError` class extending `Error` with `code` field) in `packages/domain-core/src/promocodes/promocodes.errors.ts`
+- [ ] T006 [P] Create domain error registry (`PromocodeErrorCode` union of 13 codes, `PROMOCODE_ERROR_HTTP` map, `PromocodeError` class extending `Error` with `code` and `httpStatus` fields) in `packages/domain-core/src/promocodes/promocodes.errors.ts`
 
 **Phase 2 done when:** T005–T006 pass `bun run typecheck`
 
@@ -76,7 +76,7 @@
 > Story: Admins can create, list, get, and deactivate promocodes in their workspace.
 > Independent test criterion: Repository functions accept `db`/`tx` as first param; `createPromocode` handles PG unique violation (code 23505) by rethrowing as `PromocodeError('PROMOCODE_CODE_ALREADY_EXISTS', ...)`.
 
-- [ ] T007 [US1] Create domain repository with 10 functions (`listPromocodes`, `getPromocodeById`, `getPromocodeByCode`, `createPromocode`, `deactivatePromocode`, `countTotalUsages`, `countUserUsages`, `lockPromocodeForUpdate` — uses `sql\`SELECT id FROM promocodes WHERE id = ${id} FOR UPDATE\``, `insertUsage`, `getAnalyticsSummary`) in `packages/domain-core/src/promocodes/promocodes.repository.ts`
+- [ ] T007 [US1] Create domain repository with 10 functions (`listPromocodes`, `getPromocodeById`, `getPromocodeByCode`, `createPromocode`, `deactivatePromocode`, `countTotalUsages`, `countUserUsages`, `lockPromocodeForUpdate` — returns `Promise<PromocodeRow | null>`, uses raw pg `tx.query('SELECT * FROM promocodes WHERE id = $1 FOR UPDATE', [id])`, `insertUsage`, `getAnalyticsSummary`) in `packages/domain-core/src/promocodes/promocodes.repository.ts`
 
 ---
 
@@ -104,7 +104,7 @@
 > Independent test criterion: `applyPromocode(tx, ...)` calls `lockPromocodeForUpdate`, re-runs validator, calls `calculateDiscount`, inserts usage, returns `DiscountResult`; `validatePromocode` returns `{promocode, discountPreview}` without inserting any row.
 
 - [ ] T010 [US4] Create `PromocodeService` class and `promocodeService` singleton (all 7 methods: `createPromocode`, `listPromocodes`, `getPromocode`, `deactivatePromocode`, `validatePromocode`, `applyPromocode`, `getAnalytics`) in `packages/domain-core/src/promocodes/promocodes.service.ts`
-- [ ] T011 Create domain module barrel (export `promocodeService`, `PromocodeService`, `PromocodeError`, `HTTP_STATUS`, and all public types from `promocodes.types.ts`) in `packages/domain-core/src/promocodes/index.ts`
+- [ ] T011 Create domain module barrel (export `promocodeService`, `PromocodeService`, `PromocodeError`, `PROMOCODE_ERROR_HTTP`, `PromocodeErrorCode` type, and all public types from `promocodes.types.ts`) in `packages/domain-core/src/promocodes/index.ts`
 - [ ] T012 Export `promocodes` module re-exports from domain-core package barrel in `packages/domain-core/src/index.ts`
 
 **Phase 6 done when:** T010–T012 pass `bun run typecheck`
@@ -128,7 +128,7 @@
 > Independent test criterion (subset): `POST /promocodes` with duplicate code → 409; `GET /promocodes/:id` with unknown ID → 404; `POST /promocodes/:id/deactivate` called twice → 200 both times.
 > T016–T019 are parallel once T013 (schemas) and T015 (helpers) complete.
 
-- [ ] T015 Create route helpers (`getDb(c)` extracting tenant DB from context, `buildResponsePromocode(row)` response mapper, `buildAuditCtx(c)` for audit fields) in `apps/api/src/routes/backoffice/promocodes/helpers.ts`
+- [ ] T015 Create route helpers (`getDb(c)` extracting tenant DB from context, `buildResponsePromocode(row)` response mapper, `buildAuditCtx(c)` for audit fields — **NOTE:** backoffice routes do NOT inherit `correlationMiddleware`; `buildAuditCtx` MUST call `logger.info({ correlation_id: c.get('correlationId'), workspace_slug: c.get('tenantSlug'), action: 'ACTION_NAME', ... })` explicitly for F7 structured logging compliance) in `apps/api/src/routes/backoffice/promocodes/helpers.ts`
 - [ ] T016 [P] [US1] Create `handleListPromocodes` handler (parse `listPromocodesQuerySchema` from query, apply `is_active`/`type`/`status` filters using `sql\`NOW()\``, paginate with `page`+`limit`, return `{success:true, data:{promocodes, total, page, limit}}`) in `apps/api/src/routes/backoffice/promocodes/list-promocodes.ts`
 - [ ] T017 [P] [US1] Create `handleCreatePromocode` handler (parse `createPromocodeBodySchema`, normalize `code` to `UPPERCASE` before insert, catch PG code `23505` → `PROMOCODE_CODE_ALREADY_EXISTS` 409, return 201 with created row) in `apps/api/src/routes/backoffice/promocodes/create-promocode.ts`
 - [ ] T018 [P] [US1] Create `handleGetPromocode` handler (parse `promocodeIdParamsSchema`, return code + `SinglePromocodeAnalytics`, throw `PROMOCODE_NOT_FOUND` 404 when row is null) in `apps/api/src/routes/backoffice/promocodes/get-promocode.ts`
@@ -141,7 +141,7 @@
 > Story: Admin UI can preview discount for a student/plan/code combination before creating a subscription; endpoint is read-only — no DB write occurs on success.
 > Independent test criterion: `POST /validate` with valid code → 200 `{valid:true, discount: DiscountResult}`; each of the 9 check failures → 422 with correct `error.code`; confirmed zero rows in `promocode_usages` after call.
 
-- [ ] T020 [US3] Create `handleValidatePromocode` handler (parse `validatePromocodeBodySchema`, load plan `billing_type` + student `division_id`/`group_id`, fetch `server_now` via `SELECT NOW() AS now`, build `PromocodeValidationContext`, call `validatePromocode` — read-only, no insert, return `{success:true, data:{valid:true, discount: DiscountResult}}`) in `apps/api/src/routes/backoffice/promocodes/validate-promocode.ts`
+- [ ] T020 [US3] Create `handleValidatePromocode` handler (parse `validatePromocodeBodySchema`, load plan `billing_type` + student `division_id`/`group_id` — if student not found → return 404 `STUDENT_NOT_FOUND` before building context, fetch `server_now` via `SELECT NOW() AS now`, build `PromocodeValidationContext`, call `validatePromocode` — read-only, no insert, return `{success:true, data:{valid:true, discount: DiscountResult}}`) in `apps/api/src/routes/backoffice/promocodes/validate-promocode.ts`
 
 ---
 
@@ -158,7 +158,7 @@
 
 > Order of route registration is enforced: static routes `/analytics` and `/validate` MUST be registered before the parameterised `/:id` route.
 
-- [ ] T022 Create Hono promocodes router (register `/analytics` first, then `POST /validate` with `rateLimitMiddleware({max:10, window:'1m', key:'workspace'})`, then `GET /`, `POST /`, `GET /:id`, `POST /:id/deactivate`) in `apps/api/src/routes/backoffice/promocodes/index.ts`
+- [ ] T022 Create Hono promocodes router (register `/analytics` first, then `POST /validate` with inline `createRateLimiter()` check — `const isLimited = await validateRateLimiter.isLimited(\`validate-promo:${tenantId}\`, 10, 60)`→ 429 if limited, then`GET /`, `POST /`, `GET /:id`, `POST /:id/deactivate`) in `apps/api/src/routes/backoffice/promocodes/index.ts`
 - [ ] T023 Mount `promocodesRouter` under `/promocodes` in the backoffice router in `apps/api/src/routes/backoffice/index.ts`
 
 ---
@@ -178,10 +178,10 @@
 > All unit tests target pure functions; no DB connection required; all three test files are independent and can be written in parallel.
 
 - [ ] T026 [P] Create calculator unit tests (6 cases: PERCENTAGE 10% on 100 → discount=10 final=90; PERCENTAGE 100% clamped → final=0; FIXED 30 on 100 → discount=30 final=70; FIXED 200 > planPrice → final=0; FREE_TRIAL → final=0 free_trial_days returned; two sequential calls for stacking) in `packages/domain-core/src/promocodes/__tests__/promocodes.calculator.test.ts`
-- [ ] T027 [P] Create validator unit tests (13 cases: all checks pass; null code → PROMOCODE_NOT_FOUND; is_active=false → PROMOCODE_INACTIVE; server_now < valid_from → PROMOCODE_NOT_YET_VALID; server_now > valid_until → PROMOCODE_EXPIRED; usage limit hit → PROMOCODE_USAGE_LIMIT_REACHED; per-user limit hit → PROMOCODE_PER_USER_LIMIT_REACHED; plan not eligible → PROMOCODE_PLAN_NOT_ELIGIBLE; division targeting miss → PROMOCODE_STUDENT_NOT_IN_TARGET; group targeting miss → PROMOCODE_STUDENT_NOT_IN_TARGET; no targeting → pass; stacking fail → PROMOCODE_STACKING_NOT_ALLOWED; stackable → pass) in `packages/domain-core/src/promocodes/__tests__/promocodes.validator.test.ts`
+- [ ] T027 [P] Create validator unit tests (14 cases: all checks pass; null code → PROMOCODE_NOT_FOUND; is_active=false → PROMOCODE_INACTIVE; server_now < valid_from → PROMOCODE_NOT_YET_VALID; server_now > valid_until → PROMOCODE_EXPIRED; usage limit hit → PROMOCODE_USAGE_LIMIT_REACHED; per-user limit hit → PROMOCODE_PER_USER_LIMIT_REACHED; plan not eligible → PROMOCODE_PLAN_NOT_ELIGIBLE; division targeting miss → PROMOCODE_STUDENT_NOT_IN_TARGET; group targeting miss → PROMOCODE_STUDENT_NOT_IN_TARGET; no targeting → pass; stacking fail → PROMOCODE_STACKING_NOT_ALLOWED; stackable → pass; **Case 14:** FREE_TRIAL code + `context.plan_billing_type='one_time'` → `PROMOCODE_FREE_TRIAL_REQUIRES_RECURRING`) in `packages/domain-core/src/promocodes/__tests__/promocodes.validator.test.ts`
 - [ ] T028 [P] Create service unit tests with mocked repository (5 cases: `createPromocode` success returns PromocodeRow; duplicate code → PROMOCODE_CODE_ALREADY_EXISTS; `deactivatePromocode` idempotent second call → 200; `validatePromocode` integrates validator and repository mocks; `getAnalytics` returns correctly typed shape) in `packages/domain-core/src/promocodes/__tests__/promocodes.service.test.ts`
 
-**Phase 13 done when:** `bun run test packages/domain-core` exits 0 with all 24 unit test cases green
+**Phase 13 done when:** `bun run test packages/domain-core` exits 0 with all 25 unit test cases green
 
 ---
 
@@ -189,7 +189,7 @@
 
 > End-to-end API tests against a real tenant DB; covers all 8 endpoints + subscription integration + tenant isolation. Single file, must run after all implementation phases complete.
 
-- [ ] T029 Create integration test suite covering: `POST /promocodes` (201 success, 409 duplicate, 422 invalid body); `GET /promocodes` (list, filter by is_active/type/status/pagination); `GET /promocodes/:id` (200 with analytics, 404 not found); `POST /promocodes/:id/deactivate` (200 idempotent); `POST /promocodes/validate` (200 DiscountResult + 422 for all 7 failure checks + stacking fail + FREE_TRIAL billing_type fail); `GET /promocodes/analytics` (200 PromocodeAnalytics); `POST /subscriptions` with promo_code (usage recorded, discount correct, rollback on invalid promo, per-user limit, usage limit, targeting enforcement, stacking stackable, stacking non-stackable rejected, FREE_TRIAL expires_at, tenant isolation: code from tenant A unreachable in tenant B) in `apps/api/src/routes/backoffice/promocodes/__tests__/promocodes.routes.test.ts`
+- [ ] T029 Create integration test suite covering: `POST /promocodes` (201 success, 409 duplicate, 422 invalid body); `GET /promocodes` (list, filter by is_active/type/status/pagination); `GET /promocodes/:id` (200 with analytics, 404 not found); `POST /promocodes/:id/deactivate` (200 idempotent); `POST /promocodes/validate` (200 DiscountResult + 422 for all 7 failure checks + stacking fail + FREE_TRIAL billing_type fail; **concurrent redemption:** `Promise.all` 2 simultaneous requests on `usage_limit=1` code → exactly one 201 + one 422); `GET /promocodes/analytics` (200 PromocodeAnalytics); `POST /subscriptions` with promo_code (usage recorded, discount correct, rollback on invalid promo, per-user limit, usage limit, targeting enforcement, stacking stackable, stacking non-stackable rejected, FREE_TRIAL expires_at, tenant isolation: code from tenant A unreachable in tenant B); **RBAC:** non-admin token on `POST /backoffice/promocodes` → 403 in `apps/api/src/routes/backoffice/promocodes/__tests__/promocodes.routes.test.ts`
 
 **Phase 14 done when:** `bun run test apps/api` exits 0
 
@@ -202,7 +202,7 @@ Stage 45 is **DONE** when all of the following are true:
 - [ ] All 29 tasks checked
 - [ ] 23 new files exist and compile without error
 - [ ] 6 modified files pass typecheck
-- [ ] Unit tests: 24 test cases green (`packages/domain-core`)
+- [ ] Unit tests: 25 test cases green (`packages/domain-core`)
 - [ ] Integration tests: all endpoint + subscription + isolation cases green (`apps/api`)
 - [ ] Migration applies to a fresh tenant DB without error
 - [ ] `bun run lint && bun run typecheck && bun run test` exits 0

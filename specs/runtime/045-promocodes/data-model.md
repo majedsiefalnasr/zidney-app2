@@ -35,10 +35,10 @@
  *             ADR-0006 (server-authoritative time)
  */
 
-import type { PoolClient } from 'pg'
+import type { PoolClient } from "pg";
 
 export async function up(client: PoolClient): Promise<void> {
-  await client.query('BEGIN')
+  await client.query("BEGIN");
   try {
     // -------------------------------------------------------------------------
     // promocodes
@@ -92,20 +92,20 @@ export async function up(client: PoolClient): Promise<void> {
         CONSTRAINT promocodes_usage_limit_positive
           CHECK (usage_limit IS NULL OR usage_limit >= 1)
       )
-    `)
+    `);
 
-    -- Case-insensitive unique code per tenant DB
+    // Case-insensitive unique code per tenant DB
     await client.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_promocodes_code_lower
         ON promocodes (LOWER(code))
-    `)
+    `);
 
-    -- Fast lookup for active codes within validity window
+    // Fast lookup for active codes within validity window
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_promocodes_active
         ON promocodes (is_active, valid_from, valid_until)
         WHERE is_active = TRUE
-    `)
+    `);
 
     // -------------------------------------------------------------------------
     // promocode_usages
@@ -122,25 +122,25 @@ export async function up(client: PoolClient): Promise<void> {
         CONSTRAINT promocode_usages_discount_non_negative
           CHECK (discount_amount >= 0)
       )
-    `)
+    `);
 
-    -- Deduplication: one usage per (promocode, subscription) pair
+    // Deduplication: one usage per (promocode, subscription) pair
     await client.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_promocode_usages_subscription
         ON promocode_usages (promocode_id, subscription_id)
-    `)
+    `);
 
-    -- Usage count for global limit enforcement
+    // Usage count for global limit enforcement
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_promocode_usages_promocode
         ON promocode_usages (promocode_id)
-    `)
+    `);
 
-    -- Usage count for per-user limit enforcement
+    // Usage count for per-user limit enforcement
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_promocode_usages_student_promocode
         ON promocode_usages (student_id, promocode_id)
-    `)
+    `);
 
     // -------------------------------------------------------------------------
     // schema_version bump
@@ -148,12 +148,12 @@ export async function up(client: PoolClient): Promise<void> {
     await client.query(`
       UPDATE schema_versions SET version = 24, updated_at = NOW()
         WHERE id = 1
-    `)
+    `);
 
-    await client.query('COMMIT')
+    await client.query("COMMIT");
   } catch (err) {
-    await client.query('ROLLBACK')
-    throw err
+    await client.query("ROLLBACK");
+    throw err;
   }
 }
 
