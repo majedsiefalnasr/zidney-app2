@@ -113,7 +113,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run both source and test TypeScript checks.
   - Flags: none baked into this runner. You can append more args with `bun run typecheck -- <args>` only if the underlying tool supports them.
-- Depends on: `typecheck:tests`, `typecheck:src`
+- Depends on: `typecheck:src`, `typecheck:tests`
 - Used by other root scripts: `typecheck:tests`, `validate:types`
 - Used in:
   - Workflows: None found
@@ -151,7 +151,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flag `-p tsconfig.test.json`: Pass an alternate TypeScript project file. Value: tsconfig.test.json.
-- Depends on: `typecheck:src`, `typecheck`
+- Depends on: `typecheck`, `typecheck:src`
 - Used by other root scripts: `typecheck`
 - Used in:
   - Workflows: .github/workflows/ci-type-safety.yml:41, .github/workflows/ci.yml:111
@@ -251,7 +251,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `build:packages`
 - Used in:
   - Workflows: .github/workflows/ci.yml:718
-  - Other files: apps/api/package.json:8, apps/worker/package.json:8, package.json:21, packages/api-client/package.json:12, packages/domain-core/package.json:41, packages/job-queue/package.json:24, packages/logger/package.json:31, packages/redis-utils/package.json:14, packages/types/package.json:8, packages/validation/package.json:8, scripts/validate/detect-broken-scripts.ts:46, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:232, +9 more
+  - Other files: apps/api/package.json:8, apps/worker/package.json:8, package.json:21, packages/api-client/package.json:12, packages/domain-core/package.json:43, packages/job-queue/package.json:24, packages/logger/package.json:31, packages/redis-utils/package.json:14, packages/types/package.json:8, packages/validation/package.json:8, scripts/validate/detect-broken-scripts.ts:46, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:232, +9 more
 - Updated or generated files: Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: build:packages.
 
@@ -388,7 +388,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `ai:context:validate`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:103, scripts/generate/**tests**/package-docs.test.ts:39, scripts/validate/**tests**/runtime-scripts.test.ts:28, scripts/validate/ai-context-fresh.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:38
+  - Other files: package.json:103, reports/package-script-audit.json:6, scripts/generate/**tests**/package-docs.test.ts:39, scripts/validate/**tests**/runtime-scripts.test.ts:28, scripts/validate/ai-context-fresh.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:38
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: ai:context:validate.
 
@@ -408,7 +408,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `ai:context:validate`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:103, scripts/generate/**tests**/package-docs.test.ts:39, scripts/validate/ai-context-schemas.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:38
+  - Other files: package.json:103, reports/package-script-audit.json:15, scripts/generate/**tests**/package-docs.test.ts:39, scripts/validate/ai-context-schemas.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:38
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: ai:context:validate.
 
@@ -428,8 +428,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/validate/orchestrator-handoffs.ts:8
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:24, scripts/validate/orchestrator-handoffs.ts:8
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### validate:scripts:all
@@ -448,8 +448,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:71
-  - Other files: docs/reports/script-refactor-report.json:128, docs/reports/script-refactor-report.json:133, docs/reports/script-refactor-report.json:138, docs/reports/script-refactor-report.json:143, docs/reports/script-refactor-report.json:213, docs/reports/script-refactor-report.json:218, docs/reports/script-refactor-report.json:223, docs/reports/script-refactor-report.json:228, docs/scripts/migration-map.json:90, scripts/policy-engine/adapters/script-governance.adapter.ts:4, scripts/policy-engine/adapters/script-governance.adapter.ts:53, scripts/validate/detect-broken-scripts.ts:8, +2 more
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: docs/reports/script-refactor-report.json:128, docs/reports/script-refactor-report.json:133, docs/reports/script-refactor-report.json:138, docs/reports/script-refactor-report.json:143, docs/reports/script-refactor-report.json:213, docs/reports/script-refactor-report.json:218, docs/reports/script-refactor-report.json:223, docs/reports/script-refactor-report.json:228, docs/scripts/migration-map.json:90, reports/package-script-audit.json:33, scripts/policy-engine/adapters/script-governance.adapter.ts:4, scripts/policy-engine/adapters/script-governance.adapter.ts:53, +3 more
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### validate:scripts:fast
@@ -468,8 +468,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: docs/scripts/migration-map.json:94
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: docs/scripts/migration-map.json:94, reports/package-script-audit.json:42
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### validate:scripts:naming
@@ -488,7 +488,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:161
-  - Other files: scripts/validate/**tests**/script-usage.test.ts:124, scripts/validate/**tests**/script-usage.test.ts:51, scripts/validate/script-naming.ts:12, scripts/validate/types.ts:11, scripts/validate/types.ts:42
+  - Other files: reports/package-script-audit.json:51, scripts/validate/**tests**/script-usage.test.ts:124, scripts/validate/**tests**/script-usage.test.ts:51, scripts/validate/script-naming.ts:12, scripts/validate/types.ts:11, scripts/validate/types.ts:42
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
@@ -508,7 +508,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:165
-  - Other files: scripts/validate/script-usage.ts:11
+  - Other files: reports/package-script-audit.json:60, scripts/validate/script-usage.ts:11
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
@@ -528,7 +528,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:169
-  - Other files: scripts/validate/script-infrastructure.ts:11
+  - Other files: reports/package-script-audit.json:69, scripts/validate/script-infrastructure.ts:11
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
@@ -548,8 +548,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/validate/spec-sync.ts:10
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:78, scripts/validate/spec-sync.ts:10
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### validate:scripts:docs-drift
@@ -568,8 +568,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/validate/docs-drift.ts:10
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:87, scripts/validate/docs-drift.ts:10
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### validate:scripts:ux
@@ -588,7 +588,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ci.yml:216
-  - Other files: scripts/validate/validate-scripts-ux.ts:8
+  - Other files: reports/package-script-audit.json:96, scripts/validate/validate-scripts-ux.ts:8
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
 
@@ -608,7 +608,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/validate/scan-package-scripts.ts:8
+  - Other files: reports/package-script-audit.json:105, scripts/validate/scan-package-scripts.ts:8
 - Updated or generated files: Observed in isolated worktree run: specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/runtime-script-scan.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
@@ -647,8 +647,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/architecture/add-module.ts:31, scripts/architecture/add-module.ts:8, scripts/infra-audit.ts:2238
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:116, scripts/architecture/add-module.ts:31, scripts/architecture/add-module.ts:8, scripts/infra-audit.ts:2127
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run arch:add-module -- --ci` exited non-zero before tracked file changes were observed. Output note: error: script "arch:add-module" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:audit
@@ -664,12 +664,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Primary purpose: Monorepo governance scanner — audits Vitest, ESLint, Playwright, import boundaries, and outputs infra-audit-report.json.
   - Flags: none baked into this runner. You can append more args with `bun run arch:audit -- <args>` only if the underlying tool supports them.
 - Depends on: None
-- Used by other root scripts: `arch:governance`, `arch:governance:fix`
+- Used by other root scripts: `arch:governance`, `arch:governance:fix`, `arch:guard`, `arch:guard:changed`, `arch:guard:ci`
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:59
-  - Other files: docs/scripts/migration-map.json:82, docs/scripts/migration-map.json:86, package.json:48, package.json:49, scripts/ai-engine/**tests**/run-task.test.ts:197, scripts/ai-engine/**tests**/stale-check.test.ts:169, scripts/ai-engine/**tests**/stale-check.test.ts:91, scripts/ai-engine/**tests**/validate-execution.test.ts:152, scripts/ai-engine/stale-check.ts:44, scripts/ai-engine/stale-check.ts:54, scripts/ai-guard.ts:916, scripts/architecture-guard/hooks/generate-context.ts:5, +10 more
-- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json, docs/architecture/audits/history/audit-1774722803158.json.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: arch:governance, arch:governance:fix.
+  - Other files: docs/scripts/migration-map.json:82, docs/scripts/migration-map.json:86, package.json:48, package.json:49, reports/package-script-audit.json:125, scripts/ai-engine/**tests**/run-task.test.ts:197, scripts/ai-engine/**tests**/stale-check.test.ts:169, scripts/ai-engine/**tests**/stale-check.test.ts:91, scripts/ai-engine/**tests**/validate-execution.test.ts:152, scripts/ai-engine/stale-check.ts:44, scripts/ai-engine/stale-check.ts:54, scripts/architecture-guard/hooks/generate-context.ts:17, +10 more
+- Updated or generated files: Observed in isolated worktree run: docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: arch:governance, arch:governance:fix, arch:guard, arch:guard:changed, arch:guard:ci.
 
 ### arch:check:store-cycles
 
@@ -687,7 +687,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/check-store-cycles.ts:16, scripts/check-store-cycles.ts:19, scripts/check-store-cycles.ts:8
+  - Other files: reports/package-script-audit.json:142, scripts/check-store-cycles.ts:16, scripts/check-store-cycles.ts:19, scripts/check-store-cycles.ts:8
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
@@ -707,7 +707,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:43
-  - Other files: scripts/context/build.ts:11, scripts/context/impact.ts:76, scripts/context/validate.ts:106, scripts/context/validate.ts:50
+  - Other files: reports/package-script-audit.json:151, scripts/context/build.ts:11, scripts/context/impact.ts:76, scripts/context/validate.ts:106, scripts/context/validate.ts:50
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
@@ -727,7 +727,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `governance:gate:changed`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:124, scripts/context/changed.ts:12, scripts/validate/**tests**/script-usage.test.ts:187, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:461
+  - Other files: package.json:124, reports/package-script-audit.json:160, scripts/context/changed.ts:12, scripts/validate/**tests**/script-usage.test.ts:187, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:461
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: governance:gate:changed.
 
@@ -747,7 +747,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/context/impact.ts:18
+  - Other files: reports/package-script-audit.json:169, scripts/context/impact.ts:18
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
@@ -767,7 +767,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:43
-  - Other files: scripts/context/validate.ts:17
+  - Other files: reports/package-script-audit.json:178, scripts/context/validate.ts:17
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
@@ -787,7 +787,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:63
-  - Other files: scripts/architecture-diff.ts:8
+  - Other files: reports/package-script-audit.json:187, scripts/architecture-diff.ts:8
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
@@ -807,8 +807,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `ai:context:refresh-all`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:102, scripts/ai-runtime/runtime-status.ts:241, scripts/architecture/generate-architecture-map.ts:8, scripts/architecture/visualize.ts:299
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: package.json:102, reports/package-script-audit.json:196, scripts/ai-runtime/runtime-status.ts:241, scripts/architecture/generate-architecture-map.ts:8, scripts/architecture/visualize.ts:299
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: ai:context:refresh-all.
 
 ### arch:governance
@@ -822,7 +822,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run arch:governance -- <args>` only if the underlying tool supports them.
-- Depends on: `arch:gitnexus:context`, `arch:audit`
+- Depends on: `arch:audit`, `arch:gitnexus:context`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
@@ -865,7 +865,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `arch:governance`, `ai:context:refresh-all`
 - Used in:
   - Workflows: None found
-  - Other files: docs/scripts/migration-map.json:82, package.json:102, package.json:48, scripts/gitnexus-context.ts:15, scripts/gitnexus-context.ts:16, scripts/gitnexus-context.ts:17, scripts/gitnexus-context.ts:18, scripts/gitnexus-context.ts:9, scripts/policy-engine/context/loader.ts:108, scripts/policy-engine/context/loader.ts:140, scripts/policy-engine/context/loader.ts:94, scripts/policy-engine/rules/ai/AI-001.rule.ts:56, +3 more
+  - Other files: docs/scripts/migration-map.json:82, package.json:102, package.json:48, reports/package-script-audit.json:205, scripts/gitnexus-context.ts:15, scripts/gitnexus-context.ts:16, scripts/gitnexus-context.ts:17, scripts/gitnexus-context.ts:18, scripts/gitnexus-context.ts:9, scripts/policy-engine/context/loader.ts:108, scripts/policy-engine/context/loader.ts:140, scripts/policy-engine/context/loader.ts:94, +4 more
 - Updated or generated files: Observed in isolated worktree run: docs/ai/context/gitnexus-context.json.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: arch:governance, ai:context:refresh-all.
 
@@ -885,7 +885,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/validate/validate-gitnexus.ts:8
+  - Other files: reports/package-script-audit.json:216, scripts/validate/validate-gitnexus.ts:8
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
@@ -901,11 +901,11 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run arch:guard -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:refresh`, `arch:audit`, `arch:validate:brain`
 - Used by other root scripts: `governance:gate:changed`
 - Used in:
   - Workflows: .github/workflows/ci.yml:146
-  - Other files: reports/package-script-audit.json:15, scripts/ai-engine/plan-task.ts:130, scripts/architecture-guard/architecture-guard.ts:8, scripts/dev/hygiene-checks/arch-guard-check.ts:3, scripts/generate/**tests**/script-docs.test.ts:167, scripts/generate/**tests**/script-docs.test.ts:172, scripts/policy-engine/adapters/architecture-guard.adapter.ts:4, scripts/policy-engine/adapters/architecture-guard.adapter.ts:49, tests/unit/policy-engine/adapters/architecture-guard.adapter.test.ts:36
+  - Other files: reports/package-script-audit.json:225, scripts/ai-engine/plan-task.ts:130, scripts/architecture-guard/architecture-guard.ts:8, scripts/dev/hygiene-checks/arch-guard-check.ts:3, scripts/generate/**tests**/script-docs.test.ts:167, scripts/generate/**tests**/script-docs.test.ts:172, scripts/policy-engine/adapters/architecture-guard.adapter.ts:4, scripts/policy-engine/adapters/architecture-guard.adapter.ts:49, tests/unit/policy-engine/adapters/architecture-guard.adapter.test.ts:36
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: governance:gate:changed.
 
@@ -921,12 +921,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flag `--changed`: Restrict processing to changed files.
-- Depends on: None
+- Depends on: `ai:context:refresh`, `arch:audit`, `arch:validate:brain`
 - Used by other root scripts: `governance:gate:changed`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:124, scripts/policy-engine/adapters/architecture-guard.adapter.ts:48, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:461
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: package.json:124, reports/package-script-audit.json:234, scripts/policy-engine/adapters/architecture-guard.adapter.ts:48, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:461
+- Updated or generated files: Observed in isolated worktree run: all generated files are attributed to dependency scripts.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: governance:gate:changed.
 
 ### arch:guard:ci
@@ -941,12 +941,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flag `--ci`: Enable CI-oriented behavior and reporting.
-- Depends on: None
+- Depends on: `ai:context:refresh`, `arch:audit`, `arch:validate:brain`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: reports/package-script-audit.json:24
-- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
+  - Other files: reports/package-script-audit.json:258
+- Updated or generated files: Observed in isolated worktree run: all generated files are attributed to dependency scripts.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:health
@@ -965,8 +965,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/architecture-health/architecture-health.ts:8, scripts/dev/hygiene-checks/arch-guard-check.ts:3, scripts/dev/repo-status.ts:89
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:282, scripts/architecture-health/architecture-health.ts:8, scripts/dev/hygiene-checks/arch-guard-check.ts:3, scripts/dev/repo-status.ts:89
+- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/health/architecture-drift-report.md, docs/architecture/health/architecture-health-summary.md, docs/architecture/health/architecture-health.json, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:health:benchmark
@@ -985,8 +985,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/architecture-health/benchmark.ts:8
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:309, scripts/architecture-health/benchmark.ts:8
+- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### arch:health:ci
@@ -1005,8 +1005,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:67
-  - Other files: tests/static/07-architecture-health-governance.test.ts:32
-- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/health/architecture-drift-report.md, docs/architecture/health/architecture-health-summary.md, docs/architecture/health/architecture-health.json, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json, docs/architecture/audits/history/audit-1774722807886.json.
+  - Other files: reports/package-script-audit.json:333, tests/static/07-architecture-health-governance.test.ts:32
+- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/health/architecture-drift-report.md, docs/architecture/health/architecture-health-summary.md, docs/architecture/health/architecture-health.json, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### arch:type-safety-guard
@@ -1025,7 +1025,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: `validate:types`
 - Used in:
   - Workflows: None found
-  - Other files: package.json:24, scripts/policy-engine/adapters/type-safety.adapter.ts:105, scripts/policy-engine/adapters/type-safety.adapter.ts:122, scripts/policy-engine/adapters/type-safety.adapter.ts:153, scripts/policy-engine/adapters/type-safety.adapter.ts:160, scripts/policy-engine/adapters/type-safety.adapter.ts:4, scripts/type-safety-guard.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:761
+  - Other files: package.json:24, reports/package-script-audit.json:360, scripts/policy-engine/adapters/type-safety.adapter.ts:105, scripts/policy-engine/adapters/type-safety.adapter.ts:122, scripts/policy-engine/adapters/type-safety.adapter.ts:153, scripts/policy-engine/adapters/type-safety.adapter.ts:160, scripts/policy-engine/adapters/type-safety.adapter.ts:4, scripts/type-safety-guard.ts:8, specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/script-registry-diff.json:761
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Not safe to remove directly. Other root scripts depend on it: validate:types.
 
@@ -1042,12 +1042,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run arch:validate:brain -- <args>` only if the underlying tool supports them.
 - Depends on: None
-- Used by other root scripts: None found
+- Used by other root scripts: `arch:guard`, `arch:guard:changed`, `arch:guard:ci`
 - Used in:
   - Workflows: None found
-  - Other files: docs/architecture/health/architecture-health.json:180, docs/architecture/health/history/health-2026-03-12T22-54-01-012Z.json:131, docs/architecture/health/history/health-2026-03-15T23-26-58-848Z.json:180, docs/architecture/health/history/health-2026-03-20T21-25-38-263Z.json:418, docs/architecture/health/history/health-2026-03-20T21-25-56-943Z.json:180, docs/architecture/health/history/health-2026-03-25T11-56-09-458Z.json:418, docs/architecture/health/history/health-2026-03-25T11-56-10-315Z.json:180, docs/architecture/health/history/health-2026-04-02T17-49-09-903Z.json:197, scripts/ai-runtime/runtime-status.ts:232, scripts/ai-runtime/runtime-status.ts:250, scripts/architecture-guard/hooks/validate-brain.ts:42, scripts/architecture-health/collectors/validation-governance.ts:52, +3 more
-- Updated or generated files: Not audited automatically in the isolated execution pass.
-- Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
+  - Other files: docs/architecture/health/architecture-health.json:180, docs/architecture/health/history/health-2026-03-12T22-54-01-012Z.json:131, docs/architecture/health/history/health-2026-03-15T23-26-58-848Z.json:180, docs/architecture/health/history/health-2026-03-20T21-25-38-263Z.json:418, docs/architecture/health/history/health-2026-03-20T21-25-56-943Z.json:180, docs/architecture/health/history/health-2026-03-25T11-56-09-458Z.json:418, docs/architecture/health/history/health-2026-03-25T11-56-10-315Z.json:180, docs/architecture/health/history/health-2026-04-02T17-49-09-903Z.json:197, reports/package-script-audit.json:369, scripts/ai-runtime/runtime-status.ts:232, scripts/ai-runtime/runtime-status.ts:250, scripts/architecture-guard/hooks/validate-brain.ts:65, +4 more
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: arch:guard, arch:guard:changed, arch:guard:ci.
 
 ### arch:visualize
 
@@ -1065,7 +1065,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/architecture/visualize.ts:256, scripts/architecture/visualize.ts:8, tests/static/06-architecture-visualization.test.ts:31, tests/static/06-architecture-visualization.test.ts:41, tests/static/06-architecture-visualization.test.ts:46, tests/static/06-architecture-visualization.test.ts:5, tests/static/06-architecture-visualization.test.ts:51, tests/static/06-architecture-visualization.test.ts:54, tests/static/06-architecture-visualization.test.ts:9
+  - Other files: reports/package-script-audit.json:378, scripts/architecture/visualize.ts:256, scripts/architecture/visualize.ts:8, tests/static/06-architecture-visualization.test.ts:31, tests/static/06-architecture-visualization.test.ts:41, tests/static/06-architecture-visualization.test.ts:46, tests/static/06-architecture-visualization.test.ts:5, tests/static/06-architecture-visualization.test.ts:51, tests/static/06-architecture-visualization.test.ts:54, tests/static/06-architecture-visualization.test.ts:9
 - Updated or generated files: Observed in isolated worktree run: docs/architecture/visualization/README.md.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
@@ -1137,7 +1137,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run test:e2e -- <args>` only if the underlying tool supports them.
-- Depends on: `test:e2e:frontoffice`, `test:e2e:backoffice`, `test:e2e:mmc`, `test`
+- Depends on: `test`, `test:e2e:backoffice`, `test:e2e:frontoffice`, `test:e2e:mmc`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
@@ -1396,7 +1396,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Start multiple long-running development services in parallel.
   - Flags: none baked into this runner. You can append more args with `bun run dev:all -- <args>` only if the underlying tool supports them.
-- Depends on: `dev:frontoffice`, `dev:backoffice`, `dev:worker`, `dev:api`, `dev:mmc`, `dev`
+- Depends on: `dev`, `dev:api`, `dev:backoffice`, `dev:frontoffice`, `dev:mmc`, `dev:worker`
 - Used by other root scripts: `dev`
 - Used in:
   - Workflows: None found
@@ -1416,12 +1416,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Measure key repository directory sizes and highlight the largest contributors to repository bloat.
   - Flags: none baked into this runner. You can append more args with `bun run dev:analyze:directory-sizes -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/analyze-directory-sizes.ts:9
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:389, scripts/dev/analyze-directory-sizes.ts:9
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:analyze:file-sizes
@@ -1436,12 +1436,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Analyze repository files by size and line count to identify oversized files that need optimization.
   - Flags: none baked into this runner. You can append more args with `bun run dev:analyze:file-sizes -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/analyze-file-sizes.ts:9
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:398, scripts/dev/analyze-file-sizes.ts:9
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run dev:analyze:file-sizes` exited non-zero before tracked file changes were observed. Output note: │ Failed 278 (100%) │ error: script "dev:analyze:file-sizes" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:api
@@ -1494,12 +1494,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Benchmark CI pipeline duration assumptions, generate markdown performance reports, and write a dashboard snapshot.
   - Flags: none baked into this runner. You can append more args with `bun run dev:benchmark:ci -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/benchmark-ci-duration.ts:8
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:407, scripts/dev/benchmark-ci-duration.ts:8
+- Updated or generated files: Observed in isolated worktree run: docs/reports/CI_PERFORMANCE_DASHBOARD.md, docs/reports/CI_PERFORMANCE_REPORT.md.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:demo:logger
@@ -1514,12 +1514,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Demonstrates all available logger customization options and features
   - Flags: none baked into this runner. You can append more args with `bun run dev:demo:logger -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/demo-logger-features.ts:8
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:419, scripts/dev/demo-logger-features.ts:8
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:deps:verify
@@ -1534,12 +1534,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Scan the codebase for dependency usage patterns and produce a conservative unused-dependency candidate report.
   - Flags: none baked into this runner. You can append more args with `bun run dev:deps:verify -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/verify-dependency-usage.ts:9
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:428, scripts/dev/verify-dependency-usage.ts:9
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:frontoffice
@@ -1577,8 +1577,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/generate/package-docs.ts:8, scripts/generate/package-docs.ts:917
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:437, scripts/generate/package-docs.ts:1050, scripts/generate/package-docs.ts:8
+- Updated or generated files: Observed in isolated worktree run: package.md.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:generate:script-docs
@@ -1597,8 +1597,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:173
-  - Other files: scripts/generate/**tests**/script-docs.test.ts:25, scripts/generate/**tests**/script-docs.test.ts:94, scripts/generate/**tests**/script-docs.test.ts:99, scripts/generate/script-docs.ts:11, scripts/generate/script-docs.ts:533, scripts/generate/script-docs.ts:574, scripts/generate/script-docs.ts:794, scripts/validate/docs-drift.ts:155, scripts/validate/script-infrastructure.ts:147, scripts/validate/script-infrastructure.ts:205
-- Updated or generated files: Observed in isolated worktree run: docs/scripts/SCRIPT_REGISTRY.md.
+  - Other files: reports/package-script-audit.json:448, scripts/generate/**tests**/script-docs.test.ts:25, scripts/generate/**tests**/script-docs.test.ts:94, scripts/generate/**tests**/script-docs.test.ts:99, scripts/generate/script-docs.ts:11, scripts/generate/script-docs.ts:533, scripts/generate/script-docs.ts:574, scripts/generate/script-docs.ts:794, scripts/validate/docs-drift.ts:155, scripts/validate/script-infrastructure.ts:147, scripts/validate/script-infrastructure.ts:205
+- Updated or generated files: Observed in isolated worktree run: docs/scripts/ai-context-refresh-all.md, docs/scripts/ai-context-refresh.md, docs/scripts/ai-context-validate.md, docs/scripts/arch-fix.md, docs/scripts/arch-generate.md, docs/scripts/arch-refresh.md, docs/scripts/build-api.md, docs/scripts/build-packages.md, docs/scripts/build.md, docs/scripts/ci-local-dry.md, docs/scripts/ci-local-full.md, docs/scripts/ci-local-job.md, docs/scripts/ci-local-list.md, docs/scripts/ci-local-workflow.md, docs/scripts/ci-local.md, docs/scripts/ci-smoke-staging.md, docs/scripts/ci-test.md, docs/scripts/dev-all.md, docs/scripts/dev-api.md, docs/scripts/dev-backoffice.md, docs/scripts/dev-frontoffice.md, docs/scripts/dev-infra.md, docs/scripts/dev-mmc.md, docs/scripts/dev-worker.md, docs/scripts/dev.md, docs/scripts/format-check-biome.md, docs/scripts/format.md, docs/scripts/gitnexus-context.md, docs/scripts/governance-gate-changed.md, docs/scripts/lint-fix.md, docs/scripts/lint.md, docs/scripts/prepare.md, docs/scripts/README.md, docs/scripts/SCRIPT_REGISTRY.md, docs/scripts/test-coverage.md, docs/scripts/test-e2e-backoffice.md, docs/scripts/test-e2e-frontoffice.md, docs/scripts/test-e2e-mmc.md, docs/scripts/test-e2e.md, docs/scripts/test-integration.md, docs/scripts/test-migrations.md, docs/scripts/test-performance.md, docs/scripts/test-static.md, docs/scripts/test-tenant.md, docs/scripts/test-unit-boundaries.md, docs/scripts/test-unit.md, docs/scripts/test.md, docs/scripts/typecheck-src.md, docs/scripts/typecheck-tests.md, docs/scripts/typecheck.md, docs/scripts/validate-orchestrator-handoffs.md, docs/scripts/validate-tsconfig.md, docs/scripts/validate-types.md, docs/scripts/validate-workflows.md.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### dev:hygiene:report
@@ -1613,12 +1613,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run dev:hygiene:report -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/hygiene-report-generator.ts:8
-- Updated or generated files: Isolated worktree run failed before any tracked file changes were observed.
+  - Other files: reports/package-script-audit.json:512, scripts/dev/hygiene-report-generator.ts:8
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run dev:hygiene:report -- --ci` exited non-zero before tracked file changes were observed. Output note: ReferenceError: ROOT is not defined error: script "dev:hygiene:report" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:infra
@@ -1671,12 +1671,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Profile governance script execution times across repeated runs to establish a performance baseline.
   - Flags: none baked into this runner. You can append more args with `bun run dev:profile:scripts -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/profile-script-performance.ts:9
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:521, scripts/dev/profile-script-performance.ts:9
+- Updated or generated files: Observed in isolated worktree run: docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:refactor:scripts
@@ -1691,7 +1691,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Applies the SCRIPT_MIGRATION_MAP to rename all "bun run <old>" references across the repository. Reads docs/scripts/SCRIPT_MIGRATION_MAP.md, builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain after the run. Writes a summary report to reports/SCRIPT_REFACTOR_REPORT.md.
   - Flags: none baked into this runner. You can append more args with `bun run dev:refactor:scripts -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
@@ -1711,12 +1711,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Generate a consolidated baseline diagnostics report for Phase 1 analysis and write it to docs/audit-reports.
   - Flags: none baked into this runner. You can append more args with `bun run dev:report:baseline -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/generate-baseline-report.ts:9
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:538, scripts/dev/generate-baseline-report.ts:9
+- Updated or generated files: Observed in isolated worktree run: docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:seed:dashboard-test-data
@@ -1751,12 +1751,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Measure cross-file duplication within the scripts directory and validate that modularization stays within the target threshold.
   - Flags: none baked into this runner. You can append more args with `bun run dev:validate:script-duplication -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/validate-script-duplication.ts:9
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:555, scripts/dev/validate-script-duplication.ts:9
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run dev:validate:script-duplication` exited non-zero before tracked file changes were observed. Output note: ✖ FAIL: Script duplication at 31.43% exceeds target (<5%) error: script "dev:validate:script-duplication" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:worker
@@ -1790,12 +1790,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Maintain a rolling archive of historical AI context snapshots, keeping the latest artifacts live and archiving older ones with indexes.
   - Flags: none baked into this runner. You can append more args with `bun run dev:ai:archive-snapshots -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/archive-snapshot-strategy.ts:8
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:564, scripts/dev/archive-snapshot-strategy.ts:8
+- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ARCHIVE_INDEX.md, docs/ai/context/archive/INDEX.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### dev:ai:context-artifacts
@@ -1810,12 +1810,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Analyze AI context artifacts for size, compression, and redundancy to identify Phase 3 optimization opportunities.
   - Flags: none baked into this runner. You can append more args with `bun run dev:ai:context-artifacts -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/analyze-ai-context-artifacts.ts:9
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:576, scripts/dev/analyze-ai-context-artifacts.ts:9
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### \_ai
@@ -1850,12 +1850,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Primary purpose: Generate AI context artifacts (architecture brain, module map, dependency graph). Supports incremental (default), forced, and validate-after-generation modes.
   - Flags: none baked into this runner. You can append more args with `bun run ai:context:generate -- <args>` only if the underlying tool supports them.
 - Depends on: None
-- Used by other root scripts: None found
+- Used by other root scripts: `dev:analyze:directory-sizes`, `dev:analyze:file-sizes`, `dev:benchmark:ci`, `dev:demo:logger`, `dev:deps:verify`, `dev:hygiene:report`, `dev:profile:scripts`, `dev:refactor:scripts`, `dev:report:baseline`, `dev:validate:script-duplication`, `dev:ai:archive-snapshots`, `dev:ai:context-artifacts`, `repo:doctor`, `repo:fix`, `repo:onboard`, `repo:status`, `refactor-scripts`
 - Used in:
   - Workflows: .github/workflows/ai-context-validation.yml:53, .github/workflows/ai-context-validation.yml:83
-  - Other files: scripts/ai-engine/**tests**/context-loader.test.ts:39, scripts/ai-engine/**tests**/context-loader.test.ts:43, scripts/ai-engine/**tests**/plan-task.test.ts:237, scripts/ai-engine/**tests**/run-task.test.ts:245, scripts/ai-engine/context-loader.ts:25, scripts/dev/benchmark-ai-context-warm.ts:74, scripts/dev/generate-ai-context.ts:7, scripts/dev/generate-ai-context.ts:8, scripts/dev/generate-ai-context.ts:9, scripts/generate-ai-context.ts:14, scripts/generate-ai-context.ts:15, scripts/generate-ai-context.ts:16, +3 more
+  - Other files: reports/package-script-audit.json:585, scripts/ai-engine/**tests**/context-loader.test.ts:39, scripts/ai-engine/**tests**/context-loader.test.ts:43, scripts/ai-engine/**tests**/plan-task.test.ts:237, scripts/ai-engine/**tests**/run-task.test.ts:245, scripts/ai-engine/context-loader.ts:25, scripts/dev/benchmark-ai-context-warm.ts:74, scripts/dev/generate-ai-context.ts:7, scripts/dev/generate-ai-context.ts:8, scripts/dev/generate-ai-context.ts:9, scripts/generate-ai-context.ts:14, scripts/generate-ai-context.ts:15, +5 more
 - Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json.
-- Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ai-context-validation.yml.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: dev:analyze:directory-sizes, dev:analyze:file-sizes, dev:benchmark:ci, dev:demo:logger, dev:deps:verify, dev:hygiene:report, dev:profile:scripts, dev:refactor:scripts, dev:report:baseline, dev:validate:script-duplication, dev:ai:archive-snapshots, dev:ai:context-artifacts, repo:doctor, repo:fix, repo:onboard, repo:status, refactor-scripts.
 
 ### ai:context:refresh
 
@@ -1870,12 +1870,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
   - Primary purpose: Generate AI context artifacts (architecture brain, module map, dependency graph). Supports incremental (default), forced, and validate-after-generation modes.
   - Flag `--force`: Bypass freshness checks and force regeneration.
 - Depends on: None
-- Used by other root scripts: `ai:context:refresh-all`
+- Used by other root scripts: `arch:guard`, `arch:guard:changed`, `arch:guard:ci`, `dev:analyze:directory-sizes`, `dev:analyze:file-sizes`, `dev:benchmark:ci`, `dev:demo:logger`, `dev:deps:verify`, `dev:hygiene:report`, `dev:profile:scripts`, `dev:refactor:scripts`, `dev:report:baseline`, `dev:validate:script-duplication`, `dev:ai:archive-snapshots`, `dev:ai:context-artifacts`, `ai:context:refresh-all`, `ai:guard`, `repo:doctor`, `repo:fix`, `repo:onboard`, `repo:status`, `refactor-scripts`
 - Used in:
   - Workflows: .github/workflows/ai-context-validation.yml:63, .github/workflows/ci.yml:150
-  - Other files: docs/ci-cd-integration/CACHE_WORKFLOW_EXAMPLE.yml:28, package.json:102, scripts/ai-runtime/runtime-status.ts:112, scripts/ai-runtime/runtime-status.ts:84, scripts/ai-runtime/runtime-status.ts:98, scripts/architecture-guard/hooks/generate-context.ts:10, scripts/dev/benchmark-ai-context-cold.ts:57, scripts/dev/benchmark-ai-context-warm.ts:55, scripts/validate/ai-context-fresh.ts:66, tests/unit/ai-runtime/runtime-status.test.ts:70, tests/unit/ai-runtime/runtime-status.test.ts:97
+  - Other files: docs/ci-cd-integration/CACHE_WORKFLOW_EXAMPLE.yml:28, package.json:102, reports/package-script-audit.json:602, scripts/ai-guard.ts:916, scripts/ai-runtime/runtime-status.ts:112, scripts/ai-runtime/runtime-status.ts:84, scripts/ai-runtime/runtime-status.ts:98, scripts/architecture-guard/hooks/generate-context.ts:22, scripts/dev/benchmark-ai-context-cold.ts:57, scripts/dev/benchmark-ai-context-warm.ts:55, scripts/validate/ai-context-fresh.ts:66, tests/unit/ai-runtime/runtime-status.test.ts:70, +1 more
 - Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json.
-- Removal assessment: Not safe to remove directly. Other root scripts depend on it: ai:context:refresh-all.
+- Removal assessment: Not safe to remove directly. Other root scripts depend on it: arch:guard, arch:guard:changed, arch:guard:ci, dev:analyze:directory-sizes, dev:analyze:file-sizes, dev:benchmark:ci, dev:demo:logger, dev:deps:verify, dev:hygiene:report, dev:profile:scripts, dev:refactor:scripts, dev:report:baseline, dev:validate:script-duplication, dev:ai:archive-snapshots, dev:ai:context-artifacts, ai:context:refresh-all, ai:guard, repo:doctor, repo:fix, repo:onboard, repo:status, refactor-scripts.
 
 ### ai:context:refresh-all
 
@@ -1888,7 +1888,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run ai:context:refresh-all -- <args>` only if the underlying tool supports them.
-- Depends on: `arch:gitnexus:context`, `ai:context:validate`, `ai:context:refresh`, `arch:generate`
+- Depends on: `ai:context:refresh`, `ai:context:validate`, `arch:generate`, `arch:gitnexus:context`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
@@ -1907,7 +1907,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run ai:context:validate -- <args>` only if the underlying tool supports them.
-- Depends on: `validate:ai-context-schemas`, `validate:ai-context-fresh`
+- Depends on: `validate:ai-context-fresh`, `validate:ai-context-schemas`
 - Used by other root scripts: `ai:context:refresh-all`
 - Used in:
   - Workflows: .github/workflows/ai-context-validation.yml:73
@@ -1927,12 +1927,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Enforces architecture rules (import boundaries, contract compliance) before AI-generated commits and in CI.
   - Flags: none baked into this runner. You can append more args with `bun run ai:guard -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:55
-  - Other files: scripts/ai-guard.ts:7, scripts/dev/**tests**/refactor-scripts.test.ts:107, scripts/dev/**tests**/refactor-scripts.test.ts:122, scripts/dev/**tests**/refactor-scripts.test.ts:149
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:619, scripts/ai-guard.ts:7, scripts/dev/**tests**/refactor-scripts.test.ts:107, scripts/dev/**tests**/refactor-scripts.test.ts:122, scripts/dev/**tests**/refactor-scripts.test.ts:149
+- Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### ai:plan
@@ -1951,8 +1951,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/ai-engine/plan-task.ts:9
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:628, scripts/ai-engine/plan-task.ts:9
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run ai:plan` exited non-zero before tracked file changes were observed. Output note: ✖ --task argument is required error: script "ai:plan" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### ai:run
@@ -1971,8 +1971,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/ai-engine/run-task.ts:8
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:637, scripts/ai-engine/run-task.ts:8
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run ai:run -- --ci` exited non-zero before tracked file changes were observed. Output note: ✖ --task argument is required error: script "ai:run" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### ai:runtime:status
@@ -1991,7 +1991,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ci.yml:153
-  - Other files: scripts/ai-runtime/runtime-status.ts:8
+  - Other files: reports/package-script-audit.json:646, scripts/ai-runtime/runtime-status.ts:8
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
 
@@ -2011,7 +2011,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:126
-  - Other files: reports/package-script-audit.json:6, scripts/ai-engine/plan-task.ts:144, scripts/ai-engine/validate-execution.ts:8, scripts/generate/**tests**/package-docs.test.ts:22, scripts/generate/**tests**/package-docs.test.ts:29, scripts/generate/**tests**/package-docs.test.ts:55, tests/integration/ai-engine/validate-execution.integration.test.ts:4, tests/integration/ai-engine/validate-execution.integration.test.ts:48
+  - Other files: reports/package-script-audit.json:655, scripts/ai-engine/plan-task.ts:144, scripts/ai-engine/validate-execution.ts:8, scripts/generate/**tests**/package-docs.test.ts:22, scripts/generate/**tests**/package-docs.test.ts:29, scripts/generate/**tests**/package-docs.test.ts:55, tests/integration/ai-engine/validate-execution.integration.test.ts:4, tests/integration/ai-engine/validate-execution.integration.test.ts:48
 - Updated or generated files: Audit attempt failed in isolated worktree: `bun run ai:validate -- --ci` exited non-zero before tracked file changes were observed. Output note: error: script "ai:validate" exited with code 4
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
@@ -2031,8 +2031,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/prompt-qa.ts:8
-- Updated or generated files: Audit attempt failed in isolated worktree: `bun run ai:validate:prompts --ci` exited non-zero before tracked file changes were observed.
+  - Other files: reports/package-script-audit.json:664, scripts/prompt-qa.ts:8
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run ai:validate:prompts -- --ci` exited non-zero before tracked file changes were observed. Output note: ✖ 40 violation(s) found: error: script "ai:validate:prompts" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### \_db
@@ -2308,8 +2308,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/governance/gate-ci.ts:22, scripts/governance/gate.ts:9
-- Updated or generated files: Audit attempt failed in isolated worktree: `bun run governance:gate -- --ci` exited non-zero before tracked file changes were observed. Failure path was expected: Type Safety via `validate:types` exited with code 2.
+  - Other files: reports/package-script-audit.json:673, scripts/governance/gate-ci.ts:22, scripts/governance/gate.ts:9
+- Updated or generated files: Isolated worktree run failed; files touched before failure: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json. Output note: ✖ • Type Safety (validate:types) — exit code 2 error: script "governance:gate" exited with code 1
 - Removal assessment: Treat as protected. It is a primary quality, build, test, or governance entrypoint.
 
 ### governance:gate:changed
@@ -2323,7 +2323,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run governance:gate:changed -- <args>` only if the underlying tool supports them.
-- Depends on: `arch:context:changed`, `arch:guard:changed`, `arch:guard`
+- Depends on: `arch:context:changed`, `arch:guard`, `arch:guard:changed`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
@@ -2347,8 +2347,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/architecture-governance.yml:192
-  - Other files: reports/package-script-audit.json:48, scripts/generate/**tests**/package-docs.test.ts:69, scripts/governance/gate-ci.ts:9
-- Updated or generated files: Audit attempt failed in isolated worktree: `bun run governance:gate:ci` exited non-zero before tracked file changes were observed. Output note: ✖ ::error::Governance gate failed — see output above error: script "governance:gate:ci" exited with code 1
+  - Other files: reports/package-script-audit.json:697, scripts/generate/**tests**/package-docs.test.ts:69, scripts/governance/gate-ci.ts:9
+- Updated or generated files: Isolated worktree run failed; files touched before failure: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json. Output note: ✖ ::error::Governance gate failed — see output above error: script "governance:gate:ci" exited with code 1
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/architecture-governance.yml.
 
 ### governance:report
@@ -2367,8 +2367,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/governance/report.ts:9
-- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/health/architecture-drift-report.md, docs/architecture/health/architecture-health-summary.md, docs/architecture/health/architecture-health.json, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json, docs/architecture/audits/history/audit-1774722810870.json.
+  - Other files: reports/package-script-audit.json:721, scripts/governance/report.ts:9
+- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/health/architecture-drift-report.md, docs/architecture/health/architecture-health-summary.md, docs/architecture/health/architecture-health.json, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### policy:check
@@ -2387,8 +2387,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/policy-check.yml:31
-  - Other files: scripts/policy-engine/cli.ts:8
-- Updated or generated files: Isolated worktree run failed; files touched before failure: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json, docs/architecture/audits/history/audit-1774722812109.json.
+  - Other files: reports/package-script-audit.json:748, scripts/policy-engine/cli.ts:8
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run policy:check -- --ci` exited non-zero before tracked file changes were observed. Output note: │ Policy violations detected │ error: script "policy:check" exited with code 1
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/policy-check.yml.
 
 ### policy:check:full
@@ -2407,8 +2407,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: None found
-- Updated or generated files: Isolated worktree run failed before any tracked file changes were observed.
+  - Other files: reports/package-script-audit.json:757
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run policy:check:full -- --ci` exited non-zero before tracked file changes were observed. Output note: │ Policy violations detected │ error: script "policy:check:full" exited with code 1
 - Removal assessment: Treat as protected. It is a primary quality, build, test, or governance entrypoint.
 
 ### \_ci
@@ -2561,8 +2561,8 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/run-local-ci.ts:11
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:766, scripts/run-local-ci.ts:10, scripts/run-local-ci.ts:21
+- Updated or generated files: Isolated worktree run failed; files touched before failure: specs/runtime/044-plans-and-subscriptions/reports/LOCAL_CI_REPORT.md. Output note: ✖ 2 step(s) failed: error: script "ci:run-local" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### ci:smoke:staging
@@ -2634,11 +2634,11 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run repo:doctor -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: .github/workflows/ci.yml:187
-  - Other files: scripts/dev/repo-doctor.ts:8, tests/integration/dev-scripts/repo-doctor.integration.test.ts:6
+  - Other files: reports/package-script-audit.json:777, scripts/dev/repo-doctor.ts:8, tests/integration/dev-scripts/repo-doctor.integration.test.ts:6
 - Updated or generated files: Observed in isolated worktree run: no tracked file changes.
 - Removal assessment: Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ci.yml.
 
@@ -2654,12 +2654,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run repo:fix -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/repo-fix.ts:8
-- Updated or generated files: Not audited automatically: mutates repository state.
+  - Other files: reports/package-script-audit.json:786, scripts/dev/repo-fix.ts:8
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run repo:fix -- --ci` exited non-zero before tracked file changes were observed. Output note: error: script "repo:fix" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### repo:onboard
@@ -2674,12 +2674,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run repo:onboard -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/repo-onboard.ts:8
-- Updated or generated files: Not audited automatically in the isolated execution pass.
+  - Other files: reports/package-script-audit.json:795, scripts/dev/repo-onboard.ts:8
+- Updated or generated files: Audit attempt failed in isolated worktree: `bun run repo:onboard -- --ci` exited non-zero before tracked file changes were observed. Output note: error: script "repo:onboard" exited with code 1
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### repo:status
@@ -2694,12 +2694,12 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Run the registered repository task for this area.
   - Flags: none baked into this runner. You can append more args with `bun run repo:status -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found
-  - Other files: scripts/dev/demo-logger-features.ts:65, scripts/dev/demo-logger-features.ts:66, scripts/dev/repo-status.ts:8
-- Updated or generated files: Observed in isolated worktree run: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/health/architecture-drift-report.md, docs/architecture/health/architecture-health-summary.md, docs/architecture/health/architecture-health.json, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
+  - Other files: reports/package-script-audit.json:804, scripts/dev/demo-logger-features.ts:65, scripts/dev/demo-logger-features.ts:66, scripts/dev/repo-status.ts:8
+- Updated or generated files: Observed in isolated worktree run: docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/health/architecture-drift-report.md, docs/architecture/health/architecture-health-summary.md, docs/architecture/health/architecture-health.json, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.
 - Removal assessment: Potential removal candidate if you also retire the underlying implementation and any manual workflow that depends on it.
 
 ### \_other
@@ -2733,7 +2733,7 @@ Refresh this file with `bun run dev:generate:package-docs`.
 - Usage:
   - Primary purpose: Applies the migration map to rename all "bun run <old>" references across the repository. Supports both JSON format (docs/scripts/migration-map.json, preferred) and Markdown format (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain. Writes reports to both reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
   - Flags: none baked into this runner. You can append more args with `bun run refactor-scripts -- <args>` only if the underlying tool supports them.
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 - Used in:
   - Workflows: None found

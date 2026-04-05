@@ -1,14 +1,222 @@
 {
-  "generatedAt": "2026-03-28T20:12:21.189Z",
+  "generatedAt": "2026-04-05T11:28:55.269Z",
   "audits": {
-    "ai:validate": {
-      "script": "ai:validate",
-      "command": "bun run ai:validate -- --ci",
+    "validate:ai-context-fresh": {
+      "script": "validate:ai-context-fresh",
+      "command": "bun run validate:ai-context-fresh -- --ci",
       "usedCi": true,
-      "exitCode": 4,
+      "exitCode": 0,
       "changedFiles": [],
-      "note": "Output note: error: script \"ai:validate\" exited with code 4",
-      "generatedAt": "2026-03-28T20:12:10.043Z"
+      "note": "Output note: └────────────────────────────────────────────────┘ $ bun scripts/validate/ai-context-fresh.ts --ci",
+      "generatedAt": "2026-04-05T11:20:27.432Z"
+    },
+    "validate:ai-context-schemas": {
+      "script": "validate:ai-context-schemas",
+      "command": "bun run validate:ai-context-schemas -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                5 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:20:29.912Z"
+    },
+    "validate:orchestrator:handoffs": {
+      "script": "validate:orchestrator:handoffs",
+      "command": "bun run validate:orchestrator:handoffs -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: Orchestrator registry and delegated-skill checks passed {\"source\":\".agents/agents/orchestrator.agent.md\",\"declaredAgents\":31,\"delegatedSkills\":27}",
+      "generatedAt": "2026-04-05T11:20:32.490Z"
+    },
+    "validate:scripts:all": {
+      "script": "validate:scripts:all",
+      "command": "bun run validate:scripts:all -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: ✓ VALIDATION PASSED ⚠ CI guard WARNING: missing scripts only in specs, .gitnexus, or reports {",
+      "generatedAt": "2026-04-05T11:20:40.100Z"
+    },
+    "validate:scripts:fast": {
+      "script": "validate:scripts:fast",
+      "command": "bun run validate:scripts:fast -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ (47 warnings)                                  │ ⚠ CI guard WARNING: missing scripts only in specs, .gitnexus, or reports {",
+      "generatedAt": "2026-04-05T11:20:43.945Z"
+    },
+    "validate:scripts:naming": {
+      "script": "validate:scripts:naming",
+      "command": "bun run validate:scripts:naming -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: ✓ Success 178 (100%) $ bun scripts/validate/script-naming.ts --ci",
+      "generatedAt": "2026-04-05T11:20:46.464Z"
+    },
+    "validate:scripts:usage": {
+      "script": "validate:scripts:usage",
+      "command": "bun run validate:scripts:usage -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: ✓ Success 2712 (100%) $ bun scripts/validate/script-usage.ts --ci",
+      "generatedAt": "2026-04-05T11:20:49.605Z"
+    },
+    "validate:scripts:infrastructure": {
+      "script": "validate:scripts:infrastructure",
+      "command": "bun run validate:scripts:infrastructure -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: Metadata header check {\"violations\":0} Registry freshness check {\"violations\":0}",
+      "generatedAt": "2026-04-05T11:20:52.382Z"
+    },
+    "validate:scripts:spec-sync": {
+      "script": "validate:scripts:spec-sync",
+      "command": "bun run validate:scripts:spec-sync -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Failed                                  0 (0%) │ │ Warnings                               29 (2%) │",
+      "generatedAt": "2026-04-05T11:20:55.389Z"
+    },
+    "validate:scripts:docs-drift": {
+      "script": "validate:scripts:docs-drift",
+      "command": "bun run validate:scripts:docs-drift -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                               122 (90%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:20:59.712Z"
+    },
+    "validate:scripts:ux": {
+      "script": "validate:scripts:ux",
+      "command": "bun run validate:scripts:ux -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: No scripts found to validate $ bun scripts/validate/validate-scripts-ux.ts --ci",
+      "generatedAt": "2026-04-05T11:21:02.787Z"
+    },
+    "validate:scan:packages": {
+      "script": "validate:scan:packages",
+      "command": "bun run validate:scan:packages -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "specs/runtime/fix-01-runtime-script-recovery-and-validation/audits/runtime-script-scan.json"
+      ],
+      "note": "Output note: ✓ Success 136 (100%) $ bun scripts/validate/scan-package-scripts.ts --ci",
+      "generatedAt": "2026-04-05T11:21:05.832Z"
+    },
+    "arch:add-module": {
+      "script": "arch:add-module",
+      "command": "bun run arch:add-module -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: error: script \"arch:add-module\" exited with code 1",
+      "generatedAt": "2026-04-05T11:21:08.787Z"
+    },
+    "arch:audit": {
+      "script": "arch:audit",
+      "command": "bun run arch:audit -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: │ Failed                                  0 (0%) │ │ All governance checks passed                   │",
+      "generatedAt": "2026-04-05T11:21:11.996Z"
+    },
+    "arch:check:store-cycles": {
+      "script": "arch:check:store-cycles",
+      "command": "bun run arch:check:store-cycles -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                3 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:21:16.005Z"
+    },
+    "arch:context:build": {
+      "script": "arch:context:build",
+      "command": "bun run arch:context:build -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                1 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:21:19.108Z"
+    },
+    "arch:context:changed": {
+      "script": "arch:context:changed",
+      "command": "bun run arch:context:changed -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                  0 (0%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:21:23.718Z"
+    },
+    "arch:context:impact": {
+      "script": "arch:context:impact",
+      "command": "bun run arch:context:impact -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                  0 (0%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:21:26.494Z"
+    },
+    "arch:context:validate": {
+      "script": "arch:context:validate",
+      "command": "bun run arch:context:validate -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                1 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:21:29.907Z"
+    },
+    "arch:diff": {
+      "script": "arch:diff",
+      "command": "bun run arch:diff -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Failed                                  0 (0%) │ │ No violations detected.                        │",
+      "generatedAt": "2026-04-05T11:21:33.047Z"
+    },
+    "arch:generate": {
+      "script": "arch:generate",
+      "command": "bun run arch:generate -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: ✓ Success 14 (100%) $ bun scripts/architecture/generate-architecture-map.ts --ci",
+      "generatedAt": "2026-04-05T11:21:37.283Z"
+    },
+    "arch:gitnexus:context": {
+      "script": "arch:gitnexus:context",
+      "command": "bun run arch:gitnexus:context -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": ["docs/ai/context/gitnexus-context.json"],
+      "note": "Output note: │ Passed                                3 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:21:40.370Z"
+    },
+    "arch:gitnexus:validate": {
+      "script": "arch:gitnexus:validate",
+      "command": "bun run arch:gitnexus:validate -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                                                                                                       5 (100%) │ │ Failed                                                                                                                         0 (0%) │",
+      "generatedAt": "2026-04-05T11:21:43.145Z"
     },
     "arch:guard": {
       "script": "arch:guard",
@@ -17,7 +225,31 @@
       "exitCode": 0,
       "changedFiles": [],
       "note": "Output note: │ Failed                                  0 (0%) │ │ verdict=PASS                                   │",
-      "generatedAt": "2026-03-28T20:12:12.977Z"
+      "generatedAt": "2026-04-05T11:21:46.435Z"
+    },
+    "arch:guard:changed": {
+      "script": "arch:guard:changed",
+      "command": "bun run arch:guard:changed",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json",
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: │ Failed                                  0 (0%) │ │ verdict=PASS                                   │",
+      "generatedAt": "2026-04-05T11:21:50.615Z"
     },
     "arch:guard:ci": {
       "script": "arch:guard:ci",
@@ -41,16 +273,547 @@
         "docs/reports/infra-audit-report.json"
       ],
       "note": "Output note: │ Failed                                  0 (0%) │ │ verdict=PASS                                   │",
-      "generatedAt": "2026-03-28T20:12:15.377Z"
+      "generatedAt": "2026-04-05T11:21:55.440Z"
+    },
+    "arch:health": {
+      "script": "arch:health",
+      "command": "bun run arch:health -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json",
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/health/architecture-drift-report.md",
+        "docs/architecture/health/architecture-health-summary.md",
+        "docs/architecture/health/architecture-health.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: Verdict: PASS {\"event\":\"architecture-health.completed\",\"verdict\":\"PASS\",\"score\":96,\"finding_count\":2,\"source_runs\":[{\"tool\":\"arch_guard_ci\",\"duration_ms\":2463,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"infra_audit_quick\",\"duration_ms\":1490,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"type_safety_guard_json\",\"duration_ms\":331,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"arch_validate_brain\",\"duration_ms\":81,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"gitnexus_query\",\"duration_ms\":133,\"timed_out\":false,\"exit_code\":1},{\"tool\":\"gitnexus_impact\",\"duration_ms\":131,\"timed_out\":false,\"exit_code\":1}]}",
+      "generatedAt": "2026-04-05T11:22:00.888Z"
+    },
+    "arch:health:benchmark": {
+      "script": "arch:health:benchmark",
+      "command": "bun run arch:health:benchmark -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json",
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: │ Passed                               20 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:22:51.179Z"
+    },
+    "arch:health:ci": {
+      "script": "arch:health:ci",
+      "command": "bun run arch:health:ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json",
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/health/architecture-drift-report.md",
+        "docs/architecture/health/architecture-health-summary.md",
+        "docs/architecture/health/architecture-health.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: Verdict: PASS {\"event\":\"architecture-health.completed\",\"verdict\":\"PASS\",\"score\":96,\"finding_count\":2,\"source_runs\":[{\"tool\":\"arch_guard_ci\",\"duration_ms\":2674,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"infra_audit_quick\",\"duration_ms\":1738,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"type_safety_guard_json\",\"duration_ms\":692,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"arch_validate_brain\",\"duration_ms\":108,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"gitnexus_query\",\"duration_ms\":123,\"timed_out\":false,\"exit_code\":1},{\"tool\":\"gitnexus_impact\",\"duration_ms\":122,\"timed_out\":false,\"exit_code\":1}]}",
+      "generatedAt": "2026-04-05T11:22:58.342Z"
+    },
+    "arch:type-safety-guard": {
+      "script": "arch:type-safety-guard",
+      "command": "bun run arch:type-safety-guard -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Failed                                  0 (0%) │ │ All checks passed                              │",
+      "generatedAt": "2026-04-05T11:23:02.671Z"
+    },
+    "arch:validate:brain": {
+      "script": "arch:validate:brain",
+      "command": "bun run arch:validate:brain -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Failed                                  0 (0%) │ │ Brain validation passed.                       │",
+      "generatedAt": "2026-04-05T11:23:05.921Z"
+    },
+    "arch:visualize": {
+      "script": "arch:visualize",
+      "command": "bun run arch:visualize -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": ["docs/architecture/visualization/README.md"],
+      "note": "Output note: 3 Diagrams + README Generated $ bun scripts/architecture/visualize.ts --ci",
+      "generatedAt": "2026-04-05T11:23:08.902Z"
+    },
+    "dev:analyze:directory-sizes": {
+      "script": "dev:analyze:directory-sizes",
+      "command": "bun run dev:analyze:directory-sizes",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                8 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:23:13.004Z"
+    },
+    "dev:analyze:file-sizes": {
+      "script": "dev:analyze:file-sizes",
+      "command": "bun run dev:analyze:file-sizes",
+      "usedCi": false,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: │ Failed                              278 (100%) │ error: script \"dev:analyze:file-sizes\" exited with code 1",
+      "generatedAt": "2026-04-05T11:23:19.401Z"
+    },
+    "dev:benchmark:ci": {
+      "script": "dev:benchmark:ci",
+      "command": "bun run dev:benchmark:ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/reports/CI_PERFORMANCE_DASHBOARD.md",
+        "docs/reports/CI_PERFORMANCE_REPORT.md"
+      ],
+      "note": "Output note: │ Passed                               11 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:23:23.011Z"
+    },
+    "dev:demo:logger": {
+      "script": "dev:demo:logger",
+      "command": "bun run dev:demo:logger",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: ⚠ This is a warning message ✖ This is an error message",
+      "generatedAt": "2026-04-05T11:23:57.534Z"
+    },
+    "dev:deps:verify": {
+      "script": "dev:deps:verify",
+      "command": "bun run dev:deps:verify",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                  0 (0%) │ │ Failed                               25 (100%) │",
+      "generatedAt": "2026-04-05T11:24:52.550Z"
+    },
+    "dev:generate:package-docs": {
+      "script": "dev:generate:package-docs",
+      "command": "bun run dev:generate:package-docs -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": ["package.md"],
+      "note": "Output note: │ Passed                              136 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:24:57.127Z"
+    },
+    "dev:generate:script-docs": {
+      "script": "dev:generate:script-docs",
+      "command": "bun run dev:generate:script-docs -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/scripts/ai-context-refresh-all.md",
+        "docs/scripts/ai-context-refresh.md",
+        "docs/scripts/ai-context-validate.md",
+        "docs/scripts/arch-fix.md",
+        "docs/scripts/arch-generate.md",
+        "docs/scripts/arch-refresh.md",
+        "docs/scripts/build-api.md",
+        "docs/scripts/build-packages.md",
+        "docs/scripts/build.md",
+        "docs/scripts/ci-local-dry.md",
+        "docs/scripts/ci-local-full.md",
+        "docs/scripts/ci-local-job.md",
+        "docs/scripts/ci-local-list.md",
+        "docs/scripts/ci-local-workflow.md",
+        "docs/scripts/ci-local.md",
+        "docs/scripts/ci-smoke-staging.md",
+        "docs/scripts/ci-test.md",
+        "docs/scripts/dev-all.md",
+        "docs/scripts/dev-api.md",
+        "docs/scripts/dev-backoffice.md",
+        "docs/scripts/dev-frontoffice.md",
+        "docs/scripts/dev-infra.md",
+        "docs/scripts/dev-mmc.md",
+        "docs/scripts/dev-worker.md",
+        "docs/scripts/dev.md",
+        "docs/scripts/format-check-biome.md",
+        "docs/scripts/format.md",
+        "docs/scripts/gitnexus-context.md",
+        "docs/scripts/governance-gate-changed.md",
+        "docs/scripts/lint-fix.md",
+        "docs/scripts/lint.md",
+        "docs/scripts/prepare.md",
+        "docs/scripts/README.md",
+        "docs/scripts/SCRIPT_REGISTRY.md",
+        "docs/scripts/test-coverage.md",
+        "docs/scripts/test-e2e-backoffice.md",
+        "docs/scripts/test-e2e-frontoffice.md",
+        "docs/scripts/test-e2e-mmc.md",
+        "docs/scripts/test-e2e.md",
+        "docs/scripts/test-integration.md",
+        "docs/scripts/test-migrations.md",
+        "docs/scripts/test-performance.md",
+        "docs/scripts/test-static.md",
+        "docs/scripts/test-tenant.md",
+        "docs/scripts/test-unit-boundaries.md",
+        "docs/scripts/test-unit.md",
+        "docs/scripts/test.md",
+        "docs/scripts/typecheck-src.md",
+        "docs/scripts/typecheck-tests.md",
+        "docs/scripts/typecheck.md",
+        "docs/scripts/validate-orchestrator-handoffs.md",
+        "docs/scripts/validate-tsconfig.md",
+        "docs/scripts/validate-types.md",
+        "docs/scripts/validate-workflows.md"
+      ],
+      "note": "Output note: │ Passed                              124 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:24:59.805Z"
+    },
+    "dev:hygiene:report": {
+      "script": "dev:hygiene:report",
+      "command": "bun run dev:hygiene:report -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: ReferenceError: ROOT is not defined error: script \"dev:hygiene:report\" exited with code 1",
+      "generatedAt": "2026-04-05T11:25:02.126Z"
+    },
+    "dev:profile:scripts": {
+      "script": "dev:profile:scripts",
+      "command": "bun run dev:profile:scripts",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: │ Passed                                5 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:25:25.499Z"
+    },
+    "dev:report:baseline": {
+      "script": "dev:report:baseline",
+      "command": "bun run dev:report:baseline",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: │ Passed                                  0 (0%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:25:36.297Z"
+    },
+    "dev:validate:script-duplication": {
+      "script": "dev:validate:script-duplication",
+      "command": "bun run dev:validate:script-duplication",
+      "usedCi": false,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: ✖ FAIL: Script duplication at 31.43% exceeds target (<5%) error: script \"dev:validate:script-duplication\" exited with code 1",
+      "generatedAt": "2026-04-05T11:25:39.256Z"
+    },
+    "dev:ai:archive-snapshots": {
+      "script": "dev:ai:archive-snapshots",
+      "command": "bun run dev:ai:archive-snapshots",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": ["docs/ai/context/ARCHIVE_INDEX.md", "docs/ai/context/archive/INDEX.json"],
+      "note": "Output note: │ Passed                                 2 (20%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:25:41.790Z"
+    },
+    "dev:ai:context-artifacts": {
+      "script": "dev:ai:context-artifacts",
+      "command": "bun run dev:ai:context-artifacts",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                8 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:25:44.108Z"
+    },
+    "ai:context:generate": {
+      "script": "ai:context:generate",
+      "command": "bun run ai:context:generate -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json"
+      ],
+      "note": "Output note: │ Passed                                7 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:25:46.690Z"
+    },
+    "ai:context:refresh": {
+      "script": "ai:context:refresh",
+      "command": "bun run ai:context:refresh -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json"
+      ],
+      "note": "Output note: │ Passed                                7 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:25:49.387Z"
+    },
+    "ai:guard": {
+      "script": "ai:guard",
+      "command": "bun run ai:guard -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                             1789 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:25:52.050Z"
+    },
+    "ai:plan": {
+      "script": "ai:plan",
+      "command": "bun run ai:plan",
+      "usedCi": false,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: ✖ --task argument is required error: script \"ai:plan\" exited with code 1",
+      "generatedAt": "2026-04-05T11:25:54.217Z"
+    },
+    "ai:run": {
+      "script": "ai:run",
+      "command": "bun run ai:run -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: ✖ --task argument is required error: script \"ai:run\" exited with code 1",
+      "generatedAt": "2026-04-05T11:25:56.633Z"
+    },
+    "ai:runtime:status": {
+      "script": "ai:runtime:status",
+      "command": "bun run ai:runtime:status",
+      "usedCi": false,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\nRESULT\\nTotal: 5\\nHealthy: 5\\nFailed: 0\\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n$ bun scripts/ai-runtime/runtime-status.ts",
+      "generatedAt": "2026-04-05T11:25:59.352Z"
+    },
+    "ai:validate": {
+      "script": "ai:validate",
+      "command": "bun run ai:validate -- --ci",
+      "usedCi": true,
+      "exitCode": 4,
+      "changedFiles": [],
+      "note": "Output note: error: script \"ai:validate\" exited with code 4",
+      "generatedAt": "2026-04-05T11:26:02.417Z"
+    },
+    "ai:validate:prompts": {
+      "script": "ai:validate:prompts",
+      "command": "bun run ai:validate:prompts -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: ✖ 40 violation(s) found: error: script \"ai:validate:prompts\" exited with code 1",
+      "generatedAt": "2026-04-05T11:26:05.563Z"
+    },
+    "governance:gate": {
+      "script": "governance:gate",
+      "command": "bun run governance:gate -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json",
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: ✖   • Type Safety (validate:types) — exit code 2 error: script \"governance:gate\" exited with code 1",
+      "generatedAt": "2026-04-05T11:26:27.098Z"
     },
     "governance:gate:ci": {
       "script": "governance:gate:ci",
       "command": "bun run governance:gate:ci",
       "usedCi": true,
       "exitCode": 1,
-      "changedFiles": [],
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json",
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
       "note": "Output note: ✖ ::error::Governance gate failed — see output above error: script \"governance:gate:ci\" exited with code 1",
-      "generatedAt": "2026-03-28T20:12:21.189Z"
+      "generatedAt": "2026-04-05T11:26:47.271Z"
+    },
+    "governance:report": {
+      "script": "governance:report",
+      "command": "bun run governance:report -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json",
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/health/architecture-drift-report.md",
+        "docs/architecture/health/architecture-health-summary.md",
+        "docs/architecture/health/architecture-health.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: │ Failed                                  0 (0%) │ {\"event\":\"architecture-health.completed\",\"verdict\":\"PASS\",\"score\":96,\"finding_count\":2,\"source_runs\":[{\"tool\":\"arch_guard_ci\",\"duration_ms\":2052,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"infra_audit_quick\",\"duration_ms\":1227,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"type_safety_guard_json\",\"duration_ms\":328,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"arch_validate_brain\",\"duration_ms\":68,\"timed_out\":false,\"exit_code\":0},{\"tool\":\"gitnexus_query\",\"duration_ms\":114,\"timed_out\":false,\"exit_code\":1},{\"tool\":\"gitnexus_impact\",\"duration_ms\":111,\"timed_out\":false,\"exit_code\":1}]}",
+      "generatedAt": "2026-04-05T11:26:52.394Z"
+    },
+    "policy:check": {
+      "script": "policy:check",
+      "command": "bun run policy:check -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: │ Policy violations detected                     │ error: script \"policy:check\" exited with code 1",
+      "generatedAt": "2026-04-05T11:26:58.049Z"
+    },
+    "policy:check:full": {
+      "script": "policy:check:full",
+      "command": "bun run policy:check:full -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: │ Policy violations detected                     │ error: script \"policy:check:full\" exited with code 1",
+      "generatedAt": "2026-04-05T11:27:04.187Z"
+    },
+    "ci:run-local": {
+      "script": "ci:run-local",
+      "command": "bun run ci:run-local -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": ["specs/runtime/044-plans-and-subscriptions/reports/LOCAL_CI_REPORT.md"],
+      "note": "Output note: ✖ 2 step(s) failed: error: script \"ci:run-local\" exited with code 1",
+      "generatedAt": "2026-04-05T11:27:58.991Z"
+    },
+    "repo:doctor": {
+      "script": "repo:doctor",
+      "command": "bun run repo:doctor -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [],
+      "note": "Output note: │ Passed                                7 (100%) │ │ Failed                                  0 (0%) │",
+      "generatedAt": "2026-04-05T11:28:46.162Z"
+    },
+    "repo:fix": {
+      "script": "repo:fix",
+      "command": "bun run repo:fix -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: error: script \"repo:fix\" exited with code 1",
+      "generatedAt": "2026-04-05T11:28:48.686Z"
+    },
+    "repo:onboard": {
+      "script": "repo:onboard",
+      "command": "bun run repo:onboard -- --ci",
+      "usedCi": true,
+      "exitCode": 1,
+      "changedFiles": [],
+      "note": "Output note: error: script \"repo:onboard\" exited with code 1",
+      "generatedAt": "2026-04-05T11:28:50.944Z"
+    },
+    "repo:status": {
+      "script": "repo:status",
+      "command": "bun run repo:status -- --ci",
+      "usedCi": true,
+      "exitCode": 0,
+      "changedFiles": [
+        "docs/ai/context/ai-architecture-brain.json",
+        "docs/ai/context/ai-architecture-summary.md",
+        "docs/ai/context/ai-context-mini.json",
+        "docs/ai/context/ai-dependency-graph.json",
+        "docs/ai/context/ai-layer-model.json",
+        "docs/ai/context/ai-module-map.json",
+        "docs/ai/context/ai-runtime-map.json",
+        "docs/architecture/ARCHITECTURE_DIAGRAMS.md",
+        "docs/architecture/graphs/architecture-graph.html",
+        "docs/architecture/health/architecture-drift-report.md",
+        "docs/architecture/health/architecture-health-summary.md",
+        "docs/architecture/health/architecture-health.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json",
+        "docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md",
+        "docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md",
+        "docs/reports/infra-audit-report.json"
+      ],
+      "note": "Output note: │ Passed                                 2 (50%) │ │ Failed                                 2 (50%) │",
+      "generatedAt": "2026-04-05T11:28:55.269Z"
     }
   }
 }

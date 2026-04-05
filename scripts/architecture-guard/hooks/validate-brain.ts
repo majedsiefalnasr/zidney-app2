@@ -13,14 +13,36 @@ function normalizeBrainShape(brainPath: string): void {
     return
   }
 
-  const parsed = JSON.parse(readFileSync(brainPath, 'utf-8')) as LegacyBrain
+  const parsed = JSON.parse(readFileSync(brainPath, 'utf-8')) as LegacyBrain & {
+    schema_version?: string
+  }
   let touched = false
 
-  if (!Array.isArray(parsed.modules) && parsed.modules && typeof parsed.modules === 'object') {
+  // Only normalize legacy format: if modules is an object but WITHOUT rich structure.
+  // The new format (from ai:context:refresh) has modules like: { "app/name": { "dependencies": [...], "layer": "...", ... } }
+  // The legacy format has modules like: { "app/name": {} } or just names.
+  // Detect new format by checking if any module has the rich keys we expect.
+  const hasRichModuleStructure =
+    parsed.modules &&
+    typeof parsed.modules === 'object' &&
+    !Array.isArray(parsed.modules) &&
+    Object.values(parsed.modules).some(
+      (module: unknown) =>
+        module && typeof module === 'object' && ('dependencies' in module || 'layer' in module)
+    )
+
+  // Only convert to array if this is NOT the rich new format
+  if (
+    !hasRichModuleStructure &&
+    !Array.isArray(parsed.modules) &&
+    parsed.modules &&
+    typeof parsed.modules === 'object'
+  ) {
     parsed.modules = Object.keys(parsed.modules)
     touched = true
   }
 
+  // Only normalize edges if they don't exist
   if (!Array.isArray(parsed.edges)) {
     const edges: Array<{ from: string; to: string }> = []
     for (const [source, relation] of Object.entries(parsed.dependencies ?? {})) {
@@ -32,6 +54,7 @@ function normalizeBrainShape(brainPath: string): void {
     touched = true
   }
 
+  // Only write back if we actually made changes
   if (touched) {
     writeFileSync(brainPath, `${JSON.stringify(parsed, null, 2)}\n`, 'utf-8')
   }

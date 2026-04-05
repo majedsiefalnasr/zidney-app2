@@ -115,19 +115,21 @@ interface ScriptDocEntry {
 
 interface CliOptions {
   auditScripts: string[]
+  auditAll: boolean
 }
 
 function parseArgs(argv: readonly string[]): CliOptions {
   const auditArg = argv.find((arg) => arg.startsWith('--audit='))
-  const auditScripts = auditArg
+  const rawScripts = auditArg
     ? auditArg
         .replace('--audit=', '')
         .split(',')
         .map((script) => script.trim())
         .filter(Boolean)
     : []
+  const auditAll = rawScripts.includes('all')
 
-  return { auditScripts }
+  return { auditScripts: auditAll ? [] : rawScripts, auditAll }
 }
 
 export function parseExistingPackageSections(content: string): Map<string, ExistingSection> {
@@ -197,22 +199,126 @@ export function detectScriptDependencies(
   return Array.from(found)
 }
 
-export function formatUpdatedGeneratedFiles(auditRecord?: AuditRecord, fallback?: string): string {
-  if (auditRecord) {
-    if (auditRecord.exitCode === 0) {
-      if (auditRecord.changedFiles.length === 0) {
-        return 'Observed in isolated worktree run: no tracked file changes.'
+function walkSourceDir(dir: string): string[] {
+  const files: string[] = []
+  try {
+    for (const entry of readdirSync(dir)) {
+      const absPath = join(dir, entry)
+      try {
+        const stats = statSync(absPath)
+        if (stats.isDirectory()) {
+          files.push(...walkSourceDir(absPath))
+        } else if (entry.endsWith('.ts')) {
+          files.push(absPath)
+        }
+      } catch {
+        // ignore unreadable entries
       }
-      return `Observed in isolated worktree run: ${auditRecord.changedFiles.join(', ')}.`
+    }
+  } catch {
+    // ignore unreadable directories
+  }
+  return files
+}
+
+function detectImplicitDependencies(
+  sourcePath: string,
+  scriptNames: readonly string[],
+  selfName: string
+): string[] {
+  const absoluteSourcePath = join(REPO_ROOT, sourcePath)
+  const sourceDir = dirname(absoluteSourcePath)
+  const scriptsRoot = join(REPO_ROOT, 'scripts')
+
+  // When the source file lives directly in scripts/ root, only scan that single
+  // file — scanning the whole scripts/ tree would pick up bun run calls from
+  // unrelated subdirectory modules (false positives).
+  const filesToScan = sourceDir === scriptsRoot ? [absoluteSourcePath] : walkSourceDir(sourceDir)
+
+  const found = new Set<string>()
+  for (const file of filesToScan) {
+    try {
+      const content = readFileSync(file, 'utf-8')
+      for (const m of content.matchAll(/execSync\(['"`]bun run ([A-Za-z][A-Za-z0-9:_-]*)/g)) {
+        const name = m[1]
+        if (name !== selfName && (scriptNames as readonly string[]).includes(name)) found.add(name)
+      }
+    } catch {
+      // ignore unreadable files
+    }
+  }
+  return Array.from(found)
+}
+
+function buildTransitiveDepsMap(entries: readonly ScriptDocEntry[]): Map<string, Set<string>> {
+  const direct = new Map(entries.map((e) => [e.name, e.dependsOn]))
+  const memo = new Map<string, Set<string>>()
+
+  function getAll(name: string, stack: Set<string>): Set<string> {
+    const cached = memo.get(name)
+    if (cached !== undefined) return cached
+    if (stack.has(name)) return new Set()
+    const newStack = new Set(stack)
+    newStack.add(name)
+    const deps = direct.get(name) ?? []
+    const all = new Set(deps)
+    for (const dep of deps) {
+      for (const td of getAll(dep, newStack)) all.add(td)
+    }
+    memo.set(name, all)
+    return all
+  }
+
+  for (const e of entries) getAll(e.name, new Set())
+  return memo
+}
+
+function resolveUniqueChangedFiles(
+  entry: ScriptDocEntry,
+  allAuditRecords: Readonly<Record<string, AuditRecord>>,
+  transitiveDepsMap: Map<string, Set<string>>
+): string[] | undefined {
+  if (!entry.auditRecord) return undefined
+  const allFiles = entry.auditRecord.changedFiles
+  if (allFiles.length === 0) return allFiles
+  const transitiveDeps = transitiveDepsMap.get(entry.name) ?? new Set()
+  if (transitiveDeps.size === 0) return allFiles
+
+  const depFiles = new Set<string>()
+  for (const depName of transitiveDeps) {
+    const rec = allAuditRecords[depName]
+    if (rec) {
+      for (const f of rec.changedFiles) depFiles.add(f)
+    }
+  }
+
+  if (depFiles.size === 0) return allFiles
+  return allFiles.filter((f) => !depFiles.has(f))
+}
+
+export function formatUpdatedGeneratedFiles(
+  auditRecord?: AuditRecord,
+  fallback?: string,
+  displayFiles?: string[]
+): string {
+  if (auditRecord) {
+    const files = displayFiles ?? auditRecord.changedFiles
+    if (auditRecord.exitCode === 0) {
+      if (files.length === 0) {
+        return displayFiles !== undefined && auditRecord.changedFiles.length > 0
+          ? 'Observed in isolated worktree run: all generated files are attributed to dependency scripts.'
+          : 'Observed in isolated worktree run: no tracked file changes.'
+      }
+      return `Observed in isolated worktree run: ${files.join(', ')}.`
     }
 
-    if (auditRecord.changedFiles.length === 0) {
+    if (files.length === 0) {
       const note = auditRecord.note ? ` ${auditRecord.note}` : ''
       return `Audit attempt failed in isolated worktree: \`${auditRecord.command}\` exited non-zero before tracked file changes were observed.${note}`
     }
 
     const note = auditRecord.note ? ` ${auditRecord.note}` : ''
-    return `Isolated worktree run failed; files touched before failure: ${auditRecord.changedFiles.join(', ')}.${note}`
+    return `Isolated worktree run failed; files touched before failure: ${files.join(', ')}.${note}`
   }
 
   return fallback ?? 'Not audited automatically in the isolated execution pass.'
@@ -792,7 +898,10 @@ function buildEntries(existingSections: Map<string, ExistingSection>): ScriptDoc
       meta: loadScriptMeta(sourcePath),
       sourcePath,
       sourceContent: readSourceContent(sourcePath),
-      dependsOn: detectScriptDependencies(command, scriptNames, name),
+      dependsOn: uniqueSorted([
+        ...detectScriptDependencies(command, scriptNames, name),
+        ...(sourcePath ? detectImplicitDependencies(sourcePath, scriptNames, name) : []),
+      ]),
       usedBy: [],
       usageRefs: { workflows: [], otherFiles: [] },
     } satisfies ScriptDocEntry
@@ -806,6 +915,20 @@ function buildEntries(existingSections: Map<string, ExistingSection>): ScriptDoc
     usedBy: usedByMap.get(entry.name) ?? [],
     usageRefs: usageRefsMap.get(entry.name) ?? { workflows: [], otherFiles: [] },
   }))
+}
+
+function isEligibleForAudit(entry: ScriptDocEntry): boolean {
+  if (!entry.sourcePath) return false
+  if (entry.command.includes('playwright')) return false
+  if (entry.command.includes('docker compose')) return false
+  if (entry.command.includes('concurrently')) return false
+  if (entry.name.startsWith('db:')) return false
+  if (entry.command.includes('psql')) return false
+  if (entry.command.includes('trivy')) return false
+  if (entry.name.startsWith('infra:security')) return false
+  if (/refactor|cache:clean|seed/.test(entry.name)) return false
+  if (entry.command.startsWith('echo ')) return false
+  return true
 }
 
 function renderWorkflowBoundRunners(entries: readonly ScriptDocEntry[]): string[] {
@@ -822,15 +945,21 @@ function renderWorkflowBoundRunners(entries: readonly ScriptDocEntry[]): string[
   ]
 }
 
-function renderScriptEntry(entry: ScriptDocEntry): string[] {
+function renderScriptEntry(
+  entry: ScriptDocEntry,
+  allAuditRecords: Readonly<Record<string, AuditRecord>>,
+  transitiveDepsMap: Map<string, Set<string>>
+): string[] {
   const group = inferGroup(entry.name, entry.existing)
   const power = inferPower(entry)
   const purpose = inferPurpose(entry)
   const source = inferSource(entry)
   const ciFlag = inferCiFlag(entry)
+  const uniqueFiles = resolveUniqueChangedFiles(entry, allAuditRecords, transitiveDepsMap)
   const updatedGeneratedFiles = formatUpdatedGeneratedFiles(
     entry.auditRecord,
-    entry.existing?.updatedGeneratedFiles ?? classifyUnauditedFallback(entry)
+    entry.existing?.updatedGeneratedFiles ?? classifyUnauditedFallback(entry),
+    uniqueFiles
   )
     .split(entry.command)
     .join(`bun run ${entry.name}`)
@@ -897,7 +1026,11 @@ function classifyUnauditedFallback(entry: ScriptDocEntry): string {
   return 'Not audited automatically in the isolated execution pass.'
 }
 
-function renderDocument(entries: readonly ScriptDocEntry[]): string {
+function renderDocument(
+  entries: readonly ScriptDocEntry[],
+  allAuditRecords: Readonly<Record<string, AuditRecord>>,
+  transitiveDepsMap: Map<string, Set<string>>
+): string {
   const powers = entries.reduce(
     (accumulator, entry) => {
       const power = inferPower(entry)
@@ -940,7 +1073,7 @@ function renderDocument(entries: readonly ScriptDocEntry[]): string {
   ]
 
   for (const entry of entries) {
-    lines.push(...renderScriptEntry(entry))
+    lines.push(...renderScriptEntry(entry, allAuditRecords, transitiveDepsMap))
   }
 
   return `${lines.join('\n').trimEnd()}\n`
@@ -964,8 +1097,13 @@ function main(): void {
     entry.auditRecord = auditCache.audits[entry.name]
   }
 
-  if (options.auditScripts.length > 0) {
-    for (const scriptName of options.auditScripts) {
+  const scriptsToAudit: string[] = options.auditAll
+    ? entries.filter(isEligibleForAudit).map((e) => e.name)
+    : options.auditScripts
+
+  if (scriptsToAudit.length > 0) {
+    logger.info('Starting isolated worktree audits', { count: scriptsToAudit.length })
+    for (const scriptName of scriptsToAudit) {
       const entry = entries.find((candidate) => candidate.name === scriptName)
       if (!entry) {
         logger.warn('Skipping unknown audit target', { scriptName })
@@ -987,7 +1125,13 @@ function main(): void {
     auditRecord: auditCache.audits[entry.name],
   }))
 
-  writeFileSync(PACKAGE_MD_PATH, renderDocument(entries), 'utf-8')
+  const transitiveDepsMap = buildTransitiveDepsMap(entries)
+
+  writeFileSync(
+    PACKAGE_MD_PATH,
+    renderDocument(entries, auditCache.audits, transitiveDepsMap),
+    'utf-8'
+  )
   logger.info('package.md refreshed', { outputPath: PACKAGE_MD_PATH, scripts: entries.length })
   log.result({ total: entries.length, passed: entries.length, failed: 0 })
   exit(0)
