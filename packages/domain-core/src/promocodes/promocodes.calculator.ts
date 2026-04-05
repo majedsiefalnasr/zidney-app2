@@ -31,8 +31,12 @@ export function calculateDiscount(
 ): DiscountResult {
   switch (type) {
     case 'PERCENTAGE': {
+      if (value === null || value === undefined) {
+        throw new Error('PERCENTAGE promocode requires a numeric value')
+      }
       // Floor-round at 2 decimal places to avoid floating-point creep
-      const raw = (planPrice * value!) / 100
+      const pct = value
+      const raw = (planPrice * pct) / 100
       const discount_amount = Math.floor(raw * 100) / 100
       const final_price = Math.max(0, planPrice - discount_amount)
       // Normalize final_price to 2 decimals to avoid IEEE-754 precision errors
@@ -43,7 +47,11 @@ export function calculateDiscount(
     }
 
     case 'FIXED': {
-      const final_price = Math.max(0, planPrice - value!)
+      if (value === null || value === undefined) {
+        throw new Error('FIXED promocode requires a numeric value')
+      }
+      const amt = value
+      const final_price = Math.max(0, planPrice - amt)
       const discount_amount = planPrice - final_price
       // Normalize to 2 decimals to avoid floating-point creep
       return {
@@ -53,10 +61,13 @@ export function calculateDiscount(
     }
 
     case 'FREE_TRIAL': {
+      if (freeTrialDays === null || freeTrialDays === undefined) {
+        throw new Error('FREE_TRIAL promocode requires freeTrialDays')
+      }
       return {
         discount_amount: planPrice,
         final_price: 0,
-        free_trial_days: freeTrialDays!,
+        free_trial_days: freeTrialDays,
       }
     }
   }

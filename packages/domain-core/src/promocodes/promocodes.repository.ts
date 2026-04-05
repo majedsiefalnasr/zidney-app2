@@ -178,7 +178,11 @@ export async function createPromocode(db: DbClient, input: PromocodeInput): Prom
         input.is_stackable ?? false,
       ]
     )
-    return rows[0]!
+    const row = rows[0]
+    if (!row) {
+      throw new Error('Failed to create promocode')
+    }
+    return row
   } catch (err: unknown) {
     const pgErr = err as { code?: string; constraint?: string }
     if (pgErr.code === '23505') {
@@ -287,7 +291,11 @@ export async function insertUsage(
      RETURNING ${USAGE_COLUMNS}`,
     [input.promocode_id, input.student_id, input.subscription_id, input.discount_amount]
   )
-  return rows[0]!
+  const usageRow = rows[0]
+  if (!usageRow) {
+    throw new Error('Failed to insert promocode usage')
+  }
+  return usageRow
 }
 
 // ---------------------------------------------------------------------------
@@ -319,7 +327,13 @@ export async function getAnalyticsSummary(
     FROM promocodes
   `)
 
-  const summary = summaryResult.rows[0]!
+  const summary = summaryResult.rows[0] ?? {
+    total_codes: '0',
+    active_codes: '0',
+    expired_codes: '0',
+    total_redemptions: '0',
+    revenue_impact: '0',
+  }
 
   // By-type breakdown
   const byTypeResult = await db.query<{
@@ -395,7 +409,10 @@ export async function getSinglePromocodeAnalytics(
     [promocodeId]
   )
 
-  const row = rows[0]!
+  const row = rows[0]
+  if (!row) {
+    return { total_usages: 0, total_discount_amount: 0, unique_students: 0 }
+  }
   return {
     total_usages: parseInt(row.total_usages, 10),
     total_discount_amount: parseFloat(row.total_discount_amount),

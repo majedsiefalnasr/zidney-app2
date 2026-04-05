@@ -54,7 +54,8 @@ export async function handleValidatePromocode(c: Context) {
       )
     }
 
-    const { code, student_id, plan_id } = parsed.data
+    const { student_id, plan_id } = parsed.data
+    const code = (parsed.data.code as string).trim().toUpperCase()
     const db = getDb(c)
 
     logger.debug('Validate promocode', {
@@ -64,6 +65,7 @@ export async function handleValidatePromocode(c: Context) {
       user_id: c.get('user_id'),
       correlation_id: c.get('correlation_id'),
       workspace_id: c.get('workspace_id'),
+      workspace_slug: c.get('workspace_slug'),
     })
 
     // 1. Load plan — need billing_type and price for validation
@@ -118,7 +120,7 @@ export async function handleValidatePromocode(c: Context) {
 
     // 5. Build validation context and validate
     const ctx = {
-      code: code.toUpperCase(),
+      code,
       student_id,
       plan_id,
       plan_billing_type: plan.billing_type,

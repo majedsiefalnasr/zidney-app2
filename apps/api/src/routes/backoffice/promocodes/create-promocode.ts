@@ -72,6 +72,8 @@ export async function handleCreatePromocode(c: Context) {
       type: input.type,
       correlation_id: c.get('correlation_id'),
       workspace_id: c.get('workspace_id'),
+      workspace_slug: c.get('workspace_slug'),
+      user_id: c.get('user_id'),
     })
 
     const created = await promocodeService.createPromocode(db, input, audit)
