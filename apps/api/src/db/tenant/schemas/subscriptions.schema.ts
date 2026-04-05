@@ -99,5 +99,10 @@ export const subscriptions = pgTable(
       'chk_subscriptions_expires_after_start',
       sql`${table.expires_at} > ${table.started_at}`
     ),
+    /** CHECK: price_paid must be non-negative or NULL. */
+    pricePaidNonNegative: check(
+      'chk_subscriptions_price_paid_non_negative',
+      sql`${table.price_paid} IS NULL OR ${table.price_paid} >= 0`
+    ),
   })
 )

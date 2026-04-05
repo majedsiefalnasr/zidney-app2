@@ -26,6 +26,8 @@ export type PromocodeErrorCode =
   | 'PROMOCODE_DISCOUNT_EXCEEDS_PLAN'
   | 'PROMOCODE_CODE_ALREADY_EXISTS'
   | 'PROMOCODE_IMMUTABLE_FIELDS'
+  | 'INVALID_PROMOCODE'
+  | 'INTERNAL_ERROR'
 
 // ---------------------------------------------------------------------------
 // HTTP status mapping
@@ -45,6 +47,8 @@ export const PROMOCODE_ERROR_HTTP: Record<PromocodeErrorCode, number> = {
   PROMOCODE_DISCOUNT_EXCEEDS_PLAN: 422,
   PROMOCODE_CODE_ALREADY_EXISTS: 409,
   PROMOCODE_IMMUTABLE_FIELDS: 422,
+  INVALID_PROMOCODE: 422,
+  INTERNAL_ERROR: 500,
 }
 
 // ---------------------------------------------------------------------------

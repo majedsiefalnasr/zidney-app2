@@ -73,6 +73,7 @@ export class PromocodeService {
     input: PromocodeInput,
     _audit: AuditContext
   ): Promise<PromocodeRow> {
+    // TODO: implement audit logging for AuditContext (_audit parameter)
     return repoCreatePromocode(db, input)
   }
 
@@ -108,6 +109,7 @@ export class PromocodeService {
    * Deactivate a promocode (idempotent — no error if already inactive).
    */
   async deactivatePromocode(db: DbClient, id: string, _audit: AuditContext): Promise<PromocodeRow> {
+    // TODO: implement audit logging for AuditContext (_audit parameter)
     return repoDeactivatePromocode(db, id)
   }
 
@@ -143,7 +145,15 @@ export class PromocodeService {
 
     const discountPreview = calculateDiscount(
       result.promocode.type,
-      result.promocode.value !== null ? parseFloat(result.promocode.value) : null,
+      result.promocode.value !== null
+        ? (() => {
+            const parsed = parseFloat(result.promocode.value)
+            if (!Number.isFinite(parsed)) {
+              throw new PromocodeError('INVALID_PROMOCODE', 'Invalid promocode value')
+            }
+            return parsed
+          })()
+        : null,
       result.promocode.free_trial_days,
       planPrice
     )
@@ -174,13 +184,18 @@ export class PromocodeService {
     planPrice: number,
     subscriptionId: string
   ): Promise<{ discount: DiscountResult; usageRow: PromocodeUsageRow }> {
+    // Validate that promocodeId was set in context
+    if (!ctx.promocodeId) {
+      throw new PromocodeError('INTERNAL_ERROR', 'Promocode ID not set in validation context')
+    }
+
     // 1. Lock
-    const locked = await lockPromocodeForUpdate(tx, ctx.promocodeId!)
+    const locked = await lockPromocodeForUpdate(tx, ctx.promocodeId)
 
     // 2. Count usages (parallel — both under the FOR UPDATE lock)
     const [totalUsages, userUsages] = await Promise.all([
-      countTotalUsages(tx, ctx.promocodeId!),
-      countUserUsages(tx, ctx.promocodeId!, ctx.student_id),
+      countTotalUsages(tx, ctx.promocodeId),
+      countUserUsages(tx, ctx.promocodeId, ctx.student_id),
     ])
 
     // 3. Re-validate under lock
@@ -192,14 +207,22 @@ export class PromocodeService {
     // 4. Calculate discount
     const discount = calculateDiscount(
       result.promocode.type,
-      result.promocode.value !== null ? parseFloat(result.promocode.value) : null,
+      result.promocode.value !== null
+        ? (() => {
+            const parsed = parseFloat(result.promocode.value)
+            if (!Number.isFinite(parsed)) {
+              throw new PromocodeError('INVALID_PROMOCODE', 'Invalid promocode value')
+            }
+            return parsed
+          })()
+        : null,
       result.promocode.free_trial_days,
       planPrice
     )
 
     // 5. Insert usage record
     const usageRow = await insertUsage(tx, {
-      promocode_id: ctx.promocodeId!,
+      promocode_id: ctx.promocodeId,
       student_id: ctx.student_id,
       subscription_id: subscriptionId,
       discount_amount: discount.discount_amount,

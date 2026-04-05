@@ -58,9 +58,18 @@ export async function handleListPromocodes(c: Context) {
     })
   } catch (err) {
     const requestId = (c.get('request_id') as string | undefined) ?? null
+    const workspaceSlug = c.get('workspace_slug')
+    const userId = c.get('user_id')
     const safeError = err instanceof Error ? err : new Error(String(err))
-    createLogger('backoffice-promocodes-list').error('Unhandled error in list-promocodes', {
+    logger.error('Unhandled error in list-promocodes', {
+      request_id: requestId,
+      correlation_id: c.get('correlation_id'),
+      workspace_slug: workspaceSlug,
+      user_id: userId,
+      workspace_id: c.get('workspace_id'),
       message: safeError.message,
+      stack: safeError.stack,
+      cause: safeError.cause,
     })
     return c.json(
       {

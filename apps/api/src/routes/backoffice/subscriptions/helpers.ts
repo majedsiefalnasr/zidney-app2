@@ -106,7 +106,10 @@ export async function resolvePromoContext(
 
   // 3. Server-authoritative current time
   const nowRows = await db.query<{ now: Date }>(`SELECT NOW() AS now`)
-  const serverNow = nowRows.rows[0]?.now ?? new Date()
+  if (!nowRows.rows[0]?.now) {
+    throw new Error('Failed to obtain server time from SELECT NOW()')
+  }
+  const serverNow = nowRows.rows[0].now
 
   // 4. Existing promo usage IDs for this student
   const usedRows = await db.query<{ promocode_id: string }>(

@@ -140,9 +140,7 @@
     "repo:doctor": "bun scripts/dev/repo-doctor.ts",
     "repo:fix": "bun scripts/dev/repo-fix.ts",
     "repo:onboard": "bun scripts/dev/repo-onboard.ts",
-    "repo:status": "bun scripts/dev/repo-status.ts",
-    "_other": "Other/Meta utilities",
-    "refactor-scripts": "bun scripts/dev/refactor-scripts.ts"
+    "repo:status": "bun scripts/dev/repo-status.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
@@ -178,6 +176,5 @@
   },
   "overrides": {
     "hono": "4.12.9"
-  },
-  "packageManager": "pnpm@10.12.2+sha512.a32540185b964ee30bb4e979e405adc6af59226b438ee4cc19f9e8773667a66d302f5bfee60a39d3cac69e35e4b96e708a71dd002b7e9359c4112a1722ac323f"
+  }
 }

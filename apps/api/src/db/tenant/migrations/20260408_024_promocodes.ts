@@ -78,7 +78,16 @@ export async function up(client: PoolClient): Promise<void> {
           CHECK (per_user_limit >= 1),
 
         CONSTRAINT promocodes_usage_limit_positive
-          CHECK (usage_limit IS NULL OR usage_limit >= 1)
+          CHECK (usage_limit IS NULL OR usage_limit >= 1),
+
+        CONSTRAINT promocodes_applies_to_plan_ids_array
+          CHECK (jsonb_typeof(applies_to_plan_ids) = 'array'),
+
+        CONSTRAINT promocodes_target_division_ids_array
+          CHECK (target_division_ids IS NULL OR jsonb_typeof(target_division_ids) = 'array'),
+
+        CONSTRAINT promocodes_target_group_ids_array
+          CHECK (target_group_ids IS NULL OR jsonb_typeof(target_group_ids) = 'array')
       )
     `)
 

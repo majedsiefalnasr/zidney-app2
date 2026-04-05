@@ -54,10 +54,10 @@ export async function handleCreatePromocode(c: Context) {
     const db = getDb(c)
     const audit = buildAuditCtx(c)
 
-    // Normalise code to UPPERCASE before passing to service
+    // Normalise code to UPPERCASE and trim whitespace before passing to service
     const input = {
       ...parsed.data,
-      code: parsed.data.code.toUpperCase(),
+      code: parsed.data.code.trim().toUpperCase(),
       value: parsed.data.value ?? undefined,
       free_trial_days: parsed.data.free_trial_days ?? undefined,
       usage_limit: parsed.data.usage_limit ?? undefined,

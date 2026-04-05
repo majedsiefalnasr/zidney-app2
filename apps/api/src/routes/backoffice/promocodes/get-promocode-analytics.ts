@@ -18,18 +18,23 @@ import { getDb, promocodeErrorResponse } from './helpers'
 
 const logger = createLogger('backoffice-promocodes-analytics')
 
-const analyticsQuerySchema = z.object({
-  from: z
-    .string()
-    .datetime({ offset: true })
-    .optional()
-    .transform((v) => (v ? new Date(v) : undefined)),
-  to: z
-    .string()
-    .datetime({ offset: true })
-    .optional()
-    .transform((v) => (v ? new Date(v) : undefined)),
-})
+const analyticsQuerySchema = z
+  .object({
+    from: z
+      .string()
+      .datetime({ offset: true })
+      .optional()
+      .transform((v) => (v ? new Date(v) : undefined)),
+    to: z
+      .string()
+      .datetime({ offset: true })
+      .optional()
+      .transform((v) => (v ? new Date(v) : undefined)),
+  })
+  .refine((data) => !data.from || !data.to || data.from <= data.to, {
+    message: 'Date range invalid: from must be less than or equal to to',
+    path: ['from'],
+  })
 
 export async function handleGetPromocodeAnalytics(c: Context) {
   try {
@@ -61,6 +66,9 @@ export async function handleGetPromocodeAnalytics(c: Context) {
     logger.debug('Get promocode analytics', {
       from: parsed.data.from,
       to: parsed.data.to,
+      request_id: requestId,
+      user_id: c.get('user_id'),
+      workspace_slug: c.get('workspace_slug'),
       correlation_id: c.get('correlation_id'),
       workspace_id: c.get('workspace_id'),
     })

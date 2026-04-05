@@ -61,6 +61,7 @@ export async function handleValidatePromocode(c: Context) {
       code,
       student_id,
       plan_id,
+      user_id: c.get('user_id'),
       correlation_id: c.get('correlation_id'),
       workspace_id: c.get('workspace_id'),
     })
@@ -103,7 +104,10 @@ export async function handleValidatePromocode(c: Context) {
 
     // 3. Get server time (authoritative — do not use client Date.now())
     const nowRows = await db.query<{ now: Date }>(`SELECT NOW() AS now`)
-    const serverNow = nowRows.rows[0]?.now ?? new Date()
+    if (!nowRows.rows[0]?.now) {
+      throw new Error('Failed to retrieve server time')
+    }
+    const serverNow = nowRows.rows[0].now
 
     // 4. Get promocode_ids already used by this student (for stacking + per-user limit checks)
     const usedRows = await db.query<{ promocode_id: string }>(

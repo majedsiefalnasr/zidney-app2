@@ -102,6 +102,7 @@ export function promocodeErrorResponse(c: Context, err: unknown) {
     message: safeError.message,
     code: (safeError as NodeJS.ErrnoException).code,
     request_id: requestId,
+    workspace_id: c.get('workspace_id'),
     workspace_slug: workspaceSlug,
     user_id: userId,
   })

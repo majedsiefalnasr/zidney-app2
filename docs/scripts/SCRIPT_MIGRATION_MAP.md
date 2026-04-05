@@ -97,7 +97,7 @@ in scope files are replaced with `bun run <canonicalTarget>`.
 
 ## v2.0 — Script System Full Refactor (2026-03-30)
 
-> Applied by `bun run refactor-scripts`. Source of truth: `docs/scripts/migration-map.json`
+> Applied by `bun run dev:refactor:scripts`. Source of truth: `docs/scripts/migration-map.json`
 
 ### Format Layer Consolidation (5 entries)
 

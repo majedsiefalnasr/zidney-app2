@@ -44,6 +44,9 @@ export async function handleDeactivatePromocode(c: Context) {
 
     logger.debug('Deactivate promocode', {
       id,
+      request_id: requestId,
+      user_id: c.get('user_id'),
+      workspace_slug: c.get('workspace_slug'),
       correlation_id: c.get('correlation_id'),
       workspace_id: c.get('workspace_id'),
     })

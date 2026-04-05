@@ -67,6 +67,7 @@ promocodesRouter.get(
 
 promocodesRouter.post(
   '/promocodes/validate',
+  createPermissionGuard(logger, PermissionModule.PROMOCODES, 'can_view'),
   async (c, next) => {
     const workspaceId = (c.get('workspace_id') as string) ?? 'unknown'
     const limited = await validateRateLimiter.isLimited(
@@ -91,7 +92,6 @@ promocodesRouter.post(
     }
     await next()
   },
-  createPermissionGuard(logger, PermissionModule.PROMOCODES, 'can_view'),
   handleValidatePromocode
 )
 

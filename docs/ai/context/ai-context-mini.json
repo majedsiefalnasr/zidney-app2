@@ -19,7 +19,7 @@
     },
     {
       "name": "ui",
-      "description": "Ui layer",
+      "description": "UI layer",
       "order": 4
     }
   ],

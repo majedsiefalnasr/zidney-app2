@@ -141,7 +141,7 @@ export async function handleActivateSubscription(c: Context) {
     if (promoCode && promoCtx) {
       const tx = await db.connect()
       try {
-        await tx.query('BEGIN')
+        await tx.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
         const { discount } = await promocodeService.applyPromocode(
           tx,
@@ -175,14 +175,14 @@ export async function handleActivateSubscription(c: Context) {
         })
       } catch (promoErr) {
         await tx.query('ROLLBACK').catch(() => undefined)
-        // Log but do NOT re-throw — subscription was successfully created.
-        // The promo is not consumed so the student can retry.
         logger.error('Promo application failed after subscription creation', {
           subscription_id: record.id,
           code: promoCode,
           error: promoErr instanceof Error ? promoErr.message : String(promoErr),
           correlation_id: correlationId,
         })
+        // Re-throw to abort the handler response — promo failure means the operation failed
+        throw promoErr
       } finally {
         tx.release()
       }
