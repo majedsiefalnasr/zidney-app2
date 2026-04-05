@@ -86,6 +86,7 @@ export const EXCLUDED_NAMES = new Set<string>([
   '_ci',
   '_repo',
   '_other',
+  'calls',
 ])
 
 const REPO_ROOT = process.cwd()

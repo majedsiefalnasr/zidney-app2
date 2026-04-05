@@ -360,4 +360,25 @@ describe('cancelSubscriptionService', () => {
     expect((err as SubscriptionError).code).toBe('SUBSCRIPTION_CANNOT_CANCEL')
     expect(pool._client.release).toHaveBeenCalledTimes(1)
   })
+
+  it('throws SUBSCRIPTION_CANNOT_CANCEL when concurrent UPDATE returns zero rows (race condition)', async () => {
+    const sub = makeSubRecord({ status: 'ACTIVE' })
+
+    const pool = makePool((sql) => {
+      // findSubscriptionById — SELECT FROM subscriptions WHERE id
+      if (sql.includes('FROM subscriptions') && sql.includes('WHERE id'))
+        return { rows: [sub], rowCount: 1 }
+      // cancelSubscription UPDATE subscriptions SET status = 'CANCELED' WHERE id AND status IN ('ACTIVE','PENDING')
+      // Simulate race: another request already canceled this subscription; UPDATE matches zero rows
+      if (sql.includes('UPDATE subscriptions') && sql.includes('CANCELED')) {
+        return { rows: [], rowCount: 0 }
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await cancelSubscriptionService(pool as any, SUB_ID, audit).catch((e) => e)
+    expect(err).toBeInstanceOf(SubscriptionError)
+    expect((err as SubscriptionError).code).toBe('SUBSCRIPTION_CANNOT_CANCEL')
+    expect(pool._client.release).toHaveBeenCalledTimes(1)
+  })
 })

@@ -114,10 +114,9 @@ All 12 mandatory drift criteria pass. Two low-severity warnings are logged but d
 
 ### QA Review
 
-- Unit tests defined: plans.service.test.ts (T012), subscriptions.service.test.ts (T013) ✅
-- Integration tests defined: plans.integration.test.ts (T026), subscriptions.integration.test.ts (T027) ✅
-- Race condition covered: serialization test + unique index test + FOR UPDATE lock test in unit and integration tests ✅
-- Deferred tests noted in test plan ✅
+- Unit tests defined: 23 unit tests across plans and subscriptions domain services, repositories, and error handling ✅
+- Race condition covered: concurrent-cancellation race case covered by unit test (UPDATE returns 0 rows) + unique partial index enforcement + FOR UPDATE lock serialization ✅
+- Deferred scope noted in test plan (integration tests, auto-renew job, payment processing, enforcement middleware mount) ✅
 
 ---
 

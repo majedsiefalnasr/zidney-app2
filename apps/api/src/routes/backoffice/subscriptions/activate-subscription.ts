@@ -12,6 +12,7 @@
 import { activateSubscription } from '@zidney/domain-core/subscriptions'
 import { createLogger } from '@zidney/logger'
 import { createSubscriptionBodySchema } from '@zidney/validation'
+import { randomUUID } from 'crypto'
 import type { Context } from 'hono'
 
 import { buildAuditCtx, getDb, subscriptionErrorResponse } from './helpers'
@@ -20,8 +21,10 @@ const logger = createLogger('backoffice-subscriptions-activate')
 
 export async function handleActivateSubscription(c: Context) {
   try {
-    const requestId = (c.get('request_id') as string | undefined) ?? null
+    const requestId = (c.get('request_id') as string | undefined) ?? randomUUID()
+    c.set('request_id', requestId)
     const workspaceId: string = c.get('workspace_id')
+    const workspaceSlug: string = c.get('workspace_slug') ?? 'unknown'
     const correlationId: string = c.get('correlation_id')
 
     let body: unknown
@@ -76,6 +79,7 @@ export async function handleActivateSubscription(c: Context) {
 
     logger.debug('Activate subscription request', {
       workspace_id: workspaceId,
+      workspace_slug: workspaceSlug,
       user_id: audit.user_id,
       student_id: parsed.data.student_id,
       plan_id: parsed.data.plan_id,

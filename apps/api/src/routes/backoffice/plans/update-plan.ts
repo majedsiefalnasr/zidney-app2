@@ -18,7 +18,10 @@ const logger = createLogger('backoffice-plans-update')
 export async function handleUpdatePlan(c: Context) {
   try {
     const requestId = (c.get('request_id') as string | undefined) ?? randomUUID()
+    c.set('request_id', requestId)
     const workspaceId: string = c.get('workspace_id')
+    const workspaceSlug: string = c.get('workspace_slug') ?? 'unknown'
+    const userId: string = c.get('userId')
     const correlationId: string = c.get('correlation_id')
 
     const idParsed = planIdParamsSchema.safeParse({ id: c.req.param('id') })
@@ -89,7 +92,9 @@ export async function handleUpdatePlan(c: Context) {
 
     logger.debug('Update plan request', {
       workspace_id: workspaceId,
+      workspace_slug: workspaceSlug,
       plan_id: idParsed.data.id,
+      user_id: userId,
       correlation_id: correlationId,
       request_id: requestId,
     })

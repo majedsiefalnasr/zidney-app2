@@ -204,7 +204,16 @@ export async function cancelSubscriptionService(
       )
     }
 
-    // Acquire per-student lock to serialize lifecycle changes
+    // ── Lock ordering ──────────────────────────────────────────────────────
+    // Acquire per-student lock to serialize lifecycle changes. The lock is
+    // acquired AFTER the subscription state transition (cancelSubscription)
+    // to prevent deadlock: we perform the subscription-scoped UPDATE first
+    // (it targets a single subscription row with WHERE status IN ('ACTIVE','PENDING'))
+    // which completes quickly, then acquire the per-student lock to guard
+    // the subsequent student-level consistency work (findActiveSubscriptionByStudent
+    // and syncStudentSubscriptionStatus). The lock is solely to serialize
+    // student status sync logic, not the subscription cancellation itself.
+    // ───────────────────────────────────────────────────────────────────────
     await client.query(`SELECT 1 FROM students WHERE id = $1 FOR UPDATE`, [sub.student_id])
 
     // Re-check for any active subscription after canceling (while holding lock)

@@ -105,53 +105,54 @@ All routes mount via `app.ts` directly (no `backoffice/index.ts` — pattern con
 
 ## Files to Create / Modify
 
-### New Files (33 total)
+### New Files (31 total)
 
-| File                                                                                       | Type               |
-| ------------------------------------------------------------------------------------------ | ------------------ |
-| `apps/api/src/db/tenant/migrations/20260407_023_plans_and_subscriptions.ts`                | Migration          |
-| `apps/api/src/db/tenant/schemas/plans.schema.ts`                                           | Drizzle schema     |
-| `apps/api/src/db/tenant/schemas/subscriptions.schema.ts`                                   | Drizzle schema     |
-| `packages/domain-core/src/plans/plans.types.ts`                                            | Domain types       |
-| `packages/domain-core/src/plans/plans.errors.ts`                                           | Domain errors      |
-| `packages/domain-core/src/plans/plans.repository.ts`                                       | Domain repository  |
-| `packages/domain-core/src/plans/plans.service.ts`                                          | Domain service     |
-| `packages/domain-core/src/plans/index.ts`                                                  | Domain barrel      |
-| `packages/domain-core/src/plans/__tests__/plans.service.test.ts`                           | Unit tests         |
-| `packages/domain-core/src/subscriptions/subscriptions.types.ts`                            | Domain types       |
-| `packages/domain-core/src/subscriptions/subscriptions.errors.ts`                           | Domain errors      |
-| `packages/domain-core/src/subscriptions/subscriptions.repository.ts`                       | Domain repository  |
-| `packages/domain-core/src/subscriptions/subscriptions.service.ts`                          | Domain service     |
-| `packages/domain-core/src/subscriptions/index.ts`                                          | Domain barrel      |
-| `packages/domain-core/src/subscriptions/__tests__/subscriptions.service.test.ts`           | Unit tests         |
-| `packages/validation/src/backoffice/plans.schemas.ts`                                      | Validation schemas |
-| `packages/validation/src/backoffice/subscriptions.schemas.ts`                              | Validation schemas |
-| `apps/api/src/routes/backoffice/plans/helpers.ts`                                          | Route helpers      |
-| `apps/api/src/routes/backoffice/plans/list-plans.ts`                                       | Route handler      |
-| `apps/api/src/routes/backoffice/plans/create-plan.ts`                                      | Route handler      |
-| `apps/api/src/routes/backoffice/plans/get-plan.ts`                                         | Route handler      |
-| `apps/api/src/routes/backoffice/plans/update-plan.ts`                                      | Route handler      |
-| `apps/api/src/routes/backoffice/plans/delete-plan.ts`                                      | Route handler      |
-| `apps/api/src/routes/backoffice/plans/index.ts`                                            | Router index       |
-| `apps/api/src/routes/backoffice/subscriptions/helpers.ts`                                  | Route helpers      |
-| `apps/api/src/routes/backoffice/subscriptions/list-subscriptions.ts`                       | Route handler      |
-| `apps/api/src/routes/backoffice/subscriptions/activate-subscription.ts`                    | Route handler      |
-| `apps/api/src/routes/backoffice/subscriptions/get-subscription.ts`                         | Route handler      |
-| `apps/api/src/routes/backoffice/subscriptions/cancel-subscription.ts`                      | Route handler      |
-| `apps/api/src/routes/backoffice/subscriptions/index.ts`                                    | Router index       |
-| `apps/api/src/middleware/subscription-enforcement.ts`                                      | Middleware         |
-| `apps/api/src/routes/backoffice/plans/__tests__/plans.integration.test.ts`                 | Integration tests  |
-| `apps/api/src/routes/backoffice/subscriptions/__tests__/subscriptions.integration.test.ts` | Integration tests  |
+| File                                                                             | Type               |
+| -------------------------------------------------------------------------------- | ------------------ |
+| `apps/api/src/db/tenant/migrations/20260407_023_plans_and_subscriptions.ts`      | Migration          |
+| `apps/api/src/db/tenant/schemas/plans.schema.ts`                                 | Drizzle schema     |
+| `apps/api/src/db/tenant/schemas/subscriptions.schema.ts`                         | Drizzle schema     |
+| `packages/domain-core/src/plans/plans.types.ts`                                  | Domain types       |
+| `packages/domain-core/src/plans/plans.errors.ts`                                 | Domain errors      |
+| `packages/domain-core/src/plans/plans.repository.ts`                             | Domain repository  |
+| `packages/domain-core/src/plans/plans.service.ts`                                | Domain service     |
+| `packages/domain-core/src/plans/index.ts`                                        | Domain barrel      |
+| `packages/domain-core/src/plans/__tests__/plans.service.test.ts`                 | Unit tests         |
+| `packages/domain-core/src/subscriptions/subscriptions.types.ts`                  | Domain types       |
+| `packages/domain-core/src/subscriptions/subscriptions.errors.ts`                 | Domain errors      |
+| `packages/domain-core/src/subscriptions/subscriptions.repository.ts`             | Domain repository  |
+| `packages/domain-core/src/subscriptions/subscriptions.service.ts`                | Domain service     |
+| `packages/domain-core/src/subscriptions/index.ts`                                | Domain barrel      |
+| `packages/domain-core/src/subscriptions/__tests__/subscriptions.service.test.ts` | Unit tests         |
+| `packages/validation/src/backoffice/plans.schemas.ts`                            | Validation schemas |
+| `packages/validation/src/backoffice/subscriptions.schemas.ts`                    | Validation schemas |
+| `apps/api/src/routes/backoffice/plans/helpers.ts`                                | Route helpers      |
+| `apps/api/src/routes/backoffice/plans/list-plans.ts`                             | Route handler      |
+| `apps/api/src/routes/backoffice/plans/create-plan.ts`                            | Route handler      |
+| `apps/api/src/routes/backoffice/plans/get-plan.ts`                               | Route handler      |
+| `apps/api/src/routes/backoffice/plans/update-plan.ts`                            | Route handler      |
+| `apps/api/src/routes/backoffice/plans/delete-plan.ts`                            | Route handler      |
+| `apps/api/src/routes/backoffice/plans/index.ts`                                  | Router index       |
+| `apps/api/src/routes/backoffice/subscriptions/helpers.ts`                        | Route helpers      |
+| `apps/api/src/routes/backoffice/subscriptions/list-subscriptions.ts`             | Route handler      |
+| `apps/api/src/routes/backoffice/subscriptions/activate-subscription.ts`          | Route handler      |
+| `apps/api/src/routes/backoffice/subscriptions/get-subscription.ts`               | Route handler      |
+| `apps/api/src/routes/backoffice/subscriptions/cancel-subscription.ts`            | Route handler      |
+| `apps/api/src/routes/backoffice/subscriptions/index.ts`                          | Router index       |
+| `apps/api/src/middleware/subscription-enforcement.ts`                            | Middleware         |
 
-### Modified Files (5 total)
+### Modified Files (8 total)
 
-| File                                          | Change                                                     |
-| --------------------------------------------- | ---------------------------------------------------------- |
-| `apps/api/src/db/tenant/schemas/index.ts`     | Add `plans` and `subscriptions` schema exports             |
-| `packages/domain-core/src/rbac/rbac.types.ts` | Add `PLANS` and `SUBSCRIPTIONS` to PermissionModule enum   |
-| `packages/domain-core/src/index.ts`           | Add `plans` and `subscriptions` namespace exports          |
-| `packages/validation/src/backoffice/index.ts` | Add `plans.schemas` and `subscriptions.schemas` re-exports |
-| `apps/api/src/app.ts`                         | Import and mount `plansRouter` and `subscriptionsRouter`   |
+| File                                          | Change                                                                               |
+| --------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `apps/api/src/db/tenant/schemas/index.ts`     | Add `plans` and `subscriptions` schema exports                                       |
+| `packages/domain-core/src/rbac/rbac.types.ts` | Add `PLANS` and `SUBSCRIPTIONS` to PermissionModule enum                             |
+| `packages/domain-core/src/index.ts`           | Add `plans` and `subscriptions` namespace exports                                    |
+| `packages/validation/src/backoffice/index.ts` | Add `plans.schemas` and `subscriptions.schemas` re-exports                           |
+| `apps/api/src/app.ts`                         | Import and mount `plansRouter` and `subscriptionsRouter`                             |
+| `.gitignore`                                  | Scope `plans/` and `subscriptions/` patterns to root-only (exclude from packages/\*) |
+| `apps/api/src/routes/backoffice/roles.ts`     | Add `PLANS` and `SUBSCRIPTIONS` to `MODULE_DISPLAY_NAMES` mapping                    |
+| `packages/domain-core/package.json`           | Add `plans` and `subscriptions` to package exports                                   |
 
 ---
 
@@ -172,6 +173,6 @@ Tasks T001–T027 are defined in detail in `tasks.md` (Step 4 output).
 
 Parallel execution opportunities:
 
-- T005–T008 (plans domain) ‖ T014 (plans validation schema)
-- T009–T012 (subscriptions domain) ‖ T015 (subscriptions validation schema)
-- T017 (plans route handlers) ‖ T019 (subscriptions route handlers) — after domain + validation complete
+- T005–T009 (plans domain) ‖ T012 (plans validation schema)
+- T013–T017 (subscriptions domain) ‖ T018 (subscriptions validation schema)
+- T019–T021 (plans route handlers) ‖ T022–T024 (subscriptions route handlers) — after domain + validation complete

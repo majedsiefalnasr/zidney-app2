@@ -25,9 +25,9 @@
  * ✓ Denial WARN logs have correlation_id, workspace_slug, workspace_id, user_id (SC-010)
  */
 
+import { PermissionModule } from '@zidney/domain-core/rbac'
 import { Hono } from 'hono'
 import { describe, expect, it, vi } from 'vitest'
-
 import { rolesRouter } from '../../../apps/api/src/routes/backoffice/roles'
 import type { BackofficeEnv } from '../../../apps/api/src/routes/backoffice/types'
 
@@ -471,7 +471,7 @@ describe('PATCH /api/v1/backoffice/workspace/staff/:userId/role', () => {
 // ---------------------------------------------------------------------------
 
 describe('GET /api/v1/backoffice/workspace/role-permission-modules', () => {
-  it('returns 200 with module list (12 modules)', async () => {
+  it(`returns 200 with module list (${Object.values(PermissionModule).length} modules)`, async () => {
     const app = createTestApp()
     const res = await app.request('/api/v1/backoffice/workspace/role-permission-modules', {
       method: 'GET',
@@ -479,7 +479,11 @@ describe('GET /api/v1/backoffice/workspace/role-permission-modules', () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.success).toBe(true)
-    expect(body.data.modules).toHaveLength(12)
+    expect(body.data.modules).toHaveLength(Object.values(PermissionModule).length)
+    // Verify new modules are included in the response
+    const moduleKeys = new Set(body.data.modules.map((mod: any) => mod.key))
+    expect(moduleKeys.has(PermissionModule.PLANS)).toBe(true)
+    expect(moduleKeys.has(PermissionModule.SUBSCRIPTIONS)).toBe(true)
     // Each module has key and display_name
     for (const mod of body.data.modules) {
       expect(typeof mod.key).toBe('string')
