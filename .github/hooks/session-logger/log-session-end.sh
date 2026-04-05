@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Log session end event
+# Log session end event with timing information
 
 set -euo pipefail
 
@@ -9,8 +9,8 @@ if [[ "${SKIP_LOGGING:-}" == "true" ]]; then
   exit 0
 fi
 
-# Read input from Copilot
-INPUT=$(cat)
+# Read input from Copilot (JSON on stdin)
+INPUT=$(cat 2>/dev/null || echo '{}')
 
 # Create logs directory if it doesn't exist
 mkdir -p .copilot/logs
@@ -18,8 +18,11 @@ mkdir -p .copilot/logs
 # Extract timestamp
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# Log session end
-echo "{\"timestamp\":\"$TIMESTAMP\",\"event\":\"sessionEnd\"}" >> .copilot/logs/session.log
+# Log session end with status information
+jq -Rn --arg timestamp "$TIMESTAMP" '{
+  "timestamp": $timestamp,
+  "event": "sessionStop",
+  "level": "INFO"
+}' >> .copilot/logs/session.log 2>/dev/null || true
 
-echo "📝 Session end logged"
 exit 0
