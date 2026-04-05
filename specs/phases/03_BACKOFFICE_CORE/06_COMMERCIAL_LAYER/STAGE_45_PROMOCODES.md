@@ -9,18 +9,16 @@ Scope: Workspace-level discount and affiliate code system
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-04-05T00:20:00.000Z
+Last Updated: 2026-04-05T00:30:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Migration 024: `promocodes` + `promocode_usages` tables
-- Domain package: types, errors, repository, validator, calculator, service
-- 8 API endpoints (Hono router, Zod validation, rate limiting on /validate)
-- FOR UPDATE row lock + SERIALIZABLE transaction on code application
-- Stage 44 `activate-subscription.ts` integration point
-- 24 new files + 5 modified files
+- Total: 29 atomic tasks
+- 14 phases: infrastructure → domain → validation schemas → API handlers → subscription integration → tests
+- 5 parallel execution windows identified
+- Critical path: T001 → T004 → T005/T006 → T007/T008/T009 → T010 → T011→T012 → T013 → T016–T022 → T029
 
 Deferred Scope:
 
@@ -31,12 +29,12 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Guardian: PASS (10/10 checks)
-- API Designer: PASS (after route ordering + rate limiting fix)
+- Task set compliant — drift analysis required before implementation
+- Architecture Guardian: PASS
+- API Designer: PASS
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
