@@ -52,6 +52,7 @@ import { lessonsRouter } from './routes/backoffice/lessons'
 import { mcqExamsRouter } from './routes/backoffice/mcq-exams'
 import { mcqQuestionsRouter } from './routes/backoffice/mcq-questions'
 import { plansRouter } from './routes/backoffice/plans/index'
+import { promocodesRouter } from './routes/backoffice/promocodes/index'
 import { rolesRouter } from './routes/backoffice/roles'
 import { scheduledExamsRouter } from './routes/backoffice/scheduled-exams'
 import { semestersRouter } from './routes/backoffice/semesters'
@@ -226,6 +227,9 @@ app.route('/api/v1/backoffice/workspace', plansRouter)
 
 // Subscriptions endpoints — Stage 044, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', subscriptionsRouter)
+
+// Promocodes endpoints — Stage 045, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', promocodesRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade

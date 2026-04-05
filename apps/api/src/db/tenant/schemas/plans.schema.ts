@@ -14,6 +14,7 @@
  * ✓ Tenant DB only — no master DB references
  */
 
+import { sql } from 'drizzle-orm'
 import {
   boolean,
   check,
@@ -22,7 +23,6 @@ import {
   jsonb,
   numeric,
   pgTable,
-  sql,
   text,
   timestamp,
   uuid,

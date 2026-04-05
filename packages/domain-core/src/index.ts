@@ -42,6 +42,8 @@ export * from './migrations/migrate'
 export * from './monitoring/provisioning-metrics'
 // Plans module (Stage 044)
 export * as plans from './plans'
+// Promocodes module (Stage 045)
+export * as promocodes from './promocodes'
 // Provisioning module
 export * from './provisioning/idempotency-handler'
 // Staff module (Stage 041)

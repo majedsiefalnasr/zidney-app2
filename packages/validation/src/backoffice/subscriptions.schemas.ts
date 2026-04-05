@@ -24,6 +24,13 @@ export const createSubscriptionBodySchema = z.object({
     .nullable()
     .describe('Subscription start date'),
   notes: z.string().max(1000).optional().nullable().describe('Optional notes'),
+  promo_code: z
+    .string()
+    .min(1)
+    .max(100)
+    .optional()
+    .nullable()
+    .describe('Optional promocode to apply at subscription creation'),
 })
 
 export type CreateSubscriptionBody = z.infer<typeof createSubscriptionBodySchema>
