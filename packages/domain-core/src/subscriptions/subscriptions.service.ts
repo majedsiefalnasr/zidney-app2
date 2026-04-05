@@ -84,7 +84,8 @@ export async function activateSubscription(
     const existing = await findActiveSubscriptionByStudent(client, input.student_id)
     if (existing) {
       await expireSubscription(client, existing.id)
-      // Note: Don't sync to EXPIRED here — it will be overwritten when creating the new subscription
+      // Sync student subscription_status to EXPIRED for downstream consumers
+      await syncStudentSubscriptionStatus(client, input.student_id, 'EXPIRED')
     }
 
     // 4. Insert new ACTIVE subscription (expires_at computed server-side)
