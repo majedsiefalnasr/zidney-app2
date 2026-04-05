@@ -35,7 +35,11 @@ export function calculateDiscount(
       const raw = (planPrice * value!) / 100
       const discount_amount = Math.floor(raw * 100) / 100
       const final_price = Math.max(0, planPrice - discount_amount)
-      return { discount_amount, final_price }
+      // Normalize final_price to 2 decimals to avoid IEEE-754 precision errors
+      return {
+        discount_amount,
+        final_price: Math.round(final_price * 100) / 100,
+      }
     }
 
     case 'FIXED': {

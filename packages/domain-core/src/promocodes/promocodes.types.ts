@@ -99,6 +99,8 @@ export interface PromocodeValidationContext {
   student_group_id: string | null
   /** Existing promocode IDs already applied to this student's current subscription. */
   existing_promo_ids_on_subscription: string[]
+  /** Whether any existing promo on the subscription has is_stackable=false (for symmetric stacking check). */
+  existing_promos_are_non_stackable?: boolean
   /** Server `NOW()` fetched from DB before validation. */
   server_now: Date
 }

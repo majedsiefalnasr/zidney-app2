@@ -129,12 +129,26 @@ export function validatePromocodeApplication(
     }
   }
 
-  // Check 8 — stacking policy
+  // Check 8 — stacking policy (symmetric: bidirectional check)
+  // Reject if incoming promo is non-stackable AND existing promos exist
   if (!promocode.is_stackable && ctx.existing_promo_ids_on_subscription.length > 0) {
     return {
       valid: false,
       code: 'PROMOCODE_STACKING_NOT_ALLOWED',
       message: 'This promocode cannot be combined with other promotions',
+    }
+  }
+  // Reject if incoming promo IS stackable but ANY existing promo is non-stackable
+  // (to prevent stackable code from layering on non-stackable existing promo)
+  if (
+    promocode.is_stackable &&
+    ctx.existing_promo_ids_on_subscription.length > 0 &&
+    ctx.existing_promos_are_non_stackable
+  ) {
+    return {
+      valid: false,
+      code: 'PROMOCODE_STACKING_NOT_ALLOWED',
+      message: 'This promocode cannot be combined with the existing non-stackable promotion',
     }
   }
 

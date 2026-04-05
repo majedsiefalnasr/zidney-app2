@@ -111,12 +111,22 @@ export async function resolvePromoContext(
   }
   const serverNow = nowRows.rows[0].now
 
-  // 4. Existing promo usage IDs for this student
+  // 4. Existing promo usage IDs for this student and their stackability
   const usedRows = await db.query<{ promocode_id: string }>(
     `SELECT DISTINCT promocode_id FROM promocode_usages WHERE student_id = $1`,
     [studentId]
   )
   const existingPromoIds = usedRows.rows.map((r) => r.promocode_id)
+
+  // Check if any existing promo is non-stackable (for symmetric stacking validation)
+  let existingPromosAreNonStackable = false
+  if (existingPromoIds.length > 0) {
+    const stackabilityRows = await db.query<{ is_stackable: boolean }>(
+      `SELECT is_stackable FROM promocodes WHERE id = ANY($1) AND is_stackable = false LIMIT 1`,
+      [existingPromoIds]
+    )
+    existingPromosAreNonStackable = stackabilityRows.rows.length > 0
+  }
 
   return {
     code: promoCode.toUpperCase(),
@@ -126,6 +136,7 @@ export async function resolvePromoContext(
     student_division_id: student.division_id,
     student_group_id: student.group_id,
     existing_promo_ids_on_subscription: existingPromoIds,
+    existing_promos_are_non_stackable: existingPromosAreNonStackable,
     server_now: serverNow,
   }
 }
