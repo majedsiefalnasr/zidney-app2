@@ -194,7 +194,7 @@ describe('activateSubscription', () => {
     const result = await activateSubscription(pool as any, activateInput, audit)
     expect(result.id).toBe(SUB_ID)
     expect(expireCalled).toBe(true)
-    expect(syncCallCount).toBe(2) // once for EXPIRED, once for ACTIVE
+    expect(syncCallCount).toBe(1) // once for ACTIVE (no longer updates to EXPIRED before inserting replacement)
     expect(pool._client.release).toHaveBeenCalledTimes(1)
   })
 })
@@ -229,12 +229,13 @@ describe('listSubscriptionsService', () => {
   it('returns items and total from repository', async () => {
     const sub = makeSubRecord()
     const pool = makePool((sql) => {
-      if (sql.includes('COUNT(*)')) return { rows: [{ total: '1' }], rowCount: 1 }
+      if (sql.includes('COUNT(*)')) return { rows: [{ count: '1' }], rowCount: 1 }
       return { rows: [sub], rowCount: 1 }
     })
 
     const result = await listSubscriptionsService(pool as any, { page: 1, limit: 20 }, audit)
     expect(result.items).toHaveLength(1)
+    expect(result.total).toBe(1)
   })
 })
 

@@ -1,5 +1,5 @@
 /**
- * Cancel Subscription — POST /subscriptions/:id/cancel
+ * Cancel Subscription — PATCH /subscriptions/:id/cancel
  *
  * File: apps/api/src/routes/backoffice/subscriptions/cancel-subscription.ts
  * Stage: STAGE_44_PLANS_AND_SUBSCRIPTIONS
@@ -50,7 +50,7 @@ export async function handleCancelSubscription(c: Context) {
 
     await cancelSubscriptionService(db, parsed.data.id, audit)
 
-    return c.json({ success: true, data: null, error: null }, 200)
+    return c.json({ success: true, data: null, error: null, request_id: requestId }, 200)
   } catch (err) {
     return subscriptionErrorResponse(c, err)
   }

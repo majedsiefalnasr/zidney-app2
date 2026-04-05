@@ -98,6 +98,17 @@ export async function activateSubscription(
     return subscription
   } catch (err) {
     await client.query('ROLLBACK')
+    // Handle PostgreSQL serialization and unique violation errors
+    if (err && typeof err === 'object') {
+      const maybeErr = err as { code?: string | number }
+      const code = maybeErr.code !== undefined ? String(maybeErr.code) : undefined
+      if (code === '40001' || code === '23505') {
+        throw new SubscriptionError(
+          'SUBSCRIPTION_CONFLICT',
+          'Concurrent subscription activation conflict'
+        )
+      }
+    }
     throw err
   } finally {
     client.release()
@@ -181,8 +192,14 @@ export async function cancelSubscriptionService(
       )
     }
 
+    // Conditional cancellation: only update if currently ACTIVE or PENDING
     await cancelSubscription(client, subscriptionId)
-    await syncStudentSubscriptionStatus(client, sub.student_id, 'NONE')
+
+    // Re-check for any active subscription after canceling
+    const activeAfterCancel = await findActiveSubscriptionByStudent(client, sub.student_id)
+    if (!activeAfterCancel) {
+      await syncStudentSubscriptionStatus(client, sub.student_id, 'NONE')
+    }
 
     await client.query('COMMIT')
   } catch (err) {

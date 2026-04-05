@@ -46,7 +46,7 @@ All 27 tasks completed. No deferrals.
 
 ## Files Changed
 
-### New Files (35)
+### New Files (31)
 
 - `apps/api/src/db/tenant/migrations/20260407_023_plans_and_subscriptions.ts`
 - `apps/api/src/db/tenant/schemas/plans.schema.ts`

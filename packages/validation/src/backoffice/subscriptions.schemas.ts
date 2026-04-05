@@ -14,6 +14,7 @@ export const subscriptionIdParamsSchema = z.object({
 export type SubscriptionIdParams = z.infer<typeof subscriptionIdParamsSchema>
 
 export const createSubscriptionBodySchema = z.object({
+  workspace_id: z.string().uuid().describe('Workspace ID'),
   student_id: z.string().uuid().describe('Student ID'),
   plan_id: z.string().uuid().describe('Plan ID'),
   started_at: z

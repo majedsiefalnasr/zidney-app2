@@ -47,7 +47,7 @@ export async function handleDeletePlan(c: Context) {
 
     await deletePlan(db, workspaceId, parsed.data.id, audit)
 
-    return c.json({ success: true, data: null, error: null }, 200)
+    return c.json({ success: true, data: null, error: null, request_id: requestId }, 200)
   } catch (err) {
     return planErrorResponse(c, err)
   }

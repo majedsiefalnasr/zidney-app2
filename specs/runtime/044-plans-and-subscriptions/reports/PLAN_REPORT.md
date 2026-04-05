@@ -166,9 +166,9 @@ All routes mount via `app.ts` directly (no `backoffice/index.ts` — pattern con
 
 ---
 
-## Implementation Order (24 atomic tasks)
+## Implementation Order (27 atomic tasks)
 
-Tasks T001–T024 are defined in detail in `tasks.md` (Step 4 output).
+Tasks T001–T027 are defined in detail in `tasks.md` (Step 4 output).
 
 Parallel execution opportunities:
 

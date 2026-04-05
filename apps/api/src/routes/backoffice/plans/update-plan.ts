@@ -78,7 +78,7 @@ export async function handleUpdatePlan(c: Context) {
 
     const record = await updatePlanService(db, workspaceId, idParsed.data.id, parsed.data, audit)
 
-    return c.json({ success: true, data: record, error: null }, 200)
+    return c.json({ success: true, data: record, error: null, request_id: requestId }, 200)
   } catch (err) {
     return planErrorResponse(c, err)
   }

@@ -19,6 +19,7 @@ export type SubscriptionErrorCode =
   | 'SUBSCRIPTION_CANNOT_CANCEL'
   | 'SUBSCRIPTION_REQUIRED'
   | 'SUBSCRIPTION_EXPIRED'
+  | 'SUBSCRIPTION_CONFLICT'
 
 // ---------------------------------------------------------------------------
 // HTTP status map
@@ -32,6 +33,7 @@ export const SUBSCRIPTION_ERROR_HTTP: Record<SubscriptionErrorCode, number> = {
   SUBSCRIPTION_CANNOT_CANCEL: 409,
   SUBSCRIPTION_REQUIRED: 422,
   SUBSCRIPTION_EXPIRED: 422,
+  SUBSCRIPTION_CONFLICT: 409,
 }
 
 // ---------------------------------------------------------------------------
