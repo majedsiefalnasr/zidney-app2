@@ -446,6 +446,7 @@ specs/runtime/<STAGE_DIR_NAME>/
 │   ├── PLAN_REPORT.md                     ← orchestrator summary of Step 3
 │   ├── TASKS_REPORT.md                    ← orchestrator summary of Step 4
 │   ├── IMPLEMENT_REPORT.md                ← orchestrator summary of Step 6
+│   ├── LOCAL_CI_REPORT.md                 ← `bun run ci:run-local` detailed pre-closure evidence
 │   └── CLOSURE_REPORT.md                  ← orchestrator summary of Step 7
 │
 ├── audits/
@@ -1206,7 +1207,7 @@ for tpl in commit-pre-step commit-specify commit-clarify commit-plan commit-task
 done
 
 # Report templates
-for tpl in clarify-report-template plan-report-template tasks-report-template analyze-report-template implement-report-template closure-report-template; do
+for tpl in clarify-report-template plan-report-template tasks-report-template analyze-report-template implement-report-template closure-report-template local-ci-report-template; do
   [ -f "specs/templates/reports/${tpl}.md" ] || echo "MISSING: specs/templates/reports/${tpl}.md"
 done
 ```
@@ -1292,10 +1293,66 @@ Phase: <PHASE_CODE> / <SUBPHASE_CODE>
 Started: <ISO_TIMESTAMP_WITH_MILLISECONDS>
 
 ---
+
+## MCP Activity
+
+| Timestamp | MCP / Tool | Intent | Outcome | Notes |
+| --- | --- | --- | --- | --- |
+
+## Skill Activity
+
+| Timestamp | Skill | Purpose | Outcome | Notes |
+| --- | --- | --- | --- | --- |
+
+## Agent Activity
+
+| Timestamp | Agent / Subagent | Trigger | Outcome | Notes |
+| --- | --- | --- | --- | --- |
 ```
 
 3. If file does not exist, create it with the template above.
 4. If data is from the **current stage**, preserve it (supports session resumption).
+
+## Pre.10A — Session Memory Activity Ledger
+
+The session memory file is the append-only activity ledger for the active workflow session.
+
+Required sections inside `.agents/session/session-memory.md`:
+
+```markdown
+# Session Memory
+
+Stage: STAGE <NUMBER> – <STAGE_TITLE>
+Phase: <PHASE_CODE> / <SUBPHASE_CODE>
+Started: <ISO_TIMESTAMP_WITH_MILLISECONDS>
+
+---
+
+## MCP Activity
+
+| Timestamp | MCP / Tool | Intent | Outcome | Notes |
+| --- | --- | --- | --- | --- |
+
+## Skill Activity
+
+| Timestamp | Skill | Purpose | Outcome | Notes |
+| --- | --- | --- | --- | --- |
+
+## Agent Activity
+
+| Timestamp | Agent / Subagent | Trigger | Outcome | Notes |
+| --- | --- | --- | --- | --- |
+```
+
+Logging rules:
+
+1. After every MCP invocation, append one row to `## MCP Activity` with the exact MCP/tool name, the request intent, the result state (`SUCCESS`, `FAILED`, `BLOCKED`, or `SKIPPED`), and a short note or artifact path.
+2. After every skill load or explicit skill use, append one row to `## Skill Activity` with the exact skill name, why it was loaded, the result state, and any affected artifact or workflow step.
+3. After every agent or subagent handoff, quick-mode agent route, or delegated drafting step, append one row to `## Agent Activity` using the exact case-sensitive agent name from the registry.
+4. Append a new row for every usage event. Do not overwrite earlier rows, collapse repeated events, or replace prior history.
+5. If any required section is missing, recreate the section header and table before appending the new row.
+6. When a session is resumed, continue appending to the same tables for that stage instead of resetting them.
+7. If an MCP call or handoff fails, record the failure before retrying or aborting so the session ledger remains complete.
 
 ## Pre.11 — Commit Pre-Step
 
@@ -2706,18 +2763,30 @@ Two commands exist — use the correct one for this gate:
 **Required outcome:** Exit code 0 (all 7 governance steps + all `act` workflow jobs pass)
 **Bypass:** None. This gate is not configurable or skippable. There is no exceptional case.
 
+**Required artifact:** `LOCAL_CI_REPORT.md`
+
+- When the active stage runtime is resolved: `specs/runtime/<STAGE_DIR_NAME>/reports/LOCAL_CI_REPORT.md`
+- When no stage runtime can be resolved: `docs/reports/LOCAL_CI_REPORT.md`
+
 AI must:
 
 1. Run `bun run ci:run-local` from the repository root before marking any stage as PRODUCTION READY.
-2. Confirm exit code = 0.
-3. If any governance step or workflow job fails:
+2. Read the generated `LOCAL_CI_REPORT.md` immediately after the command completes.
+3. Confirm the report metadata block shows all of the following:
+  - `overall_status = PASS`
+  - `exit_code = 0`
+  - `closure_gate_status = PASS`
+  - `ready_for_closure = true`
+4. If the exit code is non-zero or the report lists failures, fix the problems named in the report before continuing.
+5. If any governance step or workflow job fails:
    ```
    ❌ Local CI simulation failed — stage closure blocked.
       Why it matters: All governance steps and CI workflows must pass before a stage is production ready.
-      Failed step: <step name or workflow job name from output>
+    Report: <LOCAL_CI_REPORT path>
+    Failed step(s): <failed_step_names from report metadata>
       Run: bun run ci:run-local to reproduce. Fix the reported failure and re-run.
    ```
-4. Do NOT mark stage PRODUCTION READY until this gate passes.
+6. Do NOT mark stage PRODUCTION READY until this gate passes and the latest report is clean.
 
 **CI Parity Contract:**
 
@@ -2733,7 +2802,7 @@ Known local limitations (not blocking):
 | `hard-mode-guard.yml`         | PARTIAL             | Requires `--env GITHUB_REF=refs/heads/<branch>` for branch context    |
 | `ai-context-validation.yml`   | FULL                | None                                                                  |
 
-**Governance authority:** INFRA-023. See `docs/local-ci.md` for full `act` configuration reference.
+**Governance authority:** INFRA-023. See `docs/ci/local-ci.md` for full `act` configuration reference.
 
 ---
 

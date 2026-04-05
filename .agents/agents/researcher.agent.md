@@ -1,6 +1,6 @@
 ---
 description: "Explores codebase, identifies patterns, maps dependencies, discovers architecture. Use when the user asks to research, explore, analyze code, find patterns, understand architecture, investigate dependencies, or gather context before implementation. Triggers: 'research', 'explore', 'find patterns', 'analyze', 'investigate', 'understand', 'look into'."
-name: researcher
+name: Researcher
 disable-model-invocation: false
 user-invocable: true
 ---

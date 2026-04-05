@@ -1,6 +1,6 @@
 ---
 description: "Writes code using TDD (Red-Green), implements features, fixes bugs, refactors. Use when the user asks to implement, build, create, code, write, fix, or refactor. Never reviews its own work. Triggers: 'implement', 'build', 'create', 'code', 'write', 'fix', 'refactor', 'add feature'."
-name: implementer
+name: Implementer
 disable-model-invocation: false
 user-invocable: true
 ---

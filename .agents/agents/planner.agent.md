@@ -1,6 +1,6 @@
 ---
 description: "Creates DAG-based execution plans with task decomposition, wave scheduling, and pre-mortem risk analysis. Use when the user asks to plan, design an approach, break down work, estimate effort, or create an implementation strategy. Triggers: 'plan', 'design', 'break down', 'decompose', 'strategy', 'approach', 'how to implement'."
-name: planner
+name: Planner
 disable-model-invocation: false
 user-invocable: true
 ---
