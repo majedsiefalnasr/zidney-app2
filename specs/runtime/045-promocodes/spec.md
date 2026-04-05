@@ -748,3 +748,43 @@ Stage 45 is complete when:
 10. Cross-workspace code isolation is verified by tests (tenant DB separation)
 11. Analytics endpoint returns correct redemption counts and revenue impact
 12. `bun run lint && bun run typecheck && bun run test` pass with no new failures
+
+---
+
+## Clarifications
+
+### Session 2026-04-05
+
+- Q: How are race conditions on `usage_limit` resolved — specifically, `SELECT COUNT(*) ... FOR UPDATE` is not valid PostgreSQL syntax; what is the correct locking mechanism? → A: The correct approach is a **two-step lock** inside the SERIALIZABLE transaction: (1) issue `SELECT id FROM promocodes WHERE id = $1 FOR UPDATE` to acquire a row-level exclusive lock on the `promocodes` record, then (2) issue a plain `SELECT COUNT(*) FROM promocode_usages WHERE promocode_id = $1` (no FOR UPDATE on the aggregate — it is unnecessary and invalid). The SERIALIZABLE isolation level combined with the row lock on `promocodes` serializes all concurrent applications of the same code. This replaces the ambiguous phrase "FOR UPDATE lock on the `promocode_usages` aggregate" in FR-10 and FR-11, which is now superseded by this two-step pattern. Both global `usage_limit` and `per_user_limit` checks follow the same pattern (lock `promocodes` row, then count). The same `SELECT ... FOR UPDATE` on `promocodes` covers both counts — it is acquired once per transaction.
+
+- Q: What happens when a `FREE_TRIAL` code is applied to a non-recurring (one-time) plan — at which validation step is this rejected? → A: The `FREE_TRIAL`/`billing_type` check is a **sub-check of Check #6 (Plan Eligibility)**, executed immediately after confirming the plan is in `applies_to_plan_ids`. If the resolved plan's `billing_type != 'recurring'`, validation fails with `PROMOCODE_FREE_TRIAL_REQUIRES_RECURRING` (HTTP 422) before the calculator is invoked. The 7-check table in the Validation Engine section is amended: Check 6 now includes two conditions — (a) plan ID eligibility against `applies_to_plan_ids`, and (b) when `type = 'FREE_TRIAL'`, the plan's `billing_type` must equal `'recurring'`. Both sub-conditions report under Check 6, but use distinct error codes (`PROMOCODE_PLAN_NOT_ELIGIBLE` for (a), `PROMOCODE_FREE_TRIAL_REQUIRES_RECURRING` for (b)).
+
+- Q: How is stacking order determined when multiple codes are applied, and what `redeemed_at` is used for a code being applied in the current transaction? → A: Stacking order is always **existing-codes-first, new-code-last**. Codes already recorded in `promocode_usages` for the subscription are ordered by `redeemed_at ASC`; the code being applied in the current transaction is treated as the final step and receives the current transaction timestamp as its `redeemed_at`. Discount chaining: each sequential code uses the `final_price` output of the previous code as its `plan_price` input. If two or more codes are submitted in a single subscription creation request (not supported in MVP — only one `promo_code` field exists), they would be ordered by their position in the request array. For MVP this is moot: at most one code is applied per subscription creation call; additional stacked codes (applied in subsequent calls to a subscription amendment flow) are not in scope for this stage.
+
+- Q: Are partial stack failures atomic — if one stacked code fails validation inside the transaction, does the entire subscription roll back? → A: Yes. **All-or-nothing atomicity is mandatory.** The SERIALIZABLE transaction wraps the subscription INSERT and all `promocode_usages` INSERTs as a single unit. If any promocode fails re-validation inside the transaction (e.g., the usage limit was just reached by a concurrent request that committed first), the entire transaction is rolled back: no subscription is created and no usage record is inserted. The caller receives a structured error response for the first failing code. There is no partial commit of a subscription without its promo usages, nor a subscription creation with a stale (pre-lock) discount. This applies equally whether one or multiple (future stacking) codes are being applied.
+
+- Q: Does deactivating a code affect already-applied subscriptions, and is the stored `discount_amount` retroactively altered? → A: No retroactive effect. Deactivation (`is_active = false`) affects **only future applications**; it does not alter any existing `promocode_usages` rows, and the `discount_amount` stored at redemption time is immutable. Subscriptions that were created under a now-deactivated code retain their original pricing. The subscription record's `final_price` is never recalculated after the subscription is created. Admin visibility: deactivated codes and their full usage history remain visible in the admin UI (GET `/backoffice/promocodes/:id` continues to return all analytics). `updated_at` on the `promocodes` row is refreshed on deactivation, but no cascade occurs to `promocode_usages` or `subscriptions`.
+
+- Q: What is the complete response envelope for `POST /backoffice/promocodes/validate` when the code is valid? → A: The response follows the platform contract `{ success: true, data: <ValidatePromocodeResponse>, error: null }` where `ValidatePromocodeResponse` is:
+
+  ```typescript
+  interface ValidatePromocodeResponse {
+    valid: true;
+    promocode: {
+      id: string;
+      code: string;
+      type: PromocodeType;
+      value: number | null;
+      free_trial_days: number | null;
+    };
+    discount: {
+      discount_amount: number; // server-calculated
+      final_price: number; // plan_price minus discount_amount
+      free_trial_days?: number; // only present when type = 'FREE_TRIAL'
+    };
+  }
+  ```
+
+  On failure the response is `{ success: false, data: null, error: { code: "<PROMOCODE_*>", message: "..." } }` using the codes from the Error Codes table. The `ValidatePromocodeResponse` type is added to `promocodes.types.ts` and exported from the module index. The `discount` field is the `DiscountResult` shape (renamed to `discount` in the response for client clarity, not a structural change).
+
+- Q: Are analytics data scoped strictly to the current workspace, and does a super-admin cross-workspace aggregation endpoint exist in this stage? → A: Analytics are **strictly workspace-scoped** in this stage. `GET /backoffice/promocodes/analytics` queries only the current tenant's database (resolved via the standard tenant slug pipeline). No cross-workspace aggregation endpoint is defined or planned for this stage. Super-admins accessing this endpoint receive only data from the workspace their session is scoped to — identical to any other admin. Cross-workspace analytics (e.g., platform-wide revenue impact or redemption aggregation) is an explicit non-goal for Stage 45 and must be deferred to a future Platform Intelligence stage. Any AI-generated code that queries multiple tenant DBs in a single analytics request is FORBIDDEN and violates ADR-0001.

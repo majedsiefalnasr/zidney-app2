@@ -9,33 +9,34 @@ Scope: Workspace-level discount and affiliate code system
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-04-05T00:05:00.000Z
+Step: clarify
+Risk Level: MEDIUM
+Last Updated: 2026-04-05T00:10:00.000Z
 
 Scope Defined:
 
 - Workspace-scoped promocode CRUD (Backoffice admin)
 - Discount types: PERCENTAGE, FIXED, FREE_TRIAL
-- 7-check sequential validation engine
-- Usage limit and per-user limit enforcement
-- Targeting by division/group
-- Stacking policy (is_stackable)
-- Transactional usage recording
+- 8-check validation engine (FREE_TRIAL sub-check clarified)
+- FOR UPDATE row lock on promocodes + COUNT on usages (race condition resolved)
+- Stacking order: redeemed_at ASC; all-or-nothing atomicity
+- Validate endpoint response shape fully typed
+- Analytics strictly workspace-scoped
 - Subscription activation integration (Stage 44)
-- Analytics: redemptions, revenue impact, active/expired
 
 Deferred Scope:
 
 - Affiliate marketing logic (explicitly deferred per stability principle)
 - Advanced marketing rules
+- Cross-workspace analytics (forbidden per ADR-0001)
+- Analytics materialization/caching strategy
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
