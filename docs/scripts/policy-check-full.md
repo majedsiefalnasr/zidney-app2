@@ -35,4 +35,4 @@ Supported explicitly in the implementation.
 
 ## Audit Notes
 
-- Isolated worktree run failed before any tracked file changes were observed.
+- Audit attempt failed in isolated worktree: bun run policy:check:full -- --ci exited non-zero before tracked file changes were observed. Output note: │ Policy violations detected │ error: script "policy:check:full" exited with code 1

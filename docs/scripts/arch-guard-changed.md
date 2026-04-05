@@ -31,9 +31,9 @@ No explicit CI handling detected in the implementation.
 
 ## Related Scripts
 
-- Depends on: None
+- Depends on: `ai:context:refresh`, `arch:audit`, `arch:validate:brain`
 - Used by other root scripts: `governance:gate:changed`
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Observed in isolated worktree run: all generated files are attributed to dependency scripts.

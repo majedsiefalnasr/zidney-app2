@@ -35,4 +35,4 @@ Supported explicitly in the implementation.
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Observed in isolated worktree run: no tracked file changes.

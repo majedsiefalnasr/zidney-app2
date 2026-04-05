@@ -31,7 +31,7 @@ No explicit CI handling detected in the implementation.
 
 ## Related Scripts
 
-- Depends on: None
+- Depends on: `ai:context:refresh`, `arch:audit`, `arch:validate:brain`
 - Used by other root scripts: `governance:gate:changed`
 
 ## Audit Notes

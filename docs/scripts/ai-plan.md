@@ -35,4 +35,4 @@ Supported explicitly in the implementation.
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Audit attempt failed in isolated worktree: bun run ai:plan exited non-zero before tracked file changes were observed. Output note: ✖ --task argument is required error: script "ai:plan" exited with code 1

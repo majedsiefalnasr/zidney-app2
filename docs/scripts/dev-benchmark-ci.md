@@ -31,9 +31,9 @@ Dedicated CI runner by name; this entrypoint is already the CI-specific variant.
 
 ## Related Scripts
 
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Observed in isolated worktree run: docs/reports/CI_PERFORMANCE_DASHBOARD.md, docs/reports/CI_PERFORMANCE_REPORT.md.

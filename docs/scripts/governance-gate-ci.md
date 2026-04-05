@@ -36,4 +36,4 @@ Dedicated CI runner by name; this entrypoint is already the CI-specific variant.
 
 ## Audit Notes
 
-- Audit attempt failed in isolated worktree: bun run governance:gate:ci exited non-zero before tracked file changes were observed. Output note: ✖ ::error::Governance gate failed — see output above error: script "governance:gate:ci" exited with code 1
+- Isolated worktree run failed; files touched before failure: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json. Output note: ✖ ::error::Governance gate failed — see output above error: script "governance:gate:ci" exited with code 1

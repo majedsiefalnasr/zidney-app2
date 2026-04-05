@@ -12,7 +12,7 @@ Generates a structured GitNexus context JSON artifact from git state and ai-arch
 
 ## Why It Exists
 
-This runner is currently classified as medium. Not safe to remove directly. Other root scripts depend on it: arch:governance. Its implementation lives in scripts/gitnexus-context.ts and is exposed through the root package.json interface.
+This runner is currently classified as medium. Not safe to remove directly. Other root scripts depend on it: arch:governance, ai:context:refresh-all. Its implementation lives in scripts/gitnexus-context.ts and is exposed through the root package.json interface.
 
 ## Source
 
@@ -31,7 +31,7 @@ Supported explicitly in the implementation.
 ## Related Scripts
 
 - Depends on: None
-- Used by other root scripts: `arch:governance`
+- Used by other root scripts: `arch:governance`, `ai:context:refresh-all`
 
 ## Audit Notes
 

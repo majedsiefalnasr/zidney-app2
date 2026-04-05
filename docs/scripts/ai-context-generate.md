@@ -12,7 +12,7 @@ Generate AI context artifacts (architecture brain, module map, dependency graph)
 
 ## Why It Exists
 
-This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ai-context-validation.yml. Its implementation lives in scripts/generate-ai-context.ts and is exposed through the root package.json interface.
+This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: dev:analyze:directory-sizes, dev:analyze:file-sizes, dev:benchmark:ci, dev:demo:logger, dev:deps:verify, dev:hygiene:report, dev:profile:scripts, dev:refactor:scripts, dev:report:baseline, dev:validate:script-duplication, dev:ai:archive-snapshots, dev:ai:context-artifacts, repo:doctor, repo:fix, repo:onboard, repo:status, refactor-scripts. Its implementation lives in scripts/generate-ai-context.ts and is exposed through the root package.json interface.
 
 ## Source
 
@@ -31,7 +31,7 @@ Supported explicitly in the implementation.
 ## Related Scripts
 
 - Depends on: None
-- Used by other root scripts: None found
+- Used by other root scripts: `dev:analyze:directory-sizes`, `dev:analyze:file-sizes`, `dev:benchmark:ci`, `dev:demo:logger`, `dev:deps:verify`, `dev:hygiene:report`, `dev:profile:scripts`, `dev:refactor:scripts`, `dev:report:baseline`, `dev:validate:script-duplication`, `dev:ai:archive-snapshots`, `dev:ai:context-artifacts`, `repo:doctor`, `repo:fix`, `repo:onboard`, `repo:status`, `refactor-scripts`
 
 ## Audit Notes
 

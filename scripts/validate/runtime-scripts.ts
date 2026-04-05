@@ -38,6 +38,7 @@ export const EXCLUDED_NAMES = new Set<string>([
   // False positives from code literals in spec markdown files
   'references', // plan.md string literal matching false-positive pattern
   'json', // TESTING_GUIDE.md code false-positive pattern
+  'calls',
   // Parsing artifacts from markdown spec formatting
   'biome', // formatting example code
   'governance:', // incomplete domain example
@@ -86,7 +87,6 @@ export const EXCLUDED_NAMES = new Set<string>([
   '_ci',
   '_repo',
   '_other',
-  'calls',
 ])
 
 const REPO_ROOT = process.cwd()

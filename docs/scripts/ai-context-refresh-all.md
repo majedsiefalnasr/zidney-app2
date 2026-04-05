@@ -8,11 +8,11 @@ bun run ai:context:refresh-all
 
 ## Purpose
 
-Execute the registered repository runner for this workflow.
+Run the registered repository task for this area.
 
 ## Why It Exists
 
-It provides a stable root package.json interface over underlying tools or chained child runners.
+This runner is currently classified as critical. Treat as protected. It is a primary quality, build, test, or governance entrypoint. It provides a stable root package.json interface over underlying tools or chained child runners.
 
 ## Source
 
@@ -22,17 +22,17 @@ It provides a stable root package.json interface over underlying tools or chaine
 
 ## CI Behavior
 
-No explicit root-level `--ci` contract was detected for this runner.
+Indirect wrapper; CI behavior depends on child runner(s): arch:gitnexus:context, ai:context:validate, ai:context:refresh, arch:generate.
 
 ## When to Run
 
-- When the corresponding repository workflow requires this root runner.
+- When reproducing CI behavior locally or validating CI-only output paths.
 
 ## Related Scripts
 
-- Depends on: `arch:gitnexus:context`, `ai:context:validate`, `ai:context:refresh`, `arch:generate`
+- Depends on: `ai:context:refresh`, `ai:context:validate`, `arch:generate`, `arch:gitnexus:context`
 - Used by other root scripts: None found
 
 ## Audit Notes
 
-- No isolated execution audit note is currently recorded.
+- Not audited automatically: wrapper or expensive runner with no dedicated tracked-file output contract.

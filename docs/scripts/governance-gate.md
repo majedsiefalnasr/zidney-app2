@@ -35,4 +35,4 @@ Supported explicitly in the implementation; --ci is forwarded to child runners.
 
 ## Audit Notes
 
-- Audit attempt failed in isolated worktree: bun run governance:gate -- --ci exited non-zero before tracked file changes were observed. Failure path was expected: Type Safety via validate:types exited with code 2.
+- Isolated worktree run failed; files touched before failure: docs/ai/context/ai-architecture-brain.json, docs/ai/context/ai-architecture-summary.md, docs/ai/context/ai-context-mini.json, docs/ai/context/ai-dependency-graph.json, docs/ai/context/ai-layer-model.json, docs/ai/context/ai-module-map.json, docs/ai/context/ai-runtime-map.json, docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json. Output note: ✖ • Type Safety (validate:types) — exit code 2 error: script "governance:gate" exited with code 1

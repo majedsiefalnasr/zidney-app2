@@ -30,9 +30,9 @@ No explicit --ci handling detected in the implementation.
 
 ## Related Scripts
 
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Observed in isolated worktree run: docs/ai/context/ARCHIVE_INDEX.md, docs/ai/context/archive/INDEX.json.

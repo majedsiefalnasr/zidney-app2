@@ -46,6 +46,10 @@ const EXCLUDE_DIRS = new Set([
 
 const EXCLUDE_PATH_PREFIXES = ['docs/ai/context/', 'docs/architecture/health/']
 
+// Script names that may appear in prose or comments and should be ignored
+// by the usage validator to avoid false-positives (for example: "bun run calls").
+const EXCLUDE_SCRIPT_NAMES = new Set(['calls'])
+
 /** Matches: bun run [--flags] <script-name> */
 export const USAGE_RE = /bun run (?:--?\S+ )*([\w:.-]+)/g
 
@@ -180,6 +184,7 @@ export function validateUsages(
 
     const usages = extractUsages(filePath, content)
     for (const { name, line } of usages) {
+      if (EXCLUDE_SCRIPT_NAMES.has(name)) continue
       if (!knownScripts.has(name)) {
         violations.push({
           rule: 'script-usage-unknown',

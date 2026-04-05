@@ -30,9 +30,9 @@ No explicit --ci handling detected in the implementation.
 
 ## Related Scripts
 
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Audit attempt failed in isolated worktree: bun run dev:analyze:file-sizes exited non-zero before tracked file changes were observed. Output note: │ Failed 278 (100%) │ error: script "dev:analyze:file-sizes" exited with code 1

@@ -12,7 +12,7 @@ Run the registered repository task for this area.
 
 ## Why It Exists
 
-This runner is currently classified as critical. Do not remove without updating CI or workflow automation. Direct workflow usage found in: .github/workflows/ai-context-validation.yml. It provides a stable root package.json interface over underlying tools or chained child runners.
+This runner is currently classified as critical. Not safe to remove directly. Other root scripts depend on it: ai:context:refresh-all. It provides a stable root package.json interface over underlying tools or chained child runners.
 
 ## Source
 
@@ -30,7 +30,7 @@ Indirect wrapper; CI behavior depends on child runner(s): validate:ai-context-fr
 
 ## Related Scripts
 
-- Depends on: `validate:ai-context-schemas`, `validate:ai-context-fresh`
+- Depends on: `validate:ai-context-fresh`, `validate:ai-context-schemas`
 - Used by other root scripts: `ai:context:refresh-all`
 
 ## Audit Notes

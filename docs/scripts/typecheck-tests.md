@@ -31,7 +31,7 @@ Wrapper-only alias; any CI behavior depends on the underlying CLI rather than a 
 
 ## Related Scripts
 
-- Depends on: `typecheck:src`, `typecheck`
+- Depends on: `typecheck`, `typecheck:src`
 - Used by other root scripts: `typecheck`
 
 ## Audit Notes

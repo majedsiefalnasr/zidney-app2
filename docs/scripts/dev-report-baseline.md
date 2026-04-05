@@ -30,9 +30,9 @@ No explicit --ci handling detected in the implementation.
 
 ## Related Scripts
 
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Observed in isolated worktree run: docs/architecture/ARCHITECTURE_DIAGRAMS.md, docs/architecture/graphs/architecture-graph.html, docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json, docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json, docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md, docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md, docs/reports/infra-audit-report.json.

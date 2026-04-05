@@ -35,4 +35,4 @@ Explicitly rejected in the implementation; this is a local mutation helper and m
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Audit attempt failed in isolated worktree: bun run arch:add-module -- --ci exited non-zero before tracked file changes were observed. Output note: error: script "arch:add-module" exited with code 1

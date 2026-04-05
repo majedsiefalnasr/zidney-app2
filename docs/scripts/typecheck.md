@@ -31,7 +31,7 @@ Indirect wrapper; CI behavior depends on child runner(s): typecheck:src, typeche
 
 ## Related Scripts
 
-- Depends on: `typecheck:tests`, `typecheck:src`
+- Depends on: `typecheck:src`, `typecheck:tests`
 - Used by other root scripts: `typecheck:tests`, `validate:types`
 
 ## Audit Notes

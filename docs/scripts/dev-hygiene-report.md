@@ -30,9 +30,9 @@ Supported explicitly in the implementation.
 
 ## Related Scripts
 
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 
 ## Audit Notes
 
-- Isolated worktree run failed before any tracked file changes were observed.
+- Audit attempt failed in isolated worktree: bun run dev:hygiene:report -- --ci exited non-zero before tracked file changes were observed. Output note: ReferenceError: ROOT is not defined error: script "dev:hygiene:report" exited with code 1

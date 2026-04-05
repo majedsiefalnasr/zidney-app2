@@ -35,4 +35,4 @@ Supported explicitly in the implementation.
 
 ## Audit Notes
 
-- Audit attempt failed in isolated worktree: bun run ai:validate:prompts --ci exited non-zero before tracked file changes were observed.
+- Audit attempt failed in isolated worktree: bun run ai:validate:prompts -- --ci exited non-zero before tracked file changes were observed. Output note: ✖ 40 violation(s) found: error: script "ai:validate:prompts" exited with code 1

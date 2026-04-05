@@ -31,7 +31,7 @@ Indirect wrapper; CI behavior depends on child runner(s): arch:context:changed, 
 
 ## Related Scripts
 
-- Depends on: `arch:context:changed`, `arch:guard:changed`, `arch:guard`
+- Depends on: `arch:context:changed`, `arch:guard`, `arch:guard:changed`
 - Used by other root scripts: None found
 
 ## Audit Notes

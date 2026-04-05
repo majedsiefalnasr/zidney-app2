@@ -31,7 +31,7 @@ Indirect wrapper; CI behavior depends on child runner(s): arch:gitnexus:context,
 
 ## Related Scripts
 
-- Depends on: `arch:gitnexus:context`, `arch:audit`
+- Depends on: `arch:audit`, `arch:gitnexus:context`
 - Used by other root scripts: None found
 
 ## Audit Notes

@@ -35,4 +35,4 @@ Supported explicitly in the implementation; --ci is forwarded only to a strict i
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Isolated worktree run failed; files touched before failure: specs/runtime/044-plans-and-subscriptions/reports/LOCAL_CI_REPORT.md. Output note: ✖ 2 step(s) failed: error: script "ci:run-local" exited with code 1

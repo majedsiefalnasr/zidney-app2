@@ -31,7 +31,7 @@ Indirect wrapper; CI behavior depends on child runner(s): test:e2e:mmc, test:e2e
 
 ## Related Scripts
 
-- Depends on: `test:e2e:frontoffice`, `test:e2e:backoffice`, `test:e2e:mmc`, `test`
+- Depends on: `test`, `test:e2e:backoffice`, `test:e2e:frontoffice`, `test:e2e:mmc`
 - Used by other root scripts: None found
 
 ## Audit Notes

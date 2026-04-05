@@ -30,7 +30,7 @@ Not applicable as a --ci flag; this is a long-running wrapper or service launche
 
 ## Related Scripts
 
-- Depends on: `dev:frontoffice`, `dev:backoffice`, `dev:worker`, `dev:api`, `dev:mmc`, `dev`
+- Depends on: `dev`, `dev:api`, `dev:backoffice`, `dev:frontoffice`, `dev:mmc`, `dev:worker`
 - Used by other root scripts: `dev`
 
 ## Audit Notes

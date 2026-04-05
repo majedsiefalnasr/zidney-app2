@@ -30,9 +30,9 @@ Explicitly rejected in the implementation; this is a local bootstrap command and
 
 ## Related Scripts
 
-- Depends on: None
+- Depends on: `ai:context:generate`, `ai:context:refresh`
 - Used by other root scripts: None found
 
 ## Audit Notes
 
-- Not audited automatically in the isolated execution pass.
+- Audit attempt failed in isolated worktree: bun run repo:onboard -- --ci exited non-zero before tracked file changes were observed. Output note: error: script "repo:onboard" exited with code 1
