@@ -9,20 +9,18 @@ Scope: Workspace-level discount and affiliate code system
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-04-05T00:10:00.000Z
+Last Updated: 2026-04-05T00:20:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Workspace-scoped promocode CRUD (Backoffice admin)
-- Discount types: PERCENTAGE, FIXED, FREE_TRIAL
-- 8-check validation engine (FREE_TRIAL sub-check clarified)
-- FOR UPDATE row lock on promocodes + COUNT on usages (race condition resolved)
-- Stacking order: redeemed_at ASC; all-or-nothing atomicity
-- Validate endpoint response shape fully typed
-- Analytics strictly workspace-scoped
-- Subscription activation integration (Stage 44)
+- Migration 024: `promocodes` + `promocode_usages` tables
+- Domain package: types, errors, repository, validator, calculator, service
+- 8 API endpoints (Hono router, Zod validation, rate limiting on /validate)
+- FOR UPDATE row lock + SERIALIZABLE transaction on code application
+- Stage 44 `activate-subscription.ts` integration point
+- 24 new files + 5 modified files
 
 Deferred Scope:
 
@@ -33,10 +31,12 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Architecture Guardian: PASS (10/10 checks)
+- API Designer: PASS (after route ordering + rate limiting fix)
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
