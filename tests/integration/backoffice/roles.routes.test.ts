@@ -471,7 +471,7 @@ describe('PATCH /api/v1/backoffice/workspace/staff/:userId/role', () => {
 // ---------------------------------------------------------------------------
 
 describe('GET /api/v1/backoffice/workspace/role-permission-modules', () => {
-  it('returns 200 with module list (10 modules)', async () => {
+  it('returns 200 with module list (12 modules)', async () => {
     const app = createTestApp()
     const res = await app.request('/api/v1/backoffice/workspace/role-permission-modules', {
       method: 'GET',
@@ -479,7 +479,7 @@ describe('GET /api/v1/backoffice/workspace/role-permission-modules', () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.success).toBe(true)
-    expect(body.data.modules).toHaveLength(10)
+    expect(body.data.modules).toHaveLength(12)
     // Each module has key and display_name
     for (const mod of body.data.modules) {
       expect(typeof mod.key).toBe('string')
