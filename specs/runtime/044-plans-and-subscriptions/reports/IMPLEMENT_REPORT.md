@@ -80,7 +80,7 @@ All 27 tasks completed. No deferrals.
 - `packages/validation/src/backoffice/plans.schemas.ts`
 - `packages/validation/src/backoffice/subscriptions.schemas.ts`
 
-### Modified Files (7)
+### Modified Files (8)
 
 - `.gitignore` — scope `plans/` to root-only (`/plans/`)
 - `apps/api/src/app.ts` — import + mount plansRouter, subscriptionsRouter

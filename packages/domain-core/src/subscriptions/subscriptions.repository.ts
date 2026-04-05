@@ -168,17 +168,22 @@ export async function expireSubscription(
 
 /**
  * Set a subscription's status to CANCELED in-place.
+ * Only updates if currently ACTIVE or PENDING.
+ * Returns true if the row was updated, false if it was already in a terminal state.
  */
 export async function cancelSubscription(
   client: TransactionClient,
   subscriptionId: string
-): Promise<void> {
-  await client.query(
+): Promise<boolean> {
+  const { rowCount } = await client.query(
     `UPDATE subscriptions
         SET status = 'CANCELED', updated_at = NOW()
-      WHERE id = $1`,
+      WHERE id = $1
+        AND status IN ('ACTIVE', 'PENDING')
+     RETURNING id`,
     [subscriptionId]
   )
+  return (rowCount ?? 0) > 0
 }
 
 /**

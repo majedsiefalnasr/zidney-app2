@@ -135,7 +135,7 @@ All routes mount via `app.ts` directly (no `backoffice/index.ts` — pattern con
 | `apps/api/src/routes/backoffice/plans/index.ts`                                            | Router index       |
 | `apps/api/src/routes/backoffice/subscriptions/helpers.ts`                                  | Route helpers      |
 | `apps/api/src/routes/backoffice/subscriptions/list-subscriptions.ts`                       | Route handler      |
-| `apps/api/src/routes/backoffice/subscriptions/create-subscription.ts`                      | Route handler      |
+| `apps/api/src/routes/backoffice/subscriptions/activate-subscription.ts`                    | Route handler      |
 | `apps/api/src/routes/backoffice/subscriptions/get-subscription.ts`                         | Route handler      |
 | `apps/api/src/routes/backoffice/subscriptions/cancel-subscription.ts`                      | Route handler      |
 | `apps/api/src/routes/backoffice/subscriptions/index.ts`                                    | Router index       |

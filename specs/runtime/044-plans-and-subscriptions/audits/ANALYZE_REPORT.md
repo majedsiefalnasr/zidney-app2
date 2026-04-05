@@ -52,16 +52,22 @@ All 12 mandatory drift criteria pass. Two low-severity warnings are logged but d
 
 ---
 
-### ⚠️ W-02 — No serialization failure retry in activateSubscription
+### ⚠️ W-02 — Serialization failure mapping and observability
 
 **Severity:** Low  
 **Location:** `subscriptions.service.ts` → `activateSubscription`
 
-**Issue:** PostgreSQL can throw `40001 serialization_failure` under SERIALIZABLE isolation when two transactions conflict. The service has no retry loop, so a serialization failure surfaces as a 500 to the client.
+**Issue:** PostgreSQL can throw `40001 serialization_failure` under SERIALIZABLE isolation when two transactions conflict. The service maps both 40001 and 23505 errors to `SubscriptionError('SUBSCRIPTION_CONFLICT')`, which is then mapped to HTTP 409 Conflict in the route handler.
 
-**Why it is not blocking:** This is standard SERIALIZABLE behavior. The unique partial index (`idx_subscriptions_active_per_student`) prevents duplicate active subscriptions at the DB level — the serialization failure is the second line of defense. Clients can retry on 500. Consistent with the existing `createStudent` SERIALIZABLE pattern in Stage 42 (no retry loop either).
+**Why it is not blocking:** The unique partial index (`idx_subscriptions_active_per_student`) prevents duplicate active subscriptions at the DB level — the serialization failure is a secondary safety mechanism. Clients can retry on 409. Error mapping is correct and compliant with the Zidney error contract. Consistent with the existing `createStudent` SERIALIZABLE pattern in Stage 42.
 
-**Recommendation:** Log serialization failures with a distinct error code (`SUBSCRIPTION_ACTIVATION_CONFLICT`) for observability. Retry loop is optional enhancement.
+**Status:** Implemented.
+
+- `packages/domain-core/src/subscriptions/subscriptions.service.ts`: Translates PostgreSQL 40001/23505 into `SubscriptionError('SUBSCRIPTION_CONFLICT')`
+- `apps/api/src/routes/backoffice/subscriptions/helpers.ts`: Maps to HTTP 409 Conflict
+- Clients receive 409 with error code `SUBSCRIPTION_CONFLICT`
+
+**Recommendation:** Verify logs surface the error code for observability. Optional: Add dedicated `SUBSCRIPTION_ACTIVATION_CONFLICT` logging for analytics.
 
 ---
 
@@ -109,8 +115,8 @@ All 12 mandatory drift criteria pass. Two low-severity warnings are logged but d
 ### QA Review
 
 - Unit tests defined: plans.service.test.ts (T012), subscriptions.service.test.ts (T013) ✅
-- Integration tests defined: plans (T026), subscriptions (T027) ✅
-- Race condition covered: serialization test + unique index test in T027 ✅
+- Integration tests defined: plans.integration.test.ts (T026), subscriptions.integration.test.ts (T027) ✅
+- Race condition covered: serialization test + unique index test + FOR UPDATE lock test in unit and integration tests ✅
 - Deferred tests noted in test plan ✅
 
 ---

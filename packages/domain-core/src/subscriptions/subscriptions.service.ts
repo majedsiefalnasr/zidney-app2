@@ -193,9 +193,19 @@ export async function cancelSubscriptionService(
     }
 
     // Conditional cancellation: only update if currently ACTIVE or PENDING
-    await cancelSubscription(client, subscriptionId)
+    const cancelled = await cancelSubscription(client, subscriptionId)
+    if (!cancelled) {
+      // Race: another request already canceled this subscription or it's in a terminal state
+      throw new SubscriptionError(
+        'SUBSCRIPTION_CANNOT_CANCEL',
+        `Subscription is not in a cancellable state (ACTIVE or PENDING) — may have been cancelled concurrently`
+      )
+    }
 
-    // Re-check for any active subscription after canceling
+    // Acquire per-student lock to serialize lifecycle changes
+    await client.query(`SELECT 1 FROM students WHERE id = $1 FOR UPDATE`, [sub.student_id])
+
+    // Re-check for any active subscription after canceling (while holding lock)
     const activeAfterCancel = await findActiveSubscriptionByStudent(client, sub.student_id)
     if (!activeAfterCancel) {
       await syncStudentSubscriptionStatus(client, sub.student_id, 'NONE')

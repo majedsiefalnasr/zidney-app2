@@ -197,6 +197,50 @@ describe('activateSubscription', () => {
     expect(syncCallCount).toBe(1) // once for ACTIVE (no longer updates to EXPIRED before inserting replacement)
     expect(pool._client.release).toHaveBeenCalledTimes(1)
   })
+
+  it('maps PostgreSQL serialization error (40001) to SUBSCRIPTION_CONFLICT', async () => {
+    const pool = makePool((sql) => {
+      // findPlanById
+      if (sql.includes('FROM plans')) return { rows: [makePlanRow()], rowCount: 1 }
+      // findActiveSubscriptionByStudent — no existing ACTIVE sub
+      if (sql.includes('student_id') && sql.includes('FROM subscriptions'))
+        return { rows: [], rowCount: 0 }
+      // insertSubscription throws serialization error
+      if (sql.includes('INSERT INTO subscriptions')) {
+        const err = new Error('serialization_failure')
+        ;(err as any).code = '40001'
+        throw err
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await activateSubscription(pool as any, activateInput, audit).catch((e) => e)
+    expect(err).toBeInstanceOf(SubscriptionError)
+    expect((err as SubscriptionError).code).toBe('SUBSCRIPTION_CONFLICT')
+    expect(pool._client.release).toHaveBeenCalledTimes(1)
+  })
+
+  it('maps PostgreSQL unique violation error (23505) to SUBSCRIPTION_CONFLICT', async () => {
+    const pool = makePool((sql) => {
+      // findPlanById
+      if (sql.includes('FROM plans')) return { rows: [makePlanRow()], rowCount: 1 }
+      // findActiveSubscriptionByStudent — no existing ACTIVE sub
+      if (sql.includes('student_id') && sql.includes('FROM subscriptions'))
+        return { rows: [], rowCount: 0 }
+      // insertSubscription throws unique violation error
+      if (sql.includes('INSERT INTO subscriptions')) {
+        const err = new Error('unique_violation')
+        ;(err as any).code = '23505'
+        throw err
+      }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await activateSubscription(pool as any, activateInput, audit).catch((e) => e)
+    expect(err).toBeInstanceOf(SubscriptionError)
+    expect((err as SubscriptionError).code).toBe('SUBSCRIPTION_CONFLICT')
+    expect(pool._client.release).toHaveBeenCalledTimes(1)
+  })
 })
 
 // ---------------------------------------------------------------------------

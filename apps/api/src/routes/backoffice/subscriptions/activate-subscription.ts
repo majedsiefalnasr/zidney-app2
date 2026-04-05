@@ -58,6 +58,22 @@ export async function handleActivateSubscription(c: Context) {
     const db = getDb(c)
     const audit = buildAuditCtx(c)
 
+    // Enforce tenant isolation: request workspace_id must match context workspace_id
+    if (parsed.data.workspace_id !== workspaceId) {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'Workspace ID in request does not match authenticated workspace',
+          },
+          request_id: requestId,
+        },
+        403
+      )
+    }
+
     logger.debug('Activate subscription request', {
       workspace_id: workspaceId,
       user_id: audit.user_id,

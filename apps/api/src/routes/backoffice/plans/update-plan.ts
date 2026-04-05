@@ -8,6 +8,7 @@
 import { updatePlanService } from '@zidney/domain-core/plans'
 import { createLogger } from '@zidney/logger'
 import { planIdParamsSchema, updatePlanBodySchema } from '@zidney/validation'
+import { randomUUID } from 'crypto'
 import type { Context } from 'hono'
 
 import { buildAuditCtx, getDb, planErrorResponse } from './helpers'
@@ -16,7 +17,7 @@ const logger = createLogger('backoffice-plans-update')
 
 export async function handleUpdatePlan(c: Context) {
   try {
-    const requestId = (c.get('request_id') as string | undefined) ?? null
+    const requestId = (c.get('request_id') as string | undefined) ?? randomUUID()
     const workspaceId: string = c.get('workspace_id')
     const correlationId: string = c.get('correlation_id')
 
@@ -67,6 +68,22 @@ export async function handleUpdatePlan(c: Context) {
       )
     }
 
+    // Reject empty PATCH payloads
+    if (Object.keys(parsed.data || {}).length === 0) {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Empty update payload',
+          },
+          request_id: requestId,
+        },
+        422
+      )
+    }
+
     const db = getDb(c)
     const audit = buildAuditCtx(c)
 
@@ -74,6 +91,7 @@ export async function handleUpdatePlan(c: Context) {
       workspace_id: workspaceId,
       plan_id: idParsed.data.id,
       correlation_id: correlationId,
+      request_id: requestId,
     })
 
     const record = await updatePlanService(db, workspaceId, idParsed.data.id, parsed.data, audit)
