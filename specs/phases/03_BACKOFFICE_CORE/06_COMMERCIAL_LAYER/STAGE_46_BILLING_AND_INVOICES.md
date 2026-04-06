@@ -10,32 +10,32 @@ Scope: Workspace-level billing, invoice lifecycle, and subscription activation i
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-04-06T00:05:00.000Z
+Step: clarify
+Risk Level: HIGH
+Last Updated: 2026-04-06T00:10:00.000Z
 
 Scope Defined:
 
-- Invoice lifecycle system (PENDING → PAID/FAILED/CANCELLED)
-- Gateway payment flow with idempotent webhook
-- Manual payment flow with proof upload and staff approval
-- Paid invoice immutability
-- Subscription activation relay
-- Billing audit log (append-only)
-- Backoffice invoice listing and filtering
+- Invoice lifecycle: PENDING → PAID/FAILED/CANCELLED
+- Gateway payment (webhook + idempotency) and Manual payment (proof + staff approval)
+- Paid invoice immutability enforcement
+- Subscription activation relay with SERIALIZABLE transaction
+- Append-only billing audit logs
+- Backoffice paginated invoice listing with filters
 
 Deferred Scope:
 
 - Refund engine (future stage)
 - Accounting exports (future stage)
 - Multi-currency support (future)
+- Per-tenant gateway configuration (future stage)
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
