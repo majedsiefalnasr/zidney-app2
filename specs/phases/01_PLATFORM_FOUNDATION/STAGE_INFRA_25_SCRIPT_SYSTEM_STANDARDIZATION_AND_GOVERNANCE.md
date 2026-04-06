@@ -389,7 +389,7 @@ bun run <new>
 Run:
 
 ```bash
-bun run refactor-scripts
+bun run dev:refactor:scripts
 bun run validate-script-usage
 ```
 

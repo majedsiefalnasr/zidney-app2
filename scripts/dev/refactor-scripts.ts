@@ -12,7 +12,7 @@
  *   --dry-run to preview changes without writing. Exits 1 if any
  *   unresolved references remain. Writes reports to both
  *   reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
- * @usage bun run refactor-scripts [--dry-run]
+ * @usage bun run dev:refactor:scripts [--dry-run]
  */
 
 import { randomUUID } from 'node:crypto'

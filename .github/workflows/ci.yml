@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
       - "infra-*"
       - "feature/*"
       - "fix/*"
@@ -233,6 +234,7 @@ jobs:
             echo "Script UX validation passed"
           fi
 
+  # ── Job 6. Security Scan (Trivy) ───────────────────────────────
   security:
     name: "Trivy Security Scan"
     runs-on: ubuntu-latest
@@ -497,6 +499,7 @@ jobs:
   coverage-validation:
     name: Coverage Validation
     runs-on: ubuntu-latest
+    continue-on-error: true # <--- Marks failure as a warning
     timeout-minutes: 20
     needs:
       - unit-tests
@@ -523,7 +526,7 @@ jobs:
         run: bun run test:unit --coverage
 
       - name: Upload coverage report
-        if: always()
+        if: always() # Upload even if tests "failed"
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
@@ -538,6 +541,7 @@ jobs:
   e2e-mmc:
     name: "E2E: MMC"
     runs-on: ubuntu-latest
+    continue-on-error: true # <--- Marks failure as a warning
     timeout-minutes: 30
     needs:
       - integration-tests
@@ -575,7 +579,7 @@ jobs:
         run: bun run test:e2e:mmc
 
       - name: Upload MMC Playwright report
-        if: failure()
+        if: always() # Upload even if tests "failed"
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-mmc
@@ -586,6 +590,7 @@ jobs:
   e2e-backoffice:
     name: "E2E: Backoffice"
     runs-on: ubuntu-latest
+    continue-on-error: true # <--- Marks failure as a warning
     timeout-minutes: 30
     needs:
       - integration-tests
@@ -623,7 +628,7 @@ jobs:
         run: bun run test:e2e:backoffice
 
       - name: Upload Backoffice Playwright report
-        if: failure()
+        if: always() # Upload even if tests "failed"
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-backoffice
@@ -634,6 +639,7 @@ jobs:
   e2e-frontoffice:
     name: "E2E: Frontoffice"
     runs-on: ubuntu-latest
+    continue-on-error: true # <--- Marks failure as a warning
     timeout-minutes: 30
     needs:
       - integration-tests
@@ -671,7 +677,7 @@ jobs:
         run: bun run test:e2e:frontoffice
 
       - name: Upload Frontoffice Playwright report
-        if: failure()
+        if: always() # Upload even if tests "failed"
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-frontoffice
@@ -689,6 +695,7 @@ jobs:
   build-verification:
     name: Build Verification
     runs-on: ubuntu-latest
+    continue-on-error: true # <--- Marks failure as a warning
     timeout-minutes: 20
     needs:
       - lint

@@ -139,8 +139,8 @@ describe('PUBLIC_ROUTES', () => {
 // ---------------------------------------------------------------------------
 
 describe('ROUTE_PERMISSION_REGISTRY completeness', () => {
-  it('contains exactly 9 entries', () => {
-    expect(Object.keys(ROUTE_PERMISSION_REGISTRY).length).toBe(9)
+  it('contains exactly 15 entries', () => {
+    expect(Object.keys(ROUTE_PERMISSION_REGISTRY).length).toBe(15)
   })
 
   it('all module keys match known PermissionModule enum values', () => {

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-04T16:57:34.934Z",
+  "generated_at": "2026-04-05T14:07:47.594Z",
   "source_metadata": {
     "module_boundaries_hash": "6493a7d6"
   },
@@ -22,7 +22,7 @@
     },
     {
       "name": "ui",
-      "description": "Ui layer",
+      "description": "UI layer",
       "order": 4
     }
   ],

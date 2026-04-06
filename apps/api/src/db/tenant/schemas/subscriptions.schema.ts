@@ -16,12 +16,13 @@
  * ✓ Tenant DB only — no master DB references
  */
 
+import { sql } from 'drizzle-orm'
 import {
   boolean,
   check,
   index,
+  numeric,
   pgTable,
-  sql,
   text,
   timestamp,
   uniqueIndex,
@@ -65,6 +66,8 @@ export const subscriptions = pgTable(
     gateway_ref: varchar('gateway_ref', { length: 255 }),
     /** Optional administrative note. */
     notes: text('notes'),
+    /** Final price after promocode discount. NULL means no discount was applied. */
+    price_paid: numeric('price_paid', { precision: 10, scale: 2 }),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -95,6 +98,11 @@ export const subscriptions = pgTable(
     validExpiryAfterStart: check(
       'chk_subscriptions_expires_after_start',
       sql`${table.expires_at} > ${table.started_at}`
+    ),
+    /** CHECK: price_paid must be non-negative or NULL. */
+    pricePaidNonNegative: check(
+      'chk_subscriptions_price_paid_non_negative',
+      sql`${table.price_paid} IS NULL OR ${table.price_paid} >= 0`
     ),
   })
 )

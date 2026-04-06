@@ -140,9 +140,7 @@
     "repo:doctor": "bun scripts/dev/repo-doctor.ts",
     "repo:fix": "bun scripts/dev/repo-fix.ts",
     "repo:onboard": "bun scripts/dev/repo-onboard.ts",
-    "repo:status": "bun scripts/dev/repo-status.ts",
-    "_other": "Other/Meta utilities",
-    "refactor-scripts": "bun scripts/dev/refactor-scripts.ts"
+    "repo:status": "bun scripts/dev/repo-status.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",

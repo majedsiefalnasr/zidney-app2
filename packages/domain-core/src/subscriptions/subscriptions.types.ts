@@ -40,6 +40,8 @@ export interface SubscriptionRow {
   payment_method: PaymentMethod
   gateway_ref: string | null
   notes: string | null
+  /** Final price after promocode discount. NULL means no discount was applied. */
+  price_paid: string | number | null
   created_at: Date
   updated_at: Date
 }

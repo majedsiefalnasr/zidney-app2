@@ -78,6 +78,37 @@ export {
   updateDivisionBodySchema,
   updateDivisionStatusBodySchema,
 } from './backoffice/divisions.schemas'
+// Plans domain validation (Stage 044)
+export {
+  type CreatePlanBody,
+  createPlanBodySchema,
+  type ListPlansQuery,
+  listPlansQuerySchema,
+  type PlanIdParams,
+  planIdParamsSchema,
+  type UpdatePlanBody,
+  updatePlanBodySchema,
+} from './backoffice/plans.schemas'
+// Promocodes domain validation (Stage 045)
+export {
+  type CreatePromocodeBody,
+  createPromocodeBodySchema,
+  type ListPromocodesQuery,
+  listPromocodesQuerySchema,
+  type PromocodeIdParams,
+  promocodeIdParamsSchema,
+  type ValidatePromocodeBody,
+  validatePromocodeBodySchema,
+} from './backoffice/promocodes.schemas'
+// Subscriptions domain validation (Stage 044)
+export {
+  type CreateSubscriptionBody,
+  createSubscriptionBodySchema,
+  type ListSubscriptionsQuery,
+  listSubscriptionsQuerySchema,
+  type SubscriptionIdParams,
+  subscriptionIdParamsSchema,
+} from './backoffice/subscriptions.schemas'
 // Master database input validation
 export {
   ValidationError,

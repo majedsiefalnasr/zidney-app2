@@ -3,7 +3,7 @@
 ## Command
 
 ```sh
-bun run refactor-scripts
+bun run dev:refactor:scripts
 ```
 
 ## Purpose
@@ -16,7 +16,7 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Source
 
-- Package runner: `bun run refactor-scripts`
+- Package runner: `bun run dev:refactor:scripts`
 - Implementation: scripts/dev/refactor-scripts.ts
 - Metadata-backed script file: `scripts/dev/refactor-scripts.ts`
 

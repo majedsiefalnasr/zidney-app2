@@ -103,6 +103,46 @@ export const ROUTE_PERMISSION_REGISTRY: Record<string, RoutePermissionEntry> = {
     module: PermissionModule.SETTINGS,
     action: 'can_view',
   },
+
+  // -------------------------------------------------------------------------
+  // Promocode routes (Stage 045)
+  // -------------------------------------------------------------------------
+
+  /** GET /api/v1/backoffice/workspace/promocodes — list promocodes */
+  'GET /api/v1/backoffice/workspace/promocodes': {
+    module: PermissionModule.PROMOCODES,
+    action: 'can_view',
+  },
+
+  /** POST /api/v1/backoffice/workspace/promocodes — create a promocode */
+  'POST /api/v1/backoffice/workspace/promocodes': {
+    module: PermissionModule.PROMOCODES,
+    action: 'can_create',
+  },
+
+  /** GET /api/v1/backoffice/workspace/promocodes/analytics — aggregate analytics */
+  'GET /api/v1/backoffice/workspace/promocodes/analytics': {
+    module: PermissionModule.PROMOCODES,
+    action: 'can_view',
+  },
+
+  /** POST /api/v1/backoffice/workspace/promocodes/validate — validate a code for a student */
+  'POST /api/v1/backoffice/workspace/promocodes/validate': {
+    module: PermissionModule.PROMOCODES,
+    action: 'can_view',
+  },
+
+  /** GET /api/v1/backoffice/workspace/promocodes/:id — fetch single promocode */
+  'GET /api/v1/backoffice/workspace/promocodes/:id': {
+    module: PermissionModule.PROMOCODES,
+    action: 'can_view',
+  },
+
+  /** POST /api/v1/backoffice/workspace/promocodes/:id/deactivate — deactivate */
+  'POST /api/v1/backoffice/workspace/promocodes/:id/deactivate': {
+    module: PermissionModule.PROMOCODES,
+    action: 'can_edit',
+  },
 } as const
 
 // ---------------------------------------------------------------------------
