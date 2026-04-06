@@ -10,14 +10,26 @@ Scope: Workspace-level billing, invoice lifecycle, and subscription activation i
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: HIGH
-Last Updated: 2026-04-06T00:10:00.000Z
+Last Updated: 2026-04-06T00:25:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Invoice lifecycle: PENDING → PAID/FAILED/CANCELLED
-- Gateway payment (webhook + idempotency) and Manual payment (proof + staff approval)
+- Migration 025: invoices + billing_audit_logs tables
+- Domain module: packages/domain-core/src/billing/ (service, repository, errors, webhook)
+- API: 6 backoffice invoice endpoints + 1 public webhook endpoint
+- Transaction boundaries: SERIALIZABLE for all PAID transitions
+- Idempotency: idempotency_key partial index for webhook; activation_date null check for subscriptions
+
+Architecture Governance Compliance:
+
+- Technical plan compliant — task generation authorized
+- Guardian verdicts: Architecture Guardian PASS, API Designer PASS
+
+Notes:
+Technical plan complete. 28 files (22 create + 6 update). Task breakdown in progress.
+
 - Paid invoice immutability enforcement
 - Subscription activation relay with SERIALIZABLE transaction
 - Append-only billing audit logs
