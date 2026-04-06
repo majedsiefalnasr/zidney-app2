@@ -9,19 +9,22 @@ Scope: Workspace-level billing, invoice lifecycle, and subscription activation i
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: HIGH
-Last Updated: 2026-04-06T00:35:00.000Z
+Last Updated: 2026-04-06T00:45:00.000Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all 9 criteria)
+Implementation: AUTHORIZED
 
-- Total: 28 atomic tasks across 14 dependency-ordered waves
-- Wave 1–2: Migration + schemas (T001–T005)
-- Wave 3–6: Domain module — types, errors, repository, webhook service, billing service, barrel (T006–T011)
-- Wave 7–8: Root barrel + validation schemas + validation barrel (T012–T014)
-- Wave 9–12: Route helpers, 7 route handlers, router indexes, app.ts mounts (T015–T025)
-- Wave 13–14: Unit tests + integration tests (T026–T028)
+Scope Authorized:
+
+- Migration 025: invoices + billing_audit_logs tables
+- Domain module: packages/domain-core/src/billing/ (service, repository, errors, webhook)
+- API: 6 backoffice invoice endpoints + 1 gateway-billing webhook endpoint
+- Transaction boundaries: SERIALIZABLE for all PAID transitions
+- Idempotency: idempotency_key partial index + service-level early-return
+- 28 tasks across 14 execution waves
 
 Deferred Scope:
 
@@ -29,10 +32,11 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed — implementation authorized
+- Guardian verdicts: Security PASS, Performance PASS, QA PASS, Code Review PASS
 
 Notes:
-Atomic task set generated (28 tasks). Drift analysis gate pending.
+Full drift analysis passed (9/9). Composite guardian audit PASS (4/4). Implementation gate open.
 
 - Paid invoice immutability enforcement
 - Subscription activation relay with SERIALIZABLE transaction
