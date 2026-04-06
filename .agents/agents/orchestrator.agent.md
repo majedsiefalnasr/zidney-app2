@@ -629,6 +629,79 @@ The orchestrator should cache these capabilities once per session and use the de
 
 ---
 
+# Session Memory Logging Mandate (Operational Requirement)
+
+**This is a hard operational requirement. The orchestrator MUST execute it every time.**
+
+Throughout the workflow steps (Pre-Step through Closure), the orchestrator has embedded logging instructions marked with:
+
+```
+**→ Log to session memory:** ...
+```
+
+These instructions are not optional suggestions. They are executable operational steps. When the orchestrator encounters one of these markers, it MUST:
+
+1. **Actually update `.agents/session/session-memory.md`** with the prescribed row
+2. **Append to the correct table** (MCP Activity, Skill Activity, or Agent Activity)
+3. **Record the exact timestamp, name, intent/reason, outcome, and notes** as specified
+4. **Do this immediately after each action completes**, not "later"
+5. **Never skip or defer logging** because an action was "minor" or "internal"
+
+### How Logging Gets Triggered
+
+The orchestrator will encounter logging instructions at these exact points:
+
+- **After MCP calls** (Context7 MCP, GitNexus, GitHub MCP, Figma MCP, etc.)
+  - Location: Marked with `**→ Log to session memory:**` in sections like 3.1-PRE, 6.3-PRE, etc.
+
+- **After skill loads or invocations** (documentation-writer-protocol, post-implementation-simplification, architecture-intelligence, etc.)
+  - Location: Marked with `**→ Log to session memory (skill invocation):**` in sections like 1.2, 2.2, 3.2, 4.2, 5.2, 6.7, 7.1, 7.2
+
+- **After agent/subagent handoffs** (speckit.specify, speckit.clarify, Architecture Guardian, Security Auditor, etc.)
+  - Location: Marked with `**→ Log to session memory:**` in sections like 1.1, 2.1, 2.1B, 3.1A, 5.1A, 6.6, etc.
+
+### Execution Pattern
+
+When you encounter a logging marker:
+
+1. Read the marker text carefully for the exact table, row values, and outcome status
+2. Open or access `.agents/session/session-memory.md` in the context of the current stage
+3. Parse the table header (MCP Activity, Skill Activity, or Agent Activity)
+4. Append a new row with:
+   - ISO timestamp (current time in UTC)
+   - Exact name (e.g., `speckit.specify`, `documentation-writer-protocol`, `Context7 MCP`)
+   - Intent or purpose (e.g., "Specify step", "Write Plan Report", "Library docs lookup")
+   - Outcome status (e.g., `SUCCESS`, `FAILED`, `BLOCKED`, `SKIPPED`, `PASS`, `PASS/BLOCKED` depending on context)
+   - Brief note (e.g., artifact path, verdict summary, failure reason if applicable)
+5. Ensure the row is appended (not replacing) — preserve all prior history
+6. Continue with the next step in the workflow
+
+### No Exceptions
+
+This requirement applies to:
+- ✅ Every MCP invocation (even if it seems "internal")
+- ✅ Every skill load (especially documentation-writer-protocol which runs multiple times)
+- ✅ Every agent/subagent handoff (including parallel handoffs)
+- ✅ Every retry or failed attempt (FAILED outcomes must be logged just like SUCCESS)
+
+This requirement does NOT apply to:
+- ❌ Internal orchestrator logic (e.g., merging .workflow-state.json)
+- ❌ Git operations (those are logged by git-governance, not session memory)
+- ❌ Schema validation checks that don't invoke agents or MCPs
+- ❌ Terminal commands that are part of skill execution (the skill itself is logged, not each command)
+
+### Why This Matters
+
+Session memory is the audit trail and evidence log for the entire workflow. It is the only record of:
+- **What MCPs were consulted and when**
+- **Which skills were invoked and in what order**
+- **Which agents participated and their verdicts**
+- **What happened at each major decision point**
+
+Without accurate session memory logging, the workflow becomes a black box. The user cannot understand what happened, why decisions were made, or what changed. The session becomes unauditable.
+
+---
+
 # Quick Mode — Keyword Routing
 
 Before entering the standard SpecKit workflow, the orchestrator checks the user's first message for **magic keywords** that route to specialized agents or trigger session flow shortcuts, bypassing the intake form.
@@ -1354,6 +1427,51 @@ Logging rules:
 6. When a session is resumed, continue appending to the same tables for that stage instead of resetting them.
 7. If an MCP call or handoff fails, record the failure before retrying or aborting so the session ledger remains complete.
 
+## Pre.10B — Session Memory Logging Enforcement (Mandatory)
+
+**This is a hard requirement. Do not skip it.**
+
+The orchestrator MUST log every MCP invocation, skill load, and agent/subagent handoff to session memory immediately after execution completes. This is not optional and is not "nice to have" — it is mandatory for session tracking and audit trail.
+
+### When to Log (Key Integration Points)
+
+After **every MCP invocation** (whether SUCCESS, FAILED, BLOCKED, or SKIPPED):
+- Append one row to `## MCP Activity` in `.agents/session/session-memory.md`
+- Record: `<ISO_TIMESTAMP>` | `<MCP_NAME>` | `<INTENT>` | `<OUTCOME>` | `<NOTE>`
+
+After **every skill load or explicit invocation**:
+- Append one row to `## Skill Activity`
+- Record: `<ISO_TIMESTAMP>` | `<SKILL_NAME>` | `<WHY_LOADED>` | `<RESULT>` | `<AFFECTED_STEP_OR_FILE>`
+
+After **every agent/subagent handoff or delegated drafting step**:
+- Append one row to `## Agent Activity`
+- Record: `<ISO_TIMESTAMP>` | `<AGENT_NAME>` | `<TRIGGER>` | `<OUTCOME>` | `<DELIVERABLE_OR_ARTIFACT>`
+
+### Exact Integration Points in Workflow
+
+1. **MCP invocations:** After any tool call (Context7, GitNexus, GitHub MCP, Figma MCP, etc.) completes, log immediately before proceeding.
+2. **Skill loads:** After `read_file` for any `.agents/skills/*/SKILL.md`, log the skill name, purpose, and result before using it.
+3. **Subagent handoffs:** After `/handoff to=<AGENT_NAME>` executes or just before if error expected, log the agent, trigger, and outcome.
+4. **Delegated drafting:** When documentation-writer-protocol, post-implementation-simplification, or other delegated skills run, log them before and after completion.
+
+### No Exceptions
+
+- Do not skip logging because "the event was minor"
+- Do not collapse multiple events into one row — each event gets its own row
+- Do not clear or reset the session memory ledger — only append
+- Do not defer logging to "later" — log immediately after the action completes
+
+### Responsibility
+
+The orchestrator is responsible for this logging. It is not the responsibility of:
+- SpecKit agents
+- Subagents
+- Skills
+- MCPs
+- External tools
+
+The orchestrator owns session memory accuracy.
+
 ## Pre.11 — Commit Pre-Step
 
 Apply Git Hygiene Enforcement:
@@ -1391,6 +1509,8 @@ Phase: <PHASE_NAME>
 
 Apply Handoff Error Protocol after this handoff returns.
 
+**→ Log to session memory:** Append one row to `## Agent Activity`: `speckit.specify` | Specify step | outcome | spec.md path
+
 **What speckit.specify does:**
 
 - Calls `create-new-feature.sh` (branch already exists — this will detect it and use `SPECIFY_FEATURE` env var or current branch)
@@ -1413,6 +1533,8 @@ If ADR is required:
 → STOP and apply ADR Creation Protocol before continuing.
 
 ## 1.2 — Write Specify Report
+
+**→ Log to session memory (skill invocation):** Before applying Documentation Writer Protocol, note: `documentation-writer-protocol` skill will be invoked. After completion, append to `## Skill Activity`: `documentation-writer-protocol` | Write Specify Report | SUCCESS/FAILED | SPECIFY_REPORT.md
 
 Apply Documentation Writer Protocol first.
 
@@ -1503,6 +1625,8 @@ Stage: <STAGE_NAME>
 
 Apply Handoff Error Protocol after this handoff returns.
 
+**→ Log to session memory:** Append one row to `## Agent Activity`: `speckit.clarify` | Clarify step | outcome | clarifications added to spec.md
+
 **What speckit.clarify does:**
 
 - Calls `check-prerequisites.sh --json --paths-only` to locate `FEATURE_SPEC = specs/runtime/<STAGE_DIR_NAME>/spec.md`
@@ -1527,6 +1651,8 @@ Spec: specs/runtime/<STAGE_DIR_NAME>/spec.md
 
 Apply Handoff Error Protocol after this handoff returns.
 
+**→ Log to session memory:** Append one row to `## Agent Activity`: `speckit.checklist` | Checklist generation | outcome | checklists/ directory
+
 **What speckit.checklist does:**
 
 - Reads `spec.md` (including clarifications from 2.1)
@@ -1546,6 +1672,8 @@ If `speckit.checklist` is unavailable, the orchestrator must manually create min
 - [ ] Structured logging used
 
 ## 2.2 — Write Clarify Report
+
+**→ Log to session memory (skill invocation):** Before applying Documentation Writer Protocol, note: `documentation-writer-protocol` skill will be invoked. After completion, append to `## Skill Activity`: `documentation-writer-protocol` | Write Clarify Report | SUCCESS/FAILED | CLARIFY_REPORT.md
 
 Apply Documentation Writer Protocol first.
 
@@ -1639,6 +1767,7 @@ Steps:
 
 1. Scan `spec.md` for external library/framework references.
 2. For each identified third-party dependency, query Context7 MCP to retrieve current API docs, method signatures, and usage patterns.
+   - **→ Log to session memory:** After Context7 MCP returns, append to `## MCP Activity`: `Context7 MCP` | Library docs lookup | SUCCESS/FAILED | libraries retrieved
 3. Pass resolved documentation context to `speckit.plan` as part of the handoff.
 
 This prevents `plan.md` from being generated using stale training-data API knowledge.
@@ -1650,6 +1779,8 @@ Stage: <STAGE_NAME>
 ```
 
 Apply Handoff Error Protocol after this handoff returns.
+
+**→ Log to session memory:** Append one row to `## Agent Activity`: `speckit.plan` | Plan step | outcome | plan.md + research.md (if applicable)
 
 **What speckit.plan does:**
 
@@ -1694,9 +1825,15 @@ Apply Handoff Error Protocol after both handoffs return. Both MUST return `VERDI
    Fix: Remediate all listed violations, then re-run 3.1A guardians before writing PLAN_REPORT.
 ```
 
+**→ Log to session memory:** After both handoffs complete:
+- Append to `## Agent Activity`: `Architecture Guardian` | Plan validation | PASS/BLOCKED | verdict summary
+- Append to `## Agent Activity`: `API Designer` | Plan validation | PASS/BLOCKED | verdict summary
+
 → STOP. Do NOT write PLAN_REPORT or update state. Require full remediation and re-validation.
 
 ## 3.2 — Write Plan Report
+
+**→ Log to session memory (skill invocation):** Before applying Documentation Writer Protocol, note: `documentation-writer-protocol` skill will be invoked. After completion, append to `## Skill Activity`: `documentation-writer-protocol` | Write Plan Report | SUCCESS/FAILED | PLAN_REPORT.md
 
 Apply Documentation Writer Protocol first.
 
@@ -1792,6 +1929,8 @@ Stage: <STAGE_NAME>
 
 Apply Handoff Error Protocol after this handoff returns.
 
+**→ Log to session memory:** Append one row to `## Agent Activity`: `speckit.tasks` | Tasks step | outcome | tasks.md
+
 **What speckit.tasks does:**
 
 - Calls `check-prerequisites.sh --json` to locate `FEATURE_DIR`
@@ -1815,6 +1954,8 @@ Format components:
 After generation, count all `- [ ]` lines and record total as `TASKS_TOTAL`.
 
 ## 4.2 — Write Tasks Report
+
+**→ Log to session memory (skill invocation):** Before applying Documentation Writer Protocol, note: `documentation-writer-protocol` skill will be invoked. After completion, append to `## Skill Activity`: `documentation-writer-protocol` | Write Tasks Report | SUCCESS/FAILED | TASKS_REPORT.md
 
 Apply Documentation Writer Protocol first.
 
@@ -1965,6 +2106,8 @@ Stage: <STAGE_NAME>
 
 Apply Handoff Error Protocol after this handoff returns.
 
+**→ Log to session memory:** Append one row to `## Agent Activity`: `speckit.analyze` | Analyze step (drift audit) | outcome | audits/ANALYZE_REPORT.md
+
 **What speckit.analyze does:**
 
 - Calls `check-prerequisites.sh --json --require-tasks --include-tasks` to locate `FEATURE_DIR`
@@ -1987,6 +2130,12 @@ Audit for: isolation violations, license middleware bypass, snapshot integrity b
 /handoff to=Code Reviewer
 
 Apply Handoff Error Protocol after all four handoffs return. Each MUST return `VERDICT: PASS | BLOCKED`. Group findings by severity: 🚨 Critical | ⚠️ High | ⚡ Medium | ℹ️ Low
+
+**→ Log to session memory (4 agent handoffs):** After all four complete, append to `## Agent Activity`:
+- `Security Auditor` | Analyze step validation | PASS/BLOCKED | verdict summary
+- `Performance Optimizer` | Analyze step validation | PASS/BLOCKED | verdict summary
+- `QA Engineer` | Analyze step validation | PASS/BLOCKED | verdict summary
+- `Code Reviewer` | Analyze step validation | PASS/BLOCKED | verdict summary
 
 ## 5.1B — Composite Verdict Aggregation
 
@@ -2026,6 +2175,8 @@ Status key:
 Remediation is complete only when ALL rows show `✅ Fixed` and there are zero `❌ Remaining` and zero `🆕 New`. Delegate detailed retry state tracking to `.agents/skills/analysis-retry-engine`.
 
 ## 5.2 — Write Analyze Report
+
+**→ Log to session memory (skill invocation):** Before applying Documentation Writer Protocol, note: `documentation-writer-protocol` skill will be invoked. After completion, append to `## Skill Activity`: `documentation-writer-protocol` | Write Analyze Report | SUCCESS/FAILED | ANALYZE_REPORT.md
 
 Apply Documentation Writer Protocol first.
 
@@ -2246,6 +2397,7 @@ Steps:
 
 1. Scan `tasks.md` for tasks referencing external packages (identifiable by import paths, library names, or framework APIs in task descriptions).
 2. For each identified third-party dependency, query Context7 MCP for current API docs, correct method signatures, and any breaking changes.
+   - **→ Log to session memory:** After Context7 MCP returns, append to `## MCP Activity`: `Context7 MCP` | Implementation API lookups | SUCCESS/FAILED | tasks with external deps reviewed
 3. If Context7 returns updated documentation that conflicts with what is written in `plan.md`:
    ```
    ❌ API documentation conflict detected — implementation paused.
@@ -2265,6 +2417,8 @@ Tasks Total: <TASKS_TOTAL>
 ```
 
 Apply Handoff Error Protocol after this handoff returns.
+
+**→ Log to session memory:** Append one row to `## Agent Activity`: `speckit.implement` | Implement step | outcome | <TASKS_COMPLETED>/<TASKS_TOTAL> tasks completed
 
 **What speckit.implement does:**
 
@@ -2435,9 +2589,16 @@ Apply Handoff Error Protocol after all three handoffs return. Each MUST return `
    Fix: Remediate all listed violations, then re-run 6.6 guardians before proceeding to Pre-Closure Review Gate.
 ```
 
+**→ Log to session memory (3 agent handoffs):** After all three complete, append to `## Agent Activity`:
+- `GitHub Actions Expert` | Pre-closure validation | PASS/BLOCKED | CI/CD readiness verdict
+- `DevOps Engineer` | Pre-closure validation | PASS/BLOCKED | deployment readiness verdict
+- `Security Auditor` | Pre-closure validation | PASS/BLOCKED | security hardening verdict
+
 → STOP. Require remediation before Pre-Closure Review Gate.
 
 ## 6.7 — Write Implement Report
+
+**→ Log to session memory (skill invocation):** Before applying Documentation Writer Protocol, note: `documentation-writer-protocol` skill will be invoked. After completion, append to `## Skill Activity`: `documentation-writer-protocol` | Write Implement Report | SUCCESS/FAILED | IMPLEMENT_REPORT.md
 
 Apply Documentation Writer Protocol first.
 
@@ -2862,6 +3023,8 @@ If all validations pass → proceed to 7.1.
 
 ## 7.1 — Write Closure Report
 
+**→ Log to session memory (skill invocation):** Before applying Documentation Writer Protocol, note: `documentation-writer-protocol` skill will be invoked. After completion, append to `## Skill Activity`: `documentation-writer-protocol` | Write Closure Report | SUCCESS/FAILED | CLOSURE_REPORT.md
+
 Apply Documentation Writer Protocol first.
 
 Load `specs/templates/reports/closure-report-template.md`.  
@@ -2869,6 +3032,8 @@ Fill from all prior step outputs and reports.
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/CLOSURE_REPORT.md`
 
 ## 7.2 — Generate Testing Guide
+
+**→ Log to session memory (skill invocation):** Before applying Documentation Writer Protocol, note: `documentation-writer-protocol` skill will be invoked. After completion, append to `## Skill Activity`: `documentation-writer-protocol` | Generate Testing Guide | SUCCESS/FAILED | TESTING_GUIDE.md
 
 Apply Documentation Writer Protocol first.
 
