@@ -1,0 +1,32 @@
+{
+  "stage": "STAGE_UI_04_GLOBAL_ERROR_HANDLING",
+  "phase": "06_UI_APPLICATION_RUNTIME",
+  "stage_dir": "specs/runtime/ui-04-global-error-handling",
+  "stage_file": "specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_04_GLOBAL_ERROR_HANDLING.md",
+  "branch": "spec/ui-04-global-error-handling",
+  "base_branch": "develop",
+  "pkg_manager": "bun",
+  "auto_advance": true,
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "deferred_tasks": [],
+  "guardian_verdicts": {},
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "2026-04-06T00:00:00.000Z",
+  "last_updated": "2026-04-06T00:00:00.000Z",
+  "step_timings": {},
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/ui-04-global-error-handling",
+      "timestamp": "2026-04-06T00:00:00.000Z"
+    }
+  ]
+}
