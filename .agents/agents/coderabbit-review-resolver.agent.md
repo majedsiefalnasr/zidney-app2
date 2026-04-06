@@ -30,6 +30,29 @@ Use these sources. Prioritize them over general knowledge:
 
 # Workflow
 
+## 0. Fetch CodeRabbit Reviews (If Needed)
+
+If you don't already have CodeRabbit review threads, use the following script to fetch them from a GitHub PR:
+
+```bash
+bun run dev:pr:coderabbit <PR_NUMBER> [--resolved|--unresolved] [--json|--md] [--save <dir>] [--include-files] [--max-lines <n>] [--mark-resolved] [--cleanup] [--ai]
+```
+
+**Key Options:**
+- `--unresolved` (default): Show unresolved threads
+- `--resolved`: Show resolved threads instead
+- `--json` / `--md` (default): Output format
+- `--save <dir>`: Save output to a file instead of printing to stdout
+- `--include-files`: Append full file content for referenced files (respects `--max-lines`)
+- `--max-lines <n>` (default: 500): Maximum lines per file block before content is omitted
+- `--mark-resolved`: Mark all matching CodeRabbit threads as resolved after fetching
+- `--cleanup`: Delete the saved output file after marking threads resolved
+- `--ai`: Emit machine-readable JSON summary to stdout for AI processing
+
+**Reference:** See [dev:pr:coderabbit documentation](../../docs/scripts/dev-pr-coderabbit.md) for complete details.
+
+**Requires:** `gh` CLI to be authenticated with your GitHub account.
+
 ## 1. Intake
 
 - Parse the supplied review comments into discrete findings.
@@ -73,6 +96,19 @@ For every finding:
 - Describe the applied fixes.
 - List the prevention updates.
 - Provide a ready-to-use git commit message.
+
+# 7. Mark CodeRabbit Threads Resolved
+
+- When the agent fetched CodeRabbit review threads in Step 0 and has applied and validated fixes for the actionable threads, the agent MUST mark those threads resolved by running:
+
+```bash
+bun run dev:pr:coderabbit <PR_NUMBER> --mark-resolved
+```
+
+- Use the same `<PR_NUMBER>` used when fetching. If `--save <dir>` was used during fetch and you want to preserve or clean the saved file, add `--save <dir>` or `--cleanup` respectively.
+- Only mark threads resolved after the fixes are committed and the focused validation (Step 5) has passed.
+- Requires the `gh` CLI to be authenticated. If the command fails, log the failure, include the error output in the agent report, and escalate to the user instead of retrying indefinitely.
+- Record the action and outcome in the final output summary and include a note in the commit message (for example: "Marked N CodeRabbit threads resolved via dev:pr:coderabbit --mark-resolved").
 
 # Constitutional Constraints
 

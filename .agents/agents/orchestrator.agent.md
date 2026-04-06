@@ -1500,7 +1500,7 @@ Apply the automatic continuation rule before proceeding to Step 1.
 
 ## 1.1 — Execute Specify
 
-/handoff to=speckit.specify
+Use the agent tool to delegate to `speckit.specify` with the following input:
 
 ```
 Stage: <STAGE_NAME>
@@ -1617,7 +1617,7 @@ Apply the automatic continuation rule before proceeding to Step 2.
 
 ## 2.1 — Execute Clarify
 
-/handoff to=speckit.clarify
+Use the agent tool to delegate to `speckit.clarify` with the following input:
 
 ```
 Stage: <STAGE_NAME>
@@ -1642,7 +1642,7 @@ All ambiguities must be resolved before planning.
 
 ## 2.1B — Execute Checklist Generation
 
-/handoff to=speckit.checklist
+Use the agent tool to delegate to `speckit.checklist` with the following input:
 
 ```
 Stage: <STAGE_NAME>
@@ -1772,7 +1772,7 @@ Steps:
 
 This prevents `plan.md` from being generated using stale training-data API knowledge.
 
-/handoff to=speckit.plan
+Use the agent tool to delegate to `speckit.plan` with the following input:
 
 ```
 Stage: <STAGE_NAME>
@@ -1812,8 +1812,17 @@ If plan modifies architecture:
 
 Run in parallel:
 
-/handoff to=Architecture Guardian  
-/handoff to=API Designer
+Use the agent tool to delegate to `Architecture Guardian` with the following input:
+
+```
+Stage: <STAGE_NAME>
+```
+
+Use the agent tool to delegate to `API Designer` with the following input:
+
+```
+Stage: <STAGE_NAME>
+```
 
 Apply Handoff Error Protocol after both handoffs return. Both MUST return `VERDICT: PASS`. If any returns BLOCKED:
 
@@ -1921,7 +1930,7 @@ Apply the automatic continuation rule before proceeding to Step 4.
 
 ## 4.1 — Execute Tasks
 
-/handoff to=speckit.tasks
+Use the agent tool to delegate to `speckit.tasks` with the following input:
 
 ```
 Stage: <STAGE_NAME>
@@ -2098,7 +2107,7 @@ Apply the automatic continuation rule before proceeding to Step 5.
 
 ## 5.1 — Execute Structural Drift Audit
 
-/handoff to=speckit.analyze
+Use the agent tool to delegate to `speckit.analyze` with the following input:
 
 ```
 Stage: <STAGE_NAME>
@@ -2124,10 +2133,29 @@ Audit for: isolation violations, license middleware bypass, snapshot integrity b
 
 ## 5.1A — Composite Guardian Audit (Parallel)
 
-/handoff to=Security Auditor  
-/handoff to=Performance Optimizer  
-/handoff to=QA Engineer  
-/handoff to=Code Reviewer
+Use the agent tool to delegate to `Security Auditor` with the following input:
+
+```
+Stage: <STAGE_NAME>
+```
+
+Use the agent tool to delegate to `Performance Optimizer` with the following input:
+
+```
+Stage: <STAGE_NAME>
+```
+
+Use the agent tool to delegate to `QA Engineer` with the following input:
+
+```
+Stage: <STAGE_NAME>
+```
+
+Use the agent tool to delegate to `Code Reviewer` with the following input:
+
+```
+Stage: <STAGE_NAME>
+```
 
 Apply Handoff Error Protocol after all four handoffs return. Each MUST return `VERDICT: PASS | BLOCKED`. Group findings by severity: 🚨 Critical | ⚠️ High | ⚡ Medium | ℹ️ Low
 
@@ -2521,7 +2549,7 @@ options:
     value: "defer"
 ```
 
-- `continue` → resume speckit.implement from the next incomplete task
+- `continue` → Use the agent tool to delegate to `speckit.implement` to resume from the next incomplete task.
 - `defer` → for each remaining task, show a text input field asking the user to provide a written justification; record all deferrals before continuing
 
 **If `TASKS_COMPLETED = TASKS_TOTAL` (or all remaining formally deferred):** → Proceed to 6.5.
@@ -2575,9 +2603,23 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md`
 
 ## 6.6 — Pre-Closure Guardian Validation (Parallel)
 
-/handoff to=GitHub Actions Expert  
-/handoff to=DevOps Engineer  
-/handoff to=Security Auditor
+Use the agent tool to delegate to `GitHub Actions Expert` with the following input:
+
+```
+Stage: <STAGE_NAME>
+```
+
+Use the agent tool to delegate to `DevOps Engineer` with the following input:
+
+```
+Stage: <STAGE_NAME>
+```
+
+Use the agent tool to delegate to `Security Auditor` with the following input:
+
+```
+Stage: <STAGE_NAME>
+```
 
 Apply Handoff Error Protocol after all three handoffs return. Each MUST return `VERDICT: PASS | BLOCKED`. If any returns BLOCKED:
 
