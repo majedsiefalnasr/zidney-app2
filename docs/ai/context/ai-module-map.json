@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-06T10:09:05.263Z",
+  "generated_at": "2026-04-06T12:14:30.353Z",
   "source_metadata": {
     "module_boundaries_hash": "6493a7d6",
-    "audit_timestamp": "2026-04-06T10:09:05.253Z"
+    "audit_timestamp": "2026-04-06T12:14:30.339Z"
   },
   "modules": {
     "apps/mmc": {

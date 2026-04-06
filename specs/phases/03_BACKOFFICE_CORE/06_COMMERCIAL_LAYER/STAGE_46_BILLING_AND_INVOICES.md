@@ -9,10 +9,10 @@ Scope: Workspace-level billing, invoice lifecycle, and subscription activation i
 
 ## Stage Status
 
-Status: BACKEND CLOSED
-Step: implement
-Risk Level: HIGH
-Last Updated: 2026-04-06T14:05:00.000Z
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: LOW
+Closure Date: 2026-04-06T14:30:00.000Z
 
 Implementation: COMPLETE
 Tasks: 28 / 28 completed
@@ -23,13 +23,16 @@ Scope Closed:
 - Domain module: billing.types, billing.errors, billing.repository, billing.service, webhook.service
 - Validation schemas: packages/validation/src/backoffice/billing.schemas.ts
 - Backoffice routes: create, get, list, approve, cancel, upload-proof (6 endpoints)
-- Webhook route: POST /webhooks/gateway-billing (HMAC-verified)
+- Webhook route: POST /webhooks/billing/gateway (HMAC-verified)
 - Tests: 38/38 passing (17 unit, 8 webhook, 13 integration)
 - Lint: 0 errors | TypeScript: 0 errors
 
 Deferred Scope:
 
 - Refund engine (future stage)
+- Accounting exports (future stage)
+- Multi-currency support (future)
+- Per-tenant gateway configuration (future stage)
 
 Architecture Governance Compliance:
 
@@ -43,25 +46,6 @@ Architecture Governance Compliance:
 
 Notes:
 Backend implementation complete. 28/28 tasks done. No structural backend modifications allowed.
-
-- Paid invoice immutability enforcement
-- Subscription activation relay with SERIALIZABLE transaction
-- Append-only billing audit logs
-- Backoffice paginated invoice listing with filters
-
-Deferred Scope:
-
-- Refund engine (future stage)
-- Accounting exports (future stage)
-- Multi-currency support (future)
-- Per-tenant gateway configuration (future stage)
-
-Architecture Governance Compliance:
-
-- Clarifications resolved — planning authorized
-
-Notes:
-All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
