@@ -9,18 +9,20 @@ UI Foundation — Global Error Boundary & Normalization Layer
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-04-06T00:20:00.000Z
+Last Updated: 2026-04-06T00:35:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Canonical AppError interface in packages/api-client/src/types.ts (retryAfter?: number, no boolean retryable)
+- Canonical AppError interface in packages/api-client (no change to interface, extend ErrorCodes + mapHttpStatusToCode)
+- packages/api-client/src/index.ts: export mapHttpStatusToCode + normalizeResponseError
 - error-normalizer.ts (per-app) with legacy NormalizedError migration guard
-- ErrorBoundary.vue (per-app) wrapping root layout
+- ErrorBoundary.vue (per-app, onErrorCaptured, inject appLogger + isProduction)
 - global-error-handler.ts registered at Step 8.5 of main.ts bootstrap
-- redact-error.ts — production-safe error stripping
-- Logger injected via options from main.ts (never env-var-accessed in handler)
+- redact-error.ts — production-safe, pure function, isProduction param injected
+- Logger + isProduction provided via app.provide() in main.ts before mount
+- 38 total file changes: 2 in packages/api-client, 36 across 3 apps
 
 Deferred Scope:
 
@@ -30,10 +32,12 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Architecture Guardian: PASS — no import boundary violations, no ADR conflicts
+- API Designer: PASS — no API changes, frontend-only stage
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. All architecture decisions locked. Task breakdown in progress.
 
 ---
 
