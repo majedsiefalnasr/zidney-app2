@@ -539,3 +539,63 @@ Stage is complete when ALL of the following are true:
 ## Open Questions
 
 _None at time of spec authoring. All architectural decisions resolved via stage file._
+
+---
+
+## Clarifications
+
+### Session 2026-04-06
+
+**Q1: `retryable: boolean` (STAGE file) vs. `retryAfter?: number` (canonical AppError) — which field conveys transport-level retryability?**
+
+The STAGE file's `AppError` definition includes `retryable?: boolean`. The canonical implementation in `packages/api-client/src/types.ts` exports `retryAfter?: number` with no `retryable` boolean. These two representations conflict.
+
+Clarification: The authoritative source is `packages/api-client/src/types.ts`. The `retryable` field in the STAGE file is a draft artifact that predates the final type. `retryAfter?: number` is the sole signal for transport-level retryability: its presence (with a valid number) indicates the client may retry after that many seconds; its absence means no retry guidance is available. No `retryable` boolean field exists or will be added to `AppError`. The `normalizeError` function must not set or check `retryable`.
+
+Decision: RESOLVED — `retryAfter?: number` from `packages/api-client/src/types.ts` is authoritative. Ignore `retryable` in the STAGE file.
+
+---
+
+**Q2: Is `Logger` in `GlobalErrorHandlerOptions` the type from `@zidney/logger`, and is that package safe to instantiate in browser context given the "no env vars in UI" constitutional constraint?**
+
+TR4 declares `logger?: Logger` in `GlobalErrorHandlerOptions` but does not name the source package. The `@zidney/logger` docs reference `LOG_LEVEL` and `LOG_FORMAT` environment variables, which at first read appears to violate the constitution's "no `import.meta.env` in error handlers" rule.
+
+Clarification: `@zidney/logger` is already used in `apps/frontoffice` (auth.store.ts, role.guard.ts, token-manager.ts) and is Vite-compatible for browser builds. The constitutional rule prohibits reading `import.meta.env` **inside error handler modules** — it does not ban importing a logger that reads env vars at construction time. The correct pattern is: instantiate the logger once in `main.ts` with `createLogger(appName)` and inject it into `registerGlobalErrorHandlers({ ..., logger })`. The `global-error-handler.ts` module itself never calls `import.meta.env`. The `Logger` type in `GlobalErrorHandlerOptions` is `Logger` from `@zidney/logger`.
+
+Decision: RESOLVED — Use `Logger` type from `@zidney/logger`. Create the instance in `main.ts` and inject via options. `global-error-handler.ts` never accesses `import.meta.env` directly.
+
+---
+
+**Q3: Is `toastFromError` in the TR6 main.ts example a deliverable of this stage, or is it illustrative pseudocode?**
+
+TR6 shows:
+
+```ts
+registerGlobalErrorHandlers({ onError: (err) => useToast().add(toastFromError(err)) });
+```
+
+Neither `toastFromError` nor a `useToast` composable is declared as a deliverable anywhere in the spec. AC8.2 explicitly states "mode selection is the responsibility of the calling component/composable, NOT the normalizer."
+
+Clarification: The TR6 snippet is illustrative pseudocode showing the intended injection pattern. `toastFromError` is NOT a deliverable of this stage. The `onError: (error: AppError) => void` callback signature is the only contract this stage defines; the callback body is app-specific and is the responsibility of the integration task. The stage only requires that `registerGlobalErrorHandlers` is wired in `main.ts` with a valid `onError` callback before `app.mount()`. The ui-system package uses `vue-sonner` (via `packages/ui-system/src/components/shadcn-vue/sonner/`) for toasting; a `toastFromError` helper may be built as part of a separate integration task.
+
+Decision: RESOLVED — `toastFromError` is out of scope. TR6 is an integration guide pattern, not a literal deliverable spec.
+
+---
+
+**Q4: Where in the existing 9-step CL-01 `main.ts` bootstrap sequence should `registerGlobalErrorHandlers` be inserted?**
+
+The existing `main.ts` for all three apps follows a strict 9-step CL-01 sequence (Pinia → Router → TokenManager → AuthService → AuthStore → RefreshManager → ApiClient → registerGuards → mount). AC5.6 requires handlers registered before `app.mount()`. The spec does not specify a step number.
+
+Clarification: `registerGlobalErrorHandlers` must be inserted as new **Step 8.5** — after `registerGuards()` (Step 8) and before `app.mount('#app')` (Step 9). This placement ensures that all infrastructure (Pinia, router, stores, API client) is initialized when `window.addEventListener` handlers fire, so the injected `onError` callback can safely reference initialized composables and stores. Registering earlier (e.g., before Pinia at Step 0) is technically valid for capturing events but would prevent `onError` from accessing any app context. Step 8.5 is the correct position.
+
+Decision: RESOLVED — Insert as Step 8.5 in `main.ts`, between `registerGuards` and `app.mount('#app')`. Update bootstrap step comments accordingly.
+
+---
+
+**Q5: Should the migrated `error-normalizer.ts` gracefully reconstruct `AppError` from legacy `NormalizedError` objects (which lack `isNetworkError`), or hard-reject them?**
+
+All three apps' existing `error-normalizer.ts` uses a duck-typed passthrough: any `{ code: string, httpStatus: number }` object passes through unchanged. After migration, the new normalizer will use `isAppError()` from `@zidney/api-client`, which also requires `isNetworkError: boolean`. A legacy `NormalizedError` object (with `code`, `message`, `httpStatus` but no `isNetworkError`) will fail `isAppError()` and fall through to the unknown-shape fallback — losing its original `code` and becoming `UNKNOWN_ERROR`.
+
+Clarification: The migrated normalizer must NOT let old `NormalizedError` objects fall to the `UNKNOWN_ERROR` fallback. Structural detection should use two sequential guards: first `isAppError()` (full AppError pass-through), then a secondary check for `{ code: string, httpStatus: number }` without `isNetworkError` — treating these as legacy shapes and reconstructing them as `AppError` with `isNetworkError: false`, `retryAfter: undefined`. This is safe because all existing `NormalizedError` objects originate from HTTP responses (not network failures), so `isNetworkError: false` is semantically correct. All throw sites emitting `NormalizedError` must be updated in the same implementation pass; the secondary guard is a safety net for any missed sites, not a permanent compatibility layer.
+
+Decision: RESOLVED — Add a secondary structural guard in each `error-normalizer.ts` to reconstruct legacy `NormalizedError` shapes as `AppError` with `isNetworkError: false`. Remove the secondary guard once all throw sites are confirmed migrated.

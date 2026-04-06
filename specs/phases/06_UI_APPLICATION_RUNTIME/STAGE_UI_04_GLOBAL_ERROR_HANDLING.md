@@ -9,32 +9,31 @@ UI Foundation — Global Error Boundary & Normalization Layer
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-04-06T00:10:00.000Z
+Step: clarify
+Risk Level: MEDIUM
+Last Updated: 2026-04-06T00:20:00.000Z
 
 Scope Defined:
 
-- Canonical AppError interface in packages/api-client/src/types.ts
-- error-normalizer.ts (per-app) accepting unknown input → AppError
+- Canonical AppError interface in packages/api-client/src/types.ts (retryAfter?: number, no boolean retryable)
+- error-normalizer.ts (per-app) with legacy NormalizedError migration guard
 - ErrorBoundary.vue (per-app) wrapping root layout
-- global-error-handler.ts (per-app) for unhandled rejections
+- global-error-handler.ts registered at Step 8.5 of main.ts bootstrap
 - redact-error.ts — production-safe error stripping
-- HTTP status mapping (400/401/403/404/409/423/426/429/500+)
+- Logger injected via options from main.ts (never env-var-accessed in handler)
 
 Deferred Scope:
 
 - Business-specific error UI (exam/license/affiliate copy)
+- toastFromError integration (consumer responsibility)
 - Offline detection / service worker errors
-- Admin error reporting dashboards
-- Auto-retry business flows
 
 Architecture Governance Compliance:
 
-- Specification drafted — governance audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
