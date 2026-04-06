@@ -176,7 +176,7 @@ Added validation check to spec artifact generation:
 
 ## Commit Message
 
-```
+```text
 fix(stage-46): Align billing stage docs, test paths, and webhook routes
 
 Remediate CodeRabbit PR #91 findings:

@@ -420,5 +420,8 @@ describe('PATCH /api/v1/backoffice/workspace/invoices/:id/cancel', () => {
       body: JSON.stringify({}),
     })
     expect(res.status).toBe(422)
+    const body = await res.json()
+    expect(body.success).toBe(false)
+    expect(body.error.code).toBe('VALIDATION_ERROR')
   })
 })

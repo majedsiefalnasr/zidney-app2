@@ -37,7 +37,7 @@
 | T010 | 5    | —        | US1        | Create billing service                          | `packages/domain-core/src/billing/billing.service.ts`                    |
 | T011 | 6    | —        | —          | Create billing domain barrel                    | `packages/domain-core/src/billing/index.ts`                              |
 | T012 | 7    | ✅       | —          | Update domain-core root barrel                  | `packages/domain-core/src/index.ts`                                      |
-| T013 | 7    | ✅       | —          | Create invoices validation schemas              | `packages/validation/src/backoffice/invoices.schemas.ts`                 |
+| T013 | 7    | ✅       | —          | Create invoices validation schemas              | `packages/validation/src/backoffice/billing.schemas.ts`                  |
 | T014 | 8    | —        | —          | Update validation backoffice barrel             | `packages/validation/src/backoffice/index.ts`                            |
 | T015 | 9    | —        | —          | Create invoices route helpers                   | `apps/api/src/routes/backoffice/invoices/helpers.ts`                     |
 | T016 | 10   | ✅       | US2        | Create list-invoices handler                    | `apps/api/src/routes/backoffice/invoices/list-invoices.ts`               |
