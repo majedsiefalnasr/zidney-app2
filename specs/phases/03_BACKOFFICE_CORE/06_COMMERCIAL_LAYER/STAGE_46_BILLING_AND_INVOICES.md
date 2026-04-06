@@ -9,22 +9,23 @@ Scope: Workspace-level billing, invoice lifecycle, and subscription activation i
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: HIGH
-Last Updated: 2026-04-06T00:45:00.000Z
+Last Updated: 2026-04-06T14:05:00.000Z
 
-Drift Analysis: PASSED (all 9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 28 / 28 completed
 
-Scope Authorized:
+Scope Closed:
 
-- Migration 025: invoices + billing_audit_logs tables
-- Domain module: packages/domain-core/src/billing/ (service, repository, errors, webhook)
-- API: 6 backoffice invoice endpoints + 1 gateway-billing webhook endpoint
-- Transaction boundaries: SERIALIZABLE for all PAID transitions
-- Idempotency: idempotency_key partial index + service-level early-return
-- 28 tasks across 14 execution waves
+- Migration 025: invoices + billing_audit_logs tables (forward-only)
+- Domain module: billing.types, billing.errors, billing.repository, billing.service, webhook.service
+- Validation schemas: packages/validation/src/backoffice/billing.schemas.ts
+- Backoffice routes: create, get, list, approve, cancel, upload-proof (6 endpoints)
+- Webhook route: POST /webhooks/gateway-billing (HMAC-verified)
+- Tests: 38/38 passing (17 unit, 8 webhook, 13 integration)
+- Lint: 0 errors | TypeScript: 0 errors
 
 Deferred Scope:
 
@@ -32,11 +33,16 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- All drift criteria passed — implementation authorized
-- Guardian verdicts: Security PASS, Performance PASS, QA PASS, Code Review PASS
+- ADR alignment verified
+- Tenant isolation enforced (no cross-tenant queries)
+- License middleware applied on all workspace routes
+- All writes transactional (BEGIN/COMMIT/ROLLBACK)
+- SERIALIZABLE isolation for PAID transitions
+- Server-authoritative time via DB NOW()
+- Idempotency enforced via idempotency_key
 
 Notes:
-Full drift analysis passed (9/9). Composite guardian audit PASS (4/4). Implementation gate open.
+Backend implementation complete. 28/28 tasks done. No structural backend modifications allowed.
 
 - Paid invoice immutability enforcement
 - Subscription activation relay with SERIALIZABLE transaction
