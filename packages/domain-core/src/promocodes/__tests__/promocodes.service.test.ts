@@ -270,8 +270,11 @@ describe('PromocodeService.applyPromocode', () => {
     // applyPromocode takes a TransactionClient (has query + release, no connect)
     const txClient = {
       query: vi.fn(async (sql: string, _params?: unknown[]) => {
-        const tx = ['BEGIN', 'COMMIT', 'ROLLBACK']
-        if (tx.includes((sql ?? '').trim())) return { rows: [], rowCount: 0 }
+        // Fail fast if applyPromocode attempts transaction control
+        const txKeywords = ['BEGIN', 'COMMIT', 'ROLLBACK']
+        if (txKeywords.includes((sql ?? '').trim())) {
+          throw new Error(`applyPromocode must not manage transaction boundaries: ${sql?.trim()}`)
+        }
         if (sql.includes('INSERT INTO promocode_usages')) return { rows: [usageRow], rowCount: 1 }
         if (sql.includes('FOR UPDATE')) return { rows: [row], rowCount: 1 } // lockPromocodeForUpdate
         if (sql.includes('COUNT(*)') || sql.includes('promocode_usages')) {

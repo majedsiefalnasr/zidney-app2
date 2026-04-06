@@ -143,10 +143,18 @@ export async function handleActivateSubscription(c: Context) {
       try {
         await tx.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
+        // Re-read the authoritative plan price inside the transaction to avoid
+        // stale price calculations if the plan was modified between Phase 1 and Phase 3.
+        const freshPriceRow = await tx.query<{ price: string }>(
+          `SELECT price FROM plans WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,
+          [parsed.data.plan_id]
+        )
+        const freshPlanPrice = parseFloat(freshPriceRow.rows[0]?.price ?? '0')
+
         const { discount } = await promocodeService.applyPromocode(
           tx,
           promoCtx,
-          planPrice,
+          freshPlanPrice,
           record.id
         )
 

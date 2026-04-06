@@ -7,7 +7,6 @@
  *  - PERCENTAGE: normal, 100% edge case
  *  - FIXED: normal, exceeds planPrice (clamp)
  *  - FREE_TRIAL: discount matches planPrice, free_trial_days returned
- *  - Sequential stacking (calling twice for cumulative validation)
  */
 
 import { describe, expect, it } from 'vitest'
