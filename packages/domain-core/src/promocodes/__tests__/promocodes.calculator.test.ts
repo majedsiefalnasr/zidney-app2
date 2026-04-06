@@ -65,4 +65,35 @@ describe('calculateDiscount', () => {
     expect(result.final_price).toBe(0)
     expect(result.free_trial_days).toBe(30)
   })
+
+  // Edge cases
+  it('PERCENTAGE 0% → no discount', () => {
+    const result = calculateDiscount('PERCENTAGE', 0, null, 100)
+    expect(result.discount_amount).toBe(0)
+    expect(result.final_price).toBe(100)
+  })
+
+  it('FIXED 0 → no discount', () => {
+    const result = calculateDiscount('FIXED', 0, null, 100)
+    expect(result.discount_amount).toBe(0)
+    expect(result.final_price).toBe(100)
+  })
+
+  it('planPrice 0 with FIXED discount → final_price 0', () => {
+    const result = calculateDiscount('FIXED', 50, null, 0)
+    expect(result.final_price).toBe(0)
+    expect(result.discount_amount).toBe(0)
+  })
+
+  it('PERCENTAGE: missing value throws', () => {
+    expect(() => calculateDiscount('PERCENTAGE', null, null, 10)).toThrow()
+  })
+
+  it('FIXED: missing value throws', () => {
+    expect(() => calculateDiscount('FIXED', null, null, 10)).toThrow()
+  })
+
+  it('FREE_TRIAL: missing freeTrialDays throws', () => {
+    expect(() => calculateDiscount('FREE_TRIAL', null, null, 10)).toThrow()
+  })
 })

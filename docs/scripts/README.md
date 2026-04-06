@@ -6,7 +6,7 @@ This directory contains one page per root `package.json` script runner, plus the
 
 ## Scope
 
-- Root package.json runners documented: 124
+- Root package.json runners documented: 125
 - Metadata-backed script implementations are also listed in `SCRIPT_REGISTRY.md`.
 
 ## ai
@@ -149,6 +149,7 @@ This directory contains one page per root `package.json` script runner, plus the
 ## test
 
 - [test:coverage](test-coverage.md) — Run Vitest for the configured scope.
+- [test:coverage:analyze](test-coverage-analyze.md) — Run the registered repository task for this area.
 - [test:e2e](test-e2e.md) — Run the registered repository task for this area.
 - [test:e2e:backoffice](test-e2e-backoffice.md) — Run Playwright end-to-end tests for the configured app.
 - [test:e2e:frontoffice](test-e2e-frontoffice.md) — Run Playwright end-to-end tests for the configured app.

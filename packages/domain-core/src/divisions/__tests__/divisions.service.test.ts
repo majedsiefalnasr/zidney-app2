@@ -793,4 +793,60 @@ describe('removeStaffDivision', () => {
     expect(err).toBeInstanceOf(DivisionsError)
     expect((err as DivisionsError).code).toBe('DIV_STAFF_ASSIGNMENT_NOT_FOUND')
   })
+
+  // ============================= ADDITIONAL ERROR COVERAGE =============================
+  it('throws DIVISION_NOT_FOUND when updating non-existent division', async () => {
+    const mockDb = {
+      query: vi.fn(async (sql: string) => {
+        if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
+          return { rows: [], rowCount: 0 }
+        }
+        // Division not found
+        return { rows: [], rowCount: 0 }
+      }),
+    } as unknown as DbClient
+
+    const err = await updateDivision(mockDb, 'missing-div', { name: 'Updated' }, AUDIT).catch(
+      (e) => e
+    )
+
+    expect(err).toBeInstanceOf(DivisionsError)
+    expect((err as DivisionsError).code).toBe('DIVISION_NOT_FOUND')
+  })
+
+  it('throws DIVISION_NOT_FOUND when getting non-existent division', async () => {
+    const mockDb = {
+      query: vi.fn(async (_sql: string) => {
+        return { rows: [], rowCount: 0 }
+      }),
+    } as unknown as DbClient
+
+    const err = await getDivisionById(mockDb, 'missing', AUDIT).catch((e) => e)
+
+    expect(err).toBeInstanceOf(DivisionsError)
+    expect((err as DivisionsError).code).toBe('DIVISION_NOT_FOUND')
+  })
+
+  it('throws error when deleting division fails', async () => {
+    const mockDb = {
+      query: vi.fn(async (sql: string) => {
+        if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
+          return { rows: [], rowCount: 0 }
+        }
+        if (sql.includes('SELECT') && sql.includes('id') && !sql.includes('staff')) {
+          return {
+            rows: [{ ...DEFAULT_DIVISION, id: 'div-001' }],
+            rowCount: 1,
+          }
+        }
+        if (sql.includes('DELETE')) {
+          throw new Error('Delete failed')
+        }
+        return { rows: [], rowCount: 0 }
+      }),
+    } as unknown as DbClient
+
+    const err = await deleteDivision(mockDb, 'div-001', AUDIT).catch((e) => e)
+    expect(err).toBeDefined()
+  })
 })

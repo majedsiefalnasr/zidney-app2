@@ -1,3 +1,195 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createLicense, transitionLicenseState, transitionToSoftLock } from '../service'
+
+describe('license service', () => {
+  let client: any
+  let pool: any
+
+  beforeEach(() => {
+    client = {
+      query: vi.fn(),
+      release: vi.fn(),
+    }
+
+    pool = {
+      connect: vi.fn(async () => client),
+    }
+  })
+
+  it('createLicense throws PRODUCT_NOT_FOUND when product missing', async () => {
+    client.query.mockImplementation(async (sql: string) => {
+      if (typeof sql === 'string' && sql.includes('FROM products')) return { rows: [] }
+      return { rows: [] }
+    })
+
+    const options = {
+      product_id: 'prod-1',
+      workspace_id: 'ws-1',
+      workspace_slug: 'slug-1',
+      expected_schema_version: '1',
+      expected_product_version: '1',
+    }
+
+    await expect(createLicense(pool as any, options)).rejects.toMatchObject({
+      code: 'PRODUCT_NOT_FOUND',
+    })
+  })
+
+  it('createLicense inserts and returns the created license', async () => {
+    const fakeProduct = { default_student_limit: 100, default_staff_limit: 10 }
+    const licenseRow = {
+      id: 'lic-1',
+      product_id: 'prod-1',
+      workspace_id: 'ws-1',
+      workspace_slug: 'slug-1',
+      student_limit: 100,
+      staff_limit: 10,
+      status: 'ACTIVE',
+      soft_lock_until: null,
+      archived_at: null,
+      deleted_at: null,
+      expected_schema_version: '1',
+      expected_product_version: '1',
+      created_at: new Date(),
+      updated_at: new Date(),
+      snapshot_id: null,
+    }
+
+    client.query.mockImplementation(async (sql: string) => {
+      if (typeof sql === 'string' && sql.includes('FROM products')) return { rows: [fakeProduct] }
+      if (typeof sql === 'string' && sql.includes('INSERT INTO licenses'))
+        return { rows: [licenseRow] }
+      return { rows: [] }
+    })
+
+    const options = {
+      product_id: 'prod-1',
+      workspace_id: 'ws-1',
+      workspace_slug: 'slug-1',
+      expected_schema_version: '1',
+      expected_product_version: '1',
+    }
+
+    const res = await createLicense(pool as any, options)
+
+    expect(res).toMatchObject({ id: 'lic-1', product_id: 'prod-1', workspace_slug: 'slug-1' })
+  })
+
+  it('transitionLicenseState returns LICENSE_NOT_FOUND when license missing', async () => {
+    client.query.mockImplementation(async (sql: string) => {
+      if (
+        typeof sql === 'string' &&
+        sql.includes('SELECT * FROM licenses WHERE id = $1 FOR UPDATE')
+      )
+        return { rows: [] }
+      return {}
+    })
+
+    const res = await transitionLicenseState(pool as any, {
+      license_id: 'l-1',
+      target_state: 'ACTIVE',
+    })
+
+    expect(res).toEqual({ success: false, error_code: 'LICENSE_NOT_FOUND', http_status: 404 })
+  })
+
+  it('transitionLicenseState returns INVALID_STATE_TRANSITION for bad transitions', async () => {
+    client.query.mockImplementation(async (sql: string) => {
+      if (
+        typeof sql === 'string' &&
+        sql.includes('SELECT * FROM licenses WHERE id = $1 FOR UPDATE')
+      )
+        return { rows: [{ id: 'l-2', status: 'DELETED' }] }
+      return {}
+    })
+
+    const res = await transitionLicenseState(pool as any, {
+      license_id: 'l-2',
+      target_state: 'ACTIVE',
+    })
+
+    expect(res).toEqual({
+      success: false,
+      error_code: 'INVALID_STATE_TRANSITION',
+      http_status: 409,
+    })
+  })
+
+  it('transitionLicenseState performs SOFT_LOCKED transition when valid', async () => {
+    const updated = { id: 'l-3', status: 'SOFT_LOCKED' }
+
+    client.query.mockImplementation(async (sql: string) => {
+      if (
+        typeof sql === 'string' &&
+        sql.includes('SELECT * FROM licenses WHERE id = $1 FOR UPDATE')
+      )
+        return { rows: [{ id: 'l-3', status: 'ACTIVE', workspace_slug: 'ws' }] }
+      if (typeof sql === 'string' && sql.includes('UPDATE licenses')) return { rows: [updated] }
+      return {}
+    })
+
+    const res = await transitionLicenseState(pool as any, {
+      license_id: 'l-3',
+      target_state: 'SOFT_LOCKED',
+    })
+
+    expect(res.success).toBe(true)
+    expect(res.previous_state).toBe('ACTIVE')
+    expect(res.license).toMatchObject(updated)
+  })
+
+  it('transitionToSoftLock returns LICENSE_NOT_FOUND when license missing', async () => {
+    client.query.mockImplementation(async (sql: string) => {
+      if (
+        typeof sql === 'string' &&
+        sql.includes('SELECT * FROM licenses WHERE id = $1 FOR UPDATE')
+      )
+        return { rows: [] }
+      return {}
+    })
+
+    const res = await transitionToSoftLock(pool as any, 'l-4', 'some_reason', 'actor-1')
+    expect(res).toEqual({ success: false, error_code: 'LICENSE_NOT_FOUND', http_status: 404 })
+  })
+
+  it('transitionToSoftLock returns INVALID_STATE_TRANSITION when current status is not ACTIVE', async () => {
+    client.query.mockImplementation(async (sql: string) => {
+      if (
+        typeof sql === 'string' &&
+        sql.includes('SELECT * FROM licenses WHERE id = $1 FOR UPDATE')
+      )
+        return { rows: [{ id: 'l-5', status: 'ARCHIVED' }] }
+      return {}
+    })
+
+    const res = await transitionToSoftLock(pool as any, 'l-5', 'reason', 'actor-1')
+    expect(res).toEqual({
+      success: false,
+      error_code: 'INVALID_STATE_TRANSITION',
+      http_status: 409,
+    })
+  })
+
+  it('transitionToSoftLock succeeds when license is ACTIVE', async () => {
+    const updated = { id: 'l-6', status: 'SOFT_LOCKED', soft_lock_until: new Date() }
+
+    client.query.mockImplementation(async (sql: string) => {
+      if (
+        typeof sql === 'string' &&
+        sql.includes('SELECT * FROM licenses WHERE id = $1 FOR UPDATE')
+      )
+        return { rows: [{ id: 'l-6', status: 'ACTIVE', workspace_slug: 'ws' }] }
+      if (typeof sql === 'string' && sql.includes('UPDATE licenses')) return { rows: [updated] }
+      if (typeof sql === 'string' && sql.includes('INSERT INTO license_audit_logs')) return {}
+      return {}
+    })
+
+    const res = await transitionToSoftLock(pool as any, 'l-6', 'reason', 'actor-1')
+    expect(res.success).toBe(true)
+    expect(res.license).toMatchObject({ id: 'l-6', status: 'SOFT_LOCKED' })
+  })
+})
+
 /**
  * License Service Tests — Tasks T006-T015
  *
@@ -8,13 +200,12 @@
  */
 
 import type { Pool } from 'pg'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach } from 'vitest'
 import {
   restoreFromArchive,
   transitionToActive,
   transitionToArchived,
   transitionToDeleted,
-  transitionToSoftLock,
 } from '../service'
 import {
   validateAdminAuthority,

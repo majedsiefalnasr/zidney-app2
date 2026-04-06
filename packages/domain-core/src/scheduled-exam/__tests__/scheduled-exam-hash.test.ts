@@ -84,4 +84,81 @@ describe('computeBaseExamHash', () => {
     expect(withNull).toMatch(/^[a-f0-9]{64}$/)
     expect(withUndefined).toMatch(/^[a-f0-9]{64}$/)
   })
+
+  it('accepts camelCase field names (examType, durationMinutes, etc.)', () => {
+    const camelCaseInput = {
+      examType: 'MCQ',
+      title: 'Camel Case Test',
+      instructions: null,
+      subjectId: 'sub-001',
+      durationMinutes: 60,
+      passPercentage: 70,
+      totalQuestions: 20,
+      updatedAt: '2026-01-01T00:00:00Z',
+    }
+    const hash = computeBaseExamHash(camelCaseInput)
+    expect(hash).toMatch(/^[a-f0-9]{64}$/)
+    // camelCase with different description should differ from mcqInput (which has description: 'A description')
+    expect(hash).not.toBe(computeBaseExamHash(mcqInput))
+  })
+
+  it('accepts totalMarks for unified total_questions field', () => {
+    const withTotalMarks = {
+      examType: 'TRADITIONAL',
+      title: 'Test',
+      subjectId: 'sub-001',
+      totalMarks: 100,
+      durationMinutes: 90,
+      passPercentage: 60,
+      updatedAt: '2026-01-01T00:00:00Z',
+    }
+    const hash = computeBaseExamHash(withTotalMarks)
+    expect(hash).toMatch(/^[a-f0-9]{64}$/)
+  })
+
+  it('handles missing optional fields gracefully', () => {
+    const minimalInput = {
+      exam_type: 'MCQ' as const,
+    }
+    const hash = computeBaseExamHash(minimalInput)
+    expect(hash).toMatch(/^[a-f0-9]{64}$/)
+  })
+
+  it('detects changes in pass_percentage', () => {
+    const hash1 = computeBaseExamHash(mcqInput)
+    const hash2 = computeBaseExamHash({ ...mcqInput, pass_percentage: 80 })
+    expect(hash1).not.toBe(hash2)
+  })
+
+  it('handles all fields missing (produces deterministic hash)', () => {
+    const emptyInput = {}
+    const hash = computeBaseExamHash(emptyInput)
+    expect(hash).toMatch(/^[a-f0-9]{64}$/)
+    // Should be stable
+    expect(hash).toBe(computeBaseExamHash({}))
+  })
+
+  it('normalizes all null/undefined values to null in canonical form', () => {
+    const withUndefined = computeBaseExamHash({
+      exam_type: undefined,
+      name: undefined,
+      description: undefined,
+      subject_id: undefined,
+      duration_minutes: undefined,
+      pass_percentage: undefined,
+      total_questions: undefined,
+      updated_at: undefined,
+    })
+    const withNull = computeBaseExamHash({
+      exam_type: null,
+      name: null,
+      description: null,
+      subject_id: null,
+      duration_minutes: null,
+      pass_percentage: null,
+      total_questions: null,
+      updated_at: null,
+    })
+    expect(withUndefined).toBe(withNull)
+  })
 })

@@ -61,6 +61,7 @@
     "_test": "Testing: unit, integration, e2e, coverage",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:coverage:analyze": "bun scripts/coverage-analyze.ts",
     "test:e2e": "bun run test:e2e:mmc && bun run test:e2e:backoffice && bun run test:e2e:frontoffice",
     "test:e2e:backoffice": "bunx playwright test --config apps/backoffice/playwright.config.ts",
     "test:e2e:frontoffice": "bunx playwright test --config apps/frontoffice/playwright.config.ts",

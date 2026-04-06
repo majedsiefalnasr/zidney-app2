@@ -6,13 +6,148 @@
  * Tests for business logic: cycle detection, capacity guardrails, division consistency, name uniqueness.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { DepartmentsError } from '../departments.errors'
+import { createDepartment, getDepartment } from '../departments.service'
+
+describe('departments.service (focused)', () => {
+  it('getDepartment throws DEPARTMENT_NOT_FOUND when missing', async () => {
+    const db = { query: vi.fn().mockResolvedValue({ rows: [] }) }
+    await expect(getDepartment(db as any, 'd1')).rejects.toBeInstanceOf(DepartmentsError)
+    expect(db.query).toHaveBeenCalled()
+  })
+
+  it('createDepartment throws when parent_id not found', async () => {
+    const db = {
+      query: vi.fn().mockImplementation((sql: string) => {
+        if (sql === 'BEGIN') return Promise.resolve()
+        if (sql.includes('SELECT id FROM departments WHERE id = $1'))
+          return Promise.resolve({ rows: [] })
+        if (sql === 'ROLLBACK') return Promise.resolve()
+        return Promise.resolve({ rows: [] })
+      }),
+    }
+    const input = {
+      name: 'X',
+      type: 'TYPE',
+      parent_id: 'p1',
+      division_id: undefined,
+      max_users: undefined,
+      description: undefined,
+    }
+    const audit = { correlation_id: 'c', workspace_id: 'w', workspace_slug: 's', user_id: 'u' }
+    await expect(createDepartment(db as any, input as any, audit as any)).rejects.toBeInstanceOf(
+      DepartmentsError
+    )
+  })
+
+  it('createDepartment throws when division not found', async () => {
+    const db = {
+      query: vi.fn().mockImplementation((sql: string) => {
+        if (sql === 'BEGIN') return Promise.resolve()
+        if (sql.includes('SELECT id FROM departments WHERE id = $1'))
+          return Promise.resolve({ rows: [{ id: 'p1' }] })
+        if (sql.includes('SELECT id FROM divisions WHERE id = $1'))
+          return Promise.resolve({ rows: [] })
+        if (sql === 'ROLLBACK') return Promise.resolve()
+        return Promise.resolve({ rows: [] })
+      }),
+    }
+    const input = {
+      name: 'X',
+      type: 'TYPE',
+      parent_id: 'p1',
+      division_id: 'div1',
+      max_users: undefined,
+      description: undefined,
+    }
+    await expect(
+      createDepartment(
+        db as any,
+        input as any,
+        { correlation_id: 'c', workspace_id: 'w', workspace_slug: 's', user_id: 'u' } as any
+      )
+    ).rejects.toBeInstanceOf(DepartmentsError)
+  })
+
+  it('createDepartment throws on name duplicate', async () => {
+    const db = {
+      query: vi.fn().mockImplementation((sql: string) => {
+        if (sql === 'BEGIN') return Promise.resolve()
+        // name check contains LOWER(name)
+        if (sql.includes('LOWER(name)')) return Promise.resolve({ rows: [{ id: 'existing' }] })
+        if (sql === 'ROLLBACK') return Promise.resolve()
+        return Promise.resolve({ rows: [] })
+      }),
+    }
+    const input = {
+      name: 'X',
+      type: 'TYPE',
+      parent_id: undefined,
+      division_id: undefined,
+      max_users: undefined,
+      description: undefined,
+    }
+    await expect(
+      createDepartment(
+        db as any,
+        input as any,
+        { correlation_id: 'c', workspace_id: 'w', workspace_slug: 's', user_id: 'u' } as any
+      )
+    ).rejects.toBeInstanceOf(DepartmentsError)
+  })
+
+  it('createDepartment returns created row on success and commits', async () => {
+    const newDept = {
+      id: 'new1',
+      name: 'X',
+      type: 'TYPE',
+      parent_id: null,
+      division_id: null,
+      max_users: null,
+      description: null,
+      status: 'ENABLED',
+      created_at: '2026-01-01',
+      updated_at: '2026-01-01',
+      created_by: 'u',
+      updated_by: 'u',
+    }
+
+    const db = {
+      query: vi.fn().mockImplementation((sql: string) => {
+        if (sql === 'BEGIN') return Promise.resolve()
+        if (sql.includes('LOWER(name)')) return Promise.resolve({ rows: [] })
+        if (sql.includes('INSERT INTO departments')) return Promise.resolve({ rows: [newDept] })
+        if (sql === 'COMMIT') return Promise.resolve()
+        return Promise.resolve({ rows: [] })
+      }),
+    }
+
+    const input = {
+      name: 'X',
+      type: 'TYPE',
+      parent_id: undefined,
+      division_id: undefined,
+      max_users: undefined,
+      description: undefined,
+    }
+    const res = await createDepartment(
+      db as any,
+      input as any,
+      { correlation_id: 'c', workspace_id: 'w', workspace_slug: 's', user_id: 'u' } as any
+    )
+    expect(res).toEqual(newDept)
+    const sqls = (db.query as any).mock.calls.map((c: any) => c[0])
+    expect(sqls.some((s: string) => s === 'COMMIT' || String(s).includes('COMMIT'))).toBe(true)
+  })
+})
+
+import { beforeEach } from 'vitest'
 import {
   type AuditContext,
   type CreateDepartmentInput,
-  createDepartment,
-  DepartmentsError,
   DepartmentsErrorCode,
+  deleteDepartment,
   type UpdateDepartmentInput,
   updateDepartment,
 } from '../index'
@@ -275,30 +410,103 @@ describe('Departments Service — Domain Unit Tests', () => {
 
   describe('Delete Guards', () => {
     it('should fail if department has children', async () => {
-      const _parentDb = {
+      const parentDb = {
         query: vi.fn(async (sql, _params) => {
-          if (sql.includes('SELECT id FROM departments WHERE id = $1')) {
+          if (sql.includes('SELECT * FROM departments WHERE id = $1')) {
             return { rows: [{ id: 'parent-dept' }], rowCount: 1 }
           }
-          if (sql.includes('SELECT COUNT(*) FROM departments WHERE parent_id')) {
-            return { rows: [{ count: '3' }], rowCount: 1 } // Has 3 children
+          if (sql.includes('SELECT COUNT(*) as count FROM departments WHERE parent_id')) {
+            return { rows: [{ count: '3' }], rowCount: 1 }
           }
           return { rows: [], rowCount: 0 }
         }),
       }
 
-      // Similar placeholder - full test requires integration
-      expect(true).toBe(true)
+      try {
+        await deleteDepartment(parentDb as any, 'parent-dept', auditCtx)
+        expect.fail('Should have thrown DEPARTMENT_HAS_CHILDREN')
+      } catch (err) {
+        expect(err).toBeInstanceOf(DepartmentsError)
+        expect((err as DepartmentsError).code).toBe(DepartmentsErrorCode.DEPARTMENT_HAS_CHILDREN)
+      }
     })
 
     it('should fail if department has student assignments', async () => {
-      // Placeholder for student count check
-      expect(true).toBe(true)
+      const studentDb = {
+        query: vi.fn(async (sql, _params) => {
+          if (sql.includes('SELECT * FROM departments WHERE id = $1')) {
+            return { rows: [{ id: 'dept-with-students' }], rowCount: 1 }
+          }
+          if (sql.includes('SELECT COUNT(*) as count FROM departments WHERE parent_id')) {
+            return { rows: [{ count: '0' }], rowCount: 1 }
+          }
+          if (sql.includes('SELECT COUNT(*) as count FROM students WHERE department_id')) {
+            return { rows: [{ count: '5' }], rowCount: 1 }
+          }
+          return { rows: [], rowCount: 0 }
+        }),
+      }
+
+      try {
+        await deleteDepartment(studentDb as any, 'dept-with-students', auditCtx)
+        expect.fail('Should have thrown DEPARTMENT_HAS_ASSIGNMENTS')
+      } catch (err) {
+        expect(err).toBeInstanceOf(DepartmentsError)
+        expect((err as DepartmentsError).code).toBe(DepartmentsErrorCode.DEPARTMENT_HAS_ASSIGNMENTS)
+      }
     })
 
     it('should fail if department has staff assignments', async () => {
-      // Placeholder for staff count check
-      expect(true).toBe(true)
+      const staffDb = {
+        query: vi.fn(async (sql, _params) => {
+          if (sql.includes('SELECT * FROM departments WHERE id = $1')) {
+            return { rows: [{ id: 'dept-with-staff' }], rowCount: 1 }
+          }
+          if (sql.includes('SELECT COUNT(*) as count FROM departments WHERE parent_id')) {
+            return { rows: [{ count: '0' }], rowCount: 1 }
+          }
+          if (sql.includes('SELECT COUNT(*) as count FROM students WHERE department_id')) {
+            return { rows: [{ count: '0' }], rowCount: 1 }
+          }
+          if (sql.includes('SELECT COUNT(*) as count FROM staff_departments WHERE department_id')) {
+            return { rows: [{ count: '2' }], rowCount: 1 }
+          }
+          return { rows: [], rowCount: 0 }
+        }),
+      }
+
+      try {
+        await deleteDepartment(staffDb as any, 'dept-with-staff', auditCtx)
+        expect.fail('Should have thrown DEPARTMENT_HAS_ASSIGNMENTS')
+      } catch (err) {
+        expect(err).toBeInstanceOf(DepartmentsError)
+        expect((err as DepartmentsError).code).toBe(DepartmentsErrorCode.DEPARTMENT_HAS_ASSIGNMENTS)
+      }
+    })
+
+    it('should delete department when no children or assignments', async () => {
+      const deleteDb = {
+        query: vi.fn(async (sql, _params) => {
+          if (sql.includes('SELECT * FROM departments WHERE id = $1')) {
+            return { rows: [{ id: 'empty-dept' }], rowCount: 1 }
+          }
+          if (sql.includes('SELECT COUNT(*) as count FROM departments WHERE parent_id')) {
+            return { rows: [{ count: '0' }], rowCount: 1 }
+          }
+          if (sql.includes('SELECT COUNT(*) as count FROM students WHERE department_id')) {
+            return { rows: [{ count: '0' }], rowCount: 1 }
+          }
+          if (sql.includes('SELECT COUNT(*) as count FROM staff_departments WHERE department_id')) {
+            return { rows: [{ count: '0' }], rowCount: 1 }
+          }
+          if (sql.includes('DELETE FROM departments WHERE id')) {
+            return { rows: [], rowCount: 1 }
+          }
+          return { rows: [], rowCount: 0 }
+        }),
+      }
+
+      await deleteDepartment(deleteDb as any, 'empty-dept', auditCtx)
     })
   })
 })
