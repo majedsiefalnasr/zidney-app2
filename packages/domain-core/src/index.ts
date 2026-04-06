@@ -16,6 +16,8 @@ export * from './attempts/auto-selection.service'
 export * from './audit/attempt-event-logger'
 // Auth module
 export * from './auth/index'
+// Billing module (Stage 046)
+export * as billing from './billing'
 // Departments module (Stage 023)
 export * as departments from './departments'
 // Divisions module (Stage 022)

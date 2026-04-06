@@ -6,6 +6,7 @@
  */
 
 export * from './baskets.schemas'
+export * from './billing.schemas'
 export * from './categories.schemas'
 export * from './category-values.schemas'
 export * from './departments.schemas'

@@ -9,7 +9,43 @@ Scope: Workspace-level billing, invoice lifecycle, and subscription activation i
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: LOW
+Closure Date: 2026-04-06T14:30:00.000Z
+
+Implementation: COMPLETE
+Tasks: 28 / 28 completed
+
+Scope Closed:
+
+- Migration 025: invoices + billing_audit_logs tables (forward-only)
+- Domain module: billing.types, billing.errors, billing.repository, billing.service, webhook.service
+- Validation schemas: packages/validation/src/backoffice/billing.schemas.ts
+- Backoffice routes: create, get, list, approve, cancel, upload-proof (6 endpoints)
+- Webhook route: POST /webhooks/billing/gateway (HMAC-verified)
+- Tests: 38/38 passing (17 unit, 8 webhook, 13 integration)
+- Lint: 0 errors | TypeScript: 0 errors
+
+Deferred Scope:
+
+- Refund engine (future stage)
+- Accounting exports (future stage)
+- Multi-currency support (future)
+- Per-tenant gateway configuration (future stage)
+
+Architecture Governance Compliance:
+
+- ADR alignment verified
+- Tenant isolation enforced (no cross-tenant queries)
+- License middleware applied on all workspace routes
+- All writes transactional (BEGIN/COMMIT/ROLLBACK)
+- SERIALIZABLE isolation for PAID transitions
+- Server-authoritative time via DB NOW()
+- Idempotency enforced via idempotency_key
+
+Notes:
+Backend implementation complete. 28/28 tasks done. No structural backend modifications allowed.
 
 ---
 

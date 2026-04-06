@@ -67,6 +67,7 @@ export enum PermissionModule {
   PLANS = 'plans',
   SUBSCRIPTIONS = 'subscriptions',
   PROMOCODES = 'promocodes',
+  INVOICES = 'invoices',
 }
 
 /**
