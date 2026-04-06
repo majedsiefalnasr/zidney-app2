@@ -20,6 +20,14 @@ This runner is currently classified as critical. Do not remove without updating 
 - Implementation: scripts/generate/script-docs.ts
 - Metadata-backed script file: `scripts/generate/script-docs.ts`
 
+## Flags
+
+| Flag           | Type      | Description                                           | Example                                            |
+| -------------- | --------- | ----------------------------------------------------- | -------------------------------------------------- |
+| `--check-only` | `boolean` | Validate without writing any files. Exits 1 on drift. | `bun run dev:generate:script-docs -- --check-only` |
+| `--xxx`        | `string`  | —                                                     | `bun run dev:generate:script-docs -- --xxx`        |
+| `--save`       | `string`  | —                                                     | `bun run dev:generate:script-docs -- --save`       |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

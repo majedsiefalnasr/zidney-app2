@@ -20,6 +20,15 @@ This runner is currently classified as critical. Do not remove without updating 
 - Implementation: scripts/ai-guard.ts
 - Metadata-backed script file: `scripts/ai-guard.ts`
 
+## Flags
+
+| Flag               | Type      | Description                                                    | Example                                |
+| ------------------ | --------- | -------------------------------------------------------------- | -------------------------------------- |
+| `--ci`             | `boolean` | Enable CI non-interactive mode. Disables spinners and prompts. | `bun run ai:guard -- --ci`             |
+| `--incremental`    | `boolean` | —                                                              | `bun run ai:guard -- --incremental`    |
+| `--output`         | `boolean` | —                                                              | `bun run ai:guard -- --output`         |
+| `--unified-runner` | `boolean` | —                                                              | `bun run ai:guard -- --unified-runner` |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

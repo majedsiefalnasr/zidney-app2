@@ -20,6 +20,13 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 - Implementation: scripts/context/changed.ts
 - Metadata-backed script file: `scripts/context/changed.ts`
 
+## Flags
+
+| Flag        | Type      | Description                                                    | Example                                     |
+| ----------- | --------- | -------------------------------------------------------------- | ------------------------------------------- |
+| `--ci`      | `boolean` | Enable CI non-interactive mode. Disables spinners and prompts. | `bun run arch:context:changed -- --ci`      |
+| `--dry-run` | `boolean` | Report what would be done without making any changes.          | `bun run arch:context:changed -- --dry-run` |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

@@ -16,7 +16,7 @@ import { spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { createLogger, exit, hasCiFlag, log } from '../utils/logger'
+import { createLogger, exit, getPassthroughFlags, hasCiFlag, log } from '../utils/logger'
 
 const correlationId = randomUUID()
 const args = process.argv.slice(2)
@@ -99,7 +99,7 @@ function checkScriptEvolutionGuard(): boolean {
 
 function runValidator(step: ValidatorStep): { ok: boolean; durationMs: number } {
   const start = Date.now()
-  const passthrough = isCi ? ['--ci'] : []
+  const passthrough = getPassthroughFlags(args)
   const result = spawnSync('bun', [step.script, ...passthrough], {
     cwd: process.cwd(),
     stdio: 'inherit',

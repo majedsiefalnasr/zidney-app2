@@ -89,8 +89,9 @@ This directory contains one page per root `package.json` script runner, plus the
 - [dev:hygiene:report](dev-hygiene-report.md) — Run the registered repository task for this area.
 - [dev:infra](dev-infra.md) — Start the local infrastructure stack in detached mode.
 - [dev:mmc](dev-mmc.md) — Start a specific workspace development process.
+- [dev:pr:coderabbit](dev-pr-coderabbit.md) — Run the registered repository task for this area.
 - [dev:profile:scripts](dev-profile-scripts.md) — Profile governance script execution times across repeated runs to establish a performance baseline.
-- [dev:refactor:scripts](dev-refactor-scripts.md) — Applies the SCRIPT_MIGRATION_MAP to rename all "bun run <old>" references across the repository. Reads docs/scripts/SCRIPT_MIGRATION_MAP.md, builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain after the run. Writes a summary report to reports/SCRIPT_REFACTOR_REPORT.md.
+- [dev:refactor:scripts](refactor-scripts.md) — Applies the SCRIPT_MIGRATION_MAP to rename all "bun run <old>" references across the repository. Reads docs/scripts/SCRIPT_MIGRATION_MAP.md, builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain after the run. Writes a summary report to reports/SCRIPT_REFACTOR_REPORT.md.
 - [dev:report:baseline](dev-report-baseline.md) — Generate a consolidated baseline diagnostics report for Phase 1 analysis and write it to docs/audit-reports.
 - [dev:seed:dashboard-test-data](seed-dashboard-test-data.md) — Seed realistic MMC dashboard test data into master_db for dashboard testing
 - [dev:validate:script-duplication](dev-validate-script-duplication.md) — Measure cross-file duplication within the scripts directory and validate that modularization stays within the target threshold.
@@ -124,7 +125,6 @@ This directory contains one page per root `package.json` script runner, plus the
 ## misc
 
 - [dev](dev.md) — Run the registered repository task for this area.
-- [refactor-scripts](refactor-scripts.md) — Applies the migration map to rename all "bun run <old>" references across the repository. Supports both JSON format (docs/scripts/migration-map.json, preferred) and Markdown format (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain. Writes reports to both reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
 - [test](test.md) — Run Vitest for the configured scope.
 
 ## policy

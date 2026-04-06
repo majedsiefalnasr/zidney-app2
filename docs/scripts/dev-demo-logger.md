@@ -20,6 +20,15 @@ This runner is currently classified as medium. Potential removal candidate if yo
 - Implementation: scripts/dev/demo-logger-features.ts
 - Metadata-backed script file: `scripts/dev/demo-logger-features.ts`
 
+## Flags
+
+| Flag          | Type      | Description               | Example                                  |
+| ------------- | --------- | ------------------------- | ---------------------------------------- |
+| `--benchmark` | `boolean` | —                         | `bun run dev:demo:logger -- --benchmark` |
+| `--ci-sim`    | `boolean` | —                         | `bun run dev:demo:logger -- --ci-sim`    |
+| `--json`      | `boolean` | Output results as JSON.   | `bun run dev:demo:logger -- --json`      |
+| `--pretty`    | `boolean` | Pretty-print JSON output. | `bun run dev:demo:logger -- --pretty`    |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

@@ -13,7 +13,7 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
-import { exit, flushAi, hasCiFlag, log } from './utils/logger'
+import { exit, flushAi, getPassthroughFlags, hasCiFlag, log } from './utils/logger'
 
 log.setScript('ci:run-local')
 const isCi = hasCiFlag()
@@ -180,8 +180,10 @@ function run(command: string, args: string[]): { success: boolean; output: strin
 }
 
 function getBunRunArgs(step: StepDefinition): string[] {
-  const ciArgs = isCi ? (step.ciArgs ?? []) : []
-  return ciArgs.length > 0 ? ['run', step.scriptKey, '--', ...ciArgs] : ['run', step.scriptKey]
+  const passthrough = getPassthroughFlags()
+  // Merge step-specific ciArgs with the active passthrough flags, deduplicated
+  const merged = Array.from(new Set([...(isCi ? (step.ciArgs ?? []) : []), ...passthrough]))
+  return merged.length > 0 ? ['run', step.scriptKey, '--', ...merged] : ['run', step.scriptKey]
 }
 
 function formatBunCommand(step: StepDefinition): string {

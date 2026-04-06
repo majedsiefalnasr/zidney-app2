@@ -20,6 +20,12 @@ This runner is currently classified as medium. Potential removal candidate if yo
 - Implementation: scripts/architecture-health/benchmark.ts
 - Metadata-backed script file: `scripts/architecture-health/benchmark.ts`
 
+## Flags
+
+| Flag   | Type      | Description                                                    | Example                                 |
+| ------ | --------- | -------------------------------------------------------------- | --------------------------------------- |
+| `--ci` | `boolean` | Enable CI non-interactive mode. Disables spinners and prompts. | `bun run arch:health:benchmark -- --ci` |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

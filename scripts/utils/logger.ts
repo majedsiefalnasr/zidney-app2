@@ -81,6 +81,27 @@ export function hasCiFlag(args: readonly string[] = process.argv.slice(2)): bool
   return args.includes('--ci') || process.env.CI === 'true' || process.env.CI === '1'
 }
 
+/**
+ * Return the set of output-mode flags that are currently active and should be
+ * forwarded to child processes spawned by this script.
+ *
+ * Collects `--ai`, `--ci`, `--json`, `--pretty`, `--compact`, and `--silent`
+ * when any of them appear in `args` (defaults to `process.argv.slice(2)`).
+ * Environment-based CI detection is also honoured: if `hasCiFlag()` returns
+ * `true` but `--ci` is not already in the list, `--ci` is appended.
+ *
+ * @param args - argv slice to inspect
+ * @returns Array of active flag strings, ready to spread into a spawn call
+ */
+export function getPassthroughFlags(args: readonly string[] = process.argv.slice(2)): string[] {
+  const passthrough: string[] = []
+  for (const flag of ['--ai', '--ci', '--json', '--pretty', '--compact', '--silent']) {
+    if (args.includes(flag)) passthrough.push(flag)
+  }
+  if (!passthrough.includes('--ci') && hasCiFlag(args)) passthrough.push('--ci')
+  return passthrough
+}
+
 const isAiMode = process.argv.includes('--ai')
 const isCI = hasCiFlag(process.argv.slice(2))
 

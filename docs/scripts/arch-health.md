@@ -20,6 +20,15 @@ This runner is currently classified as medium. Potential removal candidate if yo
 - Implementation: scripts/architecture-health/architecture-health.ts
 - Metadata-backed script file: `scripts/architecture-health/architecture-health.ts`
 
+## Flags
+
+| Flag                | Type      | Description                                                    | Example                                    |
+| ------------------- | --------- | -------------------------------------------------------------- | ------------------------------------------ |
+| `--output`          | `boolean` | —                                                              | `bun run arch:health -- --output`          |
+| `--ci`              | `boolean` | Enable CI non-interactive mode. Disables spinners and prompts. | `bun run arch:health -- --ci`              |
+| `--refresh-context` | `boolean` | —                                                              | `bun run arch:health -- --refresh-context` |
+| `--fail-on-sync`    | `boolean` | —                                                              | `bun run arch:health -- --fail-on-sync`    |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

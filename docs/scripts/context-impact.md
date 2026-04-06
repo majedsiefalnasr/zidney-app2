@@ -20,6 +20,12 @@ This runner is currently classified as medium. Potential removal candidate if yo
 - Implementation: scripts/context/impact.ts
 - Metadata-backed script file: `scripts/context/impact.ts`
 
+## Flags
+
+| Flag     | Type      | Description             | Example                                 |
+| -------- | --------- | ----------------------- | --------------------------------------- |
+| `--json` | `boolean` | Output results as JSON. | `bun run arch:context:impact -- --json` |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

@@ -96,6 +96,7 @@
     "dev:worker": "bun run --cwd apps/worker dev",
     "dev:ai:archive-snapshots": "bun scripts/dev/archive-snapshot-strategy.ts",
     "dev:ai:context-artifacts": "bun scripts/dev/analyze-ai-context-artifacts.ts",
+    "dev:pr:coderabbit": "bun scripts/dev/coderabbit-reviews.ts",
     "_ai": "AI: runtime, execution, context, guards",
     "ai:context:generate": "bun scripts/generate-ai-context.ts",
     "ai:context:refresh": "bun scripts/generate-ai-context.ts --force",

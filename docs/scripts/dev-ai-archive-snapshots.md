@@ -20,6 +20,13 @@ This runner is currently classified as medium. Potential removal candidate if yo
 - Implementation: scripts/dev/archive-snapshot-strategy.ts
 - Metadata-backed script file: `scripts/dev/archive-snapshot-strategy.ts`
 
+## Flags
+
+| Flag        | Type      | Description            | Example                                         |
+| ----------- | --------- | ---------------------- | ----------------------------------------------- |
+| `--prune`   | `boolean` | —                      | `bun run dev:ai:archive-snapshots -- --prune`   |
+| `--verbose` | `boolean` | Enable verbose output. | `bun run dev:ai:archive-snapshots -- --verbose` |
+
 ## CI Behavior
 
 No explicit --ci handling detected in the implementation.

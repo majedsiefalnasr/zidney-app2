@@ -20,6 +20,14 @@ This runner is currently classified as critical. Do not remove without updating 
 - Implementation: scripts/validate/validate-scripts-ux.ts
 - Metadata-backed script file: `scripts/validate/validate-scripts-ux.ts`
 
+## Flags
+
+| Flag       | Type      | Description                               | Example                                   |
+| ---------- | --------- | ----------------------------------------- | ----------------------------------------- |
+| `--fix`    | `boolean` | Automatically apply fixes where possible. | `bun run validate:scripts:ux -- --fix`    |
+| `--staged` | `boolean` | —                                         | `bun run validate:scripts:ux -- --staged` |
+| `--dry`    | `boolean` | —                                         | `bun run validate:scripts:ux -- --dry`    |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

@@ -54,6 +54,13 @@ const ALLOWED_DOMAINS = new Set([
   'policy',
 ])
 
+export interface ScriptFlag {
+  name: string
+  type: 'boolean' | 'string' | 'number'
+  description: string
+  example?: string
+}
+
 export interface ScriptMeta {
   script: string
   domain: string
@@ -61,6 +68,8 @@ export interface ScriptMeta {
   description: string
   usage: string
   filePath: string
+  /** Flags detected via `@flag` annotations or code-pattern scanning. */
+  flags: ScriptFlag[]
 }
 
 interface PackageReferenceSection {
@@ -122,6 +131,129 @@ export function walkTsFiles(dir: string, excludeDirs: string[] = ['__tests__']):
   return files
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Flag detection
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Standard descriptions and examples for flags shared across many scripts. */
+const COMMON_FLAG_DESCRIPTIONS: Record<string, string> = {
+  '--ai': 'Emit machine-readable JSON to stdout instead of human-readable output.',
+  '--ci': 'Enable CI non-interactive mode. Disables spinners and prompts.',
+  '--silent': 'Suppress all non-error output.',
+  '--json': 'Output results as JSON.',
+  '--pretty': 'Pretty-print JSON output.',
+  '--compact': 'Use compact (minimal) output format.',
+  '--check-only': 'Validate without writing any files. Exits 1 on drift.',
+  '--fix': 'Automatically apply fixes where possible.',
+  '--verbose': 'Enable verbose output.',
+  '--force': 'Force execution even if checks fail or files already exist.',
+  '--changed': 'Only analyse files changed in the current git diff.',
+  '--dry-run': 'Report what would be done without making any changes.',
+  '--full': 'Run a full (non-incremental) analysis.',
+}
+
+/**
+ * Parse explicit `@flag` JSDoc annotations from a script source file.
+ *
+ * Format:  @flag --name boolean|string|number Description text [ | example ]
+ *
+ * The ` | example` suffix is optional. `SCRIPT_NAME` in the example is replaced
+ * with the actual script name.
+ */
+function parseExplicitFlags(content: string, scriptName: string): ScriptFlag[] {
+  const flags: ScriptFlag[] = []
+  const re =
+    /^[^@\n]*@flag\s+(--[\w-]+)\s+(boolean|string|number)\s+([^|\n]+?)(?:\s*\|\s*([^\n]+?))?$/gm
+  let m: RegExpExecArray | null = re.exec(content)
+  while (m !== null) {
+    flags.push({
+      name: m[1].trim(),
+      type: m[2] as ScriptFlag['type'],
+      description: m[3].trim(),
+      example: m[4]?.trim().replace('SCRIPT_NAME', scriptName),
+    })
+    m = re.exec(content)
+  }
+  return flags
+}
+
+/**
+ * Auto-detect flags from common code patterns when no explicit `@flag`
+ * annotations are present.
+ *
+ * Detects:
+ *  - `args.includes('--xxx')` / `process.argv.includes('--xxx')` → boolean
+ *  - `arg === '--xxx'` → boolean (upgraded to `string` when `args[++i]` follows)
+ */
+function detectFlagsFromCode(content: string, scriptName: string): ScriptFlag[] {
+  const map = new Map<string, ScriptFlag>()
+
+  const mkFlag = (name: string, type: ScriptFlag['type']): ScriptFlag => ({
+    name,
+    type,
+    description: COMMON_FLAG_DESCRIPTIONS[name] ?? '',
+    example: `bun run ${scriptName} -- ${name}`,
+  })
+
+  const includesRe = /(?:args|process\.argv)\.includes\(\s*'(--[\w-]+)'\s*\)/g
+  let m: RegExpExecArray | null = includesRe.exec(content)
+  while (m !== null) {
+    if (!map.has(m[1])) map.set(m[1], mkFlag(m[1], 'boolean'))
+    m = includesRe.exec(content)
+  }
+
+  const argEqRe = /\barg\s*===\s*'(--[\w-]+)'/g
+  m = argEqRe.exec(content)
+  while (m !== null) {
+    if (!map.has(m[1])) map.set(m[1], mkFlag(m[1], 'boolean'))
+    m = argEqRe.exec(content)
+  }
+
+  // Upgrade to string when arg is used as key for the next argv token:
+  // e.g.  else if (arg === '--save') config.saveDir = args[++i]
+  const strRe = /arg\s*===\s*'(--[\w-]+)'[^;{]*?args\[\+\+i\]/gs
+  m = strRe.exec(content)
+  while (m !== null) {
+    const existing = map.get(m[1])
+    if (existing) existing.type = 'string'
+    else map.set(m[1], mkFlag(m[1], 'string'))
+    m = strRe.exec(content)
+  }
+
+  return Array.from(map.values())
+}
+
+/**
+ * Return flags for a script: explicit `@flag` declarations take priority;
+ * falls back to code-pattern detection.
+ */
+function parseScriptFlags(content: string, scriptName: string): ScriptFlag[] {
+  const explicit = parseExplicitFlags(content, scriptName)
+  return explicit.length > 0 ? explicit : detectFlagsFromCode(content, scriptName)
+}
+
+/**
+ * Render a `## Flags` documentation section.
+ * Returns an empty array when the script has no flags.
+ */
+function renderFlagsSection(flags: ScriptFlag[], scriptName: string): string[] {
+  if (flags.length === 0) return []
+  const lines: string[] = [
+    '## Flags',
+    '',
+    '| Flag | Type | Description | Example |',
+    '| ---- | ---- | ----------- | ------- |',
+  ]
+  for (const flag of flags) {
+    const example = flag.example ?? `bun run ${scriptName} -- ${flag.name}`
+    lines.push(
+      `| \`${flag.name}\` | \`${flag.type}\` | ${flag.description || '—'} | \`${example}\` |`
+    )
+  }
+  lines.push('')
+  return lines
+}
+
 export function parseMetaHeader(content: string, filePath: string): ScriptMeta | null {
   const scriptMatch = content.match(/@script\s+([^\n*]+)/)
   if (!scriptMatch) return null
@@ -130,14 +262,16 @@ export function parseMetaHeader(content: string, filePath: string): ScriptMeta |
   const categoryMatch = content.match(/@category\s+([^\n*]+)/)
   const usageMatch = content.match(/@usage\s+([^\n*]+)/)
   const description = readMultilineHeaderValue(content, '@description')
+  const scriptName = scriptMatch[1].trim()
 
   return {
-    script: scriptMatch[1].trim(),
+    script: scriptName,
     domain: domainMatch ? domainMatch[1].trim() : 'unknown',
     category: categoryMatch ? categoryMatch[1].trim() : 'unknown',
     description,
-    usage: usageMatch ? usageMatch[1].trim() : `bun run ${scriptMatch[1].trim()}`,
+    usage: usageMatch ? usageMatch[1].trim() : `bun run ${scriptName}`,
     filePath: filePath.replace(`${REPO_ROOT}/`, ''),
+    flags: parseScriptFlags(content, scriptName),
   }
 }
 
@@ -485,6 +619,7 @@ export function generateScriptDoc(entry: RootScriptDocEntry): string {
     `- Implementation: ${source}`,
     `- Metadata-backed script file: ${entry.meta?.filePath ? `\`${entry.meta.filePath}\`` : 'No metadata-backed implementation file detected.'}`,
     '',
+    ...renderFlagsSection(entry.meta?.flags ?? [], entry.script),
     '## CI Behavior',
     '',
     inferCiBehavior(entry),
@@ -580,12 +715,14 @@ export function generateRegistry(metas: ScriptMeta[]): string {
     const scripts = byDomain.get(domain) ?? []
     lines.push(`## ${domain}`, '')
     lines.push(
-      '| Script Name | Source File | Category | Description | Usage |',
-      '| ----------- | ----------- | -------- | ----------- | ----- |'
+      '| Script Name | Source File | Category | Description | Usage | Flags |',
+      '| ----------- | ----------- | -------- | ----------- | ----- | ----- |'
     )
     for (const meta of scripts) {
+      const flagsCell =
+        meta.flags.length > 0 ? meta.flags.map((f) => `\`${f.name}\``).join(', ') : '—'
       lines.push(
-        `| \`${meta.script}\` | \`${meta.filePath}\` | ${meta.category} | ${meta.description} | \`${meta.usage}\` |`
+        `| \`${meta.script}\` | \`${meta.filePath}\` | ${meta.category} | ${meta.description} | \`${meta.usage}\` | ${flagsCell} |`
       )
     }
     lines.push('')

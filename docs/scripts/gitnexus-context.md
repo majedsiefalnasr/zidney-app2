@@ -20,6 +20,14 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 - Implementation: scripts/gitnexus-context.ts
 - Metadata-backed script file: `scripts/gitnexus-context.ts`
 
+## Flags
+
+| Flag                   | Type      | Description                                           | Example                                                 |
+| ---------------------- | --------- | ----------------------------------------------------- | ------------------------------------------------------- |
+| `--changed-files-only` | `boolean` | —                                                     | `bun run arch:gitnexus:context -- --changed-files-only` |
+| `--dry-run`            | `boolean` | Report what would be done without making any changes. | `bun run arch:gitnexus:context -- --dry-run`            |
+| `--all`                | `boolean` | —                                                     | `bun run arch:gitnexus:context -- --all`                |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

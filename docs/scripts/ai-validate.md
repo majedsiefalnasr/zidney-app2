@@ -20,6 +20,12 @@ This runner is currently classified as medium. Do not remove without updating CI
 - Implementation: scripts/ai-engine/validate-execution.ts
 - Metadata-backed script file: `scripts/ai-engine/validate-execution.ts`
 
+## Flags
+
+| Flag   | Type      | Description                                                    | Example                       |
+| ------ | --------- | -------------------------------------------------------------- | ----------------------------- |
+| `--ci` | `boolean` | Enable CI non-interactive mode. Disables spinners and prompts. | `bun run ai:validate -- --ci` |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

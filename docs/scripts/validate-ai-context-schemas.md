@@ -20,6 +20,12 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 - Implementation: scripts/validate/ai-context-schemas.ts
 - Metadata-backed script file: `scripts/validate/ai-context-schemas.ts`
 
+## Flags
+
+| Flag   | Type      | Description                                                            | Example                                       |
+| ------ | --------- | ---------------------------------------------------------------------- | --------------------------------------------- |
+| `--ai` | `boolean` | Emit machine-readable JSON to stdout instead of human-readable output. | `bun run validate:ai-context-schemas -- --ai` |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

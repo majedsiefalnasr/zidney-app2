@@ -20,6 +20,18 @@ This runner is currently classified as critical. Not safe to remove directly. Ot
 - Implementation: scripts/infra-audit.ts
 - Metadata-backed script file: `scripts/infra-audit.ts`
 
+## Flags
+
+| Flag               | Type      | Description                                                    | Example                                  |
+| ------------------ | --------- | -------------------------------------------------------------- | ---------------------------------------- |
+| `--quick`          | `boolean` | —                                                              | `bun run arch:audit -- --quick`          |
+| `--check-only`     | `boolean` | Validate without writing any files. Exits 1 on drift.          | `bun run arch:audit -- --check-only`     |
+| `--ci`             | `boolean` | Enable CI non-interactive mode. Disables spinners and prompts. | `bun run arch:audit -- --ci`             |
+| `--ci-strict`      | `boolean` | —                                                              | `bun run arch:audit -- --ci-strict`      |
+| `--generate-graph` | `boolean` | —                                                              | `bun run arch:audit -- --generate-graph` |
+| `--incremental`    | `boolean` | —                                                              | `bun run arch:audit -- --incremental`    |
+| `--fix-map`        | `boolean` | —                                                              | `bun run arch:audit -- --fix-map`        |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

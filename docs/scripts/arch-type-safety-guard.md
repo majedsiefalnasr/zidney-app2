@@ -20,6 +20,15 @@ This runner is currently classified as medium. Not safe to remove directly. Othe
 - Implementation: scripts/type-safety-guard.ts
 - Metadata-backed script file: `scripts/type-safety-guard.ts`
 
+## Flags
+
+| Flag               | Type      | Description             | Example                                              |
+| ------------------ | --------- | ----------------------- | ---------------------------------------------------- |
+| `--json`           | `boolean` | Output results as JSON. | `bun run arch:type-safety-guard -- --json`           |
+| `--markdown`       | `boolean` | —                       | `bun run arch:type-safety-guard -- --markdown`       |
+| `--no-exit-error`  | `boolean` | —                       | `bun run arch:type-safety-guard -- --no-exit-error`  |
+| `--unified-runner` | `boolean` | —                       | `bun run arch:type-safety-guard -- --unified-runner` |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

@@ -20,6 +20,15 @@ This runner is currently classified as critical. Do not remove without updating 
 - Implementation: scripts/architecture-health/architecture-health.ts
 - Metadata-backed script file: `scripts/architecture-health/architecture-health.ts`
 
+## Flags
+
+| Flag                | Type      | Description                                                    | Example                                    |
+| ------------------- | --------- | -------------------------------------------------------------- | ------------------------------------------ |
+| `--output`          | `boolean` | —                                                              | `bun run arch:health -- --output`          |
+| `--ci`              | `boolean` | Enable CI non-interactive mode. Disables spinners and prompts. | `bun run arch:health -- --ci`              |
+| `--refresh-context` | `boolean` | —                                                              | `bun run arch:health -- --refresh-context` |
+| `--fail-on-sync`    | `boolean` | —                                                              | `bun run arch:health -- --fail-on-sync`    |
+
 ## CI Behavior
 
 Dedicated CI runner by name; this entrypoint is already the CI-specific variant.

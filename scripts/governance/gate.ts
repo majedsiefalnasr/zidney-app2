@@ -10,7 +10,7 @@
  */
 
 import { $ } from 'bun'
-import { exit, hasCiFlag, log } from '../utils/logger'
+import { exit, getPassthroughFlags, hasCiFlag, log } from '../utils/logger'
 
 log.setScript('governance:gate')
 const isCi = hasCiFlag()
@@ -40,12 +40,12 @@ async function main(): Promise<void> {
   }
 
   const results: GuardResult[] = []
+  const passthroughFlags = getPassthroughFlags()
+  const extraArgs = passthroughFlags.length > 0 ? ['--', ...passthroughFlags] : []
 
   for (const guard of GUARDS) {
     log.step(`Running: ${guard.name} (${guard.script})`)
-    const proc = isCi
-      ? await $`bun run ${guard.script} -- --ci`.nothrow()
-      : await $`bun run ${guard.script}`.nothrow()
+    const proc = await $`bun run ${guard.script} ${extraArgs}`.nothrow()
     const exitCode = proc.exitCode ?? 1
     const passed = exitCode === 0
     results.push({ name: guard.name, script: guard.script, exitCode, passed })

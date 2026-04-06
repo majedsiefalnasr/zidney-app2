@@ -20,6 +20,14 @@ This runner is currently classified as critical. Treat as protected. It is a pri
 - Implementation: scripts/policy-engine/cli.ts
 - Metadata-backed script file: `scripts/policy-engine/cli.ts`
 
+## Flags
+
+| Flag        | Type      | Description                                         | Example                             |
+| ----------- | --------- | --------------------------------------------------- | ----------------------------------- |
+| `--full`    | `boolean` | Run a full (non-incremental) analysis.              | `bun run policy:check -- --full`    |
+| `--changed` | `boolean` | Only analyse files changed in the current git diff. | `bun run policy:check -- --changed` |
+| `--json`    | `boolean` | Output results as JSON.                             | `bun run policy:check -- --json`    |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

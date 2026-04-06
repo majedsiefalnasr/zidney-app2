@@ -20,6 +20,12 @@ This runner is currently classified as medium. Potential removal candidate if yo
 - Implementation: scripts/security/scan-secrets.ts
 - Metadata-backed script file: `scripts/security/scan-secrets.ts`
 
+## Flags
+
+| Flag       | Type      | Description | Example                                      |
+| ---------- | --------- | ----------- | -------------------------------------------- |
+| `--staged` | `boolean` | —           | `bun run infra:security:secrets -- --staged` |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

@@ -20,6 +20,14 @@ This runner is currently classified as critical. Do not remove without updating 
 - Implementation: scripts/context/build.ts
 - Metadata-backed script file: `scripts/context/build.ts`
 
+## Flags
+
+| Flag        | Type      | Description                                                 | Example                                   |
+| ----------- | --------- | ----------------------------------------------------------- | ----------------------------------------- |
+| `--dry-run` | `boolean` | Report what would be done without making any changes.       | `bun run arch:context:build -- --dry-run` |
+| `--all`     | `boolean` | —                                                           | `bun run arch:context:build -- --all`     |
+| `--force`   | `boolean` | Force execution even if checks fail or files already exist. | `bun run arch:context:build -- --force`   |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

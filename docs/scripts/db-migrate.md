@@ -20,6 +20,12 @@ This runner is currently classified as medium. Potential removal candidate if yo
 - Implementation: scripts/db/migrate.ts
 - Metadata-backed script file: `scripts/db/migrate.ts`
 
+## Flags
+
+| Flag     | Type      | Description | Example                        |
+| -------- | --------- | ----------- | ------------------------------ |
+| `--help` | `boolean` | —           | `bun run db:migrate -- --help` |
+
 ## CI Behavior
 
 Supported explicitly in the implementation.

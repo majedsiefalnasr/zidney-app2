@@ -1,4 +1,4 @@
-# refactor-scripts
+# dev:refactor:scripts
 
 ## Command
 
@@ -8,7 +8,7 @@ bun run dev:refactor:scripts
 
 ## Purpose
 
-Applies the migration map to rename all "bun run <old>" references across the repository. Supports both JSON format (docs/scripts/migration-map.json, preferred) and Markdown format (docs/scripts/SCRIPT_MIGRATION_MAP.md, legacy). Builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain. Writes reports to both reports/SCRIPT_REFACTOR_REPORT.md and docs/reports/script-refactor-report.json.
+Applies the SCRIPT_MIGRATION_MAP to rename all "bun run <old>" references across the repository. Reads docs/scripts/SCRIPT_MIGRATION_MAP.md, builds the old→new rename index, then rewrites all matching files in-place. Supports --dry-run to preview changes without writing. Exits 1 if any unresolved references remain after the run. Writes a summary report to reports/SCRIPT_REFACTOR_REPORT.md.
 
 ## Why It Exists
 
@@ -20,13 +20,19 @@ This runner is currently classified as medium. Potential removal candidate if yo
 - Implementation: scripts/dev/refactor-scripts.ts
 - Metadata-backed script file: `scripts/dev/refactor-scripts.ts`
 
+## Flags
+
+| Flag        | Type      | Description                                           | Example                                     |
+| ----------- | --------- | ----------------------------------------------------- | ------------------------------------------- |
+| `--dry-run` | `boolean` | Report what would be done without making any changes. | `bun run dev:refactor:scripts -- --dry-run` |
+
 ## CI Behavior
 
-Explicitly rejected in the implementation.
+Explicitly rejected in the implementation; this runner rewrites repository files and must not run with --ci.
 
 ## When to Run
 
-- When the corresponding repository workflow requires this root runner.
+- During local development when you need the associated developer workflow.
 
 ## Related Scripts
 
@@ -35,4 +41,4 @@ Explicitly rejected in the implementation.
 
 ## Audit Notes
 
-- Not audited automatically: mutates repository state.
+- Not audited automatically in the isolated execution pass.
