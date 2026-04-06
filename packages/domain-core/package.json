@@ -42,7 +42,7 @@
     "./billing": "./src/billing/index.ts"
   },
   "scripts": {
-    "build": "bun build src/index.ts",
+    "build": "bun build src/index.ts --target=node",
     "test": "vitest"
   },
   "dependencies": {
