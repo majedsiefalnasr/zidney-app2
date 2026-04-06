@@ -52,7 +52,7 @@
 | T025 | 12   | —        | —          | Mount invoicesRouter + webhooksRouter in app.ts | `apps/api/src/app.ts`                                                    |
 | T026 | 13   | ✅       | —          | Billing service unit tests                      | `packages/domain-core/src/billing/__tests__/billing.service.test.ts`     |
 | T027 | 13   | ✅       | —          | Webhook service unit tests                      | `packages/domain-core/src/billing/__tests__/webhook.service.test.ts`     |
-| T028 | 14   | —        | —          | Invoices API integration tests                  | `tests/api/backoffice/invoices/billing.integration.test.ts`              |
+| T028 | 14   | —        | —          | Invoices API integration tests                  | `tests/integration/backoffice/billing.routes.test.ts`                    |
 
 ---
 

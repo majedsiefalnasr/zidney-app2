@@ -60,7 +60,7 @@ All architecture governance rules are confirmed. No ADR violations. 5 clarificat
 
 - **New table:** `invoices` (with `idempotency_key`, `proof_file_id`, `activation_date`)
 - **New table:** `billing_audit_logs` (append-only, actor_type SYSTEM|STAFF|GATEWAY)
-- **Migration:** `20260407_025_billing_and_invoices.ts` (number 025)
+- **Migration:** `20260409_025_billing_and_invoices.ts` (number 025)
 - **Domain module:** `packages/domain-core/src/billing/`
 
 ---

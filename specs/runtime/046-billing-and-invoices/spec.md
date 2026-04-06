@@ -97,7 +97,7 @@ Subscriptions can currently be activated directly (manually or by gateway refere
 | ----------------------------- | -------------------------------------------------------------------------- |
 | `invoices` table              | New tenant schema table for payment lifecycle records                      |
 | Invoice domain module         | `packages/domain-core/src/billing/`                                        |
-| Gateway webhook route         | `POST /backoffice/billing/webhooks/gateway`                                |
+| Gateway webhook route         | `POST /webhooks/billing/gateway`                                           |
 | Manual payment routes         | `POST /invoices`, `POST /invoices/:id/proof`, `POST /invoices/:id/approve` |
 | Invoice listing routes        | `GET /invoices`, `GET /invoices/:id`                                       |
 | Subscription activation relay | Upgrade `subscriptions.service.ts` to require invoice                      |
@@ -182,7 +182,7 @@ CREATE INDEX idx_billing_audit_created ON billing_audit_logs(created_at DESC);
 **Migration number:** 025 (follows Stage 45 promo codes at 024)
 **Files:**
 
-- `apps/api/src/db/tenant/migrations/20260407_025_billing_and_invoices.ts`
+- `apps/api/src/db/tenant/migrations/20260409_025_billing_and_invoices.ts`
 
 Steps:
 

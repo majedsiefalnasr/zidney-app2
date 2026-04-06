@@ -190,6 +190,11 @@ describe('GET /api/v1/backoffice/workspace/invoices', () => {
     expect(body.data.items).toHaveLength(1)
     expect(body.data.items[0].id).toBe(INVOICE_ID)
     expect(mockList).toHaveBeenCalledOnce()
+    // Verify workspace-scoped DB context and pagination params passed correctly
+    const callArgs = mockList.mock.calls[0]!
+    expect(callArgs).toBeDefined()
+    expect(callArgs[0]).toHaveProperty('query') // DB pool client
+    expect(callArgs[1]).toMatchObject({ page: expect.any(Number), limit: expect.any(Number) }) // Pagination query
   })
 
   it('returns 403 when user lacks permission', async () => {
@@ -230,6 +235,19 @@ describe('POST /api/v1/backoffice/workspace/invoices', () => {
     expect(body.success).toBe(true)
     expect(body.data.id).toBe(INVOICE_ID)
     expect(mockCreate).toHaveBeenCalledOnce()
+    // Verify workspace-scoped DB, audit context, and invoice data passed correctly
+    const callArgs = mockCreate.mock.calls[0]!
+    expect(callArgs).toBeDefined()
+    expect(callArgs[0]).toHaveProperty('query') // DB pool client
+    expect(callArgs[1]).toMatchObject({
+      subscriber_id: SUBSCRIBER_ID,
+      subscription_plan_id: PLAN_ID,
+      payment_method: 'MANUAL',
+    }) // Invoice input
+    expect(callArgs[2]).toMatchObject({
+      user_id: expect.any(String),
+      workspace_id: expect.any(String),
+    }) // Audit context (staff user + workspace)
   })
 
   it('returns 422 for invalid request body (missing subscriber_id)', async () => {
