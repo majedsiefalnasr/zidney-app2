@@ -10,25 +10,29 @@ Scope: Workspace-level billing, invoice lifecycle, and subscription activation i
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: HIGH
-Last Updated: 2026-04-06T00:25:00.000Z
+Last Updated: 2026-04-06T00:35:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Migration 025: invoices + billing_audit_logs tables
-- Domain module: packages/domain-core/src/billing/ (service, repository, errors, webhook)
-- API: 6 backoffice invoice endpoints + 1 public webhook endpoint
-- Transaction boundaries: SERIALIZABLE for all PAID transitions
-- Idempotency: idempotency_key partial index for webhook; activation_date null check for subscriptions
+- Total: 28 atomic tasks across 14 dependency-ordered waves
+- Wave 1–2: Migration + schemas (T001–T005)
+- Wave 3–6: Domain module — types, errors, repository, webhook service, billing service, barrel (T006–T011)
+- Wave 7–8: Root barrel + validation schemas + validation barrel (T012–T014)
+- Wave 9–12: Route helpers, 7 route handlers, router indexes, app.ts mounts (T015–T025)
+- Wave 13–14: Unit tests + integration tests (T026–T028)
+
+Deferred Scope:
+
+- Refund engine (future stage)
 
 Architecture Governance Compliance:
 
-- Technical plan compliant — task generation authorized
-- Guardian verdicts: Architecture Guardian PASS, API Designer PASS
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. 28 files (22 create + 6 update). Task breakdown in progress.
+Atomic task set generated (28 tasks). Drift analysis gate pending.
 
 - Paid invoice immutability enforcement
 - Subscription activation relay with SERIALIZABLE transaction
