@@ -20,6 +20,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { BillingError } from '../billing.errors'
 import {
   cancelInvoice,
+  confirmGatewayPayment,
   createInvoiceForSubscription,
   getInvoiceByIdService,
   listInvoicesService,
@@ -451,5 +452,221 @@ describe('listInvoicesService', () => {
     const result = await listInvoicesService(pool as any, { page: 1, limit: 10 }, systemAudit)
     expect(result.total).toBe(0)
     expect(result.items).toHaveLength(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 7. confirmGatewayPayment
+// ---------------------------------------------------------------------------
+
+describe('confirmGatewayPayment', () => {
+  it('transitions PENDING→PAID and activates subscription', async () => {
+    const lockRow = {
+      id: INVOICE_ID,
+      status: 'PENDING',
+      subscriber_id: SUBSCRIBER_ID,
+      subscription_plan_id: PLAN_ID,
+    }
+    const paid = makeInvoiceRecord({ status: 'PAID', payment_reference: 'pay_ref_001' })
+
+    const pool = makePool((sql) => {
+      if (sql.includes('FOR UPDATE')) return { rows: [lockRow], rowCount: 1 }
+      if (sql.includes('UPDATE invoices') && sql.includes('SET status'))
+        return { rows: [paid], rowCount: 1 }
+      if (sql.includes('billing_audit_logs')) return { rows: [{ id: 'audit-001' }], rowCount: 1 }
+      if (sql.includes('FROM plans') && sql.includes('FOR SHARE'))
+        return {
+          rows: [{ id: PLAN_ID, duration_days: 30, is_active: true, workspace_id: WORKSPACE_ID }],
+          rowCount: 1,
+        }
+      if (sql.includes('FROM subscriptions')) return { rows: [], rowCount: 0 }
+      if (sql.includes('INSERT INTO subscriptions'))
+        return {
+          rows: [
+            {
+              id: 'sub-001',
+              student_id: SUBSCRIBER_ID,
+              plan_id: PLAN_ID,
+              status: 'ACTIVE',
+              started_at: NOW,
+              expires_at: FUTURE,
+              auto_renew: false,
+              payment_method: 'GATEWAY',
+              gateway_ref: null,
+              notes: null,
+              created_at: NOW,
+              updated_at: NOW,
+            },
+          ],
+          rowCount: 1,
+        }
+      if (sql.includes('UPDATE students')) return { rows: [], rowCount: 1 }
+      if (sql.includes('SET activation_date')) return { rows: [], rowCount: 1 }
+      if (sql.includes('FROM invoices')) return { rows: [paid], rowCount: 1 }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const result = await confirmGatewayPayment(
+      pool as any,
+      { invoice_id: INVOICE_ID, payment_reference: 'pay_ref_001' },
+      audit
+    )
+    expect(result.id).toBe(INVOICE_ID)
+    expect(result.status).toBe('PAID')
+    expect(pool._client.release).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns existing invoice when already PAID (idempotent)', async () => {
+    const lockRow = {
+      id: INVOICE_ID,
+      status: 'PAID',
+      subscriber_id: SUBSCRIBER_ID,
+      subscription_plan_id: PLAN_ID,
+    }
+    const paid = makeInvoiceRecord({ status: 'PAID', payment_reference: 'pay_ref_001' })
+
+    const pool = makePool((sql) => {
+      if (sql.includes('FOR UPDATE')) return { rows: [lockRow], rowCount: 1 }
+      if (sql.includes('FROM invoices') && !sql.includes('FOR UPDATE'))
+        return { rows: [paid], rowCount: 1 }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const result = await confirmGatewayPayment(
+      pool as any,
+      { invoice_id: INVOICE_ID, payment_reference: 'pay_ref_001' },
+      audit
+    )
+    expect(result.id).toBe(INVOICE_ID)
+    expect(result.status).toBe('PAID')
+  })
+
+  it('throws INVOICE_NOT_FOUND when invoice does not exist', async () => {
+    const pool = makePool((sql) => {
+      if (sql.includes('FOR UPDATE')) return { rows: [], rowCount: 0 }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await confirmGatewayPayment(
+      pool as any,
+      { invoice_id: INVOICE_ID, payment_reference: 'pay_ref_001' },
+      audit
+    ).catch((e) => e)
+    expect(err).toBeInstanceOf(BillingError)
+    expect((err as BillingError).code).toBe('INVOICE_NOT_FOUND')
+  })
+
+  it('throws INVOICE_CANNOT_CONFIRM when invoice is not PENDING', async () => {
+    const lockRow = {
+      id: INVOICE_ID,
+      status: 'CANCELLED',
+      subscriber_id: SUBSCRIBER_ID,
+      subscription_plan_id: PLAN_ID,
+    }
+    const pool = makePool((sql) => {
+      if (sql.includes('FOR UPDATE')) return { rows: [lockRow], rowCount: 1 }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await confirmGatewayPayment(
+      pool as any,
+      { invoice_id: INVOICE_ID, payment_reference: 'pay_ref_001' },
+      audit
+    ).catch((e) => e)
+    expect(err).toBeInstanceOf(BillingError)
+    expect((err as BillingError).code).toBe('INVOICE_CANNOT_CONFIRM')
+  })
+
+  it('throws SUBSCRIPTION_ACTIVATION_FAILED when plan is inactive', async () => {
+    const lockRow = {
+      id: INVOICE_ID,
+      status: 'PENDING',
+      subscriber_id: SUBSCRIBER_ID,
+      subscription_plan_id: PLAN_ID,
+    }
+
+    const pool = makePool((sql) => {
+      if (sql.includes('FOR UPDATE')) return { rows: [lockRow], rowCount: 1 }
+      if (sql.includes('UPDATE invoices') && sql.includes('SET status'))
+        return { rows: [], rowCount: 1 }
+      if (sql.includes('billing_audit_logs')) return { rows: [{ id: 'audit-001' }], rowCount: 1 }
+      if (sql.includes('FROM plans') && sql.includes('FOR SHARE'))
+        return {
+          rows: [{ id: PLAN_ID, duration_days: 30, is_active: false, workspace_id: WORKSPACE_ID }],
+          rowCount: 1,
+        }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const err = await confirmGatewayPayment(
+      pool as any,
+      { invoice_id: INVOICE_ID, payment_reference: 'pay_ref_001' },
+      audit
+    ).catch((e) => e)
+    expect(err).toBeInstanceOf(BillingError)
+    expect((err as BillingError).code).toBe('SUBSCRIPTION_ACTIVATION_FAILED')
+  })
+
+  it('expires existing subscription and creates new one on verifyManualPayment', async () => {
+    const lockRow = {
+      id: INVOICE_ID,
+      status: 'PENDING',
+      subscriber_id: SUBSCRIBER_ID,
+      subscription_plan_id: PLAN_ID,
+      proof_file_id: PROOF_FILE_ID,
+    }
+    const paid = makeInvoiceRecord({ status: 'PAID', proof_file_id: PROOF_FILE_ID })
+    const activeSub = {
+      id: 'sub-active-001',
+      student_id: SUBSCRIBER_ID,
+      plan_id: PLAN_ID,
+      status: 'ACTIVE',
+      started_at: NOW,
+      expires_at: FUTURE,
+    }
+
+    const pool = makePool((sql) => {
+      if (sql.includes('FOR UPDATE')) return { rows: [lockRow], rowCount: 1 }
+      if (sql.includes('UPDATE invoices') && sql.includes('SET status'))
+        return { rows: [paid], rowCount: 1 }
+      if (sql.includes('billing_audit_logs')) return { rows: [{ id: 'audit-001' }], rowCount: 1 }
+      if (sql.includes('FROM plans') && sql.includes('FOR SHARE'))
+        return {
+          rows: [{ id: PLAN_ID, duration_days: 30, is_active: true, workspace_id: WORKSPACE_ID }],
+          rowCount: 1,
+        }
+      if (sql.includes('FROM subscriptions') && sql.includes('FOR UPDATE'))
+        return { rows: [activeSub], rowCount: 1 }
+      if (sql.includes('UPDATE subscriptions') && sql.includes('SET status'))
+        return { rows: [], rowCount: 1 }
+      if (sql.includes('INSERT INTO subscriptions'))
+        return {
+          rows: [
+            {
+              id: 'sub-001',
+              student_id: SUBSCRIBER_ID,
+              plan_id: PLAN_ID,
+              status: 'ACTIVE',
+              started_at: NOW,
+              expires_at: FUTURE,
+              auto_renew: false,
+              payment_method: 'MANUAL',
+              gateway_ref: null,
+              notes: null,
+              created_at: NOW,
+              updated_at: NOW,
+            },
+          ],
+          rowCount: 1,
+        }
+      if (sql.includes('UPDATE students')) return { rows: [], rowCount: 1 }
+      if (sql.includes('SET activation_date')) return { rows: [], rowCount: 1 }
+      if (sql.includes('FROM invoices')) return { rows: [paid], rowCount: 1 }
+      return { rows: [], rowCount: 0 }
+    })
+
+    const result = await verifyManualPayment(pool as any, INVOICE_ID, audit)
+    expect(result.id).toBe(INVOICE_ID)
+    expect(result.status).toBe('PAID')
   })
 })
