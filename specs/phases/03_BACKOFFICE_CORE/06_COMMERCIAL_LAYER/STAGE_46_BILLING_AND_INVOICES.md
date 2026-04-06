@@ -10,20 +10,32 @@ Scope: Workspace-level billing, invoice lifecycle, and subscription activation i
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-04-06T00:00:00.000Z
+Last Updated: 2026-04-06T00:05:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Invoice lifecycle system (PENDING → PAID/FAILED/CANCELLED)
+- Gateway payment flow with idempotent webhook
+- Manual payment flow with proof upload and staff approval
+- Paid invoice immutability
+- Subscription activation relay
+- Billing audit log (append-only)
+- Backoffice invoice listing and filtering
+
+Deferred Scope:
+
+- Refund engine (future stage)
+- Accounting exports (future stage)
+- Multi-currency support (future)
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
