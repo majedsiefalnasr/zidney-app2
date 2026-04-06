@@ -107,14 +107,14 @@
 
 ## Wave 13 — Unit tests (parallel after T009 + T010)
 
-- [ ] T026 [P] Write billing service unit tests: 10 scenarios covering all service functions (createInvoiceForSubscription, confirmGatewayPayment idempotency, verifyManualPayment proof guard, cancelInvoice PAID guard, activateSubscriptionFromInvoice dedup) — `packages/domain-core/src/billing/__tests__/billing.service.test.ts`
-- [ ] T027 [P] Write webhook service unit tests: verifyGatewaySignature happy path, invalid HMAC, timingSafeEqual usage — `packages/domain-core/src/billing/__tests__/webhook.service.test.ts`
+- [x] T026 [P] Write billing service unit tests: 10 scenarios covering all service functions (createInvoiceForSubscription, confirmGatewayPayment idempotency, verifyManualPayment proof guard, cancelInvoice PAID guard, activateSubscriptionFromInvoice dedup) — `packages/domain-core/src/billing/__tests__/billing.service.test.ts`
+- [x] T027 [P] Write webhook service unit tests: verifyGatewaySignature happy path, invalid HMAC, timingSafeEqual usage — `packages/domain-core/src/billing/__tests__/webhook.service.test.ts`
 
 ---
 
 ## Wave 14 — Integration tests (after Wave 12 + Wave 13)
 
-- [ ] T028 Write integration tests: POST /invoices creates PENDING; gateway webhook confirms payment idempotently; manual approval requires proof; concurrent webhook only one PAID; invoice list pagination + filters; cross-tenant isolation — `tests/api/backoffice/invoices/billing.integration.test.ts`
+- [x] T028 Write integration tests: POST /invoices creates PENDING; gateway webhook confirms payment idempotently; manual approval requires proof; concurrent webhook only one PAID; invoice list pagination + filters; cross-tenant isolation — `tests/integration/backoffice/billing.routes.test.ts`
 
 ---
 

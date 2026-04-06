@@ -38,7 +38,8 @@
     "./scheduled-exam": "./src/scheduled-exam/index.ts",
     "./plans": "./src/plans/index.ts",
     "./subscriptions": "./src/subscriptions/index.ts",
-    "./promocodes": "./src/promocodes/index.ts"
+    "./promocodes": "./src/promocodes/index.ts",
+    "./billing": "./src/billing/index.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts",

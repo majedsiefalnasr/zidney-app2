@@ -48,6 +48,7 @@ import { departmentsRouter } from './routes/backoffice/departments/index'
 import { divisionsRouter } from './routes/backoffice/divisions/index'
 import { groupsRouter } from './routes/backoffice/groups/index'
 import { hierarchyRouter } from './routes/backoffice/hierarchy/index'
+import { invoicesRouter } from './routes/backoffice/invoices/index'
 import { lessonsRouter } from './routes/backoffice/lessons'
 import { mcqExamsRouter } from './routes/backoffice/mcq-exams'
 import { mcqQuestionsRouter } from './routes/backoffice/mcq-questions'
@@ -68,6 +69,7 @@ import { traditionalQuestionsRouter } from './routes/backoffice/traditional-ques
 import { translationRouter } from './routes/backoffice/translations/index'
 import { workflowRouter } from './routes/backoffice/workflow/index'
 import { createBackofficeWsRoute } from './routes/backoffice/ws'
+import { webhooksRouter } from './routes/webhooks/index'
 
 // ============================================================================
 // APPLICATION SETUP
@@ -230,6 +232,12 @@ app.route('/api/v1/backoffice/workspace', subscriptionsRouter)
 
 // Promocodes endpoints — Stage 045, permission guard applied per route
 app.route('/api/v1/backoffice/workspace', promocodesRouter)
+
+// Invoices endpoints — Stage 046, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', invoicesRouter)
+
+// Gateway webhook endpoints — Stage 046, HMAC-SHA256 signature only (no JWT)
+app.route('/api/v1', webhooksRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade

@@ -22,6 +22,23 @@ export {
   validateSubmitAttemptRequest,
   validateUpdateProgressRequest,
 } from './attempt-schemas'
+// Billing & Invoices domain validation (Stage 046)
+export {
+  type CancelInvoiceBody,
+  type CreateInvoiceBody,
+  cancelInvoiceBodySchema,
+  createInvoiceBodySchema,
+  type GatewayWebhookBody,
+  gatewayWebhookBodySchema,
+  type InvoiceIdParams,
+  invoiceIdParamsSchema,
+  type ListInvoicesQuery,
+  listInvoicesQuerySchema,
+  type UploadProofBody,
+  uploadProofBodySchema,
+  type VerifyManualPaymentBody,
+  verifyManualPaymentBodySchema,
+} from './backoffice/billing.schemas'
 // Departments domain validation
 export {
   type AssignStaffDepartmentBody,
