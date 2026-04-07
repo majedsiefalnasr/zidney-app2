@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vueuse/core": "^10.9.0",
     "@zidney/api-client": "workspace:*",
     "@zidney/ui-system": "workspace:*",
     "axios": "^1.7.0",
