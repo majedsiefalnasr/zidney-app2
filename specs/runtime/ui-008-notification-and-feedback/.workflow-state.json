@@ -7,7 +7,7 @@
   "base_branch": "develop",
   "pkg_manager": "bun",
   "auto_advance": true,
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
@@ -20,13 +20,22 @@
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-04-07T00:00:00.000Z",
-  "last_updated": "2026-04-07T00:00:00.000Z",
-  "step_timings": {},
+  "last_updated": "2026-04-07T00:06:00.000Z",
+  "step_timings": {
+    "specify": {
+      "started_at": "2026-04-07T00:01:00.000Z",
+      "completed_at": "2026-04-07T00:06:00.000Z"
+    }
+  },
   "history": [
     {
       "event": "branch_created",
       "branch": "spec/ui-008-notification-and-feedback",
       "timestamp": "2026-04-07T00:00:00.000Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-04-07T00:06:00.000Z"
     }
   ]
 }

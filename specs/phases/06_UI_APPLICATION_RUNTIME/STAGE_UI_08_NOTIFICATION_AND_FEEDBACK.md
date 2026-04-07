@@ -9,20 +9,36 @@ UI Foundation — Global Notifications & User Feedback Layer
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
-Risk Level: UNKNOWN
-Initiated: 2026-04-07T00:00:00.000Z
+Step: specify
+Risk Level: MEDIUM
+Last Updated: 2026-04-07T00:06:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Unified notification store (per app: MMC, Backoffice, Frontoffice)
+- Error normalization layer (core/errors/error-normalizer.ts)
+- Toast component standardization via @zidney/ui-system Toaster
+- 5 error categories with routing rules (400/401/403/422/500/network)
+- Form validation feedback pattern (Zod + vee-validate)
+- Async action feedback pattern (loading/success/error states)
+- Offline/reconnect banner
+- Duplicate prevention (2s window)
+- Exam-mode quiet toast in Frontoffice
+
+Deferred Scope:
+
+- Business error codes (backend concern)
+- Real-time websocket notifications
+- Email/SMS/push notifications
+- Notification center history
+- Sentry/error reporting integration
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete (47 requirements, 5 user stories). 0 clarification markers. Clarification step pending.
 
 ---
 
