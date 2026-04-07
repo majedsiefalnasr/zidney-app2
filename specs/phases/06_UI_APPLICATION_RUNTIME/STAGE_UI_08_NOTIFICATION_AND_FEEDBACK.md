@@ -9,21 +9,22 @@ UI Foundation — Global Notifications & User Feedback Layer
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
-Last Updated: 2026-04-07T00:20:00.000Z
+Last Updated: 2026-04-07T00:30:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- 29 files across 3 apps + packages/ui-system (7 implementation waves)
-- Per-app notification stores modified (dedup + visible cap)
-- useNotify.ts + useOfflineBanner.ts composables created per app
-- OfflineBanner.vue component created per app
-- App.vue toast bridge + Toaster mount per app
-- AppLayout.vue OfflineBanner mount per app
-- main.ts global error handler wiring per app
-- Unit + integration tests per app
-- packages/ui-system barrel exports for Toaster + form primitives
+- Total: 29 atomic tasks (28 parallel, 1 sequential)
+- 7 execution waves with strict dependency ordering
+- Wave 1: UI system barrel prerequisite (1 task)
+- Wave 2: Notification store modifications — all 3 apps (3 parallel)
+- Wave 3: Composables + attempt store stub (7 parallel)
+- Wave 4: OfflineBanner.vue components (3 parallel)
+- Wave 5: App shell wiring (6 parallel)
+- Wave 6: main.ts global error handler (3 parallel)
+- Wave 7: Unit tests — stores + composables (6 parallel)
+- User stories covered: US1–US5
 
 Deferred Scope:
 
@@ -33,15 +34,16 @@ Deferred Scope:
 - Notification center history
 - Sentry/error reporting integration
 - Offline notification queuing
+- US3 inline form bindings (usage convention, not file task)
 
 Architecture Governance Compliance:
 
 - Architecture Guardian: PASS
 - API Designer: PASS (after plan corrections)
-- Task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Two corrections applied: (1) toast bridge reactivity (storeToRefs), (2) 422 error code routing table. Ready for task breakdown.
+29 atomic tasks generated across 7 waves. All tasks scoped to UI layer: apps/mmc, apps/backoffice, apps/frontoffice, packages/ui-system. No database migrations, no API changes, no worker tasks. Drift analysis gate pending.
 
 ---
 
