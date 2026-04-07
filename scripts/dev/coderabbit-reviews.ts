@@ -7,7 +7,7 @@
  * @description Fetch CodeRabbit AI review threads from a GitHub PR via the GitHub GraphQL API.
  *   Outputs matching threads as Markdown or JSON. Optionally marks threads as resolved and/or
  *   saves output to a file. Requires `gh` CLI to be authenticated.
- * @usage bun run dev:pr:coderabbit <PR_NUMBER> [--resolved|--unresolved] [--json|--md] [--save <dir>] [--include-files] [--max-lines <n>] [--mark-resolved] [--cleanup]
+ * @usage bun run dev:pr:coderabbit <PR_NUMBER> [--resolved|--unresolved] [--json|--md] [--save <dir>] [--include-files] [--max-lines <n>] [--mark-resolved] [--mark-thread <id|id1,id2>] [--cleanup]
  * @flag --resolved boolean Show resolved threads instead of unresolved ones.
  * @flag --unresolved boolean Show unresolved threads (default).
  * @flag --json boolean Output matching threads as raw JSON.
@@ -16,6 +16,7 @@
  * @flag --include-files boolean Append full file content for each file referenced in a thread.
  * @flag --max-lines number Maximum lines per file block before content is omitted. | bun run dev:pr:coderabbit 42 --max-lines 300
  * @flag --mark-resolved boolean Mark all matching CodeRabbit threads as resolved after fetching.
+ * @flag --mark-thread string Mark specific thread(s) as resolved (comma-separated IDs or single ID). | bun run dev:pr:coderabbit 92 --mark-thread threadId1 or bun run dev:pr:coderabbit 92 --mark-thread id1,id2,id3
  * @flag --cleanup boolean Delete the saved output file after marking threads resolved.
  * @flag --ai boolean Emit machine-readable JSON summary to stdout instead of human output.
  * @flag --ci boolean Enable CI non-interactive mode. Disables spinners.
@@ -39,6 +40,7 @@ interface Args {
   format: 'json' | 'md'
   saveDir?: string
   markResolved: boolean
+  markThreadIds: string[] // Specific thread IDs to mark as resolved
   cleanup: boolean
   includeFiles: boolean
   maxLines: number
@@ -62,6 +64,7 @@ function parseArgs(): Args {
     status: 'UNRESOLVED',
     format: 'md',
     markResolved: false,
+    markThreadIds: [],
     cleanup: false,
     includeFiles: false,
     maxLines: 500,
@@ -75,7 +78,17 @@ function parseArgs(): Args {
     else if (arg === '--md') config.format = 'md'
     else if (arg === '--save') config.saveDir = args[++i]
     else if (arg === '--mark-resolved') config.markResolved = true
-    else if (arg === '--cleanup') config.cleanup = true
+    else if (arg === '--mark-thread') {
+      const threadArg = args[++i] ?? ''
+      if (!threadArg || threadArg.startsWith('-')) {
+        log.error('Missing value for --mark-thread. Provide a comma-separated list of thread IDs.')
+        exit(1)
+      }
+      config.markThreadIds = threadArg
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0)
+    } else if (arg === '--cleanup') config.cleanup = true
     else if (arg === '--include-files') config.includeFiles = true
     else if (arg === '--max-lines') config.maxLines = Number(args[++i])
     else if (!Number.isNaN(Number(arg)) && !arg.startsWith('-')) config.pr = Number(arg)
@@ -83,7 +96,7 @@ function parseArgs(): Args {
 
   if (!config.pr) {
     log.error(
-      'Missing PR number. Usage: bun run dev:pr:coderabbit <PR_NUMBER> [--resolved|--unresolved] [--json|--md] [--save <dir>] [--include-files] [--max-lines <n>] [--mark-resolved] [--cleanup]'
+      'Missing PR number. Usage: bun run dev:pr:coderabbit <PR_NUMBER> [--resolved|--unresolved] [--json|--md] [--save <dir>] [--include-files] [--max-lines <n>] [--mark-resolved] [--mark-thread <id|id1,id2>] [--cleanup]'
     )
     exit(1)
   }
@@ -242,7 +255,7 @@ function main(): void {
     process.stdout.write(`${output}\n`)
   }
 
-  if (config.markResolved && coderabbitThreads.length > 0) {
+  if ((config.markResolved && coderabbitThreads.length > 0) || config.markThreadIds.length > 0) {
     const mutation = `
       mutation($id: ID!) {
         resolveReviewThread(input: { threadId: $id }) {
@@ -250,11 +263,32 @@ function main(): void {
         }
       }
     `
-    log.step('Marking threads as resolved…')
-    for (const t of coderabbitThreads) {
-      runGql(mutation, { id: t.id })
-      log.success(`Resolved thread: ${t.id}`)
-      logger.info('Thread resolved', { threadId: t.id })
+
+    let threadsToMark: ReviewThread[] = []
+    if (config.markThreadIds.length > 0) {
+      // Mark only specific thread IDs
+      threadsToMark = coderabbitThreads.filter((t) => config.markThreadIds.includes(t.id))
+      if (threadsToMark.length === 0) {
+        logger.warn('No matching threads found for specified IDs', {
+          requestedIds: config.markThreadIds,
+          availableIds: coderabbitThreads.map((t) => t.id),
+        })
+        log.warn(
+          `⚠️  No matching threads found for IDs: ${config.markThreadIds.join(', ')}\n   Available IDs: ${coderabbitThreads.map((t) => t.id).join(', ')}`
+        )
+      }
+    } else if (config.markResolved) {
+      // Mark all fetched threads
+      threadsToMark = coderabbitThreads
+    }
+
+    if (threadsToMark.length > 0) {
+      log.step(`Marking ${threadsToMark.length} thread(s) as resolved…`)
+      for (const t of threadsToMark) {
+        runGql(mutation, { id: t.id })
+        log.success(`Resolved thread: ${t.id}`)
+        logger.info('Thread resolved', { threadId: t.id })
+      }
     }
   }
 

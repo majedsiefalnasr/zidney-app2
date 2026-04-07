@@ -22,19 +22,20 @@ This runner is currently classified as medium. Potential removal candidate if yo
 
 ## Flags
 
-| Flag              | Type      | Description                                                           | Example                                        |
-| ----------------- | --------- | --------------------------------------------------------------------- | ---------------------------------------------- |
-| `--resolved`      | `boolean` | Show resolved threads instead of unresolved ones.                     | `bun run dev:pr:coderabbit -- --resolved`      |
-| `--unresolved`    | `boolean` | Show unresolved threads (default).                                    | `bun run dev:pr:coderabbit -- --unresolved`    |
-| `--json`          | `boolean` | Output matching threads as raw JSON.                                  | `bun run dev:pr:coderabbit -- --json`          |
-| `--md`            | `boolean` | Output matching threads as Markdown (default).                        | `bun run dev:pr:coderabbit -- --md`            |
-| `--save`          | `string`  | Save output to the specified directory instead of printing to stdout. | `bun run dev:pr:coderabbit -- --save`          |
-| `--include-files` | `boolean` | Append full file content for each file referenced in a thread.        | `bun run dev:pr:coderabbit -- --include-files` |
-| `--max-lines`     | `number`  | Maximum lines per file block before content is omitted.               | `bun run dev:pr:coderabbit 42 --max-lines 300` |
-| `--mark-resolved` | `boolean` | Mark all matching CodeRabbit threads as resolved after fetching.      | `bun run dev:pr:coderabbit -- --mark-resolved` |
-| `--cleanup`       | `boolean` | Delete the saved output file after marking threads resolved.          | `bun run dev:pr:coderabbit -- --cleanup`       |
-| `--ai`            | `boolean` | Emit machine-readable JSON summary to stdout instead of human output. | `bun run dev:pr:coderabbit -- --ai`            |
-| `--ci`            | `boolean` | Enable CI non-interactive mode. Disables spinners.                    | `bun run dev:pr:coderabbit -- --ci`            |
+| Flag              | Type      | Description                                                             | Example                                                                                                          |
+| ----------------- | --------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `--resolved`      | `boolean` | Show resolved threads instead of unresolved ones.                       | `bun run dev:pr:coderabbit -- --resolved`                                                                        |
+| `--unresolved`    | `boolean` | Show unresolved threads (default).                                      | `bun run dev:pr:coderabbit -- --unresolved`                                                                      |
+| `--json`          | `boolean` | Output matching threads as raw JSON.                                    | `bun run dev:pr:coderabbit -- --json`                                                                            |
+| `--md`            | `boolean` | Output matching threads as Markdown (default).                          | `bun run dev:pr:coderabbit -- --md`                                                                              |
+| `--save`          | `string`  | Save output to the specified directory instead of printing to stdout.   | `bun run dev:pr:coderabbit -- --save`                                                                            |
+| `--include-files` | `boolean` | Append full file content for each file referenced in a thread.          | `bun run dev:pr:coderabbit -- --include-files`                                                                   |
+| `--max-lines`     | `number`  | Maximum lines per file block before content is omitted.                 | `bun run dev:pr:coderabbit 42 --max-lines 300`                                                                   |
+| `--mark-resolved` | `boolean` | Mark all matching CodeRabbit threads as resolved after fetching.        | `bun run dev:pr:coderabbit -- --mark-resolved`                                                                   |
+| `--mark-thread`   | `string`  | Mark specific thread(s) as resolved (comma-separated IDs or single ID). | `bun run dev:pr:coderabbit 92 --mark-thread threadId1 or bun run dev:pr:coderabbit 92 --mark-thread id1,id2,id3` |
+| `--cleanup`       | `boolean` | Delete the saved output file after marking threads resolved.            | `bun run dev:pr:coderabbit -- --cleanup`                                                                         |
+| `--ai`            | `boolean` | Emit machine-readable JSON summary to stdout instead of human output.   | `bun run dev:pr:coderabbit -- --ai`                                                                              |
+| `--ci`            | `boolean` | Enable CI non-interactive mode. Disables spinners.                      | `bun run dev:pr:coderabbit -- --ci`                                                                              |
 
 ## CI Behavior
 

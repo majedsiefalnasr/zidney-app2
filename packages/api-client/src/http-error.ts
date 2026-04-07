@@ -10,6 +10,13 @@ export const ErrorCodes = {
   AUTH_REFRESH_FAILED: 'AUTH_REFRESH_FAILED',
   INVALID_RESPONSE: 'INVALID_RESPONSE',
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  PERMISSION_DENIED: 'PERMISSION_DENIED',
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
+  LOCKED: 'LOCKED',
+  UPGRADE_REQUIRED: 'UPGRADE_REQUIRED',
+  SERVER_ERROR: 'SERVER_ERROR',
 } as const
 
 // ─── Type Guard ─────────────────────────────────────────────────────────────
@@ -47,6 +54,25 @@ export function createAppError(fields: {
     isNetworkError: fields.isNetworkError,
     ...(fields.retryAfter !== undefined ? { retryAfter: fields.retryAfter } : {}),
   })
+}
+
+// ─── HTTP Status Code Mapping ────────────────────────────────────────────────
+
+/**
+ * Map an HTTP status code to an ErrorCode string.
+ * 401 is intentionally omitted — handled by the API client's auth interceptor.
+ */
+export function mapHttpStatusToCode(status: number): string {
+  if (status === 400) return ErrorCodes.VALIDATION_ERROR
+  if (status === 422) return ErrorCodes.VALIDATION_ERROR
+  if (status === 403) return ErrorCodes.PERMISSION_DENIED
+  if (status === 404) return ErrorCodes.NOT_FOUND
+  if (status === 409) return ErrorCodes.CONFLICT
+  if (status === 423) return ErrorCodes.LOCKED
+  if (status === 426) return ErrorCodes.UPGRADE_REQUIRED
+  if (status === 429) return ErrorCodes.RATE_LIMITED
+  if (status >= 500) return ErrorCodes.SERVER_ERROR
+  return ErrorCodes.UNKNOWN_ERROR
 }
 
 // ─── Response Error Normalization ───────────────────────────────────────────

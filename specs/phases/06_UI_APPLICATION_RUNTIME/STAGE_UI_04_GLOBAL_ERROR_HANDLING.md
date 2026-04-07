@@ -8,7 +8,58 @@ UI Foundation — Global Error Boundary & Normalization Layer
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Step: stage_production_ready
+Risk Level: MEDIUM
+Closure Date: 2026-04-06T03:00:00.000Z
+
+Implementation: COMPLETE
+Tasks: 32 / 32 completed
+
+Scope Delivered:
+
+- ✅ Canonical AppError interface in packages/api-client (ErrorCodes, mapHttpStatusToCode, normalizeResponseError)
+- ✅ packages/api-client/src/index.ts: all error utilities exported
+- ✅ error-normalizer.ts (per-app) with 7-branch normalization + legacy NormalizedError migration guard
+- ✅ ErrorBoundary.vue (per-app, onErrorCaptured, inject appLogger + isProduction, fallback slot, reset)
+- ✅ global-error-handler.ts (per-app) — unhandledrejection + error window listeners
+- ✅ redact-error.ts (per-app) — Bearer token, password, secret, API key redaction
+- ✅ Logger + isProduction provided via app.provide() in main.ts (all 3 apps)
+- ✅ ErrorBoundary wired in App.vue (all 3 apps)
+- ✅ Legacy types.ts (NormalizedError) deleted from all 3 apps
+- ✅ 12 new spec files + 6 legacy test files updated (894 tests passing)
+
+Deferred Scope:
+
+- Business-specific error UI (exam/license/affiliate copy)
+- toastFromError integration (consumer responsibility)
+- Offline detection / service worker errors
+
+Architecture Governance Compliance:
+
+- ADR import boundary: apps/_ → packages/_ only — enforced
+- Architecture Guardian: PASS
+- API Designer: PASS
+- Security Auditor: PASS
+- Performance Optimizer: PASS
+- QA Engineer: PASS
+- Code Reviewer: PASS
+- ai:guard: PASS (1830/1830 checks)
+- arch:audit: PASS (score 100/100)
+- Governance gate: PASS (8/8 guards)
+- AI Context: PASS (5/5 valid)
+
+Audit Results:
+
+- Tests: ✅ PASS (105 files, 894 tests passing)
+- Lint: ✅ PASS (1973 files, 0 errors)
+- TypeScript: ✅ PASS (0 errors)
+- AI Guard: ✅ PASS (1830/1830)
+- Architecture Audit: ✅ PASS (100/100)
+
+Notes:
+Stage is production ready. No structural modifications allowed.
+Modifications require a new stage or amendment.
 
 ---
 
