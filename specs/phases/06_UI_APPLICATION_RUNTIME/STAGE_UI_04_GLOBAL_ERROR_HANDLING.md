@@ -8,24 +8,26 @@ UI Foundation — Global Error Boundary & Normalization Layer
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: PRODUCTION READY
+Step: stage_production_ready
 Risk Level: MEDIUM
-Last Updated: 2026-04-06T01:05:00.000Z
+Closure Date: 2026-04-06T03:00:00.000Z
 
-Drift Analysis: PASSED (all 9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 32 / 32 completed
 
-Scope Authorized:
+Scope Delivered:
 
-- Canonical AppError interface in packages/api-client (no change to interface, extend ErrorCodes + mapHttpStatusToCode)
-- packages/api-client/src/index.ts: export mapHttpStatusToCode + normalizeResponseError
-- error-normalizer.ts (per-app) with legacy NormalizedError migration guard
-- ErrorBoundary.vue (per-app, onErrorCaptured, inject appLogger + isProduction)
-- global-error-handler.ts registered at Step 8.5 of main.ts bootstrap
-- redact-error.ts — production-safe, pure function, isProduction param injected
-- Logger + isProduction provided via app.provide() in main.ts before mount
-- 38 total file changes: 2 in packages/api-client, 36 across 3 apps
+- ✅ Canonical AppError interface in packages/api-client (ErrorCodes, mapHttpStatusToCode, normalizeResponseError)
+- ✅ packages/api-client/src/index.ts: all error utilities exported
+- ✅ error-normalizer.ts (per-app) with 7-branch normalization + legacy NormalizedError migration guard
+- ✅ ErrorBoundary.vue (per-app, onErrorCaptured, inject appLogger + isProduction, fallback slot, reset)
+- ✅ global-error-handler.ts (per-app) — unhandledrejection + error window listeners
+- ✅ redact-error.ts (per-app) — Bearer token, password, secret, API key redaction
+- ✅ Logger + isProduction provided via app.provide() in main.ts (all 3 apps)
+- ✅ ErrorBoundary wired in App.vue (all 3 apps)
+- ✅ Legacy types.ts (NormalizedError) deleted from all 3 apps
+- ✅ 12 new spec files + 6 legacy test files updated (894 tests passing)
 
 Deferred Scope:
 
@@ -35,6 +37,7 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
+- ADR import boundary: apps/_ → packages/_ only — enforced
 - Architecture Guardian: PASS
 - API Designer: PASS
 - Security Auditor: PASS
@@ -43,9 +46,20 @@ Architecture Governance Compliance:
 - Code Reviewer: PASS
 - ai:guard: PASS (1830/1830 checks)
 - arch:audit: PASS (score 100/100)
+- Governance gate: PASS (8/8 guards)
+- AI Context: PASS (5/5 valid)
+
+Audit Results:
+
+- Tests: ✅ PASS (105 files, 894 tests passing)
+- Lint: ✅ PASS (1973 files, 0 errors)
+- TypeScript: ✅ PASS (0 errors)
+- AI Guard: ✅ PASS (1830/1830)
+- Architecture Audit: ✅ PASS (100/100)
 
 Notes:
-All drift criteria passed. Implementation gate open. 32 tasks authorized for execution.
+Stage is production ready. No structural modifications allowed.
+Modifications require a new stage or amendment.
 
 ---
 
