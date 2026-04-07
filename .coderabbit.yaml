@@ -1,35 +1,259 @@
-# .coderabbit.yaml - High-Strictness Configuration
+# .coderabbit.yaml - Enhanced Configuration for Zidney
+# Monorepo with Bun + Hono + Vue 3 + TypeScript
+
+language: "en-US" # Set the language for reviews
+tone_instructions: "professional" # Options: professional, casual, direct, etc.
+early_access: true
+
+# Review settings
 reviews:
   # Enable the assertive profile for comprehensive, detailed feedback
   profile: "assertive"
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  auto_title_placeholder: "@coderabbitai"
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  sequence_diagrams: true
+  abort_on_close: true
 
-  # Configuration for automatic reviews
+  # Path filters - exclude build artifacts and dependencies
+  path_filters:
+    - "!dist/**"
+    - "!node_modules/**"
+    - "!coverage/**"
+    - "!**/*.lock"
+    - "!**/bun.lock"
+
+  # Path-specific instructions for Zidney architecture
+  path_instructions:
+    # API Application - Hono backend
+    - path: "apps/api/**/*"
+      instructions: |
+        "Review API code for:
+        - Hono middleware ordering (tenant → license → auth → RBAC)
+        - Database-per-tenant isolation enforcement
+        - JWT validation and token versioning
+        - License lifecycle enforcement (ACTIVE, SOFT_LOCKED, ARCHIVED, etc.)
+        - Proper error response format: { success, error: { code, message }, request_id }
+        - Input validation with Zod
+        - No business logic embedding (should be in domain-core)
+        - No row-based multi-tenancy patterns
+        - Structured logging with Pino"
+
+    # Worker Application - Background jobs
+    - path: "apps/worker/**/*"
+      instructions: |
+        "Review Worker code for:
+        - Schema version compatibility checks before execution
+        - Idempotent job processing patterns
+        - Transaction boundaries per job
+        - Attempt snapshot immutability (use frozen data only)
+        - Deterministic grading algorithms
+        - Dead-letter queue handling after 3 retries
+        - License validation (ACTIVE) before grading
+        - No live exam config references
+        - Correlation ID logging"
+
+    # MMC - Platform control panel
+    - path: "apps/mmc/**/*"
+      instructions: |
+        "Review MMC code for:
+        - Platform-level operations only (master_db)
+        - No tenant DB access
+        - License state display correctness
+        - Provisioning flow compliance (PROVISIONING → ACTIVE)
+        - shadcn-vue component usage
+        - Tailwind v4 utilities
+        - No business logic in components"
+
+    # Backoffice - B2B institutional panel
+    - path: "apps/backoffice/**/*"
+      instructions: |
+        "Review Backoffice code for:
+        - Workspace-scoped operations only
+        - No grading logic (API-driven)
+        - RBAC permission checks from API
+        - Pagination for large datasets
+        - shadcn-vue + Tailwind v4 usage
+        - Pinia store reset on workspace change"
+
+    # Frontoffice - Student runtime
+    - path: "apps/frontoffice/**/*"
+      instructions: |
+        "Review Frontoffice code for:
+        - Display-only runtime (no business enforcement)
+        - Server-authoritative time for timers
+        - Attempt snapshot integrity
+        - Question order immutability
+        - No business rule evaluation locally
+        - Timer is read-only display (server time)"
+
+    # Domain Core - Business logic
+    - path: "packages/domain-core/**/*"
+      instructions: |
+        "Review Domain Core code for:
+        - Pure functions only (no side effects)
+        - No framework imports (no Hono, no Vue)
+        - No environment variables (no process.env)
+        - No database access
+        - No Redis/cache imports
+        - TypeScript strict mode
+        - Testable in isolation
+        - Deterministic grading logic
+        - Zod for input validation schemas"
+
+    # UI System - Shared components
+    - path: "packages/ui-system/**/*"
+      instructions: |
+        "Review UI System code for:
+        - shadcn-vue components as base
+        - Tailwind v4 utilities only
+        - No business logic in components
+        - Theme token usage (no hardcoded colors)
+        - Accessibility (ARIA compliance)
+        - Props-only data (no API calls)
+        - Composable patterns"
+
+    # API Client - HTTP layer
+    - path: "packages/api-client/**/*"
+      instructions: |
+        "Review API Client code for:
+        - Typed endpoint definitions
+        - Request/response interceptors
+        - Error handling standardization
+        - Tenant-aware configuration
+        - JWT refresh handling"
+
+    # Validation - Zod schemas
+    - path: "packages/validation/**/*"
+      instructions: |
+        "Review Validation code for:
+        - Zod schema definitions
+        - API request/response validation
+        - Domain-specific validators
+        - TypeScript type inference"
+
+    # Types - Shared types
+    - path: "packages/types/**/*"
+      instructions: |
+        "Review Types code for:
+        - Shared TypeScript interfaces
+        - Entity types
+        - API response types
+        - Cross-package consistency"
+
+    # Logger - Logging utilities
+    - path: "packages/logger/**/*"
+      instructions: |
+        "Review Logger code for:
+        - Pino integration
+        - Structured logging
+        - Contextual logging
+        - Log level management"
+
+    # Tests
+    - path: "tests/**/*"
+      instructions: |
+        "Review test code for:
+        - Arrange-Act-Assert pattern
+        - Test independence
+        - Edge case coverage
+        - Mock justification
+        - Unit tests for domain-core
+        - Integration tests for API routes
+        - E2E tests for critical flows"
+
+    # General TypeScript rules
+    - path: "**/*.ts"
+      instructions: |
+        "TypeScript code should:
+        - Use strict TypeScript mode
+        - Prefer 'import type' over 'import'
+        - Avoid 'any' type, use 'unknown'
+        - Use interface for object structures
+        - Use type aliases for complex types
+        - Define explicit return types
+        - Follow Single Responsibility Principle
+        - Keep functions brief (10-20 lines)
+        - Use early exits for error cases"
+
+    # Vue specific
+    - path: "**/*.vue"
+      instructions: |
+        "Vue components should:
+        - Use Composition API (<script setup>)
+        - Use TypeScript with strict typing
+        - Follow shadcn-vue patterns
+        - Use Tailwind v4 utilities
+        - No Options API
+        - No business logic in components"
+
+  # Auto review configuration
   auto_review:
     enabled: true
-    drafts: true # Prevents noise on incomplete work
+    auto_incremental_review: true
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+      - "SWEEP"
+    drafts: true
+    base_branches:
+      - "main"
+      - "develop"
+      - "release/**"
 
-  # Enable high-level summaries and release notes in PR descriptions
-  high_level_summary: true
-
-  # Integrated tools to catch security and style issues early
+  # Tools configuration
   tools:
-    gitleaks:
-      enabled: true # Detects hardcoded secrets
-    eslint:
-      enabled: true # Standard JS/TS linting
-    ruff:
-      enabled: true # High-performance Python linting
+    # Shell script validation
     shellcheck:
-      enabled: true # Validates shell scripts
+      enabled: true
 
-  # Targeted instructions for different parts of your codebase
-  path_instructions:
-    - path: "src/**"
-      instructions: "Ensure strict adherence to SOLID principles and DRY. Suggest performance optimizations for loops and data structures."
-    - path: "tests/**"
-      instructions: "Verify that edge cases are covered. Ensure tests are independent and follow the Arrange-Act-Assert pattern."
-    - path: "docs/**"
-      instructions: "Check for clarity, grammar, and ensure all technical terms are used consistently."
+    # Markdown linting
+    markdownlint:
+      enabled: true
 
-# Advanced features
-early_access: false
+    # GitHub checks
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+
+    # Language tool for grammar
+    languagetool:
+      enabled: true
+      enabled_only: false
+      level: "default"
+
+    # Biome for JS/TS linting
+    biome:
+      enabled: true
+
+    # Docker linting
+    hadolint:
+      enabled: true
+
+    # Secret detection
+    gitleaks:
+      enabled: true
+
+    # ESLint for JS/TS/Vue
+    eslint:
+      enabled: true
+
+    # Ruff for Python (if applicable)
+    ruff:
+      enabled: true
+
+# Chat configuration
+chat:
+  auto_reply: true
+
+# Knowledge base
+knowledge_base:
+  opt_out: false
+  learnings:
+    scope: auto
+  issues:
+    scope: auto
