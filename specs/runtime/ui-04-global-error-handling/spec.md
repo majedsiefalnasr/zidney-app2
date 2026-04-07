@@ -353,6 +353,7 @@ export function unregisterGlobalErrorHandlers(): void;
 interface GlobalErrorHandlerOptions {
   onError: (error: AppError) => void;
   logger?: Logger;
+  isProduction?: boolean;
 }
 ```
 

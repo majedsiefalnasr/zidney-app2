@@ -5,7 +5,7 @@ const BEARER_PATTERN = /\bBearer\s+[A-Za-z0-9\-_./+]+=*/gi
 const CREDENTIAL_PATTERN = /(password|token|secret|api[_-]?key|apikey|key|auth)=[^\s&]*/gi
 const COLON_CREDENTIAL_PATTERN =
   /(password|token|secret|api[_-]?key|apikey|key|auth)\s*[:=]\s*(?!(?:Bearer|Basic)\b)["']?[^"'\s,&}]+["']?/gi
-const STACK_FRAME_PATTERN = /\s+at\s+[^\n]+/gm
+const STACK_FRAME_PATTERN = /^\s+at\s+[^\n]+$/gm
 
 /**
  * Redact sensitive data from an AppError.

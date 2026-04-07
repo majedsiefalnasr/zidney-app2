@@ -65,7 +65,7 @@ These tasks modify architectural hotspots — extra review attention recommended
 
 ## Dependency Graph
 
-```
+```text
 T001 → T002 → T003 → T004 → T005 → T006 → T007 → T008
                 ↓ (T002 unblocks)
               T009 [P] → T010 [P] → T011 [P] → T012 [P] → T013 [P] → T014 [P]

@@ -79,7 +79,11 @@ function parseArgs(): Args {
     else if (arg === '--save') config.saveDir = args[++i]
     else if (arg === '--mark-resolved') config.markResolved = true
     else if (arg === '--mark-thread') {
-      const threadArg = args[++i]
+      const threadArg = args[++i] ?? ''
+      if (!threadArg || threadArg.startsWith('-')) {
+        log.error('Missing value for --mark-thread. Provide a comma-separated list of thread IDs.')
+        exit(1)
+      }
       config.markThreadIds = threadArg
         .split(',')
         .map((id) => id.trim())
