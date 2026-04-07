@@ -11,10 +11,10 @@
 
 | Metric                 | Value                                     |
 | ---------------------- | ----------------------------------------- |
-| Total tasks            | 29                                        |
-| Parallel tasks (`[P]`) | 28                                        |
+| Total tasks            | 38                                        |
+| Parallel tasks (`[P]`) | 37                                        |
 | Sequential tasks       | 1                                         |
-| Execution waves        | 7                                         |
+| Execution waves        | 8                                         |
 | User stories covered   | US1–US5 (US3 via barrel export in Wave 1) |
 
 **MVP scope**: Wave 1–Wave 3 (US1 core path: store + composable + toast bridge)
@@ -26,7 +26,8 @@
 - Wave 4: 3 tasks — all OfflineBanner.vue components (independent files)
 - Wave 5: 6 tasks — all App.vue + AppLayout.vue modifications (independent across apps)
 - Wave 6: 3 tasks — all main.ts modifications (independent files)
-- Wave 7: 6 tasks — all test files (independent files)
+- Wave 7: 12 tasks — unit tests (store expand x3, useNotify x3, OfflineBanner x3) + integration tests (x3)
+- Wave 8: 3 tasks — useFormSubmit composables (1 per app)
 
 ---
 
@@ -95,24 +96,41 @@
 > All three tasks are fully parallel — independent files.
 > Depends on Wave 2 (notification stores must be available before main.ts wiring).
 
-- [ ] T021 [P] [US2] Modify `apps/mmc/src/main.ts` — in the `registerGlobalErrorHandlers({ onError })` callback, after existing `appLogger.error(...)`: add `if (!err.isNetworkError) { useMmcNotificationStore().push({ type: 'error', title: 'Unexpected error', message: err.message, dismissible: true }) }` (network errors are handled by offline banner, not toast)
-- [ ] T022 [P] [US2] Modify `apps/backoffice/src/main.ts` — same as T021 using `useBackofficeNotificationStore()`; network error guard same: `if (!err.isNetworkError) { ... }`
-- [ ] T023 [P] [US2] Modify `apps/frontoffice/src/main.ts` — same as T021 using `useFrontofficeNotificationStore()`; network error guard same: `if (!err.isNetworkError) { ... }`
+- [ ] T021 [P] [US2] Modify `apps/mmc/src/main.ts` — in the `registerGlobalErrorHandlers({ onError })` callback: (1) log: `appLogger.error(redactError(err))` — never pass raw `err` object to logger; (2) optional dev-only detail: `if (getAppConfig().isDev) { appLogger.debug(JSON.stringify(redactError(err), null, 2)) }` — gated by `getAppConfig().isDev` (Design Decision D3: no direct `import.meta.env` usage); (3) push notification: `if (!err.isNetworkError) { useMmcNotificationStore().push({ type: 'error', title: 'Unexpected error', message: err.message, dismissible: true }) }` (network errors handled by offline banner, not toast)
+- [ ] T022 [P] [US2] Modify `apps/backoffice/src/main.ts` — same as T021 using `useBackofficeNotificationStore()`; additionally, if `useBackofficeWorkspaceStore().currentSlug` is available, include it as a context note in the notification: `message: \`${err.message} (workspace: ${workspaceStore.currentSlug})\``(FR-029); all logging gated via`redactError()`+`getAppConfig().isDev` as in T021
+- [ ] T023 [P] [US2] Modify `apps/frontoffice/src/main.ts` — same as T021 using `useFrontofficeNotificationStore()`; logging pattern identical: `appLogger.error(redactError(err))` + `getAppConfig().isDev` guard for debug detail; network error guard same: `if (!err.isNetworkError) { ... }`
 
 ---
 
-## Wave 7 — Unit Tests
+## Wave 7 — Unit Tests + Integration Tests
 
-> All six tasks are fully parallel — independent test files.
-> Depends on Waves 2–3 (implementations must exist to be tested).
-> Test files use `.test.ts` suffix in `apps/*/tests/unit/`.
+> All twelve tasks are fully parallel — independent test files.
+> Depends on Waves 2–6 (implementations and main.ts wiring must exist to be tested).
+> Test files use `.test.ts` suffix in `apps/*/tests/unit/` and `apps/*/tests/integration/`.
 
-- [ ] T024 [P] [US1] Create `apps/mmc/tests/unit/stores/notification.store.test.ts` — Vitest unit tests: `push()` returns ID; dedup within 2s returns `""`; dedup after 2s window allowed (`vi.setSystemTime`); queue evicts oldest at 20 entries; `visibleNotifications` capped at 5; `dismiss(id)` removes only target; `clearAll()` empties queue; `$reset()` clears queue AND `lastPushed` map (verify same key re-pushes successfully after reset)
-- [ ] T025 [P] [US1] Create `apps/backoffice/tests/unit/stores/notification.store.test.ts` — same test cases as T024 for `useBackofficeNotificationStore`
-- [ ] T026 [P] [US1] Create `apps/frontoffice/tests/unit/stores/notification.store.test.ts` — same test cases as T024 for `useFrontofficeNotificationStore`
+- [ ] T024 [P] [US1] **Expand** `apps/mmc/tests/unit/stores/notification.store.test.ts` (file exists from UI-06 — do NOT replace; add new test cases only) — add: dedup within 2s returns `""` (key = type:title:message); duplication after 2s window is allowed (`vi.setSystemTime`); queue evicts oldest at 20 entries (MAX_QUEUE_SIZE); `visibleNotifications` capped at 5; `$reset()` clears queue AND `lastPushed` map (verify same key re-pushes successfully after reset)
+- [ ] T025 [P] [US1] **Expand** `apps/backoffice/tests/unit/stores/notification.store.test.ts` (file exists from UI-06 — do NOT replace; add new test cases only) — same new test cases as T024 for `useBackofficeNotificationStore`
+- [ ] T026 [P] [US1] **Expand** `apps/frontoffice/tests/unit/stores/notification.store.test.ts` (file exists from UI-06 — do NOT replace; add new test cases only) — same new test cases as T024 for `useFrontofficeNotificationStore`
 - [ ] T027 [P] [US1] Create `apps/mmc/tests/unit/composables/useNotify.test.ts` — Vitest unit tests with `createPinia` + `setActivePinia`: `success()` pushes `type:'success'` with `duration:4000`; `error()` pushes with `duration:undefined`; `warning()` pushes with `duration:7000`; `info()` pushes with `duration:5000`; all have `dismissible:true`
 - [ ] T028 [P] [US1] Create `apps/backoffice/tests/unit/composables/useNotify.test.ts` — same test cases as T027 for `useBackofficeNotificationStore`-based `useNotify`; no exam-mode tests
 - [ ] T029 [P] [US5] Create `apps/frontoffice/tests/unit/composables/useNotify.test.ts` — same base tests as T027 + exam-mode guard: mock `useAttemptStore` with `isExamActive = ref(true)`; assert `success()` returns `""` and queue stays empty; assert `info()` returns `""` and queue stays empty; assert `error()` always pushes (queue length = 1); assert `warning()` always pushes (queue length = 1); then with `isExamActive = ref(false)`: all 4 methods push normally
+- [ ] T030 [P] [US4] Create `apps/mmc/tests/unit/components/OfflineBanner.test.ts` — Vitest component tests with `@vue/test-utils`: mock `useOnline` from `@vueuse/core`; assert banner renders when `isOnline=false`; assert banner absent when `isOnline=true`; assert no dismiss button; assert `role="status"` attribute present
+- [ ] T031 [P] [US4] Create `apps/backoffice/tests/unit/components/OfflineBanner.test.ts` — same test cases as T030 for Backoffice OfflineBanner
+- [ ] T032 [P] [US4] Create `apps/frontoffice/tests/unit/components/OfflineBanner.test.ts` — same test cases as T030 for Frontoffice OfflineBanner
+- [ ] T033 [P] [US1] Create `apps/mmc/tests/integration/notification-flow.test.ts` — Vitest integration test: mock `apiClient`; use real `normalizeError()` + real `useMmcNotificationStore`; assert per status code: **400** (VALIDATION_ERROR) → no toast (queue empty — field errors route to form); **401** (AUTH_REFRESH_FAILED) → no toast pushed, `router.push('/login')` called (auth redirect per FR-013); **403** (FORBIDDEN) → warning toast pushed; **409** (CONFLICT) → error toast with `err.message`; **422** (Unprocessable) → error toast with `err.message`; **500** → generic error toast ("Something went wrong"); **network error** (`isNetworkError=true`) → no toast (handled by offline banner); **loading state**: `isLoading` set to `true` before await, back to `false` in `finally`; **double-submit guard**: second call while first is in-flight is a no-op (queue length stays 1)
+- [ ] T034 [P] [US1] Create `apps/backoffice/tests/integration/notification-flow.test.ts` — same status-code assertions as T033 (including 401 redirect + 409/422 error toasts); additionally verify workspace_slug sourced from `useBackofficeWorkspaceStore()` Pinia store (not from request body) is injected into notification `message` field
+- [ ] T035 [P] [US5] Create `apps/frontoffice/tests/integration/notification-flow.test.ts` — same status-code assertions as T033 (including 401 redirect + 409/422); additionally assert exam-mode suppression: mock `useAttemptStore` with `isExamActive = ref(true)`; assert `info`/`success` notifications suppressed (queue empty); assert `error`/`warning` still push to queue
+
+---
+
+## Wave 8 — useFormSubmit Composables
+
+> All three tasks are fully parallel — independent files across apps.
+> Standalone composables: dep on Vue 3 reactivity only; no upstream wave dependency.
+
+- [ ] T036 [P] [US3] Create `apps/mmc/src/composables/useFormSubmit.ts` — Vue 3 composable for async form actions (FR-024): `const isSubmitting = ref(false); async function submit(action: () => Promise<void>) { if (isSubmitting.value) return; isSubmitting.value = true; try { await action() } finally { isSubmitting.value = false } }; return { isSubmitting: readonly(isSubmitting), submit }` — consumer binds `:disabled="isSubmitting"` and `:loading="isSubmitting"` on submit button
+- [ ] T037 [P] [US3] Create `apps/backoffice/src/composables/useFormSubmit.ts` — identical implementation to T036
+- [ ] T038 [P] [US3] Create `apps/frontoffice/src/composables/useFormSubmit.ts` — identical implementation to T036
 
 ---
 
@@ -120,12 +138,13 @@
 
 ```
 T001
-  └─► T002, T003, T004 (Wave 2 — stores add dedup/cap to existing stores)
-        └─► T005, T006, T007, T008, T009, T010, T011 (Wave 3 — composables need stores)
-              └─► T012, T013, T014 (Wave 4 — OfflineBanner needs useOfflineBanner)
-                    └─► T015, T016, T017, T018, T019, T020 (Wave 5 — App shell needs components)
-                          └─► T021, T022, T023 (Wave 6 — main.ts needs stores)
-                                └─► T024, T025, T026, T027, T028, T029 (Wave 7 — tests need implementations)
+  └► T002, T003, T004 (Wave 2 — stores add dedup/cap to existing stores)
+        └► T005, T006, T007, T008, T009, T010, T011 (Wave 3 — composables need stores)
+              └► T012, T013, T014 (Wave 4 — OfflineBanner needs useOfflineBanner)
+                    └► T015, T016, T017, T018, T019, T020 (Wave 5 — App shell needs components)
+                          └► T021, T022, T023 (Wave 6 — main.ts needs stores)
+                                └► T024–T035 (Wave 7 — tests need all implementations)
+T036, T037, T038 (Wave 8 — standalone, no upstream deps)
 ```
 
 Note: Wave 6 depends on Wave 2 (notification stores), but not on Waves 3–5. It can be run in parallel with Waves 3–5 if needed.
@@ -134,13 +153,13 @@ Note: Wave 6 depends on Wave 2 (notification stores), but not on Waves 3–5. It
 
 ## User Story Coverage
 
-| User Story | Tasks                                                            | Notes                                                                                                                        |
-| ---------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| US1        | T005, T007, T009, T015, T016, T017, T024, T025, T026, T027, T028 | Core toast path: store → composable → App.vue bridge                                                                         |
-| US2        | T021, T022, T023                                                 | Global error handler wires to notification store                                                                             |
-| US3        | T001 (partial)                                                   | Form primitives barrel export enables `<FormMessage>` usage; actual form wiring lives in feature store actions per plan §1.8 |
-| US4        | T006, T008, T010, T012, T013, T014, T018, T019, T020             | Offline detection composable + banner component + layout mount                                                               |
-| US5        | T011, T029                                                       | Attempt store stub + Frontoffice useNotify exam-mode guard + tests                                                           |
+| User Story | Tasks                                                                        | Notes                                                                            |
+| ---------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| US1        | T005, T007, T009, T015, T016, T017, T024, T025, T026, T027, T028, T033, T034 | Core toast path: store → composable → App.vue bridge + integration tests         |
+| US2        | T021, T022, T023                                                             | Global error handler wires to notification store                                 |
+| US3        | T001 (partial), T036, T037, T038                                             | Form primitives barrel export + useFormSubmit composable per app (FR-024)        |
+| US4        | T006, T008, T010, T012, T013, T014, T018, T019, T020, T030, T031, T032       | Offline detection composable + banner component + layout mount + component tests |
+| US5        | T011, T029, T035                                                             | Attempt store stub + Frontoffice useNotify exam-mode guard + integration test    |
 
 ---
 

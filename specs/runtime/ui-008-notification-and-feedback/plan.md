@@ -270,13 +270,14 @@ This stub satisfies the `useNotify.ts` import contract. It defaults to
 ### Execution Order
 
 ```
-Wave 1 (parallel): ui-system barrel fix
+Wave 1 (sequential): ui-system barrel fix
 Wave 2 (parallel): MODIFY all 3 notification stores
-Wave 3 (parallel): CREATE all 6 composables
+Wave 3 (parallel): CREATE all 6 composables + attempt store stub
 Wave 4 (parallel): CREATE all 3 OfflineBanner.vue components
 Wave 5 (parallel): MODIFY all 3 AppLayout.vue, MODIFY all 3 App.vue
 Wave 6 (parallel): MODIFY all 3 main.ts
-Wave 7 (parallel): CREATE all test files
+Wave 7 (parallel): EXPAND 3 store test files + CREATE 9 test files (useNotify x3, OfflineBanner x3, integration x3)
+Wave 8 (parallel): CREATE 3 useFormSubmit composables (FR-024)
 ```
 
 ---
@@ -348,14 +349,28 @@ Wave 7 (parallel): CREATE all test files
 
 ### Wave 7 — Tests
 
-| #   | File                                                                   | Action | Reason                                                                                                                |
-| --- | ---------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
-| 24  | `apps/mmc/src/core/state/__tests__/notification.store.spec.ts`         | CREATE | Unit tests for push, dedup, dedup expiry, max queue, visible cap, dismiss, clearAll, $reset. See spec §Testing.       |
-| 25  | `apps/backoffice/src/core/state/__tests__/notification.store.spec.ts`  | CREATE | Same.                                                                                                                 |
-| 26  | `apps/frontoffice/src/core/state/__tests__/notification.store.spec.ts` | CREATE | Same.                                                                                                                 |
-| 27  | `apps/mmc/src/core/__tests__/notification-flow.spec.ts`                | CREATE | Integration: normalizeError → store → useNotify. Tests 400→inline, 401→no toast, 500→generic toast, network→no toast. |
-| 28  | `apps/backoffice/src/core/__tests__/notification-flow.spec.ts`         | CREATE | Same.                                                                                                                 |
-| 29  | `apps/frontoffice/src/core/__tests__/notification-flow.spec.ts`        | CREATE | Same + exam-mode suppression: info/success suppressed when isExamActive=true; error still fires.                      |
+| #   | File                                                            | Action | Reason                                                                                                                                                                                                |
+| --- | --------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 24  | `apps/mmc/tests/unit/stores/notification.store.test.ts`         | EXPAND | Expand existing UI-06 tests: add dedup within 2s, dedup expiry, visibleNotifications cap at 5, $reset clears lastPushed.                                                                              |
+| 25  | `apps/backoffice/tests/unit/stores/notification.store.test.ts`  | EXPAND | Same.                                                                                                                                                                                                 |
+| 26  | `apps/frontoffice/tests/unit/stores/notification.store.test.ts` | EXPAND | Same.                                                                                                                                                                                                 |
+| 27  | `apps/mmc/tests/unit/composables/useNotify.test.ts`             | CREATE | useNotify unit tests: success/error/warning/info default durations; dismissible:true always.                                                                                                          |
+| 28  | `apps/backoffice/tests/unit/composables/useNotify.test.ts`      | CREATE | Same.                                                                                                                                                                                                 |
+| 29  | `apps/frontoffice/tests/unit/composables/useNotify.test.ts`     | CREATE | Same + exam-mode guard: success/info suppressed when isExamActive=true; error/warning always fire.                                                                                                    |
+| 30  | `apps/mmc/tests/unit/components/OfflineBanner.test.ts`          | CREATE | Component tests: show offline, hide online, no dismiss button, role="status".                                                                                                                         |
+| 31  | `apps/backoffice/tests/unit/components/OfflineBanner.test.ts`   | CREATE | Same.                                                                                                                                                                                                 |
+| 32  | `apps/frontoffice/tests/unit/components/OfflineBanner.test.ts`  | CREATE | Same.                                                                                                                                                                                                 |
+| 33  | `apps/mmc/tests/integration/notification-flow.test.ts`          | CREATE | Integration: 400→no toast (field errors); 401→redirect+no toast (FR-013); 403→warning; 409→error toast; 422→error toast; 500→generic error; network→no toast; loading lifecycle; double-submit guard. |
+| 34  | `apps/backoffice/tests/integration/notification-flow.test.ts`   | CREATE | Same + workspace_slug in error context from workspace Pinia store.                                                                                                                                    |
+| 35  | `apps/frontoffice/tests/integration/notification-flow.test.ts`  | CREATE | Same + exam-mode suppression: info/success suppressed when isExamActive=true; error still fires.                                                                                                      |
+
+### Wave 8 — Form Submit Pattern (FR-024)
+
+| #   | File                                                | Action | Reason                                                                                                                             |
+| --- | --------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 36  | `apps/mmc/src/composables/useFormSubmit.ts`         | CREATE | Composable encapsulating submit button `disabled` + loading state for async actions (FR-024). Tracks `isSubmitting: Ref<boolean>`. |
+| 37  | `apps/backoffice/src/composables/useFormSubmit.ts`  | CREATE | Same.                                                                                                                              |
+| 38  | `apps/frontoffice/src/composables/useFormSubmit.ts` | CREATE | Same.                                                                                                                              |
 
 ---
 
@@ -363,7 +378,7 @@ Wave 7 (parallel): CREATE all test files
 
 ### Unit Tests — Notification Store
 
-**Files**: `apps/*/src/core/state/__tests__/notification.store.spec.ts` (3 files)  
+**Files**: `apps/*/tests/unit/stores/notification.store.test.ts` (3 files — EXPAND existing from UI-06)  
 **Runner**: Vitest  
 **Mocks**: `crypto.randomUUID` (return deterministic IDs); `Date.now` (control dedup timing via `vi.setSystemTime`)
 
@@ -383,7 +398,7 @@ Wave 7 (parallel): CREATE all test files
 
 ### Unit Tests — `useNotify` Composable
 
-**Files**: `apps/*/src/composables/__tests__/useNotify.spec.ts` (3 files, optional per spec)  
+**Files**: `apps/*/tests/unit/composables/useNotify.test.ts` (3 files)  
 **Mocks**: Pinia testutils (`createPinia`, `setActivePinia`); Frontoffice: mock `useAttemptStore`
 
 | Test Case                                                      | Assertion                                       |
@@ -402,21 +417,24 @@ toggle its value. Assert `showBanner.value` changes correctly.
 
 ### Integration Tests — Notification Flow
 
-**Files**: `apps/*/src/core/__tests__/notification-flow.spec.ts` (3 files)  
+**Files**: `apps/*/tests/integration/notification-flow.test.ts` (3 files)  
 **Mocks**: Mock `apiClient`; use real `normalizeError()` and real notification store
 
-| Test Case                                                            | Assertion                                            |
-| -------------------------------------------------------------------- | ---------------------------------------------------- |
-| Store action catches 400 → normalized → does NOT push toast          | Queue empty after catching VALIDATION_ERROR          |
-| Store action catches 403 → pushes `warning` toast                    | Queue has 1 warning notification                     |
-| Store action catches 500 → pushes `error` toast with generic message | `message: 'An unexpected error occurred'` or similar |
-| `isNetworkError: true` → does NOT push toast                         | Queue stays empty                                    |
-| Loading state set/cleared correctly                                  | `isLoading === false` in finally                     |
-| Double-submit prevention                                             | Second call returns early while first in-flight      |
+| Test Case                                                            | Assertion                                         |
+| -------------------------------------------------------------------- | ------------------------------------------------- |
+| Store action catches 400 (VALIDATION_ERROR) → does NOT push toast    | Queue empty; field errors routed to form          |
+| Store action catches 401 → router redirect, zero toasts (FR-013)     | `router.push('/login')` called; queue stays empty |
+| Store action catches 403 → pushes `warning` toast                    | Queue has 1 warning notification                  |
+| Store action catches 409 (CONFLICT) → pushes `error` toast           | Queue has 1 error notification with `err.message` |
+| Store action catches 422 (Unprocessable) → pushes `error` toast      | Queue has 1 error notification with `err.message` |
+| Store action catches 500 → pushes `error` toast with generic message | `message: 'Something went wrong'` or equivalent   |
+| `isNetworkError: true` → does NOT push toast                         | Queue stays empty                                 |
+| Loading state set/cleared correctly                                  | `isLoading === false` in finally                  |
+| Double-submit prevention                                             | Second call returns early while first in-flight   |
 
 ### Offline Banner Tests
 
-**Files**: `apps/*/src/components/__tests__/OfflineBanner.spec.ts` (3 files)  
+**Files**: `apps/*/tests/unit/components/OfflineBanner.test.ts` (3 files)  
 **Mocks**: Mock `useOnline` from `@vueuse/core`
 
 | Test Case                                               | Assertion                              |
