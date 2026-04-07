@@ -8,6 +8,7 @@
 // Step 0: Validate environment config at import time — throws early if misconfigured
 import '@/core/config/app-config'
 
+import { createLogger } from '@zidney/logger'
 import { createPinia } from 'pinia'
 import { createPersistedState } from 'pinia-plugin-persistedstate'
 import { createApp } from 'vue'
@@ -26,6 +27,7 @@ import { useLicenseStatusStore } from '@/core/state/license-status.store'
 // Use relative imports to avoid root tsconfig @/* path alias resolving to MMC first
 import { useContextStore } from '@/stores/context'
 import App from './App.vue'
+import { registerGlobalErrorHandlers } from './core/errors/global-error-handler'
 import { registerGuards } from './core/guards'
 import { createAppRouter } from './core/router'
 
@@ -120,4 +122,16 @@ registerGuards(router, {
 const app = createApp(App)
 app.use(pinia)
 app.use(router)
+// ── Step 8.5: Register global error handlers ──────────────────────────────────
+const appLogger = createLogger('[Backoffice]')
+app.provide('appLogger', appLogger)
+const IS_PROD = import.meta.env.PROD
+app.provide('isProduction', IS_PROD)
+registerGlobalErrorHandlers({
+  onError: (err) => {
+    appLogger.error('unhandled error', { code: err.code, httpStatus: err.httpStatus })
+  },
+  logger: appLogger,
+  isProduction: IS_PROD,
+})
 app.mount('#app')

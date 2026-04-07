@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-06T20:03:48.493Z",
+  "generated_at": "2026-04-06T23:27:27.991Z",
   "metadata": {
     "total_modules": 14,
     "total_violations": 0,
     "generation_time_ms": 0,
     "source_hash": "6493a7d6",
-    "source_timestamp": "2026-04-06T20:03:48.485Z",
+    "source_timestamp": "2026-04-06T23:27:27.968Z",
     "generator_version": "1.0.0"
   },
   "layers": [

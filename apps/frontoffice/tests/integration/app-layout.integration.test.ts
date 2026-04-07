@@ -22,6 +22,7 @@ const mockRoute = { meta: { standaloneLayout: false } }
 
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => mockRoute),
+  useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() })),
   RouterLink: { props: ['to'], template: '<a><slot /></a>' },
   RouterView: { template: '<div class="stub-router-view" />' },
 }))

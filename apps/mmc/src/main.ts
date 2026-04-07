@@ -10,8 +10,9 @@
  *   Step 5: Auth Store (defineAuthStore factory + instantiate)
  *   Step 6: Refresh Manager + wire lazy accessor
  *   Step 7: API Client (wires tokenManager + refreshManager)
- *   Step 8: registerGuards() — guard pipeline with sessionInitialized gate (CL-01)
- *   Step 9: Mount
+ *   Step 8:   registerGuards() — guard pipeline with sessionInitialized gate (CL-01)
+ *   Step 8.5: Register global error handlers (appLogger + window listeners)
+ *   Step 9:   Mount
  *
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
@@ -19,6 +20,7 @@
 // Step 0: Validate environment config at import time — throws early if misconfigured
 import '@/core/config/app-config'
 
+import { createLogger } from '@zidney/logger'
 import { createPinia } from 'pinia'
 import { createPersistedState } from 'pinia-plugin-persistedstate'
 import { createApp } from 'vue'
@@ -32,6 +34,7 @@ import type { IRefreshManager } from '@/core/auth/refresh-manager'
 import { createRefreshManager } from '@/core/auth/refresh-manager'
 import { createTokenManager } from '@/core/auth/token-manager'
 // ── Step 2: Router factory (guards NOT registered here — registered via registerGuards)
+import { registerGlobalErrorHandlers } from '@/core/errors/global-error-handler'
 import { registerGuards } from '@/core/guards'
 import { createAppRouter } from '@/core/router'
 import { defineAuthStore } from '@/core/state/auth.store'
@@ -131,4 +134,18 @@ registerGuards(router, {
 const app = createApp(App)
 app.use(pinia)
 app.use(router)
+
+// ── Step 8.5: Register global error handlers ──────────────────────────────────
+const appLogger = createLogger('[MMC]')
+app.provide('appLogger', appLogger)
+const IS_PROD = import.meta.env.PROD
+app.provide('isProduction', IS_PROD)
+registerGlobalErrorHandlers({
+  onError: (err) => {
+    appLogger.error('unhandled error', { code: err.code, httpStatus: err.httpStatus })
+  },
+  logger: appLogger,
+  isProduction: IS_PROD,
+})
+
 app.mount('#app')
