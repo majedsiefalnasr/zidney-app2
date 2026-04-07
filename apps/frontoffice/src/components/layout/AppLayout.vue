@@ -6,6 +6,9 @@
       'app-layout--collapsed': _sidebarCollapsed,
     }"
   >
+    <!-- Offline indicator: shown at layout root, above all content -->
+    <OfflineBanner />
+
     <!-- Sidebar (suppressed when hideSidebar=true, e.g. for attempt runtime) -->
     <AppSidebar v-if="!hideSidebar" :navigation-config="navigationConfig">
       <template #footer>
@@ -59,6 +62,8 @@
 import { storeToRefs } from 'pinia'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { useFrontofficeUiStore } from '@/core/state/ui.store'
+// biome-ignore lint/correctness/noUnusedImports: used as Vue component in template
+import OfflineBanner from '../OfflineBanner.vue'
 
 interface AppLayoutProps {
   hideSidebar?: boolean

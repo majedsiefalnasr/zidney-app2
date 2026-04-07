@@ -11,7 +11,7 @@
  */
 
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { exit, flushAi, getPassthroughFlags, hasCiFlag, log } from './utils/logger'
 
@@ -22,7 +22,6 @@ const ROOT_COMMAND = 'bun run ci:run-local'
 const ROOT_DIR = process.cwd()
 const REPORT_TEMPLATE_PATH = join(ROOT_DIR, 'specs/templates/reports/local-ci-report-template.md')
 const FALLBACK_REPORT_PATH = join(ROOT_DIR, 'docs/reports/LOCAL_CI_REPORT.md')
-const SESSION_MEMORY_PATH = join(ROOT_DIR, '.agents/session/session-memory.md')
 
 interface StepResult {
   step: number
@@ -47,7 +46,7 @@ interface RuntimeStageContext {
   reportPath: string
   reportLocation: string
   runtimeStageResolved: boolean
-  resolutionSource: 'git-branch' | 'session-memory' | 'fallback'
+  resolutionSource: 'git-branch' | 'fallback'
 }
 
 const RESET = '\x1b[0m'
@@ -279,41 +278,9 @@ function resolveStageFromBranch(): RuntimeStageContext | null {
   return buildRuntimeStageContext(branchName.slice('spec/'.length), 'git-branch')
 }
 
-function resolveStageFromSessionMemory(): RuntimeStageContext | null {
-  if (!existsSync(SESSION_MEMORY_PATH)) {
-    return null
-  }
-
-  const sessionMemory = readFileSync(SESSION_MEMORY_PATH, 'utf-8')
-  const stageMatch = sessionMemory.match(/^Stage:\s*(.+)$/m)
-  if (!stageMatch) {
-    return null
-  }
-
-  const stageName = stageMatch[1].trim()
-  const runtimeRoot = join(ROOT_DIR, 'specs/runtime')
-  if (!existsSync(runtimeRoot)) {
-    return null
-  }
-
-  for (const entry of readdirSync(runtimeRoot, { withFileTypes: true })) {
-    if (!entry.isDirectory()) {
-      continue
-    }
-
-    const workflowState = loadWorkflowState(entry.name)
-    if (workflowState?.stage === stageName) {
-      return buildRuntimeStageContext(entry.name, 'session-memory')
-    }
-  }
-
-  return null
-}
-
 function resolveCurrentStageContext(): RuntimeStageContext {
   return (
-    resolveStageFromBranch() ??
-    resolveStageFromSessionMemory() ?? {
+    resolveStageFromBranch() ?? {
       currentStageDir: 'Not resolved',
       currentStageName: 'Not resolved',
       runtimeStagePath: 'Not resolved',

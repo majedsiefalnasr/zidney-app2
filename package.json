@@ -10,7 +10,7 @@
     "_comments": "Scripts organized by domain. See .agents/skills/script-system-governance/SKILL.md for patterns.",
     "prepare": "husky",
     "typecheck": "bun run typecheck:src && bun run typecheck:tests",
-    "typecheck:src": "tsc --noEmit",
+    "typecheck:src": "tsc --noEmit && tsc -p apps/backoffice/tsconfig.json --noEmit && tsc -p apps/frontoffice/tsconfig.json --noEmit",
     "typecheck:tests": "bun run typecheck:src -p tsconfig.test.json",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

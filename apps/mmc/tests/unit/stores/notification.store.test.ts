@@ -5,7 +5,7 @@
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AppNotification } from '@/core/state/notification.store'
 import { useMmcNotificationStore } from '@/core/state/notification.store'
 import { useIsolatedPinia } from '../store-test-helper'
@@ -88,5 +88,53 @@ describe('useMmcNotificationStore', () => {
   it('state is isolated between tests (SC-005)', () => {
     const store = useMmcNotificationStore()
     expect(store.notifications).toEqual([])
+  })
+
+  describe('deduplication (DEDUP_WINDOW_MS=2000)', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('push returns empty string for duplicate within 2s window', () => {
+      const store = useMmcNotificationStore()
+      store.push(makeNotification({ title: 'Dup' }))
+      const id = store.push(makeNotification({ title: 'Dup' }))
+      expect(id).toBe('')
+      expect(store.notifications).toHaveLength(1)
+    })
+
+    it('push succeeds for same-key notification after 2s window expires', () => {
+      const store = useMmcNotificationStore()
+      const id1 = store.push(makeNotification({ title: 'Dup' }))
+      vi.setSystemTime(Date.now() + 2001)
+      const id2 = store.push(makeNotification({ title: 'Dup' }))
+      expect(id1).not.toBe('')
+      expect(id2).not.toBe('')
+      expect(store.notifications).toHaveLength(2)
+    })
+  })
+
+  it('visibleNotifications exposes at most the 5 latest notifications', () => {
+    const store = useMmcNotificationStore()
+    for (let i = 0; i < 8; i++) {
+      store.push(makeNotification({ title: `V${i}` }))
+    }
+    expect(store.visibleNotifications).toHaveLength(5)
+    expect(store.visibleNotifications[0].title).toBe('V3')
+    expect(store.visibleNotifications[4].title).toBe('V7')
+  })
+
+  it('$reset clears lastPushed so duplicate is pushable again after reset', () => {
+    const store = useMmcNotificationStore()
+    const id1 = store.push(makeNotification({ title: 'ResetDedup' }))
+    expect(id1).not.toBe('')
+    const dup = store.push(makeNotification({ title: 'ResetDedup' }))
+    expect(dup).toBe('') // suppressed within dedup window
+    store.$reset()
+    const id2 = store.push(makeNotification({ title: 'ResetDedup' }))
+    expect(id2).not.toBe('') // allowed after reset clears lastPushed
   })
 })

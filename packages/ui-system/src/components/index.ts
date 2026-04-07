@@ -43,3 +43,17 @@ export { default as DropdownMenuItem } from './shadcn-vue/dropdown-menu/Dropdown
 export { default as DropdownMenuLabel } from './shadcn-vue/dropdown-menu/DropdownMenuLabel.vue'
 export { default as DropdownMenuSeparator } from './shadcn-vue/dropdown-menu/DropdownMenuSeparator.vue'
 export { default as DropdownMenuTrigger } from './shadcn-vue/dropdown-menu/DropdownMenuTrigger.vue'
+// shadcn-vue: Form
+export {
+  FORM_ITEM_INJECTION_KEY,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormFieldArray,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from './shadcn-vue/form'
+// shadcn-vue: Sonner (Toaster)
+export { Toaster } from './shadcn-vue/sonner'

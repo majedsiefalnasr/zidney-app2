@@ -125,7 +125,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'outline' 
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl'
 
 // Form Types
-export interface FormField {
+export interface FormFieldDefinition {
   name: string
   type: string
   value: unknown
