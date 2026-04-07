@@ -26,7 +26,7 @@
 ## Multi-Tenant / Backoffice
 
 - [ ] Backoffice error context (if workspace context is appended) uses ONLY `workspace_slug` (the public-facing identifier) — never `workspace_id` UUID or internal tenant DB primary key
-- [ ] `workspace_slug` for contextual error messages is sourced from the Pinia workspace store — never from the raw API request body, URL params, or response payload
+- [ ] `workspace_slug` for contextual error messages is sourced from the route context (and validated by app state as needed) — never from raw API request body or response payload
 - [ ] No cross-tenant error information can appear in notification messages (tenant resolution remains an API concern; UI only displays data from the authenticated session)
 
 ## Offline Banner

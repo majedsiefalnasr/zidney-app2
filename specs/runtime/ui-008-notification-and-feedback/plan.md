@@ -617,20 +617,21 @@ documented in each form-submit action, not a change to the notification system i
 
 **No ADR required**: This is a usage convention, not an architecture decision.
 
-### CONCERN-04 — `correlationId` Not in AppError
+### CONCERN-04 — `correlationId` in AppError
 
 **Issue**: The spec clarification mentions `correlationId?: string` in `AppError`,
-but the actual `packages/api-client/src/types.ts` interface does not have it.
+and this contract is reflected in the canonical `packages/api-client/src/types.ts`
+interface.
 
-**Decision**: Do not add `correlationId` to `AppError` in this stage. The API
-already includes correlation IDs in the structured `error.message` string. Toast
-rendering via `vue-sonner` renders `AppError.message` verbatim (post-sanitization
-by `normalizeError`). If the backend includes a correlation ID in the message
-like `"Request failed (ref: abc-123)"`, it will naturally appear in the toast.
-Adding `correlationId` to `AppError` is a future `@zidney/api-client` concern.
+**Decision**: The `AppError` interface includes an optional `correlationId?: string`
+field, matching the shape defined in `packages/api-client/src/types.ts`. This is
+used by `normalizeError()` to expose correlation IDs when the backend provides them.
+Toast rendering via `vue-sonner` renders `AppError.message` post-sanitization,
+and correlation IDs can optionally be embedded in the message string or accessed
+via the `correlationId` field for structured logging or debugging context.
 
-**ADR not required for this stage**: But the gap should be noted in the api-client
-package AGENTS.md or a future spec.
+**Implementation note**: No changes to `normalizeError()` or `vue-sonner` integration
+are required; the implementation already respects the canonical `AppError` contract.
 
 ---
 

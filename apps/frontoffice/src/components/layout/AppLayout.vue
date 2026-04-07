@@ -1,48 +1,49 @@
 <template>
-  <div
-    class="app-layout"
-    :class="{
-      'app-layout--mobile': _isMobile,
-      'app-layout--collapsed': _sidebarCollapsed,
-    }"
-  >
-    <!-- Offline indicator: shown at layout root, above all content -->
+  <div class="app-shell">
+    <!-- Offline indicator: shown above the layout -->
     <OfflineBanner />
-
-    <!-- Sidebar (suppressed when hideSidebar=true, e.g. for attempt runtime) -->
-    <AppSidebar v-if="!hideSidebar" :navigation-config="navigationConfig">
-      <template #footer>
-        <slot name="sidebar-footer" />
-      </template>
-    </AppSidebar>
-
-    <!-- Main content area -->
-    <div class="app-layout__main">
-      <!-- Header -->
-      <AppHeader :show-workspace="false">
-        <template #left>
-          <slot name="header-left" />
-        </template>
-        <template #right>
-          <slot name="header-right" />
-        </template>
-      </AppHeader>
-
-      <!-- Content -->
-      <main class="app-layout__content">
-        <slot name="content-top" />
-        <RouterView />
-        <slot name="content-bottom" />
-      </main>
-    </div>
-
-    <!-- Mobile backdrop (only when sidebar is visible) -->
     <div
-      v-if="!hideSidebar && _isMobile && !_sidebarCollapsed"
-      class="app-layout__backdrop"
-      aria-hidden="true"
-      @click="_toggleSidebar"
-    />
+      class="app-layout"
+      :class="{
+        'app-layout--mobile': _isMobile,
+        'app-layout--collapsed': _sidebarCollapsed,
+      }"
+    >
+      <!-- Sidebar (suppressed when hideSidebar=true, e.g. for attempt runtime) -->
+      <AppSidebar v-if="!hideSidebar" :navigation-config="navigationConfig">
+        <template #footer>
+          <slot name="sidebar-footer" />
+        </template>
+      </AppSidebar>
+
+      <!-- Main content area -->
+      <div class="app-layout__main">
+        <!-- Header -->
+        <AppHeader :show-workspace="false">
+          <template #left>
+            <slot name="header-left" />
+          </template>
+          <template #right>
+            <slot name="header-right" />
+          </template>
+        </AppHeader>
+
+        <!-- Content -->
+        <main class="app-layout__content">
+          <slot name="content-top" />
+          <RouterView />
+          <slot name="content-bottom" />
+        </main>
+      </div>
+
+      <!-- Mobile backdrop (only when sidebar is visible) -->
+      <div
+        v-if="!hideSidebar && _isMobile && !_sidebarCollapsed"
+        class="app-layout__backdrop"
+        aria-hidden="true"
+        @click="_toggleSidebar"
+      />
+    </div>
   </div>
 </template>
 
@@ -84,9 +85,17 @@ function _toggleSidebar(): void {
 </script>
 
 <style scoped>
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .app-layout {
   display: flex;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
   position: relative;
 }

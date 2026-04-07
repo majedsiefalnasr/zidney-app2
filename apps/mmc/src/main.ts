@@ -161,7 +161,7 @@ registerGlobalErrorHandlers({
       useMmcNotificationStore().push({
         type: 'error',
         title: 'Unexpected error',
-        message: err.message,
+        message: safe.message,
         dismissible: true,
       })
     }

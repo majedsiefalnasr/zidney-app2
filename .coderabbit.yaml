@@ -201,7 +201,7 @@ reviews:
       - "DO NOT MERGE"
       - "SWEEP"
     drafts: true
-    base_branches: [main, develop, release/*]
+    base_branches: [main, develop, "^release/.*$"]
 
   # Tools configuration
   tools:

@@ -11,15 +11,20 @@ import { readonly, ref } from 'vue'
 
 export function useFormSubmit() {
   const isSubmitting = ref(false)
+  let inFlight: Promise<void> | null = null
 
   async function submit(action: () => Promise<void>): Promise<void> {
-    if (isSubmitting.value) return
+    if (inFlight) return inFlight
     isSubmitting.value = true
-    try {
-      await action()
-    } finally {
-      isSubmitting.value = false
-    }
+    inFlight = (async () => {
+      try {
+        await action()
+      } finally {
+        isSubmitting.value = false
+        inFlight = null
+      }
+    })()
+    return inFlight
   }
 
   return { isSubmitting: readonly(isSubmitting), submit }

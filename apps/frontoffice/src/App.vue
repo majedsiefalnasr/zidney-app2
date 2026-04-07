@@ -22,16 +22,29 @@ const _route = useRoute()
 
 const notifStore = useFrontofficeNotificationStore()
 const { visibleNotifications } = storeToRefs(notifStore)
-const seen = new Set<string>()
+const activeToasts = new Map<string, string>()
+
 watch(
   visibleNotifications,
   (notifications) => {
+    // Compute current set of notification IDs
+    const currentIds = new Set(notifications.map((n) => n.id))
+
+    // Create toasts for new notifications
     for (const n of notifications) {
-      if (seen.has(n.id)) continue
-      seen.add(n.id)
-      toast[n.type](n.title, { description: n.message, duration: n.duration })
+      if (activeToasts.has(n.id)) continue
+      const toastId = toast[n.type](n.title, { description: n.message, duration: n.duration })
+      activeToasts.set(n.id, toastId as unknown as string)
+    }
+
+    // Dismiss toasts for removed notifications
+    for (const [notifId, toastId] of activeToasts.entries()) {
+      if (!currentIds.has(notifId)) {
+        toast.dismiss(toastId)
+        activeToasts.delete(notifId)
+      }
     }
   },
-  { deep: true }
+  { immediate: true, deep: true }
 )
 </script>

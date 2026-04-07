@@ -7,10 +7,12 @@
  */
 
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 // STUB: replaced by exam engine stage
 export const useAttemptStore = defineStore('frontoffice-attempt', () => {
-  const isExamActive = ref(false)
-  return { isExamActive }
+  const _isExamActive = ref(false)
+  // Return immutable computed to prevent client-side modification
+  const isExamActive = computed(() => _isExamActive.value)
+  return { isExamActive: isExamActive as unknown as typeof isExamActive }
 })
