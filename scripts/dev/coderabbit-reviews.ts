@@ -221,6 +221,12 @@ function formatMarkdown(threads: ReviewThread[], config: Args): string {
 
 function main(): void {
   const config = parseArgs()
+  // Default save directory to tmp/coderabbit when not explicitly provided
+  if (!config.saveDir) {
+    const defaultSaveDir = join(process.cwd(), 'tmp', 'coderabbit')
+    config.saveDir = defaultSaveDir
+    logger.info('No --save provided; defaulting saveDir', { saveDir: config.saveDir })
+  }
   log.header(
     'CodeRabbit Reviews',
     `Fetching ${config.status.toLowerCase()} threads for PR #${config.pr}`

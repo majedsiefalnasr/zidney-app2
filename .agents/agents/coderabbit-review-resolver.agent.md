@@ -42,7 +42,7 @@ bun run dev:pr:coderabbit <PR_NUMBER> [--resolved|--unresolved] [--json|--md] [-
 - `--unresolved` (default): Show unresolved threads
 - `--resolved`: Show resolved threads instead
 - `--json` / `--md` (default): Output format
-- `--save <dir>`: Save output to a file instead of printing to stdout
+- `--save <dir>`: Save output to a file instead of printing to stdout you can use the default directory tmp/coderabbit
 - `--include-files`: Append full file content for referenced files (respects `--max-lines`)
 - `--max-lines <n>` (default: 500): Maximum lines per file block before content is omitted
 - `--mark-resolved`: Mark all matching CodeRabbit threads as resolved after fetching
