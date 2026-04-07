@@ -1,3 +1,10 @@
+<!--
+  OfflineBanner Component — Backoffice
+  Renders a full-width destructive banner when the application loses network connectivity.
+  Displays WiFi-off icon and informative message. Used in AppLayout.
+  
+  Stage: STAGE_UI_08_NOTIFICATION_AND_FEEDBACK
+-->
 <script setup lang="ts">
 // biome-ignore lint/correctness/noUnusedImports: used in Vue template
 import { WifiOff } from 'lucide-vue-next'

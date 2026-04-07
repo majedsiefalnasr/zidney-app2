@@ -136,7 +136,7 @@
 
 ## Dependencies
 
-```
+```text
 T001
   └► T002, T003, T004 (Wave 2 — stores add dedup/cap to existing stores)
         └► T005, T006, T007, T008, T009, T010, T011 (Wave 3 — composables need stores)

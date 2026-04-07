@@ -269,7 +269,7 @@ This stub satisfies the `useNotify.ts` import contract. It defaults to
 
 ### Execution Order
 
-```
+```text
 Wave 1 (sequential): ui-system barrel fix
 Wave 2 (parallel): MODIFY all 3 notification stores
 Wave 3 (parallel): CREATE all 6 composables + attempt store stub
