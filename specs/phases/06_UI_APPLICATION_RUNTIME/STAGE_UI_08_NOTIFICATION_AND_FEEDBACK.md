@@ -9,21 +9,21 @@ UI Foundation — Global Notifications & User Feedback Layer
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: MEDIUM
-Last Updated: 2026-04-07T00:11:00.000Z
+Last Updated: 2026-04-07T00:20:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Unified notification store (per app: MMC, Backoffice, Frontoffice)
-- Error normalization layer (core/errors/error-normalizer.ts)
-- Toast component standardization via @zidney/ui-system Toaster
-- 5 error categories with routing rules (400/401/403/422/500/network)
-- Form validation feedback pattern (Zod + vee-validate)
-- Async action feedback pattern (loading/success/error states)
-- Offline/reconnect banner
-- Duplicate prevention (2s window)
-- Exam-mode quiet toast in Frontoffice
+- 29 files across 3 apps + packages/ui-system (7 implementation waves)
+- Per-app notification stores modified (dedup + visible cap)
+- useNotify.ts + useOfflineBanner.ts composables created per app
+- OfflineBanner.vue component created per app
+- App.vue toast bridge + Toaster mount per app
+- AppLayout.vue OfflineBanner mount per app
+- main.ts global error handler wiring per app
+- Unit + integration tests per app
+- packages/ui-system barrel exports for Toaster + form primitives
 
 Deferred Scope:
 
@@ -32,13 +32,16 @@ Deferred Scope:
 - Email/SMS/push notifications
 - Notification center history
 - Sentry/error reporting integration
+- Offline notification queuing
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Architecture Guardian: PASS
+- API Designer: PASS (after plan corrections)
+- Task generation authorized
 
 Notes:
-All specification ambiguities resolved. 5 clarifications locked. Ready for technical planning.
+Technical plan complete. Two corrections applied: (1) toast bridge reactivity (storeToRefs), (2) 422 error code routing table. Ready for task breakdown.
 
 ---
 
