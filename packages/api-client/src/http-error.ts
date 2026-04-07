@@ -64,6 +64,7 @@ export function createAppError(fields: {
  */
 export function mapHttpStatusToCode(status: number): string {
   if (status === 400) return ErrorCodes.VALIDATION_ERROR
+  if (status === 422) return ErrorCodes.VALIDATION_ERROR
   if (status === 403) return ErrorCodes.PERMISSION_DENIED
   if (status === 404) return ErrorCodes.NOT_FOUND
   if (status === 409) return ErrorCodes.CONFLICT
