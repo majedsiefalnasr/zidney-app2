@@ -27,7 +27,10 @@ import { useLicenseStatusStore } from '@/core/state/license-status.store'
 // Use relative imports to avoid root tsconfig @/* path alias resolving to MMC first
 import { useContextStore } from '@/stores/context'
 import App from './App.vue'
-import { registerGlobalErrorHandlers } from './core/errors/global-error-handler'
+import {
+  registerGlobalErrorHandlers,
+  unregisterGlobalErrorHandlers,
+} from './core/errors/global-error-handler'
 import { registerGuards } from './core/guards'
 import { createAppRouter } from './core/router'
 
@@ -127,6 +130,8 @@ const appLogger = createLogger('[Backoffice]')
 app.provide('appLogger', appLogger)
 const IS_PROD = import.meta.env.PROD
 app.provide('isProduction', IS_PROD)
+// Remove any previously-registered global handlers before re-registering
+unregisterGlobalErrorHandlers()
 registerGlobalErrorHandlers({
   onError: (err) => {
     appLogger.error('unhandled error', { code: err.code, httpStatus: err.httpStatus })

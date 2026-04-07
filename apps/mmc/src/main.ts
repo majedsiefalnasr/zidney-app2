@@ -34,7 +34,10 @@ import type { IRefreshManager } from '@/core/auth/refresh-manager'
 import { createRefreshManager } from '@/core/auth/refresh-manager'
 import { createTokenManager } from '@/core/auth/token-manager'
 // ── Step 2: Router factory (guards NOT registered here — registered via registerGuards)
-import { registerGlobalErrorHandlers } from '@/core/errors/global-error-handler'
+import {
+  registerGlobalErrorHandlers,
+  unregisterGlobalErrorHandlers,
+} from '@/core/errors/global-error-handler'
 import { registerGuards } from '@/core/guards'
 import { createAppRouter } from '@/core/router'
 import { defineAuthStore } from '@/core/state/auth.store'
@@ -140,6 +143,8 @@ const appLogger = createLogger('[MMC]')
 app.provide('appLogger', appLogger)
 const IS_PROD = import.meta.env.PROD
 app.provide('isProduction', IS_PROD)
+// Defensive: unregister previous handlers before registering new ones
+unregisterGlobalErrorHandlers()
 registerGlobalErrorHandlers({
   onError: (err) => {
     appLogger.error('unhandled error', { code: err.code, httpStatus: err.httpStatus })

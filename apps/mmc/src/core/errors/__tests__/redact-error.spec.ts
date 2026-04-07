@@ -58,4 +58,23 @@ describe('redactError', () => {
     expect(result.httpStatus).toBe(200)
     expect(result.isNetworkError).toBe(false)
   })
+
+  it('redacts secret= credentials', () => {
+    const err = makeError('secret=superSecret123&other=val')
+    const result = redactError(err, false)
+    expect(result.message).not.toContain('superSecret123')
+    expect(result.message).toContain('[REDACTED]')
+  })
+
+  it('preserves retryAfter when present', () => {
+    const err = createAppError({
+      code: 'RATE_LIMITED',
+      message: 'slow down',
+      httpStatus: 429,
+      isNetworkError: false,
+      retryAfter: 60,
+    })
+    const result = redactError(err, false)
+    expect(result.retryAfter).toBe(60)
+  })
 })

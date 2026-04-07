@@ -17,6 +17,8 @@ let _rejectionHandler: UnhandledRejectionHandler | null = null
 let _errorHandler: ErrorHandler | null = null
 
 export function registerGlobalErrorHandlers(options: GlobalErrorHandlerOptions): void {
+  // Ensure any previously-registered handlers are removed to avoid orphaned listeners
+  unregisterGlobalErrorHandlers()
   const { onError, logger, isProduction = false } = options
 
   function handle(raw: unknown): void {

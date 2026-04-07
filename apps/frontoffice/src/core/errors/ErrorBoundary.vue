@@ -14,7 +14,7 @@ import { redactError } from './redact-error'
 // biome-ignore lint/correctness/noUnusedVariables: used in Vue template
 const router = useRouter()
 const logger = inject<Logger | undefined>('appLogger', undefined)
-const isProduction = inject<boolean>('isProduction', false)
+const isProduction = inject<boolean>('isProduction', true)
 
 const capturedError = ref<AppError | null>(null)
 
@@ -53,12 +53,14 @@ onErrorCaptured((err: unknown) => {
       <p class="text-muted-foreground text-sm">{{ capturedError.code }}</p>
       <div class="flex gap-2">
         <button
+          type="button"
           class="bg-primary text-primary-foreground rounded px-4 py-2 text-sm"
           @click="reset"
         >
           Try again
         </button>
         <button
+          type="button"
           class="border-border rounded border px-4 py-2 text-sm"
           @click="router.push('/')"
         >
