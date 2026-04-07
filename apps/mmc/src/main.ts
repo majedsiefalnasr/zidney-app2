@@ -138,7 +138,7 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 
-// ── Step 8.5: Register global error handlers ──────────────────────────────────
+// ── Step 9.1: Register global error handlers ──────────────────────────────────
 const appLogger = createLogger('[MMC]')
 app.provide('appLogger', appLogger)
 const IS_PROD = import.meta.env.PROD

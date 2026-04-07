@@ -62,7 +62,7 @@ onErrorCaptured((err: unknown) => {
         <button
           type="button"
           class="border-border rounded border px-4 py-2 text-sm"
-          @click="router.push('/')"
+          @click="router.push({ name: 'fo-dashboard' })"
         >
           Go to Home
         </button>
