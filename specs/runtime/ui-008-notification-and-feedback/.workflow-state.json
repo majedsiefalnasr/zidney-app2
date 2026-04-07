@@ -1,0 +1,32 @@
+{
+  "stage": "STAGE_UI_08_NOTIFICATION_AND_FEEDBACK",
+  "phase": "06_UI_APPLICATION_RUNTIME",
+  "stage_dir": "specs/runtime/ui-008-notification-and-feedback",
+  "stage_file": "specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_08_NOTIFICATION_AND_FEEDBACK.md",
+  "branch": "spec/ui-008-notification-and-feedback",
+  "base_branch": "develop",
+  "pkg_manager": "bun",
+  "auto_advance": true,
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "deferred_tasks": [],
+  "guardian_verdicts": {},
+  "parallel_task_groups": [],
+  "current_parallel_group": null,
+  "session_started_at": "2026-04-07T00:00:00.000Z",
+  "last_updated": "2026-04-07T00:00:00.000Z",
+  "step_timings": {},
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/ui-008-notification-and-feedback",
+      "timestamp": "2026-04-07T00:00:00.000Z"
+    }
+  ]
+}
