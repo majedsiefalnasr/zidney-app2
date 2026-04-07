@@ -498,6 +498,28 @@ Location: `apps/*/src/components/__tests__/toaster.spec.ts` (or equivalent)
 - Email, SMS, or push notification delivery
 - Notification center or inbox (no persistent history)
 - Cross-tenant notification isolation (UI has no tenant cross-contamination risk; tenant resolution is API concern)
+
+---
+
+## Clarifications
+
+### Session 2026-04-07
+
+**Q: The spec text requires a "2-second deduplication window," but the pseudocode uses `notifications.value.some(...)` with no timestamp comparison — this checks the entire current queue, not time-bounded entries. What is the canonical implementation mechanism?**
+A: The notification store MUST maintain a private `lastPushed: Map<string, number>` (key → Unix ms timestamp) alongside the notification queue. This Map is NOT part of the `AppNotification` interface. Before pushing, compute `recentKey = \`${type}:${title}:${message ?? ""}\`` and check `Date.now() - (lastPushed.get(recentKey) ?? 0) < DEDUP_WINDOW_MS`. If within the window, suppress and return `""`. On accepted push, set `lastPushed.set(recentKey, Date.now())`. The Map is cleared in `$reset()`and`clearAll()`. This keeps the `AppNotification` interface clean and makes the 2-second window truly time-bounded rather than existence-bounded.
+
+**Q: The spec references `AppError` from `@zidney/api-client` but never declares its full typed interface. What canonical fields does `AppError` contain, and what must implementers import?**
+A: `AppError` (from `@zidney/api-client`) has the following minimum shape: `{ code: string; message: string; isNetworkError: boolean; statusCode?: number; correlationId?: string }`. Implementers MUST import `AppError` directly from `@zidney/api-client` — never re-declare or re-define it. The `normalizeError()` function always returns this type. The `redactError()` utility strips `stack`, tokens, and internal paths before any logging — it operates on `AppError` exclusively. No app-local `NormalizedError` type should be used after this stage; any legacy aliases must be aliased to `AppError` at the import boundary.
+
+**Q: The spec does not state whether the notification queue is cleared on route navigation. What is the intended behavior when the user navigates away from the current page?**
+A: Notifications MUST persist across route changes. `clearAll()` is never called by router navigation guards. Persistent `error` notifications remain visible until the user explicitly dismisses them. `success`/`info`/`warning` notifications auto-dismiss per their `duration` timers regardless of navigation. This ensures users see the outcome of actions even if a page transition is triggered immediately after (e.g., redirect after successful save). Each app's `router/index.ts` global navigation guard MUST NOT invoke `notificationStore.clearAll()`. Logout flows MAY call `clearAll()` explicitly as part of session teardown — this is intentional and correct.
+
+**Q: FR-030 states that Frontoffice suppresses `success`/`info` toasts when `isExamActive: true`, but does not specify WHERE this guard lives. Does the notification store itself check exam state, or is the suppression applied at the composable layer?**
+A: The suppression lives exclusively in the Frontoffice `useNotify()` composable (`apps/frontoffice/src/composables/useNotify.ts`). The notification store itself has NO knowledge of exam state — it remains domain-agnostic. In Frontoffice only, `useNotify()` imports `useAttemptStore()` and reads `isExamActive`. The `success()` and `info()` methods skip `store.push()` silently when `isExamActive` is `true`. The `error()` and `warning()` methods always call `store.push()` unconditionally. MMC and Backoffice `useNotify()` composables do NOT include this guard. This isolates exam-mode logic to Frontoffice and keeps the store reusable.
+
+**Q: FR-017 suppresses individual error toasts for network failures and FR-025 shows an offline banner, but the spec does not state whether failed API requests are queued for automatic retry when connectivity is restored. Is request queuing in scope?**
+A: Request queuing and automatic retry on reconnect are explicitly OUT OF SCOPE for this stage. This stage is UI-only (notification and feedback layer). Failed requests during offline state are not queued. The offline banner communicates the degraded state; users must manually retry their actions after the connectivity banner disappears. Automatic retry belongs to a future service worker or background job stage. The `useOfflineBanner` composable MUST NOT initiate any network requests or maintain a retry queue. The online/offline state transition triggers only banner visibility — nothing else.
+
 - Moving `AppNotification` interface to `@zidney/types` (deferred, noted as M-01 in existing stores)
 - Sentry or external error reporting integration (out of scope for this stage; may be added in an observability stage)
 

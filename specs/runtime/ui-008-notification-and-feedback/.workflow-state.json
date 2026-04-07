@@ -7,9 +7,9 @@
   "base_branch": "develop",
   "pkg_manager": "bun",
   "auto_advance": true,
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -36,6 +36,10 @@
     {
       "event": "specify_complete",
       "timestamp": "2026-04-07T00:06:00.000Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "timestamp": "2026-04-07T00:11:00.000Z"
     }
   ]
 }
