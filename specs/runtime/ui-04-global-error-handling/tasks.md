@@ -11,58 +11,58 @@
 
 ## Phase 0 — Shared Package (Sequential — must complete before Phase 1)
 
-- [ ] T001 [US1] Add 7 ErrorCodes + mapHttpStatusToCode to http-error.ts — `packages/api-client/src/http-error.ts`
-- [ ] T002 [US1] Export mapHttpStatusToCode + normalizeResponseError from barrel — `packages/api-client/src/index.ts`
+- [x] T001 [US1] Add 7 ErrorCodes + mapHttpStatusToCode to http-error.ts — `packages/api-client/src/http-error.ts`
+- [x] T002 [US1] Export mapHttpStatusToCode + normalizeResponseError from barrel — `packages/api-client/src/index.ts`
 
 ---
 
 ## Phase 1 — MMC Error Infrastructure (Group 1 — baseline)
 
-- [ ] T003 [US2] Replace error-normalizer.ts + delete types.ts (NormalizedError) — `apps/mmc/src/core/errors/error-normalizer.ts`, `apps/mmc/src/core/errors/types.ts`
-- [ ] T004 [US3] Create pure redact-error.ts with isProduction param — `apps/mmc/src/core/errors/redact-error.ts`
-- [ ] T005 [US4] Create ErrorBoundary.vue with onErrorCaptured + fallback slot — `apps/mmc/src/core/errors/ErrorBoundary.vue`
-- [ ] T006 [US5] Create global-error-handler.ts with window event listeners — `apps/mmc/src/core/errors/global-error-handler.ts`
-- [ ] T007 [US6] Wrap RouterView with ErrorBoundary in App.vue — `apps/mmc/src/App.vue`
-- [ ] T008 [US7] Insert Step 8.5 + app.provide logger/isProduction in main.ts — `apps/mmc/src/main.ts`
+- [x] T003 [US2] Replace error-normalizer.ts + delete types.ts (NormalizedError) — `apps/mmc/src/core/errors/error-normalizer.ts`, `apps/mmc/src/core/errors/types.ts`
+- [x] T004 [US3] Create pure redact-error.ts with isProduction param — `apps/mmc/src/core/errors/redact-error.ts`
+- [x] T005 [US4] Create ErrorBoundary.vue with onErrorCaptured + fallback slot — `apps/mmc/src/core/errors/ErrorBoundary.vue`
+- [x] T006 [US5] Create global-error-handler.ts with window event listeners — `apps/mmc/src/core/errors/global-error-handler.ts`
+- [x] T007 [US6] Wrap RouterView with ErrorBoundary in App.vue — `apps/mmc/src/App.vue`
+- [x] T008 [US7] Insert Step 8.5 + app.provide logger/isProduction in main.ts — `apps/mmc/src/main.ts`
 
 ---
 
 ## Phase 1 — Backoffice Error Infrastructure (Group 2 — parallel with Group 3)
 
-- [ ] T009 [P] [US2] Replace error-normalizer.ts + delete types.ts (NormalizedError) — `apps/backoffice/src/core/errors/error-normalizer.ts`, `apps/backoffice/src/core/errors/types.ts`
-- [ ] T010 [P] [US3] Create pure redact-error.ts with isProduction param — `apps/backoffice/src/core/errors/redact-error.ts`
-- [ ] T011 [P] [US4] Create ErrorBoundary.vue with onErrorCaptured + fallback slot — `apps/backoffice/src/core/errors/ErrorBoundary.vue`
-- [ ] T012 [P] [US5] Create global-error-handler.ts with window event listeners — `apps/backoffice/src/core/errors/global-error-handler.ts`
-- [ ] T013 [P] [US6] Wrap RouterView with ErrorBoundary in App.vue — `apps/backoffice/src/App.vue`
-- [ ] T014 [P] [US7] Insert Step 8.5 + app.provide logger/isProduction in main.ts — `apps/backoffice/src/main.ts`
+- [x] T009 [P] [US2] Replace error-normalizer.ts + delete types.ts (NormalizedError) — `apps/backoffice/src/core/errors/error-normalizer.ts`, `apps/backoffice/src/core/errors/types.ts`
+- [x] T010 [P] [US3] Create pure redact-error.ts with isProduction param — `apps/backoffice/src/core/errors/redact-error.ts`
+- [x] T011 [P] [US4] Create ErrorBoundary.vue with onErrorCaptured + fallback slot — `apps/backoffice/src/core/errors/ErrorBoundary.vue`
+- [x] T012 [P] [US5] Create global-error-handler.ts with window event listeners — `apps/backoffice/src/core/errors/global-error-handler.ts`
+- [x] T013 [P] [US6] Wrap RouterView with ErrorBoundary in App.vue — `apps/backoffice/src/App.vue`
+- [x] T014 [P] [US7] Insert Step 8.5 + app.provide logger/isProduction in main.ts — `apps/backoffice/src/main.ts`
 
 ---
 
 ## Phase 1 — Frontoffice Error Infrastructure (Group 3 — parallel with Group 2)
 
-- [ ] T015 [P] [US2] Replace error-normalizer.ts + delete types.ts (NormalizedError) — `apps/frontoffice/src/core/errors/error-normalizer.ts`, `apps/frontoffice/src/core/errors/types.ts`
-- [ ] T016 [P] [US3] Create pure redact-error.ts with isProduction param — `apps/frontoffice/src/core/errors/redact-error.ts`
-- [ ] T017 [P] [US4] Create ErrorBoundary.vue with onErrorCaptured + fallback slot — `apps/frontoffice/src/core/errors/ErrorBoundary.vue`
-- [ ] T018 [P] [US5] Create global-error-handler.ts with window event listeners — `apps/frontoffice/src/core/errors/global-error-handler.ts`
-- [ ] T019 [P] [US6] Wrap RouterView with ErrorBoundary in App.vue — `apps/frontoffice/src/App.vue`
-- [ ] T020 [P] [US7] Insert Step 8.5 + app.provide logger/isProduction in main.ts — `apps/frontoffice/src/main.ts`
+- [x] T015 [P] [US2] Replace error-normalizer.ts + delete types.ts (NormalizedError) — `apps/frontoffice/src/core/errors/error-normalizer.ts`, `apps/frontoffice/src/core/errors/types.ts`
+- [x] T016 [P] [US3] Create pure redact-error.ts with isProduction param — `apps/frontoffice/src/core/errors/redact-error.ts`
+- [x] T017 [P] [US4] Create ErrorBoundary.vue with onErrorCaptured + fallback slot — `apps/frontoffice/src/core/errors/ErrorBoundary.vue`
+- [x] T018 [P] [US5] Create global-error-handler.ts with window event listeners — `apps/frontoffice/src/core/errors/global-error-handler.ts`
+- [x] T019 [P] [US6] Wrap RouterView with ErrorBoundary in App.vue — `apps/frontoffice/src/App.vue`
+- [x] T020 [P] [US7] Insert Step 8.5 + app.provide logger/isProduction in main.ts — `apps/frontoffice/src/main.ts`
 
 ---
 
 ## Phase 2 — Unit Tests (all 3 apps — all parallelizable after Phase 1)
 
-- [ ] T021 [P] [US8] Create error-normalizer.spec.ts (16 cases, 100% coverage) — `apps/mmc/src/core/errors/__tests__/error-normalizer.spec.ts`
-- [ ] T022 [P] [US9] Create redact-error.spec.ts (6 cases, 100% coverage) — `apps/mmc/src/core/errors/__tests__/redact-error.spec.ts`
-- [ ] T023 [P] [US10] Create global-error-handler.spec.ts (6 cases, >=90% coverage) — `apps/mmc/src/core/errors/__tests__/global-error-handler.spec.ts`
-- [ ] T024 [P] [US10] Create ErrorBoundary.spec.ts (7 cases, >=80% branch coverage) — `apps/mmc/src/core/errors/__tests__/ErrorBoundary.spec.ts`
-- [ ] T025 [P] [US8] Create error-normalizer.spec.ts (16 cases, 100% coverage) — `apps/backoffice/src/core/errors/__tests__/error-normalizer.spec.ts`
-- [ ] T026 [P] [US9] Create redact-error.spec.ts (6 cases, 100% coverage) — `apps/backoffice/src/core/errors/__tests__/redact-error.spec.ts`
-- [ ] T027 [P] [US10] Create global-error-handler.spec.ts (6 cases, >=90% coverage) — `apps/backoffice/src/core/errors/__tests__/global-error-handler.spec.ts`
-- [ ] T028 [P] [US10] Create ErrorBoundary.spec.ts (7 cases, >=80% branch coverage) — `apps/backoffice/src/core/errors/__tests__/ErrorBoundary.spec.ts`
-- [ ] T029 [P] [US8] Create error-normalizer.spec.ts (16 cases, 100% coverage) — `apps/frontoffice/src/core/errors/__tests__/error-normalizer.spec.ts`
-- [ ] T030 [P] [US9] Create redact-error.spec.ts (6 cases, 100% coverage) — `apps/frontoffice/src/core/errors/__tests__/redact-error.spec.ts`
-- [ ] T031 [P] [US10] Create global-error-handler.spec.ts (6 cases, >=90% coverage) — `apps/frontoffice/src/core/errors/__tests__/global-error-handler.spec.ts`
-- [ ] T032 [P] [US10] Create ErrorBoundary.spec.ts (7 cases, >=80% branch coverage) — `apps/frontoffice/src/core/errors/__tests__/ErrorBoundary.spec.ts`
+- [x] T021 [P] [US8] Create error-normalizer.spec.ts (16 cases, 100% coverage) — `apps/mmc/src/core/errors/__tests__/error-normalizer.spec.ts`
+- [x] T022 [P] [US9] Create redact-error.spec.ts (6 cases, 100% coverage) — `apps/mmc/src/core/errors/__tests__/redact-error.spec.ts`
+- [x] T023 [P] [US10] Create global-error-handler.spec.ts (6 cases, >=90% coverage) — `apps/mmc/src/core/errors/__tests__/global-error-handler.spec.ts`
+- [x] T024 [P] [US10] Create ErrorBoundary.spec.ts (7 cases, >=80% branch coverage) — `apps/mmc/src/core/errors/__tests__/ErrorBoundary.spec.ts`
+- [x] T025 [P] [US8] Create error-normalizer.spec.ts (16 cases, 100% coverage) — `apps/backoffice/src/core/errors/__tests__/error-normalizer.spec.ts`
+- [x] T026 [P] [US9] Create redact-error.spec.ts (6 cases, 100% coverage) — `apps/backoffice/src/core/errors/__tests__/redact-error.spec.ts`
+- [x] T027 [P] [US10] Create global-error-handler.spec.ts (6 cases, >=90% coverage) — `apps/backoffice/src/core/errors/__tests__/global-error-handler.spec.ts`
+- [x] T028 [P] [US10] Create ErrorBoundary.spec.ts (7 cases, >=80% branch coverage) — `apps/backoffice/src/core/errors/__tests__/ErrorBoundary.spec.ts`
+- [x] T029 [P] [US8] Create error-normalizer.spec.ts (16 cases, 100% coverage) — `apps/frontoffice/src/core/errors/__tests__/error-normalizer.spec.ts`
+- [x] T030 [P] [US9] Create redact-error.spec.ts (6 cases, 100% coverage) — `apps/frontoffice/src/core/errors/__tests__/redact-error.spec.ts`
+- [x] T031 [P] [US10] Create global-error-handler.spec.ts (6 cases, >=90% coverage) — `apps/frontoffice/src/core/errors/__tests__/global-error-handler.spec.ts`
+- [x] T032 [P] [US10] Create ErrorBoundary.spec.ts (7 cases, >=80% branch coverage) — `apps/frontoffice/src/core/errors/__tests__/ErrorBoundary.spec.ts`
 
 ---
 
