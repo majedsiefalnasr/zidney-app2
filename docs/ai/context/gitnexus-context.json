@@ -1,1 +1,73 @@
-{"schemaVersion":"1.0.0","generatedAt":"2026-04-07T13:04:35.263Z","analyzedAt":"2026-04-07T13:04:35.263Z","analysisMode":"changed-only","changedFiles":[".agents/agents/coderabbit-review-resolver.agent.md","scripts/dev/coderabbit-reviews.ts"],"impactedModules":[],"dependencyGraph":{},"architectureLayerMap":{},"recentCommits":[{"hash":"efdd7e7f57fc02b39a3d26eb9038044ceadbe66d","message":"feat(scripts): add default save directory for coderabbit reviews","author":"Majed Sief Alnasr","date":"2026-04-07T14:57:38+02:00"},{"hash":"c2ad4c62c7b320c623fcf9cdd69205f7c18cf650","message":"Merge pull request #92 from majedsiefalnasr/spec/ui-04-global-error-handling","author":"Majed Sief Alnasr","date":"2026-04-07T14:43:05+02:00"},{"hash":"a57e8a94f886128c58ebdf600e95406861980470","message":"fix(ui-04-global-error-handling): add Global Error Boundary & normalization layer spec","author":"Majed Sief Alnasr","date":"2026-04-07T14:37:58+02:00"},{"hash":"50c6ed75a5af6c91af87b4166482ef18878c2335","message":"fix(ui-04-global-error-handling): api-client - map HTTP 422 to VALIDATION_ERROR (CodeRabbit suggestion)","author":"Majed Sief Alnasr","date":"2026-04-07T13:47:17+02:00"},{"hash":"9fcb6f991817eb71d5c9849c42d2d6d362559130","message":"refactor(ui-04-global-error-handling): Address CodeRabbit findings for PR #92","author":"Majed Sief Alnasr","date":"2026-04-07T13:14:26+02:00"},{"hash":"296b29c5f1ba5246aaf172f06ae27be1b459a736","message":"chore(ui-04-global-error-handling): harden redactError patterns; add secret= + retryAfter tests (backoffice, frontoffice, mmc)","author":"Majed Sief Alnasr","date":"2026-04-07T10:46:43+02:00"},{"hash":"ec17df405a2e56b89439b9ede96f9f6d7ae9e698","message":"chore(ui-04-global-error-handling): mark all tasks complete in tasks.md and record pre-closure approval and production-ready event","author":"Majed Sief Alnasr","date":"2026-04-07T09:36:05+02:00"},{"hash":"47e06cf6224776e5f172707a2c012821b3befb34","message":"chore(coderabbit): enhance configuration with detailed review instructions and tools setup","author":"Majed Sief Alnasr","date":"2026-04-07T11:22:36+02:00"},{"hash":"e8b2641f8266c83bf6d031ffb42a08a7447b7de5","message":"chore(ui-04-global-error-handling): record pre-closure approval and production-ready event","author":"Majed Sief Alnasr","date":"2026-04-07T09:14:01+02:00"},{"hash":"96ca920d169a6ae1c1c3043d148d7b21da840912","message":"chore(ui-04-global-error-handling): closure artifacts and stage production ready","author":"Majed Sief Alnasr","date":"2026-04-07T04:22:52+02:00"}],"riskIndicators":[]}
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-04-08T13:08:41.535Z",
+  "analyzedAt": "2026-04-08T13:08:41.535Z",
+  "analysisMode": "changed-only",
+  "changedFiles": [],
+  "impactedModules": [],
+  "dependencyGraph": {},
+  "architectureLayerMap": {},
+  "recentCommits": [
+    {
+      "hash": "7d010ea064821dfb2237262d7d0285e26b748e59",
+      "message": "fix(ui-008-notification-and-feedback): export toast from ui-system barrel",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-08T14:59:43+02:00"
+    },
+    {
+      "hash": "191dcaab4b49b7eb8f570a048c2efdd99678dde1",
+      "message": "chore(ui-008-notification-and-feedback): update pinia and @vueuse/core dependencies",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-08T11:47:27+02:00"
+    },
+    {
+      "hash": "975d360d0c0e20ffa016b298266ea51067327e9e",
+      "message": "chore(ui-008-notification-and-feedback): update hono and drizzle-orm dependencies to latest versions",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-08T08:26:55+02:00"
+    },
+    {
+      "hash": "d69fb28b669d08104eb2d99115d8be932c6b2694",
+      "message": "fix(ui-008-notification-and-feedback): resolve CodeRabbit findings for PR #93 (Spec/UI 008)",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-08T00:05:08+02:00"
+    },
+    {
+      "hash": "2001f488dedfeaa915786589e3f6df3312f714f9",
+      "message": "chore(ui-008-notification-and-feedback): update @vueuse/core and related dependencies to version 10.11.1",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T23:30:41+02:00"
+    },
+    {
+      "hash": "0c23fc114ceaf7273f41ee734aac34e5cf8e9c7c",
+      "message": "chore(ui-008-notification-and-feedback): update @vueuse/core dependency version",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T23:16:56+02:00"
+    },
+    {
+      "hash": "21fc0a4c3f116455c8c06c424c6869b518dc0bda",
+      "message": "fix(ui-008-notification-and-feedback): resolve 8 actionable findings from CodeRabbit review",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T21:20:35+02:00"
+    },
+    {
+      "hash": "ba680beaf008021a602c4e163a593c52b02e5bc7",
+      "message": "feat(ui-008-notification-and-feedback): implement notification and offline banner components",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T21:04:22+02:00"
+    },
+    {
+      "hash": "3e01d59688d7336ec040fc7e83c3cb6837c03ba2",
+      "message": "chore(ui-008-notification-and-feedback): complete closure step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T20:38:38+02:00"
+    },
+    {
+      "hash": "b894ae9766ab62f384023fe17c3d1a4ef9fbe333",
+      "message": "feat(ui-008-notification-and-feedback): implement notification and feedback layer",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T19:42:40+02:00"
+    }
+  ],
+  "riskIndicators": []
+}

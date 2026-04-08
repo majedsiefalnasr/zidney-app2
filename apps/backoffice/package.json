@@ -12,13 +12,13 @@
     "@vueuse/core": "^11.0.0",
     "@zidney/api-client": "workspace:*",
     "@zidney/ui-system": "workspace:*",
-    "pinia": "^2.2.0",
+    "pinia": "^3.0.0",
     "pinia-plugin-persistedstate": "^4.2.0",
     "vue": "^3.4.0",
     "vue-router": "^4.0.0"
   },
   "devDependencies": {
-    "@pinia/testing": "^0.1.6",
+    "@pinia/testing": "^1.0.0",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/test-utils": "^2.4.0",
     "eslint": "^9.0.0",
