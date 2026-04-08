@@ -19,6 +19,10 @@ export default defineProject({
     alias: [
       { find: '@', replacement: resolve(__dirname, 'src') },
       {
+        find: 'lucide-vue-next',
+        replacement: resolve(__dirname, '../../tests/shims/lucide-vue-next.ts'),
+      },
+      {
         find: '@zidney/ui-system',
         replacement: resolve(__dirname, '../../packages/ui-system/src/index.ts'),
       },

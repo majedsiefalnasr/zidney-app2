@@ -16,7 +16,13 @@ const __dirname = resolve(fileURLToPath(import.meta.url), '..')
 export default defineProject({
   plugins: [vue()],
   resolve: {
-    alias: [{ find: '@', replacement: resolve(__dirname, 'src') }],
+    alias: [
+      { find: '@', replacement: resolve(__dirname, 'src') },
+      {
+        find: 'lucide-vue-next',
+        replacement: resolve(__dirname, '../../tests/shims/lucide-vue-next.ts'),
+      },
+    ],
   },
   test: {
     name: 'ui-system',
