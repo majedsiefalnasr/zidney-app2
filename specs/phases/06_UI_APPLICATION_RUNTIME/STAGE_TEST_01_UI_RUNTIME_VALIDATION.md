@@ -6,6 +6,34 @@ Purpose: UI Runtime Integrity & Security Verification
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-04-08T00:03:00.000Z
+
+Scope Defined:
+
+- 22 validation tests across 8 areas — all clarified and confirmed
+- X-Correlation-ID header confirmed uniform across all apps
+- clearUserSpecificStores() scope confirmed: authStore + licenseStatusStore
+- Testing approach: extend existing Vitest + Playwright E2E suites
+- STAGE_UI_07/08 covered implicitly — no dedicated test areas needed
+
+Deferred Scope:
+
+- Feature implementation — this is a validation-only stage
+
+Architecture Governance Compliance:
+
+- Clarifications resolved — planning authorized
+
+Notes:
+All specification ambiguities resolved. Ready for technical planning.
+
+---
+
 # 1. OBJECTIVE
 
 This stage validates the integrity, security, and architectural correctness of the UI Runtime layer
@@ -184,41 +212,6 @@ This stage is PASSED when:
 - No global error inconsistencies
 - State isolation verified
 - Production build clean
-
----
-
-# 12. STAGE STATUS
-
-## Stage Status
-
-Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-04-08T00:01:00.000Z
-
-Scope Defined:
-
-- 22 validation tests across 8 areas (auth, router, API client, error handling, state, env, security, performance)
-- Covers all 10 PRODUCTION READY UI stages (STAGE_UI_00 through STAGE_UI_09)
-- Promotion gate: Phase 06 cannot be marked VALIDATED until this stage passes
-
-Deferred Scope:
-
-- Feature implementation — this is a validation-only stage
-
-Architecture Governance Compliance:
-
-- Specification drafted — governance audit pending
-
-Notes:
-Specification complete. 2 [NEEDS CLARIFICATION] markers pending resolution. Clarification step pending.
-
----
-
-Initial Status: DRAFT  
-Promotion Target: VALIDATED
-
-Phase 06 cannot be marked VALIDATED until this stage passes.
 
 ---
 

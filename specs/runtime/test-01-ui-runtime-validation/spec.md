@@ -37,6 +37,17 @@ Failure in any validation area blocks promotion.
 
 ---
 
+## Clarifications
+
+### Session 2026-04-08
+
+- Q: Is the correlation ID header name standardized across MMC, Backoffice, and Frontoffice? → A: `X-Correlation-ID` — uniform across all three apps via the shared `@zidney/api-client` package (`applyCorrelationId()` in `packages/api-client/src/interceptors.ts`). The spec's earlier reference to `x-request-id` was incorrect.
+- Q: What stores does `clearUserSpecificStores()` currently enumerate? → A: Empty stub in all three apps — no feature stores registered yet. `authStore` and `licenseStatusStore` are reset explicitly before the callback fires. Backoffice additionally owns `useBackofficeWorkspaceStore` (has `$reset()`); Frontoffice additionally owns `useAttemptStore`. Neither is yet registered.
+- Q: What testing approach is available for this validation stage? → A: Vitest unit tests — existing `apps/*/src/core/guards/__tests__/*.spec.ts` and `apps/*/src/core/errors/__tests__/*.spec.ts`. Playwright E2E smoke tests — `apps/*/tests/e2e/smoke.spec.ts` per app plus `tests/e2e/app-load.spec.ts`. Areas 1–7, 9 use Vitest; Areas 8, 10 and browser-observable behaviors (XSS, token storage) use Playwright.
+- Q: Do STAGE_UI_07 (Layout) and STAGE_UI_08 (Notifications) need dedicated validation areas? → A: No. STAGE_UI_07 Layout is covered implicitly by Area 8 Test 8.3 (layout re-render discipline). STAGE_UI_08 Notifications is covered implicitly by Tests 4.1, 4.2, and 3.2 which verify user-facing messages rendered through the notification system.
+
+---
+
 ## Validation Objectives
 
 1. Confirm token lifecycle security across all three apps (memory-only storage, redaction, isolation).
@@ -316,7 +327,7 @@ distributed tracing.
 
 1. Trigger an API request from each of the three apps.
 2. Inspect the outgoing HTTP headers.
-3. Verify `x-request-id` (or equivalent) header is present and non-empty.
+3. Verify `X-Correlation-ID` header is present and non-empty.
 4. Verify the correlation ID is included in error log entries when a request fails.
 
 **Pass Criteria**:
@@ -329,7 +340,7 @@ distributed tracing.
 - ❌ Requests missing correlation ID header
 - ❌ Error log entries missing request correlation reference
 
-[NEEDS CLARIFICATION: Is the correlation ID header name confirmed as `x-request-id` across all three apps, or does each app use a different header name? The STAGE_UI_02 scope should document this — confirm before test execution.]
+> **Resolved (2026-04-08)**: Header name is `X-Correlation-ID` across all three apps. All apps call `createApiClient()` from the shared `@zidney/api-client` package; `applyCorrelationId()` in `packages/api-client/src/interceptors.ts` writes `headers['X-Correlation-ID'] = correlationId ?? crypto.randomUUID()`. There is no per-app variation.
 
 ---
 
@@ -454,7 +465,7 @@ instance with no shared state between apps.
 - ❌ Any user-scoped data persists after logout
 - ❌ Previous user's data briefly visible on re-login
 
-[NEEDS CLARIFICATION: The `clearUserSpecificStores()` callback is documented as a stub in STAGE_UI_09, to be populated as feature stages land. Please confirm the current enumeration of stores to be cleared so validation coverage can target them accurately.]
+> **Resolved (2026-04-08)**: `clearUserSpecificStores()` is currently an **empty stub** in all three apps — no feature stores are yet registered. Each app's `onSessionExpired` callback explicitly resets `authStore` (via `expireSession()`) and `licenseStatusStore` before calling the stub. Stores that exist but are not yet registered: **Backoffice** — `useBackofficeWorkspaceStore` (has `$reset()`); **Frontoffice** — `useAttemptStore`. Test 5.2 scope: confirm the callback executes (no-op is acceptable), `authStore.user` is null, and `licenseStatusStore` is reset. Feature store coverage grows as future stages land.
 
 ---
 
@@ -710,11 +721,9 @@ Any blocking criterion failure prevents Phase 06 promotion to VALIDATED.
    caught; this validation stage performs a secondary confirmation scan.
 4. Performance measurements are taken on a local development machine under normal load, not under
    production traffic. Absolute timings are indicative; the baseline targets are conservative.
-5. The `clearUserSpecificStores()` stub is partially populated as of STAGE_UI_09. Full enumeration
-   of stores to clear will grow as feature stages land.
+5. The `clearUserSpecificStores()` stub is currently **empty** in all three apps as of STAGE_UI_09. No feature stores are yet registered. Backoffice uniquely has `useBackofficeWorkspaceStore` (with `$reset()`); Frontoffice has `useAttemptStore`. Neither is registered in the callback yet. Full enumeration grows as feature stages land.
 6. RFC 7807 is the expected error format for all structured API errors in the Zidney API layer.
-7. The correlation ID header name follows the API layer convention (`x-request-id` assumed, pending
-   confirmation — see Area 3, Test 3.3 clarification marker).
+7. The correlation ID header name is confirmed as `X-Correlation-ID` across all three apps, injected by `applyCorrelationId()` in `packages/api-client/src/interceptors.ts`.
 
 ---
 
@@ -732,14 +741,8 @@ Any blocking criterion failure prevents Phase 06 promotion to VALIDATED.
 
 ## Needs Clarification
 
-1. **Correlation ID Header Name** (Area 3, Test 3.3): Is the outgoing correlation ID header name
-   standardized as `x-request-id` across MMC, Backoffice, and Frontoffice, or does the API client
-   factory configuration vary per app? This affects Test 3.3 validation steps.
-
-2. **clearUserSpecificStores Enumeration** (Area 5, Test 5.2): The `clearUserSpecificStores()`
-   callback from STAGE_UI_09 is documented as a stub pending feature stage enumeration. What stores
-   are currently registered in this callback across each of the three apps? This determines the
-   scope of Test 5.2.
+All items resolved via codebase search on 2026-04-08. See `## Clarifications` section above for
+full resolutions and `## Assumptions` for updated facts.
 
 ---
 
