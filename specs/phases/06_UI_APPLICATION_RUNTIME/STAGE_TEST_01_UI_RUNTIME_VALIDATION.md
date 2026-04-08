@@ -192,20 +192,26 @@ This stage is PASSED when:
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-04-08T00:00:00.000Z
+Last Updated: 2026-04-08T00:01:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- 22 validation tests across 8 areas (auth, router, API client, error handling, state, env, security, performance)
+- Covers all 10 PRODUCTION READY UI stages (STAGE_UI_00 through STAGE_UI_09)
+- Promotion gate: Phase 06 cannot be marked VALIDATED until this stage passes
+
+Deferred Scope:
+
+- Feature implementation — this is a validation-only stage
 
 Architecture Governance Compliance:
 
-- Pending governance audit
+- Specification drafted — governance audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. 2 [NEEDS CLARIFICATION] markers pending resolution. Clarification step pending.
 
 ---
 
