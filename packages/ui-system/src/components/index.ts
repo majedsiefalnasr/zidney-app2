@@ -56,4 +56,4 @@ export {
   FormMessage,
 } from './shadcn-vue/form'
 // shadcn-vue: Sonner (Toaster)
-export { Toaster } from './shadcn-vue/sonner'
+export { Toaster, toast } from './shadcn-vue/sonner'

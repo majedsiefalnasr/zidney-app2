@@ -9,11 +9,10 @@
 
 <script setup lang="ts">
 // biome-ignore lint/correctness/noUnusedImports: used as Vue component in template
-import { Toaster } from '@zidney/ui-system'
+import { Toaster, toast } from '@zidney/ui-system'
 import { storeToRefs } from 'pinia'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { toast } from 'vue-sonner'
 // biome-ignore lint/correctness/noUnusedImports: used as Vue component in template
 import ErrorBoundary from '@/core/errors/ErrorBoundary.vue'
 import { useMmcNotificationStore } from '@/core/state/notification.store'
