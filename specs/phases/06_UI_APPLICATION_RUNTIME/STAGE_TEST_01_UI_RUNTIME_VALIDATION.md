@@ -9,17 +9,17 @@ Purpose: UI Runtime Integrity & Security Verification
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-04-08T00:03:00.000Z
+Last Updated: 2026-04-08T00:10:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- 22 validation tests across 8 areas — all clarified and confirmed
-- X-Correlation-ID header confirmed uniform across all apps
-- clearUserSpecificStores() scope confirmed: authStore + licenseStatusStore
-- Testing approach: extend existing Vitest + Playwright E2E suites
-- STAGE_UI_07/08 covered implicitly — no dedicated test areas needed
+- 22 validation tests across 8 areas mapped to existing + new test files
+- 5 coverage gaps identified (G1–G5) with exact remediation per gap
+- Phase 0: run 18 existing test files to confirm baseline
+- Phase 1–5: create/extend 5 test files for G1–G5
+- Correction applied: Test 4.1 uses Zidney error envelope (not RFC 7807)
 
 Deferred Scope:
 
@@ -27,10 +27,12 @@ Deferred Scope:
 
 Architecture Governance Compliance:
 
-- Clarifications resolved — planning authorized
+- Architecture Guardian: PASS
+- API Designer: PASS (after RFC 7807 → Zidney envelope correction)
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 

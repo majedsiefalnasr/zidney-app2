@@ -346,40 +346,47 @@ distributed tracing.
 
 ## Area 4: Global Error Handling Validation
 
-### Test 4.1: RFC 7807 Error Normalization (CRITICAL)
+### Test 4.1: Structured Error Normalization (CRITICAL)
 
-**Objective**: Confirm API error responses following RFC 7807 ("Problem Details") are correctly
-parsed and normalized into user-safe messages.
+**Objective**: Confirm API error responses using the Zidney error envelope are correctly parsed and
+normalized into user-safe messages, with no internal details exposed to the UI.
+
+> **Note (clarified 2026-04-08)**: The Zidney API does not emit canonical RFC 7807 `type`/`title`/`detail`/`instance` fields. The actual API error contract is `{ success: false, data: null, error: { code, message } }`. Test 4.1 validates against this actual format. Unsupported external formats (e.g. raw RFC 7807) are safely caught by the `UNKNOWN_ERROR` fallback — no internal fields are rendered.
 
 **Validation Steps**:
 
-1. Return an RFC 7807 response from a mock API endpoint:
+1. Simulate an API error response using the Zidney error envelope:
    ```json
    {
-     "type": "https://errors.zidney.com/validation-error",
-     "title": "Validation Failed",
-     "status": 422,
-     "detail": "The field 'email' is required.",
-     "instance": "/api/students"
+     "success": false,
+     "data": null,
+     "error": {
+       "code": "VALIDATION_ERROR",
+       "message": "The field 'email' is required."
+     }
    }
    ```
-2. Verify the app extracts `title` and `detail` but does not expose `type`, `instance`, or any
-   internal stack details.
-3. Verify the user-facing notification/toast shows a safe, localized message.
-4. Verify the original error object is available in the error log (for debugging), but not in any
-   rendered DOM element.
+2. Verify `normalizeError()` extracts `error.message` as the user-facing message.
+3. Verify the rendered UI shows only `error.message` — never the `code`, `httpStatus`, or any raw
+   object dump.
+4. Verify the full error object (including `code` and `httpStatus`) is available in the structured
+   log for debugging, but not in any rendered DOM element.
+5. Verify that unsupported error shapes (no `success`/`error` fields) produce a generic
+   `UNKNOWN_ERROR` fallback — no internal details exposed.
 
 **Pass Criteria**:
 
-- ✅ `detail` field rendered as user-facing message
-- ✅ `type` and `instance` fields NOT rendered in UI
-- ✅ No raw JSON visible to user
+- ✅ `error.message` rendered as user-facing message
+- ✅ `error.code` and `httpStatus` NOT rendered in UI
+- ✅ No raw JSON or object dump visible to user
 - ✅ Full error object logged with correlation ID
+- ✅ Unsupported error shapes fall through to `UNKNOWN_ERROR` fallback safely
 
 **Fail Criteria**:
 
-- ❌ Internal fields (`type`, `instance`, stack trace) rendered in UI
+- ❌ `error.code`, `httpStatus`, or stack trace rendered in UI
 - ❌ Raw JSON dumped to screen on error
+- ❌ `normalizeError()` throws on unsupported input shape
 
 ---
 
@@ -693,7 +700,7 @@ This stage is **PASSED** when all of the following are confirmed:
 | 423 / 426 license codes handled and routed correctly       | Router   | ✅ Yes   |
 | No raw fetch/axios calls outside API client factory        | API      | ✅ Yes   |
 | All HTTP error codes (401–500) handled without crash       | API      | ✅ Yes   |
-| RFC 7807 errors normalized, internals not exposed          | Errors   | ✅ Yes   |
+| Zidney error envelope normalized, internals not exposed    | Errors   | ✅ Yes   |
 | Network failures show safe fallback                        | Errors   | ✅ Yes   |
 | Pinia stores isolated per app                              | State    | ✅ Yes   |
 | All user state cleared on logout                           | State    | ✅ Yes   |
@@ -722,7 +729,7 @@ Any blocking criterion failure prevents Phase 06 promotion to VALIDATED.
 4. Performance measurements are taken on a local development machine under normal load, not under
    production traffic. Absolute timings are indicative; the baseline targets are conservative.
 5. The `clearUserSpecificStores()` stub is currently **empty** in all three apps as of STAGE_UI_09. No feature stores are yet registered. Backoffice uniquely has `useBackofficeWorkspaceStore` (with `$reset()`); Frontoffice has `useAttemptStore`. Neither is registered in the callback yet. Full enumeration grows as feature stages land.
-6. RFC 7807 is the expected error format for all structured API errors in the Zidney API layer.
+6. The Zidney API error contract is `{ success: false, data: null, error: { code, message } }`. Canonical RFC 7807 (`type`, `title`, `detail`, `instance`) is not emitted by the Zidney API. `normalizeError()` safely handles unsupported formats via the `UNKNOWN_ERROR` fallback.
 7. The correlation ID header name is confirmed as `X-Correlation-ID` across all three apps, injected by `applyCorrelationId()` in `packages/api-client/src/interceptors.ts`.
 
 ---
