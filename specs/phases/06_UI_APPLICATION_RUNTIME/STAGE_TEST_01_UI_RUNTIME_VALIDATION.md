@@ -9,17 +9,16 @@ Purpose: UI Runtime Integrity & Security Verification
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-04-08T00:10:00.000Z
+Last Updated: 2026-04-08T01:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- 22 validation tests across 8 areas mapped to existing + new test files
-- 5 coverage gaps identified (G1–G5) with exact remediation per gap
-- Phase 0: run 18 existing test files to confirm baseline
-- Phase 1–5: create/extend 5 test files for G1–G5
-- Correction applied: Test 4.1 uses Zidney error envelope (not RFC 7807)
+- Total: 17 atomic tasks across 9 phases
+- 3 new test files, 6 extended test files, 4 validation run / build tasks, 1 non-blocking perf baseline
+- 9 parallelizable tasks (Phase 2, Phase 5, Phase 7 builds)
+- All 5 coverage gaps (G1–G5) addressed with precise task assignments
 
 Deferred Scope:
 
@@ -29,10 +28,10 @@ Architecture Governance Compliance:
 
 - Architecture Guardian: PASS
 - API Designer: PASS (after RFC 7807 → Zidney envelope correction)
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
