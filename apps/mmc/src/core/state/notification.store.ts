@@ -7,7 +7,7 @@
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export interface AppNotification {
   id: string
@@ -24,12 +24,25 @@ export interface AppNotification {
 export const useMmcNotificationStore = defineStore('mmc-notification', () => {
   // ── Constants ──────────────────────────────────────────────────────────
   const MAX_QUEUE_SIZE = 20 // prevents unbounded growth during error-retry storms (PO-HIGH)
+  const DEDUP_WINDOW_MS = 2000 // suppress identical notifications within 2 seconds
+  const VISIBLE_CAP = 5 // maximum number of notifications surfaced to the toast bridge
 
   // ── State ──────────────────────────────────────────────────────────────
   const notifications = ref<AppNotification[]>([])
+  const lastPushed = new Map<string, number>() // key → timestamp, for dedup
+
+  // ── Computed ───────────────────────────────────────────────────────────
+  const visibleNotifications = computed(() => notifications.value.slice(-VISIBLE_CAP))
 
   // ── Actions ────────────────────────────────────────────────────────────
   function push(notification: Omit<AppNotification, 'id'>): string {
+    const key = `${notification.type}:${notification.title}:${notification.message ?? ''}`
+    const now = Date.now()
+    const last = lastPushed.get(key)
+    if (last !== undefined && now - last < DEDUP_WINDOW_MS) {
+      return '' // duplicate within dedup window — suppress
+    }
+    lastPushed.set(key, now)
     const id = crypto.randomUUID()
     if (notifications.value.length >= MAX_QUEUE_SIZE) {
       notifications.value.shift() // evict oldest when at capacity
@@ -48,10 +61,12 @@ export const useMmcNotificationStore = defineStore('mmc-notification', () => {
 
   function $reset(): void {
     notifications.value = []
+    lastPushed.clear()
   }
 
   return {
     notifications,
+    visibleNotifications,
     push,
     dismiss,
     clearAll,

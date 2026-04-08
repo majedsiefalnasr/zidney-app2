@@ -2,9 +2,10 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
+    "ignoreDeprecations": "5.0",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./apps/mmc/src/*", "./apps/backoffice/src/*", "./apps/frontoffice/src/*"],
+      "@/*": ["./apps/mmc/src/*"],
       "@zidney/app/*": ["./apps/*/src"],
       "@zidney/package/*": ["./packages/*/src"],
       "@zidney/ui": ["packages/ui-system/src/index.ts"],
@@ -27,12 +28,7 @@
       "@zidney/config/*": ["packages/config/src/*"]
     }
   },
-  "include": [
-    "apps/mmc/src/**/*",
-    "apps/backoffice/src/**/*",
-    "apps/frontoffice/src/**/*",
-    "packages/*/src/**/*"
-  ],
+  "include": ["apps/mmc/src/**/*", "packages/*/src/**/*"],
   "exclude": [
     "node_modules",
     "dist",

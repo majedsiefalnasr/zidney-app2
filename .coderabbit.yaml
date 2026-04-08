@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 # .coderabbit.yaml - Enhanced Configuration for Zidney
 # Monorepo with Bun + Hono + Vue 3 + TypeScript
 
@@ -200,10 +201,7 @@ reviews:
       - "DO NOT MERGE"
       - "SWEEP"
     drafts: true
-    base_branches:
-      - "main"
-      - "develop"
-      - "release/**"
+    base_branches: [main, develop, "release/**"]
 
   # Tools configuration
   tools:

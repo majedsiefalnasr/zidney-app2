@@ -10,7 +10,7 @@
     "_comments": "Scripts organized by domain. See .agents/skills/script-system-governance/SKILL.md for patterns.",
     "prepare": "husky",
     "typecheck": "bun run typecheck:src && bun run typecheck:tests",
-    "typecheck:src": "tsc --noEmit",
+    "typecheck:src": "tsc --noEmit && tsc -p apps/backoffice/tsconfig.json --noEmit && tsc -p apps/frontoffice/tsconfig.json --noEmit",
     "typecheck:tests": "bun run typecheck:src -p tsconfig.test.json",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -153,7 +153,7 @@
     "@vitest/coverage-v8": "^1.0.0",
     "concurrently": "^8.2.0",
     "gitnexus": "^1.4.6",
-    "hono": "4.12.9",
+    "hono": "4.12.12",
     "husky": "^9.0.0",
     "ioredis": "^5.3.0",
     "jsdom": "^28.1.0",
@@ -171,12 +171,13 @@
   "dependencies": {
     "@types/bun": "1.3.11",
     "defu": "6.1.6",
-    "string-width": "^8.2.0"
+    "string-width": "^8.2.0",
+    "vue-sonner": "^2.0.9"
   },
   "engines": {
     "bun": ">=1.3.9"
   },
   "overrides": {
-    "hono": "4.12.9"
+    "hono": "4.12.12"
   }
 }

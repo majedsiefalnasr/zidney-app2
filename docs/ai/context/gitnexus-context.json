@@ -1,1 +1,73 @@
-{"schemaVersion":"1.0.0","generatedAt":"2026-04-07T02:17:35.456Z","analyzedAt":"2026-04-07T02:17:35.456Z","analysisMode":"changed-only","changedFiles":["apps/backoffice/src/App.vue","apps/backoffice/src/core/errors/ErrorBoundary.vue","apps/backoffice/src/core/errors/__tests__/ErrorBoundary.spec.ts","apps/backoffice/src/core/errors/__tests__/error-normalizer.spec.ts","apps/backoffice/src/core/errors/__tests__/global-error-handler.spec.ts","apps/backoffice/src/core/errors/__tests__/redact-error.spec.ts","apps/backoffice/src/core/errors/error-normalizer.ts","apps/backoffice/src/core/errors/global-error-handler.ts","apps/backoffice/src/core/errors/redact-error.ts","apps/backoffice/src/core/errors/types.ts","apps/backoffice/src/main.ts","apps/backoffice/tests/integration/app-layout.integration.test.ts","apps/backoffice/tests/unit/core/error-normalizer.test.ts","apps/frontoffice/src/App.vue","apps/frontoffice/src/core/errors/ErrorBoundary.vue","apps/frontoffice/src/core/errors/__tests__/ErrorBoundary.spec.ts","apps/frontoffice/src/core/errors/__tests__/error-normalizer.spec.ts","apps/frontoffice/src/core/errors/__tests__/global-error-handler.spec.ts","apps/frontoffice/src/core/errors/__tests__/redact-error.spec.ts","apps/frontoffice/src/core/errors/error-normalizer.ts","apps/frontoffice/src/core/errors/global-error-handler.ts","apps/frontoffice/src/core/errors/redact-error.ts","apps/frontoffice/src/core/errors/types.ts","apps/frontoffice/src/main.ts","apps/frontoffice/tests/integration/app-layout.integration.test.ts","apps/frontoffice/tests/unit/core/error-normalizer.test.ts","apps/mmc/src/App.vue","apps/mmc/src/core/errors/ErrorBoundary.vue","apps/mmc/src/core/errors/__tests__/ErrorBoundary.spec.ts","apps/mmc/src/core/errors/__tests__/error-normalizer.spec.ts","apps/mmc/src/core/errors/__tests__/global-error-handler.spec.ts","apps/mmc/src/core/errors/__tests__/redact-error.spec.ts","apps/mmc/src/core/errors/error-normalizer.ts","apps/mmc/src/core/errors/global-error-handler.ts","apps/mmc/src/core/errors/redact-error.ts","apps/mmc/src/core/errors/types.ts","apps/mmc/src/main.ts","apps/mmc/tests/integration/app-layout.integration.test.ts","apps/mmc/tests/unit/core/error-normalizer.test.ts","docs/ai/context/ai-architecture-brain.json","docs/ai/context/ai-architecture-summary.md","docs/ai/context/ai-context-mini.json","docs/ai/context/ai-dependency-graph.json","docs/ai/context/ai-layer-model.json","docs/ai/context/ai-module-map.json","docs/ai/context/ai-runtime-map.json","docs/architecture/ARCHITECTURE_DIAGRAMS.md","docs/architecture/graphs/architecture-graph.html","docs/architecture/health/architecture-drift-report.md","docs/architecture/health/architecture-health.json","docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json","docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json","docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md","docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md","docs/reports/infra-audit-report.json","packages/api-client/src/http-error.ts","packages/api-client/src/index.ts"],"impactedModules":["apps/backoffice","apps/frontoffice","apps/mmc","packages/api-client"],"dependencyGraph":{"apps/backoffice":["packages/api-client","packages/logger","packages/types"],"apps/frontoffice":["packages/api-client","packages/logger","packages/types"],"apps/mmc":["packages/api-client","packages/logger","packages/types","packages/ui-system"],"packages/api-client":[]},"architectureLayerMap":{"apps/backoffice":"unknown","apps/frontoffice":"unknown","apps/mmc":"unknown","packages/api-client":"unknown"},"recentCommits":[{"hash":"c56dd9677852dfcf4658ef3d5df3ac66edec8c8c","message":"feat(ui-04-global-error-handling): implement global error boundary and normalization layer","author":"Majed Sief Alnasr","date":"2026-04-07T04:14:12+02:00"},{"hash":"dcafbd95758f0b6cad49c40fbc4be0b172d09318","message":"feat(ui-04-global-error-handling): analyze drift — all 9 criteria passed, implementation authorized","author":"Majed Sief Alnasr","date":"2026-04-06T23:29:13+02:00"},{"hash":"0854380fa331dd4b1b94b53519672d683648e71a","message":"feat(ui-04-global-error-handling): generate 32 atomic tasks for error infrastructure","author":"Majed Sief Alnasr","date":"2026-04-06T23:19:13+02:00"},{"hash":"a7b858e138ae96fd5fbfee53aa73f48338c775a7","message":"feat(ui-04-global-error-handling): plan global error infrastructure across all apps","author":"Majed Sief Alnasr","date":"2026-04-06T23:11:25+02:00"},{"hash":"442fe1ad7e02d23abb4fa00458b4a7fd28cebff6","message":"feat(ui-04-global-error-handling): clarify error contract and bootstrap integration","author":"Majed Sief Alnasr","date":"2026-04-06T22:18:43+02:00"},{"hash":"d53707fd1748fd31e4b96b59b0904811c75d4909","message":"feat(ui-04-global-error-handling): specify global error boundary and normalization layer","author":"Majed Sief Alnasr","date":"2026-04-06T22:12:01+02:00"},{"hash":"babd344f7219158c9cc4bff18abff8adb4e110a5","message":"chore(ui-04-global-error-handling): initialize stage branch and directory","author":"Majed Sief Alnasr","date":"2026-04-06T22:04:20+02:00"},{"hash":"94cee0d4b39a15d622d6ba0c6f506e96059e1863","message":"test(domain-core): add focused unit tests & fix coverage analyzer","author":"Majed Sief Alnasr","date":"2026-04-06T21:52:15+02:00"},{"hash":"862e97b42a2d6e0968e151605086d89e3d2a59e1","message":"chore(orchestrator): enhance CodeRabbit review fetching and resolution process","author":"Majed Sief Alnasr","date":"2026-04-06T17:15:54+02:00"},{"hash":"4a01ad7ce12c85ef07b7d07d22683bb8419c0078","message":"Merge pull request #91 from majedsiefalnasr/spec/046-billing-and-invoices","author":"Majed Sief Alnasr","date":"2026-04-06T17:13:26+02:00"}],"riskIndicators":[{"module":"apps/backoffice","riskScore":40,"reason":"13 changed file(s)","affectedBy":["apps/backoffice/src/App.vue","apps/backoffice/src/core/errors/ErrorBoundary.vue","apps/backoffice/src/core/errors/__tests__/ErrorBoundary.spec.ts","apps/backoffice/src/core/errors/__tests__/error-normalizer.spec.ts","apps/backoffice/src/core/errors/__tests__/global-error-handler.spec.ts","apps/backoffice/src/core/errors/__tests__/redact-error.spec.ts","apps/backoffice/src/core/errors/error-normalizer.ts","apps/backoffice/src/core/errors/global-error-handler.ts","apps/backoffice/src/core/errors/redact-error.ts","apps/backoffice/src/core/errors/types.ts","apps/backoffice/src/main.ts","apps/backoffice/tests/integration/app-layout.integration.test.ts","apps/backoffice/tests/unit/core/error-normalizer.test.ts"]},{"module":"apps/frontoffice","riskScore":40,"reason":"13 changed file(s)","affectedBy":["apps/frontoffice/src/App.vue","apps/frontoffice/src/core/errors/ErrorBoundary.vue","apps/frontoffice/src/core/errors/__tests__/ErrorBoundary.spec.ts","apps/frontoffice/src/core/errors/__tests__/error-normalizer.spec.ts","apps/frontoffice/src/core/errors/__tests__/global-error-handler.spec.ts","apps/frontoffice/src/core/errors/__tests__/redact-error.spec.ts","apps/frontoffice/src/core/errors/error-normalizer.ts","apps/frontoffice/src/core/errors/global-error-handler.ts","apps/frontoffice/src/core/errors/redact-error.ts","apps/frontoffice/src/core/errors/types.ts","apps/frontoffice/src/main.ts","apps/frontoffice/tests/integration/app-layout.integration.test.ts","apps/frontoffice/tests/unit/core/error-normalizer.test.ts"]},{"module":"apps/mmc","riskScore":40,"reason":"13 changed file(s)","affectedBy":["apps/mmc/src/App.vue","apps/mmc/src/core/errors/ErrorBoundary.vue","apps/mmc/src/core/errors/__tests__/ErrorBoundary.spec.ts","apps/mmc/src/core/errors/__tests__/error-normalizer.spec.ts","apps/mmc/src/core/errors/__tests__/global-error-handler.spec.ts","apps/mmc/src/core/errors/__tests__/redact-error.spec.ts","apps/mmc/src/core/errors/error-normalizer.ts","apps/mmc/src/core/errors/global-error-handler.ts","apps/mmc/src/core/errors/redact-error.ts","apps/mmc/src/core/errors/types.ts","apps/mmc/src/main.ts","apps/mmc/tests/integration/app-layout.integration.test.ts","apps/mmc/tests/unit/core/error-normalizer.test.ts"]},{"module":"packages/api-client","riskScore":20,"reason":"2 changed file(s); foundational module with no outbound dependencies","affectedBy":["packages/api-client/src/http-error.ts","packages/api-client/src/index.ts"]}]}
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-04-08T13:08:41.535Z",
+  "analyzedAt": "2026-04-08T13:08:41.535Z",
+  "analysisMode": "changed-only",
+  "changedFiles": [],
+  "impactedModules": [],
+  "dependencyGraph": {},
+  "architectureLayerMap": {},
+  "recentCommits": [
+    {
+      "hash": "7d010ea064821dfb2237262d7d0285e26b748e59",
+      "message": "fix(ui-008-notification-and-feedback): export toast from ui-system barrel",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-08T14:59:43+02:00"
+    },
+    {
+      "hash": "191dcaab4b49b7eb8f570a048c2efdd99678dde1",
+      "message": "chore(ui-008-notification-and-feedback): update pinia and @vueuse/core dependencies",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-08T11:47:27+02:00"
+    },
+    {
+      "hash": "975d360d0c0e20ffa016b298266ea51067327e9e",
+      "message": "chore(ui-008-notification-and-feedback): update hono and drizzle-orm dependencies to latest versions",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-08T08:26:55+02:00"
+    },
+    {
+      "hash": "d69fb28b669d08104eb2d99115d8be932c6b2694",
+      "message": "fix(ui-008-notification-and-feedback): resolve CodeRabbit findings for PR #93 (Spec/UI 008)",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-08T00:05:08+02:00"
+    },
+    {
+      "hash": "2001f488dedfeaa915786589e3f6df3312f714f9",
+      "message": "chore(ui-008-notification-and-feedback): update @vueuse/core and related dependencies to version 10.11.1",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T23:30:41+02:00"
+    },
+    {
+      "hash": "0c23fc114ceaf7273f41ee734aac34e5cf8e9c7c",
+      "message": "chore(ui-008-notification-and-feedback): update @vueuse/core dependency version",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T23:16:56+02:00"
+    },
+    {
+      "hash": "21fc0a4c3f116455c8c06c424c6869b518dc0bda",
+      "message": "fix(ui-008-notification-and-feedback): resolve 8 actionable findings from CodeRabbit review",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T21:20:35+02:00"
+    },
+    {
+      "hash": "ba680beaf008021a602c4e163a593c52b02e5bc7",
+      "message": "feat(ui-008-notification-and-feedback): implement notification and offline banner components",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T21:04:22+02:00"
+    },
+    {
+      "hash": "3e01d59688d7336ec040fc7e83c3cb6837c03ba2",
+      "message": "chore(ui-008-notification-and-feedback): complete closure step",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T20:38:38+02:00"
+    },
+    {
+      "hash": "b894ae9766ab62f384023fe17c3d1a4ef9fbe333",
+      "message": "feat(ui-008-notification-and-feedback): implement notification and feedback layer",
+      "author": "Majed Sief Alnasr",
+      "date": "2026-04-07T19:42:40+02:00"
+    }
+  ],
+  "riskIndicators": []
+}

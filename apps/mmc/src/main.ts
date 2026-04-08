@@ -33,15 +33,18 @@ import { createAuthService } from '@/core/auth/auth.service'
 import type { IRefreshManager } from '@/core/auth/refresh-manager'
 import { createRefreshManager } from '@/core/auth/refresh-manager'
 import { createTokenManager } from '@/core/auth/token-manager'
+import { isDev } from '@/core/config/app-config'
 // ── Step 2: Router factory (guards NOT registered here — registered via registerGuards)
 import {
   registerGlobalErrorHandlers,
   unregisterGlobalErrorHandlers,
 } from '@/core/errors/global-error-handler'
+import { redactError } from '@/core/errors/redact-error'
 import { registerGuards } from '@/core/guards'
 import { createAppRouter } from '@/core/router'
 import { defineAuthStore } from '@/core/state/auth.store'
 import { useLicenseStatusStore } from '@/core/state/license-status.store'
+import { useMmcNotificationStore } from '@/core/state/notification.store'
 import App from './App.vue'
 
 // App-specific route name constants — NOT shared in core/auth/
@@ -141,16 +144,30 @@ app.use(router)
 // ── Step 9.1: Register global error handlers ──────────────────────────────────
 const appLogger = createLogger('[MMC]')
 app.provide('appLogger', appLogger)
-const IS_PROD = import.meta.env.PROD
-app.provide('isProduction', IS_PROD)
 // Defensive: unregister previous handlers before registering new ones
 unregisterGlobalErrorHandlers()
 registerGlobalErrorHandlers({
   onError: (err) => {
-    appLogger.error('unhandled error', { code: err.code, httpStatus: err.httpStatus })
+    const safe = redactError(err, !isDev())
+    appLogger.error('unhandled error', {
+      code: safe.code,
+      message: safe.message,
+      httpStatus: safe.httpStatus,
+    })
+    if (isDev()) {
+      appLogger.debug('[DEV] unhandled error detail', { code: safe.code, message: safe.message })
+    }
+    if (!err.isNetworkError) {
+      useMmcNotificationStore().push({
+        type: 'error',
+        title: 'Unexpected error',
+        message: safe.message,
+        dismissible: true,
+      })
+    }
   },
   logger: appLogger,
-  isProduction: IS_PROD,
+  isProduction: !isDev(),
 })
 
 app.mount('#app')

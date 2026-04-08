@@ -87,6 +87,10 @@ export default defineWorkspace([
           ),
         },
         {
+          find: 'lucide-vue-next',
+          replacement: path.resolve(__dirname, 'tests/shims/lucide-vue-next.ts'),
+        },
+        {
           find: /^@zidney\/app\/([^/]+)\/(.*)$/,
           replacement: path.resolve(__dirname, 'apps/$1/src/$2'),
         },

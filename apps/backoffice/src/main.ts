@@ -21,8 +21,12 @@ import { createAuthService } from '@/core/auth/auth.service'
 import type { IRefreshManager } from '@/core/auth/refresh-manager'
 import { createRefreshManager } from '@/core/auth/refresh-manager'
 import { createTokenManager } from '@/core/auth/token-manager'
+import { isDev } from '@/core/config/app-config'
+import { redactError } from '@/core/errors/redact-error'
 import { defineAuthStore } from '@/core/state/auth.store'
 import { useLicenseStatusStore } from '@/core/state/license-status.store'
+import { useBackofficeNotificationStore } from '@/core/state/notification.store'
+import { useBackofficeWorkspaceStore } from '@/core/state/workspace.store'
 // ── Step 2: Router factory (guards NOT registered here — registered via registerGuards)
 // Use relative imports to avoid root tsconfig @/* path alias resolving to MMC first
 import { useContextStore } from '@/stores/context'
@@ -128,15 +132,30 @@ app.use(router)
 // ── Step 9.1: Register global error handlers ────────────────────────────────
 const appLogger = createLogger('[Backoffice]')
 app.provide('appLogger', appLogger)
-const IS_PROD = import.meta.env.PROD
-app.provide('isProduction', IS_PROD)
 // Remove any previously-registered global handlers before re-registering
 unregisterGlobalErrorHandlers()
 registerGlobalErrorHandlers({
   onError: (err) => {
-    appLogger.error('unhandled error', { code: err.code, httpStatus: err.httpStatus })
+    const safe = redactError(err, !isDev())
+    appLogger.error('unhandled error', {
+      code: safe.code,
+      message: safe.message,
+      httpStatus: safe.httpStatus,
+    })
+    if (isDev()) {
+      appLogger.debug('[DEV] unhandled error detail', { code: safe.code, message: safe.message })
+    }
+    if (!err.isNetworkError) {
+      const workspaceSlug = useBackofficeWorkspaceStore().workspace?.slug
+      useBackofficeNotificationStore().push({
+        type: 'error',
+        title: 'Unexpected error',
+        message: workspaceSlug ? `${err.message} (workspace: ${workspaceSlug})` : err.message,
+        dismissible: true,
+      })
+    }
   },
   logger: appLogger,
-  isProduction: IS_PROD,
+  isProduction: !isDev(),
 })
 app.mount('#app')

@@ -3,6 +3,8 @@
 // ===========================
 // All public exports from @zidney/ui-system
 
+// Re-exports for external integrations
+export { toast } from 'vue-sonner'
 // Components
 export * from './components/index.js'
 // Composables
