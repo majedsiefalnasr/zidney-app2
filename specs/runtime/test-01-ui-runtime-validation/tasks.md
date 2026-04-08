@@ -23,7 +23,7 @@
 
 **Purpose**: Confirm all existing test files covering validation criteria pass before any new file is introduced.
 
-- [ ] T001 Run existing test suite baseline — execute the full command from `plan.md` Phase 0 against all 31 files spanning `tests/integration/*/auth/`, `tests/unit/*/core/`, `apps/*/src/core/guards/__tests__/`, `apps/*/src/core/errors/__tests__/`, and `apps/mmc/src/core/errors/__tests__/redact-error.spec.ts`; confirm exit code 0 with zero failures
+- [ ] T001 Run existing test suite baseline — execute the full command from `plan.md` Phase 0 against all 33 files (3×401-race, 3×error.interceptor, 3×session-clear-wiring, 3×token-persistence-audit, 3×auth.guard.spec, 3×auth.guard.redirect, 2×role.guard, 3×license-status.store, 3×error-normalizer, 3×ErrorBoundary, 1×redact-error, 3×token-redact); confirm exit code 0 with zero failures
 
 ---
 
@@ -100,9 +100,14 @@
 
 ## Phase 9: Performance Baseline (NON-BLOCKING)
 
-**Purpose**: Establish router navigation p95 baseline (<50ms guard + mount, net of API data loading). Result does NOT gate stage promotion. Archive to `specs/runtime/test-01-ui-runtime-validation/reports/perf-baseline.md`.
+**Purpose**: Confirm apps load without console errors (smoke check). `tests/e2e/app-load.spec.ts` is a documentation-only file and is excluded. Smoke tests assert load + no error title only — they do not produce navigation timing metrics. Tests 8.2 (interceptor overhead) and 8.3 (re-render discipline) require dedicated tooling and are formally deferred (see Deferred section below). Result does NOT gate stage promotion. Archive to `specs/runtime/test-01-ui-runtime-validation/reports/perf-baseline.md`.
 
-- [ ] T017 Run Playwright smoke tests and record navigation baseline — execute `rtk bun run playwright test apps/mmc/tests/e2e/smoke.spec.ts apps/backoffice/tests/e2e/smoke.spec.ts apps/frontoffice/tests/e2e/smoke.spec.ts tests/e2e/app-load.spec.ts`; record p95 metric; NON-BLOCKING — does not gate stage promotion
+- [ ] T017 Run Playwright smoke tests — execute `rtk bun run playwright test apps/mmc/tests/e2e/smoke.spec.ts apps/backoffice/tests/e2e/smoke.spec.ts apps/frontoffice/tests/e2e/smoke.spec.ts`; confirm each app loads without errors; NON-BLOCKING — does not gate stage promotion
+
+**Formally Deferred (Tests 8.2 and 8.3 — NON-BLOCKING):**
+
+- Test 8.2 (Interceptor overhead < 5ms): Requires timing the API client chain; not achievable with Playwright smoke tests. Deferred to a future PERF stage.
+- Test 8.3 (Layout re-render discipline): Requires Vue DevTools or `renderCount` hooks. Deferred to a future PERF stage.
 
 ---
 
