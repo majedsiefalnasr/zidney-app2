@@ -27,7 +27,7 @@
   "parallel_task_groups": [],
   "current_parallel_group": null,
   "session_started_at": "2026-04-08T00:00:00.000Z",
-  "last_updated": "2026-04-10T01:00:00.000Z",
+  "last_updated": "2026-04-10T01:10:00.000Z",
   "step_timings": {
     "specify": {
       "started_at": "2026-04-08T00:01:00.000Z",
@@ -99,6 +99,10 @@
     {
       "event": "stage_production_ready",
       "timestamp": "2026-04-10T01:00:00.000Z"
+    },
+    {
+      "event": "final_checks_marked",
+      "timestamp": "2026-04-10T01:10:00.000Z"
     }
   ]
 }

@@ -173,8 +173,8 @@ T016 → T017                ← perf baseline is last (non-blocking)
 
 Phase 06 cannot be marked **VALIDATED** until:
 
-- [ ] T001 passes (baseline clean)
-- [ ] T011 passes (all gap files green)
-- [ ] T013, T014, T015 pass (all production builds clean)
-- [ ] T016 passes (integration suite re-run clean)
+- [x] T001 passes (baseline clean)
+- [x] T011 passes (all gap files green)
+- [x] T013, T014, T015 pass (all production builds clean)
+- [x] T016 passes (integration suite re-run clean)
 - T017 (perf baseline) is recorded but does not block promotion
