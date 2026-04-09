@@ -1,17 +1,49 @@
+import { describe, expect, it } from 'vitest'
+import {
+  findStaleDocFiles,
+  normalizeGeneratedDocContent,
+  parseMetaHeader,
+  resolveDocFileName,
+} from '../script-docs'
+
+describe('script-docs utilities', () => {
+  it('parses a minimal meta header', () => {
+    const content = `/**\n * @script dev:example\n * @domain dev\n * @category dev\n * @description Example script\n * @usage bun run dev:example\n */\n`
+    const meta = parseMetaHeader(content, '/repo/scripts/dev/example.ts')
+    expect(meta).not.toBeNull()
+    expect(meta?.script).toBe('dev:example')
+    expect(meta?.domain).toBe('dev')
+  })
+
+  it('resolves doc file name consistently', () => {
+    expect(resolveDocFileName('dev:example')).toBe('dev-example.md')
+    expect(resolveDocFileName('build')).toBe('build.md')
+  })
+
+  it('finds stale doc files', () => {
+    const existing = ['README.md', 'extra.md', 'dev-example.md']
+    const expected = ['dev-example.md']
+    const stale = findStaleDocFiles(existing, expected)
+    expect(stale).toContain('extra.md')
+  })
+
+  it('normalizes generated content by stripping timestamp for registry', () => {
+    const filePath = 'docs/scripts/SCRIPT_REGISTRY.md'
+    const content = `# Header\n> Last generated: 2026-04-09T00:00:00.000Z\n` + '\n'
+    const normalized = normalizeGeneratedDocContent(filePath, content)
+    expect(normalized).not.toContain('Last generated')
+  })
+})
+
 /** @library-module */
 
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
 import {
   compareGeneratedDocsFiles,
-  findStaleDocFiles,
   generateScriptDoc,
-  normalizeGeneratedDocContent,
-  parseMetaHeader,
   parsePackageReferenceSections,
-  resolveDocFileName,
 } from '../script-docs'
 
 describe('parseMetaHeader', () => {

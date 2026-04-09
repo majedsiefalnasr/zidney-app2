@@ -227,7 +227,7 @@ function detectFlagsFromCode(content: string, scriptName: string): ScriptFlag[] 
  * Return flags for a script: explicit `@flag` declarations take priority;
  * falls back to code-pattern detection.
  */
-function parseScriptFlags(content: string, scriptName: string): ScriptFlag[] {
+export function parseScriptFlags(content: string, scriptName: string): ScriptFlag[] {
   const explicit = parseExplicitFlags(content, scriptName)
   return explicit.length > 0 ? explicit : detectFlagsFromCode(content, scriptName)
 }
@@ -720,7 +720,9 @@ export function generateRegistry(metas: ScriptMeta[]): string {
     )
     for (const meta of scripts) {
       const flagsCell =
-        meta.flags.length > 0 ? meta.flags.map((f) => `\`${f.name}\``).join(', ') : '—'
+        (meta.flags ?? []).length > 0
+          ? (meta.flags ?? []).map((f) => `\`${f.name}\``).join(', ')
+          : '—'
       lines.push(
         `| \`${meta.script}\` | \`${meta.filePath}\` | ${meta.category} | ${meta.description} | \`${meta.usage}\` | ${flagsCell} |`
       )

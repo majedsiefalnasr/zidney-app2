@@ -80,7 +80,7 @@ export function validateCriteriaMode(blocks: CriteriaEntry[]): ValidationResult 
   }
 
   for (let i = 0; i < blocks.length; i++) {
-    const block = blocks[i]
+    const block = blocks[i]!
     const hasPercentage = block.percentage != null
     const hasFixed = block.fixed_count != null
 
