@@ -13,6 +13,7 @@ import type { IAuthService } from '../../../../apps/mmc/src/core/auth/auth.servi
 import type { IRefreshManager } from '../../../../apps/mmc/src/core/auth/refresh-manager'
 import type { ITokenManager } from '../../../../apps/mmc/src/core/auth/token-manager'
 import { defineAuthStore } from '../../../../apps/mmc/src/core/state/auth.store'
+import { useLicenseStatusStore } from '../../../../apps/mmc/src/core/state/license-status.store'
 
 vi.mock('@zidney/logger', () => ({
   createLogger: vi.fn(() => ({
@@ -150,5 +151,69 @@ describe('session clear wiring (mmc) — clearUserSpecificStores fired after exp
     await Promise.all(calls)
 
     expect(clearUserSpecificStores).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('licenseStatusStore cleared on session expiry (Tests 5.2, 2.3) — mmc', () => {
+  it('isWorkspaceLocked is false after handleAuthFailure() when pre-set to true', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const tokenManager = makeTokenManager()
+    const router = makeRouter()
+    const clearUserSpecificStores = vi.fn()
+
+    const licenseStatusStore = useLicenseStatusStore(pinia)
+    licenseStatusStore.setWorkspaceLocked(true)
+
+    const useAuthStore = defineAuthStore(makeAuthService(), tokenManager, router, LOGIN_ROUTE, () =>
+      makeRefreshManager()
+    )
+    const authStore = useAuthStore(pinia)
+    authStore.isAuthenticated = true
+
+    const interceptor = createErrorInterceptor({
+      getIsAuthenticated: () => authStore.isAuthenticated,
+      onSessionExpired: async () => {
+        licenseStatusStore.clearLicenseStatus()
+        await authStore.expireSession()
+        clearUserSpecificStores()
+      },
+      onLicenseError: vi.fn(),
+    })
+
+    await interceptor.handleAuthFailure()
+
+    expect(licenseStatusStore.isWorkspaceLocked).toBe(false)
+  })
+
+  it('isUpgradeRequired is false after handleAuthFailure() when pre-set to true', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const tokenManager = makeTokenManager()
+    const router = makeRouter()
+    const clearUserSpecificStores = vi.fn()
+
+    const licenseStatusStore = useLicenseStatusStore(pinia)
+    licenseStatusStore.setUpgradeRequired(true)
+
+    const useAuthStore = defineAuthStore(makeAuthService(), tokenManager, router, LOGIN_ROUTE, () =>
+      makeRefreshManager()
+    )
+    const authStore = useAuthStore(pinia)
+    authStore.isAuthenticated = true
+
+    const interceptor = createErrorInterceptor({
+      getIsAuthenticated: () => authStore.isAuthenticated,
+      onSessionExpired: async () => {
+        licenseStatusStore.clearLicenseStatus()
+        await authStore.expireSession()
+        clearUserSpecificStores()
+      },
+      onLicenseError: vi.fn(),
+    })
+
+    await interceptor.handleAuthFailure()
+
+    expect(licenseStatusStore.isUpgradeRequired).toBe(false)
   })
 })

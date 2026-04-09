@@ -46,15 +46,15 @@
     },
     {
       "from": "apps/mmc",
+      "to": "packages/api-client"
+    },
+    {
+      "from": "apps/mmc",
       "to": "packages/types"
     },
     {
       "from": "apps/mmc",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "packages/api-client"
     },
     {
       "from": "apps/mmc",
@@ -62,15 +62,15 @@
     },
     {
       "from": "apps/frontoffice",
+      "to": "packages/api-client"
+    },
+    {
+      "from": "apps/frontoffice",
       "to": "packages/types"
     },
     {
       "from": "apps/frontoffice",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "packages/api-client"
     },
     {
       "from": "apps/backoffice",

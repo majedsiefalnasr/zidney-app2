@@ -23,7 +23,7 @@
 
 **Purpose**: Confirm all existing test files covering validation criteria pass before any new file is introduced.
 
-- [ ] T001 Run existing test suite baseline — execute the full command from `plan.md` Phase 0 against all 33 files (3×401-race, 3×error.interceptor, 3×session-clear-wiring, 3×token-persistence-audit, 3×auth.guard.spec, 3×auth.guard.redirect, 2×role.guard, 3×license-status.store, 3×error-normalizer, 3×ErrorBoundary, 1×redact-error, 3×token-redact); confirm exit code 0 with zero failures
+- [x] T001 Run existing test suite baseline — execute the full command from `plan.md` Phase 0 against all 33 files (3×401-race, 3×error.interceptor, 3×session-clear-wiring, 3×token-persistence-audit, 3×auth.guard.spec, 3×auth.guard.redirect, 2×role.guard, 3×license-status.store, 3×error-normalizer, 3×ErrorBoundary, 1×redact-error, 3×token-redact); confirm exit code 0 with zero failures
 
 ---
 
@@ -31,7 +31,7 @@
 
 **Purpose**: Create a new Vitest file that codifies grep-based assertions for Tests 3.1, 5.3, 6.1, and 7.1 — covering raw HTTP usage, XSS surface, env secrets, and business-logic placement.
 
-- [ ] T002 Create `tests/validation/static-analysis.test.ts` — new file; content fully specified in `plan.md` Phase 1; covers Tests 3.1 (no raw fetch/axios/XHR), 7.1 (no v-html), 6.1 (.env.production not git-tracked), 5.3 (no direct apiClient calls in .vue files); run after creation to confirm all four describe blocks pass
+- [x] T002 Create `tests/validation/static-analysis.test.ts` — new file; content fully specified in `plan.md` Phase 1; covers Tests 3.1 (no raw fetch/axios/XHR), 7.1 (no v-html), 6.1 (.env.production not git-tracked), 5.3 (no direct apiClient calls in .vue files); run after creation to confirm all four describe blocks pass
 
 ---
 
@@ -39,9 +39,9 @@
 
 **Purpose**: Append the HTTP status code propagation describe block (Test 3.2) to each app's error-normalizer spec. Tasks are independent (different files) and may run in parallel.
 
-- [ ] T003 [P] Extend `apps/mmc/src/core/errors/__tests__/error-normalizer.spec.ts` — append the `"normalizeError — HTTP status code propagation (Test 3.2)"` describe block from `plan.md` Phase 2 (5 it-blocks: 403→PERMISSION_DENIED, 423→LOCKED, 426→UPGRADE_REQUIRED, 429→RATE_LIMITED, 500→SERVER_ERROR); add `AdapterResponse` import only if not already present; do not modify existing tests
-- [ ] T004 [P] Extend `apps/backoffice/src/core/errors/__tests__/error-normalizer.spec.ts` — same describe block and rules as T003; adjust imports to backoffice paths
-- [ ] T005 [P] Extend `apps/frontoffice/src/core/errors/__tests__/error-normalizer.spec.ts` — same describe block and rules as T003; adjust imports to frontoffice paths
+- [x] T003 [P] Extend `apps/mmc/src/core/errors/__tests__/error-normalizer.spec.ts` — append the `"normalizeError — HTTP status code propagation (Test 3.2)"` describe block from `plan.md` Phase 2 (5 it-blocks: 403→PERMISSION_DENIED, 423→LOCKED, 426→UPGRADE_REQUIRED, 429→RATE_LIMITED, 500→SERVER_ERROR); add `AdapterResponse` import only if not already present; do not modify existing tests
+- [x] T004 [P] Extend `apps/backoffice/src/core/errors/__tests__/error-normalizer.spec.ts` — same describe block and rules as T003; adjust imports to backoffice paths
+- [x] T005 [P] Extend `apps/frontoffice/src/core/errors/__tests__/error-normalizer.spec.ts` — same describe block and rules as T003; adjust imports to frontoffice paths
 
 ---
 
@@ -49,7 +49,7 @@
 
 **Purpose**: Create a new unit test that verifies `applyCorrelationId()` sets `X-Correlation-ID` correctly on every outgoing request (Test 3.3).
 
-- [ ] T006 Create `tests/unit/api-client/interceptors/correlation-id.test.ts` — new file in new directory `tests/unit/api-client/interceptors/`; content fully specified in `plan.md` Phase 2 (GAP 1); 5 it-blocks covering explicit ID, auto-UUID generation, UUID uniqueness, exact key name, and overwrite behaviour; import `applyCorrelationId` from `../../../../packages/api-client/src/interceptors`
+- [x] T006 Create `tests/unit/api-client/interceptors/correlation-id.test.ts` — new file in new directory `tests/unit/api-client/interceptors/`; content fully specified in `plan.md` Phase 2 (GAP 1); 5 it-blocks covering explicit ID, auto-UUID generation, UUID uniqueness, exact key name, and overwrite behaviour; import `applyCorrelationId` from `../../../../packages/api-client/src/interceptors`
 
 ---
 
@@ -57,7 +57,7 @@
 
 **Purpose**: Create a new unit test confirming each app instantiates its own Pinia instance rather than importing a shared cross-app singleton (Test 5.1).
 
-- [ ] T007 Create `tests/unit/store-isolation.test.ts` — new file; content fully specified in `plan.md` Phase 2 (GAP 4); reads `apps/{mmc,backoffice,frontoffice}/src/main.ts` via `readFileSync`; 7 it-blocks: per-app `createPinia()` call, per-app import from `'pinia'`, per-app absence of `@zidney/*` pinia import, plus one cross-app check for `const pinia = createPinia()`
+- [x] T007 Create `tests/unit/store-isolation.test.ts` — new file; content fully specified in `plan.md` Phase 2 (GAP 4); reads `apps/{mmc,backoffice,frontoffice}/src/main.ts` via `readFileSync`; 7 it-blocks: per-app `createPinia()` call, per-app import from `'pinia'`, per-app absence of `@zidney/*` pinia import, plus one cross-app check for `const pinia = createPinia()`
 
 ---
 
@@ -65,9 +65,9 @@
 
 **Purpose**: Append the `licenseStatusStore` reset assertions (Tests 5.2, 2.3) to each app's session-clear-wiring integration test. Tasks target different files and may run in parallel.
 
-- [ ] T008 [P] Extend `tests/integration/mmc/auth/session-clear-wiring.test.ts` — append the `"licenseStatusStore cleared on session expiry (Tests 5.2, 2.3)"` describe block from `plan.md` Phase 2 (GAP 5); 2 it-blocks: `isWorkspaceLocked` reset and `isUpgradeRequired` reset; add `useLicenseStatusStore` import from `../../../../apps/mmc/src/core/state/license-status.store` if not present; do not modify existing tests
-- [ ] T009 [P] Extend `tests/integration/backoffice/auth/session-clear-wiring.test.ts` — same describe block and rules as T008; adjust import to `../../../../apps/backoffice/src/core/state/license-status.store`
-- [ ] T010 [P] Extend `tests/integration/frontoffice/auth/session-clear-wiring.test.ts` — same describe block and rules as T008; adjust import to `../../../../apps/frontoffice/src/core/state/license-status.store`
+- [x] T008 [P] Extend `tests/integration/mmc/auth/session-clear-wiring.test.ts` — append the `"licenseStatusStore cleared on session expiry (Tests 5.2, 2.3)"` describe block from `plan.md` Phase 2 (GAP 5); 2 it-blocks: `isWorkspaceLocked` reset and `isUpgradeRequired` reset; add `useLicenseStatusStore` import from `../../../../apps/mmc/src/core/state/license-status.store` if not present; do not modify existing tests
+- [x] T009 [P] Extend `tests/integration/backoffice/auth/session-clear-wiring.test.ts` — same describe block and rules as T008; adjust import to `../../../../apps/backoffice/src/core/state/license-status.store`
+- [x] T010 [P] Extend `tests/integration/frontoffice/auth/session-clear-wiring.test.ts` — same describe block and rules as T008; adjust import to `../../../../apps/frontoffice/src/core/state/license-status.store`
 
 ---
 
@@ -75,7 +75,7 @@
 
 **Purpose**: Run every new and extended test file in one pass to confirm all gaps are closed and zero failures remain.
 
-- [ ] T011 Run all new and extended test files — execute `bun run test tests/validation/static-analysis.test.ts tests/unit/api-client/interceptors/correlation-id.test.ts tests/unit/store-isolation.test.ts apps/mmc/src/core/errors/__tests__/error-normalizer.spec.ts apps/backoffice/src/core/errors/__tests__/error-normalizer.spec.ts apps/frontoffice/src/core/errors/__tests__/error-normalizer.spec.ts tests/integration/mmc/auth/session-clear-wiring.test.ts tests/integration/backoffice/auth/session-clear-wiring.test.ts tests/integration/frontoffice/auth/session-clear-wiring.test.ts`; confirm exit code 0 with zero failures
+- [x] T011 Run all new and extended test files — execute `bun run test tests/validation/static-analysis.test.ts tests/unit/api-client/interceptors/correlation-id.test.ts tests/unit/store-isolation.test.ts apps/mmc/src/core/errors/__tests__/error-normalizer.spec.ts apps/backoffice/src/core/errors/__tests__/error-normalizer.spec.ts apps/frontoffice/src/core/errors/__tests__/error-normalizer.spec.ts tests/integration/mmc/auth/session-clear-wiring.test.ts tests/integration/backoffice/auth/session-clear-wiring.test.ts tests/integration/frontoffice/auth/session-clear-wiring.test.ts`; confirm exit code 0 with zero failures
 
 ---
 
@@ -83,10 +83,10 @@
 
 **Purpose**: Confirm typecheck, lint, and production builds are clean for all three apps — covers Test 6.2. Archive output to `specs/runtime/test-01-ui-runtime-validation/reports/build-validation.log`.
 
-- [ ] T012 Run typecheck and lint across all apps — execute `rtk bun run typecheck` then `rtk bun run lint`; both must exit 0
-- [ ] T013 [P] Build `apps/mmc` for production — `cd apps/mmc && bun run build`; must exit 0
-- [ ] T014 [P] Build `apps/backoffice` for production — `cd apps/backoffice && bun run build`; must exit 0
-- [ ] T015 [P] Build `apps/frontoffice` for production — `cd apps/frontoffice && bun run build`; must exit 0
+- [x] T012 Run typecheck and lint across all apps — execute `rtk bun run typecheck` then `rtk bun run lint`; both must exit 0
+- [x] T013 [P] Build `apps/mmc` for production — `cd apps/mmc && bun run build`; must exit 0
+- [x] T014 [P] Build `apps/backoffice` for production — `cd apps/backoffice && bun run build`; must exit 0
+- [x] T015 [P] Build `apps/frontoffice` for production — `cd apps/frontoffice && bun run build`; must exit 0
 
 ---
 
@@ -94,7 +94,7 @@
 
 **Purpose**: Re-run the 401 race and session-clear integration suites after all gap files are in place — covers Tests 1.1, 1.2, 5.2, 2.3. Archive output to `specs/runtime/test-01-ui-runtime-validation/reports/integration-tests.log`.
 
-- [ ] T016 Run auth + session-clear integration suite — execute `rtk bun run test tests/integration/mmc/auth/401-race.test.ts tests/integration/backoffice/auth/401-race.test.ts tests/integration/frontoffice/auth/401-race.test.ts tests/integration/mmc/auth/session-clear-wiring.test.ts tests/integration/backoffice/auth/session-clear-wiring.test.ts tests/integration/frontoffice/auth/session-clear-wiring.test.ts`; confirm exit code 0
+- [x] T016 Run auth + session-clear integration suite — execute `rtk bun run test tests/integration/mmc/auth/401-race.test.ts tests/integration/backoffice/auth/401-race.test.ts tests/integration/frontoffice/auth/401-race.test.ts tests/integration/mmc/auth/session-clear-wiring.test.ts tests/integration/backoffice/auth/session-clear-wiring.test.ts tests/integration/frontoffice/auth/session-clear-wiring.test.ts`; confirm exit code 0
 
 ---
 
@@ -102,7 +102,7 @@
 
 **Purpose**: Confirm apps load without console errors (smoke check). `tests/e2e/app-load.spec.ts` is a documentation-only file and is excluded. Smoke tests assert load + no error title only — they do not produce navigation timing metrics. Tests 8.2 (interceptor overhead) and 8.3 (re-render discipline) require dedicated tooling and are formally deferred (see Deferred section below). Result does NOT gate stage promotion. Archive to `specs/runtime/test-01-ui-runtime-validation/reports/perf-baseline.md`.
 
-- [ ] T017 Run Playwright smoke tests — execute `rtk bun run playwright test apps/mmc/tests/e2e/smoke.spec.ts apps/backoffice/tests/e2e/smoke.spec.ts apps/frontoffice/tests/e2e/smoke.spec.ts`; confirm each app loads without errors; NON-BLOCKING — does not gate stage promotion
+- [x] T017 Run Playwright smoke tests — execute `rtk bun run playwright test apps/mmc/tests/e2e/smoke.spec.ts apps/backoffice/tests/e2e/smoke.spec.ts apps/frontoffice/tests/e2e/smoke.spec.ts`; confirm each app loads without errors; NON-BLOCKING — does not gate stage promotion
 
 **Formally Deferred (Tests 8.2 and 8.3 — NON-BLOCKING):**
 
