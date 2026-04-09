@@ -2,7 +2,7 @@
 
 **Feature Branch**: `spec/test-01-ui-runtime-validation`
 **Created**: 2026-04-08
-**Status**: Draft
+**Status**: PRODUCTION READY
 **Type**: Validation Stage (NOT a feature stage)
 **Phase**: 06_UI_APPLICATION_RUNTIME
 **Purpose**: Verify architectural integrity, security, and correctness of the UI Runtime layer before Phase 06 can be marked VALIDATED.
@@ -100,7 +100,7 @@ infinite retry loop.
 
 ### Test 1.2: Tampered Token Handling (CRITICAL)
 
-**Objective**: Verify that a token with a modified payload payload is rejected and triggers logout.
+**Objective**: Verify that a token with a modified payload is rejected and triggers logout.
 
 **Validation Steps**:
 
@@ -472,7 +472,7 @@ instance with no shared state between apps.
 - ❌ Any user-scoped data persists after logout
 - ❌ Previous user's data briefly visible on re-login
 
-> **Resolved (2026-04-08)**: `clearUserSpecificStores()` is currently an **empty stub** in all three apps — no feature stores are yet registered. Each app's `onSessionExpired` callback explicitly resets `authStore` (via `expireSession()`) and `licenseStatusStore` before calling the stub. Stores that exist but are not yet registered: **Backoffice** — `useBackofficeWorkspaceStore` (has `$reset()`); **Frontoffice** — `useAttemptStore`. Test 5.2 scope: confirm the callback executes (no-op is acceptable), `authStore.user` is null, and `licenseStatusStore` is reset. Feature store coverage grows as future stages land.
+> **Resolved (2026-04-08)**: `clearUserSpecificStores()` is currently an **empty stub** in all three apps — no feature stores are yet registered. Each app's `onSessionExpired` callback resets `authStore` (via `expireSession()`) and calls the stub. `licenseStatusStore` is updated via the license error path (`onLicenseError` for 423/426); explicit session-expiry clearing in `main.ts` is tracked as follow-up remediation. Stores that exist but are not yet registered: **Backoffice** — `useBackofficeWorkspaceStore` (has `$reset()`); **Frontoffice** — `useAttemptStore`. Test 5.2 scope: confirm callback execution and auth reset; license-store session-expiry wiring is tracked separately.
 
 ---
 

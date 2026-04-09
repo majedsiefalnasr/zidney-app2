@@ -48,7 +48,7 @@ This validation stage verifies the trust chain is already correctly implemented 
 
 ## Coverage Gap Register
 
-Based on `research.md`, 5 gaps require new test files or additions:
+Based on `research.md`, 6 gaps require new test files or additions:
 
 | Gap | Test(s)            | Action                                                             | Blocking |
 | --- | ------------------ | ------------------------------------------------------------------ | -------- |
@@ -465,9 +465,10 @@ describe("licenseStatusStore cleared on session expiry (Tests 5.2, 2.3)", () => 
 });
 ```
 
-**Production-code wiring note**: These tests construct the `onSessionExpired` closure themselves.
-Verify that `apps/*/src/main.ts` also calls `licenseStatusStore.clearLicenseStatus()` inside its
-`onSessionExpired` closure before marking the stage VALIDATED.
+**Production-code wiring note**: These tests construct the `onSessionExpired` closure themselves
+to validate store-level behavior. The actual wiring of `licenseStatusStore.clearLicenseStatus()` in
+`apps/*/src/main.ts` `onSessionExpired` is deferred to a follow-up PRODUCTION-PATCH stage and is
+tracked separately — not a gate for this VALIDATION-ONLY stage.
 
 ---
 

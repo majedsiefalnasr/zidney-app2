@@ -145,7 +145,7 @@ T016 → T017                ← perf baseline is last (non-blocking)
 | ---------------------------- | -------- |
 | Total tasks                  | 17       |
 | Parallelizable tasks [P]     | 9        |
-| New files created            | 4        |
+| New files created            | 3        |
 | Existing files extended      | 6        |
 | Blocking tasks (gap closure) | 16       |
 | Non-blocking tasks           | 1 (T017) |

@@ -23,6 +23,12 @@ describe('Pinia store isolation per app (Test 5.1)', () => {
       expect(readMain(app)).toContain('createPinia()')
     })
 
+    it(`${app}/main.ts wires local pinia instance via app.use(pinia)`, () => {
+      expect(readMain(app), `${app}/main.ts missing app.use(pinia) wiring`).toMatch(
+        /app\.use\(\s*pinia\s*\)/
+      )
+    })
+
     it(`${app}/main.ts imports createPinia from 'pinia' package (not a cross-app singleton)`, () => {
       expect(readMain(app)).toMatch(/import\s+\{[^}]*createPinia[^}]*\}\s+from\s+['"]pinia['"]/)
     })

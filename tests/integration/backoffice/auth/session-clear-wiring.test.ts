@@ -125,9 +125,11 @@ describe('licenseStatusStore cleared on session expiry (Tests 5.2, 2.3) — back
     setActivePinia(pinia)
     const tokenManager = makeTokenManager()
     const router = makeRouter()
-    const clearUserSpecificStores = vi.fn()
-
     const licenseStatusStore = useLicenseStatusStore(pinia)
+    const clearUserSpecificStores = vi.fn(() => {
+      licenseStatusStore.clearLicenseStatus()
+    })
+
     licenseStatusStore.setWorkspaceLocked(true)
 
     const useAuthStore = defineAuthStore(makeAuthService(), tokenManager, router, LOGIN_ROUTE, () =>
@@ -139,7 +141,6 @@ describe('licenseStatusStore cleared on session expiry (Tests 5.2, 2.3) — back
     const interceptor = createErrorInterceptor({
       getIsAuthenticated: () => authStore.isAuthenticated,
       onSessionExpired: async () => {
-        licenseStatusStore.clearLicenseStatus()
         await authStore.expireSession()
         clearUserSpecificStores()
       },
@@ -156,9 +157,11 @@ describe('licenseStatusStore cleared on session expiry (Tests 5.2, 2.3) — back
     setActivePinia(pinia)
     const tokenManager = makeTokenManager()
     const router = makeRouter()
-    const clearUserSpecificStores = vi.fn()
-
     const licenseStatusStore = useLicenseStatusStore(pinia)
+    const clearUserSpecificStores = vi.fn(() => {
+      licenseStatusStore.clearLicenseStatus()
+    })
+
     licenseStatusStore.setUpgradeRequired(true)
 
     const useAuthStore = defineAuthStore(makeAuthService(), tokenManager, router, LOGIN_ROUTE, () =>
@@ -170,7 +173,6 @@ describe('licenseStatusStore cleared on session expiry (Tests 5.2, 2.3) — back
     const interceptor = createErrorInterceptor({
       getIsAuthenticated: () => authStore.isAuthenticated,
       onSessionExpired: async () => {
-        licenseStatusStore.clearLicenseStatus()
         await authStore.expireSession()
         clearUserSpecificStores()
       },

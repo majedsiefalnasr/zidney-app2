@@ -1,25 +1,25 @@
 # Zidney Architecture Risk Heatmap
 
-Generated: 2026-04-08T22:33:09.755Z
+Generated: 2026-04-09T08:51:17.292Z
 
 ## Module Risk Classification
 
-| Module | Risk |
-|------|------|
-| packages/logger | HIGH |
-| packages/types | HIGH |
-| packages/api-client | MEDIUM |
-| packages/job-queue | LOW |
-| packages/config | LOW |
-| packages/redis-utils | LOW |
-| packages/ui-system | LOW |
-| packages/domain-core | LOW |
-| packages/validation | LOW |
-| apps/mmc | LOW |
-| apps/frontoffice | LOW |
-| apps/backoffice | LOW |
-| apps/api | LOW |
-| apps/worker | LOW |
+| Module               | Risk   |
+| -------------------- | ------ |
+| packages/logger      | HIGH   |
+| packages/types       | HIGH   |
+| packages/api-client  | MEDIUM |
+| packages/job-queue   | LOW    |
+| packages/config      | LOW    |
+| packages/redis-utils | LOW    |
+| packages/ui-system   | LOW    |
+| packages/domain-core | LOW    |
+| packages/validation  | LOW    |
+| apps/mmc             | LOW    |
+| apps/frontoffice     | LOW    |
+| apps/backoffice      | LOW    |
+| apps/api             | LOW    |
+| apps/worker          | LOW    |
 
 ## Interpretation
 

@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-04-08T22:33:09.754Z
-Git SHA: e444956d3a7c15fbc43b6f7ae6da9cf10e8ca1e2
+Generated: 2026-04-09T08:51:17.292Z
+Git SHA: 832d5f510c0bd2c6394a153457a9f037259d0dcd
 
 ---
 
@@ -114,7 +114,7 @@ bun run arch:audit
 ```
 
 Source data:
+
 - AI Architecture Brain
 - Dependency Graph Scanner
 - ARCHITECTURE_MAP.json
-

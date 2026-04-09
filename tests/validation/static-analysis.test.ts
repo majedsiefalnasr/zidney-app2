@@ -84,7 +84,7 @@ describe('Static Analysis — Env Security (Test 6.1)', () => {
 
 describe('Static Analysis — No Business Logic in Vue Components (Test 5.3)', () => {
   it('no direct apiClient method calls inside .vue files', () => {
-    const result = scan('apiClient\\.(get|post|put|delete|patch)\\(', APP_SRC, '--glob "*.vue"')
+    const result = scan('apiClient\\.(get|post|put|delete|patch)\\(', APP_SRC, '--glob "**/*.vue"')
     expect(result, 'Direct apiClient call in .vue — delegate to composable or store action').toBe(
       ''
     )

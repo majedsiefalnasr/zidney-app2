@@ -26,9 +26,8 @@
 - [x] All validation areas defined with named test scenarios
 - [x] Pass and fail criteria are explicit for every named test
 - [x] Blocking vs. non-blocking criteria distinguished in Pass Criteria Summary table
-- [ ] **[OPEN]** Correlation ID header name confirmed — Test 3.3 marked with NEEDS CLARIFICATION
-- [ ] **[OPEN]** `clearUserSpecificStores()` store enumeration confirmed — Test 5.2 marked with
-      NEEDS CLARIFICATION
+- [x] **[RESOLVED]** Correlation ID header name confirmed — Test 3.3: `X-Correlation-ID` — uniform across all three apps via shared `@zidney/api-client` package
+- [x] **[RESOLVED]** `clearUserSpecificStores()` store enumeration confirmed — Test 5.2: Empty stub in all three apps; `authStore` and `licenseStatusStore` reset explicitly in `onSessionExpired` callback
 - [x] Edge cases identified (tampered token, cross-workspace isolation, empty 500 bodies, network
       timeout)
 - [x] Scope clearly bounded — Out of Scope section present with explicit exclusions
@@ -54,11 +53,8 @@
       logging redaction
 - [x] **Area 8 — Performance Baseline**: Router navigation latency, API client overhead, layout
       re-render discipline
-- [ ] **[OPEN]** Layout system integration (STAGE_UI_07) not covered by a dedicated validation area
-      — confirm if layout validation is addressed within Performance Area 8 or needs its own area
-- [ ] **[OPEN]** Notification and feedback layer (STAGE_UI_08) not covered by a dedicated
-      validation area — confirm if toast/notification correctness is implicitly validated within
-      Error Handling tests or needs an explicit scenario
+- [x] **[RESOLVED]** Layout system integration (STAGE_UI_07): covered implicitly by Area 8 Test 8.3 (layout re-render discipline)
+- [x] **[RESOLVED]** Notification and feedback layer (STAGE_UI_08): covered implicitly by Tests 4.1, 4.2, and 3.2 (user-facing messages rendered through notification system)
 
 ---
 

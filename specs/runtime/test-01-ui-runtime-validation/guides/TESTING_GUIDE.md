@@ -43,7 +43,7 @@ This stage closes 6 test coverage gaps identified in the UI Application Runtime 
 
 New test files:
 
-```
+```text
 tests/validation/static-analysis.test.ts
 tests/unit/api-client/interceptors/correlation-id.test.ts
 tests/unit/store-isolation.test.ts
@@ -51,7 +51,7 @@ tests/unit/store-isolation.test.ts
 
 Extended test files:
 
-```
+```text
 apps/mmc/src/core/errors/__tests__/error-normalizer.spec.ts
 apps/backoffice/src/core/errors/__tests__/error-normalizer.spec.ts
 apps/frontoffice/src/core/errors/__tests__/error-normalizer.spec.ts
@@ -140,7 +140,7 @@ has the correct error code constants. The test uses the same adapter interface a
 
 ### Scenario 2 — Verify Correlation ID Interceptor Attaches Unique IDs
 
-**Purpose:** Confirm the API client interceptor adds a `X-Correlation-Id` header with a unique UUID
+**Purpose:** Confirm the API client interceptor adds a `X-Correlation-ID` header with a unique UUID
 on every request.
 
 1. Run the correlation ID test:
