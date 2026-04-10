@@ -518,10 +518,10 @@ Archive output to `specs/runtime/test-01-ui-runtime-validation/reports/integrati
 **Target**: p95 router navigation < 50ms (guard evaluation + component mount, net of API data loading).
 
 ```bash
-rtk bun run playwright test apps/mmc/tests/e2e/smoke.spec.ts
-rtk bun run playwright test apps/backoffice/tests/e2e/smoke.spec.ts
-rtk bun run playwright test apps/frontoffice/tests/e2e/smoke.spec.ts
-rtk bun run playwright test tests/e2e/app-load.spec.ts
+rtk bun run test:e2e test apps/mmc/tests/e2e/smoke.spec.ts
+rtk bun run test:e2e test apps/backoffice/tests/e2e/smoke.spec.ts
+rtk bun run test:e2e test apps/frontoffice/tests/e2e/smoke.spec.ts
+rtk bun run test:e2e test tests/e2e/app-load.spec.ts
 ```
 
 Archive results to `specs/runtime/test-01-ui-runtime-validation/reports/perf-baseline.md`.

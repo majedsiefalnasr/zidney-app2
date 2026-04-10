@@ -199,11 +199,11 @@ to `@zidney/api-client`.
 
 ## Known Issues
 
-| Issue                                    | Severity     | Notes                                                                                         |
-| ---------------------------------------- | ------------ | --------------------------------------------------------------------------------------------- |
-| `static-analysis.test.ts` — 1 test fails | Expected     | Raw `fetch()` found in backoffice. Requires PRODUCTION-PATCH stage.                           |
-| T017 Playwright E2E — not run            | Non-blocking | Dev servers not running during validation. Run `bun run dev:apps` then `bun playwright test`. |
-| Tests 8.2/8.3 absent                     | Non-blocking | Interceptor performance and re-render discipline deferred to future PERF stage.               |
+| Issue                                    | Severity     | Notes                                                                                  |
+| ---------------------------------------- | ------------ | -------------------------------------------------------------------------------------- |
+| `static-analysis.test.ts` — 1 test fails | Expected     | Raw `fetch()` found in backoffice. Requires PRODUCTION-PATCH stage.                    |
+| T017 Playwright E2E — not run            | Non-blocking | Dev servers not running during validation. Run `bun run dev:apps` then `bun test:e2e`. |
+| Tests 8.2/8.3 absent                     | Non-blocking | Interceptor performance and re-render discipline deferred to future PERF stage.        |
 
 ---
 

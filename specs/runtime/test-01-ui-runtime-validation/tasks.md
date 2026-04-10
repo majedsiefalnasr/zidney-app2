@@ -102,7 +102,7 @@
 
 **Purpose**: Confirm apps load without console errors (smoke check). `tests/e2e/app-load.spec.ts` is a documentation-only file and is excluded. Smoke tests assert load + no error title only — they do not produce navigation timing metrics. Tests 8.2 (interceptor overhead) and 8.3 (re-render discipline) require dedicated tooling and are formally deferred (see Deferred section below). Result does NOT gate stage promotion. Archive to `specs/runtime/test-01-ui-runtime-validation/reports/perf-baseline.md`.
 
-- [x] T017 Run Playwright smoke tests — execute `rtk bun run playwright test apps/mmc/tests/e2e/smoke.spec.ts apps/backoffice/tests/e2e/smoke.spec.ts apps/frontoffice/tests/e2e/smoke.spec.ts`; confirm each app loads without errors; NON-BLOCKING — does not gate stage promotion
+- [x] T017 Run Playwright smoke tests — execute `rtk bun run test:e2e test apps/mmc/tests/e2e/smoke.spec.ts apps/backoffice/tests/e2e/smoke.spec.ts apps/frontoffice/tests/e2e/smoke.spec.ts`; confirm each app loads without errors; NON-BLOCKING — does not gate stage promotion
 
 **Formally Deferred (Tests 8.2 and 8.3 — NON-BLOCKING):**
 
