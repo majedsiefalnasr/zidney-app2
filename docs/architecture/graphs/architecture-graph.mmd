@@ -24,13 +24,13 @@ graph TD
   packages_domain_core --> packages_validation
   packages_validation --> packages_types
   packages_validation --> packages_logger
+  apps_mmc --> packages_api_client
   apps_mmc --> packages_types
   apps_mmc --> packages_logger
-  apps_mmc --> packages_api_client
   apps_mmc --> packages_ui_system
+  apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_logger
-  apps_frontoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_types
   apps_backoffice --> packages_logger

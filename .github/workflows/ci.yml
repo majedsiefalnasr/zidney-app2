@@ -62,6 +62,12 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install ripgrep (rg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+        shell: bash
+
       - name: Build packages (lightweight)
         run: |
           export PATH="$PWD/node_modules/.bin:$PATH"
@@ -100,6 +106,12 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install ripgrep (rg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+        shell: bash
+
       - name: Build packages (lightweight)
         run: |
           export PATH="$PWD/node_modules/.bin:$PATH"
@@ -134,6 +146,12 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Install ripgrep (rg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+        shell: bash
 
       - name: Restore ai-context artifacts cache (T086)
         uses: actions/cache@v4

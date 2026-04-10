@@ -125,13 +125,14 @@ function applyEnvDefaults() {
   }
 
   if (NODE_ENV === 'test') {
-    process.env.LOG_LEVEL ||= 'error'
+    // During tests we prefer a verbose default so test assertions that
+    // rely on info/debug output can observe transports without having to
+    // set LOG_LEVEL in every test file.
+    process.env.LOG_LEVEL ||= 'debug'
   }
 }
 
 applyEnvDefaults()
-
-const LOG_LEVEL = (process.env.LOG_LEVEL || 'info') as StructuredLogLevel
 
 const levelPriority: Record<StructuredLogLevel, number> = {
   debug: 0,
@@ -140,7 +141,14 @@ const levelPriority: Record<StructuredLogLevel, number> = {
   error: 3,
 }
 
-const LOG_SAMPLE_RATE = Number(process.env.LOG_SAMPLE_RATE || '1')
+function getLogLevel(): StructuredLogLevel {
+  return (process.env.LOG_LEVEL || 'info') as StructuredLogLevel
+}
+
+function getLogSampleRate(): number {
+  const n = Number(process.env.LOG_SAMPLE_RATE || '1')
+  return Number.isFinite(n) ? n : 1
+}
 
 // Global minimum display width (used by boxes, tables, and progress bars).
 // Can be overridden with `LOG_MIN_WIDTH` or (legacy) `LOG_MIN_BOX_WIDTH` env var.
@@ -192,8 +200,9 @@ function alignText(s: string, width: number, align: Align = 'start'): string {
  * Returns `true` when `LOG_SAMPLE_RATE` permits emitting the log.
  */
 function shouldSample(): boolean {
-  if (LOG_SAMPLE_RATE >= 1) return true
-  return Math.random() < LOG_SAMPLE_RATE
+  const rate = getLogSampleRate()
+  if (rate >= 1) return true
+  return Math.random() < rate
 }
 
 /**
@@ -203,7 +212,8 @@ function shouldSample(): boolean {
  * @param level - Level to evaluate
  */
 export function shouldLog(level: StructuredLogLevel): boolean {
-  return levelPriority[level] >= levelPriority[LOG_LEVEL] && shouldSample()
+  const lvl = getLogLevel()
+  return levelPriority[level] >= levelPriority[lvl] && shouldSample()
 }
 
 function isResultMetricValue(value: unknown): value is ResultMetricValue {

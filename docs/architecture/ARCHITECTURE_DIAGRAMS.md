@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-04-07T02:12:44.642Z
-Git SHA: dcafbd95758f0b6cad49c40fbc4be0b172d09318
+Generated: 2026-04-09T08:51:17.292Z
+Git SHA: 832d5f510c0bd2c6394a153457a9f037259d0dcd
 
 ---
 
@@ -47,13 +47,13 @@ graph LR
   packages_domain_core --> packages_validation
   packages_validation --> packages_types
   packages_validation --> packages_logger
+  apps_mmc --> packages_api_client
   apps_mmc --> packages_types
   apps_mmc --> packages_logger
-  apps_mmc --> packages_api_client
   apps_mmc --> packages_ui_system
+  apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_logger
-  apps_frontoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_types
   apps_backoffice --> packages_logger
@@ -83,13 +83,13 @@ graph TD
   packages_domain_core --> packages_validation
   packages_validation --> packages_types
   packages_validation --> packages_logger
+  apps_mmc --> packages_api_client
   apps_mmc --> packages_types
   apps_mmc --> packages_logger
-  apps_mmc --> packages_api_client
   apps_mmc --> packages_ui_system
+  apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_logger
-  apps_frontoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_types
   apps_backoffice --> packages_logger

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-07T02:12:44.643Z",
-  "gitSha": "dcafbd95758f0b6cad49c40fbc4be0b172d09318",
+  "generatedAt": "2026-04-09T08:51:17.292Z",
+  "gitSha": "832d5f510c0bd2c6394a153457a9f037259d0dcd",
   "architectureScore": 100,
   "moduleRisk": {
     "packages/job-queue": "LOW",
@@ -124,15 +124,15 @@
     },
     {
       "from": "apps/mmc",
+      "to": "packages/api-client"
+    },
+    {
+      "from": "apps/mmc",
       "to": "packages/types"
     },
     {
       "from": "apps/mmc",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "packages/api-client"
     },
     {
       "from": "apps/mmc",
@@ -140,15 +140,15 @@
     },
     {
       "from": "apps/frontoffice",
+      "to": "packages/api-client"
+    },
+    {
+      "from": "apps/frontoffice",
       "to": "packages/types"
     },
     {
       "from": "apps/frontoffice",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "packages/api-client"
     },
     {
       "from": "apps/backoffice",

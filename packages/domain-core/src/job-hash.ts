@@ -37,9 +37,23 @@ import { createHash } from 'node:crypto'
  */
 export function computeJobPayloadHash(payload: unknown): string {
   try {
-    // JSON.stringify converts object to string deterministically
-    // Sorted keys ensure order-independence
-    const jsonString = JSON.stringify(payload)
+    // Use a stable stringify that sorts object keys to guarantee
+    // deterministic output regardless of key insertion order.
+    const stableStringify = (value: unknown): string => {
+      return JSON.stringify(value, (_key, val) => {
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
+          // Preserve non-null object but reorder keys
+          const obj = val as Record<string, unknown>
+          const sortedKeys = Object.keys(obj).sort()
+          const sorted: Record<string, unknown> = {}
+          for (const k of sortedKeys) sorted[k] = obj[k]
+          return sorted
+        }
+        return val
+      })
+    }
+
+    const jsonString = stableStringify(payload)
 
     // Compute SHA256 hash
     const hash = createHash('sha256').update(jsonString).digest('hex')

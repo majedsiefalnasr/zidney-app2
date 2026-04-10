@@ -76,7 +76,7 @@ Stage Directory: specs/runtime/ui-008-notification-and-feedback/
 
 - [x] No cross-workspace joins _(UI-only — no DB access)_
 - [x] No default DB fallback _(N/A)_
-- [x] All queries scoped to workspace_id _(N/A — no queries)_
+- [x] All queries scoped to workspace*id *(N/A — no queries)\_
 - [x] Structured logging (no console.log) _(global error handler uses logger pattern; isDev guard)_
 - [x] Error contract compliance _(AppError → useNotify maps correctly to toast)_
 - [x] Sensitive data not logged _(redactError used in main.ts handlers)_

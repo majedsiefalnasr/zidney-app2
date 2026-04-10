@@ -31,6 +31,7 @@ coverage/.tmp/
 coverage/.tmp/coverage-*.json
 *.lcov
 .nyc_output/
+test-results/
 
 # Logging
 logs/

@@ -92,3 +92,43 @@ describe('normalizeError', () => {
     expect(result.code).toBe(ErrorCodes.UNKNOWN_ERROR)
   })
 })
+
+// ─── HTTP status code propagation (Test 3.2) ──────────────────────────
+// Confirms app-level normalizeError() delegates each critical HTTP status
+// through to the correct ErrorCode via mapHttpStatusToCode().
+
+describe('normalizeError — HTTP status code propagation (Test 3.2)', () => {
+  function makeAdapter(status: number): AdapterResponse {
+    return { status, headers: {}, body: null, ok: false }
+  }
+
+  it('403 → PERMISSION_DENIED', () => {
+    const r = normalizeError(makeAdapter(403))
+    expect(r.httpStatus).toBe(403)
+    expect(r.code).toBe(ErrorCodes.PERMISSION_DENIED)
+  })
+
+  it('423 → LOCKED', () => {
+    const r = normalizeError(makeAdapter(423))
+    expect(r.httpStatus).toBe(423)
+    expect(r.code).toBe(ErrorCodes.LOCKED)
+  })
+
+  it('426 → UPGRADE_REQUIRED', () => {
+    const r = normalizeError(makeAdapter(426))
+    expect(r.httpStatus).toBe(426)
+    expect(r.code).toBe(ErrorCodes.UPGRADE_REQUIRED)
+  })
+
+  it('429 → RATE_LIMITED', () => {
+    const r = normalizeError(makeAdapter(429))
+    expect(r.httpStatus).toBe(429)
+    expect(r.code).toBe(ErrorCodes.RATE_LIMITED)
+  })
+
+  it('500 → SERVER_ERROR', () => {
+    const r = normalizeError(makeAdapter(500))
+    expect(r.httpStatus).toBe(500)
+    expect(r.code).toBe(ErrorCodes.SERVER_ERROR)
+  })
+})
